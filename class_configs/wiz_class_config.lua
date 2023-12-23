@@ -1,5 +1,10 @@
 return {
     ['Modes'] = {
+        -- Shouldn't these be [1] = 'ModeName', ?
+        ['Ice'] = 1,
+        ['TLP'] = 1,
+        ['NoOne'] = 1,
+        ['Magic'] = 1,
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -552,7 +557,6 @@ return {
     },
 
     ['Rotations'] = {
-
         -- FIRE
         ['FIRE'] = {
             ['WIZ_DPS_MODEFIRE'] = 1,
@@ -591,12 +595,7 @@ return {
 
     },
 
-    ['Config'] = {
-        ['Mode'] = {
-            [1] = 'MODEICE',
-            [2] = 'MODETLP',
-            [3] = 'MODENOONE',
-            [4] = 'MODEMAGIC',
-        },
+    ['DefaultConfig'] = {
+        ['Mode'] = 'Ice',
     },
 }
