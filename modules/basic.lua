@@ -9,7 +9,8 @@ Module.__index      = Module
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
-    return mq.configDir .. '/rgmercs/PCConfigs/' .. 'basic_' .. server .. "_" .. RGMercConfig.CurLoadedChar .. '.lua'
+    return mq.configDir ..
+    '/rgmercs/PCConfigs/' .. Module.name .. "_" .. server .. "_" .. RGMercConfig.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
