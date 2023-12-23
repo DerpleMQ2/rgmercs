@@ -7,6 +7,7 @@ Config.__index              = Config
 Config.settings_pickle_path = mq.configDir .. '/rgmercs/' .. 'rgmercs.lua'
 Config.settings             = {}
 Config.CurLoadedChar        = mq.TLO.Me.CleanName()
+Config.CurLoadedClass       = mq.TLO.Me.Class.ShortName()
 
 function Config:SaveSettings(doBroadcast)
     mq.pickle(self.settings_pickle_path, self.settings)
@@ -17,6 +18,9 @@ function Config:SaveSettings(doBroadcast)
 end
 
 function Config:LoadSettings()
+    Config.CurLoadedChar  = mq.TLO.Me.CleanName()
+    Config.CurLoadedClass = mq.TLO.Me.Class.ShortName()
+
     RGMercsLogger.log("\ayLoading Main Settings for %s!", self.CurLoadedChar)
 
     local config, err = loadfile(self.settings_pickle_path)
