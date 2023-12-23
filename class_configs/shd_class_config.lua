@@ -502,7 +502,7 @@ return {
             ['Burn'] = 1,
         },
     },
-    ['Config'] = {
+    ['DefaultConfig'] = {
         ['Mode'] = 'Tank',
     },
 
