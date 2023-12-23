@@ -502,7 +502,15 @@ return {
             ['Burn'] = 1,
         },
     },
+<<<<<<<<< Temporary merge branch 1
     ['DefaultConfig'] = {
         ['Mode'] = 'Tank',
     },
+=========
+    ['Config'] = {
+        ['Mode'] = 'Tank',
+    },
+
+
+>>>>>>>>> Temporary merge branch 2
 }
