@@ -72,7 +72,8 @@ local function RGMercsGUI()
         if shouldDrawGUI then
             local pressed
             ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 1.0, 1.0, 1)
-            ImGui.Text("RGMercs running for " .. RGMercConfig.CurLoadedChar)
+            ImGui.Text(string.format("RGMercs running for %s (%s)", RGMercConfig.CurLoadedChar,
+                RGMercConfig.CurLoadedClass))
 
             if ImGui.BeginTabBar("RGMercsTabs") then
                 ImGui.SetItemDefaultFocus()
@@ -118,7 +119,12 @@ local function Main()
         RGMercConfig:LoadSettings()
     end
 
-    RGMercModules:execAll("GiveTime")
+    local state = "Downtime"
+    if mq.TLO.XAssist.XTFullHaterCount() > 0 then
+        state = "Combat"
+    end
+
+    RGMercModules:execAll("GiveTime", state)
 end
 
 -- Global Messaging callback
