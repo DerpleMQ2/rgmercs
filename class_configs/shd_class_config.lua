@@ -502,9 +502,15 @@ return {
             ['Burn'] = 1,
         },
     },
+<<<<<<< HEAD
     ['Config'] = {
         ['Mode'] = 'Tank',
     },
 
 
+=======
+    ['DefaultConfig'] = {
+        ['Mode'] = 'Tank',
+    },
+>>>>>>> 51a7b643fc19e64cc1fb9498f681d1c29019956a
 }
