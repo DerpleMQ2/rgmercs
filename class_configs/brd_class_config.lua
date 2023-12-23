@@ -13,8 +13,31 @@ return {
         },
     },
     ['AbilitySets'] = {
-        ['BardRunBuff'] = {},
-        ['MainAriaSong'] = {},
+        ['BardRunBuff'] = {
+        -- Bard RunSpeed 
+        [1] = "Selo's Accelerato",
+        -- Song of travel has been removed due to causing Bugs with Invis and rotation.
+        -- [] = ["Selo's Song of Travel"],
+        [1] = "Selo's Accelerating Chorus",
+        [2] = "Selo's Accelerando",
+        },
+        ['MainAriaSong'] = {
+            [1] = "Aria of Pli Xin Liako",
+            [2] = "Aria of Margidor",
+            [3] = "Aria of Begalru",
+            [4] = "Aria of Maetanrus",
+            [5] = "Aria of Va'Ker",
+            [6] = "Aria of the Orator",  
+            [7] = "Aria of the Composer",
+            [8] = "Aria of the Poet",
+            [9] = "Ancient: Call of Power",
+            [10] = "Aria of the Artist",
+            [11] = "Yelhun's Mystic Call",
+            [12] = "Ancient: Call of Power",
+            [13] = "Rizlona's Call of Flame",
+            [14] = "Rizlona's Fire",
+            [15] = "Rizlona's Embers",
+        },
         ['SufferingSong'] = {},
         ['SprySonataSong'] = {},
         ['CrescendoSong'] = {},
@@ -39,13 +62,53 @@ return {
         },
         ['InsultSong1'] = {},
         ['InsultSong2'] = {},
-        ['DichoSong'] = {},
-        ['BardDPSAura'] = {},
-        ['BardRegenAura'] = {},
+        ['DichoSong'] = {
+            -- DichoSong Level Range - 101 - 106
+            [1] = "Ecliptic Psalm",
+            [2] = "Composite Psalm",
+            [3] = "Dissident Psalm",
+            [4] = "Dichotomic Psalm",    
+        },
+        ['BardDPSAura'] = {
+                    -- BardDPSAura - Level Ranges 55 - 115
+        [] = ["Aura of Pli Xin Liako"]
+        [] = ["Aura of Margidor"]
+        [] = ["Aura of Begalru"]
+        [] = ["Aura of Maetanrus"]
+        [] = ["Aura of Va'Ker"]
+        [] = ["Aura of the Orator"]
+        [] = ["Aura of the Composer"]
+        [] = ["Aura of the Poet"]
+        [] = ["Aura of the Artist"]
+        [] = ["Aura of the Muse"]
+        [] = ["Aura of Insight"]
+
+        },
+        ['BardRegenAura'] = {
+            [] = ["Aura of Shei Vinitras"]
+            [] = ["Aura of Vhal`Sera"]
+            [] = ["Aura of Xigam"]
+            [] = ["Aura of Sionachie"]
+            [] = ["Aura of Salarra"]
+            [] = ["Aura of Lunanyn"]
+            [] = ["Aura of Renewal"]
+            [] = ["Aura of Rodcet"]
+        },
         ['PulseRegenSong'] = {},
         ['ChorusRegenSong'] = {},
         ['WarMarchSong'] = {},
-        ['CasterAriaSong'] = {},
+        ['CasterAriaSong'] = {
+            [] = "Constance's Aria",
+            [] = "Sontalak's Aria",
+            [] = "Qunard's Aria",
+            [] = "Nilsara's Aria",
+            [] = "Gosik's Aria",
+            [] = "Daevan's Aria",
+            [] = "Sotor's Aria",
+            [] = "Talendor's Aria",
+            [] = "Performer's Explosive Aria",
+            [] = "Weshlu's Chillsong Aria",
+        },
         ['SlowSong'] = {},
         ['AESlowSong'] = {},
         ['AccelerandoSong'] = {},
@@ -55,127 +118,171 @@ return {
         ['StripBuffSpell'] = {},
         ['FateSong'] = {},
         ['PsalmSong'] = {},
-        ['DotSong'] = {},
+        ['DotSong'] = { -- DotSong - Level Range 30 - 115 
+                -- Fire Dot  
+                [1] = "Shak Dathor's Chant of Flame",
+                [5] = "Sontalak's Chant of Flame",
+                [9] = "Qunard's Chant of Flame",
+                [13] = "Nilsara's Chant of Flame",
+                [17] = "Gosik's Chant of Flame", 
+                [21] = "Daevan's Chant of Flame",    
+                [25] = "Sotor's Chant of Flame",  
+                [29] = "Talendor's Chant of Flame", 
+                [33] = "Tjudawos' Chant of Flame",   
+                [38] = "Vulka's Chant of Flame",
+                [43] = "Tuyen's Chant of Fire",
+                [52] = "Tuyen's Chant of Flame",  
+
+                -- Posion Dot             
+                [2] = "Cruor's Chant of Poison",
+                [6] = "Malvus's Chant of Poison",  
+                [10] = "Nexona's Chant of Poison",
+                [14] = "Serisaria's Chant of Poison",  
+                [18] = "Slaunk's Chant of Poison",
+                [22] = "Hiqork's Chant of Poison",
+                [26] = "Spinechiller's Chant of Poison",
+                [30] = "Severilous' Chant of Poison",
+                [34] = "Kildrukaun's Chant of Poison",
+                [39] = "Vulka's Chant of Poison",
+                [45] = "Tuyen's Chant of Venom",    
+                [59] = "Tuyen's Chant of Poison",    
+
+                -- Ice Dot
+                [3] = "Sylra Fris' Chant of Frost",
+                [7] = "Yelinak's Chant of Frost",    
+                [11] = "Ekron's Chant of Frost",    
+                [15] = "Kirchen's Chant of Frost",
+                [19] = "Edoth's Chant of Frost",
+                [23] = "Kalbrok's Chant of Frost",
+                [27] = "Fergar's Chant of Frost",
+                [31] = "Gorenaire's Chant of Frost",
+                [35] = "Zeixshi-Kar's Chant of Frost",  
+                [40] = "Vulka's Chant of Frost",
+                [44] = "Tuyen's Chant of Ice",  
+                [50] = "Tuyen's Chant of Frost",
+
+                -- Disease Dot
+                [4] = "Coagulus' Chant of Disease",
+                [8] = "Zlexak's Chant of Disease",                              
+                [12] = "Hoshkar's Chant of Disease",                                         
+                [17] = "Horthin's Chant of Disease",               
+                [20] = "Siavonn's Chant of Disease",
+                [24] = "Wasinai's Chant of Disease",  
+                [28] = "Shiverback's Chant of Disease",   
+                [32] = "Trakanon's Chant of Disease",  
+                [36] = "Vyskudra's Chant of Disease", 
+                [41] = "Vulka's Chant of Disease",                    
+                [46] = "Tuyen's Chant of the Plague",
+                [51] = "Tuyen's Chant of Disease",
+
+                -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
+                [37] = "Ancient: Chaos Chant",               
+                [47] = "Angstlich's Assonance",
+                [48] = "Fufil's Diminishing Dirge",
+                [53] = "Fufil's Curtailing Chant",    
+        },
         ['CureSpell'] = {},
-        ['AllianceSong'] = {},
-        ['CharmSong'] = {},
-        ['ReflexStrike'] = {},
+        ['AllianceSong'] = {
+            [1] = "Conjunction of Sticks and Stones",
+            [2] = "Alliance of Sticks and Stones",
+            [3] = "Covenant of Sticks and Stones",
+            [4] = "Coalition of Sticks and Stones",   
+        },
+        ['CharmSong'] = {
+            [1] = "Omiyad's Demand",
+            [2] = "Voice of the Diabo",
+            [3] = "Silisia's Demand",
+            [4] = "Dawnbreeze's Demand",
+            [5] = "Desirae's Demand",
+            -- Low Level Aria Song - before Combination of Effects Under Level 68
+            [6] = "Battlecry of the Vah Shir",
+            [7] = "Warsong of the Vah Shir",
+        },
+        ['ReflexStrike'] = {
+            -- Bard ReflexStrike - Restores mana to group
+            [1] = "Reflexive Retort",
+            [2] = "Reflexive Rejoinder",
+            [3] = "Reflexive Rebuttal",
+        },
         ['ChordsAE'] = {},
         ['LowAriaSong'] = {},
-        ['AmpSong'] = {},
+        ['AmpSong'] = {
+            [1] = "Amplification",
+        },
         ['DispelSong'] = {},
-        ['ResistSong'] = {},       
-        ['MezSpell'] = {},
-        ['MezAESpell'] = {},
-
-    
-
-
-
-      
-
+        ['ResistSong'] = {
+            -- Resists Song
+            [1] = "Psalm of Cooling",
+            [2] = "Psalm of Purity",
+            [3] = "Psalm of Warmth",
+            [4] = "Psalm of Vitality",
+            [5] = "Psalm of Veeshan",
+            [6] = "Psalm of the Forsaken",
+            [7] = "Second Psalm of Veeshan",
+            [8] = "Psalm of the Restless",
+            [9] = "Psalm of the Pious",
+        },       
+        ['MezSpell'] = {
+            -- MezSpell - Level Range 15 - 114
+            [1] = "Slumber of the Diabo",
+            -- [] = "Lullaby of Nightfall",
+            -- [] = "Lullaby of Zburator",
+            [2] = "Slumber of Zburator",
+            [3] = "Slumber of Jembel", 
+            -- [] = "Lullaby of Jembel",
+            [4] = "Slumber of Silisia",
+            -- [] = "Lullaby of Silisia",
+            [5] = "Slumber of Motlak",
+            -- [] = "Lullaby of the Forsaken",   
+            [6] = "Slumber of Kolain",
+            -- [] = "Lullaby of the Forlorn",
+            [7] = "Slumber of Sionachie", 
+            -- [] = "Lullaby of the Lost",   
+            [8] = "Slumber of the Mindshear",
+            [9] = "Serenity of Oceangreen",
+            [10] = "Amber's Last Lullaby",
+            [11] = "Queen Eletyl's Screech",
+            [12] = "Command of Queen Veneneu",
+            [13] = "Aelfric's Last Lullaby",   
+            [14] = "Vulka's Lullaby",
+            [15] = "Creeping Dreams",
+            [16] = "Luvwen's Lullaby", 
+            [17] = "Lullaby of Morell",   
+            [18] = "Dreams of Terris",
+            [19] = "Dreams of Thule", 
+            [20] = "Dreams of Ayonae",  
+            [21] = "Song of Twilight",
+            [22] = "Sionachie's Dreams", 
+            [23] = "Crission's Pixie Strike",  
+            [24] = "Kelin's Lucid Lullaby",
+        },
+        ['MezAESpell'] = {
         -- Bard PBAE - Used Only for Level 2 Pull Spell.
-        [] = ["Chords of Dissonance"] ChordsAE
-    
-        -- Bard RunSpeed 
-        [] = ["Selo's Accelerato"] BardRunBuff
+            [1] = "Chords of Dissonance",
+        },
 
-        -- Song of travel has been removed due to causing Bugs with Invis and rotation.
-        --        ["Selo's Song of Travel" BardRunBuff
-        [] = ["Selo's Accelerating Chorus"] BardRunBuff
-        [] = ["Selo's Accelerando"] BardRunBuff
     
-        -- Bard ReflexStrike - Restores mana to group
-        [] = ["Reflexive Retort"] ReflexStrike
-        [] = ["Reflexive Rejoinder"] ReflexStrike
-        [] = ["Reflexive Rebuttal"] ReflexStrike
+
+
+
     
-        -- BardDPSAura - Level Ranges 55 - 115
-        [] = ["Aura of Pli Xin Liako"]   "Aura of Pli Xin Liako" BardDPSAura
-        [] = ["Aura of Margidor"]        "Aura of Margidor"      BardDPSAura   
-        [] = ["Aura of Begalru"]         "Aura of Begalru"       BardDPSAura
-        [] = ["Aura of Maetanrus"]       "Aura of Maetanrus"     BardDPSAura 
-        [] = ["Aura of Va'Ker"]          "Aura of Va'Ker"        BardDPSAura
-        [] = ["Aura of the Orator"]      "Aura of the Orator"    BardDPSAura
-        [] = ["Aura of the Composer"]    "Aura of the Composer"  BardDPSAura
-        [] = ["Aura of the Poet"]        "Aura of the Poet"      BardDPSAura    
-        [] = ["Aura of the Artist"]      "Aura of the Artist"    BardDPSAura
-        [] = ["Aura of the Muse"]        "Aura of the Muse"      BardDPSAura
-        [] = ["Aura of Insight"]         "Aura of Insight"       BardDPSAura     
+ 
+
+    
     
         /varset BardDPSAura_name ${GetAuraName[${BardDPSAura},BardDPSAura]}
-    
-        -- Amplify Song
-        [] = ["Amplification"] AmpSong 
-    
-        -- BardRegenAura - Level Ranges 82 - 112
-        [] = ["Aura of Shei Vinitras"] "Aura of Shei Vinitras" BardRegenAura
-        [] = ["Aura of Vhal`Sera"]   "Aura of Vhal`Sera"   BardRegenAura
-        [] = ["Aura of Xigam"]       "Aura of Xigam"       BardRegenAura
-        [] = ["Aura of Sionachie"]   "Aura of Sionachie"   BardRegenAura
-        [] = ["Aura of Salarra"]     "Aura of Salarra"     BardRegenAura    
-        [] = ["Aura of Lunanyn"]     "Aura of Lunanyn"     BardRegenAura
-        [] = ["Aura of Renewal"]     "Aura of Renewal"     BardRegenAura
-        [] = ["Aura of Rodcet"]      "Aura of Rodcet"      BardRegenAura     
 
-        -- Bard Alliance
-        ["Conjunction of Sticks and Stones"] AllianceSong
-        ["Alliance of Sticks and Stones"] AllianceSong
-        ["Covenant of Sticks and Stones"] AllianceSong
-        ["Coalition of Sticks and Stones"] AllianceSong
+
+
     
-        -- Bard Charm Song
-        ["Omiyad's Demand"] CharmSong
-        ["Voice of the Diabo"] CharmSong
-        ["Silisia's Demand"] CharmSong
-        ["Dawnbreeze's Demand"] CharmSong
-        ["Desirae's Demand"] CharmSong
-    
-        -- Low Level Aria Song - before Combination of Effects Under Level 68
-        ["Battlecry of the Vah Shir"] LowAriaSong
-        ["Warsong of the Vah Shir"] LowAriaSong
-    
-    
-        -- Resists Song
-        ["Psalm of Cooling"] ResistSong
-        ["Psalm of Purity"] ResistSong
-        ["Psalm of Warmth"] ResistSong
-        ["Psalm of Vitality"] ResistSong
-        ["Psalm of Veeshan"] ResistSong
-        ["Psalm of the Forsaken"] ResistSong
-        ["Second Psalm of Veeshan"] ResistSong
-        ["Psalm of the Restless"] ResistSong
-        ["Psalm of the Pious"] ResistSong
-    
+
+
         -- MainAriaSong - Level Ranges 45 - 111
         -- What differs between PsalmSong and MainAriaSong ???
-        ["Aria of Pli Xin Liako"] MainAriaSong
-        ["Aria of Margidor"] MainAriaSong 
-        ["Aria of Begalru"] MainAriaSong
-        ["Aria of Maetanrus"] MainAriaSong
-        ["Aria of Va'Ker"] MainAriaSong
-        ["Aria of the Orator"] MainAriaSong    
-        ["Aria of the Composer"] MainAriaSong
-        ["Aria of the Poet"] MainAriaSong
-        ["Ancient: Call of Power"] MainAriaSong     
-        ["Aria of the Artist"] MainAriaSong   
-        ["Yelhun's Mystic Call"] MainAriaSong 
-        ["Ancient: Call of Power"] MainAriaSong
-        ["Rizlona's Call of Flame"] MainAriaSong
-        ["Rizlona's Fire"] MainAriaSong  
-        ["Rizlona's Embers"] MainAriaSong  
-    
+
+        },
         -- CasterAriaSong - Level Range 72 - 113
-        ["Constance's Aria"] CasterAriaSong
-        ["Sontalak's Aria"] CasterAriaSong 
-        ["Qunard's Aria"] CasterAriaSong 
-        ["Nilsara's Aria"] CasterAriaSong
-        ["Gosik's Aria"] CasterAriaSong
-        ["Daevan's Aria"] CasterAriaSong
-        ["Sotor's Aria"] CasterAriaSong    
-        ["Talendor's Aria"] CasterAriaSong
-        ["Performer's Explosive Aria"] CasterAriaSong
-        ["Weshlu's Chillsong Aria"] CasterAriaSong     
+
 
     
         -- WarMarchSong Level Range 10 - 114
@@ -300,210 +407,107 @@ return {
     
     -- Seperated the Insult Songs Since they are on 2 different timers and the new one with them as one would Pick 2 Insult Timer 3 songs by Default.
     -- InsultSong1 - Level Range 12 - 112 Timer 3
-    |**
-            ["Nord's Disdain"] InsultSong
-            ["Sogran's Insult"] InsultSong
-            ["Yelinak's Insult"] InsultSong
-            ["Omorden's Insult"] InsultSong 
-            ["Sathir's Insult"] InsultSong
-            ["Travenro's Insult"] InsultSong  
-            ["Tsaph's Insult"] InsultSong
-            ["Fjilnauk's Insult"] InsultSong
-            ["Kaficus' Insult"] InsultSong
-            ["Garath's Insult"] InsultSong
-            ["Hykast's Insult"] InsultSong
-            ["Venimor's Insult"] InsultSong 
+--    
+--          [] =     ["Nord's Disdain"] InsultSong
+--          [] =   ["Sogran's Insult"] InsultSong
+--          [] =    ["Yelinak's Insult"] InsultSong
+--          [] =    ["Omorden's Insult"] InsultSong 
+--          [] =    ["Sathir's Insult"] InsultSong
+--          [] =    ["Travenro's Insult"] InsultSong  
+--          [] =     ["Tsaph's Insult"] InsultSong
+--          [] =     ["Fjilnauk's Insult"] InsultSong
+--          [] =     ["Kaficus' Insult"] InsultSong
+--          [] =     ["Garath's Insult"] InsultSong
+--          [] =     ["Hykast's Insult"] InsultSong
+--          [] =     ["Venimor's Insult"] InsultSong 
         -- Below Level 85 This line turns into "bellow" instead of "Insult"
-            ["Bellow of Chaos"] InsultSong
-            ["Brusco's Bombastic Bellow"] InsultSong   
-            ["Brusco's Boastful Bellow"] InsultSong
-    **|
-    
-    -- DichoSong Level Range - 101 - 106
-            ["Ecliptic Psalm"] DichoSong
-            ["Composite Psalm"] DichoSong
-            ["Dissident Psalm"] DichoSong    
-            ["Dichotomic Psalm"] DichoSong
+--          [] = ["Bellow of Chaos"] InsultSong
+--          [] =     ["Brusco's Bombastic Bellow"] InsultSong   
+--          [] =     ["Brusco's Boastful Bellow"] InsultSong
+--
     
     
-    -- MezSpell - Level Range 15 - 114
-            ["Slumber of the Diabo"] MezSpell
-        -- /call AbilitySet_Add "Lullaby of Nightfall" MezSpell
-        -- /call AbilitySet_Add "Lullaby of Zburator" MezSpell
-            ["Slumber of Zburator"] MezSpell
-            ["Slumber of Jembel"] MezSpell  
-        -- /call AbilitySet_Add "Lullaby of Jembel" MezSpell 
-            ["Slumber of Silisia"] MezSpell
-        -- /call AbilitySet_Add "Lullaby of Silisia" MezSpell
-            ["Slumber of Motlak"] MezSpell
-        -- /call AbilitySet_Add "Lullaby of the Forsaken" MezSpell    
-            ["Slumber of Kolain"] MezSpell
-        -- /call AbilitySet_Add "Lullaby of the Forlorn" MezSpell
-            ["Slumber of Sionachie"] MezSpell  
-        -- /call AbilitySet_Add "Lullaby of the Lost" MezSpell    
-            ["Slumber of the Mindshear"] MezSpell
-            ["Serenity of Oceangreen"] MezSpell
-            ["Amber's Last Lullaby"] MezSpell
-            ["Queen Eletyl's Screech"] MezSpell
-            ["Command of Queen Veneneu"] MezSpell
-            ["Aelfric's Last Lullaby"] MezSpell    
-            ["Vulka's Lullaby"] MezSpell
-            ["Creeping Dreams"] MezSpell
-            ["Luvwen's Lullaby"] MezSpell  
-            ["Lullaby of Morell"] MezSpell    
-            ["Dreams of Terris"] MezSpell
-            ["Dreams of Thule"] MezSpell  
-            ["Dreams of Ayonae"] MezSpell   
-            ["Song of Twilight"] MezSpell
-            ["Sionachie's Dreams"] MezSpell  
-            ["Crission's Pixie Strike"] MezSpell   
-            ["Kelin's Lucid Lullaby"] MezSpell 
     
     
     -- MezAESpell - Level Range 85 - 115 **
-            ["Wave of Nocturn"] MezAESpell
-            ["Wave of Sleep"] MezAESpell
-            ["Wave of Somnolence"] MezAESpell
-            ["Wave of Torpor"] MezAESpell    
-            ["Wave of Quietude"] MezAESpell
-            ["Wave of the Conductor"] MezAESpell
-            ["Wave of Dreams"] MezAESpell  
-            ["Wave of Slumber"] MezAESpell    
+    [] = ["Wave of Nocturn"] MezAESpell
+            [] = ["Wave of Sleep"] MezAESpell
+            [] = ["Wave of Somnolence"] MezAESpell
+            [] = ["Wave of Torpor"] MezAESpell    
+            [] = ["Wave of Quietude"] MezAESpell
+            [] = ["Wave of the Conductor"] MezAESpell
+            [] = ["Wave of Dreams"] MezAESpell  
+            [] = ["Wave of Slumber"] MezAESpell    
     
     
     -- SlowSong - We only get 1 single target slow
-            ["Requiem of Time"] SlowSong    
-        
+            ["Requiem of Time"] SlowSong          
     -- Singletarget Assonant Slow Line
     
     
     -- AESlowSong - Level Range 20 - 114 (Single target works better)  
     
-            ["Radiwol's Melodic Binding"] AESlowSong
-            ["Dekloaz's Melodic Binding"] AESlowSong
-            ["Protan's Melodic Binding"] AESlowSong  
-            ["Largo's Melodic Binding"] AESlowSong    
+    [] =     ["Radiwol's Melodic Binding"] AESlowSong
+    [] =     ["Dekloaz's Melodic Binding"] AESlowSong
+    [] =     ["Protan's Melodic Binding"] AESlowSong  
+    [] =     ["Largo's Melodic Binding"] AESlowSong    
     
      -- AccelerandoSong - Level Range 88 - 113 **
-            ["Satisfying Accelerando"] AccelerandoSong
-            ["Placating Accelerando"] AccelerandoSong
-            ["Atoning Accelerando"] AccelerandoSong    
-            ["Allaying Accelerando"] AccelerandoSong
-            ["Ameliorating Accelerando"] AccelerandoSong
-            ["Assuaging Accelerando"] AccelerandoSong  
-            ["Alleviating Accelerando"] AccelerandoSong    
+     [] =     ["Satisfying Accelerando"] AccelerandoSong
+     [] =     ["Placating Accelerando"] AccelerandoSong
+     [] =     ["Atoning Accelerando"] AccelerandoSong    
+     [] =     ["Allaying Accelerando"] AccelerandoSong
+     [] =     ["Ameliorating Accelerando"] AccelerandoSong
+     [] =     ["Assuaging Accelerando"] AccelerandoSong  
+     [] =     ["Alleviating Accelerando"] AccelerandoSong    
     
      -- SpitefulSong - Level Range 90 - 
-            ["Von Deek's Spiteful Lyric"] SpitefulSong
-            ["Omorden's Spiteful Lyric"] SpitefulSong
-            ["Travenro's Spiteful Lyric"] SpitefulSong    
-            ["Fjilnauk's Spiteful Lyric"] SpitefulSong
-            ["Kaficus' Spiteful Lyric"] SpitefulSong
-            ["Hykast's Spiteful Lyric"] SpitefulSong  
-            ["Lyrin's Spiteful Lyric"] SpitefulSong    
+     [] =     ["Von Deek's Spiteful Lyric"] SpitefulSong
+     [] =     ["Omorden's Spiteful Lyric"] SpitefulSong
+     [] =     ["Travenro's Spiteful Lyric"] SpitefulSong    
+     [] =     ["Fjilnauk's Spiteful Lyric"] SpitefulSong
+     [] =     ["Kaficus' Spiteful Lyric"] SpitefulSong
+     [] =     ["Hykast's Spiteful Lyric"] SpitefulSong  
+     [] =     ["Lyrin's Spiteful Lyric"] SpitefulSong    
     
      -- RecklessSong - Level Range 93 - 113 **
-            ["Kai's Reckless Renewal"] RecklessSong
-            ["Reivaj's Reckless Renewal"] RecklessSong    
-            ["Rigelon's Reckless Renewal"] RecklessSong
-            ["Rytan's Reckless Renewal"] RecklessSong
-            ["Ruaabri's Reckless Renewal"] RecklessSong  
-            ["Ryken's Reckless Renewal"] RecklessSong    
+     [] =     ["Kai's Reckless Renewal"] RecklessSong
+     [] =     ["Reivaj's Reckless Renewal"] RecklessSong    
+     [] =     ["Rigelon's Reckless Renewal"] RecklessSong
+     [] =     ["Rytan's Reckless Renewal"] RecklessSong
+     [] =     ["Ruaabri's Reckless Renewal"] RecklessSong  
+     [] =     ["Ryken's Reckless Renewal"] RecklessSong    
         
      -- Fatesong - Level Range 77 - 112 **
-            ["Fatesong of Lucca"] FateSong
-            ["Fatesong of Radiwol"] FateSong
-            ["Fatesong of Dekloaz"] FateSong 
-            ["Fatesong of Jocelyn"] FateSong
-            ["Fatesong of Protan"] FateSong    
-            ["Fatesong of Illdaera"] FateSong
-            ["Fatesong of Fergar"] FateSong
-            ["Fatesong of the Gelidran"] FateSong  
-            ["Garadell's Fatesong"] FateSong    
+     [] =     ["Fatesong of Lucca"] FateSong
+     [] =     ["Fatesong of Radiwol"] FateSong
+     [] =     ["Fatesong of Dekloaz"] FateSong 
+     [] =     ["Fatesong of Jocelyn"] FateSong
+     [] =     ["Fatesong of Protan"] FateSong    
+     [] =     ["Fatesong of Illdaera"] FateSong
+     [] =     ["Fatesong of Fergar"] FateSong
+     [] =     ["Fatesong of the Gelidran"] FateSong  
+     [] =     ["Garadell's Fatesong"] FateSong    
         
-     -- PsalmSong - Level Range 69 - 112 **
-     -- What differs between PsalmSong and MainAriaSong ???
-            ["Fyrthek Fior's Psalm of Potency"] PsalmSong
-            ["Velketor's Psalm of Potency"] PsalmSong
-            ["Akett's Psalm of Potency"] PsalmSong  
-            ["Horthin's Psalm of Potency"] PsalmSong
-            ["Siavonn's Psalm of Potency"] PsalmSong 
-            ["Wasinai's Psalm of Potency"] PsalmSong
-            ["Lyrin's Psalm of Potency"] PsalmSong    
-            ["Druzzil's Psalm of Potency"] PsalmSong
-            ["Erradien's Psalm of Potency"] PsalmSong
-            ["Performer's Psalm of Pyrotechnics"] PsalmSong  
-            ["Ancient: Call of Power"] PsalmSong 
-            ["Eriki's Psalm of Power"] PsalmSong    
+        -- PsalmSong - Level Range 69 - 112 **
+        -- What differs between PsalmSong and MainAriaSong ???
+        [] = ["Fyrthek Fior's Psalm of Potency"] PsalmSong
+        [] =    ["Velketor's Psalm of Potency"] PsalmSong
+        [] =    ["Akett's Psalm of Potency"] PsalmSong  
+        [] =    ["Horthin's Psalm of Potency"] PsalmSong
+        [] =    ["Siavonn's Psalm of Potency"] PsalmSong 
+        [] =   ["Wasinai's Psalm of Potency"] PsalmSong
+        [] =   ["Lyrin's Psalm of Potency"] PsalmSong    
+        [] =   ["Druzzil's Psalm of Potency"] PsalmSong
+        [] =   ["Erradien's Psalm of Potency"] PsalmSong
+         [] =   ["Performer's Psalm of Pyrotechnics"] PsalmSong  
+            [] = ["Ancient: Call of Power"] PsalmSong 
+            [] = ["Eriki's Psalm of Power"] PsalmSong    
     
-    -- DotSong - Level Range 30 - 115  
-            ["Shak Dathor's Chant of Flame"] DotSong
-            ["Cruor's Chant of Poison"] DotSong
-            ["Sylra Fris' Chant of Frost"] DotSong
-            ["Coagulus' Chant of Disease"] DotSong
-            ["Sontalak's Chant of Flame"] DotSong
-            ["Malvus's Chant of Poison"] DotSong  
-            ["Yelinak's Chant of Frost"] DotSong    
-            ["Zlexak's Chant of Disease"] DotSong
-            ["Qunard's Chant of Flame"] DotSong
-            ["Nexona's Chant of Poison"] DotSong
-            ["Ekron's Chant of Frost"] DotSong    
-            ["Hoshkar's Chant of Disease"] DotSong
-            ["Nilsara's Chant of Flame"] DotSong
-            ["Serisaria's Chant of Poison"] DotSong  
-            ["Kirchen's Chant of Frost"] DotSong
-            ["Horthin's Chant of Disease"] DotSong  
-            ["Gosik's Chant of Flame"] DotSong 
-            ["Slaunk's Chant of Poison"] DotSong
-            ["Edoth's Chant of Frost"] DotSong
-            ["Siavonn's Chant of Disease"] DotSong
-            ["Daevan's Chant of Flame"] DotSong    
-            ["Hiqork's Chant of Poison"] DotSong
-            ["Kalbrok's Chant of Frost"] DotSong
-            ["Wasinai's Chant of Disease"] DotSong  
-            ["Sotor's Chant of Flame"] DotSong    
-            ["Spinechiller's Chant of Poison"] DotSong
-            ["Fergar's Chant of Frost"] DotSong
-            ["Shiverback's Chant of Disease"] DotSong
-            ["Talendor's Chant of Flame"] DotSong    
-            ["Severilous' Chant of Poison"] DotSong
-            ["Gorenaire's Chant of Frost"] DotSong
-            ["Trakanon's Chant of Disease"] DotSong  
-            ["Tjudawos' Chant of Flame"] DotSong   
-            ["Kildrukaun's Chant of Poison"] DotSong
-            ["Zeixshi-Kar's Chant of Frost"] DotSong  
-            ["Vyskudra's Chant of Disease"] DotSong 
-            ["Ancient: Chaos Chant"] DotSong 
-            ["Vulka's Chant of Flame"] DotSong
-            ["Vulka's Chant of Poison"] DotSong
-            ["Vulka's Chant of Frost"] DotSong
-            ["Vulka's Chant of Disease"] DotSong    
-            ["Ancient: Chaos Chant"] DotSong
-            ["Tuyen's Chant of Fire"] DotSong
-            ["Tuyen's Chant of Ice"] DotSong  
-            ["Tuyen's Chant of Venom"] DotSong    
-            ["Tuyen's Chant of the Plague"] DotSong
-            ["Angstlich's Assonance"] DotSong
-            ["Fufil's Diminishing Dirge"] DotSong
-            ["Tuyen's Chant of Poison"] DotSong    
-            ["Tuyen's Chant of Frost"] DotSong
-            ["Tuyen's Chant of Disease"] DotSong
-            ["Tuyen's Chant of Flame"] DotSong  
-            ["Fufil's Curtailing Chant"] DotSong    
-      
-            ["Aria of Absolution"] CureSpell    
 
-        ['Mantle'] = {
-            [1] = "Malarian Mantle",
-            [2] = "Gorgon Mantle",
-            [3] = "Recondite Mantle",
-            [4] = "Bonebrood Mantle",
-            [5] = "Doomscale Mantle",
-            [6] = "Krellnakor Mantle",
-            [7] = "Restless Mantle",
-            [8] = "Fyrthek Mantle",
-            [9] = "Geomimus Mantle",
-        },
+      
+            [] = ["Aria of Absolution"] CureSpell    
+
     },
     ['Rotations'] = {
         ['Tank'] = {

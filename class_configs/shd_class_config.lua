@@ -505,4 +505,4 @@ return {
     ['DefaultConfig'] = {
         ['Mode'] = 'Tank',
     },
-}
+},
