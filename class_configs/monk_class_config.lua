@@ -182,6 +182,6 @@ return {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode'] = 'DPSk',
+        ['Mode'] = 'DPS',
     },
 }
