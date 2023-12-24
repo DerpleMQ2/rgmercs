@@ -354,7 +354,7 @@ return {
             [53] = "Fufil's Curtailing Chant",
         },
         ['CureSpell'] = {
-            [1] = ,"Aria of Absolution",
+            [1] = "Aria of Absolution",
         },
         ['AllianceSong'] = {
             [1] = "Conjunction of Sticks and Stones",
