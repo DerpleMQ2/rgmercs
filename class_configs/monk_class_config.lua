@@ -25,8 +25,8 @@ return {
             [10] = "Convalesce",
         },
         ['Aura'] = {
-            [1] = "Disciple's Aura" "Disciple's Aura Effect",
-            [2] = "Master's Aura" "Master's Aura Effect",
+            [1] = "Disciple's Aura",
+            [2] = "Master's Aura",
         },
         ['DichoSpell'] = {
             [1] = "Dichotomic Form",
