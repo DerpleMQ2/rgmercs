@@ -61,7 +61,7 @@ function Module:Render()
 
     ImGui.Text(string.format("Chase Target: %s", self.settings.ChaseTarget))
 
-    if chaseSpawn then
+    if chaseSpawn and chaseSpawn.ID() > 0 then
         ImGui.Indent()
         ImGui.Text(string.format("Distance: %d", chaseSpawn.Distance()))
         ImGui.Text(string.format("ID: %d", chaseSpawn.ID()))
@@ -73,6 +73,12 @@ function Module:Render()
         end
         ImGui.SameLine()
         ImGui.Text(string.format("%s", chaseSpawn.LineOfSight() and ICONS.FA_EYE or ICONS.FA_EYE_SLASH))
+        ImGui.PopStyleColor(1)
+        ImGui.Unindent()
+    else
+        ImGui.Indent()
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
+        ImGui.Text(string.format("Chase Target Invalid!"))
         ImGui.PopStyleColor(1)
         ImGui.Unindent()
     end
@@ -100,6 +106,9 @@ function Module:GiveTime()
             --self:SaveSettings()
             return
         end
+
+        if mq.TLO.Me.Dead() then return end
+        if chaseSpawn.Distance() < self.settings.ChaseDistance then return end
 
         local Nav = mq.TLO.Nav
 
@@ -137,12 +146,12 @@ end
 
 function Module:ChaseOn()
 -- Command Binds
-    if mq.TLO.Target.ID() > 0 then
-        self.settings.ChaseOn = not self.settings.ChaseOn
+    if mq.TLO.Target.ID() > 0 and mq.TLO.Target.Type() == "PC" then
+        self.settings.ChaseOn = true
         self.settings.ChaseTarget = mq.TLO.Target.CleanName()
         self:SaveSettings()
     else
-        RGMercsLogger.log("\ayWarning:\ax No valid chase target!")
+        RGMercsLogger.log("\ayWarning:\ax Not a valid chase target!")
     end
 end
 
