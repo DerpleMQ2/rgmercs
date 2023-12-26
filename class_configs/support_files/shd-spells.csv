@@ -1,0 +1,602 @@
+SpellName,ClassLevel,Expansion,Timer,ExpansionNum
+Spike of Disease,1,pop,5,4
+Sense the Dead,2,original,0,0
+Locate Corpse,3,original,0,0
+Invisibility Versus Undead,4,original,0,0
+Disease Cloud,5,original,0,0
+Siphon Strength,6,original,0,0
+Leering Corpse,7,original,0,0
+Lifetap,8,original,0,0
+Numb the Dead,9,original,0,0
+Despair,9,sol,0,3
+Endure Cold,10,original,0,0
+Clinging Darkness,11,original,0,0
+Fear,12,original,0,0
+Lesser Summon Corpse,12,original,0,0
+Shadow Step,13,original,0,0
+Bone Walk,14,original,0,0
+Lifespike,15,original,0,0
+Scream of Hate,15,sol,0,3
+Grim Aura,16,original,0,0
+Deadeye,17,original,0,0
+Ward Undead,18,original,0,0
+Cure Disease,19,original,0,0
+Tiny Companion,19,pop,0,4
+Spook the Dead,20,original,0,0
+Engulfing Darkness,20,original,0,0
+Dark Empathy,21,original,0,0
+Vampiric Embrace,22,original,0,0
+Convoke Shadow,22,original,0,0
+Scream of Pain,23,sol,0,3
+Feign Death,24,original,0,0
+Endure Disease,26,original,0,0
+Wave of Enfeeblement,27,original,0,0
+Heat Blood,28,original,0,0
+Lifedraw,29,original,0,0
+Strengthen Death,29,sov,0,2
+Restless Bones,30,original,0,0
+Gather Shadows,30,original,0,0
+Shieldskin,31,original,0,0
+Dark Temptation,32,ldon,0,6
+Terror of Darkness,33,sol,0,3
+Spear of Disease,34,pop,5,4
+Resist Cold,35,original,0,0
+Shroud of Hate,35,sov,0,2
+Cancel Magic,36,original,0,0
+Heart Flutter,36,original,0,0
+Shadow Vortex,37,original,0,0
+Scream of Death,37,sol,0,3
+Animate Dead,38,original,0,0
+Expulse Undead,39,original,0,0
+Voice of Darkness,39,sol,0,3
+Shadow Sight,40,original,0,0
+Blood of Pain,41,loy,0,5
+Terror of Shadows,42,sol,0,3
+Invoke Fear,43,original,0,0
+Dooming Darkness,44,original,0,0
+Word of Spirit,45,original,0,0
+Breath of the Dead,45,original,0,0
+Summon Dead,46,original,0,0
+Voice of Shadows,46,sol,0,3
+Life Leech,47,original,0,0
+Scythe of Darkness,47,ldon,7,6
+Spear of Pain,48,pop,5,4
+Dismiss Undead,49,original,0,0
+Harmshield,50,original,1,0
+Shroud of Pain,50,sov,0,2
+Resistant Discipline,51,original,5,0
+Siphon Life,51,original,0,0
+Malignant Dead,52,original,0,0
+Rest the Dead,52,original,0,0
+Summon Companion,52,sov,0,2
+Abduction of Strength,52,sol,0,3
+Mental Corruption,52,sol,0,3
+Comatose,52,loy,0,5
+Boil Blood,53,original,0,0
+Terror of Death,53,sol,0,3
+Fearless Discipline,54,original,5,0
+Panic the Dead,54,original,0,0
+Banshee Aura,54,original,0,0
+Torrent of Hate,54,sol,0,3
+Spear of Plague,54,pop,5,4
+Call of Darkness,54,ldon,0,6
+Scythe of Death,54,ldon,7,6
+Expel Undead,55,original,0,0
+Spirit Tap,55,original,0,0
+Shroud of Undeath,55,rok,0,1
+Bobbing Corpse,55,rok,0,1
+Shroud of Death,55,sov,0,2
+Unholy Aura Discipline,55,sov,2,2
+Voice of Death,55,sol,0,3
+Steelskin,56,original,0,0
+Torrent of Pain,56,sol,0,3
+Soulless Fear,56,don,0,9
+Ichor Guard,56,don,5,9
+Vampiric Curse,57,original,0,0
+Drain Spirit,57,original,0,0
+Conjure Corpse,57,rok,0,1
+Shadow Voice,57,don,0,9
+Nullify Magic,58,original,0,0
+Cackling Bones,58,original,0,0
+Torrent of Fatigue,58,sol,0,3
+Deathly Temptation,58,sol,0,3
+Diamondskin,59,original,0,0
+Cascading Darkness,59,original,0,0
+Terror of Terris,59,sol,0,3
+Deflection Discipline,59,sod,4,15
+Drain Soul,60,original,0,0
+Augment Death,60,original,0,0
+Asystole,60,rok,0,1
+Death Peace,60,sov,3,2
+Leechcurse Discipline,60,sov,3,2
+Voice of Terris,60,sol,0,3
+Cloak of the Akheva,60,sol,0,3
+Ignite Blood,61,original,0,0
+Improved Invisibility to Undead,61,sov,0,2
+Festering Darkness,61,pop,0,4
+Aura of Darkness,61,pop,0,4
+Soul Guard,61,don,5,9
+Soulless Panic,61,don,0,9
+Bond of Death,62,original,0,0
+Deny Undead,62,pop,7,4
+Touch of Volatis,62,pop,0,4
+Zevfeer's Bite,62,pop,2,4
+Shadow Bellow,62,don,0,9
+Shroud of Chaos,63,pop,0,4
+Aura of Pain,63,pop,0,4
+Terror of Thule,63,pop,0,4
+Blood of Hate,63,pop,0,4
+Invoke Death,64,original,0,0
+Augmentation of Death,64,sov,0,2
+Pact of Hate,64,pop,0,4
+Spear of Decay,64,pop,5,4
+Scythe of Innoruuk,64,ldon,7,6
+Voice of Thule,65,pop,0,4
+Aura of Hate,65,pop,0,4
+Touch of Innoruuk,65,pop,0,4
+Cloak of Luclin,65,pop,0,4
+Mental Horror,65,god,0,7
+Black Shroud,65,god,0,7
+Miasmic Spear,65,god,5,7
+Ancient Bite of Chaos,65,god,4,7
+Blood of Discord,66,oom,0,8
+Dark Constriction,66,oom,0,8
+Bond of Inruku,66,oom,0,8
+Soulless Terror,66,oom,0,8
+Touch of Inruku,67,oom,0,8
+Inruku's Bite,67,oom,2,8
+Shroud of Discord,67,oom,0,8
+Terror of Discord,67,oom,0,8
+Shadow Howl,67,oom,0,8
+Theft of Pain,68,oom,0,8
+Blood of Inruku,68,oom,0,8
+Son of Decay,68,oom,0,8
+Scythe of Inruku,68,oom,7,8
+Fickle Shadows,68,dod,7,10
+Rune of Decay,69,oom,0,8
+Pact of Decay,69,oom,0,8
+Spear of Muram,69,oom,5,8
+Dread Gaze,69,oom,0,8
+Soul Shield,69,don,5,9
+Touch of Draygun,69,dod,0,10
+Gift of Draygun,69,dod,0,10
+Theft of Hate,70,oom,0,8
+Touch of the Devourer,70,oom,0,8
+Cloak of Discord,70,oom,0,8
+Ancient Bite of Muram,70,oom,4,8
+Theft of Agony,70,por,0,11
+Decrepit Skin,70,por,12,11
+Exhumer's Call,71,tss,0,12
+Bond of the Blacktalon,71,tss,0,12
+Blacktalon Bite,71,tss,2,12
+Terror of Vergalid,71,tss,0,12
+Marrowthirst Horror,71,tbs,0,13
+Shroud of the Nightborn,72,tss,0,12
+Challenge for Power,72,tss,0,12
+Blood of the Blacktalon,72,tss,0,12
+Shambling Minion,73,tss,0,12
+Drink of Decomposition,73,tss,0,12
+Amplify Death,73,tss,0,12
+Dark Bargain,73,tss,0,12
+Soul Carapace,73,tbs,5,13
+Rotroot Spear,74,tss,5,12
+Vilify,74,tss,0,12
+Cloak of Corruption,74,tss,0,12
+Last Breath,75,tss,9,12
+Remorseless Demeanor,75,tss,0,12
+Touch of Severan,75,tss,0,12
+Touch of the Wailing Three,75,tbs,0,13
+Procure Corpse,76,sof,0,14
+Bond of the Blackwater,76,sof,0,14
+Blackwater Bite,76,sof,2,14
+Terror of the Soulbleeder,76,sof,0,14
+Soulthirst Horror,76,sof,0,14
+Shroud of the Gloomborn,77,sof,0,14
+Trial for Power,77,sof,0,14
+Blood of the Blackwater,77,sof,0,14
+Assiduous Impurity,77,sof,0,14
+Maladroit Minion,78,sof,0,14
+Expatiate Death,78,sof,0,14
+Grim Covenant,78,sof,0,14
+Umbral Carapace,78,sof,5,14
+Rigor Mortis,78,sof,1,14
+Rotmarrow Spear,79,sof,5,14
+Revile,79,sof,0,14
+Drape of Corruption,79,sof,0,14
+Touch of the Soulbleeder,80,sof,0,14
+Gift of the Soulbleeder,80,sof,0,14
+Gift of the Soulbleeder II,80,sof,0,14
+Gift of the Soulbleeder III,80,sof,0,14
+Last Gasp,80,sof,9,14
+Touch of Kildrukaun,80,sof,0,14
+Umbral Skin,80,sof,12,14
+Reaper's Call,81,sod,0,15
+Bond of Laarthik,81,sod,0,15
+Laarthik's Bite,81,sod,2,15
+Terror of Jelvalak,81,sod,0,15
+Mindshear Horror,81,sod,0,15
+Shroud of the Blightborn,82,sod,0,15
+Charge for Power,82,sod,0,15
+Blood of Laarthik,82,sod,0,15
+Plague of the Karanas,82,sod,0,15
+Withstand,83,sod,15,15
+Minion of Sebilis,83,sod,0,15
+Gift of Sathir,83,sod,0,15
+Venril's Covenant,83,sod,0,15
+Malarian Carapace,83,sod,5,15
+Unsavory Sacrifice,83,uf,0,16
+Unsavory Detonation,83,uf,0,16
+Malarian Mantle,83,uf,5,16
+Steely Stance,84,sod,0,15
+Malarian Spear,84,sod,5,15
+Burst of Spite,84,sod,0,15
+Drape of Korafax,84,sod,0,15
+Touch of Lanys,85,sod,0,15
+Gift of Lanys,85,sod,0,15
+Gift of Lanys II,85,sod,0,15
+Gift of Lanys III,85,sod,0,15
+Final Breath,85,sod,9,15
+Touch of Tharoff,85,sod,0,15
+Malarian Skin,85,sod,12,15
+Curse of Frailty,85,sod,0,15
+Dire Implication,85,uf,6,16
+Dire Constriction,85,uf,0,16
+Respite,86,hot,13,17
+Reaper's Beckon,86,hot,0,17
+Amygdalan Horror,86,hot,0,17
+Banshee Skin,86,hot,0,17
+Bond of Malthiasiss,86,hot,0,17
+Bond of Malthiasiss Recourse,86,hot,0,17
+Bond of Malthiasiss Recourse II,86,hot,0,17
+Bond of Malthiasiss Recourse III,86,hot,0,17
+Malthiasiss's Bite,86,hot,2,17
+Malthiasiss's Bite Recourse,86,hot,0,17
+Malthiasiss's Bite Recourse II,86,hot,0,17
+Malthiasiss's Bite Recourse III,86,hot,0,17
+Terror of Rerekalen,86,hot,0,17
+Blood of Malthiasiss,87,hot,0,17
+Confrontation for Power,87,hot,0,17
+Despairing Darkness,87,hot,0,17
+Plague of Iglum,87,hot,0,17
+Shroud of the Plagueborne,87,hot,0,17
+Defy,88,hot,15,17
+Gift of Dyalgem,88,hot,0,17
+Gixblat's Covenant,88,hot,0,17
+Gorgon Carapace,88,hot,11,17
+Gorgon Mantle,88,hot,5,17
+Minion of Fear,88,hot,0,17
+Repulsive Sacrifice,88,hot,0,17
+Repulsive Detonation,88,hot,0,17
+Gorgon Lifedraw,88,hot,0,17
+Gorgon Lifedraw II,88,hot,0,17
+Gorgon Lifedraw III,88,hot,0,17
+Gorgon Shattering,88,hot,0,17
+Gorgon Shattering II,88,hot,0,17
+Gorgon Shattering III,88,hot,0,17
+Stubborn Stance,89,hot,0,17
+Call of Dusk,89,hot,0,17
+Darkness,89,hot,0,17
+Darkness II,89,hot,0,17
+Darkness III,89,hot,0,17
+Drape of Fear,89,hot,0,17
+Gorgon Spear,89,hot,5,17
+Loathing,89,hot,0,17
+Insidious Blight,89,hot,8,17
+Curse of Enfeeblement,90,hot,0,17
+Dire Accusation,90,hot,6,17
+Dire Restriction,90,hot,0,17
+Gorgon Skin,90,hot,12,17
+Last Breath,90,hot,9,17
+Touch of Dyalgem,90,hot,0,17
+Touch of Iglum,90,hot,0,17
+Gift of Iglum,90,hot,0,17
+Gift of Iglum II,90,hot,0,17
+Gift of Iglum III,90,hot,0,17
+Reprieve,91,voa,13,18
+Reaper's Decree,91,voa,0,18
+Sholothian Horror,91,voa,0,18
+Ghoul Skin,91,voa,0,18
+Bond of Korum,91,voa,0,18
+Bond of Korum Recourse,91,voa,0,18
+Bond of Korum Recourse II,91,voa,0,18
+Bond of Korum Recourse III,91,voa,0,18
+Korum's Bite,91,voa,2,18
+Korum's Bite Recourse,91,voa,0,18
+Korum's Bite Recourse II,91,voa,0,18
+Korum's Bite Recourse III,91,voa,0,18
+Terror of Desalin,91,voa,0,18
+Blood of Korum,92,voa,0,18
+Provocation for Power,92,voa,0,18
+Suppurating Darkness,92,voa,0,18
+Insidious Audacity,92,voa,0,18
+Plague of Piqiorn,92,voa,0,18
+Shroud of the Shadeborne,92,voa,0,18
+Gouging Blade,92,voa,10,18
+Renounce,93,voa,15,18
+Gift of Urash,93,voa,0,18
+Worag's Covenant,93,voa,0,18
+Sholothian Carapace,93,voa,11,18
+Sholothian Lifedraw,93,voa,0,18
+Sholothian Lifedraw II,93,voa,0,18
+Sholothian Lifedraw III,93,voa,0,18
+Recondite Mantle,93,voa,5,18
+Recondite Shattering,93,voa,0,18
+Recondite Shattering II,93,voa,0,18
+Recondite Shattering III,93,voa,0,18
+Minion of Sholoth,93,voa,0,18
+Abhorrent Sacrifice,93,voa,0,18
+Abhorrent Detonation,93,voa,0,18
+Stoic Stance,94,voa,0,18
+Call of Shadow,94,voa,0,18
+Drape of the Sepulcher,94,voa,0,18
+Spear of Sholoth,94,voa,5,18
+Perfidious Blight,94,voa,8,18
+Abhorrence,94,voa,0,18
+Undivided Acrimony,94,voa,6,18
+Dire Allegation,95,voa,6,18
+Dire Stenosis,95,voa,0,18
+Sholothian Skin,95,voa,12,18
+Final Gasp,95,voa,9,18
+Sweet Breath,95,voa,0,18
+Sweet Breath II,95,voa,0,18
+Sweet Breath III,95,voa,0,18
+Crimson Blade,95,voa,12,18
+Touch of Urash,95,voa,0,18
+Touch of Piqiorn,95,voa,0,18
+Gift of Piqiorn,95,voa,0,18
+Gift of Piqiorn II,95,voa,0,18
+Gift of Piqiorn III,95,voa,0,18
+Rest,96,rof,13,19
+Reaper's Proclamation,96,rof,0,19
+Grelleth's Horror,96,rof,0,19
+Zombie Skin,96,rof,0,19
+Bond of Ralstok,96,rof,0,19
+Bond of Ralstok Recourse,96,rof,0,19
+Bond of Ralstok Recourse II,96,rof,0,19
+Bond of Ralstok Recourse III,96,rof,0,19
+Ralstok's Bite,96,rof,2,19
+Ralstok's Bite Recourse,96,rof,0,19
+Ralstok's Bite Recourse II,96,rof,0,19
+Ralstok's Bite Recourse III,96,rof,0,19
+Terror of Poira,96,rof,0,19
+Mental Terror,96,cotf,0,20
+Blood of Ralstok,97,rof,0,19
+Demand for Power,97,rof,0,19
+Smoldering Darkness,97,rof,0,19
+Duplicitous Audacity,97,rof,0,19
+Plague of Klonda,97,rof,0,19
+Shroud of the Darksworn,97,rof,0,19
+Gashing Blade,97,rof,10,19
+Unholy Guardian Discipline,97,rof,17,19
+Unholy Guardian Lifetap,97,rof,0,19
+Unholy Guardian Lifetap II,97,rof,0,19
+Unholy Guardian Lifetap III,97,rof,0,19
+Insolent Influence,97,cotf,11,20
+Insolent Reward,97,cotf,0,20
+Insolent Reward II,97,cotf,0,20
+Insolent Reward III,97,cotf,0,20
+Insolent Agitation,97,cotf,0,20
+Insolent Agitation II,97,cotf,0,20
+Insolent Agitation III,97,cotf,0,20
+Reprove,98,rof,15,19
+Gift of Falsin,98,rof,0,19
+Falhotep's Covenant,98,rof,0,19
+Grelleth's Carapace,98,rof,11,19
+Grelleth's Lifedraw,98,rof,0,19
+Grelleth's Lifedraw II,98,rof,0,19
+Grelleth's Lifedraw III,98,rof,0,19
+Bonebrood Mantle,98,rof,5,19
+Bonebrood Shattering,98,rof,0,19
+Bonebrood Shattering II,98,rof,0,19
+Bonebrood Shattering III,98,rof,0,19
+Minion of Grelleth,98,rof,0,19
+Insidious Deflection,98,cotf,17,20
+Steadfast Stance,99,rof,0,19
+Call of Gloomhaze,99,rof,0,19
+Drape of the Fallen,99,rof,0,19
+Spear of Grelleth,99,rof,5,19
+Surreptitious Blight,99,rof,8,19
+Repugnance,99,rof,0,19
+Unbroken Acrimony,99,rof,6,19
+Repugnant Bargain,99,rof,5,19
+Spite of Ronak,99,cotf,14,20
+Ronak's Spite,99,cotf,0,20
+Ronak's Spite II,99,cotf,0,20
+Ronak's Spite III,99,cotf,0,20
+Dire Insinuation,100,rof,6,19
+Dire Stricture,100,rof,0,19
+Grelleth's Skin,100,rof,12,19
+Terminal Breath,100,rof,9,19
+Sweet Breath,100,rof,0,19
+Sweet Breath II,100,rof,0,19
+Sweet Breath III,100,rof,0,19
+Scarlet Blade,100,rof,12,19
+Touch of Falsin,100,rof,0,19
+Touch of Klonda,100,rof,0,19
+Gift of Klonda,100,rof,0,19
+Gift of Klonda II,100,rof,0,19
+Gift of Klonda III,100,rof,0,19
+Reflexive Rancor,100,rof,19,19
+Torrent of Agony,100,cotf,0,20
+Breather,101,tds,13,21
+Stormreaper's Proclamation,101,tds,0,21
+Vizat's Horror,101,tds,0,21
+Bond of Bonemaw,101,tds,0,21
+Bonemaw's Bite,101,tds,2,21
+Bonemaw's Bite Recourse,101,tds,0,21
+Bonemaw's Bite Recourse II,101,tds,0,21
+Bonemaw's Bite Recourse III,101,tds,0,21
+Terror of Narus,101,tds,0,21
+Mental Dread,101,tds,0,21
+Dichotomic Fang,101,tbm,15,22
+Blood of Bonemaw,102,tds,0,21
+Impose for Power,102,tds,0,21
+Spreading Darkness,102,tds,0,21
+Plague of Holmein,102,tds,0,21
+Shroud of the Doomscale,102,tds,0,21
+Lacerating Blade,102,tds,10,21
+Impudent Influence,102,tbm,11,22
+Impudent Reward,102,tbm,0,22
+Impudent Reward II,102,tbm,0,22
+Impudent Reward III,102,tbm,0,22
+Impudent Agitation,102,tbm,0,22
+Impudent Agitation II,102,tbm,0,22
+Impudent Agitation III,102,tbm,0,22
+Impudent Influence Heal,102,tbm,0,22
+Impudent Influence Heal II,102,tbm,0,22
+Impudent Influence Heal III,102,tbm,0,22
+Repel,103,tds,15,21
+Deceitful Deflection,103,tds,17,21
+Gift of Lutzen,103,tds,0,21
+Livio's Covenant,103,tds,0,21
+Vizat's Carapace,103,tds,11,21
+Vizat's Lifedraw,103,tds,0,21
+Vizat's Lifedraw II,103,tds,0,21
+Vizat's Lifedraw III,103,tds,0,21
+Doomscale Mantle,103,tds,5,21
+Doomscale Shattering,103,tds,0,21
+Doomscale Shattering II,103,tds,0,21
+Doomscale Shattering III,103,tds,0,21
+Minion of Vizat,103,tds,0,21
+Harmonious Disruption,103,eok,0,23
+Staunch Stance,104,tds,0,21
+Drape of the Wrathforged,104,tds,0,21
+Spear of Vizat,104,tds,5,21
+Deceitful Blight,104,tds,8,21
+Disgust,104,tds,0,21
+Unflinching Acrimony,104,tds,6,21
+Bloodletting Alliance,104,eok,19,23
+Reflexive Revulsion,104,eok,19,23
+Dire Declaration,105,tds,6,21
+Dire Strangulation,105,tds,0,21
+Vizat's Skin,105,tds,12,21
+Carmine Blade,105,tds,12,21
+Touch of Lutzen,105,tds,0,21
+Touch of Holmein,105,tds,0,21
+Gift of Holmein,105,tds,0,21
+Gift of Holmein II,105,tds,0,21
+Gift of Holmein III,105,tds,0,21
+Torrent of Misery,105,tds,0,21
+Hiatus,106,ros,13,24
+Shadereaper's Proclamation,106,ros,0,24
+Helot Skin,106,ros,0,24
+Tylix's Horror,106,ros,0,24
+Bond of Xalgoz,106,ros,0,24
+Xalgoz's Bite,106,ros,2,24
+Xalgoz's Bite Recourse,106,ros,0,24
+Xalgoz's Bite Recourse II,106,ros,0,24
+Xalgoz's Bite Recourse III,106,ros,0,24
+Terror of Kra'Du,106,ros,0,24
+Mental Fright,106,ros,0,24
+Dissident Fang,106,tbl,15,26
+Mendacious Audacity,107,ros,0,24
+Cursed Guardian Discipline,107,ros,17,24
+Cursed Guardian Lifetap,107,ros,0,24
+Cursed Guardian Lifetap II,107,ros,0,24
+Cursed Guardian Lifetap III,107,ros,0,24
+Blood of Drakus,107,ros,0,24
+Refute for Power,107,ros,0,24
+Putrefying Darkness,107,ros,0,24
+Plague of Hemofax,107,ros,0,24
+Shroud of the Krellnakor,107,ros,0,24
+Wounding Blade,107,ros,10,24
+Spurn,108,ros,15,24
+Insidious Denial,108,ros,17,24
+Gift of T'Vem,108,ros,0,24
+Helot Covenant,108,ros,0,24
+Tylix's Carapace,108,ros,11,24
+Tylix's Lifedraw,108,ros,0,24
+Tylix's Lifedraw II,108,ros,0,24
+Tylix's Lifedraw III,108,ros,0,24
+Krellnakor Mantle,108,ros,5,24
+Krellnakor Shattering,108,ros,0,24
+Krellnakor Shattering II,108,ros,0,24
+Krellnakor Shattering III,108,ros,0,24
+Minion of T'Vem,108,ros,0,24
+Concordant Disruption,108,tbl,0,26
+Defiant Stance,109,ros,0,24
+Call of Nightfall,109,ros,0,24
+Spite of Kra'Du,109,ros,14,24
+Kra'Du's Spite,109,ros,0,24
+Kra'Du's Spite II,109,ros,0,24
+Kra'Du's Spite III,109,ros,0,24
+Drape of the Magmaforged,109,ros,0,24
+Spear of Tylix,109,ros,5,24
+Duplicitous Blight,109,ros,8,24
+Revulsion,109,ros,0,24
+Unyielding Acrimony,109,ros,6,24
+Hateful Bargain,109,ros,5,24
+Bloodletting Covenant,109,tbl,19,26
+Dire Testimony,110,ros,6,24
+Dire Coarctation,110,ros,0,24
+Tylix's Skin,110,ros,12,24
+Claret Blade,110,ros,12,24
+Touch of T'Vem,110,ros,0,24
+Touch of Hemofax,110,ros,0,24
+Gift of Hemofax,110,ros,0,24
+Gift of Hemofax II,110,ros,0,24
+Gift of Hemofax III,110,ros,0,24
+Torrent of Suffering,110,ros,0,24
+Impenitent Influence,110,tbl,11,26
+Impenitent Reward,110,tbl,0,26
+Impenitent Reward II,110,tbl,0,26
+Impenitent Reward III,110,tbl,0,26
+Impenitent Agitation,110,tbl,0,26
+Impenitent Agitation II,110,tbl,0,26
+Impenitent Agitation III,110,tbl,0,26
+Impenitent Influence Heal,110,tbl,0,26
+Impenitent Influence Heal II,110,tbl,0,26
+Impenitent Influence Heal III,110,tbl,0,26
+Relax,111,tov,13,26
+Duskreaper's Proclamation,111,tov,0,26
+Specter Skin,111,tov,0,26
+Cadcane's Horror,111,tov,0,26
+Bond of Vulak,111,tov,0,26
+Vulak's Bite,111,tov,2,26
+Vulak's Bite Recourse,111,tov,0,26
+Vulak's Bite Recourse II,111,tov,0,26
+Vulak's Bite Recourse III,111,tov,0,26
+Terror of Mirenilla,111,tov,0,26
+Mental Torment,111,tov,0,26
+Treacherous Audacity,112,tov,0,26
+Blood of Ikatiar,112,tov,0,26
+Protest for Power,112,tov,0,26
+Pestilent Darkness,112,tov,0,26
+Plague of Zlandicar,112,tov,0,26
+Shroud of the Restless,112,tov,0,26
+Rending Blade,112,tov,10,26
+Thwart,113,tov,15,26
+Insidious Rejection,113,tov,17,26
+Gift of Drendar,113,tov,0,26
+Syl'Tor Covenant,113,tov,0,26
+Cadcane's Carapace,113,tov,11,26
+Cadcane's Lifedraw,113,tov,0,26
+Cadcane's Lifedraw II,113,tov,0,26
+Cadcane's Lifedraw III,113,tov,0,26
+Restless Mantle,113,tov,5,26
+Restless Shattering,113,tov,0,26
+Restless Shattering II,113,tov,0,26
+Restless Shattering III,113,tov,0,26
+Minion of Drendar,113,tov,0,26
+Stormwall Stance,114,tov,0,26
+Call of Twilight,114,tov,0,26
+Spite of Mirenilla,114,tov,14,26
+Mirenilla's Spite,114,tov,0,26
+Mirenilla's Spite II,114,tov,0,26
+Mirenilla's Spite III,114,tov,0,26
+Drape of the Iceforged,114,tov,0,26
+Spear of Cadcane,114,tov,5,26
+Nefarious Blight,114,tov,8,26
+Contempt,114,tov,0,26
+Unending Acrimony,114,tov,6,26
+Abhorrent Bargain,114,tov,5,26
+Dire Indictment,115,tov,6,26
+Dire Convulsion,115,tov,0,26
+Cadcane's Skin,115,tov,12,26
+Cerise Blade,115,tov,12,26
+Touch of Drendar,115,tov,0,26
+Touch of Zlandicar,115,tov,0,26
+Gift of Zlandicar,115,tov,0,26
+Gift of Zlandicar II,115,tov,0,26
+Gift of Zlandicar III,115,tov,0,26
+Torrent of Anguish,115,tov,0,26

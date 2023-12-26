@@ -1,0 +1,1006 @@
+SpellName,ClassLevel,Expansion,Timer,ExpansionNum
+Minor Healing,1,original,0,0
+Endure Fire,1,original,0,0
+Sense Animals,1,original,0,0
+Skin like Wood,1,original,0,0
+Burst of Flame,1,original,0,0
+Dance of the Fireflies,1,original,0,0
+Flame Lick,1,original,0,0
+Lull Animal,1,original,0,0
+Panic Animal,1,original,0,0
+Snare,1,original,0,0
+Tangling Weeds,1,sol,0,3
+Ward Summoned,2,original,0,0
+Grasping Roots,2,original,0,0
+Burst of Fire,3,original,0,0
+Whirling Wind,3,original,4,0
+Cure Disease,4,original,0,0
+Camouflage,4,original,0,0
+Invoke Lightning,4,original,0,0
+Cure Poison,5,original,0,0
+Gate,5,original,0,0
+Harmony,5,original,0,0
+Enduring Breath,6,original,0,0
+Firefist,6,original,0,0
+Treeform,6,original,0,0
+Shield of Thistles,7,original,0,0
+Strength of Earth,7,original,0,0
+Thistlecoat,7,original,0,0
+Ignite,8,original,0,0
+Invisibility Versus Animals,8,original,0,0
+Remove Minor Curse,8,ldon,0,6
+Light Healing,9,original,0,0
+Endure Cold,9,original,0,0
+Starshine,9,original,0,0
+Protection of Wood,9,sol,0,3
+Summon Drink,10,original,0,0
+Spirit of Wolf,10,original,0,0
+Stinging Swarm,10,original,0,0
+Summon Food,11,original,0,0
+Halo of Light,11,original,0,0
+Reebo's Lesser Augury,11,ldon,0,6
+Bind Affinity,12,original,0,0
+Cascade of Hail,12,original,7,0
+Expulse Summoned,13,original,0,0
+See Invisible,13,original,0,0
+Befriend Animal,13,original,0,0
+Levitate,14,original,0,0
+Skin like Rock,14,original,0,0
+Reebo's Lesser Exorcism,14,ldon,0,6
+Reebo's Lesser Cleansing,14,ldon,0,6
+Calm Animal,15,original,0,0
+Terrorize Animal,15,original,0,0
+Ring of Karana,15,original,0,0
+Ring of Surefall Glade,15,original,0,0
+Careless Lightning,16,original,0,0
+Dizzying Wind,16,original,4,0
+Ring of Butcher,16,original,0,0
+Shield of Barbs,17,original,0,0
+Barbcoat,17,original,0,0
+Ring of Commons,17,original,0,0
+Ring of Toxxulia,17,original,0,0
+Tiny Companion,17,pop,0,4
+Cancel Magic,18,original,0,0
+Superior Camouflage,18,original,0,0
+Feral Spirit,18,original,0,0
+Lesser Succor,18,original,0,0
+Ring of Grimling,18,sol,0,3
+Endure Poison,19,original,0,0
+Healing,19,original,0,0
+Endure Disease,19,original,0,0
+Ring of the Nexus,19,sol,0,3
+Protection of Rock,19,sol,0,3
+Resist Fire,20,original,0,0
+Wolf Form,20,original,0,0
+Ring of Ro,20,original,0,0
+Ring of Stonebrunt,20,loy,0,5
+Zephyr Blightfire Moors,20,tss,0,12
+Circle of Blightfire Moors,20,tss,0,12
+Ring of Blightfire Moors,20,tss,0,12
+Primary Anchor Ring,20,hot,0,17
+Secondary Anchor Ring,20,hot,0,17
+Tremor,21,original,0,0
+Ensnaring Roots,21,original,0,0
+Spirit of Cheetah,21,original,0,0
+Ring of Steamfont,21,original,0,0
+Reebo's Augury,21,ldon,0,6
+Pogonip,22,original,7,0
+Sunbeam,22,original,0,0
+Ring of Lavastorm,22,original,0,0
+Ring of Feerrott,22,original,0,0
+Dismiss Summoned,23,original,0,0
+Charm Animals,23,original,0,0
+Ring of Twilight,23,sol,0,3
+Remove Lesser Curse,23,ldon,0,6
+Creeping Crud,24,original,0,0
+Skin like Steel,24,original,0,0
+Ring of the Combines,24,sov,0,2
+Reebo's Exorcism,24,ldon,0,6
+Reebo's Cleansing,24,ldon,0,6
+Immolate,25,original,0,0
+Ring of Misty,25,original,0,0
+Circle of Karana,25,original,0,0
+Circle of Toxxulia,25,original,0,0
+Circle of Butcher,25,original,0,0
+Ring of Knowledge,25,pop,0,4
+Ensnare,26,original,0,0
+Succor East,26,original,0,0
+Circle of Surefall Glade,26,original,0,0
+Scale of Wolf,26,rok,0,1
+Circle of the Nexus,26,sol,0,3
+Shield of Brambles,27,original,0,0
+Bramblecoat,27,original,0,0
+Circle of Commons,27,original,0,0
+Protection of Steel,27,sol,0,3
+Counteract Poison,28,original,0,0
+Counteract Disease,28,original,0,0
+Combust,28,original,0,0
+Beguile Plants,28,rok,0,1
+Circle of Stonebrunt,28,loy,0,5
+Greater Healing,29,original,0,0
+Imbue Plains Pebble,29,original,0,0
+Imbue Emerald,29,original,0,0
+Circle of Grimling,29,sol,0,3
+Ring of Dawnshroud,29,sol,0,3
+Harmony of Nature,29,pop,0,4
+Mass Imbue Emerald,29,loy,0,5
+Mass Imbue Plains Pebble,29,loy,0,5
+Resist Cold,30,original,0,0
+Greater Wolf Form,30,original,0,0
+Circle of Lavastorm,30,original,0,0
+Fury of Air,30,sov,4,2
+Spirit of the Shrew,30,ldon,0,6
+Earthquake,31,original,3,0
+Lightning Strike,31,original,0,0
+Circle of Steamfont,31,original,0,0
+Ring of Iceclad,31,sov,0,2
+Reebo's Greater Augury,31,ldon,0,6
+Drones of Doom,32,original,0,0
+Circle of Ro,32,original,0,0
+Circle of Feerrott,32,original,0,0
+Succor Butcher,32,original,0,0
+Zephyr Toxxulia,32,original,0,0
+Circle of Iceclad,32,sov,0,2
+Zephyr Nexus,32,sol,0,3
+Expel Summoned,33,original,0,0
+Beguile Animals,33,original,0,0
+Zephyr Butcherblock,33,original,0,0
+Circle of the Combines,33,rok,0,1
+Ring of Great Divide,33,sov,0,2
+Zephyr Iceclad,33,sov,0,2
+Circle of Twilight,33,sol,0,3
+Endure Magic,34,original,0,0
+Regeneration,34,original,0,0
+Strength of Stone,34,original,0,0
+Zephyr Karana,34,original,0,0
+Healing Water,34,loy,0,5
+Reebo's Greater Exorcism,34,ldon,0,6
+Reebo's Greater Cleansing,34,ldon,0,6
+Pack Spirit,35,original,0,0
+Share Wolf Form,35,original,0,0
+Zephyr Commonlands,35,original,0,0
+Zephyr Surefall Glade,35,original,0,0
+Zephyr Stonebrunt,35,loy,0,5
+Pack Shrew,35,ldon,0,6
+Primary Anchor Circle,35,hot,0,17
+Secondary Anchor Circle,35,hot,0,17
+Skin like Diamond,36,original,0,0
+Enveloping Roots,36,original,0,0
+Circle of Misty,36,original,0,0
+Ring of Wakening Lands,36,sov,0,2
+Spirit of Ash,36,pop,0,4
+Avalanche,37,original,7,0
+Shield of Spikes,37,original,0,0
+Spikecoat,37,original,0,0
+Wind of the South,37,rok,0,1
+Ro's Fiery Sundering,37,sov,0,2
+Circle of Dawnshroud,37,sol,0,3
+Firestrike,38,original,0,0
+Succor Ro,38,original,0,0
+Circle of Great Divide,38,sov,0,2
+Remove Curse,38,sol,0,3
+Zephyr Grimling,38,sol,0,3
+Circle of Knowledge,38,pop,0,4
+Pack Regeneration,39,original,0,0
+Zephyr Feerrott,39,original,0,0
+Zephyr Steamfont,39,original,0,0
+Wind of the North,39,rok,0,1
+Nature's Renewal,39,rok,0,1
+Ring of Cobalt Scar,39,sov,0,2
+Protection of Diamond,39,sol,0,3
+Form of the Great Wolf,40,original,0,0
+Drifting Death,40,original,0,0
+Zephyr Ro,40,original,0,0
+Zephyr Combines,40,rok,0,1
+Circle of Wakening Lands,40,sov,0,2
+Primary Anchor Push,40,hot,0,17
+Secondary Anchor Push,40,hot,0,17
+Zephyr Primary Anchor,40,hot,0,17
+Zephyr Secondary Anchor,40,hot,0,17
+Savage Spirit,41,original,0,0
+Succor Lavastorm,41,original,0,0
+Summon Companion,41,sov,0,2
+Zephyr Twilight,41,sol,0,3
+Chloroplast,42,original,0,0
+Fixation of Ro,42,sov,0,2
+Circle of Cobalt Scar,42,sov,0,2
+Zephyr Great Divide,42,sov,0,2
+Nullify Magic,43,original,0,0
+Banish Summoned,43,original,0,0
+Allure of the Wild,43,original,0,0
+Dustdevil,43,rok,0,1
+Zephyr Wakening Lands,43,sov,0,2
+Resist Poison,44,original,0,0
+Superior Healing,44,original,0,0
+Resist Disease,44,original,0,0
+Storm Strength,44,original,0,0
+Zephyr Cobalt Scar,44,sov,0,2
+Engulfing Roots,45,original,0,0
+Pack Chloroplast,45,original,0,0
+Zephyr Misty,45,original,0,0
+Share Form of the Great Wolf,45,pop,0,4
+Lightning Blast,46,original,0,0
+Skin like Nature,46,original,0,0
+Succor North,46,original,0,0
+Zephyr Knowledge,46,pop,0,4
+Ice,47,original,0,0
+Shield of Thorns,47,original,0,0
+Thorncoat,47,original,0,0
+Zephyr Lavastorm,47,original,0,0
+Fire,48,original,0,0
+Starfire,48,original,0,0
+Upheaval,48,rok,3,1
+Improved Superior Camouflage,48,sov,0,2
+Resist Magic,49,original,0,0
+Legacy of Spike,49,rok,0,1
+Forest's Renewal,49,rok,0,1
+Protection of Nature,49,sol,0,3
+Vengeance of the Wild,49,ldon,0,6
+Everlasting Breath,50,sol,0,3
+Levitation,50,sol,0,3
+Tangle,50,sol,0,3
+Repulse Animal,51,rok,0,1
+Circle of Winter,51,rok,0,1
+Circle of Summer,52,rok,0,1
+Call of Karana,52,rok,0,1
+Egress I,52,rok,0,1
+Breath of Ro,52,rok,0,1
+Foliage Shield,52,sol,0,3
+Pure Blood,52,loy,0,5
+Feral Pack,52,ldon,0,6
+Ring of Natimbi,52,god,0,7
+Ring of Barindu,52,god,0,7
+Circle of Undershore,52,dod,0,10
+Ring of Undershore,52,dod,0,10
+Zephyr Undershore,52,dod,0,10
+Circle of Arcstone,52,por,0,11
+Ring of Arcstone,52,por,0,11
+Spirit of Scale,53,rok,0,1
+Glamour of Tunare,53,rok,0,1
+Winged Death,53,rok,0,1
+Ring of Bloodfields,53,oom,0,8
+Regrowth,54,rok,0,1
+Form of the Howler,54,rok,0,1
+Blizzard,54,rok,7,1
+Scoriae,54,rok,0,1
+Remove Greater Curse,54,sol,0,3
+Spirit of Eagle,54,sol,0,3
+Circle of Natimbi,54,god,0,7
+Ring of Buried Sea,54,tbs,0,13
+Eradicate Curse,54,rof,0,19
+Annul Magic,55,rok,0,1
+Exile Summoned,55,rok,0,1
+Tunare's Request,55,rok,0,1
+Girdle of Karana,55,rok,0,1
+Frost,55,rok,0,1
+Chloroblast,55,sov,0,2
+Nature Walker's Behest,55,sov,0,2
+Vengeance of Nature,55,ldon,0,6
+Circle of Barindu,55,god,0,7
+Circle of Bloodfields,55,oom,0,8
+Aura of the Grove,55,por,0,11
+Bladecoat,56,rok,0,1
+Breath of Karana,56,rok,4,1
+Engorging Roots,56,rok,0,1
+Wake of Karana,56,rok,0,1
+Ro's Smoldering Disjunction,56,sol,0,3
+Zephyr Natimbi,56,god,0,7
+Zephyr Arcstone,56,por,0,11
+Natureskin,57,rok,0,1
+Succor,57,rok,0,1
+Bonds of Tunare,57,rok,0,1
+Zephyr Dawnshroud,57,sol,0,3
+Zephyr Barindu,57,god,0,7
+Zephyr Bloodfields,57,oom,0,8
+Instinctual Fear,57,don,0,9
+Shield of Blades,58,rok,0,1
+Regrowth of the Grove,58,rok,0,1
+Fist of Karana,58,rok,0,1
+Tunare's Renewal,58,sol,0,3
+Circle of Seasons,58,sol,0,3
+Eradicate Poison,58,rof,0,19
+Eradicate Disease,58,rof,0,19
+Legacy of Thorn,59,rok,0,1
+Spirit of Oak,59,rok,0,1
+Wildfire,59,rok,0,1
+Protection of the Cabbage,59,sol,0,3
+Circle of Buried Sea,59,tbs,0,13
+Incarnate Anew,59,sod,0,15
+Banishment,60,rok,0,1
+Form of the Hunter,60,rok,0,1
+Mask of the Hunter,60,rok,0,1
+Entrapping Roots,60,rok,0,1
+Nature's Touch,60,sov,0,2
+Protection of the Glades,60,sov,0,2
+Ancient Legacy of Blades,60,sov,0,2
+Ancient Starfire of Ro,60,sov,0,2
+Nature's Recovery,60,sol,0,3
+Moonfire,60,sol,0,3
+Mask of the Stalker,60,sol,0,3
+Zephyr The Steppes,60,tss,0,12
+Circle of The Steppes,60,tss,0,12
+Ring of The Steppes,60,tss,0,12
+Teleport Guild Hall Anchor,60,hot,0,17
+Entangle,61,sol,0,3
+Catastrophe,61,pop,3,4
+Earthen Roots,61,pop,0,4
+Replenishment,61,pop,0,4
+Storm's Fury,61,pop,4,4
+Hand of Ro,61,pop,0,4
+Winter's Storm,61,pop,7,4
+Mire Thorns,61,don,0,9
+Instinctual Panic,61,don,0,9
+Flight of Eagles,62,pop,0,4
+Imbue Storm,62,pop,0,4
+Immolation of Ro,62,pop,0,4
+Karana's Rage,62,pop,0,4
+Nature's Might,62,pop,0,4
+Ro's Illumination,62,pop,0,4
+Ring of Slaughter,62,oom,0,8
+Protection of the Nine,63,pop,0,4
+Blessing of Replenishment,63,pop,0,4
+E'ci's Frosty Breath,63,pop,0,4
+Nature's Infusion,63,pop,0,4
+Command of Tunare,63,pop,0,4
+Swarming Death,63,pop,0,4
+Shield of Bracken,63,pop,0,4
+Karana's Renewal,64,pop,0,4
+Protection of Seasons,64,pop,0,4
+Savage Roots,64,pop,0,4
+Summer's Flame,64,pop,0,4
+Brackencoat,64,pop,0,4
+Vengeance of Tunare,64,ldon,6,6
+Circle of Slaughter,64,oom,0,8
+Zephyr Buried Sea,64,tbs,0,13
+Destroy Summoned,65,pop,0,4
+Legacy of Bracken,65,pop,0,4
+Blessing of the Nine,65,pop,0,4
+Winter's Frost,65,pop,0,4
+Mask of the Forest,65,pop,0,4
+Sylvan Infusion,65,god,0,7
+Sylvan Fire,65,god,0,7
+Sylvan Embers,65,god,0,7
+Ancient Chaos Frost,65,god,0,7
+Oaken Vigor,66,oom,0,8
+Stormwatch,66,oom,4,8
+Tempest Wind,66,oom,7,8
+Earth Shiver,66,oom,3,8
+Instinctual Terror,66,oom,0,8
+Nature's Serenity,67,oom,0,8
+Immolation of the Sun,67,oom,0,8
+Lion's Strength,67,oom,0,8
+Sun's Corona,67,oom,0,8
+Glacier Breath,67,oom,0,8
+Nettle Shield,67,oom,0,8
+Zephyr Slaughter,67,oom,0,8
+Steeloak Skin,68,oom,0,8
+Chlorotrope,68,oom,0,8
+Wasp Swarm,68,oom,0,8
+Nettlecoat,68,oom,0,8
+Desolate Summoned,68,oom,0,8
+Cloak of Nature,68,oom,0,8
+Skin of the Reptile,68,dod,0,10
+Blessing of Oak,69,oom,0,8
+Oaken Guard,69,oom,5,8
+Solstice Strike,69,oom,0,8
+Vengeance of the Sun,69,oom,6,8
+Serpent Vines,69,don,0,9
+Spore Spiral,69,dod,0,10
+Hungry Vines,70,oom,0,8
+Nature's Beckon,70,oom,0,8
+Legacy of Nettles,70,oom,0,8
+Blessing of Steeloak,70,oom,0,8
+Glitterfrost,70,oom,0,8
+Mask of the Wild,70,oom,0,8
+Ancient Glacier Frost,70,oom,0,8
+Ancient Chlorobon,70,oom,0,8
+Dawnstrike,70,dod,0,10
+Barkspur,70,por,1,11
+Moonshadow,70,por,8,11
+Aura of Life,70,por,0,11
+Zephyr Direwind,70,tss,0,12
+Circle of Direwind,70,tss,0,12
+Ring of Direwind,70,tss,0,12
+Cure Corruption,71,tss,0,12
+Blistering Sunray,71,tss,0,12
+Gale of the Stormborn,71,tss,4,12
+Cloudburst Hail,71,tss,7,12
+Nature's Placidity,71,tss,0,12
+Mammoth's Strength,71,tss,0,12
+Beast's Beckoning,71,tss,0,12
+Fernspur,71,tbs,1,13
+Icefall Breath,72,tss,0,12
+Viridifloral Shield,72,tss,0,12
+Direwild Skin,72,tss,0,12
+Pure Life,72,tss,0,12
+Vinelash Cascade,72,tbs,17,13
+Resist Corruption,73,tss,0,12
+Skin to Vines,73,tss,0,12
+Swarm of Fireants,73,tss,0,12
+Viridicoat,73,tss,0,12
+Winter's Flame,73,tss,0,12
+Annihilate the Unnatural,73,tbs,0,13
+Tectonic Quake,74,tss,3,12
+Sunscorch,74,tss,6,12
+Direwood Guard,74,tss,5,12
+Equinox Burn,74,tss,0,12
+Chant of the Napaea,74,tss,0,12
+Hoar Frost,74,tbs,0,13
+Spirit of Falcons,74,eok,0,23
+Nature's Blazing Wrath,75,tss,9,12
+Legacy of Viridiflora,75,tss,0,12
+Blessing of the Direwild,75,tss,0,12
+Rime Crystals,75,tss,0,12
+Adrenaline Surge,75,tss,2,12
+Second Life,75,tss,0,12
+Lunarlight,75,tbs,8,13
+Zephyr Loping Plains,75,sof,0,14
+Circle of Loping Plains,75,sof,0,14
+Ring of Loping Plains,75,sof,0,14
+Torrid Sunray,76,sof,0,14
+Tempest of the Stormborn,76,sof,4,14
+Torrential Hail,76,sof,7,14
+Nature's Calm,76,sof,0,14
+Beast's Bewitching,76,sof,0,14
+Fernspike,76,sof,1,14
+Spirit of the Stalwart,76,sof,0,14
+Chillvapor Breath,77,sof,0,14
+Viridifloral Bulwark,77,sof,0,14
+Ironwood Skin,77,sof,0,14
+Puravida,77,sof,0,14
+Sharp Eyes,77,sof,0,14
+Reaping Inferno,77,sof,0,14
+Forbear Corruption,78,sof,0,14
+Skin to Mulch,78,sof,0,14
+Horde of Fireants,78,sof,10,14
+Viridithorn Coat,78,sof,0,14
+Winter's Blaze,78,sof,0,14
+Annihilate the Aberrant,78,sof,0,14
+Solarsliver,78,sof,0,14
+Survival of the Fittest,78,sof,13,14
+Tectonic Upheaval,79,sof,3,14
+Gelid Frost,79,sof,0,14
+Sunsear,79,sof,6,14
+Equinox Brand,79,sof,0,14
+Chant of the Darkvine,79,sof,0,14
+Scales of the Reptile,79,sof,0,14
+Talisman of the Stalwart,79,sof,0,14
+Nature's Burning Wrath,80,sof,9,14
+Legacy of Viridithorns,80,sof,0,14
+Blessing of the Ironwood,80,sof,0,14
+Hoar Crystals,80,sof,0,14
+Mask of the Shadowcat,80,sof,0,14
+Adrenaline Swell,80,sof,2,14
+Preincarnation,80,sof,0,14
+Crescentbloom,80,sof,8,14
+Zephyr Plane of Time,80,sod,0,15
+Circle of Plane of Time,80,sod,0,15
+Ring of Plane of Time,80,sod,0,15
+Circle of Brell's Rest,80,uf,0,16
+Ring of Brell's Rest,80,uf,0,16
+Zephyr Brell's Rest,80,uf,0,16
+Withering Sunray,81,sod,0,15
+Squall of the Stormborn,81,sod,4,15
+Cascading Hail,81,sod,7,15
+Nature's Peace,81,sod,0,15
+Beast's Befriending,81,sod,0,15
+Frondspur,81,sod,1,15
+Carve Whistle,81,sod,0,15
+Spirit of the Resolute,81,sod,0,15
+Coldwhisper Breath,82,sod,0,15
+Brierbloom Bulwark,82,sod,0,15
+Heartwood Skin,82,sod,0,15
+Granvida,82,sod,0,15
+Harvesting Inferno,82,sod,0,15
+Promised Reknit,82,sod,12,15
+Wild Growth,82,sod,16,15
+Repel Corruption,83,sod,0,15
+Skin to Flora,83,sod,0,15
+Horde of the Hive,83,sod,10,15
+Brierbloom Coat,83,sod,0,15
+Winter's Flare,83,sod,0,15
+Winter's Flare Frostbite,83,sod,0,15
+Winter's Flare Frostbite II,83,sod,0,15
+Winter's Flare Frostbite III,83,sod,0,15
+Winter's Flare Burn,83,sod,0,15
+Winter's Flare Burn II,83,sod,0,15
+Winter's Flare Burn III,83,sod,0,15
+Annihilate the Anomalous,83,sod,0,15
+Morning's Glory,83,sod,0,15
+Survival of the Felicitous,83,sod,13,15
+Remote Manaflux,83,uf,11,16
+Manaflux Enervation,83,uf,0,16
+Tectonic Tumult,84,sod,3,15
+Purified Blood,84,sod,0,15
+Blanched Frost,84,sod,0,15
+Sunsinge,84,sod,6,15
+Summer Solstice,84,sod,0,15
+Chant of the Burynai,84,sod,0,15
+Carapace of the Reptile,84,sod,0,15
+Talisman of the Resolute,84,sod,0,15
+Sundew Blessing,84,uf,0,16
+Blast of Hypergrowth,84,uf,0,16
+Nature's Searing Wrath,85,sod,9,15
+Legacy of Brierbloom,85,sod,0,15
+Blessing of the Heartwood,85,sod,0,15
+Glaciating Crystals,85,sod,0,15
+Mask of the Raptor,85,sod,0,15
+Adrenaline Burst,85,sod,2,15
+Lunulation,85,sod,8,15
+Twincast,85,sod,0,15
+Surge of Ironvines,85,uf,0,16
+Ring of the Grounds,85,hot,0,17
+Circle of the Grounds,85,hot,0,17
+Zephyr the Grounds,85,hot,0,17
+Spirit of the Relentless,86,hot,0,17
+Beast's Beguiling,86,hot,0,17
+Cyclonic Hail,86,hot,7,17
+Grasp of Ro,86,hot,0,17
+Ro's Reflection,86,hot,0,17
+Ro's Reflection II,86,hot,0,17
+Ro's Reflection III,86,hot,0,17
+Mammoth's Force,86,hot,0,17
+Nature's Harmony,86,hot,0,17
+Thornspur,86,hot,1,17
+Scorching Sunray,86,hot,14,17
+Shear of the Stormborn,86,hot,4,17
+Untamed Growth,87,hot,16,17
+Bracing Breath,87,hot,0,17
+Bracing Heal,87,hot,0,17
+Bracing Heal II,87,hot,0,17
+Bracing Heal III,87,hot,0,17
+Bonebriar Bulwark,87,hot,0,17
+Timbercore Skin,87,hot,0,17
+Benevida,87,hot,0,17
+Promised Replenishment,87,hot,12,17
+Eyes of the Winter Hawk,87,hot,0,17
+Wildfire Aura,87,hot,0,17
+Reject Corruption,88,hot,0,17
+Annihilate the Divergent,88,hot,0,17
+Horde of Scoriae,88,hot,10,17
+Bonebriar Coat,88,hot,0,17
+Daybreak,88,hot,0,17
+Frostfell Aura,88,hot,0,17
+Remote Sunflare,88,hot,11,17
+Sunflare Enervation,88,hot,0,17
+Skin to Leaves,88,hot,0,17
+Survival of the Propitious,88,hot,13,17
+Winter's Pyre,88,hot,0,17
+Winter's Pyre Frostbite,88,hot,0,17
+Winter's Pyre Frostbite II,88,hot,0,17
+Winter's Pyre Frostbite III,88,hot,0,17
+Winter's Pyre Burn,88,hot,0,17
+Winter's Pyre Burn II,88,hot,0,17
+Winter's Pyre Burn III,88,hot,0,17
+Purged Blood,89,hot,0,17
+Tectonic Shock,89,hot,3,17
+Chant of the Tae Ew,89,hot,0,17
+Talisman of the Relentless,89,hot,0,17
+Argent Frost,89,hot,0,17
+Gelid Moonbeam,89,hot,14,17
+Polyporous Assault,89,hot,0,17
+Shell of the Reptile,89,hot,0,17
+Sunrise Blessing,89,hot,0,17
+Sunbrand,89,hot,6,17
+Summer Prominence,89,hot,0,17
+Arboreal Absolution,90,hot,0,17
+Legacy of Bonebriar,90,hot,0,17
+Blessing of the Timbercore,90,hot,0,17
+Argent Crystals,90,hot,0,17
+Mask of the Arboreal,90,hot,0,17
+Adrenaline Blast,90,hot,2,17
+Lunamelioration,90,hot,8,17
+Rejuvilation,90,hot,15,17
+Surge of Bonebriars,90,hot,0,17
+Nature's Incinerating Wrath,90,hot,9,17
+Ring of the Domain,90,voa,0,18
+Circle of the Domain,90,voa,0,18
+Zephyr Beasts' Domain,90,voa,0,18
+Spirit of the Indomitable,91,voa,0,18
+Beast's Behest,91,voa,0,18
+Crashing Hail,91,voa,7,18
+Grip of Ro,91,voa,0,18
+Ro's Reflection,91,voa,0,18
+Ro's Reflection II,91,voa,0,18
+Ro's Reflection III,91,voa,0,18
+Heliacal Flare,91,voa,0,18
+Fawnwalker's Breeze,91,voa,0,18
+Nature's Tranquility,91,voa,0,18
+Vinespur,91,voa,1,18
+Blazing Sunray,91,voa,14,18
+Cyclone of the Stormborn,91,voa,4,18
+Flight of Falcons,91,eok,0,23
+Unfettered Growth,92,voa,16,18
+Encompassing Breath,92,voa,0,18
+Encompassing Heal,92,voa,0,18
+Encompassing Heal II,92,voa,0,18
+Encompassing Heal III,92,voa,0,18
+Spineburr Bulwark,92,voa,0,18
+Stonebark Skin,92,voa,0,18
+Sanavida,92,voa,0,18
+Lunar Chill,92,voa,0,18
+Beastwood Guard,92,voa,5,18
+Promised Revitalization,92,voa,12,18
+Wildblaze Aura,92,voa,0,18
+Ring of Alra,92,voa,0,18
+Circle of Alra,92,voa,0,18
+Zephyr Pillars of Alra,92,voa,0,18
+Rescind Corruption,93,voa,0,18
+Abolish the Divergent,93,voa,0,18
+Horde of Vespids,93,voa,10,18
+Spineburr Coat,93,voa,0,18
+Roar of Kolos,93,voa,0,18
+Frostcloak Aura,93,voa,0,18
+Remote Sunburst,93,voa,11,18
+Sunburst Enervation,93,voa,0,18
+Sunburst Enervation II,93,voa,0,18
+Sunburst Enervation III,93,voa,0,18
+Skin to Foliage,93,voa,0,18
+Survival of the Prosperous,93,voa,13,18
+Winter's Sear,93,voa,0,18
+Winter's Sear Frostbite,93,voa,0,18
+Winter's Sear Frostbite II,93,voa,0,18
+Winter's Sear Frostbite III,93,voa,0,18
+Winter's Sear Burn,93,voa,0,18
+Winter's Sear Burn II,93,voa,0,18
+Winter's Sear Burn III,93,voa,0,18
+Perfected Blood,94,voa,0,18
+Tectonic Tremor,94,voa,3,18
+Chant of the Izon,94,voa,0,18
+Talisman of the Indomitable,94,voa,0,18
+Silver Frost,94,voa,0,18
+Algid Moonbeam,94,voa,14,18
+Myconid Assault,94,voa,0,18
+Hide of the Reptile,94,voa,0,18
+Sunbreeze Blessing,94,voa,0,18
+Sunbreeze Blessing Trigger,94,voa,0,18
+Sunscorch,94,voa,6,18
+Summer Zenith,94,voa,0,18
+Legacy of Spineburrs,95,voa,0,18
+Stonebark Blessing,95,voa,0,18
+Sterlingfrost Crystals,95,voa,0,18
+Mask of the Thicket Dweller,95,voa,0,18
+Adrenaline Flood,95,voa,2,18
+Lunalleviation,95,voa,8,18
+Chill of the Natureward,95,voa,0,18
+Frost of the Natureward,95,voa,0,18
+Frost of the Natureward II,95,voa,0,18
+Frost of the Natureward III,95,voa,0,18
+Invigoration,95,voa,15,18
+Surge of Spineburrs,95,voa,0,18
+Nature's Scorching Wrath,95,voa,9,18
+Ring of the Landing,95,rof,0,19
+Circle of the Landing,95,rof,0,19
+Zephyr Shard's Landing,95,rof,0,19
+Ring of West Karana,95,cotf,0,20
+Circle of West Karana,95,cotf,0,20
+Zephyr West Karana,95,cotf,0,20
+Spirit of the Steadfast,96,rof,0,19
+Beast's Bespelling,96,rof,0,19
+Hailstorm,96,rof,7,19
+Heliacal Fire,96,rof,0,19
+Bosquetender's Breeze,96,rof,0,19
+Nature's Repose,96,rof,0,19
+Stemfang,96,rof,1,19
+Incinerating Sunray,96,rof,14,19
+Whirlwind of the Stormborn,96,rof,4,19
+Clutch of Ro,96,rof,0,19
+Ro's Reflection,96,rof,0,19
+Ro's Reflection II,96,rof,0,19
+Ro's Reflection III,96,rof,0,19
+Nurturing Growth,96,cotf,20,20
+Vinelash Assault,97,rof,17,19
+Rampant Growth,97,rof,16,19
+Frosthowl Breath,97,rof,0,19
+Frosthowl Heal,97,rof,0,19
+Frosthowl Heal II,97,rof,0,19
+Frosthowl Heal III,97,rof,0,19
+Spikethistle Bulwark,97,rof,0,19
+Granitebark Skin,97,rof,0,19
+Sterivida,97,rof,0,19
+Frosthowl Chill,97,rof,0,19
+Beastsnag Guard,97,rof,5,19
+Promised Recovery,97,rof,12,19
+Wildspark Aura,97,rof,0,19
+Thornmaw Vines,97,rof,0,19
+Pillar of Ro,97,cotf,0,20
+Thwart Corruption,98,rof,0,19
+Exterminate the Unnatural,98,rof,0,19
+Horde of Mutillids,98,rof,10,19
+Spikethistle Coat,98,rof,0,19
+Frostone Aura,98,rof,0,19
+Remote Sunfire,98,rof,11,19
+Sunfire Enervation,98,rof,0,19
+Sunfire Enervation II,98,rof,0,19
+Sunfire Enervation III,98,rof,0,19
+Skin to Seedlings,98,rof,0,19
+Survival of the Fortuitous,98,rof,13,19
+Winter's Wildfire,98,rof,0,19
+Winter's Wildfire Frostbite,98,rof,0,19
+Winter's Wildfire Frostbite II,98,rof,0,19
+Winter's Wildfire Frostbite III,98,rof,0,19
+Winter's Wildfire Burn,98,rof,0,19
+Winter's Wildfire Burn II,98,rof,0,19
+Winter's Wildfire Burn III,98,rof,0,19
+Katabatic Roar,98,rof,0,19
+Mysterious Ways,98,cotf,7,20
+Ring of Lceanium,98,eok,0,23
+Cleansed Blood,99,rof,0,19
+Tectonic Temblor,99,rof,3,19
+Chant of Jaerol,99,rof,0,19
+Talisman of the Steadfast,99,rof,0,19
+Lustrous Frost,99,rof,0,19
+Frigid Moonbeam,99,rof,14,19
+Sporali Assault,99,rof,0,19
+Husk of the Reptile,99,rof,0,19
+Sunbeam Blessing,99,rof,0,19
+Sunbeam Blessing Trigger,99,rof,0,19
+Sunblaze,99,rof,6,19
+Summer Suncrest,99,rof,0,19
+Frigid Thornmaw,99,rof,14,19
+Remote Moonfire,99,cotf,11,20
+Moonfire Enervation,99,cotf,0,20
+Moonfire Enervation II,99,cotf,0,20
+Moonfire Enervation III,99,cotf,0,20
+Circle of Lceanium,99,eok,0,23
+Zephyr Lceanium,99,eok,0,23
+Legacy of Spikethistles,100,rof,0,19
+Granitebark Blessing,100,rof,0,19
+Gelid Crystals,100,rof,0,19
+Mask of the Bosquetender,100,rof,0,19
+Adrenaline Rush,100,rof,2,19
+Lunassuage,100,rof,8,19
+Chill of the Visionary,100,rof,0,19
+Frost of the Visionary,100,rof,0,19
+Frost of the Visionary II,100,rof,0,19
+Frost of the Visionary III,100,rof,0,19
+Vivification,100,rof,15,19
+Nature's Withering Wrath,100,rof,9,19
+Stemfang Rush,100,rof,2,19
+Natural Unity,100,cotf,0,20
+Ring of the Tempest,100,tds,0,21
+Circle of the Tempest,100,tds,0,21
+Zephyr Tempest Temple,100,tds,0,21
+Ring of Skyfire,100,ros,0,24
+Circle of Skyfire,100,ros,0,24
+Zephyr Skyfire,100,ros,0,24
+Spirit of the Faithful,101,tds,0,21
+Beast's Bidding,101,tds,0,21
+Plummeting Hail,101,tds,7,21
+Heliacal Pyre,101,tds,0,21
+Copsetender's Breeze,101,tds,0,21
+Nature's Serenity,101,tds,0,21
+Daggerthorn,101,tds,1,21
+Consuming Sunray,101,tds,14,21
+Typhoon of the Stormborn,101,tds,4,21
+Crush of Ro,101,tds,0,21
+Ro's Reflection,101,tds,0,21
+Ro's Reflection II,101,tds,0,21
+Ro's Reflection III,101,tds,0,21
+Dichotomic Winds,101,tbm,19,22
+Nature's Response,101,eok,0,23
+Ferocious Growth,102,tds,16,21
+Chant of the Kromtus,102,tds,0,21
+Blizzard Breath,102,tds,0,21
+Blizzard Heal,102,tds,0,21
+Blizzard Heal II,102,tds,0,21
+Blizzard Heal III,102,tds,0,21
+Daggerspur Bulwark,102,tds,0,21
+Shieldstone Skin,102,tds,0,21
+Panavida,102,tds,0,21
+Windborne Chill,102,tds,0,21
+Column of Ro,102,tds,0,21
+Promised Regeneration,102,tds,12,21
+Bosquetender's Alliance,102,eok,18,23
+Bosquetender's Fortitude,102,eok,0,23
+Unblemished Blood,103,tds,0,21
+Eradicate the Unnatural,103,tds,0,21
+Horde of Aculeids,103,tds,10,21
+Daggerspur Coat,103,tds,0,21
+Frostweave Aura,103,tds,0,21
+Remote Sunflash,103,tds,11,21
+Sunflash Enervation,103,tds,0,21
+Sunflash Enervation II,103,tds,0,21
+Sunflash Enervation III,103,tds,0,21
+Anabatic Roar,103,tds,0,21
+Survival of the Serendipitous,103,tds,13,21
+Winter's Wildflame,103,tds,0,21
+Winter's Wildflame Frostbite,103,tds,0,21
+Winter's Wildflame Frostbite II,103,tds,0,21
+Winter's Wildflame Frostbite III,103,tds,0,21
+Winter's Wildflame Burn,103,tds,0,21
+Winter's Wildflame Burn II,103,tds,0,21
+Winter's Wildflame Burn III,103,tds,0,21
+Mystical Ways,103,tbm,7,22
+Talisman of the Faithful,104,tds,0,21
+Moonbright Frost,104,tds,0,21
+Argent Moonbeam,104,tds,14,21
+Argent Thornmaw,104,tds,14,21
+Pellicle of the Reptile,104,tds,0,21
+Adrenaline Torrent,104,tds,2,21
+Remote Moonflame,104,tds,11,21
+Moonflame Enervation,104,tds,0,21
+Moonflame Enervation II,104,tds,0,21
+Moonflame Enervation III,104,tds,0,21
+Sunfire Blessing,104,tds,0,21
+Sunfire Blessing Trigger,104,tds,0,21
+Sunfire Blessing Trigger II,104,tds,0,21
+Sunfire Blessing Trigger III,104,tds,0,21
+Sunflash,104,tds,6,21
+Summer Sunfire,104,tds,0,21
+Sporali Storm,104,tbm,0,22
+Tectonic Destruction,105,tds,3,21
+Legacy of Daggerspurs,105,tds,0,21
+Shieldstone Blessing,105,tds,0,21
+Frostweave Crystals,105,tds,0,21
+Mask of the Copsetender,105,tds,0,21
+Lunasoothe,105,tds,8,21
+Chill of the Copsetender,105,tds,0,21
+Frost of the Copsetender,105,tds,0,21
+Frost of the Copsetender II,105,tds,0,21
+Frost of the Copsetender III,105,tds,0,21
+Resurgence,105,tds,15,21
+Nature's Fiery Wrath,105,tds,9,21
+Copsetender's Unity,105,tds,0,21
+Daggerthorn Rush,105,tds,2,21
+Spirit of the Unwavering,106,ros,0,24
+Nourishing Growth,106,ros,20,24
+Beast's Beseeching,106,ros,0,24
+Plunging Hail,106,ros,7,24
+Heliacal Eruption,106,ros,0,24
+Wildtender's Breeze,106,ros,0,24
+Nature's Quiescense,106,ros,0,24
+Thornspike,106,ros,1,24
+Overwhelming Sunray,106,ros,14,24
+Thunderbolt of the Stormborn,106,ros,4,24
+Cowl of Ro,106,ros,0,24
+Ro's Reflection,106,ros,0,24
+Ro's Reflection II,106,ros,0,24
+Ro's Reflection III,106,ros,0,24
+Dissident Winds,106,tbl,19,26
+Savage Growth,107,ros,16,24
+Chant of the Wulthan,107,ros,0,24
+Frostreave Breath,107,ros,0,24
+Frostreave Heal,107,ros,0,24
+Frostreave Heal II,107,ros,0,24
+Frostreave Heal III,107,ros,0,24
+Daggerspike Bulwark,107,ros,0,24
+Arcronite Skin,107,ros,0,24
+Curavida,107,ros,0,24
+Frostreave Chill,107,ros,0,24
+Gaze of Ro,107,ros,0,24
+Promised Rebirth,107,ros,12,24
+Endure Corruption,108,ros,0,24
+Expurgated Blood,108,ros,0,24
+Repudiate the Unnatural,108,ros,0,24
+Skin to Sumac,108,ros,0,24
+Horde of Polybiads,108,ros,10,24
+Daggerspike Coat,108,ros,0,24
+Frostreave Aura,108,ros,0,24
+Remote Sunblaze,108,ros,11,24
+Sunblaze Enervation,108,ros,0,24
+Sunblaze Enervation II,108,ros,0,24
+Sunblaze Enervation III,108,ros,0,24
+Cyclonic Roar,108,ros,0,24
+Survival of the Auspicious,108,ros,13,24
+Winter's Wildblaze,108,ros,0,24
+Winter's Wildblaze Frostbite,108,ros,0,24
+Winter's Wildblaze Frostbite II,108,ros,0,24
+Winter's Wildblaze Frostbite III,108,ros,0,24
+Winter's Wildblaze Burn,108,ros,0,24
+Winter's Wildblaze Burn II,108,ros,0,24
+Winter's Wildblaze Burn III,108,ros,0,24
+Ring of Esianti,108,tbl,0,26
+Ethereal Ways,108,tbl,7,26
+Talisman of the Unwavering,109,ros,0,24
+Glistening Frost,109,ros,0,24
+Glistening Frost Heal,109,ros,0,24
+Glistening Frost Heal II,109,ros,0,24
+Glistening Frost Heal III,109,ros,0,24
+Pearlescent Moonbeam,109,ros,14,24
+Pearlescent Thornmaw,109,ros,14,24
+Guard of the Reptile,109,ros,0,24
+Adrenaline Barrage,109,ros,2,24
+Remote Moonflash,109,ros,11,24
+Moonflash Enervation,109,ros,0,24
+Moonflash Enervation II,109,ros,0,24
+Moonflash Enervation III,109,ros,0,24
+Sunflash Blessing,109,ros,0,24
+Sunflash Blessing Trigger,109,ros,0,24
+Sunflash Blessing Trigger II,109,ros,0,24
+Sunflash Blessing Trigger III,109,ros,0,24
+Sunflame,109,ros,6,24
+Summer Sunflame,109,ros,0,24
+Circle of Esianti,109,tbl,0,26
+Zephyr Esianti,109,tbl,0,26
+Fungusoid Assault,109,tbl,0,26
+Tectonic Eruption,110,ros,3,24
+Legacy of Daggerspikes,110,ros,0,24
+Arcronite Blessing,110,ros,0,24
+Frostreave Crystals,110,ros,0,24
+Mask of the Wildtender,110,ros,0,24
+Lunasalve,110,ros,8,24
+Chill of the Wildtender,110,ros,0,24
+Frost of the Wildtender,110,ros,0,24
+Frost of the Wildtender II,110,ros,0,24
+Frost of the Wildtender III,110,ros,0,24
+Revitalization,110,ros,15,24
+Nature's Blistering Wrath,110,ros,9,24
+Wildtender's Unity,110,ros,0,24
+Thornspike Rush,110,ros,2,24
+Tempestuous Hail,111,tov,7,26
+Sustaining Growth,111,tov,20,26
+Beast's Beckoning,111,tov,0,26
+Heliacal Embers,111,tov,0,26
+Nature's Sustenance,111,tov,0,26
+Vinespike,111,tov,1,26
+Erupting Sunray,111,tov,14,26
+Maelstrom of the Stormborn,111,tov,4,26
+Clasp of Ro,111,tov,0,26
+Ro's Reflection Azia VI,111,tov,0,26
+Ro's Reflection Beza VI,111,tov,0,26
+Ro's Reflection Caza VI,111,tov,0,26
+Spirit of the Enduring,111,tov,0,26
+Frenzied Growth,112,tov,16,26
+Icerend Breath,112,tov,0,26
+Icerend Heal,112,tov,0,26
+Icerend Heal II,112,tov,0,26
+Icerend Heal III,112,tov,0,26
+Icebriar Bulwark,112,tov,0,26
+Opaline Skin,112,tov,0,26
+Viridavida,112,tov,0,26
+Icerend Chill,112,tov,0,26
+Glare of Ro,112,tov,0,26
+Promised Refreshment,112,tov,12,26
+Ring of The Great Divide,113,tov,0,26
+Obliterate the Unnatural,113,tov,0,26
+Horde of Hyperboreads,113,tov,10,26
+Icebriar Coat,113,tov,0,26
+Icerend Aura,113,tov,0,26
+Remote Sunshock,113,tov,11,26
+Sunshock Enervation,113,tov,0,26
+Sunshock Enervation II,113,tov,0,26
+Sunshock Enervation III,113,tov,0,26
+Typhonic Roar,113,tov,0,26
+Survival of the Favored,113,tov,13,26
+Winter's Wildshock,113,tov,0,26
+Winter's Wildshock Frostbite,113,tov,0,26
+Winter's Wildshock Frostbite II,113,tov,0,26
+Winter's Wildshock Frostbite III,113,tov,0,26
+Winter's Wildshock Burn,113,tov,0,26
+Winter's Wildshock Burn II,113,tov,0,26
+Winter's Wildshock Burn III,113,tov,0,26
+Circle of The Great Divide,114,tov,0,26
+Zephyr The Great Divide,114,tov,0,26
+Restless Frost,114,tov,0,26
+Restless Frost Heal,114,tov,0,26
+Restless Frost Heal II,114,tov,0,26
+Restless Frost Heal III,114,tov,0,26
+Opaline Moonbeam,114,tov,14,26
+Opaline Thornmaw,114,tov,14,26
+Defense of the Reptile,114,tov,0,26
+Adrenaline Deluge,114,tov,2,26
+Remote Moonrake,114,tov,11,26
+Moonrake Enervation,114,tov,0,26
+Moonrake Enervation II,114,tov,0,26
+Moonrake Enervation III,114,tov,0,26
+Sunrake Blessing,114,tov,0,26
+Sunrake Blessing Trigger,114,tov,0,26
+Sunrake Blessing Trigger II,114,tov,0,26
+Sunrake Blessing Trigger III,114,tov,0,26
+Sunshock,114,tov,6,26
+Summer Sunshock,114,tov,0,26
+Talisman of the Enduring,114,tov,0,26
+Tectonic Frostheave,115,tov,3,26
+Legacy of Icebriars,115,tov,0,26
+Opaline Blessing,115,tov,0,26
+Icerend Crystals,115,tov,0,26
+Mask of the Arbor Tender,115,tov,0,26
+Lunalesce,115,tov,8,26
+Chill of the Arbor Tender,115,tov,0,26
+Frost of the Arbor Tender,115,tov,0,26
+Frost of the Arbor Tender II,115,tov,0,26
+Frost of the Arbor Tender III,115,tov,0,26
+Rejuvenescence,115,tov,15,26
+Nature's Fervid Wrath,115,tov,9,26
+Vinespike Rush,115,tov,2,26

@@ -1,0 +1,212 @@
+SpellName,ClassLevel,Expansion,Timer,ExpansionNum
+Throw Stone,1,original,9,0
+Corroded Axe,1,god,-1,7
+Elbow Strike,5,original,9,0
+Blunt Axe,5,god,-1,7
+Leg Strike,8,god,10,7
+Focused Will Discipline,10,original,5,0
+Steel Axe,10,god,-1,7
+Bearded Axe,15,god,-1,7
+Head Strike,16,god,10,7
+Mithril Axe,20,god,-1,7
+Divertive Strike,24,god,2,7
+Balanced War Axe,25,god,-1,7
+Resistant Discipline,30,original,5,0
+Bonesplicer Axe,30,god,-1,7
+Battle Cry,30,god,9,7
+Leg Cut,32,god,10,7
+Fleshtear Axe,35,god,-1,7
+Fearless Discipline,40,original,5,0
+Head Pummel,40,god,10,7
+Cold Steel Cleaving Axe,40,god,-1,7
+Mithril Bloodaxe,45,god,-1,7
+Distracting Strike,48,god,2,7
+Rage Axe,50,god,-1,7
+War Cry,50,god,9,7
+Inspired Anger Discipline,53,god,4,7
+Leg Slice,54,god,10,7
+Cleaving Rage Discipline,54,god,4,7
+Bloodseeker's Axe,55,god,-1,7
+Aura of Rage,55,por,1,11
+Reckless Discipline,56,god,3,7
+Battle Cry of Dravel,57,god,9,7
+Focused Fury Discipline,57,god,4,7
+Blind Rage Discipline,58,god,4,7
+Battle Focus Discipline,59,god,3,7
+Head Crush,60,god,10,7
+Battlerage Axe,60,god,-1,7
+Burning Rage Discipline,60,god,4,7
+Sprint Discipline,61,god,5,7
+Rage Volley,61,don,2,9
+Healing Will Discipline,63,god,5,7
+Indomitable Discipline,63,god,3,7
+War Cry of Dravel,64,god,9,7
+Confusing Strike,65,god,2,7
+Deathfury Axe,65,god,-1,7
+Battle Cry of the Mastruq,65,god,9,7
+Ancient Cry of Chaos,65,god,9,7
+Cleaving Anger Discipline,65,god,3,7
+Tainted Axe of Hatred,65,god,-1,7
+Axe of the Destroyer,66,oom,-1,8
+Unpredictable Rage Discipline,66,oom,7,8
+Crippling Strike,67,oom,10,8
+Mind Strike,68,oom,10,8
+Unflinching Will Discipline,68,oom,5,8
+Cry Havoc,68,dod,1,10
+Baffling Strike,69,oom,2,8
+Destroyer's Volley,69,don,2,9
+Vengeful Flurry Discipline,70,oom,6,8
+Bloodthirst,70,por,9,11
+Bloodlust Aura,70,por,1,11
+Axe of the Annihilator,71,tss,-1,12
+Tendon Cleave,71,tss,10,12
+Unsettling Scream,72,tss,10,12
+Second Wind,72,tbs,13,13
+Temple Blow,73,tss,10,12
+Jarring Strike,74,tss,2,12
+Annihilator's Volley,74,tbs,2,13
+Berserking Discipline,75,tss,4,12
+Axe of the Decimator,76,sof,-1,14
+Tendon Sever,76,sof,10,14
+Agitating Scream,77,sof,10,14
+Third Wind,77,sof,13,14
+Temple Strike,78,sof,10,14
+Jarring Smash,79,sof,2,14
+Decimator's Volley,79,sof,2,14
+Battle Frenzy,80,sof,11,14
+Overpowering Frenzy,81,sod,12,15
+Axe of the Eradicator,81,sod,-1,15
+Tendon Shear,81,sod,10,15
+Distressing Scream,82,sod,10,15
+Fourth Wind,82,sod,13,15
+Temple Bash,83,sod,10,15
+Blood Hatchet,83,sod,1,15
+Vigorous Axe Throw,83,uf,10,16
+Jarring Clash,84,sod,2,15
+Eradicator's Volley,84,sod,2,15
+Combat Frenzy,85,sod,11,15
+Axe of Rallos,85,uf,17,16
+Shared Bloodlust,85,uf,14,16
+Respite,86,hot,13,17
+Axe of the Savage,86,hot,-1,17
+Cleaving Acrimony Discipline,86,hot,3,17
+Overwhelming Frenzy,86,hot,12,17
+Tendon Lacerate,86,hot,10,17
+Fifth Wind,87,hot,13,17
+Distracting Scream,87,hot,10,17
+Slap in the Face,87,hot,9,17
+Blood Axe,88,hot,1,17
+Energetic Axe Throw,88,hot,10,17
+Temple Chop,88,hot,10,17
+Avenging Flurry Discipline,89,hot,6,17
+Savage Volley,89,hot,2,17
+Jarring Slam,89,hot,2,17
+Axe of Graster,90,hot,17,17
+Fighting Frenzy,90,hot,11,17
+Shared Brutality,90,hot,14,17
+Reprieve,91,voa,13,18
+Axe of the Sunderer,91,voa,-1,18
+Early Retaliation,91,voa,15,18
+Conquering Frenzy,91,voa,12,18
+Tendon Slash,91,voa,10,18
+Sixth Wind,92,voa,13,18
+Perturbing Scream,92,voa,10,18
+Kick in the Teeth,92,voa,9,18
+Inner Rejuvenation,93,voa,14,18
+Blood Blade,93,voa,1,18
+Spirited Axe Throw,93,voa,10,18
+Temple Smash,93,voa,10,18
+Unyielding Will Discipline,93,voa,5,18
+Frenzied Resolve Discipline,94,voa,15,18
+Sundering Volley,94,voa,2,18
+Jarring Blow,94,voa,2,18
+Axe of Illdaera,95,voa,17,18
+Sundering Discipline,95,voa,4,18
+Steel Frenzy,95,voa,11,18
+Shared Savagery,95,voa,14,18
+Rest,96,rof,13,19
+Axe of the Brute,96,rof,-1,19
+Advanced Retaliation,96,rof,15,19
+Vanquishing Frenzy,96,rof,12,19
+Tendon Gash,96,rof,10,19
+Capricious Rage Discipline,96,rof,7,19
+Open Wound,96,cotf,1,20
+Seventh Wind,97,rof,13,19
+Punch in the Throat,97,rof,9,19
+Vicious Spiral,97,rof,16,19
+Conditioned Retaliation,97,cotf,18,20
+Blood Brand,98,rof,1,19
+Brutal Axe Throw,98,rof,10,19
+Temple Crush,98,rof,10,19
+Cry Carnage,98,rof,1,19
+Festering Rage,98,cotf,7,20
+Brutal Volley,99,rof,2,19
+Jarring Crush,99,rof,2,19
+Augmented Frenzy,99,rof,11,19
+Arcblade,99,cotf,16,20
+Brutal Discipline,100,rof,4,19
+Fearless Frenzy,100,rof,11,19
+Shared Viciousness,100,rof,14,19
+Axe of Zurel,100,rof,17,19
+Phantom Assailant,100,cotf,19,20
+Breather,101,tds,13,21
+Axe of the Demolisher,101,tds,-1,21
+Prior Retaliation,101,tds,15,21
+Demolishing Frenzy,101,tds,12,21
+Tendon Tear,101,tds,10,21
+Dichotomic Rage,101,tbm,22,22
+Kick in the Shins,102,tds,9,21
+Vicious Cyclone,102,tds,16,21
+Bubbling Rage,102,tds,7,21
+Axe of the Aeons,102,eok,17,23
+Demolishing Axe Throw,103,tds,10,21
+Temple Demolish,103,tds,10,21
+Sapping Strikes,103,eok,8,23
+Amplified Frenzy,104,tds,11,21
+Demolishing Volley,104,tds,2,21
+Jarring Smite,104,tds,2,21
+Arcslice,104,tbm,16,22
+Disconcerting Discipline,104,eok,21,23
+Stormwild Frenzy,105,tds,11,21
+Shared Cruelty,105,tds,14,21
+Axe of Numicia,105,tds,17,21
+Demolisher's Alliance,105,eok,20,23
+Hiatus,106,ros,13,24
+Axe of the Mangler,106,ros,-1,24
+Ritual Scarification,106,ros,1,24
+Proactive Retaliation,106,ros,15,24
+Mangling Frenzy,106,ros,12,24
+Tendon Rupture,106,ros,10,24
+Dissident Rage,106,tbl,22,26
+Sucker Punch,107,ros,9,24
+Vicious Cycle,107,ros,16,24
+Smoldering Rage,107,ros,7,24
+Axe of Empyr,107,tbl,17,26
+Mangling Axe Throw,108,ros,10,24
+Temple Slam,108,ros,10,24
+Mangling Discipline,108,ros,21,24
+Bolstered Frenzy,109,ros,11,24
+Mangling Volley,109,ros,2,24
+Jarring Jolt,109,ros,2,24
+Arcsteel,109,tbl,16,26
+Torrid Frenzy,110,ros,11,24
+Shared Ruthlessness,110,ros,14,24
+Axe of Rekatok,110,ros,17,24
+Mangler's Covenant,110,tbl,20,26
+Relax,111,tov,13,26
+Axe of the Vindicator,111,tov,-1,26
+Premature Retaliation,111,tov,15,26
+Vindicating Frenzy,111,tov,12,26
+Tendon Rip,111,tov,10,26
+Rabbit Punch,112,tov,9,26
+Vicious Revolution,112,tov,16,26
+Seething Rage,112,tov,7,26
+Reflexive Retaliation,113,tov,18,26
+Vindicating Axe Throw,113,tov,10,26
+Temple Crack,113,tov,10,26
+Magnified Frenzy,114,tov,11,26
+Vindicating Volley,114,tov,2,26
+Jarring Shock,114,tov,2,26
+Restless Frenzy,115,tov,11,26
+Shared Atavism,115,tov,14,26
+Axe of Derakor,115,tov,17,26

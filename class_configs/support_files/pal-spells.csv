@@ -1,0 +1,634 @@
+SpellName,ClassLevel,Expansion,Timer,ExpansionNum
+Salve,1,god,0,7
+Flash of Light,2,original,0,0
+True North,3,original,0,0
+Sense the Dead,4,original,0,0
+Cure Poison,5,original,0,0
+Minor Healing,6,original,0,0
+Cease,7,sol,0,3
+Courage,8,original,0,0
+Spook the Dead,9,original,0,0
+Yaulp,9,original,0,0
+Lull,10,original,0,0
+Cure Disease,11,original,0,0
+Light Healing,12,original,0,0
+Desist,13,sol,0,3
+Ward Undead,14,original,0,0
+Hammer of Wrath,14,original,0,0
+Holy Armor,15,original,0,0
+Halo of Light,16,original,0,0
+Invisibility Versus Undead,17,original,0,0
+Reckless Strength,18,original,0,0
+Root,19,original,0,0
+Remove Minor Curse,19,ldon,0,6
+Center,20,original,0,0
+Endure Poison,21,original,0,0
+Reanimation,22,original,0,0
+Hammer of Striking,23,original,0,0
+Symbol of Transal,24,original,0,0
+Soothe,25,original,0,0
+Instrument of Nife,26,sol,0,3
+Healing,27,original,0,0
+Stun,28,original,5,0
+Endure Magic,29,original,0,0
+Expulse Undead,30,original,0,0
+Spirit Armor,30,original,0,0
+Reconstitution,30,original,0,0
+Reparation,31,original,0,0
+Cancel Magic,32,original,0,0
+Symbol of Ryltan,33,original,0,0
+Counteract Poison,34,original,0,0
+Remove Lesser Curse,34,ldon,0,6
+Divine Vigor,35,sol,0,3
+Greater Healing,36,original,0,0
+Daring,37,original,0,0
+Divine Purpose,37,sov,0,2
+Endure Disease,38,original,0,0
+Yaulp II,38,original,0,0
+Guard,39,original,0,0
+Revive,39,original,0,0
+Wave of Life,39,pop,0,4
+Holy Might,42,original,0,0
+Calm,43,original,0,0
+Valor of Marr,44,sol,0,3
+Ethereal Cleansing,44,loy,0,5
+Divine Might,45,rok,0,1
+Remove Curse,45,sol,0,3
+Dismiss Undead,46,original,0,0
+Symbol of Pinzarn,46,original,0,0
+Valor,47,original,0,0
+Thunder of Karana,47,sol,0,3
+Superior Healing,48,original,0,0
+Divine Aura,48,original,15,0
+Armor of Faith,48,original,0,0
+Pacify,49,original,0,0
+Renewal,49,original,0,0
+Brell's Steadfast Aegis,49,pop,0,4
+Resist Disease,50,original,0,0
+Flame of Light,50,sov,0,2
+Resistant Discipline,51,original,5,0
+Force,52,original,0,0
+Frenzied Strength,52,original,0,0
+Light of Life,52,loy,0,5
+Divine Glory,53,sov,0,2
+Force of Akera,53,pop,5,4
+Fearless Discipline,54,original,5,0
+Instill,54,original,0,0
+Expel Undead,54,original,0,0
+Quellious' Word of Tranquility,54,sol,6,3
+Resist Magic,55,original,0,0
+Restoration,55,original,0,0
+Divine Favor,55,rok,0,1
+Wave of Healing,55,sov,2,2
+Holyforge Discipline,55,sov,2,2
+Austerity,55,ldon,0,6
+Holy Aura,55,por,0,11
+Counteract Disease,56,original,0,0
+Yaulp III,56,original,0,0
+Breath of Tunare,56,sol,0,3
+Guard of Piety,56,don,5,9
+Nullify Magic,58,original,0,0
+Symbol of Naltron,58,original,0,0
+Healing Wave of Prexus,58,sol,0,3
+Blessing of Austerity,58,ldon,0,6
+Resurrection,59,original,0,0
+Celestial Cleansing,59,sol,0,3
+Deflection Discipline,59,sod,4,15
+Resolution,60,original,0,0
+Shield of Words,60,original,0,0
+Yaulp IV,60,rok,0,1
+Divine Strength,60,sov,0,2
+Sanctification Discipline,60,sov,3,2
+Remove Greater Curse,60,sol,0,3
+Brell's Mountainous Barrier,60,sol,0,3
+Eradicate Curse,60,rof,0,19
+Resist Poison,61,original,0,0
+Heroism,61,rok,0,1
+Greater Immobilize,61,pop,0,4
+Touch of Nife,61,pop,0,4
+Guard of Humility,61,don,5,9
+Crusader's Touch,62,pop,0,4
+Force of Akilae,62,pop,4,4
+Ward of Nife,62,pop,0,4
+Deny Undead,62,pop,7,4
+Symbol of Marzin,63,rok,0,1
+Improved Invisibility to Undead,63,sov,0,2
+Pious Might,63,pop,0,4
+Light of Nife,63,pop,0,4
+Heroic Bond,64,rok,0,1
+Aura of the Crusader,64,pop,0,4
+Quellious' Word of Serenity,64,pop,6,4
+Supernal Cleansing,64,pop,3,4
+Eradicate Poison,64,rof,0,19
+Bulwark of Faith,65,rok,0,1
+Shackles of Tunare,65,pop,0,4
+Wave of Marr,65,pop,0,4
+Brell's Stalwart Shield,65,pop,0,4
+Guidance,65,ldon,0,6
+Wave of Trushar,65,god,2,7
+Light of Order,65,god,0,7
+Holy Order,65,god,0,7
+Ancient Force of Chaos,65,god,5,7
+Direction,66,oom,0,8
+Touch of Piety,66,oom,0,8
+Force of Piety,66,oom,4,8
+Crusader's Purity,67,oom,0,8
+Silvered Fury,67,oom,0,8
+Spurn Undead,67,oom,7,8
+Symbol of Jeron,67,oom,0,8
+Pious Fury,68,oom,0,8
+Light of Piety,68,oom,0,8
+Serene Command,68,oom,6,8
+Jeron's Mark,68,oom,0,8
+Last Rites,68,dod,7,10
+Hand of Direction,69,oom,0,8
+Armor of the Champion,69,oom,0,8
+Pious Cleansing,69,oom,3,8
+Bulwark of Piety,69,oom,0,8
+Guard of Righteousness,69,don,5,9
+Silent Piety,69,dod,0,10
+Wave of Piety,70,oom,0,8
+Brell's Brawny Bulwark,70,oom,0,8
+Affirmation,70,oom,0,8
+Ancient Force of Jeron,70,oom,5,8
+Ward of Tunare,70,por,12,11
+Blessed Aura,70,por,0,11
+Sacred Touch,71,tss,0,12
+Sacred Force,71,tss,4,12
+Absolve,71,tss,0,12
+Burial Rites,71,tbs,7,13
+Eradicate Disease,71,rof,0,19
+Challenge for Honor,72,tss,0,12
+Gleaming Light,72,tss,0,12
+Lesson of Penitence,72,tss,6,12
+Burst of Sunlight,73,tss,8,12
+Armor of Unrelenting Faith,73,tss,0,12
+Sacred Cleansing,73,tss,3,12
+Armor of Righteousness,73,tbs,5,13
+Fenegar's Mark,74,tss,0,12
+Wave of Forgiveness,74,tss,2,12
+Brell's Stony Guard,74,tss,0,12
+Cure Corruption,75,tss,0,12
+Sworn Protector,75,tss,0,12
+Remorse for the Fallen,75,tss,0,12
+Force of Prexus,75,tbs,5,13
+Solemn Touch,76,sof,0,14
+Solemn Force,76,sof,4,14
+Atonement,76,sof,0,14
+Benediction,76,sof,0,14
+Symbol of Bthur,77,sof,0,14
+Trial for Honor,77,sof,0,14
+Radiant Light,77,sof,0,14
+Lesson of Contrition,77,sof,6,14
+Burst of Morrow,78,sof,0,14
+Armor of Inexorable Faith,78,sof,0,14
+Solemn Cleansing,78,sof,3,14
+Armor of Decorum,78,sof,5,14
+Bthur's Mark,79,sof,0,14
+Wave of Absolution,79,sof,0,14
+Brell's Earthen Aegis,79,sof,0,14
+Mark of the Saint,79,sof,0,14
+Oathbound Protector,80,sof,0,14
+Force of Timorous,80,sof,5,14
+Sustenance of Tunare,80,sof,12,14
+Aurora of Morrow,80,sof,0,14
+Righteous Fury,80,sof,0,14
+Devout Touch,81,sod,0,15
+Devout Force,81,sod,4,15
+Expiation,81,sod,0,15
+Eulogy,81,sod,0,15
+Devoted Purity,81,sod,0,15
+Mark of the Crusader,81,sod,0,15
+Symbol of Jeneca,82,sod,0,15
+Charge for Honor,82,sod,0,15
+Shining Light,82,sod,9,15
+Lesson of Compunction,82,sod,6,15
+Crush of the Crying Seas,82,sod,5,15
+Burst of Dawnlight,83,sod,0,15
+Armor of Unwavering Faith,83,sod,0,15
+Devout Cleansing,83,sod,3,15
+Armor of Endless Honor,83,sod,5,15
+Withstand,83,sod,15,15
+Splash of Sanctification,83,uf,2,16
+Honorific Mantle,83,uf,5,16
+Jeneca's Mark,84,sod,0,15
+Wave of Remitment,84,sod,2,15
+Brell's Loamy Ward,84,sod,0,15
+Mark of the Pious,84,sod,0,15
+Steely Stance,84,sod,0,15
+Sworn Keeper,85,sod,0,15
+Force of the Crying Seas,85,sod,5,15
+Preservation of Tunare,85,sod,12,15
+Aurora of Dawnlight,85,sod,0,15
+Devout Fury,85,sod,0,15
+Crush of Compunction,85,sod,6,15
+Glorious Vindication,85,uf,7,16
+Protective Confession,85,uf,9,16
+Respite,86,hot,13,17
+Annihilate the Undead,86,hot,0,17
+Cleanse,86,hot,0,17
+Earnest Purity,86,hot,0,17
+Earnest Touch,86,hot,0,17
+Earnest Force,86,hot,4,17
+Elegy,86,hot,0,17
+Mark of the Pure,86,hot,0,17
+Propitiate,86,hot,0,17
+Confrontation for Honor,87,hot,0,17
+Crush of Marr,87,hot,5,17
+Denouncement,87,hot,0,17
+Denouncement Heal,87,hot,0,17
+Denouncement Heal II,87,hot,0,17
+Denouncement Heal III,87,hot,0,17
+Joyous Light,87,hot,9,17
+Lesson of Repentance,87,hot,6,17
+Symbol of Jyleel,87,hot,0,17
+Defy,88,hot,15,17
+Armor of Courage,88,hot,11,17
+Armor of Implacable Faith,88,hot,0,17
+Burst of Daybreak,88,hot,0,17
+Earnest Cleansing,88,hot,3,17
+Exalted Mantle,88,hot,5,17
+Exalted Mantle Heal,88,hot,0,17
+Exalted Mantle Heal II,88,hot,0,17
+Exalted Mantle Heal III,88,hot,0,17
+Righteous Indignation,88,hot,14,17
+Righteous Indignation Effect,88,hot,0,17
+Righteous Indignation Effect II,88,hot,0,17
+Righteous Indignation Effect III,88,hot,0,17
+Indignant Strike,88,hot,0,17
+Indignant Strike II,88,hot,0,17
+Indignant Strike III,88,hot,0,17
+Stubborn Stance,89,hot,0,17
+Brell's Tellurian Rampart,89,hot,0,17
+Mark of the Defender,89,hot,0,17
+Penitence,89,hot,0,17
+Wave of Penitence,89,hot,0,17
+Aurora of Daybreak,90,hot,0,17
+Crush of Repentance,90,hot,6,17
+Earnest Fury,90,hot,0,17
+Earnest Fury Strike,90,hot,0,17
+Earnest Fury Strike II,90,hot,0,17
+Earnest Fury Strike III,90,hot,0,17
+Force of Marr,90,hot,5,17
+Glorious Exoneration,90,hot,7,17
+Oathbound Keeper,90,hot,0,17
+Preservation of Marr,90,hot,12,17
+Preservation of Marr Effect,90,hot,0,17
+Preservation of Marr Effect II,90,hot,0,17
+Preservation of Marr Effect III,90,hot,0,17
+Protective Devotion,90,hot,9,17
+Pureforge Discipline,90,hot,12,17
+Reprieve,91,voa,13,18
+Abolish the Undead,91,voa,0,18
+Purify,91,voa,0,18
+Zealous Purity,91,voa,0,18
+Zealous Touch,91,voa,0,18
+Zealous Force,91,voa,4,18
+Paean,91,voa,0,18
+Mark of Ragan,91,voa,0,18
+Mollify,91,voa,0,18
+Avowed Keeper,92,voa,0,18
+Provocation for Honor,92,voa,0,18
+Crush of Oseka,92,voa,5,18
+Reprimand,92,voa,0,18
+Reprimand Heal,92,voa,0,18
+Reprimand Heal II,92,voa,0,18
+Reprimand Heal III,92,voa,0,18
+Brilliant Light,92,voa,9,18
+Lesson of Remorse,92,voa,6,18
+Symbol of Erillion,92,voa,0,18
+Righteous Audacity,92,voa,0,18
+Renounce,93,voa,15,18
+Armor of Zeal,93,voa,11,18
+Armor of Formidable Faith,93,voa,0,18
+Burst of Splendor,93,voa,0,18
+Zealous Cleansing,93,voa,3,18
+Prominent Mantle,93,voa,5,18
+Prominent Mantle Heal,93,voa,0,18
+Prominent Mantle Heal II,93,voa,0,18
+Prominent Mantle Heal III,93,voa,0,18
+Righteous Vexation,93,voa,14,18
+Righteous Vexation Effect,93,voa,0,18
+Righteous Vexation Effect II,93,voa,0,18
+Righteous Vexation Effect III,93,voa,0,18
+Vexed Strike,93,voa,0,18
+Vexed Strike II,93,voa,0,18
+Vexed Strike III,93,voa,0,18
+Splash of Purification,93,voa,2,18
+Stoic Stance,94,voa,0,18
+Steely Rejuvenation,94,voa,0,18
+Steely Rejuvenation II,94,voa,0,18
+Steely Rejuvenation III,94,voa,0,18
+Brell's Adamantine Armor,94,voa,0,18
+Mark of the Reverent,94,voa,0,18
+Rejuvenating Steel,94,voa,0,18
+Contrition,94,voa,0,18
+Undivided Affirmation,94,voa,9,18
+Wave of Contrition,94,voa,0,18
+Aurora of Splendor,95,voa,0,18
+Crush of Tides,95,voa,6,18
+Zealous Fury,95,voa,0,18
+Zealous Fury Strike,95,voa,0,18
+Zealous Fury Strike II,95,voa,0,18
+Zealous Fury Strike III,95,voa,0,18
+Force of Oseka,95,voa,5,18
+Glorious Exculpation,95,voa,7,18
+Hand of the Avowed Keeper,95,voa,0,18
+Preservation of Oseka,95,voa,12,18
+Preservation of Oseka Effect,95,voa,0,18
+Preservation of Oseka Effect II,95,voa,0,18
+Preservation of Oseka Effect III,95,voa,0,18
+Protective Dedication,95,voa,9,18
+Rest,96,rof,13,19
+Abrogate the Undead,96,rof,0,19
+Shackle,96,rof,0,19
+Expurgate,96,rof,0,19
+Reverent Purity,96,rof,0,19
+Reverent Touch,96,rof,0,19
+Reverent Force,96,rof,4,19
+Laudation,96,rof,0,19
+Mark of Olsif,96,rof,0,19
+Reconcile,96,rof,0,19
+Doctrine of Abrogation,96,cotf,0,20
+Pledged Keeper,97,rof,0,19
+Demand for Honor,97,rof,0,19
+Crush of the Iceclad,97,rof,5,19
+Ostracize,97,rof,0,19
+Ostracize Heal,97,rof,0,19
+Ostracize Heal II,97,rof,0,19
+Ostracize Heal III,97,rof,0,19
+Dazzling Light,97,rof,9,19
+Lesson of Sorrow,97,rof,6,19
+Symbol of Burim,97,rof,0,19
+Devout Audacity,97,rof,0,19
+Holy Guardian Discipline,97,rof,17,19
+Holy Guardian Heal,97,rof,0,19
+Holy Guardian Heal II,97,rof,0,19
+Holy Guardian Heal III,97,rof,0,19
+Reverent Penitence,97,cotf,11,20
+Penitent Mending,97,cotf,0,20
+Penitent Mending II,97,cotf,0,20
+Penitent Mending III,97,cotf,0,20
+Penitent Reward,97,cotf,0,20
+Penitent Reward II,97,cotf,0,20
+Penitent Reward III,97,cotf,0,20
+Reprove,98,rof,15,19
+Armor of Reverence,98,rof,11,19
+Armor of Formidable Grace,98,rof,0,19
+Burst of Sunrise,98,rof,0,19
+Reverent Cleansing,98,rof,3,19
+Brightwing Mantle,98,rof,5,19
+Brightwing Mantle Heal,98,rof,0,19
+Brightwing Mantle Heal II,98,rof,0,19
+Brightwing Mantle Heal III,98,rof,0,19
+Righteous Umbrage,98,rof,14,19
+Righteous Umbrage Effect,98,rof,0,19
+Righteous Umbrage Effect II,98,rof,0,19
+Righteous Umbrage Effect III,98,rof,0,19
+Umbrage Strike,98,rof,0,19
+Umbrage Strike II,98,rof,0,19
+Umbrage Strike III,98,rof,0,19
+Splash of Cleansing,98,rof,2,19
+Valiant Deflection,98,cotf,17,20
+Valiant Healing,98,cotf,0,20
+Valiant Healing II,98,cotf,0,20
+Valiant Healing III,98,cotf,0,20
+Steadfast Stance,99,rof,0,19
+Brell's Steadfast Bulwark,99,rof,0,19
+Reinvigorating Steel,99,rof,0,19
+Steely Reinvigoration,99,rof,0,19
+Steely Reinvigoration II,99,rof,0,19
+Steely Reinvigoration III,99,rof,0,19
+Sorrow,99,rof,0,19
+Unbroken Affirmation,99,rof,9,19
+Wave of Sorrow,99,rof,0,19
+Force of Reverence,99,rof,3,19
+Reverent Healing,99,rof,0,19
+Reverent Healing II,99,rof,0,19
+Reverent Healing III,99,rof,0,19
+Blunted Blade,99,cotf,20,20
+Blunted Strike,99,cotf,0,20
+Blunted Strike II,99,cotf,0,20
+Blunted Strike III,99,cotf,0,20
+Aurora of Sunrise,100,rof,0,19
+Crush of Tarew,100,rof,6,19
+Reverent Fury,100,rof,0,19
+Reverent Fury Strike,100,rof,0,19
+Reverent Fury Strike II,100,rof,0,19
+Reverent Fury Strike III,100,rof,0,19
+Force of the Iceclad,100,rof,5,19
+Glorious Expurgation,100,rof,7,19
+Hand of the Pledged Keeper,100,rof,0,19
+Preservation of the Iceclad,100,rof,12,19
+Preservation of the Iceclad Effect,100,rof,0,19
+Preservation of the Iceclad Effect II,100,rof,0,19
+Preservation of the Iceclad Effect III,100,rof,0,19
+Protective Allegiance,100,rof,9,19
+Reflexive Righteousness,100,rof,19,19
+Force of Abrogation,100,cotf,5,20
+Breather,101,tds,13,21
+Depurate,101,tds,0,21
+Doctrine of Rescission,101,tds,0,21
+Ardent Purity,101,tds,0,21
+Ardent Touch,101,tds,0,21
+Ardent Force,101,tds,4,21
+Consecration,101,tds,0,21
+Mark of Krausig,101,tds,0,21
+Dulcify,101,tds,0,21
+Dichotomic Force,101,tbm,20,22
+Stormbound Keeper,102,tds,0,21
+Impose for Honor,102,tds,0,21
+Crush of the Darkened Sea,102,tds,5,21
+Admonish,102,tds,0,21
+Admonish Heal,102,tds,0,21
+Admonish Heal II,102,tds,0,21
+Admonish Heal III,102,tds,0,21
+Blessed Light,102,tds,9,21
+Lesson of Grief,102,tds,6,21
+Symbol of Niparson,102,tds,0,21
+Devout Penitence,102,tbm,11,22
+Penitent Mending,102,tbm,0,22
+Penitent Mending II,102,tbm,0,22
+Penitent Mending III,102,tbm,0,22
+Penitent Reward,102,tbm,0,22
+Penitent Reward II,102,tbm,0,22
+Penitent Reward III,102,tbm,0,22
+Repel,103,tds,15,21
+Armor of Ardency,103,tds,11,21
+Armor of Formidable Spirit,103,tds,0,21
+Burst of Dayspring,103,tds,0,21
+Ardent Cleansing,103,tds,3,21
+Skalber Mantle,103,tds,5,21
+Skalber Mantle Heal,103,tds,0,21
+Skalber Mantle Heal II,103,tds,0,21
+Skalber Mantle Heal III,103,tds,0,21
+Splash of Atonement,103,tds,2,21
+Harmonious Blessing,103,eok,0,23
+Staunch Stance,104,tds,0,21
+Brell's Stalwart Bulwark,104,tds,0,21
+Force of Ardency,104,tds,3,21
+Ardent Healing,104,tds,0,21
+Ardent Healing II,104,tds,0,21
+Ardent Healing III,104,tds,0,21
+Mark of the Commander,104,tds,0,21
+Grief,104,tds,0,21
+Unflinching Affirmation,104,tds,9,21
+Wave of Grief,104,tds,0,21
+Holy Alliance,104,eok,21,23
+Aurora of Dayspring,105,tds,0,21
+Crush of Povar,105,tds,6,21
+Ardent Fury,105,tds,0,21
+Ardent Fury Strike,105,tds,0,21
+Ardent Fury Strike II,105,tds,0,21
+Ardent Fury Strike III,105,tds,0,21
+Force of the Darkened Sea,105,tds,5,21
+Brilliant Vindication,105,tds,7,21
+Hand of the Stormbound Keeper,105,tds,0,21
+Protective Proclamation,105,tds,9,21
+Valiant Defense,105,eok,17,23
+Reflexive Reverence,105,eok,19,23
+Hiatus,106,ros,13,24
+Sanctify,106,ros,0,24
+Doctrine of Exculpation,106,ros,0,24
+Merciful Purity,106,ros,0,24
+Merciful Touch,106,ros,0,24
+Merciful Force,106,ros,4,24
+Remembrance,106,ros,0,24
+Remembrance Trigger,106,ros,0,24
+Remembrance Trigger II,106,ros,0,24
+Remembrance Trigger III,106,ros,0,24
+Mark of Teralov,106,ros,0,24
+Soothe,106,ros,0,24
+Dissident Force,106,tbl,20,26
+Ashbound Keeper,107,ros,0,24
+Refute for Honor,107,ros,0,24
+Crush of the Timorous Deep,107,ros,5,24
+Censure,107,ros,0,24
+Censure Heal,107,ros,0,24
+Censure Heal II,107,ros,0,24
+Censure Heal III,107,ros,0,24
+Merciful Light,107,ros,9,24
+Sanctimonious Audacity,107,ros,0,24
+Blessed Guardian Discipline,107,ros,17,24
+Blessed Guardian Heal,107,ros,0,24
+Blessed Guardian Heal II,107,ros,0,24
+Blessed Guardian Heal III,107,ros,0,24
+Lesson of Expiation,107,ros,6,24
+Symbol of Teralov,107,ros,0,24
+Merciful Penitence,107,tbl,11,26
+Spurn,108,ros,15,24
+Righteous Condemnation,108,ros,14,24
+Condemnation Strike,108,ros,0,24
+Condemnation Strike II,108,ros,0,24
+Condemnation Strike III,108,ros,0,24
+Armor of Mercy,108,ros,11,24
+Armor of Steadfast Faith,108,ros,0,24
+Burst of Morninglight,108,ros,0,24
+Merciful Cleansing,108,ros,3,24
+Kar'Zok Mantle,108,ros,5,24
+Kar'Zok Mantle Heal,108,ros,0,24
+Kar'Zok Mantle Heal II,108,ros,0,24
+Kar'Zok Mantle Heal III,108,ros,0,24
+Splash of Depuration,108,ros,2,24
+Defiant Stance,109,ros,0,24
+Revitalizating Steel,109,ros,0,24
+Steely Revitalization,109,ros,0,24
+Steely Revitalization II,109,ros,0,24
+Steely Revitalization III,109,ros,0,24
+Brell's Blessed Bastion,109,ros,0,24
+Force of Mercy,109,ros,3,24
+Merciful Healing,109,ros,0,24
+Merciful Healing II,109,ros,0,24
+Merciful Healing III,109,ros,0,24
+Mark of Orthiss,109,ros,0,24
+Expiation,109,ros,0,24
+Unyielding Affirmation,109,ros,9,24
+Unyielding Affirmation Reflection,109,ros,0,24
+Unyielding Affirmation Reflection II,109,ros,0,24
+Unyielding Affirmation Reflection III,109,ros,0,24
+Wave of Expiation,109,ros,0,24
+Penitent Mending III Azia,109,tbl,0,26
+Penitent Mending III Beza,109,tbl,0,26
+Penitent Mending III Caza,109,tbl,0,26
+Penitent Reward III Azia,109,tbl,0,26
+Penitent Reward III Beza,109,tbl,0,26
+Penitent Reward III Caza,109,tbl,0,26
+Preservation of Rodcet,110,ros,12,24
+Preservation of Rodcet Effect,110,ros,0,24
+Preservation of Rodcet Effect II,110,ros,0,24
+Preservation of Rodcet Effect III,110,ros,0,24
+Force of Orthiss,110,ros,5,24
+Aurora of Morninglight,110,ros,0,24
+Crush of E'Ci,110,ros,6,24
+Merciful Fury,110,ros,0,24
+Merciful Fury Strike,110,ros,0,24
+Merciful Fury Strike II,110,ros,0,24
+Merciful Fury Strike III,110,ros,0,24
+Force of the Timorous Deep,110,ros,5,24
+Brilliant Exoneration,110,ros,7,24
+Hand of the Ashbound Keeper,110,ros,0,24
+Protective Devotion,110,ros,9,24
+Valiant Diversion,110,tbl,17,26
+Relax,111,tov,13,26
+Doctrine of Abolishment,111,tov,0,26
+Sincere Touch,111,tov,0,26
+Sincere Force,111,tov,4,26
+Requiem,111,tov,0,26
+Requiem Trigger,111,tov,0,26
+Requiem Trigger II,111,tov,0,26
+Requiem Trigger III,111,tov,0,26
+Mark of Sevalak,111,tov,0,26
+Placating Words,111,tov,0,26
+Stormwall Keeper,112,tov,0,26
+Protest for Honor,112,tov,0,26
+Crush of the Grotto,112,tov,5,26
+Remonstrate,112,tov,0,26
+Remonstrate Heal,112,tov,0,26
+Remonstrate Heal II,112,tov,0,26
+Remonstrate Heal III,112,tov,0,26
+Sincere Light,112,tov,9,26
+Fervent Audacity,112,tov,0,26
+Lesson of Propitiation,112,tov,6,26
+Symbol of Sevalak,112,tov,0,26
+Thwart,113,tov,15,26
+Righteous Antipathy,113,tov,14,26
+Antipathetic Strike,113,tov,0,26
+Antipathetic Strike II,113,tov,0,26
+Antipathetic Strike III,113,tov,0,26
+Armor of Sincerity,113,tov,11,26
+Armor of Steadfast Grace,113,tov,0,26
+Burst of Wakening,113,tov,0,26
+Sincere Cleansing,113,tov,3,26
+Mantle of the Sapphire Cohort,113,tov,5,26
+Mantle of the Sapphire Cohort Heal,113,tov,0,26
+Mantle of the Sapphire Cohort Heal II,113,tov,0,26
+Mantle of the Sapphire Cohort Heal III,113,tov,0,26
+Splash of Exaltation,113,tov,2,26
+Stormwall Stance,114,tov,0,26
+Renewing Steel,114,tov,0,26
+Steely Renewal,114,tov,0,26
+Steely Renewal II,114,tov,0,26
+Steely Renewal III,114,tov,0,26
+Brell's Blessed Barrier,114,tov,0,26
+Mark of the Jade Cohort,114,tov,0,26
+Propitiation,114,tov,0,26
+Unending Affirmation,114,tov,9,26
+Unending Affirmation Reflection,114,tov,0,26
+Unending Affirmation Reflection II,114,tov,0,26
+Unending Affirmation Reflection III,114,tov,0,26
+Wave of Propitiation,114,tov,0,26
+Preservation of the Grotto,115,tov,12,26
+Preservation of the Grotto Effect,115,tov,0,26
+Preservation of the Grotto Effect II,115,tov,0,26
+Preservation of the Grotto Effect III,115,tov,0,26
+Force of the Jade Cohort,115,tov,5,26
+Aurora of Wakening,115,tov,0,26
+Crush of Restless Ice,115,tov,6,26
+Sincere Fury,115,tov,0,26
+Sincere Fury Strike,115,tov,0,26
+Sincere Fury Strike II,115,tov,0,26
+Sincere Fury Strike III,115,tov,0,26
+Force of the Grotto,115,tov,5,26
+Brilliant Exculpation,115,tov,7,26
+Hand of the Stormwall Keeper,115,tov,0,26
+Protective Consecration,115,tov,9,26

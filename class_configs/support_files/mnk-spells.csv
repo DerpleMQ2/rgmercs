@@ -1,0 +1,154 @@
+SpellName,ClassLevel,Expansion,Timer,ExpansionNum
+Throw Stone,1,original,9,0
+Elbow Strike,5,original,9,0
+Focused Will Discipline,10,original,5,0
+Resistant Discipline,30,original,5,0
+Phantom Zephyr,35,god,-1,7
+Fearless Discipline,40,original,5,0
+Phantom Wind,50,god,-1,7
+Stonestance Discipline,51,rok,2,1
+Thunderkick Discipline,52,rok,4,1
+Whirlwind Discipline,53,rok,2,1
+Voiddance Discipline,54,rok,2,1
+Disciple's Aura,55,por,1,11
+Innerflame Discipline,56,rok,3,1
+Hundred Fists Discipline,57,rok,3,1
+Phantom Echo,57,pop,-1,4
+Silentfist Discipline,59,rok,4,1
+Ashenhand Discipline,60,rok,4,1
+Planeswalk Discipline,61,ldon,5,6
+Leopard Claw,61,don,9,9
+Speed Focus Discipline,63,ldon,11,6
+Healing Will Discipline,63,god,5,7
+Phantom Call,64,ldon,-1,6
+Earthwalk Discipline,65,ldon,2,6
+Phantom Shadow,65,god,-1,7
+Ancient Phantom Chaos,65,god,-1,7
+Dreamwalk Discipline,66,oom,5,8
+Counterforce Discipline,68,oom,7,8
+Fists of Wu,68,dod,1,10
+Phantom Cry,69,oom,-1,8
+Dragon Fang,69,don,9,9
+Rapid Kick Discipline,70,oom,6,8
+Heel of Kanji,70,por,6,11
+Master's Aura,70,por,1,11
+Phantom Silhouette,71,tss,-1,12
+Impenetrable Discipline,72,tss,2,12
+Second Wind,72,tbs,13,13
+Echo of Misdirection,73,tss,-1,12
+Clawstriker's Flurry,74,tss,9,12
+Scaledfist Discipline,74,tbs,4,13
+Moment of Calm,75,tss,5,12
+Shimmering Silhouette,76,sof,-1,14
+Third Wind,77,sof,13,14
+Astral Projection,77,sof,19,14
+Echo of Deception,78,sof,-1,14
+Wheel of Fists,79,sof,9,14
+Crystalpalm Discipline,79,sof,3,14
+Moment of Tranquility,80,sof,5,14
+Delay Death,80,sof,8,14
+Calanin's Synergy,81,sod,9,15
+Phantom Apparition,81,sod,-1,15
+Fourth Wind,82,sod,13,15
+Chrono Projection,82,sod,19,15
+Echo of Distraction,83,sod,-1,15
+Vigorous Shuriken,83,uf,-1,16
+Whorl of Fists,84,sod,9,15
+Punch Through,84,sod,12,15
+Moment of Placidity,85,sod,5,15
+Defer Death,85,sod,8,15
+Flinch,85,uf,10,16
+Drunken Monkey Style,85,uf,-1,16
+Respite,86,hot,13,17
+Dreamwalker's Synergy,86,hot,9,17
+Phantasmal Apparition,86,hot,-1,17
+Fifth Wind,87,hot,13,17
+Cloud of Fists,87,hot,17,17
+Echo of Confusion,88,hot,-1,17
+Ironfist Discipline,88,hot,4,17
+Jab Through,89,hot,12,17
+Six-Step Pattern,89,hot,9,17
+Void Body,89,hot,12,17
+Deny Death,90,hot,8,17
+Five Breaths,90,hot,5,17
+Heel of Kai,90,hot,6,17
+Intercepting Fist,90,hot,10,17
+Reprieve,91,voa,13,18
+Veilwalker's Synergy,91,voa,9,18
+Veiled Apparition,91,voa,-1,18
+Sixth Wind,92,voa,13,18
+Tiger's Balance,92,voa,16,18
+Void Step,92,voa,18,18
+Inner Rejuvenation,93,voa,14,18
+Echo of Obfuscation,93,voa,-1,18
+Crane Stance,93,voa,14,18
+Diamondpalm Discipline,94,voa,3,18
+Seven-Step Pattern,94,voa,9,18
+Veiled Body,94,voa,12,18
+Decry Death,95,voa,8,18
+Six Breaths,95,voa,5,18
+Heel of Kojai,95,voa,6,18
+Rest,96,rof,13,19
+Shadewalker's Synergy,96,rof,9,19
+Shaded Apparition,96,rof,-1,19
+Earthforce Discipline,96,rof,2,19
+Sting of the Wasp,96,cotf,9,20
+Seventh Wind,97,rof,13,19
+Eagle's Balance,97,rof,16,19
+Shaded Step,97,rof,18,19
+Swift Reflexes,97,rof,18,19
+Technique of the Crimson Fist,97,cotf,5,20
+Eye of the Storm,98,rof,18,19
+Echo of Prevarication,98,rof,-1,19
+Reflex,98,cotf,10,20
+Terrorpalm Discipline,99,rof,3,19
+Eight-Step Pattern,99,rof,9,19
+Zalikor's Fang,99,rof,17,19
+Contraforce Discipline,99,cotf,7,20
+Forestall Death,100,rof,8,19
+Seven Breaths,100,rof,5,19
+Heel of Zagali,100,rof,6,19
+Protection of the Shadewalker,100,rof,8,19
+Phantom Partisan,100,cotf,17,20
+Breather,101,tds,13,21
+Doomwalker's Synergy,101,tds,9,21
+Darkened Apparition,101,tds,-1,21
+Dichotomic Form,101,tds,20,21
+Dragon's Balance,102,tds,16,21
+Nimble Reflexes,102,tds,18,21
+Doomwalker's Alliance,102,eok,21,23
+Echo of Deceit,103,tds,-1,21
+Curse of the Thirteen Fingers,103,tbm,10,22
+Strike Through,104,tds,12,21
+Torrent of Fists,104,tds,12,21
+Doomwalker's Precision Strike,104,eok,-1,23
+Refuse Death,105,tds,8,21
+Eight Breaths,105,tds,5,21
+Phantom Pummeling,105,eok,17,23
+Hiatus,106,ros,13,24
+Sting of the Scorpikis,106,ros,9,24
+Firewalker's Synergy,106,ros,9,24
+Ash-Clouded Apparition,106,ros,-1,24
+Dissident Form,106,tbl,20,26
+Technique of the Celestial Fist,107,ros,5,24
+Tiger's Poise,107,ros,16,24
+Rapid Reflexes,107,ros,18,24
+Firewalker's Covenant,107,tbl,21,26
+Echo of Duplicity,108,ros,-1,24
+Nine Breaths,108,ros,5,24
+Curse of Fourteen Fists,108,tbl,10,26
+Counterstrike Discipline,109,ros,7,24
+Hoshkar's Fang,109,ros,17,24
+Firewalker's Precision Strike,109,tbl,-1,26
+Firestorm of Fists,110,ros,12,24
+Reject Death,110,ros,8,24
+Relax,111,tov,13,26
+Icewalker's Synergy,111,tov,9,26
+Frostblurred Apparition,111,tov,-1,26
+Eagle's Poise,112,tov,16,26
+Heron Stance,112,tov,14,26
+Echo of Disorientation,113,tov,-1,26
+Breath of Tranquility,113,tov,5,26
+Zlexak's Fang,114,tov,17,26
+Barrage of Fists,115,tov,12,26
+Rescind Death,115,tov,8,26

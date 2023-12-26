@@ -1,0 +1,848 @@
+SpellName,ClassLevel,Expansion,Timer,ExpansionNum
+Flash of Light,1,original,0,0
+Minor Healing,1,original,0,0
+Cure Poison,1,original,0,0
+Holy Armor,1,original,0,0
+Strike,1,original,0,0
+Courage,1,original,0,0
+True North,1,original,0,0
+Divine Aura,1,original,15,0
+Lull,1,original,0,0
+Spook the Dead,1,original,0,0
+Yaulp,1,original,0,0
+Reckless Strength,2,original,0,0
+Stun,2,original,5,0
+Summon Drink,3,original,0,0
+Cure Blindness,3,original,0,0
+Cure Disease,4,original,0,0
+Light Healing,4,original,0,0
+Ward Undead,4,original,0,0
+Gate,5,original,0,0
+Soothe,5,original,0,0
+Furor,5,original,0,0
+Endure Poison,6,original,0,0
+Fear,6,original,0,0
+Sanctuary,6,sol,0,3
+Center,7,original,0,0
+Hammer of Wrath,7,original,0,0
+Root,7,original,0,0
+Endure Fire,8,original,0,0
+Summon Food,8,original,0,0
+Remove Minor Curse,8,ldon,0,6
+Sense the Dead,9,original,0,0
+Word of Pain,9,original,0,0
+Healing,10,original,0,0
+Bind Affinity,10,original,0,0
+Iony's Lesser Augury,10,ldon,0,6
+Endure Disease,11,original,0,0
+Invisibility Versus Undead,11,original,0,0
+Symbol of Transal,11,original,0,0
+Sense Summoned,12,original,0,0
+Halo of Light,12,original,0,0
+Reanimation,12,original,0,0
+Endure Cold,13,original,0,0
+Cancel Magic,13,original,0,0
+Expulse Undead,13,original,0,0
+Smite,14,original,0,0
+Iony's Lesser Exorcism,14,ldon,0,6
+Iony's Lesser Cleansing,14,ldon,0,6
+Calm,15,original,0,0
+Spirit Armor,15,original,0,0
+Blessing of Piety,15,pop,0,4
+Endure Magic,16,original,0,0
+Yaulp II,16,original,0,0
+Holy Might,16,original,0,0
+Daring,17,original,0,0
+Ward Summoned,17,original,0,0
+Reconstitution,18,original,0,0
+Word of Shadow,19,original,0,0
+Celestial Remedy,19,sol,0,3
+Greater Healing,20,original,0,0
+Hammer of Striking,20,original,0,0
+Ward of Vie,20,ldon,0,6
+Inspire Fear,21,original,0,0
+Wave of Fear,21,original,0,0
+Symbol of Ryltan,21,original,0,0
+Counteract Poison,22,original,0,0
+Bravery,22,original,0,0
+Reparation,22,original,0,0
+Dismiss Undead,23,original,0,0
+Remove Lesser Curse,23,ldon,0,6
+Iony's Augury,23,ldon,0,6
+Iony's Exorcism,24,ldon,0,6
+Iony's Cleansing,24,ldon,0,6
+Guard,25,original,0,0
+Sermon of the Righteous,25,sol,0,3
+Panic the Dead,26,original,0,0
+Word of Spirit,26,original,0,0
+Instill,27,original,0,0
+Revive,27,original,0,0
+Expulse Summoned,27,original,0,0
+Counteract Disease,28,original,0,0
+Abundant Drink,28,original,0,0
+Divine Barrier,29,original,2,0
+Wrath,29,original,0,0
+Imbue Opal,29,original,0,0
+Imbue Topaz,29,original,0,0
+Imbue Plains Pebble,29,original,0,0
+Imbue Amber,29,original,0,0
+Imbue Sapphire,29,original,0,0
+Imbue Ruby,29,original,0,0
+Imbue Emerald,29,original,0,0
+Imbue Black Pearl,29,original,0,0
+Imbue Diamond,29,original,0,0
+Imbue Rose Quartz,29,original,0,0
+Imbue Black Sapphire,29,original,0,0
+Imbue Peridot,29,original,0,0
+Celestial Health,29,sol,0,3
+Mass Imbue Amber,29,loy,0,5
+Mass Imbue Black Pearl,29,loy,0,5
+Mass Imbue Black Sapphire,29,loy,0,5
+Mass Imbue Diamond,29,loy,0,5
+Mass Imbue Emerald,29,loy,0,5
+Mass Imbue Opal,29,loy,0,5
+Mass Imbue Peridot,29,loy,0,5
+Mass Imbue Plains Pebble,29,loy,0,5
+Mass Imbue Rose Quartz,29,loy,0,5
+Mass Imbue Ruby,29,loy,0,5
+Mass Imbue Sapphire,29,loy,0,5
+Mass Imbue Topaz,29,loy,0,5
+Resist Poison,30,original,0,0
+Superior Healing,30,original,0,0
+Word of Health,30,original,0,0
+Force,31,original,0,0
+Symbol of Pinzarn,31,original,0,0
+Frenzied Strength,31,original,0,0
+Valor,32,original,0,0
+Atone,32,original,0,0
+Renewal,32,original,0,0
+Abundant Food,33,original,0,0
+Resist Fire,33,original,0,0
+Expel Undead,33,original,0,0
+Iony's Greater Augury,33,ldon,0,6
+Blinding Luminance,34,original,0,0
+Tremor,34,original,0,0
+Armor of Protection,34,sov,0,2
+Iony's Greater Exorcism,34,ldon,0,6
+Iony's Greater Cleansing,34,ldon,0,6
+Armor of Faith,35,original,0,0
+Blessing of Faith,35,pop,0,4
+Resist Disease,36,original,0,0
+Pacify,36,original,0,0
+Invoke Fear,36,original,0,0
+Dismiss Summoned,37,original,0,0
+Resuscitate,37,original,0,0
+Turning of the Unnatural,37,sov,0,2
+Nullify Magic,38,original,0,0
+Resist Cold,38,original,0,0
+Remove Curse,38,sol,0,3
+Complete Heal,39,original,0,0
+Word of Souls,39,original,0,0
+Sacred Word,39,sol,0,3
+Hammer of Requital,40,original,0,0
+Temperance,40,loy,0,5
+Guard of Vie,40,ldon,0,6
+Yaulp III,41,original,0,0
+Symbol of Naltron,41,original,0,0
+Resolution,42,original,0,0
+Restoration,42,original,0,0
+Resist Magic,43,original,0,0
+Banish Undead,43,original,0,0
+Earthquake,44,original,3,0
+Retribution,44,original,0,0
+Celestial Healing,44,sov,0,2
+Shield of Words,45,original,0,0
+Word of Healing,45,original,0,0
+Healing Light,45,original,0,0
+Blessing of Temperance,45,ldon,0,6
+Sound of Force,46,original,4,0
+Immobilize,46,original,0,0
+Resurrection,47,original,0,0
+Expel Summoned,47,original,0,0
+Abolish Poison,48,original,0,0
+Improved Invisibility to Undead,48,sov,0,2
+Word Divine,49,original,0,0
+Armor of the Faithful,49,sol,0,3
+Ward of the Divine,50,don,0,9
+Remedy,51,rok,0,1
+Dread of Night,51,rok,0,1
+Death Pact,51,rok,0,1
+Sunskin,51,rok,0,1
+Pure Blood,51,loy,0,5
+Word of Vigor,52,rok,0,1
+Heroism,52,rok,0,1
+Heroic Bond,52,rok,0,1
+Heroic Bond,52,rok,0,1
+Upheaval,52,rok,3,1
+Epitaph of Life,52,sol,0,3
+Eradicate Poison,52,rof,0,19
+Annul Magic,53,rok,0,1
+Divine Light,53,rok,0,1
+Yaulp IV,53,rok,0,1
+Symbol of Marzin,54,rok,0,1
+Reckoning,54,rok,0,1
+Unswerving Hammer of Faith,54,rok,0,1
+Mark of Retribution,54,sol,0,3
+Remove Greater Curse,54,sol,0,3
+Protection of Vie,54,ldon,0,6
+Eradicate Curse,54,rof,0,19
+Exile Undead,55,rok,0,1
+Fortitude,55,rok,0,1
+Wake of Tranquility,55,rok,0,1
+Stun Command,55,sov,0,2
+Aura of the Zealot,55,por,0,11
+Banish Summoned,56,original,0,0
+Paralyzing Earth,56,original,0,0
+Reviviscence,56,rok,0,1
+Mark of Karn,56,rok,0,1
+Hammer of Judgment,56,sol,0,3
+Yaulp V,56,sol,0,3
+Judgment,56,sol,0,3
+Cower the Dead,56,don,0,9
+Word of Restoration,57,rok,0,1
+Trepidation,57,rok,0,1
+Bulwark of Faith,57,rok,0,1
+Aegis,57,rok,0,1
+Ward of Rebuke,57,don,0,9
+Antidote,58,rok,0,1
+Enforced Reverence,58,rok,4,1
+Naltron's Mark,58,rok,0,1
+Ethereal Light,58,sol,0,3
+Blessed Armor of the Risen,58,sol,0,3
+Hammer of Divinity,58,sol,0,3
+Eradicate Disease,58,rof,0,19
+Celestial Elixir,59,rok,0,1
+The Unspoken Word,59,rok,0,1
+Ethereal Remedy,59,sol,0,3
+Deistic Voice,59,don,0,9
+Word of Redemption,60,rok,0,1
+Banishment of Shadows,60,rok,0,1
+Divine Intervention,60,rok,7,1
+Aegolism,60,sov,0,2
+Ancient High Priest's Bulwark,60,sov,0,2
+Ancient Gift of Aegolism,60,sov,0,2
+Ethereal Elixir,60,sol,0,3
+Blessing of Aegolism,60,sol,0,3
+Marzin's Mark,60,sol,0,3
+Hammer of Souls,60,sol,0,3
+Larger Reviviscence,61,pop,14,4
+Faith,61,pop,0,4
+Supernal Remedy,61,pop,0,4
+Symbol of Kazad,61,pop,0,4
+Ward of Gallantry,61,pop,0,4
+Tarnation,61,pop,4,4
+Ward of Vengeance,61,don,0,9
+Death's Despair,61,don,0,9
+Sermon of Penitence,62,pop,0,4
+Greater Immobilize,62,pop,0,4
+Virtue,62,pop,0,4
+Blessing of Reverence,62,pop,0,4
+Supernal Elixir,62,pop,0,4
+Condemnation,62,pop,0,4
+Bulwark of Vie,62,ldon,0,6
+Kazad's Mark,63,pop,0,4
+Hammer of Damnation,63,pop,0,4
+Supernal Light,63,pop,0,4
+Sound of Might,63,pop,6,4
+Deistic Bellow,63,don,0,9
+Petrifying Earth,64,pop,0,4
+Destroy Undead,64,pop,0,4
+Mark of Kings,64,pop,0,4
+Word of Replenishment,64,pop,0,4
+Catastrophe,64,pop,3,4
+Imbue Valor,64,pop,0,4
+Aura of Reverence,64,ldon,0,6
+Yaulp VI,65,pop,0,4
+Pacification,65,pop,0,4
+The Silent Command,65,pop,5,4
+Armor of the Zealot,65,pop,0,4
+Mark of the Righteous,65,pop,0,4
+Hand of Virtue,65,pop,0,4
+Holy Light,65,god,0,7
+Order,65,god,0,7
+Holy Elixir,65,god,0,7
+Ancient Chaos Censure,65,god,0,7
+Confidence,66,oom,0,8
+Pious Remedy,66,oom,0,8
+Symbol of Balikor,66,oom,0,8
+Ward of Valiance,66,oom,0,8
+Shock of Wonder,66,oom,4,8
+Sun Cloak,66,oom,0,8
+Revulsion of Death,66,dod,0,10
+Sermon of Reproach,67,oom,0,8
+Conviction,67,oom,0,8
+Blessing of Devotion,67,oom,0,8
+Pious Elixir,67,oom,0,8
+Reproach,67,oom,0,8
+Panoply of Vie,67,oom,0,8
+Unswerving Hammer of Retribution,68,oom,0,8
+Hammer of Reproach,68,oom,0,8
+Pious Light,68,oom,0,8
+Sound of Divinity,68,oom,6,8
+Desolate Undead,68,oom,0,8
+Deistic Howl,68,dod,0,10
+Death's Regret,68,dod,0,10
+Mark of the Blameless,69,oom,0,8
+Word of Vivification,69,oom,0,8
+Calamity,69,oom,3,8
+Aura of Devotion,69,oom,0,8
+Yaulp VII,69,oom,0,8
+Ward of Retribution,69,don,0,9
+Chromastrike,69,dod,0,10
+Placate,70,oom,0,8
+Silent Dictation,70,oom,5,8
+Armor of the Pious,70,oom,0,8
+Balikor's Mark,70,oom,0,8
+Hand of Conviction,70,oom,0,8
+Ancient Pious Conscience,70,oom,0,8
+Ancient Hallowed Light,70,oom,0,8
+Desperate Renewal,70,dod,0,10
+Elixir of Divinity,70,por,0,11
+Puratus,70,por,0,11
+Aura of the Pious,70,por,0,11
+Eminent Reviviscence,71,tss,14,12
+Blessing of Purpose,71,tss,0,12
+Sacred Remedy,71,tss,0,12
+Symbol of Elushar,71,tss,0,12
+Ward of the Dauntless,71,tss,0,12
+Awestruck,71,tss,4,12
+Vow of Valor,71,tss,0,12
+Dulcify,71,tss,0,12
+Yaulp VIII,71,tbs,0,13
+Tenacity,72,tss,0,12
+Sacred Elixir,72,tss,0,12
+Reproval,72,tss,0,12
+Aura of Purpose,72,tss,0,12
+Ward of Reprisal,72,tss,0,12
+Divine Custody,72,tbs,15,13
+Resist Corruption,73,tss,0,12
+Aegis of Vie,73,tss,0,12
+Sacred Light,73,tss,0,12
+Sound of Zeal,73,tss,6,12
+Promised Renewal,73,tss,12,12
+Consecrate Ground,73,tbs,0,13
+Mark of the Martyr,74,tss,0,12
+Tectonic Quake,74,tss,3,12
+Shared Purity,74,tss,0,12
+Expunge Corruption,74,tss,0,12
+Silent Decree,74,tss,5,12
+Unflinching Hammer of Zeal,74,tbs,0,13
+Armor of the Sacred,75,tss,0,12
+Elushar's Mark,75,tss,0,12
+Hand of Tenacity,75,tss,0,12
+Elixir of Redemption,75,tss,0,12
+Rallied Aegis of Vie,75,tss,0,12
+Blood of the Martyr,75,tbs,0,13
+Superior Reviviscence,76,sof,14,14
+Blessing of Resolve,76,sof,0,14
+Solemn Remedy,76,sof,0,14
+Symbol of Kaerra,76,sof,0,14
+Ward of the Resolute,76,sof,0,14
+Aweshock,76,sof,4,14
+Vow of Victory,76,sof,0,14
+Yaulp IX,76,sof,0,14
+Mollify,76,sof,0,14
+Temerity,77,sof,0,14
+Solemn Elixir,77,sof,0,14
+Divine Censure,77,sof,0,14
+Aura of Resolve,77,sof,0,14
+Ward of Requital,77,sof,0,14
+Divine Destiny,77,sof,2,14
+Eleventh-Hour,77,sof,11,14
+Fool the Fallen,77,sof,0,14
+Forbear Corruption,78,sof,0,14
+Shield of Vie,78,sof,0,14
+Solemn Light,78,sof,0,14
+Sound of Resonance,78,sof,6,14
+Promised Restoration,78,sof,12,14
+Hallowed Ground,78,sof,0,14
+Sermon of Admonition,78,sof,0,14
+Mark of the Devoted,79,sof,0,14
+Tectonic Upheaval,79,sof,3,14
+Vitiate Corruption,79,sof,0,14
+Silent Dictum,79,sof,5,14
+Indomitable Hammer of Zeal,79,sof,0,14
+Chromassault,79,sof,0,14
+Order of the Resolute,80,sof,0,14
+Armor of the Solemn,80,sof,0,14
+Kaerra's Mark,80,sof,0,14
+Hand of Temerity,80,sof,0,14
+Elixir of Atonement,80,sof,0,14
+Rallied Shield of Vie,80,sof,0,14
+Blood of the Devoted,80,sof,0,14
+Circle of Divinity,80,sof,0,14
+Frantic Renewal,80,sof,0,14
+Word of Vivacity,80,sof,0,14
+Blessing of Loyalty,81,sod,0,15
+Devout Remedy,81,sod,0,15
+Symbol of Darianna,81,sod,0,15
+Ward of the Devout,81,sod,0,15
+Aweshake,81,sod,4,15
+Vow of Valiance,81,sod,0,15
+Yaulp X,81,sod,0,15
+Reconcile,81,sod,0,15
+Gallantry,82,sod,0,15
+Devout Elixir,82,sod,0,15
+Reprehend,82,sod,0,15
+Aura of Loyalty,82,sod,0,15
+Ward of Admonishment,82,sod,0,15
+Divine Eminence,82,sod,15,15
+Twelfth Night,82,sod,11,15
+Distract the Departed,82,sod,0,15
+Repel Corruption,83,sod,0,15
+Palladium of Vie,83,sod,0,15
+Devout Light,83,sod,0,15
+Sound of Reverberance,83,sod,6,15
+Promised Recuperation,83,sod,12,15
+Holy Ground,83,sod,0,15
+Sermon of Castigation,83,sod,0,15
+Providence,83,sod,8,15
+Holy Intervention,83,uf,0,16
+Holy Intervention Strike,83,uf,0,16
+Mark of the Unsullied,84,sod,0,15
+Tectonic Tumult,84,sod,3,15
+Abolish Corruption,84,sod,0,15
+Silent Edict,84,sod,5,15
+Unwavering Hammer of Zeal,84,sod,0,15
+Chromassail,84,sod,0,15
+Blessed Aquifer,84,sod,0,15
+Purified Blood,84,sod,0,15
+Glorious Denunciation,84,uf,0,16
+Order of the Devout,85,sod,0,15
+Armor of the Devout,85,sod,0,15
+Darianna's Mark,85,sod,0,15
+Hand of Gallantry,85,sod,0,15
+Elixir of Expiation,85,sod,0,15
+Rallied Palladium of Vie,85,sod,0,15
+Blood of the Unsullied,85,sod,0,15
+Frenetic Renewal,85,sod,0,15
+Word of Recovery,85,sod,0,15
+Erud's Retort,85,uf,0,16
+Erud's Channeled Mark,85,uf,0,16
+Erud's Retort Effect,85,uf,0,16
+Holy Contravention,85,uf,0,16
+Holy Contravention Heal,85,uf,0,16
+Holy Contravention Strike,85,uf,0,16
+Annihilate the Undead,86,hot,0,17
+Blessing of Will,86,hot,0,17
+Exonerate,86,hot,0,17
+Earnest Remedy,86,hot,0,17
+Word of Awakening,86,hot,0,17
+Symbol of Ealdun,86,hot,0,17
+Ward of the Earnest,86,hot,0,17
+Awecrash,86,hot,4,17
+Inspired Heal,86,hot,0,17
+Inspired Heal II,86,hot,0,17
+Inspired Heal III,86,hot,0,17
+Appease,86,hot,0,17
+Vow of Vanquishing,86,hot,0,17
+Yaulp XI,86,hot,0,17
+Hand of Will,87,hot,0,17
+Divine Fortitude,87,hot,2,17
+Earnest Elixir,87,hot,0,17
+Pristine Blood,87,hot,0,17
+Reliance,87,hot,0,17
+Rebuke,87,hot,0,17
+Thirteenth Salve,87,hot,11,17
+Ward of Retaliation,87,hot,0,17
+Divine Intercession,87,hot,7,17
+Reject Corruption,88,hot,0,17
+Earnest Light,88,hot,0,17
+Sanctified Ground,88,hot,0,17
+Celestial Intervention,88,hot,0,17
+Celestial Intervention Strike,88,hot,0,17
+Celestial Intervention Strike II,88,hot,0,17
+Celestial Intervention Strike III,88,hot,0,17
+Rampart of Vie,88,hot,0,17
+Promised Resurgence,88,hot,12,17
+Sermon of Censure,88,hot,0,17
+Sound of Fury,88,hot,6,17
+Purged Blood,89,hot,0,17
+Tectonic Shock,89,hot,3,17
+Chromarend,89,hot,0,17
+Mark of the Devout,89,hot,0,17
+Devout Hammer of Zeal,89,hot,0,17
+Dissolve Corruption,89,hot,0,17
+Glorious Censure,89,hot,0,17
+Silent Proclamation,89,hot,5,17
+Shining Rampart,89,hot,0,17
+Shining Defense,89,hot,0,17
+Armor of the Earnest,90,hot,0,17
+Blood of the Devout,90,hot,0,17
+Ealdun's Mark,90,hot,0,17
+Fintar's Retort,90,hot,0,17
+Fintar's Channeled Mark,90,hot,0,17
+Fintar's Channeled Mark II,90,hot,0,17
+Fintar's Channeled Mark III,90,hot,0,17
+Fintar's Retort Effect,90,hot,0,17
+Fintar's Retort Effect II,90,hot,0,17
+Fintar's Retort Effect III,90,hot,0,17
+Healing Splash,90,hot,1,17
+Frenzied Renewal,90,hot,0,17
+Hand of Reliance,90,hot,0,17
+Celestial Contravention,90,hot,0,17
+Celestial Contravention Heal,90,hot,0,17
+Celestial Contravention Heal II,90,hot,0,17
+Celestial Contravention Heal III,90,hot,0,17
+Celestial Contravention Strike,90,hot,0,17
+Celestial Contravention Strike II,90,hot,0,17
+Celestial Contravention Strike III,90,hot,0,17
+Elixir of the Ardent,90,hot,0,17
+Order of the Earnest,90,hot,0,17
+Rallied Rampart of Vie,90,hot,0,17
+Word of Resurgence,90,hot,0,17
+Abolish the Undead,91,voa,0,18
+Aweburst,91,voa,4,18
+Inspired Heal,91,voa,0,18
+Inspired Heal II,91,voa,0,18
+Inspired Heal III,91,voa,0,18
+Assuage,91,voa,0,18
+Blessing of Assurance,91,voa,0,18
+Amnesty,91,voa,0,18
+Faithful Remedy,91,voa,0,18
+Infusion of the Faithful,91,voa,9,18
+Symbol of the Triumvirate,91,voa,0,18
+Word of Recuperation,91,voa,0,18
+Ward of the Zealous,91,voa,0,18
+Vow of Veneration,91,voa,0,18
+Yaulp XII,91,voa,0,18
+Unity of the Triumvirate,91,voa,0,18
+Hand of Assurance,92,voa,0,18
+Divine Guard,92,voa,15,18
+Divine Invocation,92,voa,7,18
+Zealous Elixir,92,voa,0,18
+Mark of Erion,92,voa,10,18
+Credence,92,voa,0,18
+Remonstrance,92,voa,0,18
+Fourteenth Catalyst,92,voa,11,18
+Ward of Recrimination,92,voa,0,18
+Unified Credence,92,voa,0,18
+Rescind Corruption,93,voa,0,18
+Zealous Light,93,voa,0,18
+Anointed Ground,93,voa,0,18
+Elysian Intervention,93,voa,0,18
+Elysian Intervention Strike,93,voa,0,18
+Elysian Intervention Strike II,93,voa,0,18
+Elysian Intervention Strike III,93,voa,0,18
+Issuance of Faith,93,voa,13,18
+Armor of Vie,93,voa,0,18
+Promised Restitution,93,voa,12,18
+Sermon of Condemnation,93,voa,0,18
+Sound of Fervor,93,voa,6,18
+Vow of Vitriol,93,voa,0,18
+Perfected Blood,94,voa,0,18
+Tectonic Tremor,94,voa,3,18
+Chromacleave,94,voa,0,18
+Hand of Faithful Infusion,94,voa,9,18
+Mark of the Adherent,94,voa,0,18
+Infallible Hammer of Zeal,94,voa,0,18
+Eradicate Corruption,94,voa,0,18
+Glorious Admonition,94,voa,0,18
+Silent Mandate,94,voa,5,18
+Shining Armor,94,voa,0,18
+Armor of the Zealous,95,voa,0,18
+Blood of the Adherent,95,voa,0,18
+Unified Hand of the Triumvirate,95,voa,0,18
+Galvos' Retort,95,voa,0,18
+Galvos' Channeled Mark,95,voa,0,18
+Galvos' Channeled Mark II,95,voa,0,18
+Galvos' Channeled Mark III,95,voa,0,18
+Galvos' Retort Effect,95,voa,0,18
+Galvos' Retort Effect II,95,voa,0,18
+Galvos' Retort Effect III,95,voa,0,18
+Rejuvenating Splash,95,voa,1,18
+Fervent Renewal,95,voa,0,18
+Unified Hand of Credence,95,voa,0,18
+Elysian Contravention,95,voa,0,18
+Elysian Contravention Heal,95,voa,0,18
+Elysian Contravention Heal II,95,voa,0,18
+Elysian Contravention Heal III,95,voa,0,18
+Elysian Contravention Strike,95,voa,0,18
+Elysian Contravention Strike II,95,voa,0,18
+Elysian Contravention Strike III,95,voa,0,18
+Elixir of the Beneficent,95,voa,0,18
+Hand of Credence,95,voa,0,18
+Rallied Armor of Vie,95,voa,0,18
+Word of Rehabilitation,95,voa,0,18
+Abrogate the Undead,96,rof,0,19
+Aweclash,96,rof,4,19
+Inspired Heal,96,rof,0,19
+Inspired Heal II,96,rof,0,19
+Inspired Heal III,96,rof,0,19
+Soothing Glow,96,rof,0,19
+Blessing of Fervor,96,rof,0,19
+Acquittal,96,rof,0,19
+Graceful Remedy,96,rof,0,19
+Symbol of Gezat,96,rof,0,19
+Unity of Gezat,96,rof,0,19
+Vow of Vitality,96,rof,0,19
+Word of Renewal,96,rof,0,19
+Ward of the Reverent,96,rof,0,19
+Yaulp XIII,96,rof,0,19
+Infusion of the Graceful,96,rof,9,19
+Shackle,97,rof,0,19
+Hand of Fervor,97,rof,0,19
+Divine Haven,97,rof,2,19
+Divine Interposition,97,rof,7,19
+Reverent Elixir,97,rof,0,19
+Mark of Tohan,97,rof,10,19
+Certitude,97,rof,0,19
+Castigation,97,rof,0,19
+Fifteenth Emblem,97,rof,11,19
+Unified Certitude,97,rof,0,19
+Ward of Indictment,97,rof,0,19
+Ward of Certitude,97,rof,9,19
+Anticipated Interposition,97,rof,0,19
+Hammer of Reverence,97,cotf,0,20
+Thwart Corruption,98,rof,0,19
+Reverent Light,98,rof,0,19
+Virtuous Intervention,98,rof,0,19
+Virtuous Intervention Strike,98,rof,0,19
+Virtuous Intervention Strike II,98,rof,0,19
+Virtuous Intervention Strike III,98,rof,0,19
+Issuance of Grace,98,rof,13,19
+Bastion of Vie,98,rof,0,19
+Promised Reformation,98,rof,12,19
+Sermon of Rebuke,98,rof,0,19
+Sound of Plangency,98,rof,6,19
+Vow of Vehemence,98,rof,0,19
+Glorified Ground,98,rof,0,19
+Syllable of Renewal,98,cotf,16,20
+Cleansed Blood,99,rof,0,19
+Tectonic Temblor,99,rof,3,19
+Chromacrush,99,rof,0,19
+Mark of the Zealot,99,rof,0,19
+Infallible Hammer of Reverence,99,rof,0,19
+Abrogate Corruption,99,rof,0,19
+Glorious Rebuke,99,rof,0,19
+Silent Order,99,rof,5,19
+Shining Bastion,99,rof,0,19
+Hand of Graceful Infusion,99,rof,9,19
+Cleansing Acquittal,99,cotf,0,20
+Armor of the Reverent,100,rof,0,19
+Unified Hand of Gezat,100,rof,0,19
+Olsif's Retort,100,rof,0,19
+Olsif's Channeled Mark,100,rof,0,19
+Olsif's Channeled Mark II,100,rof,0,19
+Olsif's Channeled Mark III,100,rof,0,19
+Olsif's Retort Effect,100,rof,0,19
+Olsif's Retort Effect II,100,rof,0,19
+Olsif's Retort Effect III,100,rof,0,19
+Reforming Splash,100,rof,1,19
+Fraught Renewal,100,rof,0,19
+Unified Hand of Certitude,100,rof,0,19
+Virtuous Contravention,100,rof,0,19
+Virtuous Contravention Heal,100,rof,0,19
+Virtuous Contravention Heal II,100,rof,0,19
+Virtuous Contravention Heal III,100,rof,0,19
+Virtuous Contravention Strike,100,rof,0,19
+Virtuous Contravention Strike II,100,rof,0,19
+Virtuous Contravention Strike III,100,rof,0,19
+Elixir of the Acquittal,100,rof,0,19
+Hand of Certitude,100,rof,0,19
+Rallied Bastion of Vie,100,rof,0,19
+Word of Reformation,100,rof,0,19
+Aura of the Reverent,100,rof,0,19
+Aura of Divinity,100,cotf,0,20
+Awecrush,101,tds,4,21
+Inspired Heal,101,tds,0,21
+Inspired Heal II,101,tds,0,21
+Inspired Heal III,101,tds,0,21
+Eradicate the Undead,101,tds,0,21
+Pacifying Glow,101,tds,0,21
+Benediction of Piety,101,tds,0,21
+Spiritual Remedy,101,tds,0,21
+Symbol of Nonia,101,tds,0,21
+Unity of Nonia,101,tds,0,21
+Vow of Vigor,101,tds,0,21
+Word of Convalescence,101,tds,0,21
+Ward of the Ardent,101,tds,0,21
+Yaulp XIV,101,tds,0,21
+Undying Life,101,tbm,17,22
+Divine Indemnity,102,tds,15,21
+Divine Indemnification,102,tds,7,21
+Ardent Elixir,102,tds,0,21
+Surety,102,tds,0,21
+Justice,102,tds,0,21
+Unified Surety,102,tds,0,21
+Ward of Censure,102,tds,0,21
+Ward of Surety,102,tds,9,21
+Anticipated Intercession,102,tbm,0,22
+Divine Response,102,eok,0,23
+Ardent Light,103,tds,0,21
+Mystical Intervention,103,tds,0,21
+Mystical Intervention Strike,103,tds,0,21
+Mystical Intervention Strike II,103,tds,0,21
+Mystical Intervention Strike III,103,tds,0,21
+Issuance of Spirit,103,tds,13,21
+Greater Ward of Vie,103,tds,0,21
+Promised Rehabilitation,103,tds,12,21
+Syllable of Convalescence,103,tds,16,21
+Sermon of Justice,103,tds,0,21
+Sound of Thunder,103,tds,6,21
+Vow of Virulence,103,tds,0,21
+Divine Alliance,103,eok,18,23
+Unblemished Blood,104,tds,0,21
+Tectonic Destruction,104,tds,3,21
+Chromabash,104,tds,0,21
+Mark of the Vicarum,104,tds,0,21
+Ardent Hammer of Zeal,104,tds,0,21
+Nullify Corruption,104,tds,0,21
+Glorious Judgment,104,tds,0,21
+Ardent Acquittal,104,tds,0,21
+Shining Bulwark,104,tds,0,21
+Silent Behest,104,tds,5,21
+Armor of the Ardent,105,tds,0,21
+Unified Hand of Nonia,105,tds,0,21
+Convalescent Splash,105,tds,1,21
+Fervid Renewal,105,tds,0,21
+Unified Hand of Surety,105,tds,0,21
+Ardent Contravention,105,tds,0,21
+Ardent Contravention Heal,105,tds,0,21
+Ardent Contravention Heal II,105,tds,0,21
+Ardent Contravention Heal III,105,tds,0,21
+Ardent Contravention Strike,105,tds,0,21
+Ardent Contravention Strike II,105,tds,0,21
+Ardent Contravention Strike III,105,tds,0,21
+Elixir of the Seas,105,tds,0,21
+Hand of Surety,105,tds,0,21
+Rallied Greater Ward of Vie,105,tds,0,21
+Word of Greater Reformation,105,tds,0,21
+Blood of the Vicarum,105,tbm,0,22
+Vicarum's Retort,105,eok,0,23
+Absolution,106,ros,0,24
+Awestrike,106,ros,4,24
+Inspired Heal Azia V,106,ros,0,24
+Inspired Heal Beza V,106,ros,0,24
+Inspired Heal Caza V,106,ros,0,24
+Repudiate the Undead,106,ros,0,24
+Mollifying Glow,106,ros,0,24
+Benediction of Sanctity,106,ros,0,24
+Merciful Remedy,106,ros,0,24
+Symbol of Emra,106,ros,0,24
+Unity of Emra,106,ros,0,24
+Vow of Vigilance,106,ros,0,24
+Word of Mending,106,ros,0,24
+Ward of the Merciful,106,ros,0,24
+Yaulp XV,106,ros,0,24
+Infusion of the Merciful,106,ros,9,24
+Dissident Blessing,106,tbl,17,26
+Sixteenth Serenity,107,ros,11,24
+Hammer of Repudiation,107,ros,0,24
+Hand of Sanctity,107,ros,0,24
+Divine Jurisdiction,107,ros,2,24
+Divine Imposition,107,ros,7,24
+Merciful Elixir,107,ros,0,24
+Assurance,107,ros,0,24
+Sanction,107,ros,0,24
+Unified Assurance,107,ros,0,24
+Ward of Condemnation,107,ros,0,24
+Ward of Assurance,107,ros,9,24
+Anticipated Intervention,107,tbl,0,26
+Endure Corruption,108,ros,0,24
+Merciful Light,108,ros,0,24
+Merciful Intervention,108,ros,0,24
+Merciful Intervention Strike,108,ros,0,24
+Merciful Intervention Strike II,108,ros,0,24
+Merciful Intervention Strike III,108,ros,0,24
+Issuance of Mercy,108,ros,13,24
+Greater Guard of Vie,108,ros,0,24
+Promised Remedy,108,ros,12,24
+Syllable of Mending,108,ros,16,24
+Sermon of Sanction,108,ros,0,24
+Sound of Wrath,108,ros,6,24
+Vow of Vengeance,108,ros,0,24
+Blessed Ground,108,ros,0,24
+Divine Reaction,108,tbl,0,26
+Expurgated Blood,109,ros,0,24
+Tectonic Eruption,109,ros,3,24
+Hand of Merciful Infusion,109,ros,9,24
+Chromaburst,109,ros,0,24
+Mark of Shandral,109,ros,0,24
+Unyielding Hammer of Zeal,109,ros,0,24
+Extricate Corruption,109,ros,0,24
+Unyielding Judgment,109,ros,0,24
+Merciful Acquittal,109,ros,0,24
+Shining Fortress,109,ros,0,24
+Silent Directive,109,ros,5,24
+Armor of the Merciful,110,ros,0,24
+Unified Hand of Emra,110,ros,0,24
+Mending Splash,110,ros,1,24
+Furial Renewal,110,ros,0,24
+Unified Hand of Assurance,110,ros,0,24
+Merciful Contravention,110,ros,0,24
+Merciful Contravention Heal,110,ros,0,24
+Merciful Contravention Heal II,110,ros,0,24
+Merciful Contravention Heal III,110,ros,0,24
+Merciful Contravention Strike,110,ros,0,24
+Merciful Contravention Strike II,110,ros,0,24
+Merciful Contravention Strike III,110,ros,0,24
+Elixir of Wulthan,110,ros,0,24
+Hand of Assurance,110,ros,0,24
+Rallied Greater Guard of Vie,110,ros,0,24
+Word of Greater Restoration,110,ros,0,24
+Curate's Retort,110,tbl,0,26
+Aweflash,111,tov,4,26
+Inspired Heal Azia VI,111,tov,0,26
+Inspired Heal Beza VI,111,tov,0,26
+Inspired Heal Caza VI,111,tov,0,26
+Obliterate the Undead,111,tov,0,26
+Placating Glow,111,tov,0,26
+Benediction of Reverence,111,tov,0,26
+Sincere Remedy,111,tov,0,26
+Symbol of Jorlleag,111,tov,0,26
+Unity of Jorlleag,111,tov,0,26
+Vow of Veracity,111,tov,0,26
+Word of Soothing,111,tov,0,26
+Ward of Sincerity,111,tov,0,26
+Yaulp XVI,111,tov,0,26
+Infusion of Sincerity,111,tov,9,26
+Seventeenth Rejuvenation,112,tov,11,26
+Hammer of Obliteration,112,tov,0,26
+Hand of Reverence,112,tov,0,26
+Divine Keep,112,tov,15,26
+Divine Intermediation,112,tov,7,26
+Sincere Elixir,112,tov,0,26
+Righteousness,112,tov,0,26
+Injunction,112,tov,0,26
+Unified Righteousness,112,tov,0,26
+Ward of Injunction,112,tov,0,26
+Ward of Righteousness,112,tov,9,26
+Sincere Light,113,tov,0,26
+Sincere Intervention,113,tov,0,26
+Sincere Intervention Strike,113,tov,0,26
+Sincere Intervention Strike II,113,tov,0,26
+Sincere Intervention Strike III,113,tov,0,26
+Issuance of Sincerity,113,tov,13,26
+Greater Protection of Vie,113,tov,0,26
+Promised Redemption,113,tov,12,26
+Syllable of Soothing,113,tov,16,26
+Sermon of Injunction,113,tov,0,26
+Sound of Rebuke,113,tov,6,26
+Vow of Vituperation,113,tov,0,26
+Purified Ground,113,tov,0,26
+Tectonic Frostheave,114,tov,3,26
+Hand of Sincere Infusion,114,tov,9,26
+Chromaflare,114,tov,0,26
+Mark of Wenglawks,114,tov,0,26
+Unyielding Hammer of Obliteration,114,tov,0,26
+Unyielding Censure,114,tov,0,26
+Sincere Acquittal,114,tov,0,26
+Shining Aegis,114,tov,0,26
+Silent Writ,114,tov,5,26
+Armor of Sincerity,115,tov,0,26
+Unified Hand of Jorlleag,115,tov,0,26
+Restoring Splash,115,tov,1,26
+Dire Renewal,115,tov,0,26
+Unified Hand of Righteousness,115,tov,0,26
+Sincere Contravention,115,tov,0,26
+Sincere Contravention Heal,115,tov,0,26
+Sincere Contravention Heal II,115,tov,0,26
+Sincere Contravention Heal III,115,tov,0,26
+Sincere Contravention Strike,115,tov,0,26
+Sincere Contravention Strike II,115,tov,0,26
+Sincere Contravention Strike III,115,tov,0,26
+Elixir of Transcendence,115,tov,0,26
+Hand of Righteousness,115,tov,0,26
+Rallied Greater Protection of Vie,115,tov,0,26
+Word of Greater Replenishment,115,tov,0,26

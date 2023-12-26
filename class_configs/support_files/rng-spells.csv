@@ -1,0 +1,571 @@
+SpellName,ClassLevel,Expansion,Timer,ExpansionNum
+Salve,1,god,0,7
+Glimpse,2,original,0,0
+Flame Lick,3,original,0,0
+Lull Animal,4,original,0,0
+Tangling Weeds,5,sol,0,3
+Snare,6,original,0,0
+Skin like Wood,7,original,0,0
+Minor Healing,8,original,0,0
+Endure Fire,9,original,0,0
+Dance of the Fireflies,10,original,0,0
+Hawk Eye,11,sol,0,3
+Feet like Cat,12,original,0,0
+Cure Poison,13,original,0,0
+Thistlecoat,13,original,0,0
+Burst of Fire,14,original,0,0
+Camouflage,14,original,0,0
+Grasping Roots,15,original,0,0
+Invoke Lightning,15,original,0,0
+Ward Summoned,16,original,0,0
+Panic Animal,16,original,0,0
+Bind Sight,17,original,0,0
+Firefist,17,original,0,0
+Endure Cold,18,original,0,0
+Ignite,19,original,0,0
+Light Healing,20,original,0,0
+Enduring Breath,20,original,0,0
+Skin like Rock,21,original,0,0
+Cure Disease,22,original,0,0
+Harmony,22,original,0,0
+Shield of Thistles,24,original,0,0
+Stinging Swarm,25,original,0,0
+Strength of Earth,26,original,0,0
+Eyes of the Cat,27,original,0,0
+Spirit of Wolf,28,original,0,0
+Riftwind's Protection,29,sol,0,3
+Flaming Arrow,29,pop,1,4
+Cancel Magic,30,original,0,0
+Barbcoat,30,original,0,0
+Calm Animal,31,original,0,0
+Healing,32,original,0,0
+See Invisible,32,original,0,0
+Dismiss Summoned,33,original,0,0
+Bramblecoat,34,original,0,0
+Levitate,35,original,0,0
+Call of Sky,36,sov,0,2
+Careless Lightning,37,original,0,0
+Nature's Precision,37,sol,0,3
+Skin like Steel,38,original,0,0
+Harmony of Nature,39,pop,0,4
+Burning Arrow,39,pop,4,4
+Swarm of Pain,40,loy,0,5
+Spirit of the Shrew,41,ldon,0,6
+Spikecoat,42,original,0,0
+Shield of Brambles,43,original,0,0
+Greater Healing,44,original,0,0
+Immolate,44,original,0,0
+Ensnaring Roots,45,original,0,0
+Resist Fire,46,original,0,0
+Superior Camouflage,47,original,0,0
+Wolf Form,48,original,0,0
+Force of Nature,48,sol,0,3
+Call of Flame,49,original,1,0
+Pack Shrew,49,ldon,0,6
+Jolt,50,rok,0,1
+Call of Earth,50,sov,0,2
+Resistant Discipline,51,original,5,0
+Ensnare,51,original,0,0
+Strength of Nature,51,sov,0,2
+Tangle,51,sol,0,3
+Firestrike,52,original,0,0
+Falcon Eye,52,sol,0,3
+Icewind,52,loy,2,5
+Storm Strength,53,original,0,0
+Fearless Discipline,54,original,5,0
+Drones of Doom,54,original,0,0
+Skin like Diamond,54,original,0,0
+Jolting Blades,54,sol,0,3
+Resist Cold,55,original,0,0
+Chloroplast,55,original,0,0
+Cinder Jolt,55,sov,0,2
+Call of Fire,55,sov,0,2
+Trueshot Discipline,55,sov,2,2
+Fire Swarm,55,ldon,0,6
+Greater Wolf Form,56,original,0,0
+Chill Sight,56,original,0,0
+Mark of the Predator,56,sol,0,3
+Nullify Magic,58,original,0,0
+Shield of Spikes,58,original,0,0
+Eagle Eye,58,sol,0,3
+Call of Ice,58,ldon,0,6
+Skin like Nature,59,original,0,0
+Dustdevil,59,rok,0,1
+Enveloping Roots,60,original,0,0
+Thorncoat,60,original,0,0
+Call of the Predator,60,sov,0,2
+Weapon Shield Discipline,60,sov,3,2
+Warder's Protection,60,sol,0,3
+Counteract Poison,61,original,0,0
+Counteract Disease,61,original,0,0
+Annul Magic,61,rok,0,1
+Exile Summoned,61,rok,0,1
+Circle of Winter,61,rok,0,1
+Entangle,61,sol,0,3
+Earthen Embrace,61,don,0,9
+Drifting Death,62,original,0,0
+Shield of Thorns,62,original,0,0
+Chloroblast,62,sov,0,2
+Call of the Rathe,62,pop,0,4
+Strength of Tunare,62,pop,0,4
+Circle of Summer,63,rok,0,1
+Bladecoat,63,rok,0,1
+Earthen Roots,63,pop,0,4
+Frozen Wind,63,pop,3,4
+Regrowth,64,rok,0,1
+Nature's Rebuke,64,pop,0,4
+Spirit of the Predator,64,pop,0,4
+Brushfire,64,pop,4,4
+Feral Form,64,ldon,0,6
+Natureskin,65,rok,0,1
+Spirit of Eagle,65,sol,0,3
+Mask of the Stalker,65,sol,0,3
+Protection of the Wild,65,pop,0,4
+Cry of Thunder,65,pop,0,4
+Sylvan Light,65,god,0,7
+Sylvan Burn,65,god,1,7
+Sylvan Call,65,god,0,7
+Ancient Burning Chaos,65,god,4,7
+Nature Veil,66,oom,0,8
+Displace Summoned,66,oom,0,8
+Shield of Briar,66,oom,0,8
+Locust Swarm,67,oom,0,8
+Sylvan Water,67,oom,0,8
+Guard of the Earth,67,oom,0,8
+Strength of the Hunter,67,oom,0,8
+Briarcoat,68,oom,0,8
+Frost Wind,68,oom,2,8
+Hunter's Vigor,68,oom,0,8
+Tranquility of the Glade,68,oom,0,8
+Hail of Arrows,68,dod,5,10
+Nature's Denial,69,oom,0,8
+Howl of the Predator,69,oom,0,8
+Hearth Embers,69,oom,1,8
+Nature's Balance,69,oom,0,8
+Earthen Shackles,69,don,0,9
+Warder's Wrath,69,dod,2,10
+Onyx Skin,70,oom,0,8
+Ward of the Hunter,70,oom,0,8
+Call of Lightning,70,oom,0,8
+Ancient North Wind,70,oom,3,8
+Scorched Earth,70,por,4,11
+Elddar's Grasp,70,por,0,11
+Shield of Needles,71,tss,0,12
+Wasp Swarm,71,tss,0,12
+Sunderock Springwater,71,tss,0,12
+Drifting Fog,71,tss,0,12
+Nature's Entropy,71,tbs,0,13
+Jolting Kicks,72,tss,9,12
+Strength of the Forest Stalker,72,tss,0,12
+Icefall Chill,72,tss,2,12
+Potamide Salve,73,tss,0,12
+Snarl of the Predator,73,tss,0,12
+Volcanic Ash,73,tss,1,12
+Vinelash Cascade,73,tbs,17,13
+Summer's Dew Burn,74,tss,0,12
+Summer's Dew Burn II,74,tss,0,12
+Summer's Dew Burn III,74,tss,0,12
+Summer's Dew,74,tss,0,12
+Summer's Dew Splash,74,tss,0,12
+Summer's Dew Splash II,74,tss,0,12
+Summer's Dew Splash III,74,tss,0,12
+Obsidian Skin,74,tss,0,12
+Eyes of the Owl,74,tss,0,12
+Heartshot,75,tss,6,12
+Protection of the Minohten,75,tss,0,12
+Consumed by the Hunt,75,tss,0,12
+Thundering Blades,75,tbs,0,13
+Shield of Spurs,76,sof,0,14
+Hornet Swarm,76,sof,0,14
+Dragonscale Aquifer,76,sof,0,14
+Drifting Haze,76,sof,0,14
+Skylight Sagacity,76,sof,0,14
+Eradicate Poison,76,rof,0,19
+Eradicate Disease,76,rof,0,19
+Jolting Snapkicks,77,sof,9,14
+Strength of the Gladewalker,77,sof,0,14
+Rimefall Bite,77,sof,3,14
+Cloak of Scales,77,sof,0,14
+Jolting Strikes,77,sof,0,14
+Potamide Balm,78,sof,0,14
+Gnarl of the Predator,78,sof,0,14
+Galvanic Ash,78,sof,4,14
+Deadfall,78,sof,0,14
+Summer's Viridity,79,sof,0,14
+Ravenscale,79,sof,0,14
+Eyes of the Peregrine,79,sof,0,14
+Arc of Arrows,79,sof,5,14
+Heartsting,80,sof,6,14
+Protection of the Kirkoten,80,sof,0,14
+Deafening Blades,80,sof,0,14
+Aimshot Discipline,80,sof,2,14
+Carve Whistle,81,sod,0,15
+Shield of Dryspines,81,sod,0,15
+Beetle Swarm,81,sod,0,15
+Oceangreen Aquifer,81,sod,0,15
+Drifting Mist,81,sod,0,15
+Jolting Frontkicks,82,sod,9,15
+Strength of the Tracker,82,sod,0,15
+Windwhip Bite,82,sod,2,15
+Cloak of Feathers,82,sod,0,15
+Jolting Swings,82,sod,0,15
+Burynai Balm,83,sod,0,15
+Yowl of the Predator,83,sod,0,15
+Cataclysm Ash,83,sod,1,15
+Heartpierce,83,sod,0,15
+Spinecoat,83,sod,0,15
+Swarm of Bees,83,uf,0,16
+Angry Bee Swarm,83,uf,0,16
+Cloud of Protective Bees,83,uf,0,16
+Summer's Mist,84,sod,0,15
+Summer's Mist Burn,84,sod,0,15
+Summer's Mist Burn II,84,sod,0,15
+Summer's Mist Burn III,84,sod,0,15
+Summer's Mist Splash,84,sod,0,15
+Summer's Mist Splash II,84,sod,0,15
+Summer's Mist Splash III,84,sod,0,15
+Mottlescale,84,sod,0,15
+Eyes of the Nocturnal,84,sod,0,15
+Barrage of Arrows,84,sod,5,15
+Devastating Blades,84,sod,0,15
+Heartshear,85,sod,6,15
+Protection of the Paw,85,sod,0,15
+Crackling Blades,85,sod,0,15
+Sureshot Discipline,85,sod,2,15
+Enraging Shot,85,sod,8,15
+Flusterbolt,85,sod,0,15
+Storm of Arrows,85,uf,5,16
+Focused Storm of Arrows,85,uf,5,16
+Spirit of Falcons,85,eok,0,23
+Respite,86,hot,13,17
+Called Shots,86,hot,7,17
+Drifting Cloud,86,hot,0,17
+Purefont,86,hot,0,17
+Scarab Swarm,86,hot,0,17
+Shield of Nettlespikes,86,hot,0,17
+Cloak of Quills,87,hot,0,17
+Jolting Hook Kicks,87,hot,9,17
+Jolting Edges,87,hot,0,17
+Strength of the Thicket Stalker,87,hot,0,17
+Biting Wind,87,hot,3,17
+Swarm of Hornets,88,hot,0,17
+Hornet Swarm,88,hot,0,17
+Hornet Swarm II,88,hot,0,17
+Hornet Swarm III,88,hot,0,17
+Cloud of Guardian Hornets,88,hot,0,17
+Cloud of Guardian Hornets II,88,hot,0,17
+Cloud of Guardian Hornets III,88,hot,0,17
+Lucid Balm,88,hot,0,17
+Burning Ash,88,hot,4,17
+Heartrend,88,hot,0,17
+Lingering Cloud,88,hot,0,17
+Roar of the Predator,88,hot,0,17
+Quillcoat,88,hot,0,17
+Stalker's Vigor,88,hot,0,17
+Desperate Deluge,89,hot,9,17
+Devastating Edges,89,hot,0,17
+Eyes of the Wolf,89,hot,0,17
+Fusillade of Arrows,89,hot,5,17
+Mottlecoat,89,hot,0,17
+Summer's Storm,89,hot,0,17
+Summer's Storm Burn,89,hot,0,17
+Summer's Storm Burn II,89,hot,0,17
+Summer's Storm Burn III,89,hot,0,17
+Summer's Storm Splash,89,hot,0,17
+Summer's Storm Splash II,89,hot,0,17
+Summer's Storm Splash III,89,hot,0,17
+Blusterbolt,90,hot,0,17
+Crackling Edges,90,hot,0,17
+Heartslice,90,hot,6,17
+Protection of the Vale,90,hot,0,17
+Bullseye Discipline,90,hot,2,17
+Infuriating Shot,90,hot,8,17
+Invigorated by the Hunt,90,hot,0,17
+Invigorated Effect,90,hot,0,17
+Invigorated Effect II,90,hot,0,17
+Invigorated Effect III,90,hot,0,17
+Tempest of Arrows,90,hot,5,17
+Focused Tempest of Arrows,90,hot,5,17
+Reprieve,91,voa,13,18
+Announced Shots,91,voa,7,18
+Drifting Veil,91,voa,0,18
+Grasping Nettlecoat,91,voa,0,18
+Veil of Alaris,91,voa,0,18
+Purespring,91,voa,0,18
+Vespid Swarm,91,voa,0,18
+Shield of Bramblespikes,91,voa,0,18
+Cloak of Burrs,92,voa,0,18
+Enraging Crescent Kicks,92,voa,9,18
+Jolting Crescent Kicks,92,voa,9,18
+Jolting Impact,92,voa,0,18
+Strength of the Gladetender,92,voa,0,18
+Rime-Laced Wind,92,voa,2,18
+Swarm of Sand Wasps,93,voa,0,18
+Sand Wasp Swarm,93,voa,0,18
+Sand Wasp Swarm II,93,voa,0,18
+Sand Wasp Swarm III,93,voa,0,18
+Cloud of Guardian Sand Wasps,93,voa,0,18
+Cloud of Guardian Sand Wasps II,93,voa,0,18
+Cloud of Guardian Sand Wasps III,93,voa,0,18
+Wild Balm,93,voa,0,18
+Beastwood Ash,93,voa,1,18
+Heartrip,93,voa,0,18
+Lingering Veil,93,voa,0,18
+Cry of the Predator,93,voa,0,18
+Burrcoat,93,voa,0,18
+Gladewalker's Vigor,93,voa,0,18
+Desperate Downpour,94,voa,9,18
+Devastating Slashes,94,voa,0,18
+Eyes of the Raptor,94,voa,0,18
+Swarm of Arrows,94,voa,5,18
+Shared Cloak of Burrs,94,voa,0,18
+Shadowcoat,94,voa,0,18
+Summer's Squall,94,voa,0,18
+Summer's Squall Burn,94,voa,0,18
+Summer's Squall Burn II,94,voa,0,18
+Summer's Squall Burn III,94,voa,0,18
+Summer's Squall Splash,94,voa,0,18
+Summer's Squall Splash II,94,voa,0,18
+Summer's Squall Splash III,94,voa,0,18
+Deafening Edges,95,voa,0,18
+Heartslash,95,voa,6,18
+Protection of the Copse,95,voa,0,18
+Provoking Shot,95,voa,8,18
+Galvanized by the Hunt,95,voa,0,18
+Galvanized Effect,95,voa,0,18
+Galvanized Effect II,95,voa,0,18
+Galvanized Effect III,95,voa,0,18
+Arrow Swarm,95,voa,5,18
+Focused Arrow Swarm,95,voa,5,18
+Rest,96,rof,13,19
+Forecasted Shots,96,rof,7,19
+Drifting Shadow,96,rof,0,19
+Arbor Veil,96,rof,0,19
+Cloudburst,96,rof,0,19
+Dreadbeetle Swarm,96,rof,0,19
+Shield of Nettlespines,96,rof,0,19
+Storm of Blades,96,cotf,6,20
+Cloak of Spurs,97,rof,0,19
+Enraging Heel Kicks,97,rof,9,19
+Jolting Heel Kicks,97,rof,9,19
+Jolting Shock,97,rof,0,19
+Strength of the Bosquestalker,97,rof,0,19
+Bitter Wind,97,rof,3,19
+Windblast Boon,97,rof,11,19
+Ro's Burning Cloak,97,cotf,0,20
+Vinelash Assault,98,rof,17,19
+Swarm of Vespines,98,rof,0,19
+Vespine Swarm,98,rof,0,19
+Vespine Swarm II,98,rof,0,19
+Vespine Swarm III,98,rof,0,19
+Cloud of Guardian Vespines,98,rof,0,19
+Cloud of Guardian Vespines II,98,rof,0,19
+Cloud of Guardian Vespines III,98,rof,0,19
+Herbal Balm,98,rof,0,19
+Vileoak Ash,98,rof,4,19
+Heartspike,98,rof,0,19
+Lingering Shadow,98,rof,0,19
+Shout of the Predator,98,rof,0,19
+Spurcoat,98,rof,0,19
+Bosquestalker's Vigor,98,rof,0,19
+Ashcloud Boon,98,rof,11,19
+Focused Storm of Blades,98,cotf,6,20
+Desperate Drenching,99,rof,9,19
+Devastating Impact,99,rof,0,19
+Eyes of the Howler,99,rof,0,19
+Squall of Arrows,99,rof,5,19
+Shared Cloak of Spurs,99,rof,0,19
+Shadowscale,99,rof,0,19
+Summer's Gale,99,rof,0,19
+Summer's Gale Burn,99,rof,0,19
+Summer's Gale Burn II,99,rof,0,19
+Summer's Gale Burn III,99,rof,0,19
+Summer's Gale Splash,99,rof,0,19
+Summer's Gale Splash II,99,rof,0,19
+Summer's Gale Splash III,99,rof,0,19
+Deafening Weapons,100,rof,0,19
+Bosquestalker's Discipline,100,rof,2,19
+Heartcarve,100,rof,6,19
+Protection of the Bosque,100,rof,0,19
+Angering Shot,100,rof,8,19
+Inspired by the Hunt,100,rof,0,19
+Inspired Effect,100,rof,0,19
+Inspired Effect II,100,rof,0,19
+Inspired Effect III,100,rof,0,19
+Rain of Arrows,100,rof,5,19
+Focused Rain of Arrows,100,rof,5,19
+Reflexive Bladespurs,100,rof,19,19
+Bosquetender's Unity,100,cotf,0,20
+Shout of the Bosquestalker,100,cotf,0,20
+Pureshot Discipline,100,cotf,2,20
+Breather,101,tds,13,21
+Anticipated Shots,101,tds,7,21
+Drifting Darkness,101,tds,0,21
+Shimmering Veil,101,tds,0,21
+Cloudfont,101,tds,0,21
+Blisterbeetle Swarm,101,tds,0,21
+Shield of Nettlespears,101,tds,0,21
+Squall of Blades,101,tds,6,21
+Dichotomic Fusillade,101,tbm,19,22
+Cloak of Nettlespears,102,tds,0,21
+Enraging Cut Kicks,102,tds,9,21
+Jolting Cut Kicks,102,tds,9,21
+Jolting Swords,102,tds,0,21
+Strength of the Copsestalker,102,tds,0,21
+Frozen Wind,102,tds,2,21
+Bellow of the Predator,102,tds,0,21
+Lingering Darkness,102,tds,0,21
+Windgale Boon,102,tds,11,21
+Swarm of Glistenwings,103,tds,0,21
+Glistenwing Swarm,103,tds,0,21
+Glistenwing Swarm II,103,tds,0,21
+Glistenwing Swarm III,103,tds,0,21
+Cloud of Guardian Glistenwings,103,tds,0,21
+Cloud of Guardian Glistenwings II,103,tds,0,21
+Cloud of Guardian Glistenwings III,103,tds,0,21
+Kromtus Balm,103,tds,0,21
+Wildfire Ash,103,tds,1,21
+Nettlespear Coat,103,tds,0,21
+Copsestalker's Vigor,103,tds,0,21
+Wildfire Boon,103,tds,11,21
+Focused Squall of Blades,103,eok,6,23
+Bosquestalker's Alliance,103,eok,20,23
+Silent Shot,103,eok,8,23
+Desperate Dousing,104,tds,9,21
+Devastating Swords,104,tds,0,21
+Eyes of the Harrier,104,tds,0,21
+Cyclone of Arrows,104,tds,5,21
+Ravencoat,104,tds,0,21
+Summer's Cyclone,104,tds,0,21
+Summer's Cyclone Burn,104,tds,0,21
+Summer's Cyclone Burn II,104,tds,0,21
+Summer's Cyclone Burn III,104,tds,0,21
+Summer's Cyclone Splash,104,tds,0,21
+Summer's Cyclone Splash II,104,tds,0,21
+Summer's Cyclone Splash III,104,tds,0,21
+Shout of the Copsestalker,104,tds,0,21
+Roaring Weapons,105,tds,0,21
+Copsestalker's Discipline,105,tds,2,21
+Heartsplit,105,tds,6,21
+Protection of the Forest,105,tds,0,21
+Energized by the Hunt,105,tds,0,21
+Energized Effect,105,tds,0,21
+Energized Effect II,105,tds,0,21
+Energized Effect III,105,tds,0,21
+Arrowrain,105,tds,5,21
+Focused Arrowrain,105,tds,5,21
+Copsestalker's Unity,105,tds,0,21
+Copsestalker's Enrichment,105,tbm,0,22
+Reflexive Nettlespears,105,eok,19,23
+Hiatus,106,ros,13,24
+Foreseen Shots,106,ros,7,24
+Drifting Smoke,106,ros,0,24
+Vaporous Veil,106,ros,0,24
+Wellspring,106,ros,0,24
+Bonecrawler Swarm,106,ros,0,24
+Shield of Needlebarbs,106,ros,0,24
+Gale of Blades,106,ros,6,24
+Dissident Fusillade,106,tbl,19,26
+Lavastorm Cloak,107,ros,0,24
+Cloak of Needlebarbs,107,ros,0,24
+Enraging Wheel Kicks,107,ros,9,24
+Jolting Wheel Kicks,107,ros,9,24
+Jolting Steel,107,ros,0,24
+Strength of the Wildstalker,107,ros,0,24
+Frigid Wind,107,ros,3,24
+Wail of the Predator,107,ros,0,24
+Lingering Smoke,107,ros,0,24
+Windshear Boon,107,ros,11,24
+Swarm of Polybiads,108,ros,0,24
+Polybiad Swarm,108,ros,0,24
+Polybiad Swarm II,108,ros,0,24
+Polybiad Swarm III,108,ros,0,24
+Cloud of Guardian Polybiads,108,ros,0,24
+Cloud of Guardian Polybiads II,108,ros,0,24
+Cloud of Guardian Polybiads III,108,ros,0,24
+Fereth Balm,108,ros,0,24
+Skyfire Ash,108,ros,4,24
+Needlebarb Coat,108,ros,0,24
+Wildstalker's Vigor,108,ros,0,24
+Skyfire Boon,108,ros,11,24
+Wildstalker's Covenant,108,tbl,20,26
+Shared Cloak of Needlebarbs,109,ros,0,24
+Desperate Dewcloud,109,ros,9,24
+Devastating Steel,109,ros,0,24
+Eyes of the Sabertooth,109,ros,0,24
+Gale of Arrows,109,ros,5,24
+Blackscale,109,ros,0,24
+Summer's Tempest,109,ros,0,24
+Summer's Tempest Burn,109,ros,0,24
+Summer's Tempest Burn II,109,ros,0,24
+Summer's Tempest Burn III,109,ros,0,24
+Summer's Tempest Splash,109,ros,0,24
+Summer's Tempest Splash II,109,ros,0,24
+Summer's Tempest Splash III,109,ros,0,24
+Shout of the Wildstalker,109,ros,0,24
+Focused Gale of Blades,109,tbl,6,26
+Roaring Blades,110,ros,0,24
+Wildstalker's Discipline,110,ros,2,24
+Heartcleave,110,ros,6,24
+Protection of the Woodlands,110,ros,0,24
+Spurred by the Hunt,110,ros,0,24
+Spurred Effect,110,ros,0,24
+Spurred Effect II,110,ros,0,24
+Spurred Effect III,110,ros,0,24
+Arrowgale,110,ros,5,24
+Focused Arrowgale,110,ros,5,24
+Wildstalker's Unity,110,ros,0,24
+Wildstalker's Enrichment,110,tbl,0,26
+Relax,111,tov,13,26
+Marked Shots,111,tov,7,26
+Drifting Snowshower,111,tov,0,26
+Frostveil,111,tov,0,26
+Meltwater Spring,111,tov,0,26
+Ice Burrower Swarm,111,tov,0,26
+Shield of Rimespurs,111,tov,0,26
+Blizzard of Blades,111,tov,6,26
+Outrider's Ever-Burning Cloak,112,tov,0,26
+Cloak of Rimespurs,112,tov,0,26
+Enraging Axe Kicks,112,tov,9,26
+Jolting Axe Kicks,112,tov,9,26
+Jolting Velium,112,tov,0,26
+Strength of the Arbor Stalker,112,tov,0,26
+Restless Wind,112,tov,2,26
+Frostroar of the Predator,112,tov,0,26
+Lingering Snowshower,112,tov,0,26
+Mistral Boon,112,tov,11,26
+Swarm of Hyperboreads,113,tov,0,26
+Hyperboread Swarm,113,tov,0,26
+Hyperboread Swarm II,113,tov,0,26
+Hyperboread Swarm III,113,tov,0,26
+Cloud of Guardian Hyperboreads,113,tov,0,26
+Cloud of Guardian Hyperboreads II,113,tov,0,26
+Cloud of Guardian Hyperboreads III,113,tov,0,26
+Wakening Balm,113,tov,0,26
+Pyroclastic Ash,113,tov,1,26
+Rimespur Coat,113,tov,0,26
+Arbor Stalker's Vigor,113,tov,0,26
+Pyroclastic Boon,113,tov,11,26
+Shared Cloak of Rimespurs,114,tov,0,26
+Desperate Meltwater,114,tov,9,26
+Devastating Velium,114,tov,0,26
+Eyes of the Visionary,114,tov,0,26
+Blizzard of Arrows,114,tov,5,26
+Obsidian Coat,114,tov,0,26
+Summer's Sleet,114,tov,0,26
+Summer's Sleet Burn,114,tov,0,26
+Summer's Sleet Burn II,114,tov,0,26
+Summer's Sleet Burn III,114,tov,0,26
+Summer's Sleet Splash,114,tov,0,26
+Summer's Sleet Splash II,114,tov,0,26
+Summer's Sleet Splash III,114,tov,0,26
+Shout of the Arbor Stalker,114,tov,0,26
+Howling Blades,115,tov,0,26
+Arbor Stalker's Discipline,115,tov,2,26
+Heartsunder,115,tov,6,26
+Protection of the Wakening Land,115,tov,0,26
+Provoked by the Hunt,115,tov,0,26
+Provoked Effect,115,tov,0,26
+Provoked Effect II,115,tov,0,26
+Provoked Effect III,115,tov,0,26
+Focused Blizzard of Arrows,115,tov,5,26
