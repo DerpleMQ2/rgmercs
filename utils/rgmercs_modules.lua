@@ -1,3 +1,5 @@
+local RGMercsLogger  = require("rgmercs.utils.rgmercs_logger")
+
 local Modules = { _version = '0.1a', author = 'Derple' }
 Modules.__index = Modules
 
@@ -6,6 +8,7 @@ function Modules.load()
     local newModules = setmetatable({
         modules = {
             Basic = require("modules.basic").New(),
+            Chase = require("modules.chase").New(),
             SHD   = require("modules.shd").New(),
         }
     }, Modules)
@@ -24,6 +27,7 @@ function Modules:execModule(m, fn, ...)
             return
         end
     end
+    RGMercsLogger.log_error("\arModule: \at%s\ar not found!", m)
 end
 
 function Modules:execAll(fn, ...)

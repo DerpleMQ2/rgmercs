@@ -146,6 +146,11 @@ local script_actor = RGMercUtils.Actors.register(function(message)
     end
 end)
 
+-- Binds
+mq.bind("/chaseon", function()
+    RGMercModules:execModule("Chase", "ChaseOn")
+end)
+
 while not terminate do
     Main()
     mq.doevents()
