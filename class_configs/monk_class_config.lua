@@ -1,3 +1,6 @@
+local mq             = require('mq')
+local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+
 return {
     ['Modes'] = {
         ['Tank'] = 0,
@@ -170,18 +173,140 @@ return {
         },
     },
     ['Rotations'] = {
-        ['Live'] = {
-            ['DPS'] = 1,
-            ['Burn'] = 2,
-            ['Downtime'] = 3,
+        ['Tank'] = {
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = {},
+                },
+                ['Debuff'] = {
+                    [1] = {},
+                },
+                ['Heal'] = {
+                    [1] = {},
+                },
+                ['DPS'] = {
+                    [1] = {},
+                },
+                ['Downtime'] = {
+                    [1] = {},
+                },
+            },
+            ['Spells'] = {
+                [1] = { name="", gem=1 },
+                [2] = { name="", gem=2 },
+                [3] = { name="", gem=3},
+                [4] = { name="", gem=4},
+                [5] = { name="", gem=5 },
+                [6] = { name="", gem=6 },
+                [7] = { name="", gem=7 },
+                [8] = { name="", gem=8 },
+                [9] = { name="", gem=9 },
+                [10] = { name="", gem=10 },
+                [11] = { name="", gem=11 },
+                [12] = { name="", gem=12 },
+            },
         },
-        ['TLP'] = {
-            ['DPS'] = 1,
-            ['Burn'] = 2,
-            ['Downtime'] = 3,
+        ['DPS'] = {
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = {},
+                },
+                ['Debuff'] = {
+                    [1] = {},
+                },
+                ['Heal'] = {
+                    [1] = {},
+                },
+                ['DPS'] = {
+                    [1] = {},
+                },
+                ['Downtime'] = {
+                    [1] = {},
+                },
+            },
+            ['Spells'] = {
+                [1] = { name="", gem=1 },
+                [2] = { name="", gem=2 },
+                [3] = { name="", gem=3},
+                [4] = { name="", gem=4},
+                [5] = { name="", gem=5 },
+                [6] = { name="", gem=6 },
+                [7] = { name="", gem=7 },
+                [8] = { name="", gem=8 },
+                [9] = { name="", gem=9 },
+                [10] = { name="", gem=10 },
+                [11] = { name="", gem=11 },
+                [12] = { name="", gem=12 },
+            },
         },
-    },
-    ['DefaultConfig'] = {
-        ['Mode'] = 'DPS',
+        ['Healer'] = {
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = {},
+                },
+                ['Debuff'] = {
+                    [1] = {},
+                },
+                ['Heal'] = {
+                    [1] = {},
+                },
+                ['DPS'] = {
+                    [1] = {},
+                },
+                ['Downtime'] = {
+                    [1] = {},
+                },
+            },
+            ['Spells'] = {
+                [1] = { name="", gem=1 },
+                [2] = { name="", gem=2 },
+                [3] = { name="", gem=3},
+                [4] = { name="", gem=4},
+                [5] = { name="", gem=5 },
+                [6] = { name="", gem=6 },
+                [7] = { name="", gem=7 },
+                [8] = { name="", gem=8 },
+                [9] = { name="", gem=9 },
+                [10] = { name="", gem=10 },
+                [11] = { name="", gem=11 },
+                [12] = { name="", gem=12 },
+            },
+        },
+        ['Hybrid'] = {
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = {},
+                },
+                ['Debuff'] = {
+                    [1] = {},
+                },
+                ['Heal'] = {
+                    [1] = {},
+                },
+                ['DPS'] = {
+                    [1] = {},
+                },
+                ['Downtime'] = {
+                    [1] = {},
+                },
+            },
+            ['Spells'] = {
+                [1] = { name="", gem=1 },
+                [2] = { name="", gem=2 },
+                [3] = { name="", gem=3},
+                [4] = { name="", gem=4},
+                [5] = { name="", gem=5 },
+                [6] = { name="", gem=6 },
+                [7] = { name="", gem=7 },
+                [8] = { name="", gem=8 },
+                [9] = { name="", gem=9 },
+                [10] = { name="", gem=10 },
+                [11] = { name="", gem=11 },
+                [12] = { name="", gem=12 },
+            },
+        },
+        ['DefaultConfig'] = {
+            ['Mode'] = '1',
+        },
     },
 }

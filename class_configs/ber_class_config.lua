@@ -1,3 +1,6 @@
+local mq             = require('mq')
+local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+
 return {
     ['Modes'] = {
         [1] = 'Tank',
@@ -13,15 +16,15 @@ return {
     },
     ['AbilitySets'] = {
         ['endregen'] = {
-            [1] = {SpellName = "Second Wind"                   ,        ClassLevel =  72 ,            ExpansionNum = 13 ,Timer = 13} ,
-            [2] = {SpellName = "Third Wind"                    ,        ClassLevel =  77 ,            ExpansionNum = 14 ,Timer = 13} ,
-            [3] = {SpellName = "Fourth Wind"                   ,        ClassLevel =  82 ,            ExpansionNum = 15 ,Timer = 13} ,
-            [4] = {SpellName = "Respite"                       ,        ClassLevel =  86 ,            ExpansionNum = 17 ,Timer = 13} ,
-            [5] = {SpellName = "Reprieve"                      ,        ClassLevel =  91 ,            ExpansionNum = 18 ,Timer = 13} ,
-            [6] = {SpellName = "Rest"                          ,        ClassLevel =  96 ,            ExpansionNum = 19 ,Timer = 13} ,
-            [7] = {SpellName = "Breather"                      ,        ClassLevel = 101 ,            ExpansionNum = 21 ,Timer = 13} ,
-            [8] = {SpellName = "Hiatus"                        ,        ClassLevel = 106 ,            ExpansionNum = 24 ,Timer = 13} ,
-            [9] = {SpellName = "Relax"                         ,        ClassLevel = 111 ,            ExpansionNum = 26 ,Timer = 13} ,
+            [1] = "Second Wind",
+            [2] = "Third Wind",
+            [3] = "Fourth Wind",
+            [4] = "Respite",
+            [5] = "Reprieve",
+            [6] = "Rest",
+            [7] = "Breather",
+            [8] = "Hiatus",
+            [9] = "Relax",
             [10] = "Night's Calming",
             [11] = "Convalesce",
         },

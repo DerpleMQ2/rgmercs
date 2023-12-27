@@ -22,7 +22,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log("Basic Combat Module Loading Settings for: %s.", RGMercConfig.CurLoadedChar)
+    RGMercsLogger.log_info("Basic Combat Module Loading Settings for: %s.", RGMercConfig.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
@@ -38,7 +38,7 @@ function Module:LoadSettings()
 end
 
 function Module.New()
-    RGMercsLogger.log("Basic Combat Module Loaded.")
+    RGMercsLogger.log_info("Basic Combat Module Loaded.")
     local newModule = setmetatable({ settings = {} }, Module)
 
     newModule:LoadSettings()
@@ -60,7 +60,7 @@ function Module:GiveTime()
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log("Basic Combat Module UnLoaded.")
+    RGMercsLogger.log_info("Basic Combat Module UnLoaded.")
 end
 
 return Module

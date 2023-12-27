@@ -3,10 +3,11 @@ local mq = require('mq')
 
 local actions = {}
 
-local logLeader = '\ar[\agRGMercs\ar]\aw >>>'
+local logLeaderStart = '\ar[\agRGMercs'
+local logLeaderEnd   = '\ar]\aw >>>'
 
 --- @type number
-local logLevel = 2
+local logLevel = 3
 
 function actions.get_log_level() return logLevel end
 
@@ -19,37 +20,37 @@ function actions.log_error(output, ...)
 
 	if (... ~= nil) then output = string.format(output, ...) end
 	mq.parse(string.format('/mqlog [%s] %s', mq.TLO.Me.Name(), output))
-	printf('%s \ar %s', logLeader, output)
+	printf('%s:\arERROR\ax%s \aw%s', logLeaderStart, logLeaderEnd, output)
 end
 
-function actions.log(output, ...)
+function actions.log_info(output, ...)
 	if (logLevel < 1) then
 		return
 	end
 
 	if (... ~= nil) then output = string.format(output, ...) end
 	mq.parse(string.format('/mqlog [%s] %s', mq.TLO.Me.Name(), output))
-	printf('%s \aw %s', logLeader, output)
+	printf('%s:\agINFO\ax%s \aw%s', logLeaderStart, logLeaderEnd, output)
 end
 
-function actions.log2(output, ...)
+function actions.log_warning(output, ...)
 	if (logLevel < 2) then
 		return
 	end
 
 	if (... ~= nil) then output = string.format(output, ...) end
 	mq.parse(string.format('/mqlog [%s] %s', mq.TLO.Me.Name(), output))
-	printf('%s \ao %s', logLeader, output)
+	printf('%s:\ayWARN\ax%s \aw%s', logLeaderStart, logLeaderEnd, output)
 end
 
-function actions.debug_log(output, ...)
+function actions.log_debug(output, ...)
 	if (logLevel < 3) then
 		return
 	end
 
 	if (... ~= nil) then output = string.format(output, ...) end
 	mq.cmd(string.format('/mqlog [%s] %s', mq.TLO.Me.Name(), output))
-	printf('%s \ag %s', logLeader, output)
+	printf('%s:\amDEBUG\ax%s \aw%s', logLeaderStart, logLeaderEnd, output)
 end
 
 function actions.output_test_logs()

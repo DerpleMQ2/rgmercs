@@ -29,6 +29,7 @@ local EQ_ICON_OFFSET = 500
 
 local terminate      = false
 
+-- UI --
 local function display_item_on_cursor()
     if mq.TLO.Cursor() then
         local cursor_item = mq.TLO.Cursor -- this will be an MQ item, so don't forget to use () on the members!
@@ -110,6 +111,35 @@ mq.bind('/rgmercsui', function()
     openGUI = not openGUI
 end)
 
+-- End UI --
+local unloadedPlugins = {}
+
+local function RGInit()
+    RGMercUtils.CheckPlugins({
+        "MQ2Cast", 
+        "MQ2Collections", 
+        "MQ2Rez", 
+        "MQ2AdvPath", 
+        "MQ2MoveUtils", 
+        "MQ2Nav", 
+        "MQ2DanNet", 
+        "MQ2Xassist", 
+        "MQ2SpawnMaster"})
+
+    unloadedPlugins = RGMercUtils.UnCheckPlugins({"MQ2Melee"})
+
+    mq.cmdf("/squelch /rez accept on")
+    mq.cmdf("/squelch /rez pct 90")
+
+    if mq.TLO.Plugin("MQ2DanNet")() then
+        mq.cmdf("/squelch /dnet commandecho off")
+    end
+
+    mq.cmdf("/stick set breakontarget on")
+
+    -- TODO: Chat Begs
+end
+
 local function Main()
     curState = "Idle..."
 
@@ -149,13 +179,17 @@ end)
 -- Binds
 local function bindHandler(cmd, ...)
     if cmd:lower() == "chaseon" then
-        RGMercModules:execModule("Chase", "ChaseOn")
+        RGMercModules:execModule("Chase", "ChaseOn", ...)
+    elseif cmd:lower() == "chaseoff" then
+        RGMercModules:execModule("Chase", "ChaseOff", ...)
     else
-        RGMercsLogger.log("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
+        RGMercsLogger.log_warning("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
     end
 end
 
 mq.bind("/rglua", bindHandler)
+
+RGInit()
 
 while not terminate do
     Main()

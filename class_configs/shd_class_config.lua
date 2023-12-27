@@ -1,8 +1,10 @@
+local mq             = require('mq')
+local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+
 return {
     ['Modes'] = {
-        ['Tank'] = 1,
-        ['DPS'] = 1,
-        ['TLP'] = 1,
+        [1] = 'Tank',
+        [2] = 'DPS',
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -35,7 +37,7 @@ return {
             [10] = "Xetheg's Carapace",
             [11] = "Kanghammer's Carapace",
         },
-        ['Endregen'] = {
+        ['EndRegen'] = {
             [1] = "Second Wind",
             [2] = "Third Wind",
             [3] = "Fourth Wind",
@@ -481,30 +483,110 @@ return {
     },
     ['Rotations'] = {
         ['Tank'] = {
-            ['Debuff'] = 1,
-            ['Heal'] = 1,
-            ['DPS'] = 1,
-            ['Downtime'] = 1,
-            ['Burn'] = 1,
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() end  },
+                    [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() end  },
+                },
+                ['Debuff'] = {},
+                ['Heal'] = {},
+                ['DPS'] = {
+                    [1] = { name="ActivateShield", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() > 1 and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
+                    [2] = { name="Activate2HS", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() > 1 and not self.settings.DoBurn end, cmd="/bandolier activate 2HS" },
+                    [3] = { name="EndRegen", type="DISC", cond=function(self) return mq.TLO.Me.PctEndurance < 15 end  },
+                    [4] = { name="Explosion of Hatred", type="AA", cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50") >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount >= self.settings.AeTauntCnt end },
+                    [5] = { name="Explosion of Spite", type="AA", cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50") >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount >= self.settings.AeTauntCnt end },
+                    [6] = { name="Taunt", type="Ability", cond=function(self) return mq.TLO.Me.AbilityReady("Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and mq.TLO.Target.Distance() < 30 end },
+                    [7] = { name="Terror", type="Spell", cond=function(self) return mq.TLO.Me.SecondaryPctAggro() > 60 end },
+                    [8] = { name="MeleeMit", type="DISC" },
+                    [9] = { name="ForPower", type="Spell", cond=function(self, spell) return RGMercUtils.DotSpellCheck(self.settings, spell) end },
+                    [10] = { name="Encroaching Darknesss", type="AA", cond=function(self) return self.settings.DoSnare and RGMercUtils.DetAACheck(826) end },
+                },
+                ['Downtime'] = {},
+            },
+            ['Spells'] = {
+                [1] = { name="DireDot", gem=1 },
+                [2] = { name="Spearnuke", gem=2 },
+                [3] = { name="Torrent", gem=3, cond=function(self) return self.settings.DoTorrent end, other="BondTap" },
+                [4] = { name="Diretap", gem=4, cond=function(self) return self.settings.DoDiretap end, other="SnareDOT" },
+                [5] = { name="Lifetap", gem=5 },
+                [6] = { name="Bufftap", gem=6 },
+                [7] = { name="Bitetap", gem=7 },
+                [8] = { name="ForPower", gem=8 },
+                [9] = { name="Terror", gem=9 },
+                [10] = { name="TempHP", gem=10 },
+                [11] = { name="Skin", gem=11 },
+                [12] = { name="Dicho", gem=12 },
+            },
         },
         ['DPS'] = {
-            ['Debuff'] = 1,
-            ['Heal'] = 1,
-            ['DPS'] = 1,
-            ['Downtime'] = 1,
-            ['Burn'] = 1,
+            ['Rotation'] = {
+                ['Debuff'] = 1,
+                ['Heal'] = 1,
+                ['DPS'] = 1,
+                ['Downtime'] = 1,
+                ['Burn'] = 1,
+            },
+            ['Spells'] = {
+                [1] = { name="PoisonDot", gem=1 },
+                [2] = { name="Spearnuke", gem=2 },
+                [3] = { name="Torrent", gem=3, cond=function(self) return self.settings.DoTorrent end, other="BondTap" },
+                [4] = { name="Diretap", gem=4 },
+                [5] = { name="Lifetap", gem=5 },
+                [6] = { name="Bufftap", gem=6 },
+                [7] = { name="Bitetap", gem=7 },
+                [8] = { name="ForPower", gem=8 },
+                [9] = { name="Terror", gem=9 },
+                [10] = { name="TempHP", gem=10 },
+                [11] = { name="Skin", gem=11 },
+                [12] = { name="Dicho", gem=12 },
+            },
         },
-        ['TLP'] = {
-            ['Debuff'] = 1,
-            ['Heal'] = 1,
-            ['DPS'] = 1,
-            ['Downtime'] = 1,
-            ['Burn'] = 1,
+        ['TLP_Tank'] = {
+            ['Rotation'] = {
+                ['Debuff'] = 1,
+                ['Heal'] = 1,
+                ['DPS'] = 1,
+                ['Downtime'] = 1,
+                ['Burn'] = 1,
+            },
+            ['Spells'] = {
+                [1] = { name="Terror", gem=1 },
+                [2] = { name="Spearnuke", gem=2 },
+                [3] = { name="Lifetap", gem=3 },
+                [4] = { name="Bitetap", gem=4 },
+                [5] = { name="Bufftap", gem=5 },
+                [6] = { name="PoisonDot", gem=6 },
+                [7] = { name="SnareDOT", gem=7 },
+                [8] = { name="AeTaunt", gem=8, cond=function(self) return mq.TLO.Me.NumGems() > 8 end },
+                --[9] = { name="Terror", gem=9 },
+                --[10] = { name="TempHP", gem=10 },
+                --[11] = { name="Skin", gem=11 },
+                --[12] = { name="Dicho", gem=12 },
+            },
+        },
+        ['TLP_DPS'] = {
+            ['Rotation'] = {
+                ['Debuff'] = 1,
+                ['Heal'] = 1,
+                ['DPS'] = 1,
+                ['Downtime'] = 1,
+                ['Burn'] = 1,
+            },
+            ['Spells'] = {
+                [1] = { name="Terror", gem=1 },
+                [2] = { name="Spearnuke", gem=2 },
+                [3] = { name="Lifetap", gem=3 },
+                [4] = { name="Bitetap", gem=4 },
+                [5] = { name="Bufftap", gem=5 },
+                [6] = { name="PoisonDot", gem=6 },
+                [7] = { name="SnareDOT", gem=7 },
+                [8] = { name="AeTaunt", gem=8, cond=function(self) return mq.TLO.Me.NumGems() > 8 end },
+                --[9] = { name="Terror", gem=9 },
+                --[10] = { name="TempHP", gem=10 },
+                --[11] = { name="Skin", gem=11 },
+                --[12] = { name="Dicho", gem=12 },
+            },
         },
     },
-
-    ['DefaultConfig'] = {
-        ['Mode'] = 'Tank',
-    },
-
 }
