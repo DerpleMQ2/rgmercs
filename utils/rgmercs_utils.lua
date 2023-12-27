@@ -45,6 +45,25 @@ function Utils.UnCheckPlugins(t)
     return r
 end
 
+function Utils.GetBestItem(t)
+    local selectedItem = nil
+
+    for _, i in ipairs(t or {}) do
+        if mq.TLO.FindItem("="..i)() then
+            selectedItem = i
+            break
+        end
+    end
+
+    if selectedItem then
+        RGMercsLogger.log_debug("\agFound\ax %s!", selectedItem)
+    else
+        RGMercsLogger.log_debug("\arNo items found for slot!")
+    end
+
+    return selectedItem
+end
+
 function Utils.GetBestSpell(t)
     local highestLevel = 0
     local selectedSpell = nil
@@ -75,6 +94,10 @@ end
 
 function Utils.DotSpellCheck(config, spell)
     return not mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() and spell.StacksTarget() and mq.TLO.Target.PctHPs > config.HPStopDOT
+end
+
+function Utils.DetSpellCheck(config, spell)
+    return not mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() and spell.StacksTarget()
 end
 
 function Utils.DetAACheck(aaId)
@@ -127,6 +150,50 @@ function Utils.RenderLoadoutTable(t)
             ImGui.Text(tostring(spell.Level()))
             ImGui.TableNextColumn() 
             ImGui.Text(spell.RankName())
+        end
+
+        ImGui.EndTable()
+    end
+end
+
+function Utils.RenderRotationTable(s, n, t, map)
+    if ImGui.BeginTable("Rotation_"..n, 3, ImGuiTableFlags.Resizable + ImGuiTableFlags.Borders) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('ID',(ImGuiTableColumnFlags.WidthFixed), 20.0)
+        ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.None, 20.0)
+        ImGui.TableSetupColumn('Action',(ImGuiTableColumnFlags.WidthFixed), 250.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        for idx, entry in ipairs(t) do
+            ImGui.TableNextColumn()
+            ImGui.Text(tostring(idx))
+            ImGui.TableNextColumn()
+            if entry.cond then
+                local pass = entry.cond(s, mq.TLO.Spell(entry.name))
+                if pass == true then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.03,1.0,0.3,1.0)
+                    ImGui.Text(ICONS.MD_CHECK)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0,0.3,0.3,1.0)
+                    ImGui.Text(ICONS.FA_EXCLAMATION)
+                end
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0,1.0,0.3,1.0)
+                ImGui.Text(ICONS.FA_SMILE_O)
+            end
+            ImGui.PopStyleColor()
+            ImGui.TableNextColumn()
+            local mappedAction = map[entry.name]
+            if mappedAction then
+                if type(mappedAction) == "userdata" then
+                    ImGui.Text(entry.name .. " ==> ".. mappedAction.RankName() or mappedAction.Name())
+                else
+                    ImGui.Text(entry.name .. " ==> ".. mappedAction)
+                end
+            else
+                ImGui.Text(entry.name)
+            end
         end
 
         ImGui.EndTable()
