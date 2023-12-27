@@ -4,10 +4,11 @@ local RGMercsLogger  = require("rgmercs.utils.rgmercs_logger")
 local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
 local shdClassConfig = require("rgmercs.class_configs.shd_class_config")
 
-local Module         = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
-Module.__index       = Module
-Module.Tanking       = false
-Module.SpellLoadOut  = {}
+local Module             = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
+Module.__index           = Module
+Module.Tanking           = false
+Module.SpellLoadOut      = {}
+Module.ResolvedActionMap = {}
 
 local newCombatMode  = false
 
@@ -48,6 +49,9 @@ function Module:LoadSettings()
     self.settings.AeTauntCnt = self.settings.AeTauntCnt or 2
     self.settings.HPStopDOT = self.settings.HPStopDOT or 30
     self.settings.TLP = self.settings.TLP or false
+    self.settings.ManaToNuke = self.settings.ManaToNuke or 30
+    self.settings.StartBigTap = self.settings.StartBigTap or 100
+    self.settings.StartLifeTap = self.settings.StartLifeTap or 100
 
     newCombatMode = true
 end
@@ -66,21 +70,34 @@ end
 
 function Module:setLoadOut(t)
     Module.SpellLoadOut = {}
+    Module.ResolvedActionMap = {}
+
+    -- Map AbilitySet Items and Load Them
+    for k, t in pairs(shdClassConfig.ItemSets) do
+        RGMercsLogger.log_debug("Finding best item for Set: %s", k)
+        Module.ResolvedActionMap[k] = RGMercUtils.GetBestItem(t)
+    end
+    for k, t in pairs(shdClassConfig.AbilitySets) do
+        RGMercsLogger.log_debug("\ayFinding best spell for Set: \am%s", k)
+        Module.ResolvedActionMap[k] = RGMercUtils.GetBestSpell(t)
+    end
+
     for _, s in ipairs(t) do
         local spell = s.name
         if not s.cond then
-            RGMercsLogger.log_debug( "\atGem %d will load \am%s", s.gem, s.name)
+            RGMercsLogger.log_debug( "\ayGem %d will load \am%s", s.gem, s.name)
         else
-            RGMercsLogger.log_debug( "\atGem %d will load \am%s\at or \am%s", s.gem, s.name, s.other)
+            RGMercsLogger.log_debug( "\ayGem %d will load \am%s\at or \am%s", s.gem, s.name, s.other)
             if s.cond(self) then
-                RGMercsLogger.log_debug( "\at   - Selected: \am%s", s.name)
+                RGMercsLogger.log_debug( "\ay   - Selected: \am%s", s.name)
             else
                 spell = s.other
-                RGMercsLogger.log_debug( "\at   - Selected: \am%s", s.other)
+                RGMercsLogger.log_debug( "\ay   - Selected: \am%s", s.other)
             end
         end
 
-        local bestSpell = RGMercUtils.GetBestSpell(shdClassConfig.AbilitySets[spell])
+        local bestSpell = Module.ResolvedActionMap[s.name]
+        RGMercsLogger.log_debug("\awLoaded spell \at%s\aw for type \am%s\aw from ActionMap", bestSpell.RankName(), s.name)
         
         Module.SpellLoadOut[s.gem] = bestSpell
     end
@@ -155,6 +172,13 @@ function Module:Render()
     ImGui.Text("Spell Loadout")
     RGMercUtils.RenderLoadoutTable(Module.SpellLoadOut)
 
+    ImGui.Text("Rotations")
+    local mode = shdClassConfig.Modes[self.settings.Mode]
+    for k,v in pairs(shdClassConfig.Rotations[mode].Rotation) do
+        if ImGui.CollapsingHeader(k) then
+            RGMercUtils.RenderRotationTable(self, k, shdClassConfig.Rotations[mode].Rotation[k], Module.ResolvedActionMap)
+        end
+    end
     ImGui.Text(string.format("Combat State: %s", self.CombatState))
 end
 
