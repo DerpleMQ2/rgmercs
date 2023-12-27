@@ -487,6 +487,12 @@ return {
                 ['Burn'] = {
                     [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
                     [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [3] = { name="ReflexStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [4] = { name="Harm Touch", type="AA", cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
+                    [5] = { name="Thought Leech", type="AA" },
+                    [6] = { name="Visage of Death", type="AA" },
+                    [7] = { name="Leech Touch", type="AA" },
+                    [8] = { name="T`Vyl's Resolve", type="AA" },
                 },
                 ['Debuff'] = {},
                 ['Heal'] = {},
@@ -543,11 +549,19 @@ return {
         },
         ['DPS'] = {
             ['Rotation'] = {
-                ['Debuff'] = 1,
-                ['Heal'] = 1,
-                ['DPS'] = 1,
-                ['Downtime'] = 1,
-                ['Burn'] = 1,
+                ['Buff'] = {},
+                ['Debuff'] = {},
+                ['Heal'] = {},
+                ['DPS'] = {},
+                ['Downtime'] = {},
+                ['Burn'] = {                    
+                    [1] = { name="ReflexStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [2] = { name="Harm Touch", type="AA", cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
+                    [3] = { name="Thought Leech", type="AA" },
+                    [4] = { name="Visage of Death", type="AA" },
+                    [5] = { name="Leech Touch", type="AA" },
+                    [6] = { name="T`Vyl's Resolve", type="AA" },
+                },
             },
             ['Spells'] = {
                 [1] = { name="PoisonDot", gem=1 },

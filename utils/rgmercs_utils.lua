@@ -100,6 +100,18 @@ function Utils.DetSpellCheck(config, spell)
     return not mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() and spell.StacksTarget()
 end
 
+function Utils.SmallBurn(config)
+    return config.BurnSize >=1
+end
+
+function Utils.MedBurn(config)
+    return config.BurnSize >=2
+end
+
+function Utils.BigBurn(config)
+    return config.BurnSize >=3
+end
+
 function Utils.DetAACheck(aaId)
     if not mq.TLO.Target.ID() then return false end
     local Target = mq.TLO.Target
@@ -179,8 +191,8 @@ function Utils.RenderRotationTable(s, n, t, map)
                     ImGui.Text(ICONS.FA_EXCLAMATION)
                 end
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, 1.0,1.0,0.3,1.0)
-                ImGui.Text(ICONS.FA_SMILE_O)
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.3,1.0,1.0,1.0)
+                ImGui.Text(ICONS.MD_CHECK)
             end
             ImGui.PopStyleColor()
             ImGui.TableNextColumn()

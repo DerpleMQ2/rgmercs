@@ -52,7 +52,8 @@ function Module:LoadSettings()
     self.settings.ManaToNuke = self.settings.ManaToNuke or 30
     self.settings.StartBigTap = self.settings.StartBigTap or 100
     self.settings.StartLifeTap = self.settings.StartLifeTap or 100
-
+    self.settings.BurnSize = self.settings.BurnSize or 1
+    self.settings.BurnAuto = self.settings.BurnAuto or false
     newCombatMode = true
 end
 
@@ -167,6 +168,9 @@ function Module:Render()
     if pressed then self:SaveSettings(true) end
 
     self.settings.DoBurn, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_burn", "Burn", self.settings.DoBurn)
+    if pressed then self:SaveSettings(true) end
+
+    self.settings.BurnAuto, pressed = RGMercUtils.RenderOptionToggle("##_bool_auto_burn", "Burn Auto", self.settings.BurnAuto)
     if pressed then self:SaveSettings(true) end
 
     ImGui.Text("Spell Loadout")
