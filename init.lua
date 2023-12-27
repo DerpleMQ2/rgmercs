@@ -146,6 +146,17 @@ local script_actor = RGMercUtils.Actors.register(function(message)
     end
 end)
 
+-- Binds
+local function bindHandler(cmd, ...)
+    if cmd:lower() == "chaseon" then
+        RGMercModules:execModule("Chase", "ChaseOn")
+    else
+        RGMercsLogger.log("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
+    end
+end
+
+mq.bind("/rglua", bindHandler)
+
 while not terminate do
     Main()
     mq.doevents()

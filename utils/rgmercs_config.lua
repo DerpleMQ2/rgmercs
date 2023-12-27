@@ -1,6 +1,7 @@
 local mq                    = require('mq')
 local RGMercUtils           = require("rgmercs.utils.rgmercs_utils")
 local RGMercsLogger         = require("rgmercs.utils.rgmercs_logger")
+local Set                   = require("mq.Set")
 
 local Config                = { _version = '0.1a', author = 'Derple' }
 Config.__index              = Config
@@ -8,6 +9,14 @@ Config.settings_pickle_path = mq.configDir .. '/rgmercs/' .. 'rgmercs.lua'
 Config.settings             = {}
 Config.CurLoadedChar        = mq.TLO.Me.CleanName()
 Config.CurLoadedClass       = mq.TLO.Me.Class.ShortName()
+
+-- Constants
+Config.RGCasters            = Set.new({"BRD","BST","CLR","DRU","ENC","MAG","NEC","PAL","RNG","SHD","SHM","WIZ"})
+Config.RGMelee              = Set.new({"BRD","SHD","PAL","WAR","ROG","BER","MNK","RNG","BST"})
+Config.RGHybrid             = Set.new({"SHD","PAL","RNG","BST","BRD"})
+Config.RGTank               = Set.new({"WAR","PAL","SHD"})
+Config.RGModRod             = Set.new({"BST","CLR","DRU","SHM","MAG","ENC","WIZ","NEC","PAL","RNG","SHD"})
+Config.RGPetClass           = Set.new({"BST","NEC","MAG","SHM","ENC","SHD"})
 
 function Config:SaveSettings(doBroadcast)
     mq.pickle(self.settings_pickle_path, self.settings)
