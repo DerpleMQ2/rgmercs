@@ -1,7 +1,9 @@
 return {
     ['Modes'] = {
-        ['DPS'] = 0,
-        ['TLP'] = 2,
+        [1] = 'Tank',
+        [2] = 'DPS',
+        [3] = 'Healer',
+        [4] = 'Hybrid',
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -602,11 +604,33 @@ return {
             [5] = "Ikatiar's Vindication",
         },
    },
-    ['Rotations'] = {
+   ['Rotations'] = {
+    ['Tank'] = {
+        ["Available"] = 0,
+        ['Combat'] = {},
+        ['Downtime'] = {},
+        ['Burn'] = {},
     },
-
-    ['DefaultConfig'] = {
-        ['Mode'] = 'DPS',
+    ['DPS'] = {
+        ["Available"] = 1,
+        ['Combat'] = {},
+        ['Downtime'] = {},
+        ['Burn'] = {},
     },
-
+    ['Healer'] = { 
+        ["Available"] = 0,
+        ['Combat'] = {},
+        ['Downtime'] = {},
+        ['Burn'] = {},
+    },
+    ['Hybrid'] = { 
+        ["Available"] = 0,
+        ['Combat'] = {},
+        ['Downtime'] = {},
+        ['Burn'] = {},
+    },
+},
+['DefaultConfig'] = {
+    ['Mode'] = '2',
+},
 }

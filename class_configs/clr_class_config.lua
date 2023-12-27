@@ -1,8 +1,9 @@
 return {
     ['Modes'] = {
-        ['Heal'] = 0,
-        ['Battle'] = 1,
-        ['TLP'] = 2,
+        [1] = 'Tank',
+        [2] = 'DPS',
+        [3] = 'Healer',
+        [4] = 'Hybrid',
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -611,25 +612,32 @@ return {
     },
     ['Rotations'] = {
         ['Tank'] = {
-            ['Active'] = 1,
-            ['Downtime'] = 1,
-            ['Burn'] = 1,
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
         ['DPS'] = {
-            ['Ative'] = 1,
-            ['Downtime'] = 1,
-            ['Burn'] = 1,
+            ["Available"] = 1,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
-        ['TLP'] = {
-            ['TLPTank'] = 1,
-            ['TLPDPSHeal'] = 1,
-            ['TLPDowntime'] = 1,
-            ['TLPBurn'] = 1,
+        ['Healer'] = { 
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
+        },
+        ['Hybrid'] = { 
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
     },
-
     ['DefaultConfig'] = {
-        ['Mode'] = 'Tank',
+        ['Mode'] = '2',
     },
 }
 

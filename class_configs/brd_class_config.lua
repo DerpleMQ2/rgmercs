@@ -1,10 +1,9 @@
 return {
     ['Modes'] = {
-        ['MeleeGroup'] = 1,
-        ['DotGroup'] = 1, -- Druid/Necro
-        ['CasterGroup'] = 1,
-        ['TLP'] = 1,
-        ['BuffAndCCOnly'] = 1, -- Buff and CC only - No melee or dmg
+        [1] = 'Tank',
+        [2] = 'DPS',
+        [3] = 'Healer',
+        [4] = 'Hybrid',
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -452,31 +451,33 @@ return {
         [8] = "Wave of Slumber",
         },
     },
-
     ['Rotations'] = {
         ['Tank'] = {
-            ['Debuff'] = 1,
-            ['Heal'] = 1,
-            ['DPS'] = 1,
-            ['Downtime'] = 1,
-            ['Burn'] = 1,
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
         ['DPS'] = {
-            ['Debuff'] = 1,
-            ['Heal'] = 1,
-            ['DPS'] = 1,
-            ['Downtime'] = 1,
-            ['Burn'] = 1,
+            ["Available"] = 1,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
-        ['TLP'] = {
-            ['Debuff'] = 1,
-            ['Heal'] = 1,
-            ['DPS'] = 1,
-            ['Downtime'] = 1,
-            ['Burn'] = 1,
+        ['Healer'] = { 
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
+        },
+        ['Hybrid'] = { 
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
     },
     ['DefaultConfig'] = {
-        ['Mode'] = 'Tank',
+        ['Mode'] = '2',
     },
 }

@@ -1,10 +1,9 @@
 return {
     ['Modes'] = {
-        -- Shouldn't these be [1] = 'ModeName', ?
-        ['Ice'] = 1,
-        ['TLP'] = 1,
-        ['NoOne'] = 1,
-        ['Magic'] = 1,
+        [1] = 'Tank',
+        [2] = 'DPS',
+        [3] = 'Healer',
+        [4] = 'Hybrid',
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -555,47 +554,33 @@ return {
             },
         },
     },
-
     ['Rotations'] = {
-        -- FIRE
-        ['FIRE'] = {
-            ['WIZ_DPS_MODEFIRE'] = 1,
-            ['WIZ_Downtime_MODEFIRE'] = 1,
-            ['WIZ_Burn_MODEFIRE'] = 1,
+        ['Tank'] = {
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
-
-        -- ICE
-        ['ICE'] = {
-            ['WIZ_DPS_MODEICE'] = 1,
-            ['WIZ_Downtime_MODEICE'] = 1,
-            ['WIZ_Burn_MODEICE'] = 1,
+        ['DPS'] = {
+            ["Available"] = 1,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
-
-        -- TLP
-        ['TLP'] = {
-            ['WIZ_DPS_MODETLP'] = 1,
-            ['WIZ_Downtime_MODETLP'] = 1,
-            ['WIZ_Burn_MODETLP'] = 1,
-            ['WIZ_BURN_MODETLP_'] = 1,
+        ['Healer'] = { 
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
-
-        -- MAGIC
-        ['MAGIC'] = {
-            ['WIZ_DPS_MODEMAGIC'] = 1,
-            ['WIZ_Downtime_MODEMAGIC'] = 1,
-            ['WIZ_Burn_MODEMAGIC'] = 1,
+        ['Hybrid'] = { 
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
         },
-
-        -- NOONE
-        ['NOONE'] = {
-            ['WIZ_DPS_MODENOONE'] = 1,
-            ['WIZ_Downtime_MODENOONE'] = 1,
-            ['WIZ_Burn_MODENOONE'] = 1,
-        },
-
     },
-
     ['DefaultConfig'] = {
-        ['Mode'] = 'Ice',
+        ['Mode'] = '2',
     },
 }
