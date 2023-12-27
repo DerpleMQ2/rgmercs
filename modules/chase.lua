@@ -23,7 +23,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log("Chase Module Loading Settings for: %s.", RGMercConfig.CurLoadedChar)
+    RGMercsLogger.log_info("Chase Module Loading Settings for: %s.", RGMercConfig.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
@@ -43,7 +43,7 @@ function Module:LoadSettings()
 end
 
 function Module.New()
-    RGMercsLogger.log("Chase Module Loaded.")
+    RGMercsLogger.log_info("Chase Module Loaded.")
     local newModule = setmetatable({ settings = {} }, Module)
 
     newModule:LoadSettings()
@@ -91,7 +91,7 @@ end
 
 function Module:GiveTime()
     if mq.TLO.Me.Dead() and self.settings.ChaseOn then
-        RGMercsLogger.log("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.", self.settings.ChaseTarget)
+        RGMercsLogger.log_warning("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.", self.settings.ChaseTarget)
         self.settings.ChaseOn = false
         self:SaveSettings()
         return
@@ -101,7 +101,7 @@ function Module:GiveTime()
         local chaseSpawn = mq.TLO.Spawn("pc ="..self.settings.ChaseTarget)
 
         if not chaseSpawn or chaseSpawn.Dead() or not chaseSpawn.ID() then
-            RGMercsLogger.log("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...", self.settings.ChaseTarget)
+            RGMercsLogger.log_warning("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...", self.settings.ChaseTarget)
             --self.settings.ChaseOn = false
             --self:SaveSettings()
             return
@@ -141,18 +141,29 @@ function Module:GiveTime()
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log("Chase Module UnLoaded.")
+    RGMercsLogger.log_info("Chase Module UnLoaded.")
 end
 
-function Module:ChaseOn()
--- Command Binds
-    if mq.TLO.Target.ID() > 0 and mq.TLO.Target.Type() == "PC" then
+function Module:ChaseOn(target)
+    local chaseTarget = mq.TLO.Target
+
+    if target then
+        chaseTarget = mq.TLO.Spawn("pc ="..target)
+    end
+
+    if chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
         self.settings.ChaseOn = true
-        self.settings.ChaseTarget = mq.TLO.Target.CleanName()
+        self.settings.ChaseTarget = chaseTarget.CleanName()
         self:SaveSettings()
     else
-        RGMercsLogger.log("\ayWarning:\ax Not a valid chase target!")
+        RGMercsLogger.log_warning("\ayWarning:\ax Not a valid chase target!")
     end
+end
+
+function Module:ChaseOff()
+    self.settings.ChaseOn = false
+    self:SaveSettings()
+    RGMercsLogger.log_warning("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
 end
 
 
