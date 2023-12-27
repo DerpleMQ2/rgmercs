@@ -57,11 +57,10 @@ function Module:Render()
     ImGui.Text(string.format("Chase LOS Required: %s", self.settings.LineOfSight and "On" or "Off"))
 
     local pressed
-    local chaseSpawn = mq.TLO.Spawn("pc ="..self.settings.ChaseTarget)
-
-    ImGui.Text(string.format("Chase Target: %s", self.settings.ChaseTarget))
 
     if chaseSpawn and chaseSpawn.ID() > 0 then
+        local chaseSpawn = mq.TLO.Spawn("pc ="..self.settings.ChaseTarget)
+        ImGui.Text(string.format("Chase Target: %s", self.settings.ChaseTarget))
         ImGui.Indent()
         ImGui.Text(string.format("Distance: %d", chaseSpawn.Distance()))
         ImGui.Text(string.format("ID: %d", chaseSpawn.ID()))
