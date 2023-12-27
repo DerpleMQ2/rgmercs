@@ -9,6 +9,7 @@ Config.settings_pickle_path = mq.configDir .. '/rgmercs/' .. 'rgmercs.lua'
 Config.settings             = {}
 Config.CurLoadedChar        = mq.TLO.Me.CleanName()
 Config.CurLoadedClass       = mq.TLO.Me.Class.ShortName()
+Config.CurServer            = mq.TLO.EverQuest.Server():gsub(" ", "")
 
 -- Constants
 Config.RGCasters            = Set.new({"BRD","BST","CLR","DRU","ENC","MAG","NEC","PAL","RNG","SHD","SHM","WIZ"})
@@ -29,8 +30,9 @@ end
 function Config:LoadSettings()
     Config.CurLoadedChar  = mq.TLO.Me.CleanName()
     Config.CurLoadedClass = mq.TLO.Me.Class.ShortName()
+    Config.CurServer      = mq.TLO.EverQuest.Server():gsub(" ", "")
 
-    RGMercsLogger.log("\ayLoading Main Settings for %s!", self.CurLoadedChar)
+    RGMercsLogger.log_info("\ayLoading Main Settings for %s!", self.CurLoadedChar)
 
     local config, err = loadfile(self.settings_pickle_path)
     if err or not config then
