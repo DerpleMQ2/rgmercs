@@ -94,7 +94,7 @@ end
 
 function Utils.SelfBuffPetCheck(spell)
     if not spell then return false end
-    return not mq.TLO.Me.PetBuff(spell.Name()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
+    return not mq.TLO.Me.PetBuff(spell.Name())() and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0   
 end
 
 function Utils.SelfBuffCheck(spell)
@@ -203,9 +203,9 @@ end
 function Utils.RenderRotationTable(s, n, t, map)
     if ImGui.BeginTable("Rotation_"..n, 3, ImGuiTableFlags.Resizable + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
-        ImGui.TableSetupColumn('ID',(ImGuiTableColumnFlags.WidthFixed), 20.0)
-        ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.None, 20.0)
-        ImGui.TableSetupColumn('Action',(ImGuiTableColumnFlags.WidthFixed), 250.0)
+        ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
+        ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
+        ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthStretch, 250.0)
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
@@ -227,6 +227,9 @@ function Utils.RenderRotationTable(s, n, t, map)
                 ImGui.Text(ICONS.MD_CHECK)
             end
             ImGui.PopStyleColor()
+            if entry.tooltip then
+                Utils.Tooltip(entry.tooltip)
+            end
             ImGui.TableNextColumn()
             local mappedAction = map[entry.name]
             if mappedAction then

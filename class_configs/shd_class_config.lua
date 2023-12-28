@@ -484,6 +484,22 @@ return {
     ['Rotations'] = {
         ['Tank'] = {
             ['Rotation'] = {
+                ['Buff'] = {
+                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
+                    [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [4] = { name="Demeanor", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [5] = { name="CloakHP", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [6] = { name="SelfDS", type="Spell", cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
+                    [7] = { name="Shroud", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [8] = { name="Covenant", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [9] = { name="CallAtk", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [10] = { name="TempHP", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [11] = { name="HealBurn", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [12] = { name="Voice of Thule", type="AA", cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
+                    [13] = { name="PetSpell", type="Spell", cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
+                    [14] = { name="PetHaste", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                },
                 ['Burn'] = {
                     [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
                     [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
@@ -497,7 +513,7 @@ return {
                 ['Debuff'] = {},
                 ['Heal'] = {},
                 ['DPS'] = {
-                    [1] = { name="ActivateShield", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
+                    [1] = { name="ActivateShield", type="cmd", tooltip="Activates when you have DoBandolier enabled and a 'Shield' bandolier", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
                     [2] = { name="Activate2HS", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and not self.settings.DoBurn end, cmd="/bandolier activate 2HS" },
                     [3] = { name="EndRegen", type="DISC", cond=function(self) return mq.TLO.Me.PctEndurance() < 15 end  },
                     [4] = { name="Explosion of Hatred", type="AA", cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt end },
@@ -567,7 +583,9 @@ return {
                 },
                 ['Debuff'] = {},
                 ['Heal'] = {},
-                ['DPS'] = {},
+                ['DPS'] = {
+                    
+                },
                 ['Downtime'] = {},
                 ['Burn'] = {                    
                     [1] = { name="ReflexStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
@@ -600,6 +618,22 @@ return {
                 ['DPS'] = 1,
                 ['Downtime'] = 1,
                 ['Burn'] = 1,
+                ['Buff'] = {
+                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
+                    [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [4] = { name="Demeanor", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [5] = { name="CloakHP", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [6] = { name="SelfDS", type="Spell", cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
+                    [7] = { name="Shroud", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [8] = { name="Covenant", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [9] = { name="CallAtk", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [10] = { name="TempHP", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [11] = { name="HealBurn", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [12] = { name="Voice of Thule", type="AA", cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
+                    [13] = { name="PetSpell", type="Spell", cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
+                    [14] = { name="PetHaste", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                },
             },
             ['Spells'] = {
                 [1] = { name="Terror", gem=1 },
@@ -623,6 +657,22 @@ return {
                 ['DPS'] = 1,
                 ['Downtime'] = 1,
                 ['Burn'] = 1,
+                ['Buff'] = {
+                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
+                    [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [4] = { name="Demeanor", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [5] = { name="CloakHP", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [6] = { name="SelfDS", type="Spell", cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
+                    [7] = { name="Shroud", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [8] = { name="Covenant", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [9] = { name="CallAtk", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [10] = { name="TempHP", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [11] = { name="HealBurn", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [12] = { name="Voice of Thule", type="AA", cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
+                    [13] = { name="PetSpell", type="Spell", cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
+                    [14] = { name="PetHaste", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                },
             },
             ['Spells'] = {
                 [1] = { name="Terror", gem=1 },

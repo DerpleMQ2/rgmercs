@@ -188,15 +188,23 @@ function Module:Render()
     self.settings.BurnAuto, pressed = RGMercUtils.RenderOptionToggle("##_bool_auto_burn", "Burn Auto", self.settings.BurnAuto)
     if pressed then self:SaveSettings(true) end
 
-    ImGui.Text("Spell Loadout")
-    RGMercUtils.RenderLoadoutTable(Module.SpellLoadOut)
+    if ImGui.CollapsingHeader("Spell Loadout") then
+        ImGui.Indent()
+        RGMercUtils.RenderLoadoutTable(Module.SpellLoadOut)
+        ImGui.Unindent()
+    end
 
-    ImGui.Text("Rotations")
-    local mode = shdClassConfig.Modes[self.settings.Mode]
-    for k,v in pairs(shdClassConfig.Rotations[mode].Rotation) do
-        if ImGui.CollapsingHeader(k) then
-            RGMercUtils.RenderRotationTable(self, k, shdClassConfig.Rotations[mode].Rotation[k], Module.ResolvedActionMap)
+    if ImGui.CollapsingHeader("Rotations") then
+        ImGui.Indent()
+        local mode = shdClassConfig.Modes[self.settings.Mode]
+        for k,v in pairs(shdClassConfig.Rotations[mode].Rotation) do
+            if ImGui.CollapsingHeader(k) then
+                ImGui.Indent()
+                RGMercUtils.RenderRotationTable(self, k, shdClassConfig.Rotations[mode].Rotation[k], Module.ResolvedActionMap)
+                ImGui.Unindent()
+            end
         end
+        ImGui.Unindent()
     end
     ImGui.Text(string.format("Combat State: %s", self.CombatState))
 end
