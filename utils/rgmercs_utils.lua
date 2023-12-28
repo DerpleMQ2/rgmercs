@@ -3,7 +3,7 @@ local RGMercsLogger     = require("rgmercs.utils.rgmercs_logger")
 local animSpellGems     = mq.FindTextureAnimation('A_SpellGems')
 local ICONS             = require('mq.Icons')
 local ICON_SIZE         = 20
-
+local USEGEM            = mq.TLO.Me.NumGems()
 -- Global
 Memorizing = false
 
@@ -92,8 +92,86 @@ function Utils.GetBestSpell(t)
     return selectedSpell
 end
 
+function Utils.WaitCastFinish()
+    while mq.TLO.Me.Casting() and (not mq.TLO.Cast.Ready()) do
+        mq.delay(100)
+    end
+end
+
 function Utils.ManaCheck(config)
     return not mq.TLO.Me.PctMana() >= config.ManaToNuke
+end
+
+function Utils.MemorizeSpell(gem, spell)
+    RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
+    mq.cmdf("/memspell %d \"%s\"", gem, spell)
+
+    while mq.TLO.Me.Gem(gem)() ~= spell do
+        RGMercsLogger.log_info("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
+        mq.delay(100)
+    end
+end
+
+function Utils.WaitCastReady(spell)
+    while not mq.TLO.Cast.Ready(spell)() do
+        mq.delay(100)
+        RGMercsLogger.log_debug("Waiting for spell '%s' to be ready...", spell)
+    end
+end
+
+function Utils.ExecEntry(e, map)
+    if e.type:lower() == "item" then
+        local i = map[e.name]
+        cmd = string.format("/useitem \"%s\"", i)
+        mq.cmdf(cmd)
+        RGMercsLogger.debug_log("Running: \at'%s'", cmd)
+        return
+    end
+
+    if e.type:lower() == "spell" then
+        local s = map[e.name]
+        if s then
+            if not mq.TLO.Me.Book(s.Name())() then
+                --RGMercsLogger.log_error("\arSpell '\at%s\ar' is not in your book!", s.Name())
+                return
+            end
+
+            if not mq.TLO.Me.Gem(s.Name())() then
+                RGMercsLogger.log_debug("\ay%s is not memorized - meming!", s.Name())
+                Utils.MemorizeSpell(USEGEM, s.Name())
+            end
+
+            Utils.WaitCastReady(s.Name())
+            cmd = string.format("/casting \"%s\" -maxtries|5", s)
+            mq.cmdf(cmd)
+            RGMercsLogger.log_debug("Running: \at'%s'", cmd)
+        else
+            RGMercsLogger.log_error("Entry Key: %s not found in map!", e.name)
+        end
+        
+        Utils.WaitCastFinish()
+
+        return
+    end
+end
+
+function Utils.RunRotation(s, r, map)
+    local oldSpellInSlot = mq.TLO.Me.Gem(USEGEM)
+    for idx, entry in ipairs(r) do
+        if entry.cond then
+            local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
+            if pass == true then
+                Utils.ExecEntry(entry, map)
+            end
+        else
+            Utils.ExecEntry(entry, map)
+        end
+    end
+
+    if oldSpellInSlot and mq.TLO.Me.Gem(USEGEM)()     ~= oldSpellInSlot.Name() then
+        RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, USEGEM)
+        Utils.MemorizeSpell(USEGEM, oldSpellInSlot.Name())
+    end
 end
 
 function Utils.SelfBuffPetCheck(spell)
@@ -301,12 +379,7 @@ function Utils.LoadSpellLoadOut(t)
         end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
-            RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", selectedRank, gem)
-            mq.cmdf("/memspell %d \"%s\"", gem, selectedRank)
-
-            while mq.TLO.Me.Gem(gem)() ~= selectedRank do
-                mq.delay(10)
-            end
+            Utils.MemorizeSpell(gem, selectedRank)
         end
     end
 end
