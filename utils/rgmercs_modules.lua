@@ -7,9 +7,9 @@ Modules.__index = Modules
 function Modules.load()
     local newModules = setmetatable({
         modules = {
-            Basic = require("modules.basic").New(),
-            Chase = require("modules.chase").New(),
-            SHD   = require("modules.shd").New(),
+            Basic          = require("modules.basic").New(),
+            Chase          = require("modules.chase").New(),
+            ShadowKnight   = require("modules.shd").New(),
         }
     }, Modules)
 
