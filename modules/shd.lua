@@ -54,6 +54,7 @@ function Module:LoadSettings()
     self.settings.StartLifeTap = self.settings.StartLifeTap or 100
     self.settings.BurnSize = self.settings.BurnSize or 1
     self.settings.BurnAuto = self.settings.BurnAuto or false
+    self.settings.DoPet = self.settings.DoPet or true
     newCombatMode = true
 end
 
@@ -67,6 +68,17 @@ function Module.New()
     newModule:LoadSettings()
 
     return newModule
+end
+
+-- helper function for advanced logic to see if we want to use Darl Lord's Unity
+function Module:castDLU()
+    if not Module.ResolvedActionMap['Shroud'] then return false end
+
+    local res = mq.TLO.Spell(Module.ResolvedActionMap['Shroud']).Level() <= (mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Level() or 0) and
+            mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").MinLevel() <= mq.TLO.Me.Level() and
+            mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Rank() > 0
+
+    return res
 end
 
 function Module:setLoadOut(t)
@@ -163,6 +175,9 @@ function Module:Render()
 
     self.settings.DoDiretap, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_diretap", "Use Diretap", self.settings.DoDiretap)
     newCombatMode = newCombatMode or pressed
+
+    self.settings.DoPet, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_pet", "Cast Pet", self.settings.DoPet)
+    if pressed then self:SaveSettings(true) end
 
     self.settings.DoBandolier, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_bandolier", "Use Bandolier", self.settings.DoBandolier)
     if pressed then self:SaveSettings(true) end
