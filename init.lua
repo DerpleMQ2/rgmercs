@@ -117,7 +117,6 @@ local unloadedPlugins = {}
 local function RGInit()
     RGMercUtils.CheckPlugins({
         "MQ2Cast", 
-        "MQ2Collections", 
         "MQ2Rez", 
         "MQ2AdvPath", 
         "MQ2MoveUtils", 

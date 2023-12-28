@@ -1,6 +1,83 @@
 local mq             = require('mq')
 local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
 
+ToolTip_ActivateShield="Activates when you have DoBandolier enabled and a 'Shield' bandolier"
+ToolTip_Activate2HS="Activates when you have DoBandolier enabled and a '2HS' bandolier"
+ToolTip_EndRegen="Activates Endurance Regen Discipline"
+ToolTip_EOH="Explosion of Hatred AA"
+ToolTip_DLU = "Activates Dark Lord's Unity AA (Casts Highest Level of Shroud Line, Horror Line, CloakHP Line, Demeanor Line, SelfDS Line, Covenant Line, CallAttk Line)"
+ToolTip_Skin = "Activates Skin Spell Line (Add Melee Def Proc)"
+ToolTip_Horror = "Activates Horror Spell Line (Add Melee Proc)"
+ToolTip_Demeanor= ""
+ToolTip_CloakHP = ""
+ToolTip_SelfDS = ""
+ToolTip_Shroud = ""
+ToolTip_Covenant = ""
+ToolTip_CallAtk = ""
+ToolTip_TempHP = ""
+ToolTip_HealBurn = ""
+ToolTip_VOT = ""
+ToolTip_PetSpell = ""
+ToolTip_PetHaste = ""
+ToolTip_Mantle = ""
+ToolTip_Carapace = ""
+ToolTip_EndRegen = ""
+ToolTip_Blade = ""
+ToolTip_Crimson = ""
+ToolTip_MeleeMit = ""
+ToolTip_Deflection = ""
+ToolTip_LeechCurse = ""
+ToolTip_UnholyAura = ""
+ToolTip_CurseGuard = ""
+ToolTip_Shroud = ""
+ToolTip_Horror = ""
+ToolTip_Skin = ""
+ToolTip_SelfDS = ""
+ToolTip_Demeanor = ""
+ToolTip_HealBurn = ""
+ToolTip_CloakHP = ""
+ToolTip_Covenant = ""
+ToolTip_CallAtk = ""
+ToolTip_AeTaunt = ""
+ToolTip_PoisonDot = ""
+ToolTip_Spearnuke = ""
+ToolTip_BondTap = ""
+ToolTip_Diretap = ""
+ToolTip_Lifetap = ""
+ToolTip_Bufftap = ""
+ToolTip_Bitetap = ""
+ToolTip_ForPower = ""
+ToolTip_Terror = ""
+ToolTip_TempHP = ""
+ToolTip_Dicho = ""
+ToolTip_Torrent = ""
+ToolTip_SnareDOT = ""
+ToolTip_Acrimony = ""
+ToolTip_SpiteStrike = ""
+ToolTip_ReflexStrike = ""
+ToolTip_DireDot = ""
+ToolTip_AllianceNuke = ""
+ToolTip_InfluenceDisc = ""
+ToolTip_Acrimony = ""
+ToolTip_SpikeStrike = ""
+ToolTip_ReflexStrike = ""
+ToolTip_HT = ""
+ToolTip_TL = ""
+ToolTip_VOD = ""
+ToolTip_LT = ""
+ToolTip_Tyvls = ""
+ToolTip_EOS = ""
+ToolTip_ED = ""
+ToolTip_Taunt = ""
+ToolTip_Epic = ""
+ToolTip_SpearNuke = ""
+ToolTip_VBOC = ""
+ToolTip_DireTap = ""
+ToolTip_BuffTap = ""
+ToolTip_BiteTap = ""
+ToolTip_LifeTap = ""
+ToolTip_AETaunt = ""
+
 return {
     ['Modes'] = {
         [1] = 'Tank',
@@ -198,7 +275,7 @@ return {
             [13] = "Drape of the Akheva",
             [14] = "Drape of the Ankexfen",
         },
-        ['Convenant'] = {
+        ['Covenant'] = {
             [1] = "Grim Covenant",
             [2] = "Venril's Covenant",
             [3] = "Gixblat's Covenant",
@@ -267,7 +344,7 @@ return {
             [17] = "Spear of Bloodwretch",
             [18] = "Spear of Lazam",
         },
-        ['Bondtap'] = {
+        ['BondTap'] = {
             [1] = "Bond of Tatalros",
             [2] = "Bond of Bynn",
             [3] = "Bond of Vulak",
@@ -420,7 +497,7 @@ return {
             [5] = "Torrent of Suffering",
             [6] = "Torrent of Anguish",
             [7] = "Torrent of Melancholy",
-            [8] = "Torrent of Desolation",
+            [8] = "Torrent of Desolation"
         },
         ['SnareDOT'] = {
             [1] = "Clinging Darkness",
@@ -484,25 +561,68 @@ return {
     ['Rotations'] = {
         ['Tank'] = {
             ['Rotation'] = {
+                ['Downtime'] = {
+                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", tooltip=ToolTip_DLU, cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
+                    [2] = { name="Skin", type="Spell", tooltip=ToolTip_Skin, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [3] = { name="Horror", type="Spell", tooltip=ToolTip_Horror, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [4] = { name="Demeanor", type="Spell", tooltip=ToolTip_Demeanor, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [5] = { name="CloakHP", type="Spell", tooltip=ToolTip_CloakHP, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [6] = { name="SelfDS", type="Spell", tooltip=ToolTip_SelfDS, cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
+                    [7] = { name="Shroud", type="Spell", tooltip=ToolTip_Shroud, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [8] = { name="Covenant", type="Spell", tooltip=ToolTip_Covenant, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [9] = { name="CallAtk", type="Spell", tooltip=ToolTip_CallAtk, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [10] = { name="TempHP", type="Spell", tooltip=ToolTip_TempHP, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [11] = { name="HealBurn", type="Spell", tooltip=ToolTip_HealBurn, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [12] = { name="Voice of Thule", type="AA", tooltip=ToolTip_VOT, cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
+                    [13] = { name="PetSpell", type="Spell", tooltip=ToolTip_PetSpell, cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
+                    [14] = { name="PetHaste", type="Spell", tooltip=ToolTip_PetHaste, cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                },
                 ['Burn'] = {
-                    [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() end  },
-                    [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() end  },
+                    [1] = { name="Acrimony", type="Disc", tooltip=ToolTip_Acrimony, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [2] = { name="SpiteStrike", type="Disc", tooltip=ToolTip_SpikeStrike, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [3] = { name="ReflexStrike", type="Disc", tooltip=ToolTip_ReflexStrike, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [4] = { name="Harm Touch", type="AA", tooltip=ToolTip_HT, cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
+                    [5] = { name="Thought Leech", type="AA", tooltip=ToolTip_TL },
+                    [6] = { name="Visage of Death", type="AA", tooltip=ToolTip_VOD },
+                    [7] = { name="Leech Touch", type="AA", tooltip=ToolTip_LT },
+                    [8] = { name="T`Vyl's Resolve", type="AA", tooltip=ToolTip_Tyvls },
                 },
                 ['Debuff'] = {},
                 ['Heal'] = {},
                 ['DPS'] = {
-                    [1] = { name="ActivateShield", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() > 1 and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
-                    [2] = { name="Activate2HS", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() > 1 and not self.settings.DoBurn end, cmd="/bandolier activate 2HS" },
-                    [3] = { name="EndRegen", type="DISC", cond=function(self) return mq.TLO.Me.PctEndurance < 15 end  },
-                    [4] = { name="Explosion of Hatred", type="AA", cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50") >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount >= self.settings.AeTauntCnt end },
-                    [5] = { name="Explosion of Spite", type="AA", cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50") >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount >= self.settings.AeTauntCnt end },
-                    [6] = { name="Taunt", type="Ability", cond=function(self) return mq.TLO.Me.AbilityReady("Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and mq.TLO.Target.Distance() < 30 end },
-                    [7] = { name="Terror", type="Spell", cond=function(self) return mq.TLO.Me.SecondaryPctAggro() > 60 end },
-                    [8] = { name="MeleeMit", type="DISC" },
-                    [9] = { name="ForPower", type="Spell", cond=function(self, spell) return RGMercUtils.DotSpellCheck(self.settings, spell) end },
-                    [10] = { name="Encroaching Darknesss", type="AA", cond=function(self) return self.settings.DoSnare and RGMercUtils.DetAACheck(826) end },
+                    [1] = { name="ActivateShield", type="cmd", tooltip=ToolTip_ActivateShield, cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
+                    [2] = { name="Activate2HS", type="cmd", tooltip=ToolTip_Activate2HS, cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and not self.settings.DoBurn end, cmd="/bandolier activate 2HS" },
+                    [3] = { name="EndRegen", type="DISC", tooltip=ToolTip_EndRegen, cond=function(self) return mq.TLO.Me.PctEndurance() < 15 end  },
+                    [4] = { name="Explosion of Hatred", type="AA", tooltip=ToolTip_EOH, cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt end },
+                    [5] = { name="Explosion of Spite", type="AA", tooltip=ToolTip_EOS, cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt end },
+                    [6] = { name="Taunt", type="Ability", tooltip=ToolTip_Taunt, cond=function(self) return mq.TLO.Me.AbilityReady("Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and mq.TLO.Target() and RGMercUtils.GetTargetDistance() < 30 end },
+                    [7] = { name="Terror", type="Spell", tooltip=ToolTip_Terror, cond=function(self) return mq.TLO.Me.SecondaryPctAggro() > 60 end },
+                    [8] = { name="MeleeMit", type="DISC", tooltip=ToolTip_MeleeMit },
+                    [9] = { name="ForPower", type="Spell", tooltip=ToolTip_ForPower, cond=function(self, spell) return RGMercUtils.DotSpellCheck(self.settings, spell) end },
+                    [10] = { name="Encroaching Darknesss",type="AA", tooltip=ToolTip_ED,  cond=function(self) return self.settings.DoSnare and RGMercUtils.DetAACheck(826) end },
+                    [11] = { name="SnareDOT", type="Spell", tooltip=ToolTip_SnareDOT, cond=function(self, spell) return self.settings.DoSnare and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [12] = { name="Epic", type="Item", tooltip=ToolTip_Epic, cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
+                    [13] = { name="LeechCurse", type="DISC", tooltip=ToolTip_LeechCurse, cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" end },
+                    [14] = { name="Deflection", type="DISC", tooltip=ToolTip_Deflection, cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
+                    [15] = { name="Mantle", type="DISC", tooltip=ToolTip_Mantle, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [16] = { name="Carapace", type="DISC", tooltip=ToolTip_Carapace, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [17] = { name="CurseGuard", type="DISC", tooltip=ToolTip_CurseGuard, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [18] = { name="UnholyAura", type="DISC", tooltip=ToolTip_UnholyAura, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [19] = { name="PoisonDot", type="Spell", tooltip=ToolTip_PoisonDot, cond=function(self, spell) return RGMercUtils.DotSpellCheck(self.settings, spell) end },
+                    [20] = { name="DireDot", type="Spell", tooltip=ToolTip_DireDot, cond=function(self, spell) return RGMercUtils.DotSpellCheck(self.settings, spell) end },
+                    [21] = { name="Torrent", type="Spell", tooltip=ToolTip_Torrent, cond=function(self, spell) return self.settings.DoTorrent and not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() end },
+                    [22] = { name="SpearNuke", type="Spell", tooltip=ToolTip_SpearNuke, cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke end },
+                    [23] = { name="BondTap", type="Spell", tooltip=ToolTip_BondTap, cond=function(self, spell) return not self.settings.DoTorrent and not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
+                    -- TODO: Verify this logic, it seems wrong
+                    [24] = { name="Vicious Bite of Chaos",type="AA", tooltip=ToolTip_VBOC,  cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [25] = { name="Blade", type="Disc", tooltip=ToolTip_Blade, cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [26] = { name="Crimson", type="Disc", tooltip=ToolTip_Crimson, cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [27] = { name="Dicho", type="Spell", tooltip=ToolTip_Dicho, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [28] = { name="DireTap", type="Spell", tooltip=ToolTip_DireTap, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [29] = { name="BuffTap", type="Spell", tooltip=ToolTip_BuffTap, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [30] = { name="BiteTap", type="Spell", tooltip=ToolTip_BiteTap, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [31] = { name="LifeTap", type="Spell", tooltip=ToolTip_LifeTap, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
                 },
-                ['Downtime'] = {},
             },
             ['Spells'] = {
                 [1] = { name="DireDot", gem=1 },
@@ -521,11 +641,46 @@ return {
         },
         ['DPS'] = {
             ['Rotation'] = {
-                ['Debuff'] = 1,
-                ['Heal'] = 1,
-                ['DPS'] = 1,
-                ['Downtime'] = 1,
-                ['Burn'] = 1,
+                ['Downtime'] = {
+                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", tooltip=ToolTip_DLU, cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
+                    [2] = { name="Skin", type="Spell", tooltip=ToolTip_Skin, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [3] = { name="Horror", type="Spell", tooltip=ToolTip_Horror, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [4] = { name="Demeanor", type="Spell", tooltip=ToolTip_Demeanor, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [5] = { name="CloakHP", type="Spell", tooltip=ToolTip_CloakHP, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [6] = { name="SelfDS", type="Spell", tooltip=ToolTip_SelfDS, cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
+                    [7] = { name="Shroud", type="Spell", tooltip=ToolTip_Shroud, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [8] = { name="Covenant", type="Spell", tooltip=ToolTip_Covenant, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [9] = { name="CallAtk", type="Spell", tooltip=ToolTip_CallAtk, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [10] = { name="TempHP", type="Spell", tooltip=ToolTip_TempHP, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [11] = { name="HealBurn", type="Spell", tooltip=ToolTip_HealBurn, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [12] = { name="Voice of Thule", type="AA", tooltip=ToolTip_VOT, cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
+                    [13] = { name="PetSpell", type="Spell", tooltip=ToolTip_PetSpell, cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
+                    [14] = { name="PetHaste", type="Spell", tooltip=ToolTip_PetHaste, cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                },
+                ['Debuff'] = {},
+                ['Heal'] = {},
+                ['DPS'] = {
+                    [1] = { name="Torrent", type="Spell", tooltip=ToolTip_Torrent, cond=function(self, spell) return self.settings.DoTorrent and not TargetHasBuff(spell) end },
+                    [2] = { name="SpearNuke", type="Spell", tooltip=ToolTip_SpearNuke, cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke or RGMercConfig.BurnCheck(self.settings) end },
+                    [3] = { name="BondTap", type="Spell", tooltip=ToolTip_BondTap, cond=function(self, spell) return not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
+                    [4] = { name="Vicious Bite of Chaos", type="AA", tooltip=ToolTip_VBOC, cond=function(self) return RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [5] = { name="Blade", type="DISC", tooltip=ToolTip_Blade, cond=function(self) return RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [6] = { name="Crimson", type="DISC", tooltip=ToolTip_Crimson, cond=function(self) return RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [7] = { name="PoisonDot", type="Spell", tooltip=ToolTip_PoisonDot, cond=function(self, spell) return self.settings.DoDot and not TargetHasBuff(spell) end },
+                    [8] = { name="DireTap", type="Spell", tooltip=ToolTip_DireTap, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [9] = { name="BuffTap", type="Spell", tooltip=ToolTip_BuffTap, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [10] = { name="BiteTap", type="Spell", tooltip=ToolTip_BiteTap, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [11] = { name="Dicho", type="Spell", tooltip=ToolTip_Dicho, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [12] = { name="LifeTap", type="Spell", tooltip=ToolTip_LifeTap, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                },
+                ['Burn'] = {
+                    [1] = { name="ReflexStrike", type="DISC", tooltip=ToolTip_ReflexStrike, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [2] = { name="Harm Touch", type="AA", tooltip=ToolTip_HT, cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
+                    [3] = { name="Thought Leech", type="AA", tooltip=ToolTip_TL,  },
+                    [4] = { name="Visage of Death", type="AA", tooltip=ToolTip_VOD, },
+                    [5] = { name="Leech Touch", type="AA", tooltip=ToolTip_LT, },
+                    [6] = { name="T`Vyl's Resolve", type="AA", tooltip=ToolTip_Tyvls,  },
+                },
             },
             ['Spells'] = {
                 [1] = { name="PoisonDot", gem=1 },
@@ -544,11 +699,63 @@ return {
         },
         ['TLP_Tank'] = {
             ['Rotation'] = {
-                ['Debuff'] = 1,
-                ['Heal'] = 1,
-                ['DPS'] = 1,
-                ['Downtime'] = 1,
-                ['Burn'] = 1,
+                ['Debuff'] = {},
+                ['Heal'] = {},
+                ['DPS'] = {
+                    [1] = { name="ActivateShield", type="cmd", tooltip=ToolTip_ActivateShield, cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
+                    [2] = { name="Activate2HS", type="cmd", tooltip=ToolTip_Activate2HS, cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and not mq.TLO.Target.Named() end, cmd="/bandolier activate 2HS" },
+                    [3] = { name="EndRegen", type="DISC", tooltip=ToolTip_EndRegen, cond=function(self) return mq.TLO.Me.PctEndurance() < 15 end  },
+                    [4] = { name="Epic", type="Item", tooltip=ToolTip_Epic, cond=function(self) return self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings) and mq.TLO.Me.PctHPs() < self.settings.FlashHP end },
+                    [5] = { name="Taunt", type="Ability", tooltip=ToolTip_Taunt, cond=function(self) return mq.TLO.Me.AbilityReady("Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30 end },
+                    [6] = { name="Terror", type="Spell", tooltip=ToolTip_Terror, cond=function(self, spell) return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30 end },
+                    [7] = { name="AeTaunt", type="Spell", tooltip=ToolTip_AETaunt, cond=function(self, spell) return self.settings.DoAE and mq.TLO.SpawnCount("NPC radius 60 zradius 50")() >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt end },
+                    [8] = { name="SnareDOT", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return self.settings.DoSnare and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [9] = { name="LeechCurse", type="DISC", tooltip=ToolTip_, cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" end },
+                    [10] = { name="Deflection", type="DISC", tooltip=ToolTip_, cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
+                    [11] = { name="Mantle", type="DISC", tooltip=ToolTip_, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [12] = { name="Carapace", type="DISC", tooltip=ToolTip_, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [13] = { name="CurseGuard", type="DISC", tooltip=ToolTip_, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [14] = { name="UnholyAura", type="DISC", tooltip=ToolTip_, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [15] = { name="PoisonDot", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return (self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings)) and RGMercUtils.DotSpellCheck(self.settings, spell) and RGMercUtils.ManaCheck(self.settings) end },
+                    [16] = { name="Torrent", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return self.settings.DoTorrent and not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() end },
+                    [17] = { name="SpearNuke", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke end },
+                    [18] = { name="BondTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not self.settings.DoTorrent and not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
+                    -- TODO: Verify this logic, it seems wrong
+                    [19] = { name="Vicious Bite of Chaos", type="AA", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [20] = { name="Blade", type="Disc", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [21] = { name="Crimson", type="Disc", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [22] = { name="Dicho", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [23] = { name="DireTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [24] = { name="BuffTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [25] = { name="BiteTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [26] = { name="LifeTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                },
+                ['Burn'] = {
+                    [1] = { name="Acrimony", type="DISC", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [2] = { name="SpiteStrike", type="DISC", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [3] = { name="ReflexStrike", type="DISC", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [4] = { name="Harm Touch", type="AA", tooltip=ToolTip_, cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
+                    [5] = { name="Thought Leech", type="AA", tooltip=ToolTip_, },
+                    [6] = { name="Visage of Death", type="AA", tooltip=ToolTip_, },
+                    [7] = { name="Leech Touch", type="AA", tooltip=ToolTip_, },
+                    [8] = { name="T`Vyl's Resolve", type="AA", tooltip=ToolTip_, },
+                },
+                ['Downtime'] = {
+                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", tooltip="Activates Dark Lord's Unity AA (Casts Highest Level of Shroud Line, Horror Line, CloakHP Line, Demeanor Line, SelfDS Line, Covenant Line, CallAttk Line)", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
+                    [2] = { name="Skin", type="Spell", tooltip=ToolTip_Skin, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [3] = { name="Horror", type="Spell", tooltip="Activates Horror Spell Line (Add Melee Proc)", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [4] = { name="Demeanor", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [5] = { name="CloakHP", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [6] = { name="SelfDS", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
+                    [7] = { name="Shroud", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [8] = { name="Covenant", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [9] = { name="CallAtk", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [10] = { name="TempHP", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [11] = { name="HealBurn", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [12] = { name="Voice of Thule", type="AA", tooltip=ToolTip_, cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
+                    [13] = { name="PetSpell", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
+                    [14] = { name="PetHaste", type="Spell", tooltip=ToolTip_PetHaste, cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                },
             },
             ['Spells'] = {
                 [1] = { name="Terror", gem=1 },
@@ -567,11 +774,60 @@ return {
         },
         ['TLP_DPS'] = {
             ['Rotation'] = {
-                ['Debuff'] = 1,
-                ['Heal'] = 1,
-                ['DPS'] = 1,
-                ['Downtime'] = 1,
-                ['Burn'] = 1,
+                ['Debuff'] = {},
+                ['Heal'] = {},
+                ['DPS'] = {
+                    [1] = { name="ActivateShield", type="cmd", tooltip=ToolTip_ActivateShield, cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
+                    [2] = { name="Activate2HS", type="cmd", type="AA", tooltip=ToolTip_Activate2HS, cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and not mq.TLO.Target.Named() end, cmd="/bandolier activate 2HS" },
+                    [3] = { name="EndRegen", type="DISC", type="AA", tooltip=ToolTip_, cond=function(self) return mq.TLO.Me.PctEndurance() < 15 end  },
+                    [4] = { name="Epic", type="Item", tooltip=ToolTip_, cond=function(self) return self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings) and mq.TLO.Me.PctHPs() < self.settings.FlashHP end },
+                    [5] = { name="SnareDOT", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return self.settings.DoSnare and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [6] = { name="LeechCurse", type="DISC", tooltip=ToolTip_, cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" end },
+                    [7] = { name="Deflection", type="DISC", tooltip=ToolTip_, cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
+                    [8] = { name="Mantle", type="DISC", tooltip=ToolTip_, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [9] = { name="Carapace", type="Disc", tooltip=ToolTip_, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [10] = { name="CurseGuard", type="DISC", tooltip=ToolTip_, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [11] = { name="UnholyAura", type="DISC", tooltip=ToolTip_, cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [12] = { name="PoisonDot", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return (self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings)) and RGMercUtils.DotSpellCheck(self.settings, spell) and RGMercUtils.ManaCheck(self.settings) end },
+                    [13] = { name="Torrent", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return self.settings.DoTorrent and not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() end },
+                    [14] = { name="SpearNuke", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke end },
+                    [15] = { name="BondTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return not self.settings.DoTorrent and not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
+                    -- TODO: Verify this logic, it seems wrong
+                    [16] = { name="Vicious Bite of Chaos", type="AA", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [17] = { name="Blade", type="Disc", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [18] = { name="Crimson", type="Disc", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [19] = { name="Dicho", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [20] = { name="DireTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [21] = { name="BuffTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [22] = { name="BiteTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [23] = { name="LifeTap", type="Spell", tooltip=ToolTip_, cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                },
+                ['Burn'] = {
+                    [1] = { name="Acrimony", type="Disc", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [2] = { name="SpiteStrike", type="Disc", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [3] = { name="ReflexStrike", type="Disc", tooltip=ToolTip_, cond=function(self) return mq.TLO.Target.Named() == true end },
+                    [4] = { name="Harm Touch", type="AA", tooltip=ToolTip_, cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
+                    [5] = { name="Thought Leech", type="AA" },
+                    [6] = { name="Visage of Death", type="AA" },
+                    [7] = { name="Leech Touch", type="AA" },
+                    [8] = { name="T`Vyl's Resolve", type="AA" },
+                },
+                ['Downtime'] = {
+                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", tooltip=ToolTip_DLU, cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
+                    [2] = { name="Skin", type="Spell", tooltip=ToolTip_Skin, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [3] = { name="Horror", type="Spell", tooltip=ToolTip_Horror, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [4] = { name="Demeanor", type="Spell", tooltip=ToolTip_Demeanor, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [5] = { name="CloakHP", type="Spell", tooltip=ToolTip_CloakHP, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [6] = { name="SelfDS", type="Spell", tooltip=ToolTip_SelfDS, cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
+                    [7] = { name="Shroud", type="Spell", tooltip=ToolTip_Shroud, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [8] = { name="Covenant", type="Spell", tooltip=ToolTip_Covenant, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [9] = { name="CallAtk", type="Spell", tooltip=ToolTip_CallAtk, cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
+                    [10] = { name="TempHP", type="Spell", tooltip=ToolTip_TempHP, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [11] = { name="HealBurn", type="Spell", tooltip=ToolTip_HealBurn, cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
+                    [12] = { name="Voice of Thule", type="AA", tooltip=ToolTip_VOT, cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
+                    [13] = { name="PetSpell", type="Spell", tooltip=ToolTip_PetSpell, cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
+                    [14] = { name="PetHaste", type="Spell", tooltip=ToolTip_PetHaste, cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                },
             },
             ['Spells'] = {
                 [1] = { name="Terror", gem=1 },
