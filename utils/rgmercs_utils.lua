@@ -92,11 +92,32 @@ function Utils.GetBestSpell(t)
     return selectedSpell
 end
 
+function Utils.SelfBuffPetCheck(spell)
+    if not spell then return false end
+    return not mq.TLO.Me.PetBuff(spell.Name()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
+end
+
+function Utils.SelfBuffCheck(spell)
+    if not spell then return false end
+    local res = not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() and spell.Stacks()
+    return res
+end
+
+function Utils.SelfBuffAACheck(aaName)
+    return not mq.TLO.Me.FindBuff("id "..tostring(mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName)).ID())).ID() and
+           not mq.TLO.Me.FindBuff("id "..tostring(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())).ID() and
+           not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID() and
+           mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName()).Stacks() and
+           mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)).Stacks()
+end
+
 function Utils.DotSpellCheck(config, spell)
+    if not spell then return false end
     return not mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() and spell.StacksTarget() and mq.TLO.Target.PctHPs > config.HPStopDOT
 end
 
 function Utils.DetSpellCheck(config, spell)
+    if not spell then return false end
     return not mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() and spell.StacksTarget()
 end
 
@@ -120,6 +141,17 @@ function Utils.DetAACheck(aaId)
     return (not Target.FindBuff("id " .. tostring(Me.AltAbility(aaId).Spell.ID())).ID() and
            not Target.FindBuff("id " .. tostring(Me.AltAbility(aaId).Spell.Trigger(1).ID()))) and
            (Me.AltAbility(aaid).Spell.StacksTarget() or Me.AltAbility(aaid).Spell.Trigger(1).StacksTarget())
+end
+
+function Utils.Tooltip(desc)
+    ImGui.SameLine()
+    if ImGui.IsItemHovered() then
+        ImGui.BeginTooltip()
+        ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0)
+        ImGui.Text(desc)
+        ImGui.PopTextWrapPos()
+        ImGui.EndTooltip()
+    end
 end
 
 function Utils.DrawInspectableSpellIcon(iconID, spell)
@@ -182,7 +214,7 @@ function Utils.RenderRotationTable(s, n, t, map)
             ImGui.Text(tostring(idx))
             ImGui.TableNextColumn()
             if entry.cond then
-                local pass = entry.cond(s, mq.TLO.Spell(entry.name))
+                local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
                 if pass == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03,1.0,0.3,1.0)
                     ImGui.Text(ICONS.MD_CHECK)
