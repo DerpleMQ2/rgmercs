@@ -92,6 +92,10 @@ function Utils.GetBestSpell(t)
     return selectedSpell
 end
 
+function Utils.ManaCheck(config)
+    return not mq.TLO.Me.PctMana() >= config.ManaToNuke
+end
+
 function Utils.SelfBuffPetCheck(spell)
     if not spell then return false end
     return not mq.TLO.Me.PetBuff(spell.Name())() and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0   
@@ -119,6 +123,22 @@ end
 function Utils.DetSpellCheck(config, spell)
     if not spell then return false end
     return not mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() and spell.StacksTarget()
+end
+
+function Utils.TargetHasBuff(spell)
+    return mq.TLO.Target() and mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() > 0
+end
+
+function Utils.GetTargetDistance()
+    return (mq.TLO.Target.Distance() or 9999)
+end
+
+function Utils.GetTragetPctHPs()
+    return (mq.TLO.Target.PctHPs() or 0)
+end
+
+function Utils.BurnCheck(config)
+    return ( ( config.BurnAuto and ( mq.TLO.XAssist.XTFullHaterCount >= config.BurnMobCount or (mq.TLO.Target.Named() and config.BurnNamed) or (config.BurnAlways and config.BurnAuto) ) ) or ( not config.BurnAuto and config.BurnSize ) )
 end
 
 function Utils.SmallBurn(config)

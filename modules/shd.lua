@@ -46,15 +46,20 @@ function Module:LoadSettings()
     self.settings.DoBandolier = self.settings.DoBandolier or false
     self.settings.DoBurn = self.settings.DoBurn or false
     self.settings.DoSnare = self.settings.DoSnare or true
+    self.settings.DoDot = self.settings.DoDot or true
+    self.settings.DoAE = self.settings.DoAE or true
     self.settings.AeTauntCnt = self.settings.AeTauntCnt or 2
     self.settings.HPStopDOT = self.settings.HPStopDOT or 30
     self.settings.TLP = self.settings.TLP or false
     self.settings.ManaToNuke = self.settings.ManaToNuke or 30
+    self.settings.FlashHP = self.settings.FlashHP or 35
     self.settings.StartBigTap = self.settings.StartBigTap or 100
     self.settings.StartLifeTap = self.settings.StartLifeTap or 100
     self.settings.BurnSize = self.settings.BurnSize or 1
     self.settings.BurnAuto = self.settings.BurnAuto or false
     self.settings.DoPet = self.settings.DoPet or true
+    self.settings.BurnMobCount = self.settings.BurnMobCount or 3
+    self.settings.BurnNamed = self.settings.BurnNamed or false
     newCombatMode = true
 end
 
@@ -176,6 +181,15 @@ function Module:Render()
     self.settings.DoDiretap, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_diretap", "Use Diretap", self.settings.DoDiretap)
     newCombatMode = newCombatMode or pressed
 
+    self.settings.DoSnare, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_snare", "Cast Snares", self.settings.DoSnare)
+    if pressed then self:SaveSettings(true) end
+
+    self.settings.DoDot, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_dot", "Cast DoTs", self.settings.DoDot)
+    if pressed then self:SaveSettings(true) end
+
+    self.settings.DoAE, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_ae", "Cast AE Taunt", self.settings.DoAE)
+    if pressed then self:SaveSettings(true) end    
+
     self.settings.DoPet, pressed = RGMercUtils.RenderOptionToggle("##_bool_do_pet", "Cast Pet", self.settings.DoPet)
     if pressed then self:SaveSettings(true) end
 
@@ -186,6 +200,9 @@ function Module:Render()
     if pressed then self:SaveSettings(true) end
 
     self.settings.BurnAuto, pressed = RGMercUtils.RenderOptionToggle("##_bool_auto_burn", "Burn Auto", self.settings.BurnAuto)
+    if pressed then self:SaveSettings(true) end
+
+    self.settings.BurnNamed, pressed = RGMercUtils.RenderOptionToggle("##_bool_auto_named", "Burn NAmed", self.settings.BurnNamed)
     if pressed then self:SaveSettings(true) end
 
     if ImGui.CollapsingHeader("Spell Loadout") then
