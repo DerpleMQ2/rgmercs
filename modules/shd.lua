@@ -214,6 +214,9 @@ function Module:Render()
     if ImGui.CollapsingHeader("Rotations") then
         ImGui.Indent()
         local mode = shdClassConfig.Modes[self.settings.Mode]
+        if self.settings.TLP then
+            mode = "TLP_"..mode
+        end
         for k,v in pairs(shdClassConfig.Rotations[mode].Rotation) do
             if ImGui.CollapsingHeader(k) then
                 ImGui.Indent()
