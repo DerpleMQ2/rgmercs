@@ -484,7 +484,7 @@ return {
     ['Rotations'] = {
         ['Tank'] = {
             ['Rotation'] = {
-                ['Buff'] = {
+                ['Downtime'] = {
                     [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
                     [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
                     [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
@@ -565,7 +565,7 @@ return {
         },
         ['DPS'] = {
             ['Rotation'] = {
-                ['Buff'] = {
+                ['Downtime'] = {
                     [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
                     [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
                     [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
@@ -666,7 +666,7 @@ return {
                     [7] = { name="Leech Touch", type="AA" },
                     [8] = { name="T`Vyl's Resolve", type="AA" },
                 },
-                ['Buff'] = {
+                ['Downtime'] = {
                     [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
                     [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
                     [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
@@ -707,31 +707,27 @@ return {
                     [2] = { name="Activate2HS", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and not mq.TLO.Target.Named() end, cmd="/bandolier activate 2HS" },
                     [3] = { name="EndRegen", type="DISC", cond=function(self) return mq.TLO.Me.PctEndurance() < 15 end  },
                     [4] = { name="Epic", type="Item", cond=function(self) return self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings) and mq.TLO.Me.PctHPs() < self.settings.FlashHP end },
-                    [5] = { name="Taunt", type="Ability", cond=function(self) return mq.TLO.Me.AbilityReady("Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30 end },
-                    [6] = { name="Terror", type="Spell", cond=function(self, spell) return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30 end },
-                    [7] = { name="AeTaunt", type="Spell", cond=function(self, spell) return self.settings.DoAE and mq.TLO.SpawnCount("NPC radius 60 zradius 50")() >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt end },
-                    [8] = { name="SnareDOT", type="Spell", cond=function(self, spell) return self.settings.DoSnare and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [9] = { name="LeechCurse", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" end },
-                    [10] = { name="Deflection", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
-                    [11] = { name="Mantle", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [12] = { name="Carapace", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [13] = { name="CurseGuard", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [14] = { name="UnholyAura", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [15] = { name="PoisonDot", type="Spell", cond=function(self, spell) return (self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings)) and RGMercUtils.DotSpellCheck(self.settings, spell) and RGMercUtils.ManaCheck(self.settings) end },
-                    [16] = { name="Torrent", type="Spell", cond=function(self, spell) return self.settings.DoTorrent and not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() end },
-                    [17] = { name="SpearNuke", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke end },
-                    [18] = { name="BondTap", type="Spell", cond=function(self, spell) return not self.settings.DoTorrent and not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
+                    [5] = { name="SnareDOT", type="Spell", cond=function(self, spell) return self.settings.DoSnare and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [6] = { name="LeechCurse", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" end },
+                    [7] = { name="Deflection", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
+                    [8] = { name="Mantle", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [9] = { name="Carapace", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [10] = { name="CurseGuard", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [11] = { name="UnholyAura", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
+                    [12] = { name="PoisonDot", type="Spell", cond=function(self, spell) return (self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings)) and RGMercUtils.DotSpellCheck(self.settings, spell) and RGMercUtils.ManaCheck(self.settings) end },
+                    [13] = { name="Torrent", type="Spell", cond=function(self, spell) return self.settings.DoTorrent and not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() end },
+                    [14] = { name="SpearNuke", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke end },
+                    [15] = { name="BondTap", type="Spell", cond=function(self, spell) return not self.settings.DoTorrent and not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
                     -- TODO: Verify this logic, it seems wrong
-                    [19] = { name="Vicious Bite of Chaos", type="AA", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [20] = { name="Blade", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [21] = { name="Crimson", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [22] = { name="Dicho", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [23] = { name="DireTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [24] = { name="BuffTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [25] = { name="BiteTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
-                    [26] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [16] = { name="Vicious Bite of Chaos", type="AA", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [17] = { name="Blade", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [18] = { name="Crimson", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
+                    [19] = { name="Dicho", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [20] = { name="DireTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
+                    [21] = { name="BuffTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
+                    [22] = { name="BiteTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [23] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
                 },
-                ['Downtime'] = {},
                 ['Burn'] = {
                     [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
                     [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
@@ -742,7 +738,7 @@ return {
                     [7] = { name="Leech Touch", type="AA" },
                     [8] = { name="T`Vyl's Resolve", type="AA" },
                 },
-                ['Buff'] = {
+                ['Downtime'] = {
                     [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
                     [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
                     [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
