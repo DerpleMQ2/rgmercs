@@ -546,7 +546,6 @@ return {
                     [30] = { name="BiteTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
                     [31] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
                 },
-                ['Downtime'] = {},
             },
             ['Spells'] = {
                 [1] = { name="DireDot", gem=1 },
@@ -597,7 +596,6 @@ return {
                     [11] = { name="Dicho", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
                     [12] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
                 },
-                ['Downtime'] = {},
                 ['Burn'] = {                    
                     [1] = { name="ReflexStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
                     [2] = { name="Harm Touch", type="AA", cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
@@ -655,7 +653,6 @@ return {
                     [25] = { name="BiteTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
                     [26] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
                 },
-                ['Downtime'] = {},
                 ['Burn'] = {
                     [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
                     [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
