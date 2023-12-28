@@ -236,6 +236,19 @@ function Module:GiveTime(combat_state)
     end
 
     self.CombatState = combat_state
+
+    if self.CombatState == "Downtime" then
+        if Module.Tanking and self.settings.TLP then
+            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_Tank.Rotation.Downtime, Module.ResolvedActionMap)
+        elseif not Module.Tanking and self.settings.TLP then
+            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_DPS.Rotation.Downtime, Module.ResolvedActionMap)
+        elseif Module.Tanking then
+            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.Tank.Rotation.Downtime, Module.ResolvedActionMap)
+        else
+            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.DPS.Rotation.  Downtime, Module.ResolvedActionMap)
+        end
+    else
+    end
 end
 
 function Module:Shutdown()
