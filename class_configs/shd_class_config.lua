@@ -1,5 +1,5 @@
-local mq             = require('mq')
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local mq          = require('mq')
+local RGMercUtils = require("rgmercs.utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
@@ -485,139 +485,669 @@ return {
         ['Tank'] = {
             ['Rotation'] = {
                 ['Downtime'] = {
-                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
-                    [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [4] = { name="Demeanor", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [5] = { name="CloakHP", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [6] = { name="SelfDS", type="Spell", cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
-                    [7] = { name="Shroud", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [8] = { name="Covenant", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [9] = { name="CallAtk", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [10] = { name="TempHP", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [11] = { name="HealBurn", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [12] = { name="Voice of Thule", type="AA", cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
-                    [13] = { name="PetSpell", type="Spell", cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
-                    [14] = { name="PetHaste", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                    [1] = {
+                        name = "Dark Lord's Unity (Azia)",
+                        type = "AA",
+                        cond = function(self)
+                            return self:castDLU() and
+                                not mq.TLO.Me.FindBuff("name " ..
+                                    tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))()
+                        end
+                    },
+                    [2] = {
+                        name = "Skin",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils.SelfBuffCheck(
+                                spell)
+                        end
+                    },
+                    [3] = {
+                        name = "Horror",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [4] = {
+                        name = "Demeanor",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [5] = {
+                        name = "CloakHP",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [6] = {
+                        name = "SelfDS",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [7] = {
+                        name = "Shroud",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [8] = {
+                        name = "Covenant",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [9] = {
+                        name = "CallAtk",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [10] = {
+                        name = "TempHP",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffCheck(spell)
+                        end
+                    },
+                    [11] = {
+                        name = "HealBurn",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffCheck(spell)
+                        end
+                    },
+                    [12] = {
+                        name = "Voice of Thule",
+                        type = "AA",
+                        cond = function(self)
+                            return RGMercUtils
+                                .SelfBuffAACheck("Voice of Thule")
+                        end
+                    },
+                    [13] = {
+                        name = "PetSpell",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not mq.TLO.Me.Pet.ID() and
+                                self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0
+                        end
+                    },
+                    [14] = {
+                        name = "PetHaste",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffPetCheck(spell)
+                        end
+                    },
                 },
                 ['Burn'] = {
-                    [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [3] = { name="ReflexStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [4] = { name="Harm Touch", type="AA", cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
-                    [5] = { name="Thought Leech", type="AA" },
-                    [6] = { name="Visage of Death", type="AA" },
-                    [7] = { name="Leech Touch", type="AA" },
-                    [8] = { name="T`Vyl's Resolve", type="AA" },
+                    [1] = { name = "Acrimony", type = "DISC", cond = function(self) return mq.TLO.Target.Named() == true end },
+                    [2] = {
+                        name = "SpiteStrike",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Target.Named() ==
+                                true
+                        end
+                    },
+                    [3] = {
+                        name = "ReflexStrike",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Target.Named() ==
+                                true
+                        end
+                    },
+                    [4] = {
+                        name = "Harm Touch",
+                        type = "AA",
+                        cond = function(self)
+                            return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or
+                                RGMercUtils.BigBurn(self.settings)
+                        end
+                    },
+                    [5] = { name = "Thought Leech", type = "AA" },
+                    [6] = { name = "Visage of Death", type = "AA" },
+                    [7] = { name = "Leech Touch", type = "AA" },
+                    [8] = { name = "T`Vyl's Resolve", type = "AA" },
                 },
                 ['Debuff'] = {},
                 ['Heal'] = {},
                 ['DPS'] = {
-                    [1] = { name="ActivateShield", type="cmd", tooltip="Activates when you have DoBandolier enabled and a 'Shield' bandolier", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
-                    [2] = { name="Activate2HS", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and not self.settings.DoBurn end, cmd="/bandolier activate 2HS" },
-                    [3] = { name="EndRegen", type="DISC", cond=function(self) return mq.TLO.Me.PctEndurance() < 15 end  },
-                    [4] = { name="Explosion of Hatred", type="AA", cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt end },
-                    [5] = { name="Explosion of Spite", type="AA", cond=function(self) return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt end },
-                    [6] = { name="Taunt", type="Ability", cond=function(self) return mq.TLO.Me.AbilityReady("Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and mq.TLO.Target() and RGMercUtils.GetTargetDistance() < 30 end },
-                    [7] = { name="Terror", type="Spell", cond=function(self) return mq.TLO.Me.SecondaryPctAggro() > 60 end },
-                    [8] = { name="MeleeMit", type="DISC" },
-                    [9] = { name="ForPower", type="Spell", cond=function(self, spell) return RGMercUtils.DotSpellCheck(self.settings, spell) end },
-                    [10] = { name="Encroaching Darknesss", type="AA", cond=function(self) return self.settings.DoSnare and RGMercUtils.DetAACheck(826) end },
-                    [11] = { name="SnareDOT", type="Spell", cond=function(self, spell) return self.settings.DoSnare and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [12] = { name="Epic", type="Item", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
-                    [13] = { name="LeechCurse", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" end },
-                    [14] = { name="Deflection", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
-                    [15] = { name="Mantle", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [16] = { name="Carapace", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [17] = { name="CurseGuard", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [18] = { name="UnholyAura", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [19] = { name="PoisonDot", type="Spell", cond=function(self, spell) return RGMercUtils.DotSpellCheck(self.settings, spell) end },
-                    [20] = { name="DireDot", type="Spell", cond=function(self, spell) return RGMercUtils.DotSpellCheck(self.settings, spell) end },
-                    [21] = { name="Torrent", type="Spell", cond=function(self, spell) return self.settings.DoTorrent and not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() end },
-                    [22] = { name="SpearNuke", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke end },
-                    [23] = { name="BondTap", type="Spell", cond=function(self, spell) return not self.settings.DoTorrent and not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
+                    [1] = {
+                        name = "ActivateShield",
+                        type = "cmd",
+                        tooltip = "Activates when you have DoBandolier enabled and a 'Shield' bandolier",
+                        cond = function(
+                            self)
+                            return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
+                                mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn
+                        end,
+                        cmd = "/bandolier activate Shield"
+                    },
+                    [2] = {
+                        name = "Activate2HS",
+                        type = "cmd",
+                        cond = function(self)
+                            return self.settings.DoBandolier and
+                                not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and
+                                not self.settings.DoBurn
+                        end,
+                        cmd = "/bandolier activate 2HS"
+                    },
+                    [3] = { name = "EndRegen", type = "DISC", cond = function(self) return mq.TLO.Me.PctEndurance() < 15 end },
+                    [4] = {
+                        name = "Explosion of Hatred",
+                        type = "AA",
+                        cond = function(self)
+                            return mq.TLO.SpawnCount(
+                                    "NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
+                                mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt
+                        end
+                    },
+                    [5] = {
+                        name = "Explosion of Spite",
+                        type = "AA",
+                        cond = function(self)
+                            return mq.TLO.SpawnCount(
+                                    "NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
+                                mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt
+                        end
+                    },
+                    [6] = {
+                        name = "Taunt",
+                        type = "Ability",
+                        cond = function(self)
+                            return mq.TLO.Me.AbilityReady(
+                                    "Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and mq.TLO.Target() and
+                                RGMercUtils.GetTargetDistance() < 30
+                        end
+                    },
+                    [7] = {
+                        name = "Terror",
+                        type = "Spell",
+                        cond = function(self)
+                            return mq.TLO.Me.SecondaryPctAggro() >
+                                60
+                        end
+                    },
+                    [8] = { name = "MeleeMit", type = "DISC" },
+                    [9] = {
+                        name = "ForPower",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .DotSpellCheck(self.settings, spell)
+                        end
+                    },
+                    [10] = {
+                        name = "Encroaching Darknesss",
+                        type = "AA",
+                        cond = function(self)
+                            return self.settings
+                                .DoSnare and RGMercUtils.DetAACheck(826)
+                        end
+                    },
+                    [11] = {
+                        name = "SnareDOT",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings
+                                .DoSnare and RGMercUtils.DetSpellCheck(spell)
+                        end
+                    },
+                    [12] = {
+                        name = "Epic",
+                        type = "Item",
+                        cond = function(self)
+                            return mq.TLO.Me.ActiveDisc.Name() ~=
+                                "Leechcurse Discipline"
+                        end
+                    },
+                    [13] = {
+                        name = "LeechCurse",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Me.ActiveDisc.Name() ~=
+                                "Deflection Discipline"
+                        end
+                    },
+                    [14] = {
+                        name = "Deflection",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Me.ActiveDisc.Name() ~=
+                                "Leechcurse Discipline"
+                        end
+                    },
+                    [15] = {
+                        name = "Mantle",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [16] = {
+                        name = "Carapace",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [17] = {
+                        name = "CurseGuard",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [18] = {
+                        name = "UnholyAura",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [19] = {
+                        name = "PoisonDot",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .DotSpellCheck(self.settings, spell)
+                        end
+                    },
+                    [20] = {
+                        name = "DireDot",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .DotSpellCheck(self.settings, spell)
+                        end
+                    },
+                    [21] = {
+                        name = "Torrent",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings
+                                .DoTorrent and not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID()
+                        end
+                    },
+                    [22] = {
+                        name = "SpearNuke",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctMana() >
+                                self.settings.ManaToNuke
+                        end
+                    },
+                    [23] = {
+                        name = "BondTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self.settings
+                                .DoTorrent and not mq.TLO.Me.FindBuff("name " .. spell.Name() .. " Recourse").ID()
+                        end
+                    },
                     -- TODO: Verify this logic, it seems wrong
-                    [24] = { name="Vicious Bite of Chaos", type="AA", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [25] = { name="Blade", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [26] = { name="Crimson", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [27] = { name="Dicho", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [28] = { name="DireTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [29] = { name="BuffTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [30] = { name="BiteTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
-                    [31] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [24] = {
+                        name = "Vicious Bite of Chaos",
+                        type = "AA",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [25] = {
+                        name = "Blade",
+                        type = "Disc",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [26] = {
+                        name = "Crimson",
+                        type = "Disc",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [27] = {
+                        name = "Dicho",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartBigTap
+                        end
+                    },
+                    [28] = {
+                        name = "DireTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartBigTap
+                        end
+                    },
+                    [29] = {
+                        name = "BuffTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(spell)
+                        end
+                    },
+                    [30] = {
+                        name = "BiteTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
+                    [31] = {
+                        name = "LifeTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
                 },
             },
             ['Spells'] = {
-                [1] = { name="DireDot", gem=1 },
-                [2] = { name="Spearnuke", gem=2 },
-                [3] = { name="Torrent", gem=3, cond=function(self) return self.settings.DoTorrent end, other="BondTap" },
-                [4] = { name="Diretap", gem=4, cond=function(self) return self.settings.DoDiretap end, other="SnareDOT" },
-                [5] = { name="Lifetap", gem=5 },
-                [6] = { name="Bufftap", gem=6 },
-                [7] = { name="Bitetap", gem=7 },
-                [8] = { name="ForPower", gem=8 },
-                [9] = { name="Terror", gem=9 },
-                [10] = { name="TempHP", gem=10 },
-                [11] = { name="Skin", gem=11 },
-                [12] = { name="Dicho", gem=12 },
+                [1] = { name = "DireDot", gem = 1 },
+                [2] = { name = "Spearnuke", gem = 2 },
+                [3] = { name = "Torrent", gem = 3, cond = function(self) return self.settings.DoTorrent end, other = "BondTap" },
+                [4] = { name = "Diretap", gem = 4, cond = function(self) return self.settings.DoDiretap end, other = "SnareDOT" },
+                [5] = { name = "Lifetap", gem = 5 },
+                [6] = { name = "Bufftap", gem = 6 },
+                [7] = { name = "Bitetap", gem = 7 },
+                [8] = { name = "ForPower", gem = 8 },
+                [9] = { name = "Terror", gem = 9 },
+                [10] = { name = "TempHP", gem = 10 },
+                [11] = { name = "Skin", gem = 11 },
+                [12] = { name = "Dicho", gem = 12 },
             },
         },
         ['DPS'] = {
             ['Rotation'] = {
                 ['Downtime'] = {
-                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
-                    [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [4] = { name="Demeanor", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [5] = { name="CloakHP", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [6] = { name="SelfDS", type="Spell", cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
-                    [7] = { name="Shroud", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [8] = { name="Covenant", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [9] = { name="CallAtk", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [10] = { name="TempHP", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [11] = { name="HealBurn", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [12] = { name="Voice of Thule", type="AA", cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
-                    [13] = { name="PetSpell", type="Spell", cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
-                    [14] = { name="PetHaste", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                    [1] = {
+                        name = "Dark Lord's Unity (Azia)",
+                        type = "AA",
+                        cond = function(self)
+                            return self:castDLU() and
+                                not mq.TLO.Me.FindBuff("name " ..
+                                    tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))()
+                        end
+                    },
+                    [2] = {
+                        name = "Skin",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils.SelfBuffCheck(
+                                spell)
+                        end
+                    },
+                    [3] = {
+                        name = "Horror",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [4] = {
+                        name = "Demeanor",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [5] = {
+                        name = "CloakHP",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [6] = {
+                        name = "SelfDS",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [7] = {
+                        name = "Shroud",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [8] = {
+                        name = "Covenant",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [9] = {
+                        name = "CallAtk",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [10] = {
+                        name = "TempHP",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffCheck(spell)
+                        end
+                    },
+                    [11] = {
+                        name = "HealBurn",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffCheck(spell)
+                        end
+                    },
+                    [12] = {
+                        name = "Voice of Thule",
+                        type = "AA",
+                        cond = function(self)
+                            return RGMercUtils
+                                .SelfBuffAACheck("Voice of Thule")
+                        end
+                    },
+                    [13] = {
+                        name = "PetSpell",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not mq.TLO.Me.Pet.ID() and
+                                self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0
+                        end
+                    },
+                    [14] = {
+                        name = "PetHaste",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffPetCheck(spell)
+                        end
+                    },
                 },
                 ['Debuff'] = {},
                 ['Heal'] = {},
                 ['DPS'] = {
-                    [1] = { name="Torrent", type="Spell", cond=function(self, spell) return self.settings.DoTorrent and not TargetHasBuff(spell) end },
-                    [2] = { name="SpearNuke", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke or RGMercConfig.BurnCheck(self.settings) end },
-                    [3] = { name="BondTap", type="Spell", cond=function(self, spell) return not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
-                    [4] = { name="Vicious Bite of Chaos", type="AA", cond=function(self) return RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [5] = { name="Blade", type="DISC", cond=function(self) return RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [6] = { name="Crimson", type="DISC", cond=function(self) return RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [7] = { name="PoisonDot", type="Spell", cond=function(self, spell) return self.settings.DoDot and not TargetHasBuff(spell) end },
-                    [8] = { name="DireTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
-                    [9] = { name="BuffTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [10] = { name="BiteTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
-                    [11] = { name="Dicho", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [12] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [1] = {
+                        name = "Torrent",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings
+                                .DoTorrent and not TargetHasBuff(spell)
+                        end
+                    },
+                    [2] = {
+                        name = "SpearNuke",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctMana() >
+                                self.settings.ManaToNuke or RGMercConfig.BurnCheck(self.settings)
+                        end
+                    },
+                    [3] = {
+                        name = "BondTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not mq.TLO.Me.FindBuff(
+                                "name " .. spell.Name() .. " Recourse").ID()
+                        end
+                    },
+                    [4] = {
+                        name = "Vicious Bite of Chaos",
+                        type = "AA",
+                        cond = function(self)
+                            return RGMercUtils
+                                .GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [5] = {
+                        name = "Blade",
+                        type = "DISC",
+                        cond = function(self)
+                            return RGMercUtils.GetTragetPctHPs() > 5 and
+                                RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [6] = {
+                        name = "Crimson",
+                        type = "DISC",
+                        cond = function(self)
+                            return RGMercUtils.GetTragetPctHPs() >
+                                5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [7] = {
+                        name = "PoisonDot",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings.DoDot and
+                                not TargetHasBuff(spell)
+                        end
+                    },
+                    [8] = {
+                        name = "DireTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
+                    [9] = {
+                        name = "BuffTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(spell)
+                        end
+                    },
+                    [10] = {
+                        name = "BiteTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
+                    [11] = {
+                        name = "Dicho",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartBigTap
+                        end
+                    },
+                    [12] = {
+                        name = "LifeTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
                 },
-                ['Burn'] = {                    
-                    [1] = { name="ReflexStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [2] = { name="Harm Touch", type="AA", cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
-                    [3] = { name="Thought Leech", type="AA" },
-                    [4] = { name="Visage of Death", type="AA" },
-                    [5] = { name="Leech Touch", type="AA" },
-                    [6] = { name="T`Vyl's Resolve", type="AA" },
+                ['Burn'] = {
+                    [1] = {
+                        name = "ReflexStrike",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Target.Named() ==
+                                true
+                        end
+                    },
+                    [2] = {
+                        name = "Harm Touch",
+                        type = "AA",
+                        cond = function(self)
+                            return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or
+                                RGMercUtils.BigBurn(self.settings)
+                        end
+                    },
+                    [3] = { name = "Thought Leech", type = "AA" },
+                    [4] = { name = "Visage of Death", type = "AA" },
+                    [5] = { name = "Leech Touch", type = "AA" },
+                    [6] = { name = "T`Vyl's Resolve", type = "AA" },
                 },
             },
             ['Spells'] = {
-                [1] = { name="PoisonDot", gem=1 },
-                [2] = { name="Spearnuke", gem=2 },
-                [3] = { name="Torrent", gem=3, cond=function(self) return self.settings.DoTorrent end, other="BondTap" },
-                [4] = { name="Diretap", gem=4 },
-                [5] = { name="Lifetap", gem=5 },
-                [6] = { name="Bufftap", gem=6 },
-                [7] = { name="Bitetap", gem=7 },
-                [8] = { name="ForPower", gem=8 },
-                [9] = { name="Terror", gem=9 },
-                [10] = { name="TempHP", gem=10 },
-                [11] = { name="Skin", gem=11 },
-                [12] = { name="Dicho", gem=12 },
+                [1] = { name = "PoisonDot", gem = 1 },
+                [2] = { name = "Spearnuke", gem = 2 },
+                [3] = { name = "Torrent", gem = 3, cond = function(self) return self.settings.DoTorrent end, other = "BondTap" },
+                [4] = { name = "Diretap", gem = 4 },
+                [5] = { name = "Lifetap", gem = 5 },
+                [6] = { name = "Bufftap", gem = 6 },
+                [7] = { name = "Bitetap", gem = 7 },
+                [8] = { name = "ForPower", gem = 8 },
+                [9] = { name = "Terror", gem = 9 },
+                [10] = { name = "TempHP", gem = 10 },
+                [11] = { name = "Skin", gem = 11 },
+                [12] = { name = "Dicho", gem = 12 },
             },
         },
         ['TLP_Tank'] = {
@@ -625,70 +1155,374 @@ return {
                 ['Debuff'] = {},
                 ['Heal'] = {},
                 ['DPS'] = {
-                    [1] = { name="ActivateShield", type="cmd", tooltip="Activates when you have DoBandolier enabled and a 'Shield' bandolier", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
-                    [2] = { name="Activate2HS", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and not mq.TLO.Target.Named() end, cmd="/bandolier activate 2HS" },
-                    [3] = { name="EndRegen", type="DISC", cond=function(self) return mq.TLO.Me.PctEndurance() < 15 end  },
-                    [4] = { name="Epic", type="Item", cond=function(self) return self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings) and mq.TLO.Me.PctHPs() < self.settings.FlashHP end },
-                    [5] = { name="Taunt", type="Ability", cond=function(self) return mq.TLO.Me.AbilityReady("Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30 end },
-                    [6] = { name="Terror", type="Spell", cond=function(self, spell) return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30 end },
-                    [7] = { name="AeTaunt", type="Spell", cond=function(self, spell) return self.settings.DoAE and mq.TLO.SpawnCount("NPC radius 60 zradius 50")() >= self.settings.AeTauntCnt and mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt end },
-                    [8] = { name="SnareDOT", type="Spell", cond=function(self, spell) return self.settings.DoSnare and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [9] = { name="LeechCurse", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" end },
-                    [10] = { name="Deflection", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
-                    [11] = { name="Mantle", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [12] = { name="Carapace", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [13] = { name="CurseGuard", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [14] = { name="UnholyAura", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [15] = { name="PoisonDot", type="Spell", cond=function(self, spell) return (self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings)) and RGMercUtils.DotSpellCheck(self.settings, spell) and RGMercUtils.ManaCheck(self.settings) end },
-                    [16] = { name="Torrent", type="Spell", cond=function(self, spell) return self.settings.DoTorrent and not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() end },
-                    [17] = { name="SpearNuke", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke end },
-                    [18] = { name="BondTap", type="Spell", cond=function(self, spell) return not self.settings.DoTorrent and not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
+                    [1] = {
+                        name = "ActivateShield",
+                        type = "cmd",
+                        tooltip = "Activates when you have DoBandolier enabled and a 'Shield' bandolier",
+                        cond = function(
+                            self)
+                            return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
+                                mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn
+                        end,
+                        cmd = "/bandolier activate Shield"
+                    },
+                    [2] = {
+                        name = "Activate2HS",
+                        type = "cmd",
+                        cond = function(self)
+                            return self.settings.DoBandolier and
+                                not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and
+                                mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and
+                                not mq.TLO.Target.Named()
+                        end,
+                        cmd = "/bandolier activate 2HS"
+                    },
+                    [3] = { name = "EndRegen", type = "DISC", cond = function(self) return mq.TLO.Me.PctEndurance() < 15 end },
+                    [4] = {
+                        name = "Epic",
+                        type = "Item",
+                        cond = function(self)
+                            return self.settings.BurnAuto or
+                                RGMercUtils.SmallBurn(self.settings) and mq.TLO.Me.PctHPs() < self.settings.FlashHP
+                        end
+                    },
+                    [5] = {
+                        name = "Taunt",
+                        type = "Ability",
+                        cond = function(self)
+                            return mq.TLO.Me.AbilityReady(
+                                    "Taunt")() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and
+                                RGMercUtils.GetTargetDistance() < 30
+                        end
+                    },
+                    [6] = {
+                        name = "Terror",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me
+                                .TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30
+                        end
+                    },
+                    [7] = {
+                        name = "AeTaunt",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings.DoAE and
+                                mq.TLO.SpawnCount("NPC radius 60 zradius 50")() >= self.settings.AeTauntCnt and
+                                mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt
+                        end
+                    },
+                    [8] = {
+                        name = "SnareDOT",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings.DoSnare and
+                                RGMercUtils.DetSpellCheck(spell)
+                        end
+                    },
+                    [9] = {
+                        name = "LeechCurse",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Me.ActiveDisc.Name() ~=
+                                "Deflection Discipline"
+                        end
+                    },
+                    [10] = {
+                        name = "Deflection",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Me.ActiveDisc.Name() ~=
+                                "Leechcurse Discipline"
+                        end
+                    },
+                    [11] = {
+                        name = "Mantle",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [12] = {
+                        name = "Carapace",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [13] = {
+                        name = "CurseGuard",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [14] = {
+                        name = "UnholyAura",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [15] = {
+                        name = "PoisonDot",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return (self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings)) and
+                                RGMercUtils.DotSpellCheck(self.settings, spell) and RGMercUtils.ManaCheck(self.settings)
+                        end
+                    },
+                    [16] = {
+                        name = "Torrent",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings
+                                .DoTorrent and not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID()
+                        end
+                    },
+                    [17] = {
+                        name = "SpearNuke",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctMana() >
+                                self.settings.ManaToNuke
+                        end
+                    },
+                    [18] = {
+                        name = "BondTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self.settings
+                                .DoTorrent and not mq.TLO.Me.FindBuff("name " .. spell.Name() .. " Recourse").ID()
+                        end
+                    },
                     -- TODO: Verify this logic, it seems wrong
-                    [19] = { name="Vicious Bite of Chaos", type="AA", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [20] = { name="Blade", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [21] = { name="Crimson", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [22] = { name="Dicho", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [23] = { name="DireTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [24] = { name="BuffTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [25] = { name="BiteTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
-                    [26] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [19] = {
+                        name = "Vicious Bite of Chaos",
+                        type = "AA",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [20] = {
+                        name = "Blade",
+                        type = "Disc",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [21] = {
+                        name = "Crimson",
+                        type = "Disc",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [22] = {
+                        name = "Dicho",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartBigTap
+                        end
+                    },
+                    [23] = {
+                        name = "DireTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartBigTap
+                        end
+                    },
+                    [24] = {
+                        name = "BuffTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(spell)
+                        end
+                    },
+                    [25] = {
+                        name = "BiteTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
+                    [26] = {
+                        name = "LifeTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
                 },
                 ['Burn'] = {
-                    [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [3] = { name="ReflexStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [4] = { name="Harm Touch", type="AA", cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
-                    [5] = { name="Thought Leech", type="AA" },
-                    [6] = { name="Visage of Death", type="AA" },
-                    [7] = { name="Leech Touch", type="AA" },
-                    [8] = { name="T`Vyl's Resolve", type="AA" },
+                    [1] = { name = "Acrimony", type = "DISC", cond = function(self) return mq.TLO.Target.Named() == true end },
+                    [2] = {
+                        name = "SpiteStrike",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Target.Named() ==
+                                true
+                        end
+                    },
+                    [3] = {
+                        name = "ReflexStrike",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Target.Named() ==
+                                true
+                        end
+                    },
+                    [4] = {
+                        name = "Harm Touch",
+                        type = "AA",
+                        cond = function(self)
+                            return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or
+                                RGMercUtils.BigBurn(self.settings)
+                        end
+                    },
+                    [5] = { name = "Thought Leech", type = "AA" },
+                    [6] = { name = "Visage of Death", type = "AA" },
+                    [7] = { name = "Leech Touch", type = "AA" },
+                    [8] = { name = "T`Vyl's Resolve", type = "AA" },
                 },
                 ['Downtime'] = {
-                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
-                    [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [4] = { name="Demeanor", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [5] = { name="CloakHP", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [6] = { name="SelfDS", type="Spell", cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
-                    [7] = { name="Shroud", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [8] = { name="Covenant", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [9] = { name="CallAtk", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [10] = { name="TempHP", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [11] = { name="HealBurn", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [12] = { name="Voice of Thule", type="AA", cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
-                    [13] = { name="PetSpell", type="Spell", cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
-                    [14] = { name="PetHaste", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                    [1] = {
+                        name = "Dark Lord's Unity (Azia)",
+                        type = "AA",
+                        cond = function(self)
+                            return self:castDLU() and
+                                not mq.TLO.Me.FindBuff("name " ..
+                                    tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))()
+                        end
+                    },
+                    [2] = {
+                        name = "Skin",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils.SelfBuffCheck(
+                                spell)
+                        end
+                    },
+                    [3] = {
+                        name = "Horror",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [4] = {
+                        name = "Demeanor",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [5] = {
+                        name = "CloakHP",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [6] = {
+                        name = "SelfDS",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [7] = {
+                        name = "Shroud",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [8] = {
+                        name = "Covenant",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [9] = {
+                        name = "CallAtk",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [10] = {
+                        name = "TempHP",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffCheck(spell)
+                        end
+                    },
+                    [11] = {
+                        name = "HealBurn",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffCheck(spell)
+                        end
+                    },
+                    [12] = {
+                        name = "Voice of Thule",
+                        type = "AA",
+                        cond = function(self)
+                            return RGMercUtils
+                                .SelfBuffAACheck("Voice of Thule")
+                        end
+                    },
+                    [13] = {
+                        name = "PetSpell",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not mq.TLO.Me.Pet.ID() and
+                                self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0
+                        end
+                    },
+                    [14] = {
+                        name = "PetHaste",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffPetCheck(spell)
+                        end
+                    },
                 },
             },
             ['Spells'] = {
-                [1] = { name="Terror", gem=1 },
-                [2] = { name="Spearnuke", gem=2 },
-                [3] = { name="Lifetap", gem=3 },
-                [4] = { name="Bitetap", gem=4 },
-                [5] = { name="Bufftap", gem=5 },
-                [6] = { name="PoisonDot", gem=6 },
-                [7] = { name="SnareDOT", gem=7 },
-                [8] = { name="AeTaunt", gem=8, cond=function(self) return mq.TLO.Me.NumGems() > 8 end },
+                [1] = { name = "Terror", gem = 1 },
+                [2] = { name = "Spearnuke", gem = 2 },
+                [3] = { name = "Lifetap", gem = 3 },
+                [4] = { name = "Bitetap", gem = 4 },
+                [5] = { name = "Bufftap", gem = 5 },
+                [6] = { name = "PoisonDot", gem = 6 },
+                [7] = { name = "SnareDOT", gem = 7 },
+                [8] = { name = "AeTaunt", gem = 8, cond = function(self) return mq.TLO.Me.NumGems() > 8 end },
                 --[9] = { name="Terror", gem=9 },
                 --[10] = { name="TempHP", gem=10 },
                 --[11] = { name="Skin", gem=11 },
@@ -700,94 +1534,375 @@ return {
                 ['Debuff'] = {},
                 ['Heal'] = {},
                 ['DPS'] = {
-                    [1] = { name="ActivateShield", type="cmd", tooltip="Activates when you have DoBandolier enabled and a 'Shield' bandolier", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn end, cmd="/bandolier activate Shield" },
-                    [2] = { name="Activate2HS", type="cmd", cond=function(self) return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and not mq.TLO.Target.Named() end, cmd="/bandolier activate 2HS" },
-                    [3] = { name="EndRegen", type="DISC", cond=function(self) return mq.TLO.Me.PctEndurance() < 15 end  },
-                    [4] = { name="Epic", type="Item", cond=function(self) return self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings) and mq.TLO.Me.PctHPs() < self.settings.FlashHP end },
-                    [5] = { name="SnareDOT", type="Spell", cond=function(self, spell) return self.settings.DoSnare and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [6] = { name="LeechCurse", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" end },
-                    [7] = { name="Deflection", type="DISC", cond=function(self) return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" end },
-                    [8] = { name="Mantle", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [9] = { name="Carapace", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [10] = { name="CurseGuard", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [11] = { name="UnholyAura", type="DISC", cond=function(self) return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and not mq.TLO.Me.ActiveDisc.ID() end },
-                    [12] = { name="PoisonDot", type="Spell", cond=function(self, spell) return (self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings)) and RGMercUtils.DotSpellCheck(self.settings, spell) and RGMercUtils.ManaCheck(self.settings) end },
-                    [13] = { name="Torrent", type="Spell", cond=function(self, spell) return self.settings.DoTorrent and not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() end },
-                    [14] = { name="SpearNuke", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctMana() > self.settings.ManaToNuke end },
-                    [15] = { name="BondTap", type="Spell", cond=function(self, spell) return not self.settings.DoTorrent and not mq.TLO.Me.FindBuff("name "..spell.Name().." Recourse").ID() end },
+                    [1] = {
+                        name = "ActivateShield",
+                        type = "cmd",
+                        tooltip = "Activates when you have DoBandolier enabled and a 'Shield' bandolier",
+                        cond = function(
+                            self)
+                            return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
+                                mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn
+                        end,
+                        cmd = "/bandolier activate Shield"
+                    },
+                    [2] = {
+                        name = "Activate2HS",
+                        type = "cmd",
+                        cond = function(self)
+                            return self.settings.DoBandolier and
+                                not mq.TLO.Me.Bandolier("2HS").Active() and mq.TLO.Me.Bandolier("2HS").Index() and
+                                mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and
+                                not mq.TLO.Target.Named()
+                        end,
+                        cmd = "/bandolier activate 2HS"
+                    },
+                    [3] = { name = "EndRegen", type = "DISC", cond = function(self) return mq.TLO.Me.PctEndurance() < 15 end },
+                    [4] = {
+                        name = "Epic",
+                        type = "Item",
+                        cond = function(self)
+                            return self.settings.BurnAuto or
+                                RGMercUtils.SmallBurn(self.settings) and mq.TLO.Me.PctHPs() < self.settings.FlashHP
+                        end
+                    },
+                    [5] = {
+                        name = "SnareDOT",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings.DoSnare and
+                                RGMercUtils.DetSpellCheck(spell)
+                        end
+                    },
+                    [6] = {
+                        name = "LeechCurse",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Me.ActiveDisc.Name() ~=
+                                "Deflection Discipline"
+                        end
+                    },
+                    [7] = {
+                        name = "Deflection",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Me.ActiveDisc.Name() ~=
+                                "Leechcurse Discipline"
+                        end
+                    },
+                    [8] = {
+                        name = "Mantle",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [9] = {
+                        name = "Carapace",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [10] = {
+                        name = "CurseGuard",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [11] = {
+                        name = "UnholyAura",
+                        type = "DISC",
+                        cond = function(self)
+                            return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                                not mq.TLO.Me.ActiveDisc.ID()
+                        end
+                    },
+                    [12] = {
+                        name = "PoisonDot",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return (self.settings.BurnAuto or RGMercUtils.SmallBurn(self.settings)) and
+                                RGMercUtils.DotSpellCheck(self.settings, spell) and RGMercUtils.ManaCheck(self.settings)
+                        end
+                    },
+                    [13] = {
+                        name = "Torrent",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return self.settings
+                                .DoTorrent and not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID()
+                        end
+                    },
+                    [14] = {
+                        name = "SpearNuke",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctMana() >
+                                self.settings.ManaToNuke
+                        end
+                    },
+                    [15] = {
+                        name = "BondTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self.settings
+                                .DoTorrent and not mq.TLO.Me.FindBuff("name " .. spell.Name() .. " Recourse").ID()
+                        end
+                    },
                     -- TODO: Verify this logic, it seems wrong
-                    [16] = { name="Vicious Bite of Chaos", type="AA", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [17] = { name="Blade", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [18] = { name="Crimson", type="Disc", cond=function(self) return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35 end },
-                    [19] = { name="Dicho", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [20] = { name="DireTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap end },
-                    [21] = { name="BuffTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(self.settings, spell) end },
-                    [22] = { name="BiteTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
-                    [23] = { name="LifeTap", type="Spell", cond=function(self, spell) return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap end },
+                    [16] = {
+                        name = "Vicious Bite of Chaos",
+                        type = "AA",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [17] = {
+                        name = "Blade",
+                        type = "Disc",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [18] = {
+                        name = "Crimson",
+                        type = "Disc",
+                        cond = function(self)
+                            return mq.TLO.Target() and
+                                RGMercUtils.GetTragetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                        end
+                    },
+                    [19] = {
+                        name = "Dicho",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartBigTap
+                        end
+                    },
+                    [20] = {
+                        name = "DireTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartBigTap
+                        end
+                    },
+                    [21] = {
+                        name = "BuffTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap and RGMercUtils.DetSpellCheck(spell)
+                        end
+                    },
+                    [22] = {
+                        name = "BiteTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
+                    [23] = {
+                        name = "LifeTap",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return mq.TLO.Me.PctHPs() <=
+                                self.settings.StartLifeTap
+                        end
+                    },
                 },
                 ['Burn'] = {
-                    [1] = { name="Acrimony", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [2] = { name="SpiteStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [3] = { name="ReflexStrike", type="DISC", cond=function(self) return mq.TLO.Target.Named() == true end },
-                    [4] = { name="Harm Touch", type="AA", cond=function(self) return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or RGMercUtils.BigBurn(self.settings) end },
-                    [5] = { name="Thought Leech", type="AA" },
-                    [6] = { name="Visage of Death", type="AA" },
-                    [7] = { name="Leech Touch", type="AA" },
-                    [8] = { name="T`Vyl's Resolve", type="AA" },
+                    [1] = { name = "Acrimony", type = "DISC", cond = function(self) return mq.TLO.Target.Named() == true end },
+                    [2] = {
+                        name = "SpiteStrike",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Target.Named() ==
+                                true
+                        end
+                    },
+                    [3] = {
+                        name = "ReflexStrike",
+                        type = "DISC",
+                        cond = function(self)
+                            return mq.TLO.Target.Named() ==
+                                true
+                        end
+                    },
+                    [4] = {
+                        name = "Harm Touch",
+                        type = "AA",
+                        cond = function(self)
+                            return (self.settings.BurnAuto and mq.TLO.Target.Named() == true) or
+                                RGMercUtils.BigBurn(self.settings)
+                        end
+                    },
+                    [5] = { name = "Thought Leech", type = "AA" },
+                    [6] = { name = "Visage of Death", type = "AA" },
+                    [7] = { name = "Leech Touch", type = "AA" },
+                    [8] = { name = "T`Vyl's Resolve", type = "AA" },
                 },
                 ['Downtime'] = {
-                    [1] = { name="Dark Lord's Unity (Azia)", type="AA", cond=function(self) return self:castDLU() and not mq.TLO.Me.FindBuff("name "..tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))() end },
-                    [2] = { name="Skin", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [3] = { name="Horror", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [4] = { name="Demeanor", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [5] = { name="CloakHP", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [6] = { name="SelfDS", type="Spell", cond=function(self, spell) return not self:castDLU() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and RGMercUtils.SelfBuffCheck(spell) end },
-                    [7] = { name="Shroud", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [8] = { name="Covenant", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [9] = { name="CallAtk", type="Spell", cond=function(self, spell) return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell) end },
-                    [10] = { name="TempHP", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [11] = { name="HealBurn", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end },
-                    [12] = { name="Voice of Thule", type="AA", cond=function(self) return RGMercUtils.SelfBuffAACheck("Voice of Thule") end },
-                    [13] = { name="PetSpell", type="Spell", cond=function(self, spell) return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0 end },
-                    [14] = { name="PetHaste", type="Spell", cond=function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end },
+                    [1] = {
+                        name = "Dark Lord's Unity (Azia)",
+                        type = "AA",
+                        cond = function(self)
+                            return self:castDLU() and
+                                not mq.TLO.Me.FindBuff("name " ..
+                                    tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))()
+                        end
+                    },
+                    [2] = {
+                        name = "Skin",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils.SelfBuffCheck(
+                                spell)
+                        end
+                    },
+                    [3] = {
+                        name = "Horror",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [4] = {
+                        name = "Demeanor",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [5] = {
+                        name = "CloakHP",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [6] = {
+                        name = "SelfDS",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [7] = {
+                        name = "Shroud",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [8] = {
+                        name = "Covenant",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [9] = {
+                        name = "CallAtk",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not self:castDLU() and
+                                RGMercUtils.SelfBuffCheck(spell)
+                        end
+                    },
+                    [10] = {
+                        name = "TempHP",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffCheck(spell)
+                        end
+                    },
+                    [11] = {
+                        name = "HealBurn",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffCheck(spell)
+                        end
+                    },
+                    [12] = {
+                        name = "Voice of Thule",
+                        type = "AA",
+                        cond = function(self)
+                            return RGMercUtils
+                                .SelfBuffAACheck("Voice of Thule")
+                        end
+                    },
+                    [13] = {
+                        name = "PetSpell",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return not mq.TLO.Me.Pet.ID() and
+                                self.settings.DoPet and mq.TLO.FindItemCount(spell.ReagentID(1))() > 0
+                        end
+                    },
+                    [14] = {
+                        name = "PetHaste",
+                        type = "Spell",
+                        cond = function(self, spell)
+                            return RGMercUtils
+                                .SelfBuffPetCheck(spell)
+                        end
+                    },
                 },
             },
             ['Spells'] = {
-                [1] = { name="Terror", gem=1 },
-                [2] = { name="Spearnuke", gem=2 },
-                [3] = { name="Lifetap", gem=3 },
-                [4] = { name="Bitetap", gem=4 },
-                [5] = { name="Bufftap", gem=5 },
-                [6] = { name="PoisonDot", gem=6 },
-                [7] = { name="SnareDOT", gem=7 },
-                [8] = { name="AeTaunt", gem=8, cond=function(self) return mq.TLO.Me.NumGems() > 8 end },
+                [1] = { name = "Terror", gem = 1 },
+                [2] = { name = "Spearnuke", gem = 2 },
+                [3] = { name = "Lifetap", gem = 3 },
+                [4] = { name = "Bitetap", gem = 4 },
+                [5] = { name = "Bufftap", gem = 5 },
+                [6] = { name = "PoisonDot", gem = 6 },
+                [7] = { name = "SnareDOT", gem = 7 },
+                [8] = { name = "AeTaunt", gem = 8, cond = function(self) return mq.TLO.Me.NumGems() > 8 end },
                 --[9] = { name="Terror", gem=9 },
                 --[10] = { name="TempHP", gem=10 },
                 --[11] = { name="Skin", gem=11 },
                 --[12] = { name="Dicho", gem=12 },
             },
-        },        
+        },
     },
     ['DefaultConfig'] = {
-        ['Mode'] = { DisplayName="Mode", ToolTip="Select the Combat Mode for this Toon", Type="Combo", Default=1, Min=1, Max=3 },
-        ['DoTorrent'] = { DisplayName="Cast Torrents", ToolTip="Enable casting Torrent spells.", Default=true },
-        ['DoDiretap'] = { DisplayName="Cast Dire Taps", ToolTip="Enable casting Dire Tap spells.", Default=true },
-        ['DoBandolier'] = { DisplayName="Use Bandolier", ToolTip="Enable Swapping of items using the bandolier.", Default=false },
-        ['DoBurn'] = { DisplayName="Enable Burning", ToolTip="Put character in 'burn' mode", Default=false },
-        ['DoSnare'] = { DisplayName="Cast Snares", ToolTip="Enable casting Snare spells.", Default=true },
-        ['DoDot'] = { DisplayName="Cast DOTs", ToolTip="Enable casting Damage Over Time spells.", Default=true },
-        ['DoAE'] = { DisplayName="Use AE Taunts", ToolTip="Enable casting AE Taunt spells.", Default=true },
-        ['AeTauntCnt'] = { DisplayName="AE Taunt Count", ToolTip="Minimum number of haters before using AE Taunt.", Default=2, Min=1, Max=10 },
-        ['HPStopDOT'] = { DisplayName="HP Stop DOTs", ToolTip="Stop casting DOTs when the mob hits [x] HP %.", Default=30, Min=1, Max=100 },
-        ['TLP'] = { DisplayName="Enable TLP Mode", ToolTip="Adjust for older mechanics on TLPs.", Default=false },
-        ['ManaToNuke'] = { DisplayName="Mana to Nuke", ToolTip="Minimum % Mana in order to continue to cast nukes.", Default=30, Min=1, Max=100 },
-        ['FlashHP'] = { DisplayName="Flash HP", ToolTip="TODO: No Idea", Default=35, Min=1, Max=100 },
-        ['StartBigTap'] = { DisplayName="Use Big Taps", ToolTip="Your HP % before we use Big Taps.", Default=80, Min=1, Max=100 },
-        ['StartLifeTap'] = { DisplayName="Use Life Taps", ToolTip="Your HP % before we use Life Taps.", Default=100, Min=1, Max=100 },
-        ['BurnSize'] = { DisplayName="Burn Size", ToolTip="1=Small, 2=Medium, 3=Large", Default=1, Min=1, Max=3 },
-        ['BurnAuto'] = { DisplayName="Auto Burn", ToolTip="Automatically burn", Default=false },
-        ['DoPet'] = { DisplayName="Cast Pet", ToolTip="Enable casting Pet spells.", Default=true },
-        ['BurnMobCount'] = { DisplayName="Burn Mob Count", ToolTip="Number of haters before we start burning.", Default=3, Min=1, Max=10 },
-        ['BurnNamed'] = { DisplayName="Burn Named", ToolTip="Automatically burn named mobs.", Default=false },
+        ['Mode'] = { DisplayName = "Mode", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3 },
+        ['DoTorrent'] = { DisplayName = "Cast Torrents", Tooltip = "Enable casting Torrent spells.", RequiresLoadoutChange = true, Default = true },
+        ['DoDiretap'] = { DisplayName = "Cast Dire Taps", Tooltip = "Enable casting Dire Tap spells.", RequiresLoadoutChange = true, Default = true },
+        ['DoBandolier'] = { DisplayName = "Use Bandolier", Tooltip = "Enable Swapping of items using the bandolier.", Default = false },
+        ['DoBurn'] = { DisplayName = "Enable Burning", Tooltip = "Put character in 'burn' mode", Default = false },
+        ['DoSnare'] = { DisplayName = "Cast Snares", Tooltip = "Enable casting Snare spells.", Default = true },
+        ['DoDot'] = { DisplayName = "Cast DOTs", Tooltip = "Enable casting Damage Over Time spells.", Default = true },
+        ['DoAE'] = { DisplayName = "Use AE Taunts", Tooltip = "Enable casting AE Taunt spells.", Default = true },
+        ['AeTauntCnt'] = { DisplayName = "AE Taunt Count", Tooltip = "Minimum number of haters before using AE Taunt.", Default = 2, Min = 1, Max = 10 },
+        ['HPStopDOT'] = { DisplayName = "HP Stop DOTs", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100 },
+        ['TLP'] = { DisplayName = "Enable TLP Mode", Tooltip = "Adjust for older mechanics on TLPs.", RequiresLoadoutChange = true, Default = false },
+        ['ManaToNuke'] = { DisplayName = "Mana to Nuke", Tooltip = "Minimum % Mana in order to continue to cast nukes.", Default = 30, Min = 1, Max = 100 },
+        ['FlashHP'] = { DisplayName = "Flash HP", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100 },
+        ['StartBigTap'] = { DisplayName = "Use Big Taps", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100 },
+        ['StartLifeTap'] = { DisplayName = "Use Life Taps", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100 },
+        ['BurnSize'] = { DisplayName = "Burn Size", Tooltip = "1=Small, 2=Medium, 3=Large", Default = 1, Min = 1, Max = 3 },
+        ['BurnAuto'] = { DisplayName = "Auto Burn", Tooltip = "Automatically burn", Default = false },
+        ['DoPet'] = { DisplayName = "Cast Pet", Tooltip = "Enable casting Pet spells.", Default = true },
+        ['BurnMobCount'] = { DisplayName = "Burn Mob Count", Tooltip = "Number of haters before we start burning.", Default = 3, Min = 1, Max = 10 },
+        ['BurnNamed'] = { DisplayName = "Burn Named", Tooltip = "Automatically burn named mobs.", Default = false },
     },
 }
