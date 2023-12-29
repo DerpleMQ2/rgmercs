@@ -1,16 +1,16 @@
-local mq                = require('mq')
-local RGMercsLogger     = require("rgmercs.utils.rgmercs_logger")
-local animSpellGems     = mq.FindTextureAnimation('A_SpellGems')
-local ICONS             = require('mq.Icons')
-local ICON_SIZE         = 20
-local USEGEM            = mq.TLO.Me.NumGems()
+local mq            = require('mq')
+local RGMercsLogger = require("rgmercs.utils.rgmercs_logger")
+local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
+local ICONS         = require('mq.Icons')
+local ICON_SIZE     = 20
+local USEGEM        = mq.TLO.Me.NumGems()
 -- Global
-Memorizing = false
+Memorizing          = false
 
-local Utils      = { _version = '0.1a', author = 'Derple' }
-Utils.__index    = Utils
-Utils.Actors     = require('actors')
-Utils.ScriptName = "RGMercs"
+local Utils         = { _version = '0.1a', author = 'Derple' }
+Utils.__index       = Utils
+Utils.Actors        = require('actors')
+Utils.ScriptName    = "RGMercs"
 
 function Utils.BroadcastUpdate(module, event)
     Utils.Actors.send({ from = RGMercConfig.CurLoadedChar, script = Utils.ScriptName, module = module, event = event })
@@ -49,7 +49,7 @@ function Utils.GetBestItem(t)
     local selectedItem = nil
 
     for _, i in ipairs(t or {}) do
-        if mq.TLO.FindItem("="..i)() then
+        if mq.TLO.FindItem("=" .. i)() then
             selectedItem = i
             break
         end
@@ -78,13 +78,16 @@ function Utils.GetBestSpell(t)
                     selectedSpell = spell
                 end
             else
-                Utils.PrintGroupMessage(string.format("%s \aw [%s] \ax \ar MISSING SPELL \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), s, spell.RankName(), spell.Level() ))
+                Utils.PrintGroupMessage(string.format(
+                    "%s \aw [%s] \ax \ar MISSING SPELL \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), s,
+                    spell.RankName(), spell.Level()))
             end
         end
     end
 
     if selectedSpell then
-        RGMercsLogger.log_debug("\agFound\ax %s level(%d) rank(%s)", selectedSpell.BaseName(), selectedSpell.Level(), selectedSpell.RankName())
+        RGMercsLogger.log_debug("\agFound\ax %s level(%d) rank(%s)", selectedSpell.BaseName(), selectedSpell.Level(),
+            selectedSpell.RankName())
     else
         RGMercsLogger.log_debug("\arNo spell found for slot!")
     end
@@ -99,7 +102,7 @@ function Utils.WaitCastFinish()
 end
 
 function Utils.ManaCheck(config)
-    return not mq.TLO.Me.PctMana() >= config.ManaToNuke
+    return mq.TLO.Me.PctMana() >= config.ManaToNuke
 end
 
 function Utils.MemorizeSpell(gem, spell)
@@ -148,7 +151,7 @@ function Utils.ExecEntry(e, map)
         else
             RGMercsLogger.log_error("Entry Key: %s not found in map!", e.name)
         end
-        
+
         Utils.WaitCastFinish()
 
         return
@@ -168,7 +171,7 @@ function Utils.RunRotation(s, r, map)
         end
     end
 
-    if oldSpellInSlot and mq.TLO.Me.Gem(USEGEM)()     ~= oldSpellInSlot.Name() then
+    if oldSpellInSlot and mq.TLO.Me.Gem(USEGEM)() ~= oldSpellInSlot.Name() then
         RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, USEGEM)
         Utils.MemorizeSpell(USEGEM, oldSpellInSlot.Name())
     end
@@ -176,35 +179,36 @@ end
 
 function Utils.SelfBuffPetCheck(spell)
     if not spell then return false end
-    return not mq.TLO.Me.PetBuff(spell.Name())() and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0   
+    return not mq.TLO.Me.PetBuff(spell.Name())() and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
 function Utils.SelfBuffCheck(spell)
     if not spell then return false end
-    local res = not mq.TLO.Me.FindBuff("id "..tostring(spell.ID())).ID() and spell.Stacks()
+    local res = not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID() and spell.Stacks()
     return res
 end
 
 function Utils.SelfBuffAACheck(aaName)
-    return not mq.TLO.Me.FindBuff("id "..tostring(mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName)).ID())).ID() and
-           not mq.TLO.Me.FindBuff("id "..tostring(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())).ID() and
-           not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID() and
-           mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName()).Stacks() and
-           mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)).Stacks()
+    return not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName)).ID())).ID() and
+        not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())).ID() and
+        not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID() and
+        mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName()).Stacks() and
+        mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)).Stacks()
 end
 
 function Utils.DotSpellCheck(config, spell)
     if not spell then return false end
-    return not mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() and spell.StacksTarget() and mq.TLO.Target.PctHPs > config.HPStopDOT
+    return not mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() and spell.StacksTarget() and
+        Utils.GetTragetPctHPs() > config.HPStopDOT
 end
 
-function Utils.DetSpellCheck(config, spell)
+function Utils.DetSpellCheck(spell)
     if not spell then return false end
-    return not mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() and spell.StacksTarget()
+    return not mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() and spell.StacksTarget()
 end
 
 function Utils.TargetHasBuff(spell)
-    return mq.TLO.Target() and mq.TLO.Target.FindBuff("id "..tostring(spell.ID())).ID() > 0
+    return mq.TLO.Target() and mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() > 0
 end
 
 function Utils.GetTargetDistance()
@@ -216,19 +220,19 @@ function Utils.GetTragetPctHPs()
 end
 
 function Utils.BurnCheck(config)
-    return ( ( config.BurnAuto and ( mq.TLO.XAssist.XTFullHaterCount >= config.BurnMobCount or (mq.TLO.Target.Named() and config.BurnNamed) or (config.BurnAlways and config.BurnAuto) ) ) or ( not config.BurnAuto and config.BurnSize ) )
+    return ((config.BurnAuto and (mq.TLO.XAssist.XTFullHaterCount >= config.BurnMobCount or (mq.TLO.Target.Named() and config.BurnNamed) or (config.BurnAlways and config.BurnAuto))) or (not config.BurnAuto and config.BurnSize))
 end
 
 function Utils.SmallBurn(config)
-    return config.BurnSize >=1
+    return config.BurnSize >= 1
 end
 
 function Utils.MedBurn(config)
-    return config.BurnSize >=2
+    return config.BurnSize >= 2
 end
 
 function Utils.BigBurn(config)
-    return config.BurnSize >=3
+    return config.BurnSize >= 3
 end
 
 function Utils.DetAACheck(aaId)
@@ -237,11 +241,11 @@ function Utils.DetAACheck(aaId)
     local Me     = mq.TLO.Me
 
     return (not Target.FindBuff("id " .. tostring(Me.AltAbility(aaId).Spell.ID())).ID() and
-           not Target.FindBuff("id " .. tostring(Me.AltAbility(aaId).Spell.Trigger(1).ID()))) and
-           (Me.AltAbility(aaid).Spell.StacksTarget() or Me.AltAbility(aaid).Spell.Trigger(1).StacksTarget())
+            not Target.FindBuff("id " .. tostring(Me.AltAbility(aaId).Spell.Trigger(1).ID()))) and
+        (Me.AltAbility(aaId).Spell.StacksTarget() or Me.AltAbility(aaId).Spell.Trigger(1).StacksTarget())
 end
 
-function Utils.SetLoadOut(t, itemSets, abilitySets)
+function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
     local spellLoadOut = {}
     local resolvedActionMap = {}
 
@@ -258,20 +262,22 @@ function Utils.SetLoadOut(t, itemSets, abilitySets)
     for _, s in ipairs(t) do
         local spell = s.name
         if not s.cond then
-            RGMercsLogger.log_debug( "\ayGem %d will load \am%s", s.gem, s.name)
+            RGMercsLogger.log_debug("\ayGem %d will load \am%s", s.gem, s.name)
         else
-            RGMercsLogger.log_debug( "\ayGem %d will load \am%s\at or \am%s", s.gem, s.name, s.other)
-            if s.cond(self) then
-                RGMercsLogger.log_debug( "\ay   - Selected: \am%s", s.name)
+            RGMercsLogger.log_debug("\ayGem %d will load \am%s\at or \am%s", s.gem, s.name, s.other)
+            if s.cond(caller) then
+                RGMercsLogger.log_debug("\ay   - Selected: \am%s", s.name)
             else
                 spell = s.other
-                RGMercsLogger.log_debug( "\ay   - Selected: \am%s", s.other)
+                RGMercsLogger.log_debug("\ay   - Selected: \am%s", s.other)
             end
         end
 
-        local bestSpell = resolvedActionMap[s.name]
-        RGMercsLogger.log_debug("\awLoaded spell \at%s\aw for type \am%s\aw from ActionMap", bestSpell.RankName(), s.name)
-        
+        local bestSpell = resolvedActionMap[spell]
+        RGMercsLogger.log_debug("\awLoaded spell \at%s\aw for type \am%s\aw from ActionMap",
+            (bestSpell and bestSpell.RankName() or "None Found!"), s
+            .name)
+
         spellLoadOut[s.gem] = bestSpell
     end
 
@@ -312,7 +318,7 @@ function Utils.RenderLoadoutTable(t)
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('Icon', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Gem', (ImGuiTableColumnFlags.WidthFixed), 20.0)
-        ImGui.TableSetupColumn('Base Name',(ImGuiTableColumnFlags.WidthFixed), 150.0)
+        ImGui.TableSetupColumn('Base Name', (ImGuiTableColumnFlags.WidthFixed), 150.0)
         ImGui.TableSetupColumn('Level', ImGuiTableColumnFlags.None, 20.0)
         ImGui.TableSetupColumn('Rank Name', ImGuiTableColumnFlags.None, 150.0)
         ImGui.PopStyleColor()
@@ -327,7 +333,7 @@ function Utils.RenderLoadoutTable(t)
             ImGui.Text(spell.BaseName())
             ImGui.TableNextColumn()
             ImGui.Text(tostring(spell.Level()))
-            ImGui.TableNextColumn() 
+            ImGui.TableNextColumn()
             ImGui.Text(spell.RankName())
         end
 
@@ -336,7 +342,7 @@ function Utils.RenderLoadoutTable(t)
 end
 
 function Utils.RenderRotationTable(s, n, t, map)
-    if ImGui.BeginTable("Rotation_"..n, 3, ImGuiTableFlags.Resizable + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("Rotation_" .. n, 3, ImGuiTableFlags.Resizable + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
@@ -351,14 +357,14 @@ function Utils.RenderRotationTable(s, n, t, map)
             if entry.cond then
                 local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
                 if pass == true then
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.03,1.0,0.3,1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
                     ImGui.Text(ICONS.MD_CHECK)
                 else
-                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0,0.3,0.3,1.0)
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
                     ImGui.Text(ICONS.FA_EXCLAMATION)
                 end
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.3,1.0,1.0,1.0)
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
                 ImGui.Text(ICONS.MD_CHECK)
             end
             ImGui.PopStyleColor()
@@ -369,9 +375,9 @@ function Utils.RenderRotationTable(s, n, t, map)
             local mappedAction = map[entry.name]
             if mappedAction then
                 if type(mappedAction) == "userdata" then
-                    ImGui.Text(entry.name .. " ==> ".. mappedAction.RankName() or mappedAction.Name())
+                    ImGui.Text(entry.name .. " ==> " .. mappedAction.RankName() or mappedAction.Name())
                 else
-                    ImGui.Text(entry.name .. " ==> ".. mappedAction)
+                    ImGui.Text(entry.name .. " ==> " .. mappedAction)
                 end
             else
                 ImGui.Text(entry.name)
@@ -379,14 +385,6 @@ function Utils.RenderRotationTable(s, n, t, map)
         end
 
         ImGui.EndTable()
-    end
-end
-
-function Module:RenderSettings(settings, defaults)
-    for k,v in settings do
-        if type(v) == 'boolean' then
-            settings[k], pressed = RGMercUtils.RenderOptionToggle("##_bool_tlp_mode", "TLP Mode", settings[k])
-            newCombatMode = newCombatMode or pressed
     end
 end
 
@@ -412,11 +410,66 @@ function Utils.RenderOptionToggle(id, text, on)
     return state, toggled
 end
 
+function Utils.RenderOptionNumber(id, text, cur, min, max)
+    ImGui.PushID("##num_spin_" .. id)
+    local input, changed = ImGui.InputInt(text, cur)
+    ImGui.PopID()
+
+    if input > max then input = max end
+    if input < min then input = min end
+
+    changed = cur ~= input
+
+    return input, changed
+end
+
+function Utils.RenderSettings(settings, defaults)
+    local any_pressed = false
+    local new_loadout = false
+    local pressed = false
+
+    local settingNames = {}
+    for k, _ in pairs(settings) do
+        table.insert(settingNames, k)
+    end
+
+    table.sort(settingNames, function(k1, k2) return defaults[k1].DisplayName < defaults[k2].DisplayName end)
+
+    if ImGui.BeginTable("Options", 2, ImGuiTableFlags.BordersH) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
+        ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthStretch), 150.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        for _, k in ipairs(settingNames) do
+            if defaults[k].Type ~= "Custom" then
+                ImGui.TableNextColumn()
+                if type(settings[k]) == 'boolean' then
+                    settings[k], pressed = Utils.RenderOptionToggle(k, "", settings[k])
+                    new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
+                    any_pressed = any_pressed or pressed
+                elseif type(settings[k]) == 'number' then
+                    settings[k], pressed = Utils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
+                        defaults[k].Max)
+                    new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
+                    any_pressed = any_pressed or pressed
+                end
+                ImGui.TableNextColumn()
+                ImGui.Text((defaults[k].DisplayName or "None"))
+                Utils.Tooltip(defaults[k].Tooltip)
+            end
+        end
+        ImGui.EndTable()
+    end
+
+    return settings, any_pressed, new_loadout
+end
+
 function Utils.LoadSpellLoadOut(t)
     local selectedRank = ""
 
     for gem, spell in pairs(t) do
-
         if mq.TLO.Me.SpellRankCap() > 1 then
             selectedRank = spell.RankName()
         else
