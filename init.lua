@@ -54,7 +54,15 @@ end
 
 local function renderModulesTabs()
     if not RGMercConfig:settingsLoaded() then return end
+
+    local tabNames = {}
     for name, _ in pairs(RGMercModules:getModuleList()) do
+        table.insert(tabNames, name)
+    end
+
+    table.sort(tabNames)
+
+    for _, name in ipairs(tabNames) do
         ImGui.TableNextColumn()
         if ImGui.BeginTabItem(name) then
             RGMercModules:execModule(name, "Render")
@@ -116,16 +124,16 @@ local unloadedPlugins = {}
 
 local function RGInit()
     RGMercUtils.CheckPlugins({
-        "MQ2Cast", 
-        "MQ2Rez", 
-        "MQ2AdvPath", 
-        "MQ2MoveUtils", 
-        "MQ2Nav", 
-        "MQ2DanNet", 
-        "MQ2Xassist", 
-        "MQ2SpawnMaster"})
+        "MQ2Cast",
+        "MQ2Rez",
+        "MQ2AdvPath",
+        "MQ2MoveUtils",
+        "MQ2Nav",
+        "MQ2DanNet",
+        "MQ2Xassist",
+        "MQ2SpawnMaster" })
 
-    unloadedPlugins = RGMercUtils.UnCheckPlugins({"MQ2Melee"})
+    unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee" })
 
     mq.cmdf("/squelch /rez accept on")
     mq.cmdf("/squelch /rez pct 90")

@@ -11,7 +11,7 @@ local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
     return mq.configDir ..
-    '/rgmercs/PCConfigs/' .. Module.name .. "_" .. server .. "_" .. RGMercConfig.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module.name .. "_" .. server .. "_" .. RGMercConfig.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -57,9 +57,9 @@ function Module:Render()
     ImGui.Text(string.format("Chase LOS Required: %s", self.settings.LineOfSight and "On" or "Off"))
 
     local pressed
+    local chaseSpawn = mq.TLO.Spawn("pc =" .. (self.settings.ChaseTarget or "NoOne"))
 
     if chaseSpawn and chaseSpawn.ID() > 0 then
-        local chaseSpawn = mq.TLO.Spawn("pc ="..self.settings.ChaseTarget)
         ImGui.Text(string.format("Chase Target: %s", self.settings.ChaseTarget))
         ImGui.Indent()
         ImGui.Text(string.format("Distance: %d", chaseSpawn.Distance()))
@@ -82,25 +82,32 @@ function Module:Render()
         ImGui.Unindent()
     end
 
-    self.settings.ChaseOn, pressed = ImGui.Checkbox("Chase On", self.settings.ChaseOn)
+    local state, pressed = RGMercUtils.RenderOptionToggle("##chase_om", "Chase On", self.settings.ChaseOn)
     if pressed then
-        self:SaveSettings()
+        mq.cmdf("/rgl chase%s", state and "on" or "off")
     end
 end
 
 function Module:GiveTime()
     if mq.TLO.Me.Dead() and self.settings.ChaseOn then
-        RGMercsLogger.log_warning("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.", self.settings.ChaseTarget)
+        RGMercsLogger.log_warning("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
+            self.settings.ChaseTarget)
         self.settings.ChaseOn = false
         self:SaveSettings()
         return
     end
 
+    if self.settings.ChaseOn and not self.settings.ChaseTarget then
+        self.settings.ChaseOn = false
+        RGMercsLogger.log_warning("\awNOTICE:\ax \ayChase Target is invalid. Turning Chase Off!")
+    end
+
     if self.settings.ChaseOn and self.settings.ChaseTarget then
-        local chaseSpawn = mq.TLO.Spawn("pc ="..self.settings.ChaseTarget)
+        local chaseSpawn = mq.TLO.Spawn("pc =" .. self.settings.ChaseTarget)
 
         if not chaseSpawn or chaseSpawn.Dead() or not chaseSpawn.ID() then
-            RGMercsLogger.log_warning("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...", self.settings.ChaseTarget)
+            RGMercsLogger.log_warning("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...",
+                self.settings.ChaseTarget)
             --self.settings.ChaseOn = false
             --self:SaveSettings()
             return
@@ -117,8 +124,9 @@ function Module:GiveTime()
         -- are missing with minimal issues.
         if Nav.MeshLoaded() then
             if not Nav.Active() then
-                if Nav.PathExists("id "..chaseSpawn.ID()) then
-                    mq.cmdf("/squelch /nav id %d | log=critical distance %d lineofsight=%s", chaseSpawn.ID(), self.settings.ChaseDistance, self.settings.RequireLoS and "on" or "off")
+                if Nav.PathExists("id " .. chaseSpawn.ID()) then
+                    mq.cmdf("/squelch /nav id %d | log=critical distance %d lineofsight=%s", chaseSpawn.ID(),
+                        self.settings.ChaseDistance, self.settings.RequireLoS and "on" or "off")
                 else
                     -- Assuming no line of site problems.
                     -- Moveto underwater style until 20 units away
@@ -129,9 +137,9 @@ function Module:GiveTime()
             -- If we don't have a mesh we're using afollow as legacy RG behavior.
             mq.cmdf("/squelch /afollow spawn %d", chaseSpawn.ID())
             mq.cmdf("/squelch /afollow %d", self.settings.ChaseDistance)
-           
+
             mq.delay("2s")
-            
+
             if chaseSpawn.Distance() < self.settings.ChaseDistance then
                 mq.cmdf("/squelch /afollow off")
             end
@@ -147,7 +155,7 @@ function Module:ChaseOn(target)
     local chaseTarget = mq.TLO.Target
 
     if target then
-        chaseTarget = mq.TLO.Spawn("pc ="..target)
+        chaseTarget = mq.TLO.Spawn("pc =" .. target)
     end
 
     if chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
@@ -161,9 +169,9 @@ end
 
 function Module:ChaseOff()
     self.settings.ChaseOn = false
+    self.settings.ChaseTarget = nil
     self:SaveSettings()
     RGMercsLogger.log_warning("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
 end
-
 
 return Module
