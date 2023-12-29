@@ -61,6 +61,16 @@ function Module:LoadSettings()
     self.settings.DoPet = self.settings.DoPet or shdClassConfig.DefaultConfig.DoPet.Default
     self.settings.BurnMobCount = self.settings.BurnMobCount or shdClassConfig.DefaultConfig.BurnMobCount.Default
     self.settings.BurnNamed = self.settings.BurnNamed or shdClassConfig.DefaultConfig.BurnNamed.Default
+
+    for rot, rot_entry in pairs(shdClassConfig.DefaultRotations) do
+        RGMercsLogger.log_debug("Appending new entry for rotation %s", rot)
+        for _, entry in ipairs(rot_entry) do
+            for rot_type, _ in pairs(shdClassConfig.Rotations) do
+                table.insert(shdClassConfig.Rotations[rot_type].Rotation[rot], entry)
+            end
+        end
+    end
+
     newCombatMode = true
 end
 
