@@ -1,10 +1,12 @@
+local mq             = require('mq')
+local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+
 return {
     ['Modes'] = {
-        -- Shouldn't these be [1] = 'ModeName', ?
-        ['Ice'] = 1,
-        ['TLP'] = 1,
-        ['NoOne'] = 1,
-        ['Magic'] = 1,
+        [1] = 'Tank',
+        [2] = 'DPS',
+        [3] = 'Healer',
+        [4] = 'Hybrid',
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -555,47 +557,141 @@ return {
             },
         },
     },
-
     ['Rotations'] = {
-        -- FIRE
-        ['FIRE'] = {
-            ['WIZ_DPS_MODEFIRE'] = 1,
-            ['WIZ_Downtime_MODEFIRE'] = 1,
-            ['WIZ_Burn_MODEFIRE'] = 1,
+        ['Tank'] = {
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = {},
+                },
+                ['Debuff'] = {
+                    [1] = {},
+                },
+                ['Heal'] = {
+                    [1] = {},
+                },
+                ['DPS'] = {
+                    [1] = {},
+                },
+                ['Downtime'] = {
+                    [1] = {},
+                },
+            },
+            ['Spells'] = {
+                [1] = { name="", gem=1 },
+                [2] = { name="", gem=2 },
+                [3] = { name="", gem=3},
+                [4] = { name="", gem=4},
+                [5] = { name="", gem=5 },
+                [6] = { name="", gem=6 },
+                [7] = { name="", gem=7 },
+                [8] = { name="", gem=8 },
+                [9] = { name="", gem=9 },
+                [10] = { name="", gem=10 },
+                [11] = { name="", gem=11 },
+                [12] = { name="", gem=12 },
+            },
         },
-
-        -- ICE
-        ['ICE'] = {
-            ['WIZ_DPS_MODEICE'] = 1,
-            ['WIZ_Downtime_MODEICE'] = 1,
-            ['WIZ_Burn_MODEICE'] = 1,
+        ['DPS'] = {
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = {},
+                },
+                ['Debuff'] = {
+                    [1] = {},
+                },
+                ['Heal'] = {
+                    [1] = {},
+                },
+                ['DPS'] = {
+                    [1] = {},
+                },
+                ['Downtime'] = {
+                    [1] = {},
+                },
+            },
+            ['Spells'] = {
+                [1] = { name="", gem=1 },
+                [2] = { name="", gem=2 },
+                [3] = { name="", gem=3},
+                [4] = { name="", gem=4},
+                [5] = { name="", gem=5 },
+                [6] = { name="", gem=6 },
+                [7] = { name="", gem=7 },
+                [8] = { name="", gem=8 },
+                [9] = { name="", gem=9 },
+                [10] = { name="", gem=10 },
+                [11] = { name="", gem=11 },
+                [12] = { name="", gem=12 },
+            },
         },
-
-        -- TLP
-        ['TLP'] = {
-            ['WIZ_DPS_MODETLP'] = 1,
-            ['WIZ_Downtime_MODETLP'] = 1,
-            ['WIZ_Burn_MODETLP'] = 1,
-            ['WIZ_BURN_MODETLP_'] = 1,
+        ['Healer'] = {
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = {},
+                },
+                ['Debuff'] = {
+                    [1] = {},
+                },
+                ['Heal'] = {
+                    [1] = {},
+                },
+                ['DPS'] = {
+                    [1] = {},
+                },
+                ['Downtime'] = {
+                    [1] = {},
+                },
+            },
+            ['Spells'] = {
+                [1] = { name="", gem=1 },
+                [2] = { name="", gem=2 },
+                [3] = { name="", gem=3},
+                [4] = { name="", gem=4},
+                [5] = { name="", gem=5 },
+                [6] = { name="", gem=6 },
+                [7] = { name="", gem=7 },
+                [8] = { name="", gem=8 },
+                [9] = { name="", gem=9 },
+                [10] = { name="", gem=10 },
+                [11] = { name="", gem=11 },
+                [12] = { name="", gem=12 },
+            },
         },
-
-        -- MAGIC
-        ['MAGIC'] = {
-            ['WIZ_DPS_MODEMAGIC'] = 1,
-            ['WIZ_Downtime_MODEMAGIC'] = 1,
-            ['WIZ_Burn_MODEMAGIC'] = 1,
+        ['Hybrid'] = {
+            ['Rotation'] = {
+                ['Burn'] = {
+                    [1] = {},
+                },
+                ['Debuff'] = {
+                    [1] = {},
+                },
+                ['Heal'] = {
+                    [1] = {},
+                },
+                ['DPS'] = {
+                    [1] = {},
+                },
+                ['Downtime'] = {
+                    [1] = {},
+                },
+            },
+            ['Spells'] = {
+                [1] = { name="", gem=1 },
+                [2] = { name="", gem=2 },
+                [3] = { name="", gem=3},
+                [4] = { name="", gem=4},
+                [5] = { name="", gem=5 },
+                [6] = { name="", gem=6 },
+                [7] = { name="", gem=7 },
+                [8] = { name="", gem=8 },
+                [9] = { name="", gem=9 },
+                [10] = { name="", gem=10 },
+                [11] = { name="", gem=11 },
+                [12] = { name="", gem=12 },
+            },
         },
-
-        -- NOONE
-        ['NOONE'] = {
-            ['WIZ_DPS_MODENOONE'] = 1,
-            ['WIZ_Downtime_MODENOONE'] = 1,
-            ['WIZ_Burn_MODENOONE'] = 1,
+        ['DefaultConfig'] = {
+            ['Mode'] = '1',
         },
-
-    },
-
-    ['DefaultConfig'] = {
-        ['Mode'] = 'Ice',
     },
 }
