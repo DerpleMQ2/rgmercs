@@ -76,7 +76,7 @@ function Module.New()
     return newModule
 end
 
--- helper function for advanced logic to see if we want to use Darl Lord's Unity
+-- helper function for advanced logic to see if we want to use Dark Lord's Unity
 function Module:castDLU()
     if not Module.ResolvedActionMap['Shroud'] then return false end
 
@@ -115,28 +115,8 @@ function Module:setCombatMode(mode)
     RGMercUtils.LoadSpellLoadOut(Module.SpellLoadOut)
 end
 
-local function renderSetting(k, v)
-    if type(v) == "table" then
-        ImGui.Text(k)
-        ImGui.Indent()
-        for ki, kv in pairs(v) do
-            renderSetting(ki, kv)
-        end
-        ImGui.Unindent()
-    else
-        ImGui.Text("%s => %s", k, v)
-    end
-end
-
 function Module:Render()
     ImGui.Text("ShadowKnight Combat Modules")
-    local pressed
-
-    --if ImGui.CollapsingHeader("Current Settings") then
-    --    for k, v in pairs(self.settings) do
-    --        renderSetting(k, v)
-    --    end
-    --end
 
     ---@type boolean|nil
     local pressed = false
