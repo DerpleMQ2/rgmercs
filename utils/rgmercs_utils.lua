@@ -241,6 +241,43 @@ function Utils.DetAACheck(aaId)
            (Me.AltAbility(aaid).Spell.StacksTarget() or Me.AltAbility(aaid).Spell.Trigger(1).StacksTarget())
 end
 
+function Utils.SetLoadOut(t, itemSets, abilitySets)
+    local spellLoadOut = {}
+    local resolvedActionMap = {}
+
+    -- Map AbilitySet Items and Load Them
+    for k, t in pairs(itemSets) do
+        RGMercsLogger.log_debug("Finding best item for Set: %s", k)
+        resolvedActionMap[k] = Utils.GetBestItem(t)
+    end
+    for k, t in pairs(abilitySets) do
+        RGMercsLogger.log_debug("\ayFinding best spell for Set: \am%s", k)
+        resolvedActionMap[k] = Utils.GetBestSpell(t)
+    end
+
+    for _, s in ipairs(t) do
+        local spell = s.name
+        if not s.cond then
+            RGMercsLogger.log_debug( "\ayGem %d will load \am%s", s.gem, s.name)
+        else
+            RGMercsLogger.log_debug( "\ayGem %d will load \am%s\at or \am%s", s.gem, s.name, s.other)
+            if s.cond(self) then
+                RGMercsLogger.log_debug( "\ay   - Selected: \am%s", s.name)
+            else
+                spell = s.other
+                RGMercsLogger.log_debug( "\ay   - Selected: \am%s", s.other)
+            end
+        end
+
+        local bestSpell = resolvedActionMap[s.name]
+        RGMercsLogger.log_debug("\awLoaded spell \at%s\aw for type \am%s\aw from ActionMap", bestSpell.RankName(), s.name)
+        
+        spellLoadOut[s.gem] = bestSpell
+    end
+
+    return resolvedActionMap, spellLoadOut
+end
+
 function Utils.Tooltip(desc)
     ImGui.SameLine()
     if ImGui.IsItemHovered() then
@@ -342,6 +379,14 @@ function Utils.RenderRotationTable(s, n, t, map)
         end
 
         ImGui.EndTable()
+    end
+end
+
+function Module:RenderSettings(settings, defaults)
+    for k,v in settings do
+        if type(v) == 'boolean' then
+            settings[k], pressed = RGMercUtils.RenderOptionToggle("##_bool_tlp_mode", "TLP Mode", settings[k])
+            newCombatMode = newCombatMode or pressed
     end
 end
 
