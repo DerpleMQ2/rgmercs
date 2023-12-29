@@ -595,6 +595,7 @@ local _ClassConfig = {
             [14] = {
                 name = "PetHaste",
                 type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
                 cond = function(self, spell)
                     return RGMercUtils
                         .SelfBuffPetCheck(spell)

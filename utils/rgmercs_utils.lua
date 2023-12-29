@@ -180,7 +180,7 @@ end
 
 function Utils.SelfBuffPetCheck(spell)
     if not spell then return false end
-    return not mq.TLO.Me.PetBuff(spell.Name())() and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
+    return not mq.TLO.Me.PetBuff(spell.RankName())() and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
 function Utils.SelfBuffCheck(spell)
