@@ -357,7 +357,13 @@ function Utils.RenderRotationTable(s, n, t, map)
             ImGui.TableNextColumn()
             if entry.cond then
                 local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
-                if pass == true then
+                local active = entry.active_cond and
+                    entry.active_cond(s, map[entry.name] or mq.TLO.Spell(entry.name)) or false
+
+                if active == true then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+                    ImGui.Text(ICONS.FA_SMILE_O)
+                elseif pass == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
                     ImGui.Text(ICONS.MD_CHECK)
                 else
