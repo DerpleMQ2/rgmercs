@@ -40,26 +40,26 @@ function Module:LoadSettings()
     end
 
     -- Setup Defaults
-    self.settings.Mode = self.settings.Mode or 1
-    self.settings.DoTorrent = self.settings.DoTorrent or true
-    self.settings.DoDiretap = self.settings.DoDiretap or true
-    self.settings.DoBandolier = self.settings.DoBandolier or false
-    self.settings.DoBurn = self.settings.DoBurn or false
-    self.settings.DoSnare = self.settings.DoSnare or true
-    self.settings.DoDot = self.settings.DoDot or true
-    self.settings.DoAE = self.settings.DoAE or true
-    self.settings.AeTauntCnt = self.settings.AeTauntCnt or 2
-    self.settings.HPStopDOT = self.settings.HPStopDOT or 30
-    self.settings.TLP = self.settings.TLP or false
-    self.settings.ManaToNuke = self.settings.ManaToNuke or 30
-    self.settings.FlashHP = self.settings.FlashHP or 35
-    self.settings.StartBigTap = self.settings.StartBigTap or 100
-    self.settings.StartLifeTap = self.settings.StartLifeTap or 100
-    self.settings.BurnSize = self.settings.BurnSize or 1
-    self.settings.BurnAuto = self.settings.BurnAuto or false
-    self.settings.DoPet = self.settings.DoPet or true
-    self.settings.BurnMobCount = self.settings.BurnMobCount or 3
-    self.settings.BurnNamed = self.settings.BurnNamed or false
+    self.settings.Mode = self.settings.Mode or shdClassConfig.DefaultConfig.Mode.Default
+    self.settings.DoTorrent = self.settings.DoTorrent or shdClassConfig.DefaultConfig.DoTorrent.Default
+    self.settings.DoDiretap = self.settings.DoDiretap or shdClassConfig.DefaultConfig.DoDiretap.Default
+    self.settings.DoBandolier = self.settings.DoBandolier or shdClassConfig.DefaultConfig.DoBandolier.Default
+    self.settings.DoBurn = self.settings.DoBurn or shdClassConfig.DefaultConfig.DoBurn.Default
+    self.settings.DoSnare = self.settings.DoSnare or shdClassConfig.DefaultConfig.DoSnare.Default
+    self.settings.DoDot = self.settings.DoDot or shdClassConfig.DefaultConfig.DoDot.Default
+    self.settings.DoAE = self.settings.DoAE or shdClassConfig.DefaultConfig.DoAE.Default
+    self.settings.AeTauntCnt = self.settings.AeTauntCnt or shdClassConfig.DefaultConfig.AeTauntCnt.Default
+    self.settings.HPStopDOT = self.settings.HPStopDOT or shdClassConfig.DefaultConfig.HPStopDOT.Default
+    self.settings.TLP = self.settings.TLP or shdClassConfig.DefaultConfig.TLP.Default
+    self.settings.ManaToNuke = self.settings.ManaToNuke or shdClassConfig.DefaultConfig.ManaToNuke.Default
+    self.settings.FlashHP = self.settings.FlashHP or shdClassConfig.DefaultConfig.FlashHP.Default
+    self.settings.StartBigTap = self.settings.StartBigTap or shdClassConfig.DefaultConfig.StartBigTap.Default
+    self.settings.StartLifeTap = self.settings.StartLifeTap or shdClassConfig.DefaultConfig.StartLifeTap.Default
+    self.settings.BurnSize = self.settings.BurnSize or shdClassConfig.DefaultConfig.BurnSize.Default
+    self.settings.BurnAuto = self.settings.BurnAuto or shdClassConfig.DefaultConfig.BurnAuto.Default
+    self.settings.DoPet = self.settings.DoPet or shdClassConfig.DefaultConfig.DoPet.Default
+    self.settings.BurnMobCount = self.settings.BurnMobCount or shdClassConfig.DefaultConfig.BurnMobCount.Default
+    self.settings.BurnNamed = self.settings.BurnNamed or shdClassConfig.DefaultConfig.BurnNamed.Default
     newCombatMode = true
 end
 
@@ -86,60 +86,25 @@ function Module:castDLU()
     return res
 end
 
-function Module:setLoadOut(t)
-    Module.SpellLoadOut = {}
-    Module.ResolvedActionMap = {}
-
-    -- Map AbilitySet Items and Load Them
-    for k, t in pairs(shdClassConfig.ItemSets) do
-        RGMercsLogger.log_debug("Finding best item for Set: %s", k)
-        Module.ResolvedActionMap[k] = RGMercUtils.GetBestItem(t)
-    end
-    for k, t in pairs(shdClassConfig.AbilitySets) do
-        RGMercsLogger.log_debug("\ayFinding best spell for Set: \am%s", k)
-        Module.ResolvedActionMap[k] = RGMercUtils.GetBestSpell(t)
-    end
-
-    for _, s in ipairs(t) do
-        local spell = s.name
-        if not s.cond then
-            RGMercsLogger.log_debug( "\ayGem %d will load \am%s", s.gem, s.name)
-        else
-            RGMercsLogger.log_debug( "\ayGem %d will load \am%s\at or \am%s", s.gem, s.name, s.other)
-            if s.cond(self) then
-                RGMercsLogger.log_debug( "\ay   - Selected: \am%s", s.name)
-            else
-                spell = s.other
-                RGMercsLogger.log_debug( "\ay   - Selected: \am%s", s.other)
-            end
-        end
-
-        local bestSpell = Module.ResolvedActionMap[s.name]
-        RGMercsLogger.log_debug("\awLoaded spell \at%s\aw for type \am%s\aw from ActionMap", bestSpell.RankName(), s.name)
-        
-        Module.SpellLoadOut[s.gem] = bestSpell
-    end
-
-    RGMercUtils.LoadSpellLoadOut(Module.SpellLoadOut)
-end
-
 function Module:setCombatMode(mode)
     RGMercsLogger.log_debug("\aySettings Combat Mode to: \am%s", mode)
     if mode == "Tank" then
         Module.Tanking = true
         if self.settings.TLP then
-            self:setLoadOut(shdClassConfig.Rotations.TLP_Tank.Spells)
+            Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(shdClassConfig.Rotations.TLP_Tank.Spells, shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
         else
-            self:setLoadOut(shdClassConfig.Rotations.Tank.Spells)
+            Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(shdClassConfig.Rotations.Tank.Spells, shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
         end
     elseif mode == "DPS" then
         Module.Tanking = false
         if self.settings.TLP then
-            self:setLoadOut(shdClassConfig.Rotations.TLP_DPS.Spells)
+            Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(shdClassConfig.Rotations.TLP_DPS.Spells, shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
         else
-            self:setLoadOut(shdClassConfig.Rotations.DPS.Spells)
+            Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(shdClassConfig.Rotations.DPS.Spells, shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
         end 
-    end   
+    end
+    
+    RGMercUtils.LoadSpellLoadOut(Module.SpellLoadOut)
 end
 
 local function renderSetting(k, v)
@@ -172,6 +137,8 @@ function Module:Render()
     self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, shdClassConfig.Modes, #shdClassConfig.Modes)
     newCombatMode = newCombatMode or pressed
 
+    self.settings.ManaToNuke, pressed = ImGui.InputInt("test", self.settings.ManaToNuke, 1, 25)
+
     self.settings.TLP, pressed = RGMercUtils.RenderOptionToggle("##_bool_tlp_mode", "TLP Mode", self.settings.TLP)
     newCombatMode = newCombatMode or pressed
 
@@ -202,7 +169,7 @@ function Module:Render()
     self.settings.BurnAuto, pressed = RGMercUtils.RenderOptionToggle("##_bool_auto_burn", "Burn Auto", self.settings.BurnAuto)
     if pressed then self:SaveSettings(true) end
 
-    self.settings.BurnNamed, pressed = RGMercUtils.RenderOptionToggle("##_bool_auto_named", "Burn NAmed", self.settings.BurnNamed)
+    self.settings.BurnNamed, pressed = RGMercUtils.RenderOptionToggle("##_bool_auto_named", "Burn Named", self.settings.BurnNamed)
     if pressed then self:SaveSettings(true) end
 
     if ImGui.CollapsingHeader("Spell Loadout") then
@@ -240,6 +207,7 @@ function Module:GiveTime(combat_state)
 
     self.CombatState = combat_state
 
+    -- Downtime totaiton will just run a full rotation to completion
     if self.CombatState == "Downtime" then
         if Module.Tanking and self.settings.TLP then
             RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_Tank.Rotation.Downtime, Module.ResolvedActionMap)
