@@ -1,15 +1,15 @@
-local RGMercsLogger  = require("rgmercs.utils.rgmercs_logger")
+local RGMercsLogger = require("rgmercs.utils.rgmercs_logger")
 
-local Modules = { _version = '0.1a', author = 'Derple' }
-Modules.__index = Modules
+local Modules       = { _version = '0.1a', author = 'Derple' }
+Modules.__index     = Modules
 
 ---@return any
 function Modules.load()
     local newModules = setmetatable({
         modules = {
-            Basic          = require("modules.basic").New(),
-            Chase          = require("modules.chase").New(),
-            ShadowKnight   = require("modules.shd").New(),
+            --Basic          = require("modules.basic").New(),
+            Chase        = require("modules.chase").New(),
+            ShadowKnight = require("modules.shd").New(),
         }
     }, Modules)
 
