@@ -110,7 +110,7 @@ function Utils.MemorizeSpell(gem, spell)
     mq.cmdf("/memspell %d \"%s\"", gem, spell)
 
     while mq.TLO.Me.Gem(gem)() ~= spell do
-        RGMercsLogger.log_info("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
+        RGMercsLogger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         mq.delay(100)
     end
 end
@@ -133,19 +133,20 @@ function Utils.ExecEntry(e, map)
 
     if e.type:lower() == "spell" then
         local s = map[e.name]
+        RGMercsLogger.log_debug("%s - %s", e.name, s)
         if s then
-            if not mq.TLO.Me.Book(s.Name())() then
+            if not mq.TLO.Me.Book(s.RankName())() then
                 --RGMercsLogger.log_error("\arSpell '\at%s\ar' is not in your book!", s.Name())
                 return
             end
 
-            if not mq.TLO.Me.Gem(s.Name())() then
-                RGMercsLogger.log_debug("\ay%s is not memorized - meming!", s.Name())
-                Utils.MemorizeSpell(USEGEM, s.Name())
+            if not mq.TLO.Me.Gem(s.RankName())() then
+                RGMercsLogger.log_debug("\ay%s is not memorized - meming!", s.RankName())
+                Utils.MemorizeSpell(USEGEM, s.RankName())
             end
 
-            Utils.WaitCastReady(s.Name())
-            cmd = string.format("/casting \"%s\" -maxtries|5", s)
+            Utils.WaitCastReady(s.RankName())
+            cmd = string.format("/casting \"%s\" -maxtries|5", s.RankName())
             mq.cmdf(cmd)
             RGMercsLogger.log_debug("Running: \at'%s'", cmd)
         else
@@ -160,7 +161,7 @@ end
 
 function Utils.RunRotation(s, r, map)
     local oldSpellInSlot = mq.TLO.Me.Gem(USEGEM)
-    for idx, entry in ipairs(r) do
+    for _, entry in ipairs(r) do
         if entry.cond then
             local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
             if pass == true then
