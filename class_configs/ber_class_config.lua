@@ -1,8 +1,12 @@
+local mq             = require('mq')
+local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+
 return {
     ['Modes'] = {
-        ['DPS']     = 0,
-        ['NoOne']   = 1,
-        ['TLP']     = 2,
+        [1] = 'Tank',
+        [2] = 'DPS',
+        [3] = 'Healer',
+        [4] = 'Hybrid',
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -273,7 +277,33 @@ return {
             [11] = "Jarring Impact",
         },
     },
-    ['Rotations'] = {},
-
-    ['DefaultConfig'] = {},
+    ['Rotations'] = {
+        ['Tank'] = {
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
+        },
+        ['DPS'] = {
+            ["Available"] = 1,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
+        },
+        ['Healer'] = { 
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
+        },
+        ['Hybrid'] = { 
+            ["Available"] = 0,
+            ['Combat'] = {},
+            ['Downtime'] = {},
+            ['Burn'] = {},
+        },
+    },
+    ['DefaultConfig'] = {
+        ['Mode'] = '2',
+    },
 }
