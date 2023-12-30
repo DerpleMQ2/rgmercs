@@ -12,12 +12,23 @@ Config.CurLoadedClass       = mq.TLO.Me.Class.ShortName()
 Config.CurServer            = mq.TLO.EverQuest.Server():gsub(" ", "")
 
 -- Constants
-Config.RGCasters            = Set.new({"BRD","BST","CLR","DRU","ENC","MAG","NEC","PAL","RNG","SHD","SHM","WIZ"})
-Config.RGMelee              = Set.new({"BRD","SHD","PAL","WAR","ROG","BER","MNK","RNG","BST"})
-Config.RGHybrid             = Set.new({"SHD","PAL","RNG","BST","BRD"})
-Config.RGTank               = Set.new({"WAR","PAL","SHD"})
-Config.RGModRod             = Set.new({"BST","CLR","DRU","SHM","MAG","ENC","WIZ","NEC","PAL","RNG","SHD"})
-Config.RGPetClass           = Set.new({"BST","NEC","MAG","SHM","ENC","SHD"})
+Config.RGCasters            = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD", "SHM", "WIZ" })
+Config.RGMelee              = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST" })
+Config.RGHybrid             = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD" })
+Config.RGTank               = Set.new({ "WAR", "PAL", "SHD" })
+Config.RGModRod             = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD" })
+Config.RGPetClass           = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD" })
+
+-- Defaults
+Config.DefaultConfig        = {
+    ['DoAutoEngage']  = { DisplayName = "Auto Engage", Tooltip = "Automatically engage targets.", Default = true },
+    ['DoMelee']       = { DisplayName = "Enable Melee Combat", Tooltip = "Melee targets.", Default = true },
+    ['AssistRange']   = { DisplayName = "Assist Range", Tooltip = "Distance to the target before you engage.", Default = 45, Min = 15, Max = 200 },
+    ['AutoAssistAt']  = { DisplayName = "Auto Assist At", Tooltip = "Melee attack when target hits [x] HP %.", Default = 98, Min = 1, Max = 100 },
+    ['StickHow']      = { DisplayName = "Stick How", Tooltip = "Custom /stick command", Type = "Custom", Default = "" },
+    ['AllowMezBreak'] = { DisplayName = "Allow Mez Break", Tooltip = "Allow Mez Breaking.", Default = false },
+    ['BgOpacity']     = { DisplayName = "Background Opacity", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = 1.0 },
+}
 
 function Config:SaveSettings(doBroadcast)
     mq.pickle(self.settings_pickle_path, self.settings)
@@ -49,11 +60,19 @@ function Config:LoadSettings()
 
     if not self.settings[self.CurLoadedChar] then
         self.settings[self.CurLoadedChar] = self.settings[self.CurLoadedChar] or {}
-        self.settings[self.CurLoadedChar].BgOpacity = 1.0
         self:SaveSettings(true)
     end
 
+    -- Setup Defaults
+    for k, v in pairs(Config.DefaultConfig) do
+        self.settings[self.CurLoadedChar][k] = self.settings[self.CurLoadedChar][k] or v.Default
+    end
+
     return true
+end
+
+function Config:setSettings(newSettings)
+    self.settings[self.CurLoadedChar] = newSettings
 end
 
 function Config:getSettings()

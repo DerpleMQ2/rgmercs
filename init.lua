@@ -88,10 +88,20 @@ local function RGMercsGUI()
                 ImGui.SetItemDefaultFocus()
                 if ImGui.BeginTabItem("RGMercsMain") then
                     ImGui.Text(curState)
+                    if ImGui.CollapsingHeader("Config Options") then
+                        local newSettings = RGMercConfig:getSettings()
+                        newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig)
+                        if pressed then
+                            RGMercConfig:setSettings(newSettings)
+                            RGMercConfig:SaveSettings(true)
+                        end
+                    end
+
                     ImGui.EndTabItem()
                 end
 
                 renderModulesTabs()
+
 
                 ImGui.EndTabBar();
             end
@@ -150,6 +160,8 @@ end
 local function Main()
     curState = "Idle..."
 
+    if mq.TLO.Me.Zoning() then return end
+
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
     if RGMercConfig.CurLoadedChar ~= mq.TLO.Me.CleanName() then
@@ -159,6 +171,10 @@ local function Main()
     local state = "Downtime"
     if mq.TLO.XAssist.XTFullHaterCount() > 0 then
         state = "Combat"
+
+        if RGMercUtils.OkToEngage(RGMercConfig:getSettings(), mq.TLO.Me.ID(), mq.TLO.Target.ID(), true) then
+            RGMercUtils.EngageTarget(RGMercConfig:getSettings(), mq.TLO.Me.ID(), mq.TLO.Target.ID())
+        end
     end
 
     RGMercModules:execAll("GiveTime", state)
