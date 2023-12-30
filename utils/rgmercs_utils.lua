@@ -255,6 +255,21 @@ function Utils.BigBurn(config)
     return config.BurnSize >= 3
 end
 
+function Utils.PetAttack(config, target)
+    if not config.DoPet then return end
+
+    local pet = mq.TLO.Me.Pet
+
+    if not target() then return end
+    if not pet() then return end
+
+    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" and (target.PctHPs() <= config.PetEngagePct) then
+        mq.cmdf("/squelch /pet attack")
+        mq.cmdf("/squelch /pet swarm")
+        RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
+    end
+end
+
 function Utils.DetAACheck(aaId)
     if not mq.TLO.Target.ID() then return false end
     local Target = mq.TLO.Target

@@ -7,6 +7,7 @@ local shdClassConfig     = require("rgmercs.class_configs.shd_class_config")
 local Module             = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
 Module.__index           = Module
 Module.Tanking           = false
+Module.LastPetCmd        = 0
 Module.SpellLoadOut      = {}
 Module.ResolvedActionMap = {}
 
@@ -41,26 +42,9 @@ function Module:LoadSettings()
     end
 
     -- Setup Defaults
-    self.settings.Mode = self.settings.Mode or shdClassConfig.DefaultConfig.Mode.Default
-    self.settings.DoTorrent = self.settings.DoTorrent or shdClassConfig.DefaultConfig.DoTorrent.Default
-    self.settings.DoDiretap = self.settings.DoDiretap or shdClassConfig.DefaultConfig.DoDiretap.Default
-    self.settings.DoBandolier = self.settings.DoBandolier or shdClassConfig.DefaultConfig.DoBandolier.Default
-    self.settings.DoBurn = self.settings.DoBurn or shdClassConfig.DefaultConfig.DoBurn.Default
-    self.settings.DoSnare = self.settings.DoSnare or shdClassConfig.DefaultConfig.DoSnare.Default
-    self.settings.DoDot = self.settings.DoDot or shdClassConfig.DefaultConfig.DoDot.Default
-    self.settings.DoAE = self.settings.DoAE or shdClassConfig.DefaultConfig.DoAE.Default
-    self.settings.AeTauntCnt = self.settings.AeTauntCnt or shdClassConfig.DefaultConfig.AeTauntCnt.Default
-    self.settings.HPStopDOT = self.settings.HPStopDOT or shdClassConfig.DefaultConfig.HPStopDOT.Default
-    self.settings.TLP = self.settings.TLP or shdClassConfig.DefaultConfig.TLP.Default
-    self.settings.ManaToNuke = self.settings.ManaToNuke or shdClassConfig.DefaultConfig.ManaToNuke.Default
-    self.settings.FlashHP = self.settings.FlashHP or shdClassConfig.DefaultConfig.FlashHP.Default
-    self.settings.StartBigTap = self.settings.StartBigTap or shdClassConfig.DefaultConfig.StartBigTap.Default
-    self.settings.StartLifeTap = self.settings.StartLifeTap or shdClassConfig.DefaultConfig.StartLifeTap.Default
-    self.settings.BurnSize = self.settings.BurnSize or shdClassConfig.DefaultConfig.BurnSize.Default
-    self.settings.BurnAuto = self.settings.BurnAuto or shdClassConfig.DefaultConfig.BurnAuto.Default
-    self.settings.DoPet = self.settings.DoPet or shdClassConfig.DefaultConfig.DoPet.Default
-    self.settings.BurnMobCount = self.settings.BurnMobCount or shdClassConfig.DefaultConfig.BurnMobCount.Default
-    self.settings.BurnNamed = self.settings.BurnNamed or shdClassConfig.DefaultConfig.BurnNamed.Default
+    for k, v in pairs(shdClassConfig.DefaultConfig) do
+        self.settings[k] = self.settings[k] or v.Default
+    end
 
     for rot, rot_entry in pairs(shdClassConfig.DefaultRotations) do
         RGMercsLogger.log_debug("Appending new entry for rotation %s", rot)
@@ -203,6 +187,10 @@ function Module:GiveTime(combat_state)
             RGMercUtils.RunRotation(self, shdClassConfig.Rotations.DPS.Rotation.Downtime, Module.ResolvedActionMap)
         end
     else
+        if Module.Tanking and ((os.clock() - Module.LastPetCmd) > 2) then
+            Module.LastPetCmd = os.clock()
+            RGMercUtils.PetAttack(self.settings, mq.TLO.Target)
+        end
     end
 end
 
