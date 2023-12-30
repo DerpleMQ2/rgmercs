@@ -162,6 +162,8 @@ function Module:Render()
 
     if ImGui.CollapsingHeader("Rotations") then
         ImGui.Indent()
+        RGMercUtils.RenderRotationTableKey()
+
         local mode = shdClassConfig.Modes[self.settings.Mode]
         if self.settings.TLP then
             mode = "TLP_" .. mode

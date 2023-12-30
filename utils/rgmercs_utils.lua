@@ -123,6 +123,8 @@ function Utils.WaitCastReady(spell)
 end
 
 function Utils.ExecEntry(e, map)
+    local cmd
+
     if e.type:lower() == "item" then
         local i = map[e.name]
         cmd = string.format("/useitem \"%s\"", i)
@@ -146,7 +148,7 @@ function Utils.ExecEntry(e, map)
             end
 
             Utils.WaitCastReady(s.RankName())
-            cmd = string.format("/casting \"%s\" -maxtries|5", s.RankName())
+            cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", s.RankName(), mq.TLO.Me.ID())
             mq.cmdf(cmd)
             RGMercsLogger.log_debug("Running: \at'%s'", cmd)
         else
@@ -154,6 +156,23 @@ function Utils.ExecEntry(e, map)
         end
 
         Utils.WaitCastFinish()
+        return
+    end
+
+    if e.type:lower() == "aa" then
+        local oldTarget = mq.TLO.Target.ID()
+
+        local s = mq.TLO.Me.AltAbility(e.name)
+
+        if not s then
+            RGMercsLogger.log_warning("\ayYou do not have the AA Ability: %s!", s.RankName())
+            return
+        end
+
+        cmd = string.format("/multiline ; /target id %d ; /alt act %d", mq.TLO.Me.ID(), s.ID())
+        mq.cmdf(cmd)
+        mq.delay(200)
+        mq.cmdf("/target id %d", oldTarget or 0)
 
         return
     end
@@ -190,11 +209,11 @@ function Utils.SelfBuffCheck(spell)
 end
 
 function Utils.SelfBuffAACheck(aaName)
-    return not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName)).ID())).ID() and
+    return not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.ID())).ID() and
         not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())).ID() and
         not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID() and
         mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName()).Stacks() and
-        mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)).Stacks()
+        (not mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1))() or mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)).Stacks())
 end
 
 function Utils.DotSpellCheck(config, spell)
@@ -205,7 +224,7 @@ end
 
 function Utils.DetSpellCheck(spell)
     if not spell then return false end
-    return not mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() and spell.StacksTarget()
+    return mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() ~= nil and spell.StacksTarget()
 end
 
 function Utils.TargetHasBuff(spell)
@@ -338,6 +357,35 @@ function Utils.RenderLoadoutTable(t)
             ImGui.Text(spell.RankName())
         end
 
+        ImGui.EndTable()
+    end
+end
+
+function Utils.RenderRotationTableKey()
+    if ImGui.BeginTable("Rotation_keys", 2, ImGuiTableFlags.Borders) then
+        ImGui.TableNextColumn()
+        ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+        ImGui.Text(ICONS.FA_SMILE_O .. ": Active")
+
+        ImGui.PopStyleColor()
+        ImGui.TableNextColumn()
+
+        ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+        ImGui.Text(ICONS.MD_CHECK .. ": Will Cast (Coditions Met)")
+
+        ImGui.PopStyleColor()
+        ImGui.TableNextColumn()
+
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+        ImGui.Text(ICONS.FA_EXCLAMATION .. ": Cannot Cast")
+
+        ImGui.PopStyleColor()
+        ImGui.TableNextColumn()
+
+        ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
+        ImGui.Text(ICONS.MD_CHECK .. ": Will Cast (No Conditions)")
+
+        ImGui.PopStyleColor()
         ImGui.EndTable()
     end
 end
