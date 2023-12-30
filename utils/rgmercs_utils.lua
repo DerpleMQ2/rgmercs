@@ -110,7 +110,7 @@ function Utils.MemorizeSpell(gem, spell)
     mq.cmdf("/memspell %d \"%s\"", gem, spell)
 
     while mq.TLO.Me.Gem(gem)() ~= spell do
-        RGMercsLogger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
+        --RGMercsLogger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         mq.delay(100)
     end
 end
@@ -118,7 +118,7 @@ end
 function Utils.WaitCastReady(spell)
     while not mq.TLO.Cast.Ready(spell)() do
         mq.delay(100)
-        RGMercsLogger.log_debug("Waiting for spell '%s' to be ready...", spell)
+        --RGMercsLogger.log_debug("Waiting for spell '%s' to be ready...", spell)
     end
 end
 
@@ -253,6 +253,118 @@ end
 
 function Utils.BigBurn(config)
     return config.BurnSize >= 3
+end
+
+function Utils.DoStick(config, assistId, targetId)
+    if config.StickHow:len() > 0 then
+        mq.cmdf("/stick %s", config.StickHow)
+    else
+        if mq.TLO.Me.ID() == assistId then
+            mq.cmdf("/stick 20 id %d moveback uw", targetId)
+        else
+            mq.cmdf("/stick 20 id %d behindonce moveback uw", targetId)
+        end
+    end
+end
+
+function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
+    if not config.DoAutoEngage then return end
+
+    if mq.TLO.Stick.Active() then
+        mq.cmdf("/stick off")
+    end
+
+    if mq.TLO.Nav.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
+        mq.cmdf("/nav id %d distance=%d log=off lineofsight=on", targetId, distance)
+        while mq.TLO.Nav.Active() and mq.TLO.Nav.Velocity() > 0 do
+            mq.delay(100)
+        end
+    else
+        mq.cmdf("/moveto id %d uw mdist %d", targetId, distance)
+        while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveUtils.Stuck() do
+            mq.delay(100)
+        end
+    end
+
+    if not bDontStick then
+        Utils.DoStick(config, assistId, targetId)
+    end
+end
+
+function Utils.EngageTarget(config, assistId, autoTargetId, preEngageRoutine)
+    if not config.DoAutoEngage then return end
+
+    if mq.TLO.Me.State():lower() == "feign" and mq.TLO.Me.Class.ShortName():lower() ~= "mnk" then
+        mq.cmd("/stand")
+    end
+
+    local target = mq.TLO.Target
+
+    if target() and target.ID() == autoTargetId and mq.TLO.Target.Distance() <= config.AssistRange then
+        if config.DoMelee then
+            if mq.TLO.Me.Sitting() then
+                mq.cmdf("/stand")
+            end
+
+            if (target.PctHPs() <= config.AutoAssistAt or assistId == mq.TLO.Me.ID()) and target.PctHPs() > 0 then
+                if target.Distance() > target.MaxRangeTo() then
+                    RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(), target.MaxRangeTo())
+                    if preEngageRoutine then
+                        preEngageRoutine()
+                    end
+
+                    Utils.NavInCombat(config, assistId, autoTargetId, target.MaxRangeTo(), false)
+                else
+                    mq.cmdf("/nav stop log=off")
+                    if mq.TLO.Stick.Status():lower() == "off" then
+                        Utils.DoStick(config, assistId, autoTargetId)
+                    end
+
+                    if not mq.TLO.Me.Combat() then
+                        RGMercsLogger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", target.CleanName())
+                        mq.cmdf("/keypress AUTOPRIM")
+                    end
+                end
+            end
+        end
+    else
+        if not config.DoMelee and RGMercConfig.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
+            mq.cmdf("/stick pin 40")
+        end
+
+        -- TODO: why are we doing this after turning stick on just now?
+        if mq.TLO.Stick.Status():lower() == "on" then mq.cmdf("/stick off") end
+    end
+end
+
+function Utils.OkToEngage(config, assistId, autoTargetId, isTanking)
+    if not config.DoAutoEngage then return false end
+
+    local target = mq.TLO.Target
+
+    if not target() then return false end
+
+    if target.ID() ~= autoTargetId then
+        RGMercsLogger.log_debug("%d != %d --> Not Engageing", target.ID() or 0, autoTargetId)
+        return false
+    end
+
+    if target.Mezzed.ID() and not config.AllowMezBreak then
+        RGMercsLogger.log_debug("Target is mezzed and not AllowMezBreak --> Not Engaging")
+        return false
+    end
+
+    if mq.TLO.XAssist.XTFullHaterCount() > 0 then -- TODO: or KillTargetID and !BackOffFlag
+        if target.Distance() < config.AssistRange and (target.PctHPs() < config.AutoAssistAt or isTanking or assistId == mq.TLO.Me.ID()) then
+            if not mq.TLO.Me.Combat() then
+                RGMercsLogger.log_debug("%d < %d and %d < %d or Tanking or %d == %d --> OK To Engage!",
+                    target.Distance(), config.AssistRange, target.PctHPs(), config.AutoAssistAt, assistId, mq.TLO.Me.ID())
+            end
+            return true
+        end
+    end
+
+    return false
 end
 
 function Utils.PetAttack(config, target)
@@ -420,8 +532,13 @@ function Utils.RenderRotationTable(s, n, t, map)
             ImGui.TableNextColumn()
             if entry.cond then
                 local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
-                local active = entry.active_cond and
-                    entry.active_cond(s, map[entry.name] or mq.TLO.Spell(entry.name)) or false
+                local active = entry.active_cond and entry.active_cond(s, map[entry.name] or mq.TLO.Spell(entry.name)) or false
+
+                if entry.type == "Item" then
+                    local passtwo = entry.cond(s)
+
+                    RGMercsLogger.log_debug("%s : %s : %s", entry.name, pass and "True" or "False", passtwo and "True" or "False")
+                end
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)

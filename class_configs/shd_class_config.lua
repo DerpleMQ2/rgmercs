@@ -740,8 +740,7 @@ local _ClassConfig = {
                         name = "ActivateShield",
                         type = "cmd",
                         tooltip = Tooltips.ActivateShield,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
                                 mq.TLO.Me.Bandolier("Shield").Index() and self.settings.DoBurn
                         end,
@@ -751,8 +750,7 @@ local _ClassConfig = {
                         name = "Activate2HS",
                         type = "cmd",
                         tooltip = Tooltips.Activate2HS,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and
                                 mq.TLO.Me.Bandolier("2HS").Index() and not self.settings.DoBurn
                         end,
@@ -762,8 +760,7 @@ local _ClassConfig = {
                         name = "EndRegen",
                         type = "DISC",
                         tooltip = Tooltips.EndRegen,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Me.PctEndurance() < 15
                         end
                     },
@@ -771,8 +768,7 @@ local _ClassConfig = {
                         name = "Explosion of Hatred",
                         type = "AA",
                         tooltip = Tooltips.ExplosionOfHatred,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                                 mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt
                         end
@@ -781,8 +777,7 @@ local _ClassConfig = {
                         name = "Explosion of Spite",
                         type = "AA",
                         tooltip = Tooltips.ExplosionOfSpite,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                                 mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt
                         end
@@ -791,8 +786,7 @@ local _ClassConfig = {
                         name = "Taunt",
                         type = "Ability",
                         tooltip = Tooltips.Taunt,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Me.AbilityReady("Taunt")() and
                                 mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and mq.TLO.Target() and
                                 RGMercUtils.GetTargetDistance() < 30
@@ -802,8 +796,7 @@ local _ClassConfig = {
                         name = "Terror",
                         type = "Spell",
                         tooltip = Tooltips.Terror,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Me.SecondaryPctAggro() > 60
                         end
                     },
@@ -812,8 +805,7 @@ local _ClassConfig = {
                         name = "ForPower",
                         type = "Spell",
                         tooltip = Tooltips.ForPower,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return RGMercUtils.DotSpellCheck(self.settings, spell)
                         end
                     },
@@ -821,8 +813,7 @@ local _ClassConfig = {
                         name = "Encroaching Darknesss",
                         tooltip = Tooltips.EncroachingDarkness,
                         type = "AA",
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return self.settings.DoSnare and RGMercUtils.DetAACheck(826)
                         end
                     },
@@ -830,8 +821,7 @@ local _ClassConfig = {
                         name = "SnareDOT",
                         type = "Spell",
                         tooltip = Tooltips.SnareDOT,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return self.settings.DoSnare and RGMercUtils.DetSpellCheck(spell)
                         end
                     },
@@ -839,8 +829,7 @@ local _ClassConfig = {
                         name = "Epic",
                         type = "Item",
                         tooltip = Tooltips.Epic,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
                         end
                     },
@@ -848,8 +837,7 @@ local _ClassConfig = {
                         name = "LeechCurse",
                         type = "DISC",
                         tooltip = Tooltips.LeechCurse,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline"
                         end
                     },
@@ -857,8 +845,7 @@ local _ClassConfig = {
                         name = "Deflection",
                         type = "DISC",
                         tooltip = Tooltips.Deflection,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
                         end
                     },
@@ -866,8 +853,7 @@ local _ClassConfig = {
                         name = "Mantle",
                         type = "DISC",
                         tooltip = Tooltips.Mantle,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                                 not mq.TLO.Me.ActiveDisc.ID()
                         end
@@ -876,8 +862,7 @@ local _ClassConfig = {
                         name = "Carapace",
                         type = "DISC",
                         tooltip = Tooltips.Carapace,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                                 not mq.TLO.Me.ActiveDisc.ID()
                         end
@@ -886,8 +871,7 @@ local _ClassConfig = {
                         name = "CurseGuard",
                         type = "DISC",
                         tooltip = Tooltips.CurseGuard,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                                 not mq.TLO.Me.ActiveDisc.ID()
                         end
@@ -896,8 +880,7 @@ local _ClassConfig = {
                         name = "UnholyAura",
                         type = "DISC",
                         tooltip = Tooltips.UnholyAura,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return (mq.TLO.Target.Named() or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                                 not mq.TLO.Me.ActiveDisc.ID()
                         end
@@ -906,8 +889,7 @@ local _ClassConfig = {
                         name = "PoisonDot",
                         type = "Spell",
                         tooltip = Tooltips.PoisonDot,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return RGMercUtils.DotSpellCheck(self.settings, spell)
                         end
                     },
@@ -915,8 +897,7 @@ local _ClassConfig = {
                         name = "DireDot",
                         type = "Spell",
                         tooltip = Tooltips.DireDot,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return RGMercUtils.DotSpellCheck(self.settings, spell)
                         end
                     },
@@ -924,8 +905,7 @@ local _ClassConfig = {
                         name = "Torrent",
                         type = "Spell",
                         tooltip = Tooltips.Torrent,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return self.settings.DoTorrent and
                                 not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID()
                         end
@@ -934,8 +914,7 @@ local _ClassConfig = {
                         name = "SpearNuke",
                         type = "Spell",
                         tooltip = Tooltips.SpearNuke,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return mq.TLO.Me.PctMana() > self.settings.ManaToNuke
                         end
                     },
@@ -943,8 +922,7 @@ local _ClassConfig = {
                         name = "BondTap",
                         type = "Spell",
                         tooltip = Tooltips.BondTap,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return not self.settings.DoTorrent and
                                 not mq.TLO.Me.FindBuff("name " .. spell.Name() .. " Recourse").ID()
                         end
@@ -954,8 +932,7 @@ local _ClassConfig = {
                         name = "Vicious Bite of Chaos",
                         type = "AA",
                         tooltip = Tooltips.ViciousBiteOfChaos,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and
                                 RGMercUtils.GetTargetDistance() < 35
                         end
@@ -964,8 +941,7 @@ local _ClassConfig = {
                         name = "Blade",
                         type = "Disc",
                         tooltip = Tooltips.Blade,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and
                                 RGMercUtils.GetTargetDistance() < 35
                         end
@@ -974,8 +950,7 @@ local _ClassConfig = {
                         name = "Crimson",
                         type = "Disc",
                         tooltip = Tooltips.Crimson,
-                        cond = function(
-                            self)
+                        cond = function(self)
                             return mq.TLO.Target() and RGMercUtils.GetTragetPctHPs() > 5 and
                                 RGMercUtils.GetTargetDistance() < 35
                         end
@@ -984,8 +959,7 @@ local _ClassConfig = {
                         name = "Dicho",
                         type = "Spell",
                         tooltip = Tooltips.Dicho,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap
                         end
                     },
@@ -993,8 +967,7 @@ local _ClassConfig = {
                         name = "DireTap",
                         type = "Spell",
                         tooltip = Tooltips.DireTap,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap
                         end
                     },
@@ -1002,8 +975,7 @@ local _ClassConfig = {
                         name = "BuffTap",
                         type = "Spell",
                         tooltip = Tooltips.BuffTap,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and
                                 RGMercUtils.DetSpellCheck(spell)
                         end
@@ -1012,8 +984,7 @@ local _ClassConfig = {
                         name = "BiteTap",
                         type = "Spell",
                         tooltip = Tooltips.BiteTap,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
                         end
                     },
@@ -1021,8 +992,7 @@ local _ClassConfig = {
                         name = "LifeTap",
                         type = "Spell",
                         tooltip = Tooltips.LifeTap,
-                        cond = function(
-                            self, spell)
+                        cond = function(self, spell)
                             return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
                         end
                     },
@@ -1817,27 +1787,27 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode'] = { DisplayName = "Mode", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3 },
-        ['DoTorrent'] = { DisplayName = "Cast Torrents", Tooltip = "Enable casting Torrent spells.", RequiresLoadoutChange = true, Default = true },
-        ['DoDiretap'] = { DisplayName = "Cast Dire Taps", Tooltip = "Enable casting Dire Tap spells.", RequiresLoadoutChange = true, Default = true },
-        ['DoBandolier'] = { DisplayName = "Use Bandolier", Tooltip = "Enable Swapping of items using the bandolier.", Default = false },
-        ['DoBurn'] = { DisplayName = "Enable Burning", Tooltip = "Put character in 'burn' mode", Default = false },
-        ['DoSnare'] = { DisplayName = "Cast Snares", Tooltip = "Enable casting Snare spells.", Default = true },
-        ['DoDot'] = { DisplayName = "Cast DOTs", Tooltip = "Enable casting Damage Over Time spells.", Default = true },
-        ['DoAE'] = { DisplayName = "Use AE Taunts", Tooltip = "Enable casting AE Taunt spells.", Default = true },
-        ['AeTauntCnt'] = { DisplayName = "AE Taunt Count", Tooltip = "Minimum number of haters before using AE Taunt.", Default = 2, Min = 1, Max = 10 },
-        ['HPStopDOT'] = { DisplayName = "HP Stop DOTs", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100 },
-        ['TLP'] = { DisplayName = "Enable TLP Mode", Tooltip = "Adjust for older mechanics on TLPs.", RequiresLoadoutChange = true, Default = false },
-        ['ManaToNuke'] = { DisplayName = "Mana to Nuke", Tooltip = "Minimum % Mana in order to continue to cast nukes.", Default = 30, Min = 1, Max = 100 },
-        ['FlashHP'] = { DisplayName = "Flash HP", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100 },
-        ['StartBigTap'] = { DisplayName = "Use Big Taps", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100 },
+        ['Mode']         = { DisplayName = "Mode", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3 },
+        ['DoTorrent']    = { DisplayName = "Cast Torrents", Tooltip = "Enable casting Torrent spells.", RequiresLoadoutChange = true, Default = true },
+        ['DoDiretap']    = { DisplayName = "Cast Dire Taps", Tooltip = "Enable casting Dire Tap spells.", RequiresLoadoutChange = true, Default = true },
+        ['DoBandolier']  = { DisplayName = "Use Bandolier", Tooltip = "Enable Swapping of items using the bandolier.", Default = false },
+        ['DoBurn']       = { DisplayName = "Enable Burning", Tooltip = "Put character in 'burn' mode", Default = false },
+        ['DoSnare']      = { DisplayName = "Cast Snares", Tooltip = "Enable casting Snare spells.", Default = true },
+        ['DoDot']        = { DisplayName = "Cast DOTs", Tooltip = "Enable casting Damage Over Time spells.", Default = true },
+        ['DoAE']         = { DisplayName = "Use AE Taunts", Tooltip = "Enable casting AE Taunt spells.", Default = true },
+        ['AeTauntCnt']   = { DisplayName = "AE Taunt Count", Tooltip = "Minimum number of haters before using AE Taunt.", Default = 2, Min = 1, Max = 10 },
+        ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100 },
+        ['TLP']          = { DisplayName = "Enable TLP Mode", Tooltip = "Adjust for older mechanics on TLPs.", RequiresLoadoutChange = true, Default = false },
+        ['ManaToNuke']   = { DisplayName = "Mana to Nuke", Tooltip = "Minimum % Mana in order to continue to cast nukes.", Default = 30, Min = 1, Max = 100 },
+        ['FlashHP']      = { DisplayName = "Flash HP", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100 },
+        ['StartBigTap']  = { DisplayName = "Use Big Taps", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100 },
         ['StartLifeTap'] = { DisplayName = "Use Life Taps", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100 },
-        ['BurnSize'] = { DisplayName = "Burn Size", Tooltip = "1=Small, 2=Medium, 3=Large", Default = 1, Min = 1, Max = 3 },
-        ['BurnAuto'] = { DisplayName = "Auto Burn", Tooltip = "Automatically burn", Default = false },
-        ['DoPet'] = { DisplayName = "Cast Pet", Tooltip = "Enable casting Pet spells.", Default = true },
+        ['BurnSize']     = { DisplayName = "Burn Size", Tooltip = "1=Small, 2=Medium, 3=Large", Default = 1, Min = 1, Max = 3 },
+        ['BurnAuto']     = { DisplayName = "Auto Burn", Tooltip = "Automatically burn", Default = false },
+        ['DoPet']        = { DisplayName = "Cast Pet", Tooltip = "Enable casting Pet spells.", Default = true },
         ['PetEngagePct'] = { DisplayName = "Pet Engage HPs", Tooltip = "Send in pet when target hits [x] HP %.", Default = 90, Min = 1, Max = 100 },
         ['BurnMobCount'] = { DisplayName = "Burn Mob Count", Tooltip = "Number of haters before we start burning.", Default = 3, Min = 1, Max = 10 },
-        ['BurnNamed'] = { DisplayName = "Burn Named", Tooltip = "Automatically burn named mobs.", Default = false },
+        ['BurnNamed']    = { DisplayName = "Burn Named", Tooltip = "Automatically burn named mobs.", Default = false },
     },
 }
 
