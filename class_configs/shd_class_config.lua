@@ -1835,6 +1835,7 @@ local _ClassConfig = {
         ['BurnSize'] = { DisplayName = "Burn Size", Tooltip = "1=Small, 2=Medium, 3=Large", Default = 1, Min = 1, Max = 3 },
         ['BurnAuto'] = { DisplayName = "Auto Burn", Tooltip = "Automatically burn", Default = false },
         ['DoPet'] = { DisplayName = "Cast Pet", Tooltip = "Enable casting Pet spells.", Default = true },
+        ['PetEngagePct'] = { DisplayName = "Pet Engage HPs", Tooltip = "Send in pet when target hits [x] HP %.", Default = 90, Min = 1, Max = 100 },
         ['BurnMobCount'] = { DisplayName = "Burn Mob Count", Tooltip = "Number of haters before we start burning.", Default = 3, Min = 1, Max = 10 },
         ['BurnNamed'] = { DisplayName = "Burn Named", Tooltip = "Automatically burn named mobs.", Default = false },
     },
