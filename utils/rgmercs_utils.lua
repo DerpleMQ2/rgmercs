@@ -11,13 +11,75 @@ local Utils         = { _version = '0.1a', author = 'Derple' }
 Utils.__index       = Utils
 Utils.Actors        = require('actors')
 Utils.ScriptName    = "RGMercs"
+Utils.LastZoneID    = 0
+Utils.NamedList     = {}
 
 function Utils.BroadcastUpdate(module, event)
-    Utils.Actors.send({ from = RGMercConfig.CurLoadedChar, script = Utils.ScriptName, module = module, event = event })
+    Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event })
 end
 
-function Utils.PrintGroupMessage(msg)
-    mq.cmdf("/dgt group_%s_%s %s", RGMercConfig.CurServer, mq.TLO.Group.Leader() or "None", msg)
+function Utils.PrintGroupMessage(msg, ...)
+    local output = msg
+    if (... ~= nil) then output = string.format(output, ...) end
+
+    mq.cmdf("/dgt group_%s_%s %s", RGMercConfig.Globals.CurServer, mq.TLO.Group.Leader() or "None", output)
+end
+
+function Utils.PopUp(msg, ...)
+    local output = msg
+    if (... ~= nil) then output = string.format(output, ...) end
+
+    mq.cmdf("/popup %s", output)
+end
+
+function Utils.SetTarget(targetId)
+    if RGMercConfig:GetSettings().DoAutoTarget then
+        if mq.TLO.Target.ID() ~= targetId then
+            mq.cmdf("/target id %d", targetId)
+            mq.delay(10)
+        end
+    end
+end
+
+function Utils.ClearTarget()
+    if RGMercConfig:GetSettings().DoAutoTarget then
+        RGMercConfig.Globals.AutoTargetID = 0
+        RGMercConfig.Globals.BurnNow = false
+        if mq.TLO.Stick.Status():lower() == "on" then mq.cmdf("/stick off") end
+        mq.cmdf("/target clear")
+    end
+end
+
+function Utils.HandleDeath()
+    RGMercsLogger.log_warning("You are sleeping with the fishes.")
+
+    Utils.ClearTarget()
+
+    RGMercModules:execAll("OnDeath")
+
+    -- TODO: Cancel pulling in OnDeath
+
+    while mq.TLO.Me.Hovering() do
+        if mq.TLO.Window("RespawnWnd").Open() and RGMercConfig:GetSettings().InstantRelease then
+            mq.TLO.Window("RespawnWnd").Child("RW_OptionsList").Select(1)
+            mq.delay("1s")
+            mq.TLO.Window("RespawnWnd").Child("RW_SelectButton").LeftMouseUp()
+        else
+            break
+        end
+    end
+
+    mq.delay("1m", (not mq.TLO.Me.Zoning()))
+
+    if RGMercConfig:GetSettings().DoFellow then
+        if mq.TLO.FindItem("Fellowship Registration Insignia").Timer() == 0 then
+            mq.delay("30s", (mq.TLO.Me.CombatState():lower() == "active"))
+            mq.cmdf("/useitem \"Fellowship Registration Insignia\"")
+            mq.delay("2s", (mq.TLO.FindItem("Fellowship Registration Insignia").Timer() ~= 0))
+        else
+            RGMercsLogger.log_error("\aw Bummer, Insignia on cooldown, you must really suck at this game...")
+        end
+    end
 end
 
 ---@param t table
@@ -43,6 +105,23 @@ function Utils.UnCheckPlugins(t)
     end
 
     return r
+end
+
+function Utils.WelcomeMsg()
+    RGMercsLogger.log_info("\aw****************************")
+    RGMercsLogger.log_info("\aw\awWelcome to \ag%s", RGMercConfig._name)
+    RGMercsLogger.log_info("\aw\awVersion \ag%s \aw(\at%s\aw)", RGMercConfig._version, RGMercConfig._subVersion)
+    RGMercsLogger.log_info("\aw\awBy \ag%s", RGMercConfig._author)
+    RGMercsLogger.log_info("\aw****************************")
+    RGMercsLogger.log_info("\aw use \ag /rg \aw for a list of commands")
+end
+
+function Utils.CanUseAA(aaName)
+    return mq.TLO.Me.AltAbility(aaName)() and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level() and mq.TLO.Me.AltAbility(aaName).Rank() > 0
+end
+
+function Utils.AAReady(aaName)
+    return Utils.CanUseAA(aaName) and mq.TLO.Me.AltAbilityReady(aaName)
 end
 
 function Utils.GetBestItem(t)
@@ -108,10 +187,12 @@ end
 function Utils.MemorizeSpell(gem, spell)
     RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
     mq.cmdf("/memspell %d \"%s\"", gem, spell)
+    local maxWait = 5000
 
-    while mq.TLO.Me.Gem(gem)() ~= spell do
-        --RGMercsLogger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
+    while mq.TLO.Me.Gem(gem)() ~= spell and maxWait > 0 do
+        RGMercsLogger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         mq.delay(100)
+        maxWait = maxWait - 100
     end
 end
 
@@ -240,7 +321,7 @@ function Utils.GetTragetPctHPs()
 end
 
 function Utils.BurnCheck(config)
-    return ((config.BurnAuto and (mq.TLO.XAssist.XTFullHaterCount >= config.BurnMobCount or (mq.TLO.Target.Named() and config.BurnNamed) or (config.BurnAlways and config.BurnAuto))) or (not config.BurnAuto and config.BurnSize))
+    return ((config.BurnAuto and (Utils.GetXTHaterCount() >= config.BurnMobCount or (mq.TLO.Target.Named() and config.BurnNamed) or (config.BurnAlways and config.BurnAuto))) or (not config.BurnAuto and config.BurnSize))
 end
 
 function Utils.SmallBurn(config)
@@ -291,14 +372,140 @@ function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
     end
 end
 
-function Utils.EngageTarget(config, assistId, autoTargetId, preEngageRoutine)
+function Utils.ShouldKillTargetReset()
+    local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", RGMercConfig.Globals.KillTargetID))
+    local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", RGMercConfig.Globals.KillTargetID))
+    return ((not killSpawn()) or killCorpse()) and RGMercConfig.Globals.KillTargetID > 0
+end
+
+function Utils.AutoMed()
+    local me = mq.TLO.Me
+    if not RGMercConfig:GetSettings().DoMed then return end
+
+    if me.Class.ShortName():lower() == "brd" and me.Level() > 5 then return end
+
+    -- TODO: Add DoMount Check
+    if me.Mount.ID() and not mq.TLO.Zone.Indoor() then
+        return
+    end
+
+    RGMercConfig:StoreLastMove()
+
+    --If we're moving/following/navigating/sticking, don't med.
+    if me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Nav.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+        return
+    end
+
+    -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
+    if RGMercConfig.Globals.LastMove.TimeSinceMove < math.random(7, 12) then return end
+
+    if RGMercConfig.Constants.RGHybrid:contains(me.Class.ShortName()) then
+        -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
+        -- the original stat checks.
+        if me.PctHPs() >= RGMercConfig:GetSettings().HPMedPctStop and me.PctMana() >= RGMercConfig:GetSettings().ManaMedPctStop and me.PctEndurance() >= RGMercConfig:GetSettings().EndMedPctStop then
+            RGMercConfig.Globals.InMedState = false
+            return
+        end
+    elseif RGMercConfig.Constants.RGCasters:contains(me.Class.ShortName()) then
+        if me.PctHPs() >= RGMercConfig:GetSettings().HPMedPctStop and me.PctMana() >= RGMercConfig:GetSettings().ManaMedPctStop then
+            RGMercConfig.Globals.InMedState = false
+            return
+        end
+    elseif RGMercConfig.Constants.RGMelee:contains(me.Class.ShortName()) then
+        if me.PctHPs() >= RGMercConfig:GetSettings().HPMedPctStop and me.PctEndurance() >= RGMercConfig:GetSettings().EndMedPctStop then
+            RGMercConfig.Globals.InMedState = false
+            return
+        end
+    else
+        RGMercsLogger.log_error("\arYour character class is not in the type list(s): rghybrid, rgcasters, rgmelee. That's a problem for a dev.")
+        RGMercConfig.Globals.InMedState = false
+        return
+    end
+
+    --RGMercsLogger.log_debug(
+    --    "MED MAIN STATS CHECK :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d", me.PctMana(), RGMercConfig:GetSettings().ManaMedPct, me.PctEndurance(),
+    --    RGMercConfig:GetSettings().EndMedPct)
+
+    local enablesit = true
+    if Utils.GetXTHaterCount() > 0 then
+        if RGMercConfig:GetSettings().DoMelee then enablesit = false end
+        if RGMercConfig:GetSettings().DoMed ~= 2 then enablesit = false end
+    end
+
+    if me.Sitting() and not enablesit then
+        RGMercConfig.Globals.InMedState = false
+        mq.cmdf("/stand")
+        return
+    end
+
+    if not me.Sitting() and enablesit then
+        RGMercConfig.Globals.InMedState = true
+        mq.cmdf("/sit")
+    end
+end
+
+function Utils.ClickModRod()
+    local me = mq.TLO.Me
+    if me.PctMana() > RGMercConfig:GetSettings().ModRodManaPct or me.PctHPs() < 60 then return end
+
+    for _, itemName in ipairs(RGMercConfig.Constants.ModRods) do
+        local item = mq.TLO.FindItem(itemName)
+        if item() and item.Timer() == 0 then
+            mq.cmdf("/useitem \"%s\"", itemName)
+            return
+        end
+    end
+end
+
+function Utils.DoBuffCheck()
+    if not RGMercConfig:GetSettings().DoBuffs then return false end
+
+    if mq.TLO.Me.Invis() then return false end
+
+    if Utils.GetXTHaterCount() > 0 or RGMercConfig.Globals.KillTargetID > 0 then return false end
+
+    if (mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Nav.Active()) and mq.TLO.Me.Class.ShortName():lower() ~= "brd" then return false end
+
+    if RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
+
+    return true
+end
+
+function Utils.DoCamp()
+    return Utils.GetXTHaterCount() == 0 and RGMercConfig.KillTargetID == 0
+end
+
+function Utils.AutoCampCheck(config, tempConfig)
+    if not config.ReturnToCamp then return end
+
+    if mq.TLO.Me.Casting.ID() and mq.TLO.Me.Class.ShortName():lower() ~= "brd" then return end
+
+    -- chasing a toon dont use camnp.
+    if config.ChaseOn then return end
+
+    -- camped in a different zone.
+    if tempConfig.CampZoneId ~= mq.TLO.Zone.ID() then return end
+
+    local me = mq.TLO.Me
+
+    if mq.TLO.Math.Distance(string.format("%d,%d,%d,%d", me.Y(), me.X(), tempConfig.AutoCampY, tempConfig.AutoCampX)) >= 400 then
+        Utils.PrintGroupMessage("I'm over 400 units from camp, not returning!")
+        mq.cmdf("/rgl campoff")
+        return
+    end
+end
+
+function Utils.EngageTarget(autoTargetId, preEngageRoutine)
+    local config = RGMercConfig:GetSettings()
+
     if not config.DoAutoEngage then return end
+
+    local target = mq.TLO.Target
+    local assistId = RGMercConfig:GetAssistId()
 
     if mq.TLO.Me.State():lower() == "feign" and mq.TLO.Me.Class.ShortName():lower() ~= "mnk" then
         mq.cmd("/stand")
     end
-
-    local target = mq.TLO.Target
 
     if target() and target.ID() == autoTargetId and mq.TLO.Target.Distance() <= config.AssistRange then
         if config.DoMelee then
@@ -328,7 +535,7 @@ function Utils.EngageTarget(config, assistId, autoTargetId, preEngageRoutine)
             end
         end
     else
-        if not config.DoMelee and RGMercConfig.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
+        if not config.DoMelee and RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
             mq.cmdf("/stick pin 40")
         end
 
@@ -337,10 +544,340 @@ function Utils.EngageTarget(config, assistId, autoTargetId, preEngageRoutine)
     end
 end
 
-function Utils.OkToEngage(config, assistId, autoTargetId, isTanking)
-    if not config.DoAutoEngage then return false end
+function Utils.MercAssist()
+    mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_CallForAssistButton").LeftMouseUp()
+end
+
+function Utils.MercEngage()
+    local target = mq.TLO.Target
+    local merc   = mq.TLO.Me.Mercenary
+
+    if merc() and target() and target.ID() == RGMercConfig.Globals.AutoTargetID and target.Distance() < RGMercConfig:GetSettings().AssistRange then
+        if target.PctHPs() <= RGMercConfig:GetSettings().AutoAssistAt or                               -- Hit Assist HP
+            merc.Class.ShortName():lower() == "clr" or                                                 -- Cleric can engage right away
+            (merc.Class.ShortName():lower() == "war" and mq.TLO.Group.MainTank.ID() == merc.ID()) then -- Merc is our Main Tank
+            return true
+        end
+    end
+
+    return false
+end
+
+function Utils.KillPCPet()
+    RGMercsLogger.log_warning("\arKilling your pet!")
+    local problemPetOwner = mq.TLO.Spawn(string.format("id %d", mq.TLO.Me.XTarget(1).ID())).Master.CleanName()
+
+    mq.cmdf("/dexecute %s /pet leave", problemPetOwner)
+end
+
+function Utils.HaveExpansion(name)
+    return mq.TLO.Me.HaveExpansion(RGMercConfig.ExpansionNameToID[name])
+end
+
+function Utils.IsNamed(spawn)
+    for _, n in ipairs(Utils.NamedList) do
+        if spawn.Name() == n or spawn.CleanName() == n then return true end
+    end
+
+    return false
+end
+
+function Utils.IsPCSafe(t, name)
+    if mq.TLO.DanNet(name)() then return true end
+
+    for _, n in ipairs(RGMercConfig:GetSettings().OutsideAssistList) do
+        if name == n then return true end
+    end
+
+    if mq.TLO.Group.Member(name)() then return true end
+    if mq.TLO.Raid.Member(name)() then return true end
+
+    if mq.TLO.Spawn(string.format("%s =%s", t, name)).Guild() == mq.TLO.Me.Guild() then return true end
+
+    return false
+end
+
+---@param spawn any
+---@param radius number
+---@return boolean
+function Utils.IsSpawnFightingStranger(spawn, radius)
+    local searchTypes = { "PC", "PCPET", "MERCENARY" }
+
+    for _, t in searchTypes do
+        local count = mq.TLO.SpawnCount(string.format("%s radius %d zradius %d", t, radius, radius))
+
+        for i = 1, count do
+            local cur_spawn = mq.TLO.NearestSpawn(i, string.format("%s radius %d zradius %d", t, radius, radius))
+
+            if cur_spawn() then
+                if cur_spawn.AssistName():len() > 0 then
+                    RGMercsLogger.log_debug("My Interest: %s =? Their Interest: %s", spawn.Name(), cur_spawn.AssistName())
+                    if cur_spawn.AssistName() == spawn.Name() then
+                        RGMercsLogger.log_debug("[%s] Fighting same mob as: %s Theirs: %s Ours: %s", t, cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
+                        if not Utils.IsPCSafe(t, cur_spawn.CleanName()) then
+                            RGMercsLogger.log_info("\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax", cur_spawn.CleanName(), cur_spawn.AssistName())
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
+function Utils.DoCombatActions()
+    if RGMercConfig.Globals.LastMove then return false end
+    if RGMercConfig.Globals.AutoTargetID == 0 then return false end
+    if Utils.GetXTHaterCount() == 0 then return false end
+
+    -- We can't assume our target is our autotargetid for where this sub is used.
+    local autoSpawn = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
+    if autoSpawn() and autoSpawn.Distance() > RGMercConfig:GetSettings().AssistRange then return false end
+
+    return true
+end
+
+---@param radius number
+---@param zradius number
+---@return number
+function Utils.MATargetScan(radius, zradius)
+    local aggroSearch    = string.format("npc radius %d zradius %d targetable playerstate 4", radius, zradius)
+    local aggroSearchPet = string.format("npcpet radius %d zradius %d targetable playerstate 4", radius, zradius)
+
+    local lowestHP       = 101
+    local killId         = 0
+
+    -- Maybe spawn search is failing us -- look through the xtarget list
+    local xtCount        = mq.TLO.Me.XTarget()
+
+    for i = 1, xtCount do
+        local xtSpawn = mq.TLO.Me.XTarget(i)
+
+        if xtSpawn() and xtSpawn.Type():lower() == "auto hater" and xtSpawn.ID() > 0 then
+            RGMercsLogger.log_debug("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
+            if xtSpawn.Distance() <= radius then
+                -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
+                -- get aggro data from the spawn data type.
+                if Utils.HaveExpansion("EXPANSION_LEVEL_ROF") then
+                    if xtSpawn.PctAggro() < 100 and RGMercConfig:GetSettings().DoTanking then
+                        -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
+                        if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
+                            RGMercsLogger.log_debug("Have not fully aggro'd %s -- returning %s [%d]", xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
+                            return xtSpawn.ID()
+                        end
+                    end
+                end
+
+                -- If a name has take priority.
+                if Utils.IsNamed(xtSpawn) then
+                    RGMercsLogger.log_debug("Found Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
+                    return xtSpawn.ID()
+                end
+
+                if xtSpawn.Body.Name():lower() == "Giant" then
+                    return xtSpawn.ID()
+                end
+
+                if xtSpawn.PctHPs() < lowestHP then
+                    lowestHP = xtSpawn.PctHPs()
+                    killId = xtSpawn.ID()
+                end
+            end
+        end
+    end
+
+    RGMercsLogger.log_debug("We apparently didn't find anything on xtargets, doing a search for mezzed targets")
+
+    -- We didn't find anything to kill yet so spawn search
+    if killId == 0 then
+        RGMercsLogger.log_debug("Falling back on Spawn Searching")
+        local aggroMobCount = mq.TLO.SpawnCount(aggroSearch)()
+        local aggroMobPetCount = mq.TLO.SpawnCount(aggroSearchPet)()
+        RGMercsLogger.log_debug("NPC Target Scan: %s ===> %d", aggroSearch, aggroMobCount)
+        RGMercsLogger.log_debug("NPCPET Target Scan: %s ===> %d", aggroSearchPet, aggroMobPetCount)
+
+        for i = 1, aggroMobCount do
+            local spawn = mq.TLO.NearestSpawn(i, aggroSearch)
+
+            -- If the spawn is already in combat with someone else, we should skip them.
+            if not RGMercConfig:GetSettings().SafeTargeting or not Utils.IsSpawnFightingStranger(spawn, radius) then
+                -- If a name has pulled in we target the name first and return. Named always
+                -- take priority. Note: More mobs as of ToL are "named" even though they really aren't.
+
+                if Utils.IsNamed(spawn) then
+                    RGMercsLogger.log_debug("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
+                    return spawn.ID()
+                end
+
+                -- Unmezzables
+                if spawn.Body.Name():lower() == "Giant" then
+                    return spawn.ID()
+                end
+
+                -- Lowest HP
+                if spawn.PctHPs() < lowestHP then
+                    lowestHP = spawn.PctHPs()
+                    killId = spawn.ID()
+                end
+            end
+        end
+
+        for i = 1, aggroMobPetCount do
+            local spawn = mq.TLO.NearestSpawn(i, aggroSearchPet)
+
+            if not RGMercConfig:GetSettings().SafeTargeting or not Utils.IsSpawnFightingStranger(spawn, radius) then
+                -- Lowest HP
+                if spawn.PctHPs() < lowestHP then
+                    lowestHP = spawn.PctHPs()
+                    killId = spawn.ID()
+                end
+            end
+        end
+    end
+
+    return killId
+end
+
+function Utils.FindTarget()
+    if mq.TLO.Spawn(string.format("id %d pcpet xtarhater", mq.TLO.Me.XTarget(1).ID())).ID() then
+        Utils.KillPCPet()
+    end
+
+    -- Handle cases where our autotarget is no longer valid because it isn't a valid spawn or is dead.
+
+    -- TODO: Add pulling code here.
+
+    if RGMercConfig.Globals.AutoTargetID ~= 0 then
+        local autoSpawn = mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID))
+        if not autoSpawn() or autoSpawn.Type():lower() == "corpse" then
+            Utils.ClearTarget()
+        end
+    end
+
+    -- FollowMarkTarget causes RG to have allow RG toons focus on who the group has marked. We'll exit early if this is the case.
+    if RGMercConfig:GetSettings().FollowMarkTarget then
+        if mq.TLO.Me.GroupMarkNPC(1).ID() and RGMercConfig.Globals.AutoTargetID ~= mq.TLO.Me.GroupMarkNPC(1).ID() then
+            RGMercConfig.Globals.AutoTargetID = mq.TLO.Me.GroupMarkNPC(1).ID()
+            return
+        end
+    end
 
     local target = mq.TLO.Target
+
+    -- Now handle normal situations where we need to choose a target because we don't have one.
+    if Utils.IAmMA() then
+        -- We need to handle manual targeting and autotargeting seperately
+        if RGMercConfig:GetSettings().DoAutoTarget then
+            -- Manual targetting let the manual user target any npc or npcpet.
+            if RGMercConfig.Globals.AutoTargetID ~= target.ID() and
+                (target.Type():lower() == "npc" or target.Type():lower() == "npcpet") and
+                target.Distance() < RGMercConfig:GetSettings().AssistRange and
+                target.DistanceZ() < 20 and
+                target.Aggressive() then
+                RGMercsLogger.log_info("Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName(), target.ID())
+                RGMercConfig.Globals.AutoTargetID = target.ID()
+            end
+        else
+            -- If we're the main assist, we need to scan our nearby area and choose a target based on our built in algorithm. We
+            -- only need to do this if we don't already have a target. Assume if any mob runs into camp, we shouldn't reprioritize
+            -- unless specifically told.
+
+            if RGMercConfig.Globals.AutoTargetID == 0 then
+                -- If we currently don't have a target, we should see if there's anything nearby we should go after.
+                RGMercConfig.Globals.AutoTargetID = Utils.MATargetScan(RGMercConfig:GetSettings().AssistRange, RGMercConfig:GetSettings().MAScanZRange)
+                RGMercsLogger.log_debug("MATargetScan returned %d -- Current Target: %s [%d]", RGMercConfig.Globals.AutoTargetID, target.CleanName(), target.ID())
+            else
+                -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
+                -- Only be turned off by tank modes.
+                if not RGMercConfig:GetSettings().StayOnTarget then
+                    RGMercConfig.Globals.AutoTargetID = Utils.MATargetScan(RGMercConfig:GetSettings().AssistRange, RGMercConfig:GetSettings().MAScanZRange)
+                    local autoTarget = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
+                    RGMercsLogger.log_debug("Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]", autoTarget.CleanName(), RGMercConfig
+                        .AutoTargetID, target.CleanName(), target.ID())
+                end
+            end
+        end
+    else
+        -- We're not the main assist so we need to choose our target based on our main assist.
+        -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
+        -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
+        if RGMercConfig:GetSettings().AssistOutside then
+            local assist = mq.TLO.Spawn(RGMercConfig:GetAssistId())
+            local assistTarget = mq.TLO.Spawn(assist.AssistName())
+
+            RGMercsLogger.log_debug("FindTarget Assisting %s [%d] -- Target Agressive: %s", RGMercConfig.Globals.MainAssist, assist.ID(),
+                assistTarget.Aggressive() and "True" or "False")
+
+            if assistTarget() and assistTarget.Aggressive() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
+                RGMercsLogger.log_debug(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(), assistTarget.ID())
+                RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
+            end
+        else
+            RGMercConfig.Globals.AutoTargetID = mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID() or 0
+        end
+    end
+    --Target the new target we'll do another spawn check just in case. Given we just did our spawn checks,
+    -- Assume the target is still valid so we don't do two more spawn checks.
+    if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
+        Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+    end
+end
+
+function Utils.GetXTHaterCount()
+    local xtCount = mq.TLO.Me.XTarget()
+    local haterCount = 0
+
+    for i = 1, xtCount do
+        local xtarg = mq.TLO.Me.XTarget(i)
+        if xtarg and xtarg.PctAggro() > 1 then
+            haterCount = haterCount + 1
+        end
+    end
+
+    return haterCount
+end
+
+function Utils.SetControlTool()
+    if RGMercConfig:GetSettings().AssistOutside then
+        if #RGMercConfig:GetSettings().OutsideAssistList > 0 then
+            for _, name in ipairs(RGMercConfig:GetSettings().OutsideAssistList) do
+                local assistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
+
+                if assistSpawn() then
+                    RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
+                    mq.cmdf("/squelch /xtarget assist %d", assistSpawn.ID())
+                    RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
+                end
+            end
+        else
+            if not RGMercConfig.Globals.MainAssist or RGMercConfig.Globals.MainAssist:len() == 0 then
+                -- Use our Target hope for the best!
+                mq.cmdf("/squelch /xtarget assist %d", mq.TLO.Target.ID())
+                RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
+            end
+        end
+    end
+end
+
+function Utils.IAmMA()
+    return RGMercConfig:GetAssistId() == mq.TLO.Me.ID()
+end
+
+function Utils.FindTargetCheck()
+    local config = RGMercConfig:GetSettings()
+    -- TODO: Add Do Pull logic
+    return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget) and not RGMercConfig.Globals.LastMove
+end
+
+function Utils.OkToEngage(autoTargetId, isTanking)
+    local config = RGMercConfig:GetSettings()
+
+    if not config.DoAutoEngage then return false end
+
+
+    local target = mq.TLO.Target
+    local assistId = RGMercConfig:GetAssistId()
 
     if not target() then return false end
 
@@ -354,10 +891,10 @@ function Utils.OkToEngage(config, assistId, autoTargetId, isTanking)
         return false
     end
 
-    if mq.TLO.XAssist.XTFullHaterCount() > 0 then -- TODO: or KillTargetID and !BackOffFlag
+    if Utils.GetXTHaterCount() > 0 then -- TODO: or KillTargetID and !BackOffFlag
         if target.Distance() < config.AssistRange and (target.PctHPs() < config.AutoAssistAt or isTanking or assistId == mq.TLO.Me.ID()) then
             if not mq.TLO.Me.Combat() then
-                RGMercsLogger.log_debug("%d < %d and %d < %d or Tanking or %d == %d --> OK To Engage!",
+                RGMercsLogger.log_debug("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
                     target.Distance(), config.AssistRange, target.PctHPs(), config.AutoAssistAt, assistId, mq.TLO.Me.ID())
             end
             return true
@@ -439,6 +976,58 @@ function Utils.Tooltip(desc)
         ImGui.Text(desc)
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
+    end
+end
+
+function Utils.RenderZoneNamed()
+    if Utils.LastZoneID ~= mq.TLO.Zone.ID() then
+        Utils.LastZoneID = mq.TLO.Zone.ID()
+        Utils.NamedList = {}
+        local zoneName = mq.TLO.Zone.Name():lower()
+
+        for _, n in ipairs(RGMercNameds[zoneName] or {}) do
+            table.insert(Utils.NamedList, n)
+        end
+
+        zoneName = mq.TLO.Zone.ShortName():lower()
+
+        for _, n in ipairs(RGMercNameds[zoneName] or {}) do
+            table.insert(Utils.NamedList, n)
+        end
+    end
+
+    if ImGui.BeginTable("Zone Nameds", 4, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
+        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
+        ImGui.TableSetupColumn('Up', (ImGuiTableColumnFlags.WidthFixed), 20.0)
+        ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        for idx, name in ipairs(Utils.NamedList) do
+            local spawn = mq.TLO.Spawn(string.format("NPC =%s", name))
+            ImGui.TableNextColumn()
+            ImGui.Text(tostring(idx))
+            ImGui.TableNextColumn()
+            ImGui.Text(name)
+            ImGui.TableNextColumn()
+            if spawn() and spawn.PctHPs() > 0 then
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
+                ImGui.Text(ICONS.FA_SMILE_O)
+                ImGui.PopStyleColor()
+                ImGui.TableNextColumn()
+                ImGui.Text(tostring(math.ceil(spawn.Distance())))
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+                ImGui.Text(ICONS.FA_FROWN_O)
+                ImGui.PopStyleColor()
+                ImGui.TableNextColumn()
+                ImGui.Text("0")
+            end
+        end
+
+        ImGui.EndTable()
     end
 end
 
@@ -534,12 +1123,6 @@ function Utils.RenderRotationTable(s, n, t, map)
                 local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
                 local active = entry.active_cond and entry.active_cond(s, map[entry.name] or mq.TLO.Spell(entry.name)) or false
 
-                if entry.type == "Item" then
-                    local passtwo = entry.cond(s)
-
-                    RGMercsLogger.log_debug("%s : %s : %s", entry.name, pass and "True" or "False", passtwo and "True" or "False")
-                end
-
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
                     ImGui.Text(ICONS.FA_SMILE_O)
@@ -616,7 +1199,7 @@ function Utils.RenderSettings(settings, defaults)
     local pressed = false
 
     local settingNames = {}
-    for k, _ in pairs(settings) do
+    for k, _ in pairs(defaults) do
         table.insert(settingNames, k)
     end
 

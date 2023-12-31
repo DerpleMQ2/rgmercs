@@ -16,7 +16,7 @@ local newCombatMode      = false
 local function getConfigFileName()
     return mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module.name .. "_" .. RGMercConfig.CurServer .. "_" .. RGMercConfig.CurLoadedChar .. '.lua'
+        Module.name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -28,7 +28,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("Basic Combat Module Loading Settings for: %s.", RGMercConfig.CurLoadedChar)
+    RGMercsLogger.log_info("Basic Combat Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
@@ -60,7 +60,7 @@ end
 
 function Module.New()
     -- Only load this module for SKs
-    if RGMercConfig.CurLoadedClass ~= "SHD" then return nil end
+    if RGMercConfig.Globals.CurLoadedClass ~= "SHD" then return nil end
 
     RGMercsLogger.log_info("ShadowKnight Combat Module Loaded.")
     local newModule = setmetatable({ settings = {}, CombatState = "None" }, Module)
@@ -186,6 +186,8 @@ function Module:GiveTime(combat_state)
         else
             RGMercUtils.RunRotation(self, shdClassConfig.Rotations.DPS.Rotation.Downtime, Module.ResolvedActionMap)
         end
+
+        if not self.settings.BurnAuto then self.settings.BurnSize = 0 end
     else
         if Module.Tanking and ((os.clock() - Module.LastPetCmd) > 2) then
             Module.LastPetCmd = os.clock()

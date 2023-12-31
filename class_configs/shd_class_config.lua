@@ -770,7 +770,7 @@ local _ClassConfig = {
                         tooltip = Tooltips.ExplosionOfHatred,
                         cond = function(self)
                             return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
-                                mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt
+                                RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                         end
                     },
                     [5] = {
@@ -779,7 +779,7 @@ local _ClassConfig = {
                         tooltip = Tooltips.ExplosionOfSpite,
                         cond = function(self)
                             return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
-                                mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt
+                                RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                         end
                     },
                     [6] = {
@@ -1195,7 +1195,7 @@ local _ClassConfig = {
                             self)
                             return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and
                                 mq.TLO.Me.Bandolier("2HS").Index() and
-                                mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and
+                                RGMercUtils.GetXTHaterCount() < self.settings.BurnMobCount and
                                 not mq.TLO.Target.Named()
                         end,
                         cmd = "/bandolier activate 2HS"
@@ -1247,7 +1247,7 @@ local _ClassConfig = {
                             self, spell)
                             return self.settings.DoAE and
                                 mq.TLO.SpawnCount("NPC radius 60 zradius 50")() >= self.settings.AeTauntCnt and
-                                mq.TLO.XAssist.XTFullHaterCount() >= self.settings.AeTauntCnt
+                                RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                         end
                     },
                     [8] = {
@@ -1517,7 +1517,7 @@ local _ClassConfig = {
                             self)
                             return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and
                                 mq.TLO.Me.Bandolier("2HS").Index() and
-                                mq.TLO.XAssist.XTFullHaterCount() < self.settings.BurnMobCount and
+                                RGMercUtils.GetXTHaterCount() < self.settings.BurnMobCount and
                                 not mq.TLO.Target.Named()
                         end,
                         cmd = "/bandolier activate 2HS"
