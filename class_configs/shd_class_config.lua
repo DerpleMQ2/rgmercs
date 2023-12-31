@@ -35,7 +35,7 @@ local Tooltips     = {
     Terror = "Spell Line: Hate Increase + Taunt",
     TempHP = "Spell Line: Temporary Hitpoints (Decrease per Tick)",
     Dicho = "Spell Line: Hate Increase + Lifetap",
-    Torrent = "Spell Line: Attack Tap",
+    Torrent = "Spell Line: Attack tap",
     SnareDOT = "Spell Line: Snare + HP DOT",
     Acrimony = "Spell Increase: Aggrolock + Lifetap DOT + Hate Generation",
     SpiteStrike = "Spell Line: Lifetap + Caster 1H Blunt Increase + Target Armor Decrease",
@@ -325,7 +325,7 @@ local _ClassConfig = {
             [17] = "Spear of Bloodwretch",
             [18] = "Spear of Lazam",
         },
-        ['BondTap'] = {
+        ['Bondtap'] = {
             [1] = "Bond of Tatalros",
             [2] = "Bond of Bynn",
             [3] = "Bond of Vulak",
@@ -371,7 +371,7 @@ local _ClassConfig = {
             [16] = "Touch of Volatis",
             [17] = "Drain Soul",
             [18] = "Drain Spirit",
-            [19] = "Spirit Tap",
+            [19] = "Spirit tap",
             [20] = "Siphon Life",
             [21] = "Life Leech",
             [22] = "Lifedraw",
@@ -838,7 +838,7 @@ local _ClassConfig = {
                         type = "DISC",
                         tooltip = Tooltips.LeechCurse,
                         cond = function(self)
-                            return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline"
+                            return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and mq.TLO.Me.PctHPs() < 50
                         end
                     },
                     [14] = {
@@ -846,7 +846,7 @@ local _ClassConfig = {
                         type = "DISC",
                         tooltip = Tooltips.Deflection,
                         cond = function(self)
-                            return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
+                            return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
                         end
                     },
                     [15] = {
@@ -911,7 +911,7 @@ local _ClassConfig = {
                         end
                     },
                     [22] = {
-                        name = "SpearNuke",
+                        name = "Spearnuke",
                         type = "Spell",
                         tooltip = Tooltips.SpearNuke,
                         cond = function(self, spell)
@@ -919,7 +919,7 @@ local _ClassConfig = {
                         end
                     },
                     [23] = {
-                        name = "BondTap",
+                        name = "Bondtap",
                         type = "Spell",
                         tooltip = Tooltips.BondTap,
                         cond = function(self, spell)
@@ -964,7 +964,7 @@ local _ClassConfig = {
                         end
                     },
                     [28] = {
-                        name = "DireTap",
+                        name = "Diretap",
                         type = "Spell",
                         tooltip = Tooltips.DireTap,
                         cond = function(self, spell)
@@ -972,7 +972,7 @@ local _ClassConfig = {
                         end
                     },
                     [29] = {
-                        name = "BuffTap",
+                        name = "Bufftap",
                         type = "Spell",
                         tooltip = Tooltips.BuffTap,
                         cond = function(self, spell)
@@ -981,7 +981,7 @@ local _ClassConfig = {
                         end
                     },
                     [30] = {
-                        name = "BiteTap",
+                        name = "Bitetap",
                         type = "Spell",
                         tooltip = Tooltips.BiteTap,
                         cond = function(self, spell)
@@ -989,7 +989,7 @@ local _ClassConfig = {
                         end
                     },
                     [31] = {
-                        name = "LifeTap",
+                        name = "Lifetap",
                         type = "Spell",
                         tooltip = Tooltips.LifeTap,
                         cond = function(self, spell)
@@ -1001,7 +1001,7 @@ local _ClassConfig = {
             ['Spells'] = {
                 [1] = { name = "DireDot", gem = 1 },
                 [2] = { name = "Spearnuke", gem = 2 },
-                [3] = { name = "Torrent", gem = 3, cond = function(self) return self.settings.DoTorrent end, other = "BondTap" },
+                [3] = { name = "Torrent", gem = 3, cond = function(self) return self.settings.DoTorrent end, other = "Bondtap" },
                 [4] = { name = "Diretap", gem = 4, cond = function(self) return self.settings.DoDiretap end, other = "SnareDOT" },
                 [5] = { name = "Lifetap", gem = 5 },
                 [6] = { name = "Bufftap", gem = 6 },
@@ -1029,7 +1029,7 @@ local _ClassConfig = {
                         end
                     },
                     [2] = {
-                        name = "SpearNuke",
+                        name = "Spearnuke",
                         type = "Spell",
                         tooltip = Tooltips.SpearNuke,
                         cond = function(
@@ -1039,9 +1039,9 @@ local _ClassConfig = {
                         end
                     },
                     [3] = {
-                        name = "BondTap",
+                        name = "Bondtap",
                         type = "Spell",
-                        tooltip = Tooltips.BondTap,
+                        tooltip = Tooltips.Bondtap,
                         cond = function(
                             self, spell)
                             return not mq.TLO.Me.FindBuff("name " .. spell.Name() .. " Recourse").ID()
@@ -1080,11 +1080,11 @@ local _ClassConfig = {
                         tooltip = Tooltips.PoisonDot,
                         cond = function(
                             self, spell)
-                            return self.settings.DoDot and not TargetHasBuff(spell)
+                            return self.settings.DoDot and not RGMercUtils.TargetHasBuff(spell)
                         end
                     },
                     [8] = {
-                        name = "DireTap",
+                        name = "Diretap",
                         type = "Spell",
                         tooltip = Tooltips.DireTap,
                         cond = function(
@@ -1093,7 +1093,7 @@ local _ClassConfig = {
                         end
                     },
                     [9] = {
-                        name = "BuffTap",
+                        name = "Bufftap",
                         type = "Spell",
                         tooltip = Tooltips.BuffTap,
                         cond = function(
@@ -1103,7 +1103,7 @@ local _ClassConfig = {
                         end
                     },
                     [10] = {
-                        name = "BiteTap",
+                        name = "Bitetap",
                         type = "Spell",
                         tooltip = Tooltips.BiteTap,
                         cond = function(
@@ -1121,7 +1121,7 @@ local _ClassConfig = {
                         end
                     },
                     [12] = {
-                        name = "LifeTap",
+                        name = "Lifetap",
                         type = "Spell",
                         tooltip = Tooltips.LifeTap,
                         cond = function(
@@ -1159,7 +1159,7 @@ local _ClassConfig = {
             ['Spells'] = {
                 [1] = { name = "PoisonDot", gem = 1 },
                 [2] = { name = "Spearnuke", gem = 2 },
-                [3] = { name = "Torrent", gem = 3, cond = function(self) return self.settings.DoTorrent end, other = "BondTap" },
+                [3] = { name = "Torrent", gem = 3, cond = function(self) return self.settings.DoTorrent end, other = "Bondtap" },
                 [4] = { name = "Diretap", gem = 4 },
                 [5] = { name = "Lifetap", gem = 5 },
                 [6] = { name = "Bufftap", gem = 6 },
@@ -1264,7 +1264,7 @@ local _ClassConfig = {
                         tooltip = Tooltips.LeechCurse,
                         cond = function(
                             self)
-                            return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline"
+                            return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and mq.TLO.Me.PctHPs() < 50
                         end
                     },
                     [10] = {
@@ -1273,7 +1273,7 @@ local _ClassConfig = {
                         tooltip = Tooltips.Deflection,
                         cond = function(
                             self)
-                            return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
+                            return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
                         end
                     },
                     [11] = {
@@ -1337,7 +1337,7 @@ local _ClassConfig = {
                         end
                     },
                     [17] = {
-                        name = "SpearNuke",
+                        name = "Spearnuke",
                         type = "Spell",
                         tooltip = Tooltips.SpearNuke,
                         cond = function(
@@ -1346,7 +1346,7 @@ local _ClassConfig = {
                         end
                     },
                     [18] = {
-                        name = "BondTap",
+                        name = "Bondtap",
                         type = "Spell",
                         tooltip = Tooltips.BondTap,
                         cond = function(
@@ -1396,7 +1396,7 @@ local _ClassConfig = {
                         end
                     },
                     [23] = {
-                        name = "DireTap",
+                        name = "Diretap",
                         type = "Spell",
                         tooltip = Tooltips.DireTap,
                         cond = function(
@@ -1405,7 +1405,7 @@ local _ClassConfig = {
                         end
                     },
                     [24] = {
-                        name = "BuffTap",
+                        name = "Bufftap",
                         type = "Spell",
                         tooltip = Tooltips.BuffTap,
                         cond = function(
@@ -1415,7 +1415,7 @@ local _ClassConfig = {
                         end
                     },
                     [25] = {
-                        name = "BiteTap",
+                        name = "Bitetap",
                         type = "Spell",
                         tooltip = Tooltips.BiteTap,
                         cond = function(
@@ -1424,7 +1424,7 @@ local _ClassConfig = {
                         end
                     },
                     [26] = {
-                        name = "LifeTap",
+                        name = "Lifetap",
                         type = "Spell",
                         tooltip = Tooltips.LifeTap,
                         cond = function(
@@ -1486,10 +1486,10 @@ local _ClassConfig = {
                 [5] = { name = "Bufftap", gem = 5 },
                 [6] = { name = "PoisonDot", gem = 6 },
                 [7] = { name = "SnareDOT", gem = 7 },
-                [8] = { name = "AeTaunt", gem = 8, cond = function(self) return mq.TLO.Me.NumGems() > 8 end },
-                --[9] = { name="Terror", gem=9 },
-                --[10] = { name="TempHP", gem=10 },
-                --[11] = { name="Skin", gem=11 },
+                [8] = { name = "AeTaunt", gem = 8, cond = function(self) return mq.TLO.Me.NumGems() >= 8 end },
+                [9] = { name = "Bondtap", gem = 9, cond = function(self) return mq.TLO.Me.NumGems() >= 9 end },
+                [10] = { name = "Torrent", gem = 10, cond = function(self) return mq.TLO.Me.NumGems() >= 10 end },
+                [11] = { name = "TempHP", gem = 11, cond = function(self) return mq.TLO.Me.NumGems() >= 11 end },
                 --[12] = { name="Dicho", gem=12 },
             },
         },
@@ -1556,7 +1556,7 @@ local _ClassConfig = {
                         tooltip = Tooltips.LeechCurse,
                         cond = function(
                             self)
-                            return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline"
+                            return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and mq.TLO.Me.PctHPs() < 50
                         end
                     },
                     [7] = {
@@ -1565,7 +1565,7 @@ local _ClassConfig = {
                         tooltip = Tooltips.Deflection,
                         cond = function(
                             self)
-                            return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
+                            return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
                         end
                     },
                     [8] = {
@@ -1629,7 +1629,7 @@ local _ClassConfig = {
                         end
                     },
                     [14] = {
-                        name = "SpearNuke",
+                        name = "Spearnuke",
                         type = "Spell",
                         tooltip = Tooltips.SpearNuke,
                         cond = function(
@@ -1638,7 +1638,7 @@ local _ClassConfig = {
                         end
                     },
                     [15] = {
-                        name = "BondTap",
+                        name = "Bondtap",
                         type = "Spell",
                         tooltip = Tooltips.BondTap,
                         cond = function(
@@ -1688,7 +1688,7 @@ local _ClassConfig = {
                         end
                     },
                     [20] = {
-                        name = "DireTap",
+                        name = "Diretap",
                         type = "Spell",
                         tooltip = Tooltips.DireTap,
                         cond = function(
@@ -1697,7 +1697,7 @@ local _ClassConfig = {
                         end
                     },
                     [21] = {
-                        name = "BuffTap",
+                        name = "Bufftap",
                         type = "Spell",
                         tooltip = Tooltips.BuffTap,
                         cond = function(
@@ -1707,7 +1707,7 @@ local _ClassConfig = {
                         end
                     },
                     [22] = {
-                        name = "BiteTap",
+                        name = "Bitetap",
                         type = "Spell",
                         tooltip = Tooltips.BiteTap,
                         cond = function(
@@ -1716,7 +1716,7 @@ local _ClassConfig = {
                         end
                     },
                     [23] = {
-                        name = "LifeTap",
+                        name = "Lifetap",
                         type = "Spell",
                         tooltip = Tooltips.LifeTap,
                         cond = function(
@@ -1778,10 +1778,10 @@ local _ClassConfig = {
                 [5] = { name = "Bufftap", gem = 5 },
                 [6] = { name = "PoisonDot", gem = 6 },
                 [7] = { name = "SnareDOT", gem = 7 },
-                [8] = { name = "AeTaunt", gem = 8, cond = function(self) return mq.TLO.Me.NumGems() > 8 end },
-                --[9] = { name="Terror", gem=9 },
-                --[10] = { name="TempHP", gem=10 },
-                --[11] = { name="Skin", gem=11 },
+                [8] = { name = "AeTaunt", gem = 8, cond = function(self) return mq.TLO.Me.NumGems() >= 8 end },
+                [9] = { name = "Bondtap", gem = 9, cond = function(self) return mq.TLO.Me.NumGems() >= 9 end },
+                [10] = { name = "Torrent", gem = 10, cond = function(self) return mq.TLO.Me.NumGems() >= 10 end },
+                [11] = { name = "TempHP", gem = 11, cond = function(self) return mq.TLO.Me.NumGems() >= 11 end },
                 --[12] = { name="Dicho", gem=12 },
             },
         },

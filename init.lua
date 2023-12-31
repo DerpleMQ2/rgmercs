@@ -210,7 +210,7 @@ local function RGInit(...)
     end
 
     if mq.TLO.Group.MainAssist.CleanName() ~= mainAssist then
-        RGMercUtils.PopUp("Assisting %s NOTICE: Group MainAssist != Your Target. Is This On Purpose?")
+        RGMercUtils.PopUp(string.format("Assisting %s NOTICE: Group MainAssist != Your Target. Is This On Purpose?", mainAssist))
     end
 end
 
@@ -245,7 +245,7 @@ local function Main()
             RGMercUtils.FindTarget()
         end
 
-        if RGMercUtils.OkToEngage(mq.TLO.Target.ID(), true) then
+        if RGMercUtils.OkToEngage(mq.TLO.Target.ID()) then
             RGMercUtils.EngageTarget(mq.TLO.Target.ID())
         end
     end

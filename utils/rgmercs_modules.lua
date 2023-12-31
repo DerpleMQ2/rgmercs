@@ -31,7 +31,7 @@ function Modules:execModule(m, fn, ...)
 end
 
 function Modules:execAll(fn, ...)
-    for _, m in pairs(self.modules) do
+    for n, m in pairs(self.modules) do
         m[fn](m, ...)
     end
 end
