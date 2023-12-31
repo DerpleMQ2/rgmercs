@@ -287,7 +287,7 @@ local function Main()
     end
 
     if RGMercUtils.DoCamp() then
-        if mq.TLO.Me.Mercenary() and mq.TLO.Me.Mercenary.Class.ShortName():lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
+        if mq.TLO.Me.Mercenary() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
             mq.cmdf("/squelch /stance passive")
         end
     end
@@ -352,13 +352,13 @@ end)
 -- Binds
 local function bindHandler(cmd, ...)
     if cmd:lower() == "chaseon" then
-        RGMercModules:execModule("Chase", "ChaseOn", ...)
+        RGMercModules:execModule("Movement", "ChaseOn", ...)
     elseif cmd:lower() == "chaseoff" then
-        RGMercModules:execModule("Chase", "ChaseOff", ...)
+        RGMercModules:execModule("Movement", "ChaseOff", ...)
     elseif cmd:lower() == "campon" then
-        RGMercModules:execModule("Chase", "CampOn", ...)
+        RGMercModules:execModule("Movement", "CampOn", ...)
     elseif cmd:lower() == "campoff" then
-        RGMercModules:execModule("Chase", "CampOff", ...)
+        RGMercModules:execModule("Movement", "CampOff", ...)
     else
         RGMercsLogger.log_warning("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
     end
