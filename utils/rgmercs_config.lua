@@ -17,6 +17,7 @@ Config.Globals.PauseMain      = false
 Config.Globals.LastMove       = nil
 Config.Globals.BackOffFlag    = false
 Config.Globals.IsHealing      = false
+Config.Globals.IsTanking      = false
 Config.Globals.InMedState     = false
 Config.Globals.IsMezzing      = false
 Config.Globals.CurLoadedChar  = mq.TLO.Me.CleanName()

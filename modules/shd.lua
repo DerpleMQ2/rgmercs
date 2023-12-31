@@ -6,7 +6,6 @@ local shdClassConfig     = require("rgmercs.class_configs.shd_class_config")
 
 local Module             = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
 Module.__index           = Module
-Module.Tanking           = false
 Module.LastPetCmd        = 0
 Module.SpellLoadOut      = {}
 Module.ResolvedActionMap = {}
@@ -85,7 +84,7 @@ end
 function Module:setCombatMode(mode)
     RGMercsLogger.log_debug("\aySettings Combat Mode to: \am%s", mode)
     if mode == "Tank" then
-        Module.Tanking = true
+        RGMercConfig.Globals.IsTanking = true
         if self.settings.TLP then
             Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(self,
                 shdClassConfig.Rotations.TLP_Tank.Spells, shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
@@ -95,7 +94,7 @@ function Module:setCombatMode(mode)
                 shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
         end
     elseif mode == "DPS" then
-        Module.Tanking = false
+        RGMercConfig.Globals.IsTanking = false
         if self.settings.TLP then
             Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(self,
                 shdClassConfig.Rotations.TLP_DPS.Spells, shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
@@ -177,11 +176,11 @@ function Module:GiveTime(combat_state)
 
     -- Downtime totaiton will just run a full rotation to completion
     if self.CombatState == "Downtime" then
-        if Module.Tanking and self.settings.TLP then
+        if RGMercConfig.Globals.IsTanking and self.settings.TLP then
             RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_Tank.Rotation.Downtime, Module.ResolvedActionMap)
-        elseif not Module.Tanking and self.settings.TLP then
+        elseif not RGMercConfig.Globals.IsTanking and self.settings.TLP then
             RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_DPS.Rotation.Downtime, Module.ResolvedActionMap)
-        elseif Module.Tanking then
+        elseif RGMercConfig.Globals.IsTanking then
             RGMercUtils.RunRotation(self, shdClassConfig.Rotations.Tank.Rotation.Downtime, Module.ResolvedActionMap)
         else
             RGMercUtils.RunRotation(self, shdClassConfig.Rotations.DPS.Rotation.Downtime, Module.ResolvedActionMap)
@@ -189,7 +188,7 @@ function Module:GiveTime(combat_state)
 
         if not self.settings.BurnAuto then self.settings.BurnSize = 0 end
     else
-        if Module.Tanking and ((os.clock() - Module.LastPetCmd) > 2) then
+        if RGMercConfig.Globals.IsTanking and ((os.clock() - Module.LastPetCmd) > 2) then
             Module.LastPetCmd = os.clock()
             RGMercUtils.PetAttack(self.settings, mq.TLO.Target)
         end

@@ -660,7 +660,7 @@ function Utils.MATargetScan(radius, zradius)
                 -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                 -- get aggro data from the spawn data type.
                 if Utils.HaveExpansion("EXPANSION_LEVEL_ROF") then
-                    if xtSpawn.PctAggro() < 100 and RGMercConfig:GetSettings().DoTanking then
+                    if xtSpawn.PctAggro() < 100 and RGMercConfig.Globals.IsTanking then
                         -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
                         if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
                             RGMercsLogger.log_debug("Have not fully aggro'd %s -- returning %s [%d]", xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
@@ -870,7 +870,7 @@ function Utils.FindTargetCheck()
     return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget) and not RGMercConfig.Globals.LastMove
 end
 
-function Utils.OkToEngage(autoTargetId, isTanking)
+function Utils.OkToEngage(autoTargetId)
     local config = RGMercConfig:GetSettings()
 
     if not config.DoAutoEngage then return false end
@@ -892,7 +892,7 @@ function Utils.OkToEngage(autoTargetId, isTanking)
     end
 
     if Utils.GetXTHaterCount() > 0 then -- TODO: or KillTargetID and !BackOffFlag
-        if target.Distance() < config.AssistRange and (target.PctHPs() < config.AutoAssistAt or isTanking or assistId == mq.TLO.Me.ID()) then
+        if target.Distance() < config.AssistRange and (target.PctHPs() < config.AutoAssistAt or RGMercConfig.Globals.IsTanking or assistId == mq.TLO.Me.ID()) then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_debug("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
                     target.Distance(), config.AssistRange, target.PctHPs(), config.AutoAssistAt, assistId, mq.TLO.Me.ID())
