@@ -204,11 +204,11 @@ function Module:GiveTime(combat_state)
             RGMercUtils.PetAttack(self.settings, mq.TLO.Target)
         end
 
-        RGMercUtils.RunRotation(self, self:GetRotationTable("DPS"), RGMercConfig.Globals.AutoTargetID,
+        self.TempSettings.RotationStates.DPS = RGMercUtils.RunRotation(self, self:GetRotationTable("DPS"), RGMercConfig.Globals.AutoTargetID,
             Module.ResolvedActionMap, 1, self.TempSettings.RotationStates.DPS)
 
-        if RGMercConfig.BurnCheck(self.settings) then
-            RGMercUtils.RunRotation(self, self:GetRotationTable("Burn"), RGMercConfig.Globals.AutoTargetID,
+        if RGMercUtils.BurnCheck(self.settings) then
+            self.TempSettings.RotationStates.Burn = RGMercUtils.RunRotation(self, self:GetRotationTable("Burn"), RGMercConfig.Globals.AutoTargetID,
                 Module.ResolvedActionMap, 1, self.TempSettings.RotationStates.Burn)
         end
     end
