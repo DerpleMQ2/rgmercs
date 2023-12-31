@@ -1,16 +1,23 @@
 -- Sample Basic Class Module
-local mq                 = require('mq')
-local RGMercsLogger      = require("rgmercs.utils.rgmercs_logger")
-local RGMercUtils        = require("rgmercs.utils.rgmercs_utils")
-local shdClassConfig     = require("rgmercs.class_configs.shd_class_config")
+local mq                           = require('mq')
+local RGMercsLogger                = require("rgmercs.utils.rgmercs_logger")
+local RGMercUtils                  = require("rgmercs.utils.rgmercs_utils")
+local shdClassConfig               = require("rgmercs.class_configs.shd_class_config")
 
-local Module             = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
-Module.__index           = Module
-Module.LastPetCmd        = 0
-Module.SpellLoadOut      = {}
-Module.ResolvedActionMap = {}
+local Module                       = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
+Module.__index                     = Module
+Module.LastPetCmd                  = 0
+Module.SpellLoadOut                = {}
+Module.ResolvedActionMap           = {}
+Module.TempSettings                = {}
 
-local newCombatMode      = false
+-- Track the state of rotations between frames
+Module.TempSettings.RotationStates = {
+    ['DPS'] = 1,
+    ['Burn'] = 1,
+}
+
+local newCombatMode                = false
 
 local function getConfigFileName()
     return mq.configDir ..
@@ -155,7 +162,7 @@ function Module:Render()
             if ImGui.CollapsingHeader(k) then
                 ImGui.Indent()
                 RGMercUtils.RenderRotationTable(self, k, shdClassConfig.Rotations[mode].Rotation[k],
-                    Module.ResolvedActionMap)
+                    Module.ResolvedActionMap, self.TempSettings.RotationStates[k])
                 ImGui.Unindent()
             end
         end
@@ -177,13 +184,13 @@ function Module:GiveTime(combat_state)
     -- Downtime totaiton will just run a full rotation to completion
     if self.CombatState == "Downtime" then
         if RGMercConfig.Globals.IsTanking and self.settings.TLP then
-            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_Tank.Rotation.Downtime, Module.ResolvedActionMap)
+            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_Tank.Rotation.Downtime, mq.TLO.Me.ID(), Module.ResolvedActionMap)
         elseif not RGMercConfig.Globals.IsTanking and self.settings.TLP then
-            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_DPS.Rotation.Downtime, Module.ResolvedActionMap)
+            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_DPS.Rotation.Downtime, mq.TLO.Me.ID(), Module.ResolvedActionMap)
         elseif RGMercConfig.Globals.IsTanking then
-            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.Tank.Rotation.Downtime, Module.ResolvedActionMap)
+            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.Tank.Rotation.Downtime, mq.TLO.Me.ID(), Module.ResolvedActionMap)
         else
-            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.DPS.Rotation.Downtime, Module.ResolvedActionMap)
+            RGMercUtils.RunRotation(self, shdClassConfig.Rotations.DPS.Rotation.Downtime, mq.TLO.Me.ID(), Module.ResolvedActionMap)
         end
 
         if not self.settings.BurnAuto then self.settings.BurnSize = 0 end
@@ -191,6 +198,24 @@ function Module:GiveTime(combat_state)
         if RGMercConfig.Globals.IsTanking and ((os.clock() - Module.LastPetCmd) > 2) then
             Module.LastPetCmd = os.clock()
             RGMercUtils.PetAttack(self.settings, mq.TLO.Target)
+        end
+
+        if RGMercConfig.Globals.IsTanking and self.settings.TLP then
+            self.TempSettings.RotationStates.DPS = RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_Tank.Rotation.DPS, RGMercConfig.Globals.AutoTargetID,
+                Module.ResolvedActionMap, 1,
+                self.TempSettings.RotationStates.DPS)
+        elseif not RGMercConfig.Globals.IsTanking and self.settings.TLP then
+            self.TempSettings.RotationStates.DPS = RGMercUtils.RunRotation(self, shdClassConfig.Rotations.TLP_DPS.Rotation.DPS, RGMercConfig.Globals.AutoTargetID,
+                Module.ResolvedActionMap, 1,
+                self.TempSettings.RotationStates.DPS)
+        elseif RGMercConfig.Globals.IsTanking then
+            self.TempSettings.RotationStates.DPS = RGMercUtils.RunRotation(self, shdClassConfig.Rotations.Tank.Rotation.DPS, RGMercConfig.Globals.AutoTargetID,
+                Module.ResolvedActionMap, 1,
+                self.TempSettings.RotationStates.DPS)
+        else
+            self.TempSettings.RotationStates.DPS = RGMercUtils.RunRotation(self, shdClassConfig.Rotations.DPS.Rotation.DPS, RGMercConfig.Globals.AutoTargetID,
+                Module.ResolvedActionMap, 1,
+                self.TempSettings.RotationStates.DPS)
         end
     end
 end

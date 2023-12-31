@@ -33,6 +33,7 @@ function Utils.PopUp(msg, ...)
 end
 
 function Utils.SetTarget(targetId)
+    RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if RGMercConfig:GetSettings().DoAutoTarget then
         if mq.TLO.Target.ID() ~= targetId then
             mq.cmdf("/target id %d", targetId)
@@ -42,6 +43,7 @@ function Utils.SetTarget(targetId)
 end
 
 function Utils.ClearTarget()
+    RGMercsLogger.log_debug("Clearing Target")
     if RGMercConfig:GetSettings().DoAutoTarget then
         RGMercConfig.Globals.AutoTargetID = 0
         RGMercConfig.Globals.BurnNow = false
@@ -196,6 +198,10 @@ function Utils.MemorizeSpell(gem, spell)
     end
 end
 
+function Utils.CastReady(spell)
+    return mq.TLO.Cast.Ready(spell)()
+end
+
 function Utils.WaitCastReady(spell)
     while not mq.TLO.Cast.Ready(spell)() do
         mq.delay(100)
@@ -203,7 +209,14 @@ function Utils.WaitCastReady(spell)
     end
 end
 
-function Utils.ExecEntry(e, map)
+function Utils.WaitGlobalCoolDown()
+    while mq.TLO.Me.SpellInCooldown() do
+        mq.delay(100)
+        --RGMercsLogger.log_debug("Waiting for spell '%s' to be ready...", spell)
+    end
+end
+
+function Utils.ExecEntry(e, targetId, map)
     local cmd
 
     if e.type:lower() == "item" then
@@ -223,13 +236,21 @@ function Utils.ExecEntry(e, map)
                 return
             end
 
+            Utils.WaitGlobalCoolDown()
+
+            if Utils.GetXTHaterCount() > 1 and (not Utils.CastReady(s.RankName()) or not mq.TLO.Me.Gem(s.RankName())()) then
+                RGMercsLogger.log_debug("\ayI tried to cast %s but it was not ready and we are in combat - moving on.", s.RankName())
+                return
+            end
+
             if not mq.TLO.Me.Gem(s.RankName())() then
                 RGMercsLogger.log_debug("\ay%s is not memorized - meming!", s.RankName())
                 Utils.MemorizeSpell(USEGEM, s.RankName())
             end
 
             Utils.WaitCastReady(s.RankName())
-            cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", s.RankName(), mq.TLO.Me.ID())
+
+            cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", s.RankName(), targetId)
             mq.cmdf(cmd)
             RGMercsLogger.log_debug("Running: \at'%s'", cmd)
         else
@@ -237,6 +258,7 @@ function Utils.ExecEntry(e, map)
         end
 
         Utils.WaitCastFinish()
+
         return
     end
 
@@ -250,32 +272,73 @@ function Utils.ExecEntry(e, map)
             return
         end
 
-        cmd = string.format("/multiline ; /target id %d ; /alt act %d", mq.TLO.Me.ID(), s.ID())
+        if not mq.TLO.Me.AltAbilityReady(e.name)() then
+            RGMercsLogger.log_warning("\ayAbility %s is not ready!", e.name)
+            return
+        end
+
+        cmd = string.format("/multiline ; /target id %d ; /alt act %d", targetId, s.ID())
+
+        Utils.WaitCastFinish()
+
         mq.cmdf(cmd)
         mq.delay(200)
+        RGMercsLogger.log_debug("switching target back to old target after casting aa")
         mq.cmdf("/target id %d", oldTarget or 0)
 
         return
     end
 end
 
-function Utils.RunRotation(s, r, map)
+function Utils.RunRotation(s, r, targetId, map, steps, start_step)
     local oldSpellInSlot = mq.TLO.Me.Gem(USEGEM)
-    for _, entry in ipairs(r) do
-        if entry.cond then
-            local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
-            if pass == true then
-                Utils.ExecEntry(entry, map)
+    local stepsThisTime  = 0
+    local lastStepIdx    = 0
+
+    for idx, entry in ipairs(r) do
+        if not steps or (steps and start_step and idx >= start_step) then
+            if steps then
+                RGMercsLogger.log_debug("Doing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             end
-        else
-            Utils.ExecEntry(entry, map)
+            lastStepIdx = idx
+            if entry.cond then
+                local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
+                if pass == true then
+                    Utils.ExecEntry(entry, targetId, map)
+                    stepsThisTime = stepsThisTime + 1
+
+                    if steps and stepsThisTime >= steps then
+                        break
+                    end
+                end
+            else
+                Utils.ExecEntry(entry, targetId, map)
+                stepsThisTime = stepsThisTime + 1
+
+                if steps and stepsThisTime >= steps then
+                    break
+                end
+            end
         end
     end
 
-    if oldSpellInSlot and mq.TLO.Me.Gem(USEGEM)() ~= oldSpellInSlot.Name() then
+    if oldSpellInSlot() and mq.TLO.Me.Gem(USEGEM)() ~= oldSpellInSlot.Name() then
         RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, USEGEM)
         Utils.MemorizeSpell(USEGEM, oldSpellInSlot.Name())
     end
+
+    -- Move to the next step
+    lastStepIdx = lastStepIdx + 1
+
+    if lastStepIdx > #r then
+        lastStepIdx = 1
+    end
+
+    if steps then
+        RGMercsLogger.log_debug("Ended RunRotation(start(%d), step(%d), next(%d))", start_step, steps, lastStepIdx)
+    end
+
+    return lastStepIdx
 end
 
 function Utils.SelfBuffPetCheck(spell)
@@ -392,9 +455,11 @@ function Utils.AutoMed()
     RGMercConfig:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
-    if me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Nav.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+    if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Nav.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
         return
     end
+
+    local enablesit = false
 
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
     if RGMercConfig.Globals.LastMove.TimeSinceMove < math.random(7, 12) then return end
@@ -406,15 +471,27 @@ function Utils.AutoMed()
             RGMercConfig.Globals.InMedState = false
             return
         end
+
+        if me.PctHPs() < RGMercConfig:GetSettings().HPMedPct and me.PctMana() < RGMercConfig:GetSettings().ManaMedPct and me.PctEndurance() < RGMercConfig:GetSettings().EndMedPct then
+            enablesit = true
+        end
     elseif RGMercConfig.Constants.RGCasters:contains(me.Class.ShortName()) then
         if me.PctHPs() >= RGMercConfig:GetSettings().HPMedPctStop and me.PctMana() >= RGMercConfig:GetSettings().ManaMedPctStop then
             RGMercConfig.Globals.InMedState = false
             return
         end
+
+        if me.PctHPs() < RGMercConfig:GetSettings().HPMedPct and me.PctMana() < RGMercConfig:GetSettings().ManaMedPct then
+            enablesit = true
+        end
     elseif RGMercConfig.Constants.RGMelee:contains(me.Class.ShortName()) then
         if me.PctHPs() >= RGMercConfig:GetSettings().HPMedPctStop and me.PctEndurance() >= RGMercConfig:GetSettings().EndMedPctStop then
             RGMercConfig.Globals.InMedState = false
             return
+        end
+
+        if me.PctHPs() < RGMercConfig:GetSettings().HPMedPct and me.PctEndurance() < RGMercConfig:GetSettings().EndMedPct then
+            enablesit = true
         end
     else
         RGMercsLogger.log_error("\arYour character class is not in the type list(s): rghybrid, rgcasters, rgmelee. That's a problem for a dev.")
@@ -426,7 +503,6 @@ function Utils.AutoMed()
     --    "MED MAIN STATS CHECK :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d", me.PctMana(), RGMercConfig:GetSettings().ManaMedPct, me.PctEndurance(),
     --    RGMercConfig:GetSettings().EndMedPct)
 
-    local enablesit = true
     if Utils.GetXTHaterCount() > 0 then
         if RGMercConfig:GetSettings().DoMelee then enablesit = false end
         if RGMercConfig:GetSettings().DoMed ~= 2 then enablesit = false end
@@ -440,6 +516,7 @@ function Utils.AutoMed()
 
     if not me.Sitting() and enablesit then
         RGMercConfig.Globals.InMedState = true
+        RGMercsLogger.log_debug("Forcing a sit - all conditions met.")
         mq.cmdf("/sit")
     end
 end
@@ -1106,18 +1183,32 @@ function Utils.RenderRotationTableKey()
     end
 end
 
-function Utils.RenderRotationTable(s, n, t, map)
-    if ImGui.BeginTable("Rotation_" .. n, 3, ImGuiTableFlags.Resizable + ImGuiTableFlags.Borders) then
+function Utils.RenderRotationTable(s, n, t, map, rotationState)
+    if ImGui.BeginTable("Rotation_" .. n, rotationState and 4 or 3, ImGuiTableFlags.Resizable + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
+        if rotationState then
+            ImGui.TableSetupColumn('Cur', ImGuiTableColumnFlags.WidthFixed, 20.0)
+        end
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthStretch, 250.0)
+
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         for idx, entry in ipairs(t) do
             ImGui.TableNextColumn()
             ImGui.Text(tostring(idx))
+            if rotationState then
+                ImGui.TableNextColumn()
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
+                if idx == rotationState then
+                    ImGui.Text(ICONS.FA_DOT_CIRCLE_O)
+                else
+                    ImGui.Text("")
+                end
+                ImGui.PopStyleColor()
+            end
             ImGui.TableNextColumn()
             if entry.cond then
                 local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
