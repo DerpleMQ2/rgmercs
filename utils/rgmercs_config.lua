@@ -11,7 +11,6 @@ Config.settings               = {}
 Config.Globals                = {}
 Config.Globals.MainAssist     = ""
 Config.Globals.AutoTargetID   = 0
-Config.Globals.KillTargetID   = 0
 Config.Globals.BurnNow        = false
 Config.Globals.PauseMain      = false
 Config.Globals.LastMove       = nil
