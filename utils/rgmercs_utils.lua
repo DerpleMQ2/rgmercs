@@ -14,6 +14,16 @@ Utils.ScriptName    = "RGMercs"
 Utils.LastZoneID    = 0
 Utils.NamedList     = {}
 
+function Utils.file_exists(path)
+    local f = io.open(path, "r")
+    if f ~= nil then
+        io.close(f)
+        return true
+    else
+        return false
+    end
+end
+
 function Utils.BroadcastUpdate(module, event)
     Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event })
 end

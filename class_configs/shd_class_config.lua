@@ -60,17 +60,19 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    ['Modes'] = {
+    _version          = "0.1a",
+    _author           = "Derple",
+    ['Modes']         = {
         [1] = 'Tank',
         [2] = 'DPS',
     },
-    ['ItemSets'] = {
+    ['ItemSets']      = {
         ['Epic'] = {
             [1] = "Innoruuk's Dark Blessing",
             [2] = "Innoruuk's Voice",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']   = {
         ['Mantle'] = {
             [1] = "Malarian Mantle",
             [2] = "Gorgon Mantle",
@@ -540,7 +542,7 @@ local _ClassConfig = {
             [5] = "Ignominious Influence",
         },
     },
-    ['Rotations'] = {
+    ['Rotations']     = {
         ['Downtime'] = {
             [1] = {
                 name = "Dark Lord's Unity (Azia)",
@@ -1002,7 +1004,7 @@ local _ClassConfig = {
             },
         },
     },
-    ['Spells'] = {
+    ['Spells']        = {
         [1] = {
             gem = 1,
             spells = {

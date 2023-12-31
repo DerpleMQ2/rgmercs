@@ -1,8 +1,26 @@
 -- Sample Basic Class Module
-local mq                           = require('mq')
-local RGMercsLogger                = require("rgmercs.utils.rgmercs_logger")
-local RGMercUtils                  = require("rgmercs.utils.rgmercs_utils")
-local shdClassConfig               = require("rgmercs.class_configs.shd_class_config")
+local mq                 = require('mq')
+local RGMercsLogger      = require("rgmercs.utils.rgmercs_logger")
+local RGMercUtils        = require("rgmercs.utils.rgmercs_utils")
+
+local custom_config_file = mq.configDir .. "/rgmercs/class_configs/shd_class_config.lua"
+
+local shdClassConfig     = nil
+if RGMercUtils.file_exists(custom_config_file) then
+    RGMercsLogger.log_info("Loading Custom SK Config: %s", custom_config_file)
+    local config, err = loadfile(custom_config_file)
+    if not config or err then
+        RGMercsLogger.log_error("Failed to Load Custom SK Config: %s", custom_config_file)
+    else
+        shdClassConfig = config()
+    end
+end
+
+if not shdClassConfig then
+    printf(custom_config_file)
+    shdClassConfig = require("rgmercs.class_configs.shd_class_config")
+end
+
 
 local Module                       = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
 Module.__index                     = Module
@@ -34,12 +52,13 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("Basic Combat Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_info("\arShadowKnight\ao Combat Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", shdClassConfig._author, shdClassConfig._version)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[Basic]: Unable to load global settings file(%s), creating a new one!",
+        RGMercsLogger.log_error("\ay[ShadowKnight]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self.settings = {}
         self:SaveSettings(true)
