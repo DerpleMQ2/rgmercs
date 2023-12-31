@@ -54,14 +54,21 @@ function actions.log_debug(output, ...)
 
 	if (... ~= nil) then output = string.format(output, ...) end
 	mq.cmd(string.format('/mqlog [%s] %s', mq.TLO.Me.Name(), output))
-	printf('%s:\amDEBUG::%s\ax%s\aw%s', logLeaderStart, callerTracer, logLeaderEnd, output)
+	printf('%s:\amDEBUG::%s\ax%s \aw%s', logLeaderStart, callerTracer, logLeaderEnd, output)
 end
 
-function actions.output_test_logs()
-	actions.log_error("Test Error")
-	actions.log("Test Warning")
-	actions.log2("Test Normal")
-	actions.debug_log("Test Debug")
+function actions.log_verbose(output, ...)
+	if (logLevel < 4) then
+		return
+	end
+
+	local info = debug.getinfo(2, "nl")
+
+	local callerTracer = string.format("\aw<\ay%s()\aw:\ay%d\aw>\ax", info.name, info.currentline)
+
+	if (... ~= nil) then output = string.format(output, ...) end
+	mq.cmd(string.format('/mqlog [%s] %s', mq.TLO.Me.Name(), output))
+	printf('%s:\apVERBOSE::%s\ax%s \aw%s', logLeaderStart, callerTracer, logLeaderEnd, output)
 end
 
 return actions

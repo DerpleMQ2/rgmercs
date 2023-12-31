@@ -239,8 +239,10 @@ local function Main()
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
 
+        RGMercsLogger.log_verbose("Setting ControlToon()")
         RGMercUtils.SetControlTool()
 
+        RGMercsLogger.log_verbose("Checking FindTargetCheck()")
         if RGMercUtils.FindTargetCheck() then
             RGMercUtils.FindTarget()
         end
