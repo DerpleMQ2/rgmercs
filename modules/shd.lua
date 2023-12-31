@@ -52,15 +52,6 @@ function Module:LoadSettings()
         self.settings[k] = self.settings[k] or v.Default
     end
 
-    for rot, rot_entry in pairs(shdClassConfig.DefaultRotations) do
-        RGMercsLogger.log_debug("Appending new entry for rotation %s", rot)
-        for _, entry in ipairs(rot_entry) do
-            for rot_type, _ in pairs(shdClassConfig.Rotations) do
-                table.insert(shdClassConfig.Rotations[rot_type].Rotation[rot], entry)
-            end
-        end
-    end
-
     newCombatMode = true
 end
 
@@ -92,24 +83,14 @@ function Module:setCombatMode(mode)
     RGMercsLogger.log_debug("\aySettings Combat Mode to: \am%s", mode)
     if mode == "Tank" then
         RGMercConfig.Globals.IsTanking = true
-        if self.settings.TLP then
-            Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(self,
-                shdClassConfig.Rotations.TLP_Tank.Spells, shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
-        else
-            Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(self,
-                shdClassConfig.Rotations.Tank.Spells,
-                shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
-        end
+        Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(self,
+            shdClassConfig.Spells,
+            shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
     elseif mode == "DPS" then
         RGMercConfig.Globals.IsTanking = false
-        if self.settings.TLP then
-            Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(self,
-                shdClassConfig.Rotations.TLP_DPS.Spells, shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
-        else
-            Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(self,
-                shdClassConfig.Rotations.DPS.Spells,
-                shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
-        end
+        Module.ResolvedActionMap, Module.SpellLoadOut = RGMercUtils.SetLoadOut(self,
+            shdClassConfig.Spells,
+            shdClassConfig.ItemSets, shdClassConfig.AbilitySets)
     end
 
     RGMercUtils.LoadSpellLoadOut(Module.SpellLoadOut)
@@ -151,17 +132,19 @@ function Module:Render()
     ImGui.Separator()
 
     if ImGui.CollapsingHeader("Rotations") then
+        local rotationNames = {}
+        for k, _ in pairs(shdClassConfig.Rotations) do
+            table.insert(rotationNames, k)
+        end
+        table.sort(rotationNames)
+
         ImGui.Indent()
         RGMercUtils.RenderRotationTableKey()
 
-        local mode = shdClassConfig.Modes[self.settings.Mode]
-        if self.settings.TLP then
-            mode = "TLP_" .. mode
-        end
-        for k, v in pairs(shdClassConfig.Rotations[mode].Rotation) do
+        for _, k in pairs(rotationNames) do
             if ImGui.CollapsingHeader(k) then
                 ImGui.Indent()
-                RGMercUtils.RenderRotationTable(self, k, shdClassConfig.Rotations[mode].Rotation[k],
+                RGMercUtils.RenderRotationTable(self, k, shdClassConfig.Rotations[k],
                     Module.ResolvedActionMap, self.TempSettings.RotationStates[k])
                 ImGui.Unindent()
             end
@@ -172,15 +155,11 @@ function Module:Render()
 end
 
 function Module:GetRotationTable(mode)
-    if RGMercConfig.Globals.IsTanking and self.settings.TLP then
-        return shdClassConfig.Rotations.TLP_Tank.Rotation[mode]
-    elseif not RGMercConfig.Globals.IsTanking and self.settings.TLP then
-        return shdClassConfig.Rotations.TLP_DPS.Rotation[mode]
-    elseif RGMercConfig.Globals.IsTanking then
-        return shdClassConfig.Rotations.Tank.Rotation[mode]
+    if RGMercConfig.Globals.IsTanking then
+        return shdClassConfig.Rotations[mode]
     end
 
-    return shdClassConfig.Rotations.DPS.Rotation[mode]
+    return shdClassConfig.Rotations[mode]
 end
 
 function Module:GiveTime(combat_state)
@@ -195,7 +174,7 @@ function Module:GiveTime(combat_state)
 
     -- Downtime totaiton will just run a full rotation to completion
     if self.CombatState == "Downtime" then
-        RGMercUtils.RunRotation(self, self:GetRotationTable("Downtime"), mq.TLO.Me.ID(), Module.ResolvedActionMap)
+        RGMercUtils.RunRotation(self, self:GetRotationTable("Downtime"), mq.TLO.Me.ID(), Module.ResolvedActionMap, nil, nil, true)
 
         if not self.settings.BurnAuto then self.settings.BurnSize = 0 end
     else
@@ -204,18 +183,21 @@ function Module:GiveTime(combat_state)
             RGMercUtils.PetAttack(self.settings, mq.TLO.Target)
         end
 
-        self.TempSettings.RotationStates.DPS = RGMercUtils.RunRotation(self, self:GetRotationTable("DPS"), RGMercConfig.Globals.AutoTargetID,
-            Module.ResolvedActionMap, 1, self.TempSettings.RotationStates.DPS)
-
         if RGMercUtils.BurnCheck(self.settings) then
             self.TempSettings.RotationStates.Burn = RGMercUtils.RunRotation(self, self:GetRotationTable("Burn"), RGMercConfig.Globals.AutoTargetID,
-                Module.ResolvedActionMap, 1, self.TempSettings.RotationStates.Burn)
+                Module.ResolvedActionMap, 1, self.TempSettings.RotationStates.Burn, false)
         end
+
+        self.TempSettings.RotationStates.DPS = RGMercUtils.RunRotation(self, self:GetRotationTable("DPS"), RGMercConfig.Globals.AutoTargetID,
+            Module.ResolvedActionMap, 1, self.TempSettings.RotationStates.DPS, false)
     end
 end
 
 function Module:Shutdown()
     RGMercsLogger.log_info("ShadowKnight Combat Module UnLoaded.")
+end
+
+function Module:OnDeath()
 end
 
 return Module

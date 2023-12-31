@@ -77,7 +77,7 @@ Config.DefaultConfig          = {
     ['DoModRod']          = { DisplayName = "Do Mod Rod", Tooltip = "Auto use Mod Rods if we have them", Default = true },
     ['ModRodManaPct']     = { DisplayName = "Mod Rod Mana Pct", Tooltip = "What Mana Pct to hit before using a rod.", Default = 30, Min = 1, Max = 99 },
     ['DoMed']             = { DisplayName = "Do Meditate", Tooltip = "0 = No Auto Med, 1 = Auto Med Out of Combat, 2 = Auto Med In Combat", Default = 1, Min = 0, Max = 2 },
-    ['HPMedPct']          = { DisplayName = "Med HP Pct", Tooltip = "What HP Pct to hit before medding.", Default = 30, Min = 1, Max = 99 },
+    ['HPMedPct']          = { DisplayName = "Med HP Pct", Tooltip = "What HP Pct to hit before medding.", Default = 60, Min = 1, Max = 99 },
     ['ManaMedPct']        = { DisplayName = "Med Mana Pct", Tooltip = "What Mana Pct to hit before medding.", Default = 30, Min = 1, Max = 99 },
     ['EndMedPct']         = { DisplayName = "Med Endurance Pct", Tooltip = "What Endurance Pct to hit before medding.", Default = 30, Min = 1, Max = 99 },
     ['ManaMedPctStop']    = { DisplayName = "Med Mana Pct Stop", Tooltip = "What Mana Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99 },
@@ -99,7 +99,7 @@ Config.DefaultConfig          = {
     ['AllowMezBreak']     = { DisplayName = "Allow Mez Break", Tooltip = "Allow Mez Breaking.", Default = false },
     ['InstantRelease']    = { DisplayName = "Instant Release", Tooltip = "Instantly release when you die.", Default = false },
     ['FollowMarkTarget']  = { DisplayName = "Follow Mark Target", Tooltip = "Auto target MA target Marks.", Default = false },
-    ['LogLevel']          = { DisplayName = "Log Level", Tooltip = "0 = Errors, 1 = Warnings, 2 = Info, 3 = Debug", Default = 2, Min = 0, Max = 3 },
+    ['LogLevel']          = { DisplayName = "Log Level", Tooltip = "0 = Errors, 1 = Warnings, 2 = Info, 3 = Debug, 4 = Verbose", Default = 2, Min = 0, Max = 4 },
     ['OutsideAssistList'] = { DisplayName = "List of Outsiders to Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {} },
     ['BgOpacity']         = { DisplayName = "Background Opacity", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = 1.0 },
 }
@@ -111,6 +111,8 @@ end
 
 function Config:SaveSettings(doBroadcast)
     mq.pickle(self:GetConfigFileName(), self.settings)
+
+    RGMercsLogger.set_log_level(self.settings.LogLevel)
 
     if doBroadcast then
         RGMercUtils.BroadcastUpdate("main", "SaveSettings")
