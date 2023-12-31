@@ -652,9 +652,9 @@ function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
 end
 
 function Utils.ShouldKillTargetReset()
-    local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", RGMercConfig.Globals.KillTargetID))
-    local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", RGMercConfig.Globals.KillTargetID))
-    return ((not killSpawn()) or killCorpse()) and RGMercConfig.Globals.KillTargetID > 0
+    local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", RGMercConfig.Globals.AutoTargetID))
+    local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", RGMercConfig.Globals.AutoTargetID))
+    return ((not killSpawn()) or killCorpse()) and RGMercConfig.Globals.AutoTargetID > 0
 end
 
 function Utils.AutoMed()
@@ -755,7 +755,7 @@ function Utils.DoBuffCheck()
 
     if mq.TLO.Me.Invis() then return false end
 
-    if Utils.GetXTHaterCount() > 0 or RGMercConfig.Globals.KillTargetID > 0 then return false end
+    if Utils.GetXTHaterCount() > 0 or RGMercConfig.Globals.AutoTargetID > 0 then return false end
 
     if (mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Nav.Active()) and mq.TLO.Me.Class.ShortName():lower() ~= "brd" then return false end
 
@@ -765,7 +765,7 @@ function Utils.DoBuffCheck()
 end
 
 function Utils.DoCamp()
-    return Utils.GetXTHaterCount() == 0 and RGMercConfig.KillTargetID == 0
+    return Utils.GetXTHaterCount() == 0 and RGMercConfig.Globals.AutoTargetID == 0
 end
 
 function Utils.AutoCampCheck(config, tempConfig)
@@ -781,10 +781,31 @@ function Utils.AutoCampCheck(config, tempConfig)
 
     local me = mq.TLO.Me
 
-    if mq.TLO.Math.Distance(string.format("%d,%d,%d,%d", me.Y(), me.X(), tempConfig.AutoCampY, tempConfig.AutoCampX)) >= 400 then
+    local distanceToCamp = mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", me.Y(), me.X(), tempConfig.AutoCampY, tempConfig.AutoCampX))()
+
+    if distanceToCamp >= 400 then
         Utils.PrintGroupMessage("I'm over 400 units from camp, not returning!")
         mq.cmdf("/rgl campoff")
         return
+    end
+
+    if distanceToCamp < config.AutoCampRadius then return end
+
+    if distanceToCamp > 5 then
+        local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
+        if mq.TLO.Nav.PathExists(navTo)() then
+            mq.cmdf("/nav %s", navTo)
+            while mq.TLO.Nav.Active() do
+                mq.delay(10)
+                mq.doevents()
+            end
+        else
+            mq.cmdf("/moveto loc %d %d|on", tempConfig.AutoCampY, tempConfig.AutoCampX)
+            while mq.TLO.MoveTo.Moving() do
+                mq.delay(10)
+                mq.doevents()
+            end
+        end
     end
 end
 
@@ -950,7 +971,7 @@ function Utils.MATargetScan(radius, zradius)
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
         if xtSpawn() and xtSpawn.Type():lower() == "auto hater" and xtSpawn.ID() > 0 then
-            RGMercsLogger.log_debug("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
+            RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
             if xtSpawn.Distance() <= radius then
                 -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                 -- get aggro data from the spawn data type.
@@ -958,7 +979,7 @@ function Utils.MATargetScan(radius, zradius)
                     if xtSpawn.PctAggro() < 100 and RGMercConfig.Globals.IsTanking then
                         -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
                         if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
-                            RGMercsLogger.log_debug("Have not fully aggro'd %s -- returning %s [%d]", xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
+                            RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]", xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
                             return xtSpawn.ID()
                         end
                     end
@@ -966,7 +987,7 @@ function Utils.MATargetScan(radius, zradius)
 
                 -- If a name has take priority.
                 if Utils.IsNamed(xtSpawn) then
-                    RGMercsLogger.log_debug("Found Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
+                    RGMercsLogger.log_verbose("Found Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
                     return xtSpawn.ID()
                 end
 
@@ -982,15 +1003,15 @@ function Utils.MATargetScan(radius, zradius)
         end
     end
 
-    RGMercsLogger.log_debug("We apparently didn't find anything on xtargets, doing a search for mezzed targets")
+    RGMercsLogger.log_verbose("We apparently didn't find anything on xtargets, doing a search for mezzed targets")
 
     -- We didn't find anything to kill yet so spawn search
     if killId == 0 then
-        RGMercsLogger.log_debug("Falling back on Spawn Searching")
+        RGMercsLogger.log_verbose("Falling back on Spawn Searching")
         local aggroMobCount = mq.TLO.SpawnCount(aggroSearch)()
         local aggroMobPetCount = mq.TLO.SpawnCount(aggroSearchPet)()
-        RGMercsLogger.log_debug("NPC Target Scan: %s ===> %d", aggroSearch, aggroMobCount)
-        RGMercsLogger.log_debug("NPCPET Target Scan: %s ===> %d", aggroSearchPet, aggroMobPetCount)
+        RGMercsLogger.log_verbose("NPC Target Scan: %s ===> %d", aggroSearch, aggroMobCount)
+        RGMercsLogger.log_verbose("NPCPET Target Scan: %s ===> %d", aggroSearchPet, aggroMobPetCount)
 
         for i = 1, aggroMobCount do
             local spawn = mq.TLO.NearestSpawn(i, aggroSearch)
@@ -1001,7 +1022,7 @@ function Utils.MATargetScan(radius, zradius)
                 -- take priority. Note: More mobs as of ToL are "named" even though they really aren't.
 
                 if Utils.IsNamed(spawn) then
-                    RGMercsLogger.log_debug("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
+                    RGMercsLogger.log_verbose("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
                     return spawn.ID()
                 end
 
@@ -1031,6 +1052,7 @@ function Utils.MATargetScan(radius, zradius)
         end
     end
 
+    RGMercsLogger.log_verbose("\agMATargetScan Returning: \at%d", killId)
     return killId
 end
 
@@ -1084,14 +1106,14 @@ function Utils.FindTarget()
             if RGMercConfig.Globals.AutoTargetID == 0 then
                 -- If we currently don't have a target, we should see if there's anything nearby we should go after.
                 RGMercConfig.Globals.AutoTargetID = Utils.MATargetScan(RGMercConfig:GetSettings().AssistRange, RGMercConfig:GetSettings().MAScanZRange)
-                RGMercsLogger.log_debug("MATargetScan returned %d -- Current Target: %s [%d]", RGMercConfig.Globals.AutoTargetID, target.CleanName(), target.ID())
+                RGMercsLogger.log_verbose("MATargetScan returned %d -- Current Target: %s [%d]", RGMercConfig.Globals.AutoTargetID, target.CleanName(), target.ID())
             else
                 -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
                 -- Only be turned off by tank modes.
                 if not RGMercConfig:GetSettings().StayOnTarget then
                     RGMercConfig.Globals.AutoTargetID = Utils.MATargetScan(RGMercConfig:GetSettings().AssistRange, RGMercConfig:GetSettings().MAScanZRange)
                     local autoTarget = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
-                    RGMercsLogger.log_debug("Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
+                    RGMercsLogger.log_verbose("Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
                         autoTarget.CleanName() or "None", RGMercConfig.AutoTargetID or 0, target() and target.CleanName() or "None", target() and target.ID() or 0)
                 end
             end
@@ -1104,11 +1126,11 @@ function Utils.FindTarget()
             local assist = mq.TLO.Spawn(RGMercConfig:GetAssistId())
             local assistTarget = mq.TLO.Spawn(assist.AssistName())
 
-            RGMercsLogger.log_debug("FindTarget Assisting %s [%d] -- Target Agressive: %s", RGMercConfig.Globals.MainAssist, assist.ID(),
+            RGMercsLogger.log_verbose("FindTarget Assisting %s [%d] -- Target Agressive: %s", RGMercConfig.Globals.MainAssist, assist.ID(),
                 assistTarget.Aggressive() and "True" or "False")
 
             if assistTarget() and assistTarget.Aggressive() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
-                RGMercsLogger.log_debug(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(), assistTarget.ID())
+                RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(), assistTarget.ID())
                 RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
             end
         else
@@ -1192,7 +1214,7 @@ function Utils.OkToEngage(autoTargetId)
         return false
     end
 
-    if Utils.GetXTHaterCount() > 0 then -- TODO: or KillTargetID and !BackOffFlag
+    if Utils.GetXTHaterCount() > 0 then -- TODO: or AutoTargetID and !BackOffFlag
         if target.Distance() < config.AssistRange and (target.PctHPs() < config.AutoAssistAt or RGMercConfig.Globals.IsTanking or assistId == mq.TLO.Me.ID()) then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_debug("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",

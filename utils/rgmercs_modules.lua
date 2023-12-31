@@ -8,7 +8,7 @@ function Modules.load()
     local newModules = setmetatable({
         modules = {
             --Basic          = require("modules.basic").New(),
-            Chase        = require("modules.chase").New(),
+            Movement     = require("modules.movement").New(),
             ShadowKnight = require("modules.shd").New(),
         }
     }, Modules)

@@ -104,6 +104,8 @@ local function RGMercsGUI()
                 if ImGui.BeginTabItem("RGMercsMain") then
                     ImGui.Text("Current State: " .. curState)
                     ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
+                    ImGui.Text("AutoTargetID: " .. tostring(RGMercConfig.Globals.AutoTargetID))
+                    ImGui.Text("MA: " .. RGMercConfig:GetAssistSpawn().CleanName())
                     if ImGui.CollapsingHeader("Config Options") then
                         local newSettings = RGMercConfig:GetSettings()
                         newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig)
@@ -236,20 +238,18 @@ local function Main()
 
     if mq.TLO.Me.Hovering() then RGMercUtils.HandleDeath() end
 
+    RGMercUtils.SetControlTool()
+
+    if RGMercUtils.FindTargetCheck() then
+        RGMercUtils.FindTarget()
+    end
+
+    if RGMercUtils.OkToEngage(mq.TLO.Target.ID()) then
+        RGMercUtils.EngageTarget(mq.TLO.Target.ID())
+    end
+
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
-
-        RGMercsLogger.log_verbose("Setting ControlToon()")
-        RGMercUtils.SetControlTool()
-
-        RGMercsLogger.log_verbose("Checking FindTargetCheck()")
-        if RGMercUtils.FindTargetCheck() then
-            RGMercUtils.FindTarget()
-        end
-
-        if RGMercUtils.OkToEngage(mq.TLO.Target.ID()) then
-            RGMercUtils.EngageTarget(mq.TLO.Target.ID())
-        end
     end
 
     -- TODO: Write Healing Module
@@ -308,7 +308,6 @@ local function Main()
 
     if RGMercUtils.ShouldKillTargetReset() then
         RGMercConfig.Globals.AutoTargetID = 0
-        RGMercConfig.Globals.KillTargetID = 0
     end
 
     -- TODO: Fix Curing

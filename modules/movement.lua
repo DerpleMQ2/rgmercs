@@ -4,13 +4,14 @@ local RGMercsLogger            = require("rgmercs.utils.rgmercs_logger")
 local RGMercUtils              = require("rgmercs.utils.rgmercs_utils")
 local ICONS                    = require('mq.Icons')
 
-local Module                   = { _version = '0.1a', name = "Chase", author = 'Derple' }
+local Module                   = { _version = '0.1a', name = "Movement", author = 'Derple' }
 Module.__index                 = Module
 
 Module.TempSettings            = {}
 Module.TempSettings.CampZoneId = 0
 
 Module.DefaultConfig           = {
+    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Tooltip = "Return to camp after you get this far away", Default = 60, Min = 10, Max = 150 },
     ['ChaseOn']          = { DisplayName = "Chase On", Tooltip = "Chase your Chase Target.", Default = false },
     ['ChaseDistance']    = { DisplayName = "Chase Distance", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100 },
     ['ChaseTarget']      = { DisplayName = "Chase Target", Tooltip = "Character you are Chasing", Type = "Custom", Default = "" },
@@ -227,9 +228,14 @@ function Module:Render()
     ImGui.Separator()
 
     if self.settings.ReturnToCamp then
+        local me = mq.TLO.Me
+        local distanceToCamp = mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0))()
         ImGui.Text("Camp Location")
         ImGui.Indent()
-        ImGui.Text(string.format("X: %d, Y: %d, Z: %d", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY, self.TempSettings.AutoCampZ))
+        ImGui.Text(string.format("X: %d, Y: %d, Z: %d", self.TempSettings.AutoCampX or 0, self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampZ or 0))
+        if self.TempSettings.CampZoneId > 0 then
+            ImGui.Text(string.format("Distance to Camp: %d", distanceToCamp))
+        end
         ImGui.Unindent()
         if ImGui.SmallButton("Set New Camp Here") then
             self:CampOn()
@@ -267,11 +273,11 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    if not self:ShouldFollow() then return end
-
     if RGMercUtils.DoCamp() then
         RGMercUtils.AutoCampCheck(self.settings, self.TempSettings)
     end
+
+    if not self:ShouldFollow() then return end
 
     if self.settings.ChaseOn and not self.settings.ChaseTarget then
         self.settings.ChaseOn = false
