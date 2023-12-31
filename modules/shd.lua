@@ -173,6 +173,12 @@ function Module:Render()
     ImGui.Text(string.format("Combat State: %s", self.CombatState))
 end
 
+function Module:ResetRotation()
+    for k, _ in pairs(self.TempSettings.RotationStates) do
+        self.TempSettings.RotationStates[k] = 1
+    end
+end
+
 function Module:GetRotationTable(mode)
     if RGMercConfig.Globals.IsTanking then
         return shdClassConfig.Rotations[mode]
@@ -187,6 +193,10 @@ function Module:GiveTime(combat_state)
         RGMercsLogger.log_debug("New Combat Mode Requested: %s", shdClassConfig.Modes[self.settings.Mode])
         self:setCombatMode(shdClassConfig.Modes[self.settings.Mode])
         newCombatMode = false
+    end
+
+    if self.CombatState ~= combat_state and combat_state == "Downtime" then
+        self:ResetRotation()
     end
 
     self.CombatState = combat_state
