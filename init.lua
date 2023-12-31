@@ -105,7 +105,7 @@ local function RGMercsGUI()
                     ImGui.Text("Current State: " .. curState)
                     ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
                     ImGui.Text("AutoTargetID: " .. tostring(RGMercConfig.Globals.AutoTargetID))
-                    ImGui.Text("MA: " .. RGMercConfig:GetAssistSpawn().CleanName())
+                    ImGui.Text("MA: " .. (RGMercConfig:GetAssistSpawn().CleanName() or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
                         local newSettings = RGMercConfig:GetSettings()
                         newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig)
