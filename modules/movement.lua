@@ -64,7 +64,7 @@ function Module.New()
 end
 
 function Module:ChaseOn(target)
-    local chaseTarget = mq.TLO.Target
+    local chaseTarget = RGMercConfig:GetAssistSpawn() or mq.TLO.Target
 
     if target then
         chaseTarget = mq.TLO.Spawn("pc =" .. target)
@@ -74,6 +74,8 @@ function Module:ChaseOn(target)
         self.settings.ChaseOn = true
         self.settings.ChaseTarget = chaseTarget.CleanName()
         self:SaveSettings(true)
+
+        RGMercsLogger.log_info("\ao Now Chasing \ag %s", chaseTarget.CleanName())
     else
         RGMercsLogger.log_warning("\ayWarning:\ax Not a valid chase target!")
     end
