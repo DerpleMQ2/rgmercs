@@ -254,8 +254,9 @@ local function RGInit(...)
         RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist, RGMercConfig:GetSettings().AutoAssistAt)
     end
 
-    if mq.TLO.Group.MainAssist.CleanName() ~= mainAssist then
-        RGMercUtils.PopUp(string.format("Assisting %s NOTICE: Group MainAssist != Your Target. Is This On Purpose?", mainAssist))
+    if RGMercUtils.GetGroupMainAssistName() ~= mainAssist then
+        RGMercUtils.PopUp(string.format("Assisting: %s NOTICE: Group MainAssist [%s] != Your Assist Target [%s]. Is This On Purpose?", mainAssist,
+            RGMercUtils.GetGroupMainAssistName(), mainAssist))
     end
 end
 
