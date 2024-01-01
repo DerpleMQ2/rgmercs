@@ -414,8 +414,6 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
             RGMercsLogger.log_debug("Running: \at'%s'", cmd)
 
             Utils.WaitCastFinish(target)
-        else
-            RGMercsLogger.log_error("Entry Key: %s not found in map!", e.name)
         end
 
         return
