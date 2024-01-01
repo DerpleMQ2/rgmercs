@@ -68,8 +68,11 @@ Config.ExpansionNameToID      = {
     ['EXPANSION_LEVEL_LS'] = 30,     -- Laurion's Song
 }
 
+Config.ExpansionIDToName      = {}
+for k, v in pairs(Config.ExpansionNameToID) do Config.ExpansionIDToName[v] = k end
+
 -- Defaults
-Config.DefaultConfig          = {
+Config.DefaultConfig = {
     ['DoAutoTarget']      = { DisplayName = "Auto Target", Tooltip = "Automatically change targets.", Default = true },
     ['DoMercenary']       = { DisplayName = "Use Mercenary", Tooltip = "Use Merc during combat.", Default = true },
     ['PriorityHealing']   = { DisplayName = "Priority Healing", Tooltip = "Prioritize Healing over Combat", Default = false },

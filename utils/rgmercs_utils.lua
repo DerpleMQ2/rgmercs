@@ -614,6 +614,10 @@ function Utils.GetTargetPctHPs()
     return (mq.TLO.Target.PctHPs() or 0)
 end
 
+function Utils.GetTargetName()
+    return (mq.TLO.Target.Name() or "")
+end
+
 function Utils.GetTargetID()
     return (mq.TLO.Target.ID() or 0)
 end
@@ -1223,7 +1227,7 @@ function Utils.OkToEngage(autoTargetId)
 
     if not target() then return false end
 
-    if target.ID() ~= autoTargetId then
+    if Utils.GetTargetID() ~= autoTargetId then
         RGMercsLogger.log_debug("%d != %d --> Not Engageing", target.ID() or 0, autoTargetId)
         return false
     end
@@ -1234,7 +1238,7 @@ function Utils.OkToEngage(autoTargetId)
     end
 
     if Utils.GetXTHaterCount() > 0 then -- TODO: or AutoTargetID and !BackOffFlag
-        if target.Distance() < config.AssistRange and (Utils.GetTargetPctHPs() < config.AutoAssistAt or RGMercConfig.Globals.IsTanking or assistId == mq.TLO.Me.ID()) then
+        if Utils.GetTargetDistance() < config.AssistRange and (Utils.GetTargetPctHPs() < config.AutoAssistAt or RGMercConfig.Globals.IsTanking or assistId == mq.TLO.Me.ID()) then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_debug("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
                     target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId, mq.TLO.Me.ID())
