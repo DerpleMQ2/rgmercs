@@ -121,6 +121,7 @@ end
 function Module:DestoryCampfire()
     mq.TLO.Window("FellowshipWnd").DoOpen()
     mq.delay("3s", mq.TLO.Window("FellowshipWnd").Open())
+    ---@diagnostic disable-next-line: undefined-field
     mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
     if mq.TLO.Me.Fellowship.Campfire() then
@@ -165,6 +166,7 @@ function Module:Campfire(camptype)
     for i = 1, spawnCount do
         local spawn = mq.TLO.NearestSpawn(i, "PC radius 50")
 
+        ---@diagnostic disable-next-line: redundant-parameter
         if spawn() and mq.TLO.Me.Fellowship.Member(spawn.CleanName()) then
             fellowCount = fellowCount + 1
         end
@@ -173,6 +175,7 @@ function Module:Campfire(camptype)
     if fellowCount >= 3 then
         mq.TLO.Window("FellowshipWnd").DoOpen()
         mq.delay("3s", mq.TLO.Window("FellowshipWnd").Open())
+        ---@diagnostic disable-next-line: undefined-field
         mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
         if mq.TLO.Me.Fellowship.Campfire() then
@@ -190,6 +193,7 @@ function Module:Campfire(camptype)
 
         mq.TLO.Window("FellowshipWnd").Child("FP_RefreshList").LeftMouseUp()
         mq.delay("1s")
+        ---@diagnostic disable-next-line: redundant-parameter
         mq.TLO.Window("FellowshipWnd").Child("FP_CampsiteKitList").Select(self.settings.MaintainCampfire or camptype)
         mq.delay("1s")
         mq.TLO.Window("FellowshipWnd").Child("FP_CreateCampsite").LeftMouseUp()
@@ -327,6 +331,7 @@ function Module:GiveTime(combat_state)
         if mq.TLO.Me.Dead() then return end
         if not chaseSpawn() or chaseSpawn.Distance() < self.settings.ChaseDistance then return end
 
+        ---@diagnostic disable-next-line: undefined-field
         local Nav = mq.TLO.Nav
 
         -- Use MQ2Nav with moveto as a failover if we have a mesh. We'll use a nav
@@ -344,7 +349,7 @@ function Module:GiveTime(combat_state)
                     mq.cmdf("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
                 end
             end
-        elseif chaseSpawn.Distance() > self.settings.ChaseDistance and chaseSpawn.Distnance() < 400 then
+        elseif chaseSpawn.Distance() > self.settings.ChaseDistance and chaseSpawn.Distance() < 400 then
             -- If we don't have a mesh we're using afollow as legacy RG behavior.
             mq.cmdf("/squelch /afollow spawn %d", chaseSpawn.ID())
             mq.cmdf("/squelch /afollow %d", self.settings.ChaseDistance)

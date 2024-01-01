@@ -73,6 +73,7 @@ function Utils.HandleDeath()
 
     while mq.TLO.Me.Hovering() do
         if mq.TLO.Window("RespawnWnd").Open() and RGMercConfig:GetSettings().InstantRelease then
+            ---@diagnostic disable-next-line: redundant-parameter
             mq.TLO.Window("RespawnWnd").Child("RW_OptionsList").Select(1)
             mq.delay("1s")
             mq.TLO.Window("RespawnWnd").Child("RW_SelectButton").LeftMouseUp()
@@ -81,6 +82,7 @@ function Utils.HandleDeath()
         end
     end
 
+    ---@diagnostic disable-next-line: undefined-field
     mq.delay("1m", (not mq.TLO.Me.Zoning()))
 
     if RGMercConfig:GetSettings().DoFellow then
@@ -183,6 +185,7 @@ function Utils.GetBestSpell(t)
     end
 
     if selectedSpell then
+        ---@diagnostic disable-next-line: undefined-field
         RGMercsLogger.log_debug("\agFound\ax %s level(%d) rank(%s)", selectedSpell.BaseName(), selectedSpell.Level(),
             selectedSpell.RankName())
     else
@@ -196,6 +199,7 @@ function Utils.WaitCastFinish(target)
     local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime.TotalSeconds() or 0) + ((mq.TLO.EverQuest.Ping() * 2 / 100) + 1)) * 1000
     local maxWait = maxWaitOrig
 
+    ---@diagnostic disable-next-line: undefined-field
     while mq.TLO.Me.Casting() and (not mq.TLO.Cast.Ready()) do
         mq.delay(100)
         if target() and Utils.GetTargetPctHPs() <= 0 or (Utils.GetTargetID() ~= target.ID()) then
@@ -674,8 +678,10 @@ function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
         mq.cmdf("/stick off")
     end
 
+    ---@diagnostic disable-next-line: undefined-field
     if mq.TLO.Nav.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
         mq.cmdf("/nav id %d distance=%d log=off lineofsight=on", targetId, distance)
+        ---@diagnostic disable-next-line: undefined-field
         while mq.TLO.Nav.Active() and mq.TLO.Nav.Velocity() > 0 do
             mq.delay(100)
         end
@@ -712,6 +718,7 @@ function Utils.AutoMed()
     if me.Class.ShortName():lower() == "brd" and me.Level() > 5 then return end
 
     -- TODO: Add DoMount Check
+    ---@diagnostic disable-next-line: undefined-field
     if me.Mount.ID() and not mq.TLO.Zone.Indoor() then
         RGMercsLogger.log_verbose("Sit check returning early due to mount.")
         return
@@ -720,6 +727,7 @@ function Utils.AutoMed()
     RGMercConfig:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
+    ---@diagnostic disable-next-line: undefined-field
     if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Nav.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
         RGMercsLogger.log_verbose("Sit check returning early due to movement.")
         return
@@ -817,6 +825,7 @@ function Utils.DoBuffCheck()
 
     if Utils.GetXTHaterCount() > 0 or RGMercConfig.Globals.AutoTargetID > 0 then return false end
 
+    ---@diagnostic disable-next-line: undefined-field
     if (mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Nav.Active()) and mq.TLO.Me.Class.ShortName():lower() ~= "brd" then return false end
 
     if RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
@@ -853,8 +862,10 @@ function Utils.AutoCampCheck(config, tempConfig)
 
     if distanceToCamp > 5 then
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
+        ---@diagnostic disable-next-line: undefined-field
         if mq.TLO.Nav.PathExists(navTo)() then
             mq.cmdf("/nav %s", navTo)
+            ---@diagnostic disable-next-line: undefined-field
             while mq.TLO.Nav.Active() do
                 mq.delay(10)
                 mq.doevents()
@@ -1196,6 +1207,7 @@ function Utils.FindTarget()
                 RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
             end
         else
+            ---@diagnostic disable-next-line: undefined-field
             RGMercConfig.Globals.AutoTargetID = mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID() or 0
         end
     end
@@ -1556,6 +1568,7 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState)
             local mappedAction = map[entry.name]
             if mappedAction then
                 if type(mappedAction) == "userdata" then
+                    ---@diagnostic disable-next-line: undefined-field
                     ImGui.Text(entry.name .. " ==> " .. mappedAction.RankName() or mappedAction.Name())
                 else
                     ImGui.Text(entry.name .. " ==> " .. mappedAction)
