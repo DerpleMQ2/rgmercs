@@ -2,6 +2,7 @@
 local mq                 = require('mq')
 local RGMercsLogger      = require("rgmercs.utils.rgmercs_logger")
 local RGMercUtils        = require("rgmercs.utils.rgmercs_utils")
+local Set                = require("mq.Set")
 
 local custom_config_file = mq.configDir .. "/rgmercs/class_configs/shd_class_config.lua"
 
@@ -22,12 +23,19 @@ if not shdClassConfig then
 end
 
 
-local Module                       = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
-Module.__index                     = Module
-Module.LastPetCmd                  = 0
-Module.SpellLoadOut                = {}
-Module.ResolvedActionMap           = {}
-Module.TempSettings                = {}
+local Module             = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
+Module.__index           = Module
+Module.LastPetCmd        = 0
+Module.SpellLoadOut      = {}
+Module.ResolvedActionMap = {}
+Module.TempSettings      = {}
+
+Module.DefaultCategories = Set.new({})
+for _, v in pairs(shdClassConfig.DefaultConfig) do
+    if v.Type ~= "Custom" then
+        Module.DefaultCategories:add(v.Category)
+    end
+end
 
 -- Track the state of rotations between frames
 Module.TempSettings.RotationStates = {
@@ -71,6 +79,13 @@ function Module:LoadSettings()
         self.settings[k] = self.settings[k] or v.Default
     end
 
+    -- Remove Deprecated options
+    for k, _ in pairs(self.settings) do
+        if not shdClassConfig.DefaultConfig[k] then
+            self.settings[k] = nil
+            RGMercsLogger.log_info("\aySettings [\am%s\ay] has been deprecated -- removing from your config.", k)
+        end
+    end
     newCombatMode = true
 end
 
@@ -133,7 +148,7 @@ function Module:Render()
     end
 
     if ImGui.CollapsingHeader("Config Options") then
-        self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, shdClassConfig.DefaultConfig)
+        self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, shdClassConfig.DefaultConfig, self.DefaultCategories)
         if pressed then
             self:SaveSettings(true)
             newCombatMode = newCombatMode or loadoutChange

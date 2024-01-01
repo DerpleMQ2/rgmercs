@@ -3,6 +3,7 @@ local mq                       = require('mq')
 local RGMercsLogger            = require("rgmercs.utils.rgmercs_logger")
 local RGMercUtils              = require("rgmercs.utils.rgmercs_utils")
 local ICONS                    = require('mq.Icons')
+local Set                      = require("mq.Set")
 
 local Module                   = { _version = '0.1a', name = "Movement", author = 'Derple' }
 Module.__index                 = Module
@@ -11,14 +12,21 @@ Module.TempSettings            = {}
 Module.TempSettings.CampZoneId = 0
 
 Module.DefaultConfig           = {
-    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Tooltip = "Return to camp after you get this far away", Default = 60, Min = 10, Max = 150 },
-    ['ChaseOn']          = { DisplayName = "Chase On", Tooltip = "Chase your Chase Target.", Default = false },
-    ['ChaseDistance']    = { DisplayName = "Chase Distance", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100 },
-    ['ChaseTarget']      = { DisplayName = "Chase Target", Tooltip = "Character you are Chasing", Type = "Custom", Default = "" },
-    ['ReturnToCamp']     = { DisplayName = "Return To Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())) },
-    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Tooltip = "0: Off; 1: Regular Fellowship; 2: Empowered Fellowship; 36: Scaled Wolf", Default = 1, Min = 0, Max = 36 },
-    ['RequireLoS']       = { DisplayName = "Require LOS", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) },
+    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = 60, Min = 10, Max = 150 },
+    ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false },
+    ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100 },
+    ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "" },
+    ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())) },
+    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "0: Off; 1: Regular Fellowship; 2: Empowered Fellowship; 36: Scaled Wolf", Default = 1, Min = 0, Max = 36 },
+    ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) },
 }
+
+Module.DefaultCategories       = Set.new({})
+for _, v in pairs(Module.DefaultConfig) do
+    if v.Type ~= "Custom" then
+        Module.DefaultCategories:add(v.Category)
+    end
+end
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -51,6 +59,14 @@ function Module:LoadSettings()
     -- Setup Defaults
     for k, v in pairs(self.DefaultConfig) do
         self.settings[k] = self.settings[k] or v.Default
+    end
+
+    -- Remove Deprecated options
+    for k, _ in pairs(self.settings) do
+        if not self.DefaultConfig[k] then
+            self.settings[k] = nil
+            RGMercsLogger.log_info("\aySettings [\am%s\ay] has been deprecated -- removing from your config.", k)
+        end
     end
 end
 
@@ -196,7 +212,7 @@ function Module:Render()
     local chaseSpawn = mq.TLO.Spawn("pc =" .. (self.settings.ChaseTarget or "NoOne"))
 
     if ImGui.CollapsingHeader("Config Options") then
-        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig)
+        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
         if pressed then
             self:SaveSettings(true)
         end
@@ -275,8 +291,14 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    if combat_state == "Downtime" and RGMercConfig:GetSettings().DoShrink and mq.TLO.Me.Height() > 2 then
-        RGMercUtils.UseItem(RGMercConfig:GetSettings().ShrinkItem, mq.TLO.Me.ID())
+    if combat_state == "Downtime" then
+        if RGMercUtils.ShouldShrink() then
+            RGMercUtils.UseItem(RGMercConfig:GetSettings().ShrinkItem, mq.TLO.Me.ID())
+        end
+
+        if RGMercUtils.ShouldMount() then
+            RGMercUtils.UseItem(RGMercConfig:GetSettings().MountItem, mq.TLO.Me.ID())
+        end
     end
 
     if RGMercUtils.DoCamp() then
