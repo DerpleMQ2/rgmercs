@@ -1,6 +1,6 @@
 local RGMercsLogger = require("utils.rgmercs_logger")
 
-local Modules       = { _version = '0.1a', author = 'Derple' }
+local Modules       = { _version = '0.1a', author = 'Derple', }
 Modules.__index     = Modules
 
 ---@return any
@@ -11,7 +11,8 @@ function Modules.load()
             Movement     = require("modules.movement").New(),
             Travel       = require("modules.travel").New(),
             ShadowKnight = require("modules.shd").New(),
-        }
+            Bard         = require("modules.brd").New(),
+        },
     }, Modules)
 
     return newModules
