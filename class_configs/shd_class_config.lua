@@ -141,10 +141,10 @@ local _ClassConfig = {
             [8] = "Repudiate",
             [9] = "Gird",
         },
-        ['Deflection'] = { [1] = 'Deflection Discipline' },
-        ['LeechCurse'] = { [1] = 'Leechcurse Discipline' },
-        ['UnholyAura'] = { [1] = 'Unholy Aura Discipline' },
-        ['CurseGuard'] = { [1] = 'Cursed Guardian Discipline' },
+        ['Deflection'] = { [1] = 'Deflection Discipline', },
+        ['LeechCurse'] = { [1] = 'Leechcurse Discipline', },
+        ['UnholyAura'] = { [1] = 'Unholy Aura Discipline', },
+        ['CurseGuard'] = { [1] = 'Cursed Guardian Discipline', },
         ['PetSpell'] = {
             [1] = "Leering Corpse",
             [2] = "Bone Walk",
@@ -482,7 +482,7 @@ local _ClassConfig = {
             [5] = "Torrent of Suffering",
             [6] = "Torrent of Anguish",
             [7] = "Torrent of Melancholy",
-            [8] = "Torrent of Desolation"
+            [8] = "Torrent of Desolation",
         },
         ['SnareDOT'] = {
             [1] = "Clinging Darkness",
@@ -555,7 +555,7 @@ local _ClassConfig = {
                     return self:castDLU() and
                         not mq.TLO.Me.FindBuff("name " ..
                             tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))()
-                end
+                end,
             },
             [2] = {
                 name = "Skin",
@@ -564,7 +564,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [3] = {
                 name = "Horror",
@@ -574,7 +574,7 @@ local _ClassConfig = {
                 cond = function(
                     self, spell)
                     return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [4] = {
                 name = "Demeanor",
@@ -584,7 +584,7 @@ local _ClassConfig = {
                 cond = function(
                     self, spell)
                     return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [5] = {
                 name = "CloakHP",
@@ -594,7 +594,7 @@ local _ClassConfig = {
                 cond = function(
                     self, spell)
                     return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [6] = {
                 name = "SelfDS",
@@ -605,7 +605,7 @@ local _ClassConfig = {
                     self, spell)
                     return not self:castDLU() and mq.TLO.Me.Level() <= 60 and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and
                         RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [7] = {
                 name = "Shroud",
@@ -615,7 +615,7 @@ local _ClassConfig = {
                 cond = function(
                     self, spell)
                     return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [8] = {
                 name = "Covenant",
@@ -625,7 +625,7 @@ local _ClassConfig = {
                 cond = function(
                     self, spell)
                     return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [9] = {
                 name = "CallAtk",
@@ -635,7 +635,7 @@ local _ClassConfig = {
                 cond = function(
                     self, spell)
                     return not self:castDLU() and RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [10] = {
                 name = "TempHP",
@@ -645,7 +645,7 @@ local _ClassConfig = {
                 cond = function(
                     self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [11] = {
                 name = "HealBurn",
@@ -655,7 +655,7 @@ local _ClassConfig = {
                 cond = function(
                     self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
-                end
+                end,
             },
             [12] = {
                 name = "Voice of Thule",
@@ -665,7 +665,7 @@ local _ClassConfig = {
                 cond = function(
                     self)
                     return RGMercUtils.SelfBuffAACheck("Voice of Thule")
-                end
+                end,
             },
             [13] = {
                 name = "PetSpell",
@@ -674,9 +674,9 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
                 cond = function(
                     self, spell)
-                    return mq.TLO.Me.Pet.ID() == 0 and self.settings.DoPet and
+                    return mq.TLO.Me.Pet.ID() == 0 and RGMercConfig:GetSettings().DoPet and
                         mq.TLO.FindItemCount(spell.ReagentID(1))() > 0
-                end
+                end,
             },
             [14] = {
                 name = "PetHaste",
@@ -685,7 +685,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName) ~= nil end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffPetCheck(spell)
-                end
+                end,
             },
         },
         ['Burn'] = {
@@ -695,7 +695,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Acrimony,
                 cond = function(self)
                     return RGMercUtils.IsNamed(mq.TLO.Target)
-                end
+                end,
             },
             [2] = {
                 name = "SpiteStrike",
@@ -703,7 +703,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SpikeStrike,
                 cond = function(self)
                     return RGMercUtils.IsNamed(mq.TLO.Target)
-                end
+                end,
             },
             [3] = {
                 name = "ReflexStrike",
@@ -711,7 +711,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ReflexStrike,
                 cond = function(self)
                     return RGMercUtils.IsNamed(mq.TLO.Target)
-                end
+                end,
             },
             [4] = {
                 name = "Harm Touch",
@@ -720,7 +720,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return (self.settings.BurnAuto and RGMercUtils.IsNamed(mq.TLO.Target)) or
                         RGMercUtils.BigBurn(self.settings)
-                end
+                end,
             },
             [5] = { name = "Thought Leech", type = "AA", tooltip = Tooltips.ThoughtLeech, },
             [6] = { name = "Visage of Death", type = "AA", tooltip = Tooltips.VisageOfDeath, },
@@ -745,7 +745,7 @@ local _ClassConfig = {
                     return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
                         mq.TLO.Me.Bandolier("Shield").Index() and RGMercConfig.Globals.IsTanking
                 end,
-                cmd = "/bandolier activate Shield"
+                cmd = "/bandolier activate Shield",
             },
             [2] = {
                 name = "Activate2HS",
@@ -755,7 +755,7 @@ local _ClassConfig = {
                     return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and
                         mq.TLO.Me.Bandolier("2HS").Index() and not RGMercConfig.Globals.IsTanking
                 end,
-                cmd = "/bandolier activate 2HS"
+                cmd = "/bandolier activate 2HS",
             },
             [3] = {
                 name = "EndRegen",
@@ -763,7 +763,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.EndRegen,
                 cond = function(self)
                     return mq.TLO.Me.PctEndurance() < 15
-                end
+                end,
             },
             [4] = {
                 name = "Explosion of Hatred",
@@ -772,7 +772,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return RGMercConfig.Globals.IsTanking and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
-                end
+                end,
             },
             [5] = {
                 name = "Explosion of Spite",
@@ -781,7 +781,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return RGMercConfig.Globals.IsTanking and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
-                end
+                end,
             },
             [6] = {
                 name = "Taunt",
@@ -791,7 +791,7 @@ local _ClassConfig = {
                     return RGMercConfig.Globals.IsTanking and mq.TLO.Me.AbilityReady("Taunt")() and
                         mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
                         RGMercUtils.GetTargetDistance() < 30
-                end
+                end,
             },
             [7] = {
                 name = "Terror",
@@ -799,7 +799,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Terror,
                 cond = function(self)
                     return RGMercConfig.Globals.IsTanking and mq.TLO.Me.SecondaryPctAggro() > 60
-                end
+                end,
             },
             [8] = {
                 name = "MeleeMit",
@@ -807,7 +807,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.MeleeMit,
                 cond = function(self, spell)
                     return RGMercConfig.Globals.IsTanking
-                end
+                end,
             },
             [9] = {
                 name = "ForPower",
@@ -815,7 +815,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ForPower,
                 cond = function(self, spell)
                     return RGMercConfig.Globals.IsTanking and RGMercUtils.DotSpellCheck(self.settings, spell)
-                end
+                end,
             },
             [10] = {
                 name = "Encroaching Darknesss",
@@ -823,7 +823,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self)
                     return self.settings.DoSnare and RGMercUtils.DetAACheck(826)
-                end
+                end,
             },
             [11] = {
                 name = "SnareDOT",
@@ -831,7 +831,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SnareDOT,
                 cond = function(self, spell)
                     return self.settings.DoSnare and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Me.AltAbility(826)()
-                end
+                end,
             },
             [12] = {
                 name = "Epic",
@@ -839,7 +839,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Epic,
                 cond = function(self)
                     return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
-                end
+                end,
             },
             [13] = {
                 name = "LeechCurse",
@@ -847,7 +847,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.LeechCurse,
                 cond = function(self)
                     return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and mq.TLO.Me.PctHPs() < 50
-                end
+                end,
             },
             [14] = {
                 name = "Deflection",
@@ -855,7 +855,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Deflection,
                 cond = function(self)
                     return RGMercConfig.Globals.IsTanking and mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
-                end
+                end,
             },
             [15] = {
                 name = "Mantle",
@@ -864,7 +864,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return RGMercConfig.Globals.IsTanking and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                         not mq.TLO.Me.ActiveDisc.ID()
-                end
+                end,
             },
             [16] = {
                 name = "Carapace",
@@ -873,7 +873,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return RGMercConfig.Globals.IsTanking and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                         not mq.TLO.Me.ActiveDisc.ID()
-                end
+                end,
             },
             [17] = {
                 name = "CurseGuard",
@@ -882,7 +882,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return RGMercConfig.Globals.IsTanking and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                         not mq.TLO.Me.ActiveDisc.ID()
-                end
+                end,
             },
             [18] = {
                 name = "UnholyAura",
@@ -891,7 +891,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                         not mq.TLO.Me.ActiveDisc.ID()
-                end
+                end,
             },
             [19] = {
                 name = "PoisonDot",
@@ -899,7 +899,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.PoisonDot,
                 cond = function(self, spell)
                     return RGMercUtils.DotSpellCheck(self.settings, spell)
-                end
+                end,
             },
             [20] = {
                 name = "DireDot",
@@ -907,7 +907,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.DireDot,
                 cond = function(self, spell)
                     return RGMercUtils.DotSpellCheck(self.settings, spell)
-                end
+                end,
             },
             [21] = {
                 name = "Torrent",
@@ -916,7 +916,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return self.settings.DoTorrent and
                         not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID()
-                end
+                end,
             },
             [22] = {
                 name = "Spearnuke",
@@ -924,7 +924,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Spearnuke,
                 cond = function(self, spell)
                     return mq.TLO.Me.PctMana() > self.settings.ManaToNuke
-                end
+                end,
             },
             [23] = {
                 name = "BondTap",
@@ -933,7 +933,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return not self.settings.DoTorrent and
                         not mq.TLO.Me.FindBuff("name " .. spell.Name() .. " Recourse").ID()
-                end
+                end,
             },
             -- TODO: Verify this logic, it seems wrong
             [24] = {
@@ -943,7 +943,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
                         RGMercUtils.GetTargetDistance() < 35
-                end
+                end,
             },
             [25] = {
                 name = "Blade",
@@ -952,7 +952,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
                         RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
-                end
+                end,
             },
             [26] = {
                 name = "Crimson",
@@ -961,7 +961,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
                         RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
-                end
+                end,
             },
             [27] = {
                 name = "Dicho",
@@ -969,7 +969,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Dicho,
                 cond = function(self, spell)
                     return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap
-                end
+                end,
             },
             [28] = {
                 name = "DireTap",
@@ -977,7 +977,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.DireTap,
                 cond = function(self, spell)
                     return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap
-                end
+                end,
             },
             [29] = {
                 name = "BuffTap",
@@ -986,7 +986,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and
                         RGMercUtils.DetSpellCheck(spell)
-                end
+                end,
             },
             [30] = {
                 name = "BiteTap",
@@ -994,7 +994,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.BiteTap,
                 cond = function(self, spell)
                     return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
-                end
+                end,
             },
             [31] = {
                 name = "LifeTap",
@@ -1002,7 +1002,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell)
                     return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
-                end
+                end,
             },
             [32] = {
                 name = "Bash",
@@ -1011,7 +1011,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return mq.TLO.Me.AbilityReady("Bash")() and RGMercUtils.GetTargetID() > 0 and
                         RGMercUtils.GetTargetDistance() < 30
-                end
+                end,
             },
             [33] = {
                 name = "Slam",
@@ -1020,7 +1020,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return mq.TLO.Me.AbilityReady("Slam")() and RGMercUtils.GetTargetID() > 0 and
                         RGMercUtils.GetTargetDistance() < 30
-                end
+                end,
             },
         },
     },
@@ -1034,19 +1034,19 @@ local _ClassConfig = {
         [2] = {
             gem = 2,
             spells = {
-                [1] = { name = "ForPower" },
+                [1] = { name = "ForPower", },
             },
         },
         [3] = {
             gem = 3,
             spells = {
-                [1] = { name = "LifeTap" },
+                [1] = { name = "LifeTap", },
             },
         },
         [4] = {
             gem = 4,
             spells = {
-                [1] = { name = "BuffTap", }
+                [1] = { name = "BuffTap", },
             },
         },
         [5] = {
@@ -1054,7 +1054,7 @@ local _ClassConfig = {
             spells = {
                 [1] = {
                     name = "SnareDOT",
-                    cond = function(self) return not mq.TLO.Me.AltAbility(826)() end
+                    cond = function(self) return not mq.TLO.Me.AltAbility(826)() end,
                 },
                 [2] = { name = "BondTap", },
             },
@@ -1123,26 +1123,24 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3 },
-        ['DoTorrent']    = { DisplayName = "Cast Torrents", Category = "Spells and Abilities", Tooltip = "Enable casting Torrent spells.", RequiresLoadoutChange = true, Default = true },
-        ['DoDireTap']    = { DisplayName = "Cast Dire Taps", Category = "Spells and Abilities", Tooltip = "Enable casting Dire Tap spells.", RequiresLoadoutChange = true, Default = true },
-        ['DoBandolier']  = { DisplayName = "Use Bandolier", Category = "Equipment", Tooltip = "Enable Swapping of items using the bandolier.", Default = false },
-        ['DoBurn']       = { DisplayName = "Enable Burning", Category = "Spells and Abilities", Tooltip = "Put character in 'burn' mode", Default = false },
-        ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true },
-        ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true },
-        ['DoAE']         = { DisplayName = "Use AE Taunts", Category = "Spells and Abilities", Tooltip = "Enable casting AE Taunt spells.", Default = true },
-        ['AeTauntCnt']   = { DisplayName = "AE Taunt Count", Category = "Spells and Abilities", Tooltip = "Minimum number of haters before using AE Taunt.", Default = 2, Min = 1, Max = 10 },
-        ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100 },
-        ['ManaToNuke']   = { DisplayName = "Mana to Nuke", Category = "Spells and Abilities", Tooltip = "Minimum % Mana in order to continue to cast nukes.", Default = 30, Min = 1, Max = 100 },
-        ['FlashHP']      = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100 },
-        ['StartBigTap']  = { DisplayName = "Use Big Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100 },
-        ['StartLifeTap'] = { DisplayName = "Use Life Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100 },
-        ['BurnSize']     = { DisplayName = "Burn Size", Category = "Combat", Tooltip = "0=Off, 1=Small, 2=Medium, 3=Large", Default = 1, Min = 0, Max = 3 },
-        ['BurnAuto']     = { DisplayName = "Auto Burn", Category = "Combat", Tooltip = "Automatically burn", Default = false },
-        ['DoPet']        = { DisplayName = "Cast Pet", Category = "Pet", Tooltip = "Enable casting Pet spells.", Default = true },
-        ['PetEngagePct'] = { DisplayName = "Pet Engage HPs", Category = "Combat", Tooltip = "Send in pet when target hits [x] HP %.", Default = 90, Min = 1, Max = 100 },
-        ['BurnMobCount'] = { DisplayName = "Burn Mob Count", Category = "Combat", Tooltip = "Number of haters before we start burning.", Default = 3, Min = 1, Max = 10 },
-        ['BurnNamed']    = { DisplayName = "Burn Named", Category = "Combat", Tooltip = "Automatically burn named mobs.", Default = false },
+        ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
+        ['DoTorrent']    = { DisplayName = "Cast Torrents", Category = "Spells and Abilities", Tooltip = "Enable casting Torrent spells.", RequiresLoadoutChange = true, Default = true, },
+        ['DoDireTap']    = { DisplayName = "Cast Dire Taps", Category = "Spells and Abilities", Tooltip = "Enable casting Dire Tap spells.", RequiresLoadoutChange = true, Default = true, },
+        ['DoBandolier']  = { DisplayName = "Use Bandolier", Category = "Equipment", Tooltip = "Enable Swapping of items using the bandolier.", Default = false, },
+        ['DoBurn']       = { DisplayName = "Enable Burning", Category = "Spells and Abilities", Tooltip = "Put character in 'burn' mode", Default = false, },
+        ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
+        ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
+        ['DoAE']         = { DisplayName = "Use AE Taunts", Category = "Spells and Abilities", Tooltip = "Enable casting AE Taunt spells.", Default = true, },
+        ['AeTauntCnt']   = { DisplayName = "AE Taunt Count", Category = "Spells and Abilities", Tooltip = "Minimum number of haters before using AE Taunt.", Default = 2, Min = 1, Max = 10, },
+        ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
+        ['ManaToNuke']   = { DisplayName = "Mana to Nuke", Category = "Spells and Abilities", Tooltip = "Minimum % Mana in order to continue to cast nukes.", Default = 30, Min = 1, Max = 100, },
+        ['FlashHP']      = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
+        ['StartBigTap']  = { DisplayName = "Use Big Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100, },
+        ['StartLifeTap'] = { DisplayName = "Use Life Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100, },
+        ['BurnSize']     = { DisplayName = "Burn Size", Category = "Combat", Tooltip = "0=Off, 1=Small, 2=Medium, 3=Large", Default = 1, Min = 0, Max = 3, },
+        ['BurnAuto']     = { DisplayName = "Auto Burn", Category = "Combat", Tooltip = "Automatically burn", Default = false, },
+        ['BurnMobCount'] = { DisplayName = "Burn Mob Count", Category = "Combat", Tooltip = "Number of haters before we start burning.", Default = 3, Min = 1, Max = 10, },
+        ['BurnNamed']    = { DisplayName = "Burn Named", Category = "Combat", Tooltip = "Automatically burn named mobs.", Default = false, },
     },
 }
 

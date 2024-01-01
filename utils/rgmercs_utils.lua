@@ -7,7 +7,7 @@ local USEGEM        = mq.TLO.Me.NumGems()
 -- Global
 Memorizing          = false
 
-local Utils         = { _version = '0.1a', author = 'Derple' }
+local Utils         = { _version = '0.2a', author = 'Derple', }
 Utils.__index       = Utils
 Utils.Actors        = require('actors')
 Utils.ScriptName    = "RGMercs"
@@ -26,7 +26,7 @@ function Utils.file_exists(path)
 end
 
 function Utils.BroadcastUpdate(module, event, data)
-    Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event, data = data })
+    Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event, data = data, })
 end
 
 function Utils.PrintGroupMessage(msg, ...)
@@ -1003,7 +1003,7 @@ end
 ---@param radius number
 ---@return boolean
 function Utils.IsSpawnFightingStranger(spawn, radius)
-    local searchTypes = { "PC", "PCPET", "MERCENARY" }
+    local searchTypes = { "PC", "PCPET", "MERCENARY", }
 
     for _, t in ipairs(searchTypes) do
         local count = mq.TLO.SpawnCount(string.format("%s radius %d zradius %d", t, radius, radius))()
@@ -1323,15 +1323,17 @@ function Utils.OkToEngage(autoTargetId)
     return false
 end
 
-function Utils.PetAttack(config, target)
-    if not config.DoPet then return end
+function Utils.PetAttack()
+    if not RGMercConfig:GetSettings().DoPet then return end
 
     local pet = mq.TLO.Me.Pet
+
+    local target = RGMercConfig():GetAutoTarget()
 
     if not target() then return end
     if not pet() then return end
 
-    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" and (Utils.GetTargetPctHPs() <= config.PetEngagePct) then
+    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" and (Utils.GetTargetPctHPs() <= RGMercConfig:GetSettings().PetEngagePct) then
         mq.cmdf("/squelch /pet attack")
         mq.cmdf("/squelch /pet swarm")
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
@@ -1720,7 +1722,7 @@ function Utils.RenderSettings(settings, defaults, categories)
 
     table.sort(settingNames, function(k1, k2) return defaults[k1].Category < defaults[k2].Category and defaults[k1].DisplayName < defaults[k2].DisplayName end)
 
-    local catNames = categories and categories:toList() or { "" }
+    local catNames = categories and categories:toList() or { "", }
     table.sort(catNames)
 
     if ImGui.BeginTabBar("Settings_Categories") then

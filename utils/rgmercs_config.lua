@@ -3,7 +3,7 @@ local RGMercUtils               = require("utils.rgmercs_utils")
 local RGMercsLogger             = require("utils.rgmercs_logger")
 local Set                       = require("mq.Set")
 
-local Config                    = { _version = '0.3a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Gortar' }
+local Config                    = { _version = '0.5a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Gortar', }
 Config.__index                  = Config
 Config.settings                 = {}
 
@@ -19,6 +19,7 @@ Config.Globals.IsHealing        = false
 Config.Globals.IsTanking        = false
 Config.Globals.InMedState       = false
 Config.Globals.IsMezzing        = false
+Config.Globals.LastPetCmd       = 0
 Config.Globals.LastFaceTime     = 0
 Config.Globals.CurLoadedChar    = mq.TLO.Me.CleanName()
 Config.Globals.CurLoadedClass   = mq.TLO.Me.Class.ShortName()
@@ -26,14 +27,14 @@ Config.Globals.CurServer        = mq.TLO.EverQuest.Server():gsub(" ", "")
 
 -- Constants
 Config.Constants                = {}
-Config.Constants.RGCasters      = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD", "SHM", "WIZ" })
-Config.Constants.RGMelee        = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST" })
-Config.Constants.RGHybrid       = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD" })
-Config.Constants.RGTank         = Set.new({ "WAR", "PAL", "SHD" })
-Config.Constants.RGModRod       = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD" })
-Config.Constants.RGPetClass     = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD" })
-Config.Constants.RGMezAnims     = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135 })
-Config.Constants.ModRods        = { [1] = "Modulation Shard", [2] = "Transvergence", [3] = "Modulation", [4] = "Modulating" }
+Config.Constants.RGCasters      = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD", "SHM", "WIZ", })
+Config.Constants.RGMelee        = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
+Config.Constants.RGHybrid       = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
+Config.Constants.RGTank         = Set.new({ "WAR", "PAL", "SHD", })
+Config.Constants.RGModRod       = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD", })
+Config.Constants.RGPetClass     = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
+Config.Constants.RGMezAnims     = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
+Config.Constants.ModRods        = { [1] = "Modulation Shard", [2] = "Transvergence", [3] = "Modulation", [4] = "Modulating", }
 Config.Constants.SpellBookSlots = 1120
 
 Config.ExpansionNameToID        = {
@@ -75,40 +76,63 @@ for k, v in pairs(Config.ExpansionNameToID) do Config.ExpansionIDToName[v] = k e
 
 -- Defaults
 Config.DefaultConfig = {
-    ['DoAutoTarget']      = { DisplayName = "Auto Target", Category = "Combat", Tooltip = "Automatically change targets.", Default = true },
-    ['MountItem']         = { DisplayName = "Mount Item", Category = "Utilities", Tooltip = "Item to use to cast Mount", Default = "" },
-    ['DoMount']           = { DisplayName = "Do Mount", Category = "Utilities", Tooltip = "Enable auto mounting if DoMelee is off.", Default = false },
-    ['ShrinkItem']        = { DisplayName = "Shrink Item", Category = "Utilities", Tooltip = "Item to use to Shrink yourself", Default = "" },
-    ['DoShrink']          = { DisplayName = "Do Shrink", Category = "Utilities", Tooltip = "Enable auto shrinking", Default = false },
-    ['DoMercenary']       = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = true },
-    ['PriorityHealing']   = { DisplayName = "Priority Healing", Category = "Utilities", Tooltip = "Prioritize Healing over Combat", Default = false },
-    ['DoModRod']          = { DisplayName = "Do Mod Rod", Category = "Combat", Tooltip = "Auto use Mod Rods if we have them", Default = true },
-    ['ModRodManaPct']     = { DisplayName = "Mod Rod Mana Pct", Category = "Utilities", Tooltip = "What Mana Pct to hit before using a rod.", Default = 30, Min = 1, Max = 99 },
-    ['DoMed']             = { DisplayName = "Do Meditate", Category = "Meditation", Tooltip = "0 = No Auto Med, 1 = Auto Med Out of Combat, 2 = Auto Med In Combat", Default = 1, Min = 0, Max = 2 },
-    ['HPMedPct']          = { DisplayName = "Med HP Pct", Category = "Meditation", Tooltip = "What HP Pct to hit before medding.", Default = 60, Min = 1, Max = 99 },
-    ['ManaMedPct']        = { DisplayName = "Med Mana Pct", Category = "Meditation", Tooltip = "What Mana Pct to hit before medding.", Default = 30, Min = 1, Max = 99 },
-    ['EndMedPct']         = { DisplayName = "Med Endurance Pct", Category = "Meditation", Tooltip = "What Endurance Pct to hit before medding.", Default = 30, Min = 1, Max = 99 },
-    ['ManaMedPctStop']    = { DisplayName = "Med Mana Pct Stop", Category = "Meditation", Tooltip = "What Mana Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99 },
-    ['EndMedPctStop']     = { DisplayName = "Med Endurance Pct Stop", Category = "Meditation", Tooltip = "What Endurance Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99 },
-    ['HPMedPctStop']      = { DisplayName = "Med HP Pct Stop", Category = "Meditation", Tooltip = "What HP Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99 },
-    ['StayOnTarget']      = { DisplayName = "Stay On Target", Category = "Combat", Tooltip = "Stick to your target. Default: true; Tank Mode Defaults: false. false allows intelligent target swapping based on aggro/named/ etc.", Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())) },
-    ['DoAutoEngage']      = { DisplayName = "Auto Engage", Category = "Combat", Tooltip = "Automatically engage targets.", Default = true },
-    ['DoMelee']           = { DisplayName = "Enable Melee Combat", Category = "Combat", Tooltip = "Melee targets.", Default = Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass) },
-    ['DoBuffs']           = { DisplayName = "Do Buffs", Category = "Buffs", Tooltip = "Do Non-Class Specific Buffs.", Default = true },
-    ['SafeTargeting']     = { DisplayName = "Use Safe Targeting", Category = "Combat", Tooltip = "Do not target mobs that are fighting others.", Default = true },
-    ['DoTwist']           = { DisplayName = "Enable Bard Twisting", Category = "Buffs", Tooltip = "Use MQ2Twist", Default = true },
-    ['DoFellow']          = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = true },
-    ['AssistOutside']     = { DisplayName = "Assist Outside of Group", Category = "Combat", Tooltip = "Allow assisting characters outside of your group.", Default = false },
-    ['AssistRange']       = { DisplayName = "Assist Range", Category = "Combat", Tooltip = "Distance to the target before you engage.", Default = 45, Min = 15, Max = 200 },
-    ['MAScanZRange']      = { DisplayName = "Main Assist Scan ZRange", Category = "Combat", Tooltip = "Distance in Z direction to look for targets.", Default = 45, Min = 15, Max = 200 },
-    ['AutoAssistAt']      = { DisplayName = "Auto Assist At", Category = "Combat", Tooltip = "Melee attack when target hits [x] HP %.", Default = 98, Min = 1, Max = 100 },
-    ['StickHow']          = { DisplayName = "Stick How", Category = "Combat", Tooltip = "Custom /stick command", Type = "Custom", Default = "" },
-    ['AllowMezBreak']     = { DisplayName = "Allow Mez Break", Category = "Combat", Tooltip = "Allow Mez Breaking.", Default = false },
-    ['InstantRelease']    = { DisplayName = "Instant Release", Category = "Combat", Tooltip = "Instantly release when you die.", Default = false },
-    ['FollowMarkTarget']  = { DisplayName = "Follow Mark Target", Category = "Targeting", Tooltip = "Auto target MA target Marks.", Default = false },
-    ['LogLevel']          = { DisplayName = "Log Level", Category = "Debug", Tooltip = "0 = Errors, 1 = Warnings, 2 = Info, 3 = Debug, 4 = Verbose", Default = 2, Min = 0, Max = 4 },
-    ['OutsideAssistList'] = { DisplayName = "List of Outsiders to Assist", Category = "Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {} },
-    ['BgOpacity']         = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = 1.0 },
+    -- [ UTILITIES ] --
+    ['MountItem']         = { DisplayName = "Mount Item", Category = "Utilities", Tooltip = "Item to use to cast Mount", Default = "", },
+    ['DoMount']           = { DisplayName = "Do Mount", Category = "Utilities", Tooltip = "Enable auto mounting if DoMelee is off.", Default = false, },
+    ['ShrinkItem']        = { DisplayName = "Shrink Item", Category = "Utilities", Tooltip = "Item to use to Shrink yourself", Default = "", },
+    ['DoShrink']          = { DisplayName = "Do Shrink", Category = "Utilities", Tooltip = "Enable auto shrinking", Default = false, },
+    ['PriorityHealing']   = { DisplayName = "Priority Healing", Category = "Utilities", Tooltip = "Prioritize Healing over Combat", Default = false, },
+    ['ModRodManaPct']     = { DisplayName = "Mod Rod Mana Pct", Category = "Utilities", Tooltip = "What Mana Pct to hit before using a rod.", Default = 30, Min = 1, Max = 99, },
+
+    -- [ MEDITATION ] --
+    ['DoMed']             = { DisplayName = "Do Meditate", Category = "Meditation", Tooltip = "0 = No Auto Med, 1 = Auto Med Out of Combat, 2 = Auto Med In Combat", Default = 1, Min = 0, Max = 2, },
+    ['HPMedPct']          = { DisplayName = "Med HP Pct", Category = "Meditation", Tooltip = "What HP Pct to hit before medding.", Default = 60, Min = 1, Max = 99, },
+    ['ManaMedPct']        = { DisplayName = "Med Mana Pct", Category = "Meditation", Tooltip = "What Mana Pct to hit before medding.", Default = 30, Min = 1, Max = 99, },
+    ['EndMedPct']         = { DisplayName = "Med Endurance Pct", Category = "Meditation", Tooltip = "What Endurance Pct to hit before medding.", Default = 30, Min = 1, Max = 99, },
+    ['ManaMedPctStop']    = { DisplayName = "Med Mana Pct Stop", Category = "Meditation", Tooltip = "What Mana Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
+    ['EndMedPctStop']     = { DisplayName = "Med Endurance Pct Stop", Category = "Meditation", Tooltip = "What Endurance Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
+    ['HPMedPctStop']      = { DisplayName = "Med HP Pct Stop", Category = "Meditation", Tooltip = "What HP Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
+
+    -- [ MERCENCARY ] --
+    ['DoMercenary']       = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = true, },
+
+    -- [ PET ] --
+    ['DoPet']             = { DisplayName = "Do Pet", Category = "Pet", Tooltip = "Enable using Pets.", Default = true, },
+    ['PetEngagePct']      = { DisplayName = "Pet Engage HPs", Category = "Pet", Tooltip = "Send in pet when target hits [x] HP %.", Default = 90, Min = 1, Max = 100, },
+
+    -- [ COMBAT ] --
+    ['SafeTargeting']     = { DisplayName = "Use Safe Targeting", Category = "Combat", Tooltip = "Do not target mobs that are fighting others.", Default = true, },
+    ['AssistOutside']     = { DisplayName = "Assist Outside of Group", Category = "Combat", Tooltip = "Allow assisting characters outside of your group.", Default = false, },
+    ['AssistRange']       = { DisplayName = "Assist Range", Category = "Combat", Tooltip = "Distance to the target before you engage.", Default = 45, Min = 15, Max = 200, },
+    ['MAScanZRange']      = { DisplayName = "Main Assist Scan ZRange", Category = "Combat", Tooltip = "Distance in Z direction to look for targets.", Default = 45, Min = 15, Max = 200, },
+    ['AutoAssistAt']      = { DisplayName = "Auto Assist At", Category = "Combat", Tooltip = "Melee attack when target hits [x] HP %.", Default = 98, Min = 1, Max = 100, },
+    ['StickHow']          = { DisplayName = "Stick How", Category = "Combat", Tooltip = "Custom /stick command", Type = "Custom", Default = "", },
+    ['AllowMezBreak']     = { DisplayName = "Allow Mez Break", Category = "Combat", Tooltip = "Allow Mez Breaking.", Default = false, },
+    ['InstantRelease']    = { DisplayName = "Instant Release", Category = "Combat", Tooltip = "Instantly release when you die.", Default = false, },
+    ['DoAutoTarget']      = { DisplayName = "Auto Target", Category = "Combat", Tooltip = "Automatically change targets.", Default = true, },
+    ['DoModRod']          = { DisplayName = "Do Mod Rod", Category = "Combat", Tooltip = "Auto use Mod Rods if we have them", Default = true, },
+    ['StayOnTarget']      = { DisplayName = "Stay On Target", Category = "Combat", Tooltip = "Stick to your target. Default: true; Tank Mode Defaults: false. false allows intelligent target swapping based on aggro/named/ etc.", Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
+    ['DoAutoEngage']      = { DisplayName = "Auto Engage", Category = "Combat", Tooltip = "Automatically engage targets.", Default = true, },
+    ['DoMelee']           = { DisplayName = "Enable Melee Combat", Category = "Combat", Tooltip = "Melee targets.", Default = Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass), },
+
+    -- [ BUFF ] --
+    ['DoTwist']           = { DisplayName = "Enable Bard Twisting", Category = "Buffs", Tooltip = "Use MQ2Twist", Default = true, },
+    ['DoBuffs']           = { DisplayName = "Do Buffs", Category = "Buffs", Tooltip = "Do Non-Class Specific Buffs.", Default = true, },
+
+    -- [ FELLOWSHIP ] --
+    ['DoFellow']          = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = true, },
+
+    -- [ TARGETING ] --
+    ['FollowMarkTarget']  = { DisplayName = "Follow Mark Target", Category = "Targeting", Tooltip = "Auto target MA target Marks.", Default = false, },
+
+    -- [ DEBUG ] --
+    ['LogLevel']          = { DisplayName = "Log Level", Category = "Debug", Tooltip = "0 = Errors, 1 = Warnings, 2 = Info, 3 = Debug, 4 = Verbose", Default = 2, Min = 0, Max = 4, },
+
+    -- [ ASSIST ] --
+    ['OutsideAssistList'] = { DisplayName = "List of Outsiders to Assist", Category = "Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {}, },
+
+    -- [ UI ] --
+    ['BgOpacity']         = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = 1.0, },
 }
 
 Config.DefaultCategories = Set.new({})
@@ -178,6 +202,10 @@ end
 
 function Config:GetAssistSpawn()
     return mq.TLO.Spawn(string.format("PC =%s", self.Globals.MainAssist))
+end
+
+function Config:GetAutoTarget()
+    return mq.TLO.Spawn(string.format("id %d", self.Globals.AutoTargetID))
 end
 
 function Config:SetSettings(newSettings)
