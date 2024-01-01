@@ -691,6 +691,14 @@ function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
     end
 end
 
+function Utils.ShouldShrink()
+    return RGMercConfig:GetSettings().DoShrink and mq.TLO.Me.Height() > 2 and RGMercConfig:GetSettings().ShrinkItem:len() > 0
+end
+
+function Utils.ShouldMount()
+    return RGMercConfig:GetSettings().DoMount and not RGMercConfig:GetSettings().DoMelee and RGMercConfig:GetSettings().MountItem:len() > 0
+end
+
 function Utils.ShouldKillTargetReset()
     local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", RGMercConfig.Globals.AutoTargetID))
     local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", RGMercConfig.Globals.AutoTargetID))
@@ -1596,23 +1604,15 @@ function Utils.RenderOptionNumber(id, text, cur, min, max)
     return input, changed
 end
 
-function Utils.RenderSettings(settings, defaults)
+function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
     local any_pressed = false
     local new_loadout = false
     local pressed = false
-
-    local settingNames = {}
-    for k, _ in pairs(defaults) do
-        table.insert(settingNames, k)
-    end
-
     local renderWidth = 300
     local windowWidth = ImGui.GetWindowWidth()
     local numCols = math.max(1, math.floor(windowWidth / renderWidth))
 
-    table.sort(settingNames, function(k1, k2) return defaults[k1].DisplayName < defaults[k2].DisplayName end)
-
-    if ImGui.BeginTable("Options", 2 * numCols, ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         for i = 1, numCols do
             ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
@@ -1622,27 +1622,59 @@ function Utils.RenderSettings(settings, defaults)
         ImGui.TableHeadersRow()
 
         for _, k in ipairs(settingNames) do
-            if defaults[k].Type ~= "Custom" then
-                ImGui.TableNextColumn()
-                if type(settings[k]) == 'boolean' then
-                    settings[k], pressed = Utils.RenderOptionToggle(k, "", settings[k])
-                    new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
-                    any_pressed = any_pressed or pressed
-                elseif type(settings[k]) == 'number' then
-                    settings[k], pressed = Utils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
-                        defaults[k].Max)
-                    new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
-                    any_pressed = any_pressed or pressed
-                elseif type(settings[k]) == 'string' then -- display only
-                    ImGui.Text(settings[k])
-                    Utils.Tooltip(settings[k])
+            if defaults[k].Category == category then
+                if defaults[k].Type ~= "Custom" then
+                    ImGui.TableNextColumn()
+                    if type(settings[k]) == 'boolean' then
+                        settings[k], pressed = Utils.RenderOptionToggle(k, "", settings[k])
+                        new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
+                        any_pressed = any_pressed or pressed
+                    elseif type(settings[k]) == 'number' then
+                        settings[k], pressed = Utils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
+                            defaults[k].Max)
+                        new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
+                        any_pressed = any_pressed or pressed
+                    elseif type(settings[k]) == 'string' then -- display only
+                        ImGui.Text(settings[k])
+                        Utils.Tooltip(settings[k])
+                    end
+                    ImGui.TableNextColumn()
+                    ImGui.Text((defaults[k].DisplayName or "None"))
+                    Utils.Tooltip(defaults[k].Tooltip)
                 end
-                ImGui.TableNextColumn()
-                ImGui.Text((defaults[k].DisplayName or "None"))
-                Utils.Tooltip(defaults[k].Tooltip)
             end
         end
         ImGui.EndTable()
+    end
+
+    return settings, any_pressed, new_loadout
+end
+
+function Utils.RenderSettings(settings, defaults, categories)
+    local any_pressed = false
+    local new_loadout = false
+
+    local settingNames = {}
+    for k, _ in pairs(defaults) do
+        table.insert(settingNames, k)
+    end
+
+    table.sort(settingNames, function(k1, k2) return defaults[k1].Category < defaults[k2].Category and defaults[k1].DisplayName < defaults[k2].DisplayName end)
+
+    local catNames = categories and categories:toList() or { "" }
+    table.sort(catNames)
+
+    if ImGui.BeginTabBar("Settings_Categories") then
+        for _, c in ipairs(catNames) do
+            if ImGui.BeginTabItem(c) then
+                local cat_pressed = false
+
+                settings, cat_pressed, new_loadout = Utils.RenderSettingsTable(settings, settingNames, defaults, c)
+                any_pressed = any_pressed or cat_pressed
+                ImGui.EndTabItem()
+            end
+        end
+        ImGui.EndTabBar()
     end
 
     return settings, any_pressed, new_loadout

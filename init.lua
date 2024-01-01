@@ -124,7 +124,7 @@ local function RGMercsGUI()
                     ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
                         local newSettings = RGMercConfig:GetSettings()
-                        newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig)
+                        newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
                         if pressed then
                             RGMercConfig:SetSettings(newSettings)
                             RGMercConfig:SaveSettings(true)
@@ -138,6 +138,8 @@ local function RGMercsGUI()
                         local dropped, newItem = renderDragDropForItem("Drop Mount Item")
                         if dropped then
                             RGMercsLogger.log_debug("New item dropped: %s", newItem)
+                            RGMercConfig:GetSettings().MountItem = newItem
+                            RGMercConfig:SaveSettings(true)
                         end
 
                         dropped, newItem = renderDragDropForItem("Drop Shrink Item")
