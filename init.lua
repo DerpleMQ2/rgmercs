@@ -266,7 +266,7 @@ local function Main()
         if RGMercConfig:GetSettings().DoMercenary then
             local merc = mq.TLO.Me.Mercenary
 
-            if merc() then
+            if merc() and merc.ID() then
                 if RGMercUtils.MercEngage() then
                     if merc.Class.ShortName():lower() == "war" and merc.Stance():lower() ~= "aggressive" then
                         mq.cmdf("/squelch /stance aggressive")
@@ -287,7 +287,7 @@ local function Main()
     end
 
     if RGMercUtils.DoCamp() then
-        if mq.TLO.Me.Mercenary() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
+        if mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
             mq.cmdf("/squelch /stance passive")
         end
     end
