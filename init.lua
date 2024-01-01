@@ -394,7 +394,7 @@ local script_actor = RGMercUtils.Actors.register(function(message)
         if message()["module"] == "main" then
             RGMercConfig:LoadSettings()
         else
-            RGMercModules:execModule(message()["module"], "LoadSettings")
+            RGMercModules:execModule(message()["module"], message()["event"], message()["data"])
         end
     end
 end)

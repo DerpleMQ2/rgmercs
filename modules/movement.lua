@@ -39,7 +39,7 @@ function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast then
-        RGMercUtils.BroadcastUpdate(self.name, "SaveSettings")
+        RGMercUtils.BroadcastUpdate(self.name, "LoadSettings")
     end
 end
 
