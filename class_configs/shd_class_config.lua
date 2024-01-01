@@ -787,7 +787,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Taunt,
                 cond = function(self)
                     return RGMercConfig.Globals.IsTanking and mq.TLO.Me.AbilityReady("Taunt")() and
-                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and mq.TLO.Target() and
+                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
                         RGMercUtils.GetTargetDistance() < 30
                 end
             },
@@ -939,7 +939,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ViciousBiteOfChaos,
                 cond = function(self)
-                    return mq.TLO.Target() and RGMercUtils.GetTargetPctHPs() > 5 and
+                    return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
                         RGMercUtils.GetTargetDistance() < 35
                 end
             },
@@ -948,7 +948,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.Blade,
                 cond = function(self)
-                    return mq.TLO.Target() and RGMercUtils.GetTargetPctHPs() > 5 and
+                    return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
                         RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
                 end
             },
@@ -957,7 +957,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.Crimson,
                 cond = function(self)
-                    return mq.TLO.Target() and RGMercUtils.GetTargetPctHPs() > 5 and
+                    return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
                         RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
                 end
             },

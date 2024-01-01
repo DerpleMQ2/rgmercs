@@ -396,7 +396,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
     end
 
     if e.type:lower() == "aa" then
-        local oldTarget = mq.TLO.Target.ID()
+        local oldTarget = Utils.GetTargetID()
 
         local s = mq.TLO.Me.AltAbility(e.name)
 
