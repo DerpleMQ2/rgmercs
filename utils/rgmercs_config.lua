@@ -74,6 +74,8 @@ for k, v in pairs(Config.ExpansionNameToID) do Config.ExpansionIDToName[v] = k e
 -- Defaults
 Config.DefaultConfig = {
     ['DoAutoTarget']      = { DisplayName = "Auto Target", Tooltip = "Automatically change targets.", Default = true },
+    ['ShrinkItem']        = { DisplayName = "Shrink Item", Tooltip = "Item to use to Shrink yourself", Default = "" },
+    ['DoShrink']          = { DisplayName = "Do Shrink", Tooltip = "Enable auto shrinking", Default = false },
     ['DoMercenary']       = { DisplayName = "Use Mercenary", Tooltip = "Use Merc during combat.", Default = true },
     ['PriorityHealing']   = { DisplayName = "Priority Healing", Tooltip = "Prioritize Healing over Combat", Default = false },
     ['DoModRod']          = { DisplayName = "Do Mod Rod", Tooltip = "Auto use Mod Rods if we have them", Default = true },

@@ -75,13 +75,18 @@ local function renderModulesTabs()
     end
 end
 
---local function renderDragDropForItem(label)
---    ImGui.Text(label)
---    if ImGui.Button("HERE", ICON_WIDTH, ICON_HEIGHT) then
---        if mq.TLO.Cursor.NMam
---        return true,
---    end
---end
+local function renderDragDropForItem(label)
+    ImGui.Text(label)
+    ImGui.PushID(label .. "__btn")
+    if ImGui.Button("HERE", ICON_WIDTH, ICON_HEIGHT) then
+        if mq.TLO.Cursor() then
+            return true, mq.TLO.Cursor.Name()
+        end
+        return false, ""
+    end
+    ImGui.PopID()
+    return false, ""
+end
 
 local function RGMercsGUI()
     if openGUI then
@@ -114,6 +119,7 @@ local function RGMercsGUI()
                     ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
                     ImGui.Text("AutoTargetID: " .. tostring(RGMercConfig.Globals.AutoTargetID))
                     ImGui.Text("MA: " .. (RGMercConfig:GetAssistSpawn().CleanName() or "None"))
+                    ImGui.Text("Stuck To: " .. (mq.TLO.Stick.StickTargetName()))
                     if ImGui.CollapsingHeader("Config Options") then
                         local newSettings = RGMercConfig:GetSettings()
                         newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig)
@@ -127,7 +133,17 @@ local function RGMercsGUI()
                     end
 
                     if ImGui.CollapsingHeader("Custom Items") then
+                        local dropped, newItem = renderDragDropForItem("Drop Mount Item")
+                        if dropped then
+                            RGMercsLogger.log_debug("New item dropped: %s", newItem)
+                        end
 
+                        dropped, newItem = renderDragDropForItem("Drop Shrink Item")
+                        if dropped then
+                            RGMercsLogger.log_debug("New item dropped: %s", newItem)
+                            RGMercConfig:GetSettings().ShrinkItem = newItem
+                            RGMercConfig:SaveSettings(true)
+                        end
                     end
 
                     ImGui.EndTabItem()
@@ -240,7 +256,6 @@ local function RGInit(...)
 end
 
 local function Main()
-    curState = "Downtime"
     if mq.TLO.Me.Zoning() then
         mq.delay(1000)
         return
@@ -249,6 +264,12 @@ local function Main()
     if RGMercConfig.Globals.PauseMain then
         mq.delay(1000)
         return
+    end
+
+    if RGMercUtils.GetXTHaterCount() > 0 then
+        curState = "Combat"
+    else
+        curState = "Downtime"
     end
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
@@ -269,10 +290,6 @@ local function Main()
 
     if RGMercUtils.OkToEngage(RGMercUtils.GetTargetID()) then
         RGMercUtils.EngageTarget(RGMercUtils.GetTargetID())
-    end
-
-    if RGMercUtils.GetXTHaterCount() > 0 then
-        curState = "Combat"
     end
 
     -- TODO: Write Healing Module
