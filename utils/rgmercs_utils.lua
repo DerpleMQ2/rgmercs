@@ -45,7 +45,7 @@ end
 function Utils.SetTarget(targetId)
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if RGMercConfig:GetSettings().DoAutoTarget then
-        if mq.TLO.Target.ID() ~= targetId then
+        if Utils.GetTargetID() ~= targetId then
             mq.cmdf("/target id %d", targetId)
             mq.delay(10)
         end
@@ -198,7 +198,7 @@ function Utils.WaitCastFinish(target)
 
     while mq.TLO.Me.Casting() and (not mq.TLO.Cast.Ready()) do
         mq.delay(100)
-        if target() and Utils.GetTargetPctHPs() <= 0 or (mq.TLO.Target.ID() ~= target.ID()) then
+        if target() and Utils.GetTargetPctHPs() <= 0 or (Utils.GetTargetID() ~= target.ID()) then
             mq.TLO.Me.StopCast()
             return
         end
@@ -430,7 +430,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
         Utils.ActionPrep()
 
-        if mq.TLO.Target.ID() ~= targetId and target() then
+        if Utils.GetTargetID() ~= targetId and target() then
             if me.Combat() and target.Type():lower() == "pc" then
                 RGMercsLogger.log_info("\awNOTICE:\ax Turning off autoattack to cast on a PC.")
                 mq.cmdf("/attack off")
@@ -589,7 +589,7 @@ end
 function Utils.DotSpellCheck(config, spell)
     if not spell then return false end
     return not mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() and spell.StacksTarget() and
-        Utils.GetTragetPctHPs() > config.HPStopDOT
+        Utils.GetTargetPctHPs() > config.HPStopDOT
 end
 
 function Utils.DetSpellCheck(spell)
@@ -605,8 +605,12 @@ function Utils.GetTargetDistance()
     return (mq.TLO.Target.Distance() or 9999)
 end
 
-function Utils.GetTragetPctHPs()
+function Utils.GetTargetPctHPs()
     return (mq.TLO.Target.PctHPs() or 0)
+end
+
+function Utils.GetTargetID()
+    return (mq.TLO.Target.ID() or 0)
 end
 
 function Utils.BurnCheck(config)
@@ -1151,7 +1155,7 @@ function Utils.FindTarget()
     end
     --Target the new target we'll do another spawn check just in case. Given we just did our spawn checks,
     -- Assume the target is still valid so we don't do two more spawn checks.
-    if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
+    if RGMercConfig.Globals.AutoTargetID > 0 and Utils.GetTargetID() ~= RGMercConfig.Globals.AutoTargetID then
         Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
     end
 end
@@ -1253,7 +1257,7 @@ function Utils.PetAttack(config, target)
 end
 
 function Utils.DetAACheck(aaId)
-    if not mq.TLO.Target.ID() then return false end
+    if Utils.GetTargetID() == 0 then return false end
     local Target = mq.TLO.Target
     local Me     = mq.TLO.Me
 

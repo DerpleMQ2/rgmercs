@@ -70,7 +70,7 @@ function Module:ChaseOn(target)
         chaseTarget = mq.TLO.Spawn("pc =" .. target)
     end
 
-    if chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
+    if chaseTarget() and chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
         self.settings.ChaseOn = true
         self.settings.ChaseTarget = chaseTarget.CleanName()
         self:SaveSettings(true)

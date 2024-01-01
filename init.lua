@@ -244,8 +244,8 @@ local function Main()
         RGMercUtils.FindTarget()
     end
 
-    if RGMercUtils.OkToEngage(mq.TLO.Target.ID()) then
-        RGMercUtils.EngageTarget(mq.TLO.Target.ID())
+    if RGMercUtils.OkToEngage(RGMercUtils.GetTargetID()) then
+        RGMercUtils.EngageTarget(RGMercUtils.GetTargetID())
     end
 
     if RGMercUtils.GetXTHaterCount() > 0 then
