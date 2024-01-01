@@ -1634,17 +1634,25 @@ function Utils.RenderOptionToggle(id, text, on)
     local toggled = false
     local state   = on
     ImGui.PushID(id .. "_togg_btn")
+
+    ImGui.PushStyleColor(ImGuiCol.ButtonActive, 1.0, 1.0, 1.0, 0)
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 1.0, 1.0, 1.0, 0)
+    ImGui.PushStyleColor(ImGuiCol.Button, 1.0, 1.0, 1.0, 0)
+
     if on then
-        if ImGui.SmallButton(ICONS.FA_TOGGLE_ON) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.9)
+        if ImGui.Button(ICONS.FA_TOGGLE_ON) then
             toggled = true
             state   = false
         end
     else
-        if ImGui.SmallButton(ICONS.FA_TOGGLE_OFF) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
+        if ImGui.Button(ICONS.FA_TOGGLE_OFF) then
             toggled = true
             state   = true
         end
     end
+    ImGui.PopStyleColor(4)
     ImGui.PopID()
     ImGui.SameLine()
     ImGui.Text(text)
@@ -1654,7 +1662,12 @@ end
 
 function Utils.RenderOptionNumber(id, text, cur, min, max)
     ImGui.PushID("##num_spin_" .. id)
+    ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0.5, 0.5, 0.5, 1.0)
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.5, 0.5, 0.5, 0.5)
+    ImGui.PushStyleColor(ImGuiCol.Button, 1.0, 1.0, 1.0, 0)
+    ImGui.PushStyleColor(ImGuiCol.FrameBg, 1.0, 1.0, 1.0, 0)
     local input, changed = ImGui.InputInt(text, cur)
+    ImGui.PopStyleColor(4)
     ImGui.PopID()
 
     if input > max then input = max end
