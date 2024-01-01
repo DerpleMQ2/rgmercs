@@ -642,7 +642,7 @@ function Utils.DoStick(config, assistId, targetId)
     if config.StickHow:len() > 0 then
         mq.cmdf("/stick %s", config.StickHow)
     else
-        if mq.TLO.Me.ID() == assistId then
+        if Utils.IAmMA() then
             mq.cmdf("/stick 20 id %d moveback uw", targetId)
         else
             mq.cmdf("/stick 20 id %d behindonce moveback uw", targetId)
@@ -1604,6 +1604,9 @@ function Utils.RenderSettings(settings, defaults)
                         defaults[k].Max)
                     new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
                     any_pressed = any_pressed or pressed
+                elseif type(settings[k]) == 'string' then -- display only
+                    ImGui.Text(settings[k])
+                    Utils.Tooltip(settings[k])
                 end
                 ImGui.TableNextColumn()
                 ImGui.Text((defaults[k].DisplayName or "None"))
