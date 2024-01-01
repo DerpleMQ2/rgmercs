@@ -715,7 +715,8 @@ function Utils.AutoMed()
         return
     end
 
-    local enablesit = false
+    local forcesit = false
+    local forcestand = false
 
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
     if RGMercConfig.Globals.LastMove.TimeSinceMove < math.random(7, 12) then return end
@@ -725,29 +726,29 @@ function Utils.AutoMed()
         -- the original stat checks.
         if me.PctHPs() >= RGMercConfig:GetSettings().HPMedPctStop and me.PctMana() >= RGMercConfig:GetSettings().ManaMedPctStop and me.PctEndurance() >= RGMercConfig:GetSettings().EndMedPctStop then
             RGMercConfig.Globals.InMedState = false
-            return
+            forcestand = true
         end
 
         if me.PctHPs() < RGMercConfig:GetSettings().HPMedPct or me.PctMana() < RGMercConfig:GetSettings().ManaMedPct or me.PctEndurance() < RGMercConfig:GetSettings().EndMedPct then
-            enablesit = true
+            forcesit = true
         end
     elseif RGMercConfig.Constants.RGCasters:contains(me.Class.ShortName()) then
         if me.PctHPs() >= RGMercConfig:GetSettings().HPMedPctStop and me.PctMana() >= RGMercConfig:GetSettings().ManaMedPctStop then
             RGMercConfig.Globals.InMedState = false
-            return
+            forcestand = true
         end
 
         if me.PctHPs() < RGMercConfig:GetSettings().HPMedPct or me.PctMana() < RGMercConfig:GetSettings().ManaMedPct then
-            enablesit = true
+            forcesit = true
         end
     elseif RGMercConfig.Constants.RGMelee:contains(me.Class.ShortName()) then
         if me.PctHPs() >= RGMercConfig:GetSettings().HPMedPctStop and me.PctEndurance() >= RGMercConfig:GetSettings().EndMedPctStop then
             RGMercConfig.Globals.InMedState = false
-            return
+            forcestand = true
         end
 
         if me.PctHPs() < RGMercConfig:GetSettings().HPMedPct or me.PctEndurance() < RGMercConfig:GetSettings().EndMedPct then
-            enablesit = true
+            forcesit = true
         end
     else
         RGMercsLogger.log_error("\arYour character class is not in the type list(s): rghybrid, rgcasters, rgmelee. That's a problem for a dev.")
@@ -760,19 +761,26 @@ function Utils.AutoMed()
     --    RGMercConfig:GetSettings().EndMedPct)
 
     if Utils.GetXTHaterCount() > 0 then
-        if RGMercConfig:GetSettings().DoMelee then enablesit = false end
-        if RGMercConfig:GetSettings().DoMed ~= 2 then enablesit = false end
+        if RGMercConfig:GetSettings().DoMelee then
+            forcesit = false
+            forcestand = true
+        end
+        if RGMercConfig:GetSettings().DoMed ~= 2 then
+            forcesit = false
+            forcestand = true
+        end
     end
 
-    if me.Sitting() and not enablesit then
+    if me.Sitting() and forcestand then
         RGMercConfig.Globals.InMedState = false
+        RGMercsLogger.log_debug("Forcing stand - all conditions met.")
         me.Stand()
         return
     end
 
-    if not me.Sitting() and enablesit then
+    if not me.Sitting() and forcesit then
         RGMercConfig.Globals.InMedState = true
-        RGMercsLogger.log_debug("Forcing a sit - all conditions met.")
+        RGMercsLogger.log_debug("Forcing sit - all conditions met.")
         me.Sit()
     end
 end
