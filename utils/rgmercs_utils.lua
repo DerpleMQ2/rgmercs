@@ -705,6 +705,7 @@ function Utils.AutoMed()
 
     -- TODO: Add DoMount Check
     if me.Mount.ID() and not mq.TLO.Zone.Indoor() then
+        RGMercsLogger.log_verbose("Sit check returning early due to mount.")
         return
     end
 
@@ -712,10 +713,11 @@ function Utils.AutoMed()
 
     --If we're moving/following/navigating/sticking, don't med.
     if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Nav.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+        RGMercsLogger.log_verbose("Sit check returning early due to movement.")
         return
     end
 
-    local forcesit = false
+    local forcesit   = false
     local forcestand = false
 
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
@@ -757,10 +759,10 @@ function Utils.AutoMed()
     end
 
     RGMercsLogger.log_verbose(
-        "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d",
+        "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d :: forceSit %s :: forceStand %s",
         me.PctHPs(), RGMercConfig:GetSettings().HPMedPct, me.PctMana(),
         RGMercConfig:GetSettings().ManaMedPct, me.PctEndurance(),
-        RGMercConfig:GetSettings().EndMedPct)
+        RGMercConfig:GetSettings().EndMedPct, forcesit and "True" or "False", forcestand and "True" or "False")
 
     if Utils.GetXTHaterCount() > 0 then
         if RGMercConfig:GetSettings().DoMelee then
