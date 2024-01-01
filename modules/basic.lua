@@ -59,6 +59,10 @@ function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
 end
 
+function Module:OnDeath()
+    -- Death Handler
+end
+
 function Module:Shutdown()
     RGMercsLogger.log_info("Basic Combat Module UnLoaded.")
 end
