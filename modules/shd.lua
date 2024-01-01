@@ -30,7 +30,7 @@ Module.ResolvedActionMap = {}
 Module.TempSettings      = {}
 
 Module.DefaultCategories = Set.new({})
-for _, v in pairs(shdClassConfig.DefaultConfig) do
+for _, v in pairs(shdClassConfig.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
     end

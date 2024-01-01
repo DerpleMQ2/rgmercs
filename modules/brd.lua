@@ -29,7 +29,7 @@ Module.ResolvedActionMap = {}
 Module.TempSettings      = {}
 
 Module.DefaultCategories = Set.new({})
-for _, v in pairs(brdClassConfig.DefaultConfig) do
+for _, v in pairs(brdClassConfig.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
     end
