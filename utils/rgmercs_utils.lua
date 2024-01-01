@@ -1155,7 +1155,7 @@ function Utils.FindTarget()
 end
 
 function Utils.GetXTHaterCount()
-    local xtCount = mq.TLO.Me.XTarget()
+    local xtCount = mq.TLO.Me.XTarget() or 0
     local haterCount = 0
 
     for i = 1, xtCount do
