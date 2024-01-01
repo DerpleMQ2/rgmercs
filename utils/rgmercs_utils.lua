@@ -1258,12 +1258,12 @@ end
 
 function Utils.DetAACheck(aaId)
     if Utils.GetTargetID() == 0 then return false end
-    local Target = mq.TLO.Target
-    local Me     = mq.TLO.Me
+    local target = mq.TLO.Target
+    local me     = mq.TLO.Me
 
-    return (not Target.FindBuff("id " .. tostring(Me.AltAbility(aaId).Spell.ID())).ID() and
-            not Target.FindBuff("id " .. tostring(Me.AltAbility(aaId).Spell.Trigger(1).ID()))) and
-        (Me.AltAbility(aaId).Spell.StacksTarget() or Me.AltAbility(aaId).Spell.Trigger(1).StacksTarget())
+    return (not target.FindBuff("id " .. tostring(me.AltAbility(aaId).Spell.ID())).ID() and
+            not target.FindBuff("id " .. tostring(me.AltAbility(aaId).Spell.Trigger(1).ID()))) and
+        (me.AltAbility(aaId).Spell.StacksTarget() or me.AltAbility(aaId).Spell.Trigger(1).StacksTarget())
 end
 
 function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
