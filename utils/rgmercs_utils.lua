@@ -1015,7 +1015,12 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
                     RGMercsLogger.log_debug("My Interest: %s =? Their Interest: %s", spawn.Name(), cur_spawn.AssistName())
                     if cur_spawn.AssistName() == spawn.Name() then
                         RGMercsLogger.log_debug("[%s] Fighting same mob as: %s Theirs: %s Ours: %s", t, cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
-                        if not Utils.IsPCSafe(t, cur_spawn.CleanName()) then
+                        local checkName = cur_spawn.CleanName()
+
+                        if cur_spawn.Type():lower() == "mercenary" then checkName = cur_spawn.Owner.CleanName() end
+                        if cur_spawn.Type():lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
+
+                        if not Utils.IsPCSafe(t, checkName) then
                             RGMercsLogger.log_info("\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax", cur_spawn.CleanName(), cur_spawn.AssistName())
                             return true
                         end
