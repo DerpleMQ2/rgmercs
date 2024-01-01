@@ -299,8 +299,6 @@ function Module:GiveTime(combat_state)
         if not chaseSpawn or chaseSpawn.Dead() or not chaseSpawn.ID() then
             RGMercsLogger.log_warning("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...",
                 self.settings.ChaseTarget)
-            --self.settings.ChaseOn = false
-            --self:SaveSettings()
             return
         end
 
