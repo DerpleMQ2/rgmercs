@@ -17,7 +17,7 @@ RGMercModules        = require("utils.rgmercs_modules").load()
 -- ImGui Variables
 local openGUI        = true
 local shouldDrawGUI  = true
-local BgOpacity      = tonumber(RGMercConfig:GetSettings().BgOpacity)
+local BgOpacity      = tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0
 
 local curState       = "Downtime"
 
@@ -26,8 +26,8 @@ local animItems      = mq.FindTextureAnimation("A_DragItem")
 local animBox        = mq.FindTextureAnimation("A_RecessedBox")
 
 -- Constants
-local ICON_WIDTH     = 40
-local ICON_HEIGHT    = 40
+local ICON_WIDTH     = 45
+local ICON_HEIGHT    = 45
 local COUNT_X_OFFSET = 39
 local COUNT_Y_OFFSET = 23
 local EQ_ICON_OFFSET = 500
@@ -166,7 +166,7 @@ local function RGMercsGUI()
             ImGui.NewLine()
             ImGui.Separator()
 
-            BgOpacity, pressed = ImGui.SliderFloat("BG Opacity", BgOpacity, 0, 1.0, "%.1f", 0.1)
+            BgOpacity, pressed = ImGui.SliderFloat("BG Opacity", BgOpacity, 0, 1.0, "%.1f")
             if pressed then
                 RGMercConfig:GetSettings().BgOpacity = tostring(BgOpacity)
                 RGMercConfig:SaveSettings(true)

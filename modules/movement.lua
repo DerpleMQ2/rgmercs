@@ -5,20 +5,20 @@ local RGMercUtils              = require("utils.rgmercs_utils")
 local ICONS                    = require('mq.Icons')
 local Set                      = require("mq.Set")
 
-local Module                   = { _version = '0.1a', name = "Movement", author = 'Derple' }
+local Module                   = { _version = '0.1a', name = "Movement", author = 'Derple', }
 Module.__index                 = Module
 
 Module.TempSettings            = {}
 Module.TempSettings.CampZoneId = 0
 
 Module.DefaultConfig           = {
-    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = 60, Min = 10, Max = 150 },
-    ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false },
-    ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100 },
-    ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "" },
-    ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())) },
-    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "0: Off; 1: Regular Fellowship; 2: Empowered Fellowship; 36: Scaled Wolf", Default = 1, Min = 0, Max = 36 },
-    ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) },
+    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = 60, Min = 10, Max = 150, },
+    ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false, },
+    ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100, },
+    ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
+    ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
+    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "0: Off; 1: Regular Fellowship; 2: Empowered Fellowship; 36: Scaled Wolf", Default = 1, Min = 0, Max = 36, },
+    ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
 }
 
 Module.DefaultCategories       = Set.new({})
@@ -72,7 +72,7 @@ end
 
 function Module.New()
     RGMercsLogger.log_info("Chase Module Loaded.")
-    local newModule = setmetatable({ settings = {} }, Module)
+    local newModule = setmetatable({ settings = {}, }, Module)
 
     newModule:LoadSettings()
 
@@ -120,20 +120,20 @@ end
 
 function Module:DestoryCampfire()
     mq.TLO.Window("FellowshipWnd").DoOpen()
-    mq.delay("3s", mq.TLO.Window("FellowshipWnd").Open())
+    mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() end)
     ---@diagnostic disable-next-line: undefined-field
     mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
     if mq.TLO.Me.Fellowship.Campfire() then
         if mq.TLO.Zone.ID() ~= mq.TLO.Me.Fellowship.CampfireZone.ID() then
             mq.TLO.Window("FellowshipWnd").Child("FP_DestroyCampsite").LeftMouseUp()
-            mq.delay("5s", mq.TLO.Window("ConfirmationDialogBox").Open())
+            mq.delay("5s", function() return mq.TLO.Window("ConfirmationDialogBox").Open() end)
 
             if mq.TLO.Window("ConfirmationDialogBox").Open() then
                 mq.TLO.Window("ConfirmationDialogBox").Child("Yes_Button").LeftMouseUp()
             end
 
-            mq.delay("5s", mq.TLO.Me.Fellowship.Campfire() == nil)
+            mq.delay("5s", function() return mq.TLO.Me.Fellowship.Campfire() == nil end)
         end
     end
     mq.TLO.Window("FellowshipWnd").DoClose()
@@ -174,20 +174,20 @@ function Module:Campfire(camptype)
 
     if fellowCount >= 3 then
         mq.TLO.Window("FellowshipWnd").DoOpen()
-        mq.delay("3s", mq.TLO.Window("FellowshipWnd").Open())
+        mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() end)
         ---@diagnostic disable-next-line: undefined-field
         mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
         if mq.TLO.Me.Fellowship.Campfire() then
             if mq.TLO.Zone.ID() ~= mq.TLO.Me.Fellowship.CampfireZone.ID() then
                 mq.TLO.Window("FellowshipWnd").Child("FP_DestroyCampsite").LeftMouseUp()
-                mq.delay("5s", mq.TLO.Window("ConfirmationDialogBox").Open())
+                mq.delay("5s", function() return mq.TLO.Window("ConfirmationDialogBox").Open() end)
 
                 if mq.TLO.Window("ConfirmationDialogBox").Open() then
                     mq.TLO.Window("ConfirmationDialogBox").Child("Yes_Button").LeftMouseUp()
                 end
 
-                mq.delay("5s", mq.TLO.Me.Fellowship.Campfire() == nil)
+                mq.delay("5s", function() return mq.TLO.Me.Fellowship.Campfire() == nil end)
             end
         end
 
@@ -197,7 +197,7 @@ function Module:Campfire(camptype)
         mq.TLO.Window("FellowshipWnd").Child("FP_CampsiteKitList").Select(self.settings.MaintainCampfire or camptype)
         mq.delay("1s")
         mq.TLO.Window("FellowshipWnd").Child("FP_CreateCampsite").LeftMouseUp()
-        mq.delay("5s", mq.TLO.Me.Fellowship.Campfire() ~= nil)
+        mq.delay("5s", function() return mq.TLO.Me.Fellowship.Campfire() ~= nil end)
         mq.TLO.Window("FellowshipWnd").DoClose()
 
         RGMercsLogger.log_info("\agCampfire Dropped")

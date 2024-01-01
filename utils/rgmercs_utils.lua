@@ -84,13 +84,13 @@ function Utils.HandleDeath()
     end
 
     ---@diagnostic disable-next-line: undefined-field
-    mq.delay("1m", (not mq.TLO.Me.Zoning()))
+    mq.delay("1m", function() return (not mq.TLO.Me.Zoning()) end)
 
     if RGMercConfig:GetSettings().DoFellow then
         if mq.TLO.FindItem("Fellowship Registration Insignia").Timer() == 0 then
-            mq.delay("30s", (mq.TLO.Me.CombatState():lower() == "active"))
+            mq.delay("30s", function() return (mq.TLO.Me.CombatState():lower() == "active") end)
             mq.cmdf("/useitem \"Fellowship Registration Insignia\"")
-            mq.delay("2s", (mq.TLO.FindItem("Fellowship Registration Insignia").Timer() ~= 0))
+            mq.delay("2s", function() return (mq.TLO.FindItem("Fellowship Registration Insignia").Timer() ~= 0) end)
         else
             RGMercsLogger.log_error("\aw Bummer, Insignia on cooldown, you must really suck at this game...")
         end
@@ -269,7 +269,7 @@ end
 function Utils.ActionPrep()
     if not mq.TLO.Me.Standing() then
         mq.TLO.Me.Stand()
-        mq.delay(10, mq.TLO.Me.Standing())
+        mq.delay(10, function() return mq.TLO.Me.Standing() end)
 
         RGMercConfig.Globals.InMedState = false
     end
@@ -284,7 +284,7 @@ function Utils.UseItem(itemName, targetId)
 
     if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
         if me.Class.ShortName():lower() == "brd" then
-            mq.delay("3s", not mq.TLO.Window("CastingWindow").Open())
+            mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
             mq.delay(10)
             mq.cmdf("/stopsong")
         else
@@ -325,7 +325,7 @@ function Utils.UseItem(itemName, targetId)
     local oldTargetId = Utils.GetTargetID()
     if targetId > 0 then
         mq.cmdf("/target id %d", targetId)
-        mq.delay("2s", Utils.GetTargetID() == targetId)
+        mq.delay("2s", function() return Utils.GetTargetID() == targetId end)
     end
 
     RGMercsLogger.log_debug("\aw Using Item \ag %s", itemName)
@@ -340,7 +340,7 @@ function Utils.UseItem(itemName, targetId)
         -- slight delay for instant casts
         mq.delay(4)
     else
-        mq.delay(item.CastTime(), not me.Casting.ID())
+        mq.delay(item.CastTime(), function() return not me.Casting.ID() end)
 
         -- pick up any additonal server lag.
         while me.Casting.ID() do
@@ -355,7 +355,7 @@ function Utils.UseItem(itemName, targetId)
 
     if oldTargetId > 0 then
         mq.cmdf("/target id %d", oldTargetId)
-        mq.delay("2s", Utils.GetTargetID() == oldTargetId)
+        mq.delay("2s", function() return Utils.GetTargetID() == oldTargetId end)
     else
         mq.cmdf("/target clear")
     end
@@ -432,7 +432,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
         if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
             if me.Class.ShortName():lower() == "brd" then
-                mq.delay("3s", not mq.TLO.Window("CastingWindow").Open())
+                mq.delay("3s", function() return (not mq.TLO.Window("CastingWindow").Open()) end)
                 mq.delay(10)
                 mq.cmdf("/stopsong")
             else
@@ -459,7 +459,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
             if me.Combat() and target.Type():lower() == "pc" then
                 RGMercsLogger.log_info("\awNOTICE:\ax Turning off autoattack to cast on a PC.")
                 mq.cmdf("/attack off")
-                mq.delay("2s", not me.Combat())
+                mq.delay("2s", function() return not me.Combat() end)
             end
 
             Utils.SetTarget(targetId)
@@ -469,7 +469,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
         mq.cmdf(cmd)
 
-        mq.delay(5, not Utils.AAReady(e.name))
+        mq.delay(5, function() return not Utils.AAReady(e.name) end)
 
         if me.AltAbility(e.name).Spell.MyCastTime.TotalSeconds() > 0 then
             Utils.WaitCastFinish(target)
@@ -483,7 +483,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
     if e.type:lower() == "ability" then
         mq.cmdf("/doability %s", e.name)
-        mq.delay(8, not me.AbilityReady(e.name))
+        mq.delay(8, function() return not me.AbilityReady(e.name) end)
         RGMercsLogger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", e.name)
 
         return
@@ -522,17 +522,17 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
             if me.ActiveDisc.ID() then
                 RGMercsLogger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName(), me.ActiveDisc.Name())
                 mq.cmdf("/stopdisc")
-                mq.delay(20, not me.ActiveDisc.ID())
+                mq.delay(20, function() return not me.ActiveDisc.ID() end)
             end
         end
 
         mq.cmdf("/squelch /doability \"%s\"", discSpell.RankName())
 
-        mq.delay(discSpell.MyCastTime() / 100 or 100, (not me.CombatAbilityReady(discSpell.RankName()) and not me.Casting.ID()))
+        mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName()) and not me.Casting.ID()) end)
 
         -- Is this even needed?
         if Utils.IsDisc(discSpell.RankName()) then
-            mq.delay(20, me.ActiveDisc.ID())
+            mq.delay(20, function() return me.ActiveDisc.ID() end)
         end
 
         RGMercsLogger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName())
@@ -608,7 +608,7 @@ function Utils.SelfBuffAACheck(aaName)
         not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())).ID() and
         not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID() and
         mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName()).Stacks() and
-        (not mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1))() or mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)).Stacks())
+        (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
 end
 
 function Utils.DotSpellCheck(config, spell)
@@ -643,6 +643,7 @@ function Utils.GetTargetID()
 end
 
 function Utils.GetTargetAggroPct()
+    ---@diagnostic disable-next-line: undefined-field
     return (mq.TLO.Target.PctAggro() or 0)
 end
 
@@ -1507,7 +1508,7 @@ function Utils.DrawInspectableSpellIcon(iconID, spell)
 end
 
 function Utils.RenderLoadoutTable(t)
-    if ImGui.BeginTable("Spells", 5, ImGuiTableFlags.Resizable + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("Spells", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('Icon', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Gem', (ImGuiTableColumnFlags.WidthFixed), 20.0)
@@ -1564,7 +1565,7 @@ function Utils.RenderRotationTableKey()
 end
 
 function Utils.RenderRotationTable(s, n, t, map, rotationState)
-    if ImGui.BeginTable("Rotation_" .. n, rotationState and 4 or 3, ImGuiTableFlags.Resizable + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("Rotation_" .. n, rotationState and 4 or 3, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
         if rotationState then
@@ -1663,8 +1664,8 @@ end
 function Utils.RenderOptionNumber(id, text, cur, min, max)
     ImGui.PushID("##num_spin_" .. id)
     ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0.5, 0.5, 0.5, 1.0)
-    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.5, 0.5, 0.5, 0.5)
-    ImGui.PushStyleColor(ImGuiCol.Button, 1.0, 1.0, 1.0, 0)
+    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.5, 0.5, 0.5, 0.8)
+    ImGui.PushStyleColor(ImGuiCol.Button, 1.0, 1.0, 1.0, 0.2)
     ImGui.PushStyleColor(ImGuiCol.FrameBg, 1.0, 1.0, 1.0, 0)
     local input, changed = ImGui.InputInt(text, cur)
     ImGui.PopStyleColor(4)
