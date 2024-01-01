@@ -194,12 +194,12 @@ local function RGInit(...)
         "MQ2AdvPath",
         "MQ2MoveUtils",
         "MQ2Nav",
-        "MQ2DanNet" })
+        "MQ2DanNet", })
 
-    unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee" })
+    unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
 
     if not RGMercConfig:GetSettings().DoTwist then
-        local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist" })
+        local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist", })
         if #unloaded == 1 then table.insert(unloadedPlugins, unloaded[1]) end
     end
 
@@ -313,6 +313,11 @@ local function Main()
         -- may have changed by this point.
         if RGMercUtils.FindTargetCheck() and (not RGMercConfig.Globals.IsHealing or not RGMercConfig.Globals.IsMezzing) then
             RGMercUtils.FindTarget()
+        end
+
+        if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
+            RGMercConfig.Globals.LastPetCmd = os.clock()
+            RGMercUtils.PetAttack()
         end
 
         if RGMercConfig:GetSettings().DoMercenary then

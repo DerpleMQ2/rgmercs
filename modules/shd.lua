@@ -22,7 +22,7 @@ if not shdClassConfig then
 end
 
 
-local Module             = { _version = '0.1a', name = "ShadowKnight", author = 'Derple' }
+local Module             = { _version = '0.2a', name = "ShadowKnight", author = 'Derple', }
 Module.__index           = Module
 Module.LastPetCmd        = 0
 Module.SpellLoadOut      = {}
@@ -93,7 +93,7 @@ function Module.New()
     if RGMercConfig.Globals.CurLoadedClass ~= "SHD" then return nil end
 
     RGMercsLogger.log_info("ShadowKnight Combat Module Loaded.")
-    local newModule = setmetatable({ settings = {}, CombatState = "None" }, Module)
+    local newModule = setmetatable({ settings = {}, CombatState = "None", }, Module)
 
     newModule:LoadSettings()
 
@@ -221,11 +221,6 @@ function Module:GiveTime(combat_state)
 
         if not self.settings.BurnAuto then self.settings.BurnSize = 0 end
     else
-        if RGMercConfig.Globals.IsTanking and ((os.clock() - Module.LastPetCmd) > 2) then
-            Module.LastPetCmd = os.clock()
-            RGMercUtils.PetAttack(self.settings, mq.TLO.Target)
-        end
-
         if RGMercUtils.BurnCheck(self.settings) then
             self.TempSettings.RotationStates.Burn = RGMercUtils.RunRotation(self, self:GetRotationTable("Burn"), RGMercConfig.Globals.AutoTargetID,
                 Module.ResolvedActionMap, 1, self.TempSettings.RotationStates.Burn, false)
