@@ -292,6 +292,11 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
         end
 
         local itemName = map[e.name]
+
+        if not itemName then
+            return
+        end
+
         local item = mq.TLO.FindItem("=" .. itemName)
 
         if not item() then
