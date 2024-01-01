@@ -93,7 +93,7 @@ Config.DefaultConfig = {
     ['HPMedPctStop']      = { DisplayName = "Med HP Pct Stop", Category = "Meditation", Tooltip = "What HP Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99 },
     ['StayOnTarget']      = { DisplayName = "Stay On Target", Category = "Combat", Tooltip = "Stick to your target. Default: true; Tank Mode Defaults: false. false allows intelligent target swapping based on aggro/named/ etc.", Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())) },
     ['DoAutoEngage']      = { DisplayName = "Auto Engage", Category = "Combat", Tooltip = "Automatically engage targets.", Default = true },
-    ['DoMelee']           = { DisplayName = "Enable Melee Combat", Category = "Combat", Tooltip = "Melee targets.", Default = false },
+    ['DoMelee']           = { DisplayName = "Enable Melee Combat", Category = "Combat", Tooltip = "Melee targets.", Default = Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass) },
     ['DoBuffs']           = { DisplayName = "Do Buffs", Category = "Buffs", Tooltip = "Do Non-Class Specific Buffs.", Default = true },
     ['SafeTargeting']     = { DisplayName = "Use Safe Targeting", Category = "Combat", Tooltip = "Do not target mobs that are fighting others.", Default = true },
     ['DoTwist']           = { DisplayName = "Enable Bard Twisting", Category = "Buffs", Tooltip = "Use MQ2Twist", Default = true },
