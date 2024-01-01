@@ -9,6 +9,7 @@ function Modules.load()
         modules = {
             --Basic          = require("modules.basic").New(),
             Movement     = require("modules.movement").New(),
+            Travel       = require("modules.travel").New(),
             ShadowKnight = require("modules.shd").New(),
         }
     }, Modules)

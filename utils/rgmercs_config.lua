@@ -1,41 +1,42 @@
-local mq                      = require('mq')
-local RGMercUtils             = require("utils.rgmercs_utils")
-local RGMercsLogger           = require("utils.rgmercs_logger")
-local Set                     = require("mq.Set")
+local mq                        = require('mq')
+local RGMercUtils               = require("utils.rgmercs_utils")
+local RGMercsLogger             = require("utils.rgmercs_logger")
+local Set                       = require("mq.Set")
 
-local Config                  = { _version = '0.3a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Gortar' }
-Config.__index                = Config
-Config.settings               = {}
+local Config                    = { _version = '0.3a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Gortar' }
+Config.__index                  = Config
+Config.settings                 = {}
 
 -- Global State
-Config.Globals                = {}
-Config.Globals.MainAssist     = ""
-Config.Globals.AutoTargetID   = 0
-Config.Globals.BurnNow        = false
-Config.Globals.PauseMain      = false
-Config.Globals.LastMove       = nil
-Config.Globals.BackOffFlag    = false
-Config.Globals.IsHealing      = false
-Config.Globals.IsTanking      = false
-Config.Globals.InMedState     = false
-Config.Globals.IsMezzing      = false
-Config.Globals.LastFaceTime   = 0
-Config.Globals.CurLoadedChar  = mq.TLO.Me.CleanName()
-Config.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
-Config.Globals.CurServer      = mq.TLO.EverQuest.Server():gsub(" ", "")
+Config.Globals                  = {}
+Config.Globals.MainAssist       = ""
+Config.Globals.AutoTargetID     = 0
+Config.Globals.BurnNow          = false
+Config.Globals.PauseMain        = false
+Config.Globals.LastMove         = nil
+Config.Globals.BackOffFlag      = false
+Config.Globals.IsHealing        = false
+Config.Globals.IsTanking        = false
+Config.Globals.InMedState       = false
+Config.Globals.IsMezzing        = false
+Config.Globals.LastFaceTime     = 0
+Config.Globals.CurLoadedChar    = mq.TLO.Me.CleanName()
+Config.Globals.CurLoadedClass   = mq.TLO.Me.Class.ShortName()
+Config.Globals.CurServer        = mq.TLO.EverQuest.Server():gsub(" ", "")
 
 -- Constants
-Config.Constants              = {}
-Config.Constants.RGCasters    = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD", "SHM", "WIZ" })
-Config.Constants.RGMelee      = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST" })
-Config.Constants.RGHybrid     = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD" })
-Config.Constants.RGTank       = Set.new({ "WAR", "PAL", "SHD" })
-Config.Constants.RGModRod     = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD" })
-Config.Constants.RGPetClass   = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD" })
-Config.Constants.RGMezAnims   = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135 })
-Config.Constants.ModRods      = { [1] = "Modulation Shard", [2] = "Transvergence", [3] = "Modulation", [4] = "Modulating" }
+Config.Constants                = {}
+Config.Constants.RGCasters      = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD", "SHM", "WIZ" })
+Config.Constants.RGMelee        = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST" })
+Config.Constants.RGHybrid       = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD" })
+Config.Constants.RGTank         = Set.new({ "WAR", "PAL", "SHD" })
+Config.Constants.RGModRod       = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD" })
+Config.Constants.RGPetClass     = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD" })
+Config.Constants.RGMezAnims     = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135 })
+Config.Constants.ModRods        = { [1] = "Modulation Shard", [2] = "Transvergence", [3] = "Modulation", [4] = "Modulating" }
+Config.Constants.SpellBookSlots = 1120
 
-Config.ExpansionNameToID      = {
+Config.ExpansionNameToID        = {
     ['EXPANSION_LEVEL_CLASSIC'] = 0, -- No Expansion
     ['EXPANSION_LEVEL_ROK'] = 1,     -- The Ruins of Kunark
     ['EXPANSION_LEVEL_SOV'] = 2,     -- The Scars of Velious
@@ -69,7 +70,7 @@ Config.ExpansionNameToID      = {
     ['EXPANSION_LEVEL_LS'] = 30,     -- Laurion's Song
 }
 
-Config.ExpansionIDToName      = {}
+Config.ExpansionIDToName        = {}
 for k, v in pairs(Config.ExpansionNameToID) do Config.ExpansionIDToName[v] = k end
 
 -- Defaults
@@ -128,7 +129,7 @@ function Config:SaveSettings(doBroadcast)
     RGMercsLogger.set_log_level(self.settings.LogLevel)
 
     if doBroadcast then
-        RGMercUtils.BroadcastUpdate("main", "SaveSettings")
+        RGMercUtils.BroadcastUpdate("main", "LoadSettings")
     end
 end
 
