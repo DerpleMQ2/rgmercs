@@ -32,8 +32,6 @@ local COUNT_X_OFFSET = 39
 local COUNT_Y_OFFSET = 23
 local EQ_ICON_OFFSET = 500
 
-local terminate      = false
-
 -- UI --
 local function display_item_on_cursor()
     if mq.TLO.Cursor() then
@@ -89,8 +87,12 @@ local function renderDragDropForItem(label)
     return false, ""
 end
 
+local function Alive()
+    return mq.TLO.NearestSpawn('pc')() ~= nil
+end
+
 local function RGMercsGUI()
-    if openGUI then
+    if openGUI and Alive() then
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
         if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
@@ -418,7 +420,7 @@ mq.bind("/rglua", bindHandler)
 
 RGInit(...)
 
-while not terminate do
+while openGUI do
     Main()
     mq.doevents()
     mq.delay(10)
