@@ -24,8 +24,8 @@ function Utils.file_exists(path)
     end
 end
 
-function Utils.BroadcastUpdate(module, event)
-    Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event })
+function Utils.BroadcastUpdate(module, event, data)
+    Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event, data = data })
 end
 
 function Utils.PrintGroupMessage(msg, ...)
@@ -641,6 +641,14 @@ function Utils.GetTargetID()
     return (mq.TLO.Target.ID() or 0)
 end
 
+function Utils.GetTargetAggroPct()
+    return (mq.TLO.Target.PctAggro() or 0)
+end
+
+function Utils.GetTargetAggressive()
+    return (mq.TLO.Target.Aggressive() or false)
+end
+
 function Utils.GetGroupMainAssistID()
     return (mq.TLO.Group.MainAssist.ID() or 0)
 end
@@ -1226,11 +1234,11 @@ end
 
 function Utils.GetXTHaterCount()
     local xtCount = mq.TLO.Me.XTarget() or 0
-    local haterCount = 0
+    local haterCount = (Utils.GetTargetAggroPct() > 0 or Utils.GetTargetAggressive()) and 1 or 0
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.PctAggro() > 1 then
+        if xtarg and xtarg.PctAggro() > 1 and xtarg.ID() ~= Utils.GetTargetID() then
             haterCount = haterCount + 1
         end
     end
