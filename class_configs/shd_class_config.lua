@@ -1002,6 +1002,24 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
                 end
             },
+            [32] = {
+                name = "Bash",
+                type = "Ability",
+                tooltip = Tooltips.Bash,
+                cond = function(self)
+                    return mq.TLO.Me.AbilityReady("Bash")() and RGMercUtils.GetTargetID() > 0 and
+                        RGMercUtils.GetTargetDistance() < 30
+                end
+            },
+            [33] = {
+                name = "Slam",
+                type = "Ability",
+                tooltip = Tooltips.Slam,
+                cond = function(self)
+                    return mq.TLO.Me.AbilityReady("Slam")() and RGMercUtils.GetTargetID() > 0 and
+                        RGMercUtils.GetTargetDistance() < 30
+                end
+            },
         },
     },
     ['Spells']        = {
