@@ -57,6 +57,8 @@ local Tooltips     = {
     EncroachingDarkness = "Ability: Snare + HP DOT",
     Epic = 'Item: Casts Epic Weapon Ability',
     ViciousBiteOfChaos = "Spell: Duration LifeTap + Mana Return",
+    Bash = "Use Bash Ability",
+    Slam = "Use Slam Ability",
 }
 
 local _ClassConfig = {
