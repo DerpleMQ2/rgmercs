@@ -1183,7 +1183,7 @@ function Utils.GetXTHaterCount()
     return haterCount
 end
 
-function Utils.SetControlTool()
+function Utils.SetControlToon()
     if RGMercConfig:GetSettings().AssistOutside then
         if #RGMercConfig:GetSettings().OutsideAssistList > 0 then
             for _, name in ipairs(RGMercConfig:GetSettings().OutsideAssistList) do
@@ -1202,6 +1202,10 @@ function Utils.SetControlTool()
                 RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
             end
         end
+    end
+
+    if RGMercConfig:GetAssistId() ~= mq.TLO.Group.MainAssist.ID() and mq.TLO.Group.MainAssist.ID() > 0 then
+        RGMercConfig.Globals.MainAssist = mq.TLO.Group.MainAssist.CleanName()
     end
 end
 

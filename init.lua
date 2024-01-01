@@ -75,6 +75,14 @@ local function renderModulesTabs()
     end
 end
 
+--local function renderDragDropForItem(label)
+--    ImGui.Text(label)
+--    if ImGui.Button("HERE", ICON_WIDTH, ICON_HEIGHT) then
+--        if mq.TLO.Cursor.NMam
+--        return true,
+--    end
+--end
+
 local function RGMercsGUI()
     if openGUI then
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
@@ -85,7 +93,7 @@ local function RGMercsGUI()
         if shouldDrawGUI then
             local pressed
             ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 1.0, 1.0, 1)
-            ImGui.Text(string.format("RGMercs running for %s (%s)", RGMercConfig.Globals.CurLoadedChar,
+            ImGui.Text(string.format("RGMercs [%s/%s] running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig.Globals.CurLoadedChar,
                 RGMercConfig.Globals.CurLoadedClass))
 
             if RGMercConfig.Globals.PauseMain then
@@ -116,6 +124,10 @@ local function RGMercsGUI()
                     end
                     if ImGui.CollapsingHeader("Zone Named") then
                         RGMercUtils.RenderZoneNamed()
+                    end
+
+                    if ImGui.CollapsingHeader("Custom Items") then
+
                     end
 
                     ImGui.EndTabItem()
@@ -249,7 +261,7 @@ local function Main()
 
     if mq.TLO.Me.Hovering() then RGMercUtils.HandleDeath() end
 
-    RGMercUtils.SetControlTool()
+    RGMercUtils.SetControlToon()
 
     if RGMercUtils.FindTargetCheck() then
         RGMercUtils.FindTarget()
