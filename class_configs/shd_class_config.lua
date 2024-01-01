@@ -1117,7 +1117,7 @@ local _ClassConfig = {
         ['FlashHP']      = { DisplayName = "Flash HP", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100 },
         ['StartBigTap']  = { DisplayName = "Use Big Taps", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100 },
         ['StartLifeTap'] = { DisplayName = "Use Life Taps", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100 },
-        ['BurnSize']     = { DisplayName = "Burn Size", Tooltip = "1=Small, 2=Medium, 3=Large", Default = 1, Min = 1, Max = 3 },
+        ['BurnSize']     = { DisplayName = "Burn Size", Tooltip = "0=Off, 1=Small, 2=Medium, 3=Large", Default = 1, Min = 0, Max = 3 },
         ['BurnAuto']     = { DisplayName = "Auto Burn", Tooltip = "Automatically burn", Default = false },
         ['DoPet']        = { DisplayName = "Cast Pet", Tooltip = "Enable casting Pet spells.", Default = true },
         ['PetEngagePct'] = { DisplayName = "Pet Engage HPs", Tooltip = "Send in pet when target hits [x] HP %.", Default = 90, Min = 1, Max = 100 },
