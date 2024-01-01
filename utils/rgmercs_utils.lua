@@ -606,7 +606,7 @@ function Utils.GetTargetDistance()
 end
 
 function Utils.GetTragetPctHPs()
-    return (Utils.GetTargetPctHPs() or 0)
+    return (mq.TLO.Target.PctHPs() or 0)
 end
 
 function Utils.BurnCheck(config)
@@ -1545,8 +1545,8 @@ function Utils.RenderOptionNumber(id, text, cur, min, max)
     if input > max then input = max end
     if input < min then input = min end
 
-    changed = cur ~= input
 
+    changed = cur ~= input
     return input, changed
 end
 
