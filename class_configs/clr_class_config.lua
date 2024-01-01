@@ -1,5 +1,5 @@
-local mq             = require('mq')
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
@@ -17,7 +17,7 @@ return {
     },
     ['AbilitySets'] = {
         ['wardspell'] = {
-            -----Ward Spell Slot 1 or Heal over time for low level 
+            -----Ward Spell Slot 1 or Heal over time for low level
             [1] = "Celestial Remedy",
             [2] = "Celestial Health",
             [3] = "Celestial Healing",
@@ -93,7 +93,7 @@ return {
             [5] = "Syllable of Invigoration",
         },
         ['groupheal'] = {
-            -----Group Heals Slot 5 
+            -----Group Heals Slot 5
             [1] = "Word of Health",
             [2] = "Word of Healing",
             [3] = "Word of Vigor",
@@ -154,7 +154,7 @@ return {
             [8] = "Dire Renewal",
             [9] = "Determined Renewal",
             [10] = "Heroic Renewal",
-        },  
+        },
         ['yaulpspell'] = {
             -----Yaulp Setup Pre-91 AA
             [1] = "Yaulp V",
@@ -297,7 +297,7 @@ return {
             [2] = "Symbol of Ryltan",
             [3] = "Symbol of Pinzarn",
             [4] = "Symbol of Naltron",
-            [5] = "Symbol of Marzin",	
+            [5] = "Symbol of Marzin",
             [6] = "Symbol of Kazad",
             [7] = "Symbol of Balikor",
             [8] = "Symbol of Elushar",
@@ -575,7 +575,7 @@ return {
             [8] = "Elixir of Benevolence",
             [9] = "Elixir of Realization",
         },
-        ['GroupHotCure'] = {        
+        ['GroupHotCure'] = {
             -- Group Hot Line Cure + Hot 99+
             [1] = "Cleansing Acquittal",
             [2] = "Ardent Acquittal",
@@ -633,18 +633,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DPS'] = {
@@ -666,18 +666,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Healer'] = {
@@ -699,18 +699,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Hybrid'] = {
@@ -732,18 +732,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DefaultConfig'] = {
@@ -751,17 +751,3 @@ return {
         },
     },
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

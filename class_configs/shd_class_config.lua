@@ -1,5 +1,5 @@
 local mq           = require('mq')
-local RGMercUtils  = require("rgmercs.utils.rgmercs_utils")
+local RGMercUtils  = require("utils.rgmercs_utils")
 
 local Tooltips     = {
     Mantle = "Spell Line: Melee Absorb Proc",

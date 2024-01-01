@@ -1,5 +1,5 @@
-local mq             = require('mq')
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
@@ -93,7 +93,7 @@ return {
         },
         ['Alliance'] = {
             [1] = "Demolisher's,",
-            [2] = "Mangler's Covenant"  ,
+            [2] = "Mangler's Covenant",
             [3] = "Vindicator's Coalition",
             [4] = "Conqueror's Conjunction",
 
@@ -243,10 +243,10 @@ return {
         },
         ['RetaliationDodge'] = {
             [1] = "Preemptive Retaliation",
-            [2] = "Primed Retaliation" ,
+            [2] = "Primed Retaliation",
             [3] = "Premature Retaltion",
             [4] = "Proactive Retaliation",
-            [5] = "Prior Retaliation"  ,
+            [5] = "Prior Retaliation",
             [6] = "Advanced Retaliation",
             [7] = "Early Retaliation",
         },
@@ -290,13 +290,13 @@ return {
             ['Downtime'] = {},
             ['Burn'] = {},
         },
-        ['Healer'] = { 
+        ['Healer'] = {
             ["Available"] = 0,
             ['Combat'] = {},
             ['Downtime'] = {},
             ['Burn'] = {},
         },
-        ['Hybrid'] = { 
+        ['Hybrid'] = {
             ["Available"] = 0,
             ['Combat'] = {},
             ['Downtime'] = {},

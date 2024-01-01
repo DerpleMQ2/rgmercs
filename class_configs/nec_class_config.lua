@@ -1,5 +1,5 @@
-local mq             = require('mq')
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
@@ -55,7 +55,7 @@ return {
             [5] = "Shield of Fate",
         },
         ['FDSpell'] = {
-        -- Fd Spell
+            -- Fd Spell
             [1] = "Death Peace",
         },
 
@@ -322,7 +322,7 @@ return {
             [4] = "Serisaria's Swift Venom",
             [5] = "Slaunk's Swift Venom",
             [6] = "Hyboram's Swift Venom",
-            [7] = "Burlabis' Swift Venom",            
+            [7] = "Burlabis' Swift Venom",
         },
         ['Poison2'] = {
             ---Poison2 >=LVL1 (DOT)
@@ -371,7 +371,7 @@ return {
             -- >= LVL56 Crippling Claudication
             [1] = "Crippling Paraplegia",
             [2] = "Crippling Incapacity",
-            [3] = "Crippling Claudication",            
+            [3] = "Crippling Claudication",
         },
         ['ChaoticDebuff'] = {
             -- >= LVL93
@@ -549,18 +549,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DPS'] = {
@@ -582,18 +582,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Healer'] = {
@@ -615,18 +615,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Hybrid'] = {
@@ -648,18 +648,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DefaultConfig'] = {

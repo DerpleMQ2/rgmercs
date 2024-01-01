@@ -1,5 +1,5 @@
-local mq             = require('mq')
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
@@ -17,27 +17,27 @@ return {
     ['AbilitySets'] = {
         ["FocusSpell"] = {
             -- Focus Spell - Lower Levels Mix in Single Target, Higher Prefer Group Target
-            [1] = "Inner Fire",                    -- Level 1 - Single
-            [2] = "Talisman of Tnarg",             -- Level 32 - Single
-            [3] = "Talisman of Altuna",            -- Level 40 - Single 
-            [4] = "Talisman of Kragg",             -- Level 55 - Single
-            [5] = "Khura's Focusing",              -- Level 60 - Group
-            [6] = "Focus of the Seventh",          -- Level 65 - Group
-            [7] = "Talisman of Wunshi",            -- Level 70 - Group
-            [8] = "Talisman of the Dire",          -- Level 75 - Group
-            [9] = "Talisman of the Bloodworg",     -- Level 80 - Group
-            [10] = "Talisman of Unity",             -- Level 85 - Group
-            [11] = "Talisman of Soul's Unity",      -- Level 90 - Group
-            [12] = "Talisman of Kolos' Unity",      -- Level 95 - Group
-            [13] = "Talisman of the Courageous",    -- Level 100 - Group
-            [14] = "Talisman of the Doomscale",     -- Level 105 - Group
-            [15] = "Talisman of the Wulthan",       -- Level 110 - Group
-            [16] = "Unity of the Kromrif",          -- Level 111 - Single
-            [17] = "Talisman of the Ry'Gorr",       -- Level 115 - Group
-            [18] = "Unity of the Vampyre",          -- Level 116 - Single
-            [19] = "Talisman of the Usurper",       -- Level 120 - Group
-            [20] = "Celeritous Unity",              -- Level 121 - Single
-            [21] = "Talisman of the Heroic",      -- Level 125 - Group
+            [1] = "Inner Fire",                  -- Level 1 - Single
+            [2] = "Talisman of Tnarg",           -- Level 32 - Single
+            [3] = "Talisman of Altuna",          -- Level 40 - Single
+            [4] = "Talisman of Kragg",           -- Level 55 - Single
+            [5] = "Khura's Focusing",            -- Level 60 - Group
+            [6] = "Focus of the Seventh",        -- Level 65 - Group
+            [7] = "Talisman of Wunshi",          -- Level 70 - Group
+            [8] = "Talisman of the Dire",        -- Level 75 - Group
+            [9] = "Talisman of the Bloodworg",   -- Level 80 - Group
+            [10] = "Talisman of Unity",          -- Level 85 - Group
+            [11] = "Talisman of Soul's Unity",   -- Level 90 - Group
+            [12] = "Talisman of Kolos' Unity",   -- Level 95 - Group
+            [13] = "Talisman of the Courageous", -- Level 100 - Group
+            [14] = "Talisman of the Doomscale",  -- Level 105 - Group
+            [15] = "Talisman of the Wulthan",    -- Level 110 - Group
+            [16] = "Unity of the Kromrif",       -- Level 111 - Single
+            [17] = "Talisman of the Ry'Gorr",    -- Level 115 - Group
+            [18] = "Unity of the Vampyre",       -- Level 116 - Single
+            [19] = "Talisman of the Usurper",    -- Level 120 - Group
+            [20] = "Celeritous Unity",           -- Level 121 - Single
+            [21] = "Talisman of the Heroic",     -- Level 125 - Group
         },
         ["RunSpeedBuff"] = {
             -- Run Speed Buff - 9 - 74
@@ -145,7 +145,7 @@ return {
             [5] = "Malosinia",
             [6] = "Malo",
             [7] = "Malosini",
-            [8] = "Malosi",   
+            [8] = "Malosi",
             [9] = "Malaisement",
             [10] = "Malaise",
         },
@@ -422,7 +422,7 @@ return {
         ["ChaoticDoT"] = {
             -- Long Dot(42s) LVL 109 -> LVL104
             -- Two resist types because it throws 2 dots
-            -- Stacking: Nectar of Pain - Stacking: Blood of Saryrn 
+            -- Stacking: Nectar of Pain - Stacking: Blood of Saryrn
             [1] = "Chaotic Poison",
             [2] = "Chaotic Venom",
             [3] = "Chaotic Venin",
@@ -430,7 +430,7 @@ return {
         },
         ["PandemicDot"] = {
             -- Pandemic Dot Long Dot(84s) Level 103 - 108
-            -- Two resist types because it throws 2 dots    
+            -- Two resist types because it throws 2 dots
             -- Stacking: Kralbor's Pandemic  -    Stacking: Breath of Ultor
             [1] = "Skraiw's Pandemic",
             [2] = "Elkikatar's Pandemic",
@@ -517,7 +517,7 @@ return {
             [6] = "Elsrop's Malady",
             [7] = "Giaborn's Malady",
             [8] = "Nargul's Malady",
-        }, 
+        },
         ["UltorDot"] = {
             ---, Stacking: Breath of Ultor - Long Dot(84s) - Level 4 - 111
             [1] = "Breath of the Hotariton",
@@ -613,18 +613,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DPS'] = {
@@ -646,18 +646,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Healer'] = {
@@ -679,18 +679,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Hybrid'] = {
@@ -712,18 +712,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DefaultConfig'] = {

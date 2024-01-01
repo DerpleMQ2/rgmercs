@@ -1,5 +1,5 @@
-local mq             = require('mq')
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
@@ -124,7 +124,7 @@ return {
             [13] = "Firebolt of Tallon",
             [14] = "Seeking Flame of Seukor",
             [15] = "Scars of Sigil",
-            [16] = "Lava Bolt",    
+            [16] = "Lava Bolt",
             [17] = "Cinder Bolt",
             [18] = "Bolt of Flame",
             [19] = "Flame Bolt",
@@ -383,8 +383,8 @@ return {
             [5] = "Gather Magnitude",
             [6] = "Gather Capacity",
             [7] = "Gather Potential",
-        },          
-        -- Pet Spells Pets & Spells Affecting them   
+        },
+        -- Pet Spells Pets & Spells Affecting them
         ['MeleeGuard  '] = {
             [1] = "Shield of Inescapability",
             [2] = "Shield of Inevitability",
@@ -482,7 +482,7 @@ return {
             [15] = "Elemental Empathy",
             [16] = "Burnout III",
             [17] = "Burnout II",
-            [18] = "Burnout",            
+            [18] = "Burnout",
         },
         ['PetIceFlame'] = {
             [1] = "IceFlame Palisade",
@@ -496,10 +496,10 @@ return {
             [9] = "Iceflame Efflux",
             [10] = "Iceflame Tenement",
             [11] = "Iceflame Body",
-            [12] = "Iceflame Guard",            
+            [12] = "Iceflame Guard",
         },
         ['EarthPetSpell'] = {
-            [1] = "Recruitment of Earth",    
+            [1] = "Recruitment of Earth",
             [2] = "Conscription of Earth",
             [3] = "Manifestation of Earth",
             [4] = "Embodiment of Earth",
@@ -628,12 +628,12 @@ return {
             [14] = "Bulwark of Calliav",
             [15] = "Protection of Calliav",
             [16] = "Guard of Calliav",
-            [17] = "Ward of Calliav",            
+            [17] = "Ward of Calliav",
         },
         ['PetManaNuke'] = {
             --- PetManaNuke
             [1] = "Thaumatize Pet",
-        },          
+        },
         -- - Summoned item Spells
         ['PetArmorSummon'] = {
             -- >=LVL71
@@ -642,7 +642,7 @@ return {
             [3] = "Grant Ocoenydd's Plate",
             [4] = "Grant Wirn's Plate",
             [5] = "Grant Thassis' Plate",
-            [6] = "Grant Frightforged Plate", 
+            [6] = "Grant Frightforged Plate",
             [7] = "Grant Manaforged Plate",
             [8] = "Grant Spectral Plate",
             [9] = "Summon Plate of the Prime",
@@ -680,7 +680,7 @@ return {
             [4] = "Grant Glacial Paradox",
             [5] = "Summon Frigid Paradox",
             [6] = "Summon Gelid Paradox",
-            [7] = "Summon Wintry Paradox",            
+            [7] = "Summon Wintry Paradox",
         },
         ['FireOrbSummon'] = {
             [1] = "Summon Molten Komatiite Orb",
@@ -708,7 +708,7 @@ return {
             [7] = "Summon Exigent Minion",
         },
         ['ManaRodSummon'] = {
-            --- ManaRodSummon - Focuses on group mana rod summon for ease. _ 
+            --- ManaRodSummon - Focuses on group mana rod summon for ease. _
             --  - no TOL spell?
             [1] = "Mass Dark Transvergence",
             [2] = "Mass Dark Transvergence",
@@ -718,7 +718,7 @@ return {
             [6] = "Mass Prime Transvergence",
             [7] = "Mass Elemental Transvergence",
             [8] = "Mass Mystical Transvergence",
-            [9] = "Modulating Rod"            
+            [9] = "Modulating Rod"
         },
         ['SelfManaRodSummon'] = {
             ---, - Focuses on self mana rod summon separate from other timers. >95
@@ -727,9 +727,9 @@ return {
             [3] = "Wand of Frozen Modulation",
             [4] = "Wand of Burning Modulation",
             [5] = "Wand of Dark Modulation",
-            [6] = "Wand of Phantasmal Modulation",            
+            [6] = "Wand of Phantasmal Modulation",
         },
-        -- - Debuffs     
+        -- - Debuffs
         ['MaloDebuff'] = {
             -- line < LVL 75 @ LVL75 use the AA
             [1] = "Malosinera",
@@ -771,18 +771,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DPS'] = {
@@ -804,18 +804,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Healer'] = {
@@ -837,18 +837,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Hybrid'] = {
@@ -870,18 +870,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DefaultConfig'] = {
@@ -889,7 +889,3 @@ return {
         },
     },
 }
-
-
-
- 

@@ -1,5 +1,5 @@
 local mq            = require('mq')
-local RGMercsLogger = require("rgmercs.utils.rgmercs_logger")
+local RGMercsLogger = require("utils.rgmercs_logger")
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
 local ICONS         = require('mq.Icons')
 local ICON_SIZE     = 20

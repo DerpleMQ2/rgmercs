@@ -1,5 +1,5 @@
-local mq             = require('mq')
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
@@ -85,7 +85,7 @@ return {
             [12] = "Voice of Clairvoyance",
             [13] = "Voice of Quellious",
             [14] = "Tranquility",
-            -- [] = ["Gift of Brilliance", -- Removed because the Map Defaults to it Instead of Koadics 
+            -- [] = ["Gift of Brilliance", -- Removed because the Map Defaults to it Instead of Koadics
             [15] = "Koadic's Endless Intellect",
             [16] = "Gift of Pure Thought",
             [17] = "Sagacity",
@@ -179,7 +179,7 @@ return {
             [2] = "Deviser's Unity",
             [3] = "Marvel's Unity",
         },
-        ['SingleRune'] =  {
+        ['SingleRune'] = {
             [1] = "Rune of Zoraxmen",
             [2] = "Rune of Tearc",
             [3] = "Rune of Kildrukaun",
@@ -392,7 +392,7 @@ return {
             [31] = "Allure",
             [32] = "Cajoling Whispers",
             [33] = "Beguile",
-            [34] = "Charm",            
+            [34] = "Charm",
         },
         ['CrippleSpell'] = {
             [1] = "Splintered Consciousness",
@@ -425,7 +425,7 @@ return {
             [7] = "Taper Enchantment",
         },
         ['TashSpell'] = {
-            [1] = "Roar of Tashan"  ,
+            [1] = "Roar of Tashan",
             [2] = "Edict of Tashan",
             [3] = "Proclamation of Tashan",
             [4] = "Order of Tashan",
@@ -511,7 +511,7 @@ return {
             [5] = "Bewildering Constriction",
             [6] = "Confounding Constriction",
             [7] = "Confusing Constriction",
-            [8] = "Baffling Constriction",            
+            [8] = "Baffling Constriction",
         },
         ['NukeSpell'] = {
             --- Nuke 1 -- >= LVL7
@@ -573,7 +573,7 @@ return {
             [6] = "Spectral Assault",
             [7] = "Polychaotic Assault",
             [8] = "Multichromatic Assault",
-            [9] = "Polychromatic Assault",            
+            [9] = "Polychromatic Assault",
         },
         ['CripSlowSpell'] = {
             --- Slow Cripple Combo Spell - Beginning @ Level 88
@@ -771,18 +771,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DPS'] = {
@@ -804,18 +804,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Healer'] = {
@@ -837,18 +837,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Hybrid'] = {
@@ -870,18 +870,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DefaultConfig'] = {
@@ -889,4 +889,3 @@ return {
         },
     },
 }
-

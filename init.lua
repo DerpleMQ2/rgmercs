@@ -1,18 +1,18 @@
 local mq        = require('mq')
 local ImGui     = require('ImGui')
-local GitCommit = require('rgmercs.version')
-RGMercConfig    = require('rgmercs.utils.rgmercs_config')
+local GitCommit = require('version')
+RGMercConfig    = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 
-local RGMercsLogger = require("rgmercs.utils.rgmercs_logger")
+local RGMercsLogger = require("utils.rgmercs_logger")
 RGMercsLogger.set_log_level(RGMercConfig:GetSettings().LogLevel)
 
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local RGMercUtils    = require("utils.rgmercs_utils")
 
-RGMercNameds         = require("rgmercs.utils.rgmercs_named")
+RGMercNameds         = require("utils.rgmercs_named")
 
 -- Initialize class-based moduldes
-RGMercModules        = require("rgmercs.utils.rgmercs_modules").load()
+RGMercModules        = require("utils.rgmercs_modules").load()
 
 -- ImGui Variables
 local openGUI        = true
@@ -261,6 +261,7 @@ local function RGInit(...)
 end
 
 local function Main()
+    ---@diagnostic disable-next-line: undefined-field
     if mq.TLO.Me.Zoning() then
         mq.delay(1000)
         return
