@@ -277,7 +277,10 @@ function Module:GiveTime(combat_state)
         RGMercUtils.AutoCampCheck(self.settings, self.TempSettings)
     end
 
-    if not self:ShouldFollow() then return end
+    if not self:ShouldFollow() then
+        RGMercsLogger.log_verbose("ShouldFollow() check failed.")
+        return
+    end
 
     if self.settings.ChaseOn and not self.settings.ChaseTarget then
         self.settings.ChaseOn = false
@@ -296,7 +299,7 @@ function Module:GiveTime(combat_state)
         end
 
         if mq.TLO.Me.Dead() then return end
-        if chaseSpawn.Distance() < self.settings.ChaseDistance then return end
+        if not chaseSpawn() or chaseSpawn.Distance() < self.settings.ChaseDistance then return end
 
         local Nav = mq.TLO.Nav
 

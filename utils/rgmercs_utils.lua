@@ -664,7 +664,7 @@ end
 function Utils.ShouldKillTargetReset()
     local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", RGMercConfig.Globals.AutoTargetID))
     local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", RGMercConfig.Globals.AutoTargetID))
-    return ((not killSpawn()) or killCorpse()) and RGMercConfig.Globals.AutoTargetID > 0
+    return ((not killSpawn() or killSpawn.Dead()) or killCorpse()) and RGMercConfig.Globals.AutoTargetID > 0
 end
 
 function Utils.AutoMed()
