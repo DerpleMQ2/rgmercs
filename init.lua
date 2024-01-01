@@ -336,7 +336,7 @@ local script_actor = RGMercUtils.Actors.register(function(message)
     if message()["from"] == RGMercConfig.Globals.CurLoadedChar then return end
     if message()["script"] ~= RGMercUtils.ScriptName then return end
 
-    RGMercsLogger.log_error("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", message()["from"],
+    RGMercsLogger.log_info("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", message()["from"],
         message()["module"],
         message()["event"])
 
