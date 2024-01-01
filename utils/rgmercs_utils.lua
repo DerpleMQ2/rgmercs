@@ -643,6 +643,14 @@ function Utils.GetTargetID()
     return (mq.TLO.Target.ID() or 0)
 end
 
+function Utils.GetGroupMainAssistID()
+    return (mq.TLO.Group.MainAssist.ID() or 0)
+end
+
+function Utils.GetGroupMainAssistName()
+    return (mq.TLO.Group.MainAssist.CleanName() or "")
+end
+
 function Utils.BurnCheck(config)
     return ((config.BurnAuto and (Utils.GetXTHaterCount() >= config.BurnMobCount or (mq.TLO.Target.Named() and config.BurnNamed) or (config.BurnAlways and config.BurnAuto))) or (not config.BurnAuto and config.BurnSize))
 end
@@ -1253,8 +1261,8 @@ function Utils.SetControlToon()
         end
     end
 
-    if RGMercConfig:GetAssistId() ~= mq.TLO.Group.MainAssist.ID() and mq.TLO.Group.MainAssist.ID() > 0 then
-        RGMercConfig.Globals.MainAssist = mq.TLO.Group.MainAssist.CleanName()
+    if RGMercConfig:GetAssistId() ~= Utils.GetGroupMainAssistID() and Utils.GetGroupMainAssistID() > 0 then
+        RGMercConfig.Globals.MainAssist = Utils.GetGroupMainAssistName()
     end
 end
 
