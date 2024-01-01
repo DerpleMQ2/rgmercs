@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": ".",
+		},
+		{
+			"path": "../../config/rgmercs",
+		},
+	],
+	"settings": {
+		"Lua.format.defaultConfig": {
+			"max_line_length": "180",
+			"indent_style": "space",
+			"indent_size": "4",
+			"trailing_table_separator": "always",
+			"align_function_params": "true"
+		}
+	}
+}
