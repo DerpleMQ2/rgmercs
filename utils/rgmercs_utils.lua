@@ -198,7 +198,7 @@ function Utils.WaitCastFinish(target)
 
     while mq.TLO.Me.Casting() and (not mq.TLO.Cast.Ready()) do
         mq.delay(100)
-        if target() and target.PctHPs() <= 0 or (mq.TLO.Target.ID() ~= target.ID()) then
+        if target() and Utils.GetTargetPctHPs() <= 0 or (mq.TLO.Target.ID() ~= target.ID()) then
             mq.TLO.Me.StopCast()
             return
         end
@@ -606,7 +606,7 @@ function Utils.GetTargetDistance()
 end
 
 function Utils.GetTragetPctHPs()
-    return (mq.TLO.Target.PctHPs() or 0)
+    return (Utils.GetTargetPctHPs() or 0)
 end
 
 function Utils.BurnCheck(config)
@@ -837,7 +837,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
                 mq.TLO.Me.Stand()
             end
 
-            if (target.PctHPs() <= config.AutoAssistAt or assistId == mq.TLO.Me.ID()) and target.PctHPs() > 0 then
+            if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or assistId == mq.TLO.Me.ID()) and Utils.GetTargetPctHPs() > 0 then
                 if target.Distance() > target.MaxRangeTo() then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(), target.MaxRangeTo())
                     if preEngageRoutine then
@@ -877,7 +877,7 @@ function Utils.MercEngage()
     local merc   = mq.TLO.Me.Mercenary
 
     if merc() and target() and target.ID() == RGMercConfig.Globals.AutoTargetID and target.Distance() < RGMercConfig:GetSettings().AssistRange then
-        if target.PctHPs() <= RGMercConfig:GetSettings().AutoAssistAt or                               -- Hit Assist HP
+        if Utils.GetTargetPctHPs() <= RGMercConfig:GetSettings().AutoAssistAt or                       -- Hit Assist HP
             merc.Class.ShortName():lower() == "clr" or                                                 -- Cleric can engage right away
             (merc.Class.ShortName():lower() == "war" and mq.TLO.Group.MainTank.ID() == merc.ID()) then -- Merc is our Main Tank
             return true
@@ -1209,8 +1209,6 @@ function Utils.OkToEngage(autoTargetId)
     local config = RGMercConfig:GetSettings()
 
     if not config.DoAutoEngage then return false end
-
-
     local target = mq.TLO.Target
     local assistId = RGMercConfig:GetAssistId()
 
@@ -1227,10 +1225,10 @@ function Utils.OkToEngage(autoTargetId)
     end
 
     if Utils.GetXTHaterCount() > 0 then -- TODO: or AutoTargetID and !BackOffFlag
-        if target.Distance() < config.AssistRange and (target.PctHPs() < config.AutoAssistAt or RGMercConfig.Globals.IsTanking or assistId == mq.TLO.Me.ID()) then
+        if target.Distance() < config.AssistRange and (Utils.GetTargetPctHPs() < config.AutoAssistAt or RGMercConfig.Globals.IsTanking or assistId == mq.TLO.Me.ID()) then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_debug("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
-                    target.Distance(), config.AssistRange, target.PctHPs(), config.AutoAssistAt, assistId, mq.TLO.Me.ID())
+                    target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId, mq.TLO.Me.ID())
             end
             return true
         end
@@ -1247,7 +1245,7 @@ function Utils.PetAttack(config, target)
     if not target() then return end
     if not pet() then return end
 
-    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" and (target.PctHPs() <= config.PetEngagePct) then
+    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" and (Utils.GetTargetPctHPs() <= config.PetEngagePct) then
         mq.cmdf("/squelch /pet attack")
         mq.cmdf("/squelch /pet swarm")
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
