@@ -671,10 +671,10 @@ local _ClassConfig = {
                 name = "PetSpell",
                 type = "Spell",
                 tooltip = Tooltips.PetSpell,
-                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() ~= nil end,
+                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
                 cond = function(
                     self, spell)
-                    return not mq.TLO.Me.Pet.ID() and self.settings.DoPet and
+                    return mq.TLO.Me.Pet.ID() == 0 and self.settings.DoPet and
                         mq.TLO.FindItemCount(spell.ReagentID(1))() > 0
                 end
             },
