@@ -756,9 +756,11 @@ function Utils.AutoMed()
         return
     end
 
-    --RGMercsLogger.log_debug(
-    --    "MED MAIN STATS CHECK :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d", me.PctMana(), RGMercConfig:GetSettings().ManaMedPct, me.PctEndurance(),
-    --    RGMercConfig:GetSettings().EndMedPct)
+    RGMercsLogger.log_verbose(
+        "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d",
+        me.PctHPs(), RGMercConfig:GetSettings().HPMedPct, me.PctMana(),
+        RGMercConfig:GetSettings().ManaMedPct, me.PctEndurance(),
+        RGMercConfig:GetSettings().EndMedPct)
 
     if Utils.GetXTHaterCount() > 0 then
         if RGMercConfig:GetSettings().DoMelee then
