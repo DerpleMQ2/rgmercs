@@ -268,6 +268,7 @@ local function Main()
 
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
+        mq.cmdf("/squelch /face")
     else
         curState = "Downtime"
     end
