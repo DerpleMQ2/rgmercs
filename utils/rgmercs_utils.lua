@@ -13,6 +13,7 @@ Utils.Actors        = require('actors')
 Utils.ScriptName    = "RGMercs"
 Utils.LastZoneID    = 0
 Utils.NamedList     = {}
+Utils.ShowDownNamed = false
 
 function Utils.file_exists(path)
     local f = io.open(path, "r")
@@ -1396,6 +1397,22 @@ function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
     return resolvedActionMap, spellLoadOut
 end
 
+function Utils.NavEnabledLoc(loc)
+    ImGui.PushStyleColor(ImGuiCol.Text, 0.690, 0.553, 0.259, 1)
+    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.33, 0.33, 0.33, 0.5)
+    ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0.0, 0.66, 0.33, 0.5)
+    local navLoc = ImGui.Selectable(loc, false, ImGuiSelectableFlags.AllowDoubleClick)
+    ImGui.PopStyleColor(3)
+    if loc ~= "0,0,0" then
+        if navLoc and ImGui.IsMouseDoubleClicked(0) then
+            mq.cmdf('/nav locYXZ %s', loc)
+            printf('\ayNavigating to \ag%s', loc)
+        end
+
+        Utils.Tooltip("Double click to Nav")
+    end
+end
+
 function Utils.Tooltip(desc)
     ImGui.SameLine()
     if ImGui.IsItemHovered() then
@@ -1424,34 +1441,44 @@ function Utils.RenderZoneNamed()
         end
     end
 
-    if ImGui.BeginTable("Zone Nameds", 4, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    Utils.ShowDownNamed, _ = Utils.RenderOptionToggle("ShowDown", "Show Down Nameds", Utils.ShowDownNamed)
+
+    if ImGui.BeginTable("Zone Nameds", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
         ImGui.TableSetupColumn('Up', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
+        ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthFixed), 160.0)
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
         for idx, name in ipairs(Utils.NamedList) do
             local spawn = mq.TLO.Spawn(string.format("NPC =%s", name))
-            ImGui.TableNextColumn()
-            ImGui.Text(tostring(idx))
-            ImGui.TableNextColumn()
-            ImGui.Text(name)
-            ImGui.TableNextColumn()
-            if spawn() and spawn.PctHPs() > 0 then
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
-                ImGui.Text(ICONS.FA_SMILE_O)
-                ImGui.PopStyleColor()
+            if Utils.ShowDownNamed or (spawn() and spawn.ID() > 0) then
                 ImGui.TableNextColumn()
-                ImGui.Text(tostring(math.ceil(spawn.Distance())))
-            else
-                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-                ImGui.Text(ICONS.FA_FROWN_O)
-                ImGui.PopStyleColor()
+                ImGui.Text(tostring(idx))
                 ImGui.TableNextColumn()
-                ImGui.Text("0")
+                local _, clicked = ImGui.Selectable(name, false)
+                if clicked then
+                    mq.cmdf("/target id %d", spawn() and spawn.ID() or 0)
+                end
+                ImGui.TableNextColumn()
+                if spawn() and spawn.PctHPs() > 0 then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
+                    ImGui.Text(ICONS.FA_SMILE_O)
+                    ImGui.PopStyleColor()
+                    ImGui.TableNextColumn()
+                    ImGui.Text(tostring(math.ceil(spawn.Distance())))
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+                    ImGui.Text(ICONS.FA_FROWN_O)
+                    ImGui.PopStyleColor()
+                    ImGui.TableNextColumn()
+                    ImGui.Text("0")
+                end
+                ImGui.TableNextColumn()
+                Utils.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
             end
         end
 
