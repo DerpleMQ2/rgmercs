@@ -1026,25 +1026,27 @@ function Utils.MATargetScan(radius, zradius)
         for i = 1, aggroMobCount do
             local spawn = mq.TLO.NearestSpawn(i, aggroSearch)
 
-            -- If the spawn is already in combat with someone else, we should skip them.
-            if not RGMercConfig:GetSettings().SafeTargeting or not Utils.IsSpawnFightingStranger(spawn, radius) then
-                -- If a name has pulled in we target the name first and return. Named always
-                -- take priority. Note: More mobs as of ToL are "named" even though they really aren't.
+            if spawn() then
+                -- If the spawn is already in combat with someone else, we should skip them.
+                if not RGMercConfig:GetSettings().SafeTargeting or not Utils.IsSpawnFightingStranger(spawn, radius) then
+                    -- If a name has pulled in we target the name first and return. Named always
+                    -- take priority. Note: More mobs as of ToL are "named" even though they really aren't.
 
-                if Utils.IsNamed(spawn) then
-                    RGMercsLogger.log_verbose("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
-                    return spawn.ID()
-                end
+                    if Utils.IsNamed(spawn) then
+                        RGMercsLogger.log_verbose("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
+                        return spawn.ID()
+                    end
 
-                -- Unmezzables
-                if spawn.Body.Name():lower() == "Giant" then
-                    return spawn.ID()
-                end
+                    -- Unmezzables
+                    if (spawn.Body.Name() or "none"):lower() == "Giant" then
+                        return spawn.ID()
+                    end
 
-                -- Lowest HP
-                if spawn.PctHPs() < lowestHP then
-                    lowestHP = spawn.PctHPs()
-                    killId = spawn.ID()
+                    -- Lowest HP
+                    if spawn.PctHPs() < lowestHP then
+                        lowestHP = spawn.PctHPs()
+                        killId = spawn.ID()
+                    end
                 end
             end
         end
