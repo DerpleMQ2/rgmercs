@@ -274,79 +274,96 @@ function Utils.ActionPrep()
     end
 end
 
+function Utils.UseItem(itemName, targetId)
+    local me = mq.TLO.Me
+
+    if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
+        if me.Class.ShortName():lower() == "brd" then
+            mq.delay("3s", not mq.TLO.Window("CastingWindow").Open())
+            mq.delay(10)
+            mq.cmdf("/stopsong")
+        else
+            RGMercsLogger.log_debug("\arCANT Use Item - Casting Window Open")
+            return
+        end
+    end
+
+    if not itemName then
+        return
+    end
+
+    local item = mq.TLO.FindItem("=" .. itemName)
+
+    if not item() then
+        RGMercsLogger.log_error("\arTried to use item '%s' - but it is not found!", itemName)
+        return
+    end
+
+    if me.FindBuff("id " .. tostring(item.Clicky.SpellID()))() then
+        return
+    end
+
+    if me.FindBuff("id " .. tostring(item.Spell.ID()))() then
+        return
+    end
+
+    if me.Song(tostring(item.Spell.ID()))() then
+        return
+    end
+
+    Utils.ActionPrep()
+
+    if not me.ItemReady(itemName) then
+        return
+    end
+
+    local oldTargetId = Utils.GetTargetID()
+    if targetId > 0 then
+        mq.cmdf("/target id %d", targetId)
+        mq.delay("2s", Utils.GetTargetID() == targetId)
+    end
+
+    RGMercsLogger.log_debug("\aw Using Item \ag %s", itemName)
+
+    local cmd = string.format("/useitem \"%s\"", itemName)
+    mq.cmdf(cmd)
+    RGMercsLogger.log_debug("Running: \at'%s'", cmd)
+
+    mq.delay(2)
+
+    if not item.CastTime() then
+        -- slight delay for instant casts
+        mq.delay(4)
+    else
+        mq.delay(item.CastTime(), not me.Casting.ID())
+
+        -- pick up any additonal server lag.
+        while me.Casting.ID() do
+            mq.delay(5)
+            mq.doevents()
+        end
+    end
+
+    if mq.TLO.Cursor.ID() then
+        mq.cmdf("/autoinv")
+    end
+
+    if oldTargetId > 0 then
+        mq.cmdf("/target id %d", oldTargetId)
+        mq.delay("2s", Utils.GetTargetID() == oldTargetId)
+    else
+        mq.cmdf("/target clear")
+    end
+end
+
 function Utils.ExecEntry(e, targetId, map, bAllowMem)
     local cmd
 
     local me = mq.TLO.Me
 
     if e.type:lower() == "item" then
-        if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
-            if me.Class.ShortName():lower() == "brd" then
-                mq.delay("3s", not mq.TLO.Window("CastingWindow").Open())
-                mq.delay(10)
-                mq.cmdf("/stopsong")
-            else
-                RGMercsLogger.log_debug("\arCANT Use Item - Casting Window Open")
-                return
-            end
-        end
-
         local itemName = map[e.name]
-
-        if not itemName then
-            return
-        end
-
-        local item = mq.TLO.FindItem("=" .. itemName)
-
-        if not item() then
-            RGMercsLogger.log_error("\arTried to use item '%s' - but it is not found!", itemName)
-            return
-        end
-
-        if me.FindBuff("id " .. tostring(item.Clicky.SpellID()))() then
-            return
-        end
-
-        if me.FindBuff("id " .. tostring(item.Spell.ID()))() then
-            return
-        end
-
-        if me.Song(tostring(item.Spell.ID()))() then
-            return
-        end
-
-        Utils.ActionPrep()
-
-        if not me.ItemReady(itemName) then
-            return
-        end
-
-        RGMercsLogger.log_debug("\aw Using Item \ag %s", itemName)
-
-        cmd = string.format("/useitem \"%s\"", itemName)
-        mq.cmdf(cmd)
-        RGMercsLogger.log_debug("Running: \at'%s'", cmd)
-
-        mq.delay(2)
-
-        if not item.CastTime() then
-            -- slight delay for instant casts
-            mq.delay(4)
-        else
-            mq.delay(item.CastTime(), not me.Casting.ID())
-
-            -- pick up any additonal server lag.
-            while me.Casting.ID() do
-                mq.delay(5)
-                mq.doevents()
-            end
-        end
-
-        if mq.TLO.Cursor.ID() then
-            mq.cmdf("/autoinv")
-        end
-
+        Utils.UseItem(itemName, targetId)
         return
     end
 

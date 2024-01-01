@@ -19,6 +19,7 @@ Config.Globals.IsHealing      = false
 Config.Globals.IsTanking      = false
 Config.Globals.InMedState     = false
 Config.Globals.IsMezzing      = false
+Config.Globals.LastFaceTime   = 0
 Config.Globals.CurLoadedChar  = mq.TLO.Me.CleanName()
 Config.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
 Config.Globals.CurServer      = mq.TLO.EverQuest.Server():gsub(" ", "")

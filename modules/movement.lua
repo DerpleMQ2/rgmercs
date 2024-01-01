@@ -275,6 +275,10 @@ function Module:GiveTime(combat_state)
         return
     end
 
+    if combat_state == "Downtime" and RGMercConfig:GetSettings().DoShrink and mq.TLO.Me.Height() > 2 then
+        RGMercUtils.UseItem(RGMercConfig:GetSettings().ShrinkItem, mq.TLO.Me.ID())
+    end
+
     if RGMercUtils.DoCamp() then
         RGMercUtils.AutoCampCheck(self.settings, self.TempSettings)
     end

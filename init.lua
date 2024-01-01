@@ -119,7 +119,7 @@ local function RGMercsGUI()
                     ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
                     ImGui.Text("AutoTargetID: " .. tostring(RGMercConfig.Globals.AutoTargetID))
                     ImGui.Text("MA: " .. (RGMercConfig:GetAssistSpawn().CleanName() or "None"))
-                    ImGui.Text("Stuck To: " .. (mq.TLO.Stick.StickTargetName()))
+                    ImGui.Text("Stuck To: " .. (mq.TLO.Stick.StickTargetName() or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
                         local newSettings = RGMercConfig:GetSettings()
                         newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig)
@@ -268,7 +268,10 @@ local function Main()
 
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
-        mq.cmdf("/squelch /face")
+        if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
+            RGMercConfig.Globals.LastFaceTime = os.clock()
+            mq.cmdf("/squelch /face")
+        end
     else
         curState = "Downtime"
     end
