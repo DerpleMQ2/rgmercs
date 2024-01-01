@@ -1,6 +1,6 @@
 local mq                      = require('mq')
-local RGMercUtils             = require("rgmercs.utils.rgmercs_utils")
-local RGMercsLogger           = require("rgmercs.utils.rgmercs_logger")
+local RGMercUtils             = require("utils.rgmercs_utils")
+local RGMercsLogger           = require("utils.rgmercs_logger")
 local Set                     = require("mq.Set")
 
 local Config                  = { _version = '0.3a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Gortar' }

@@ -1,7 +1,7 @@
 -- Sample Basic Class Module
 local mq                 = require('mq')
-local RGMercsLogger      = require("rgmercs.utils.rgmercs_logger")
-local RGMercUtils        = require("rgmercs.utils.rgmercs_utils")
+local RGMercsLogger      = require("utils.rgmercs_logger")
+local RGMercUtils        = require("utils.rgmercs_utils")
 local Set                = require("mq.Set")
 
 local custom_config_file = mq.configDir .. "/rgmercs/class_configs/shd_class_config.lua"
@@ -18,8 +18,7 @@ if RGMercUtils.file_exists(custom_config_file) then
 end
 
 if not shdClassConfig then
-    printf(custom_config_file)
-    shdClassConfig = require("rgmercs.class_configs.shd_class_config")
+    shdClassConfig = require("class_configs.shd_class_config")
 end
 
 

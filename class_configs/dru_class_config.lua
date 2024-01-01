@@ -1,5 +1,5 @@
-local mq             = require('mq')
-local RGMercUtils    = require("rgmercs.utils.rgmercs_utils")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
@@ -134,7 +134,7 @@ return {
             [8] = "Crescentbloom",
             [9] = "Lunarlight",
             [10] = "Moonshadow",
-            [11] = "Lunarush",           
+            [11] = "Lunarush",
         },
         ['PromHeal'] = {
             -- Promised Heals Line Druid
@@ -328,7 +328,7 @@ return {
             [3] = "Cyclonic Roar",
             [4] = "Anabatic Roar",
             [5] = "Katabatic Roar",
-            [6] = "Roar of Kolos",            
+            [6] = "Roar of Kolos",
         },
         ['QuickRoarDD'] = {
             -- Quick Cast Roar Series -- will be replaced by roar at lvl 93
@@ -344,14 +344,14 @@ return {
             [10] = "Stormwatch",
             [11] = "Storm's Fury",
             [12] = "Dustdevil",
-            [13] = "Fury of Air",            
+            [13] = "Fury of Air",
         },
         ['DichoSpell'] = {
             -- Dicho Spell >= 101LVL
             [1] = "Ecliptic Winds",
             [2] = "Composite Winds",
             [3] = "Dissident Winds",
-            [4] = "Dichotomic Winds",            
+            [4] = "Dichotomic Winds",
         },
         ['WinterFireDD'] = {
             -- Winters Fire DD Line >= 73LVL -- Using for Low level Fire DD as well
@@ -367,15 +367,15 @@ return {
             [10] = "Winter's Flame",
             [11] = "Solstice Strike",
             [12] = "Sylvan Fire",
-            [13] = "Summer's Flame",    
+            [13] = "Summer's Flame",
             [14] = "Wildfire",
             [15] = "Scoriae",
-            [16] = "Starfire",      
+            [16] = "Starfire",
             [17] = "Firestrike",
             [18] = "Combust",
-            [19] = "Ignite", 
+            [19] = "Ignite",
             [20] = "Burst of Fire",
-            [21] = "Burst of Flame",             
+            [21] = "Burst of Flame",
         },
         ['ChillDOT'] = {
             -- Chill DOT Line -- >= 95LVL -- Used for Burns
@@ -384,7 +384,7 @@ return {
             [3] = "Chill of the Wildtender",
             [4] = "Chill of the Copsetender",
             [5] = "Chill of the Visionary",
-            [6] = "Chill of the Natureward",            
+            [6] = "Chill of the Natureward",
         },
         ['RootSpells'] = {
             -- Root Spells
@@ -398,7 +398,7 @@ return {
             [8] = "Engulfing Roots",
             [9] = "Enveloping Roots",
             [10] = "Ensnaring Roots",
-            [11] = "Grasping Roots",            
+            [11] = "Grasping Roots",
         },
         ['SnareSpells'] = {
             -- Snare Spells
@@ -410,7 +410,7 @@ return {
             [6] = "Bonds of Tunare",
             [7] = "Ensnare",
             [8] = "Snare",
-            [9] = "Tangling Weeds",            
+            [9] = "Tangling Weeds",
         },
         ['TwincastNuke'] = {
             -- Druid Twincast
@@ -421,7 +421,7 @@ return {
             [5] = "SunFire Blessing",
             [6] = "SunFlash Blessing",
             [7] = "SunRake Blessing",
-            [8] = "Sunwarmth Blessing",            
+            [8] = "Sunwarmth Blessing",
         },
         ['IceNuke'] = {
             --Ice Nuke
@@ -439,7 +439,7 @@ return {
             [12] = "Frostweave Crystals",
             [13] = "Frostreave Crystals",
             [14] = "Icerend Crystals",
-            [15] = "Moonwhisper Crystals",            
+            [15] = "Moonwhisper Crystals",
         },
         ['IceRainNuke'] = {
             [1] = "Cascade of Hail",
@@ -456,7 +456,7 @@ return {
             [12] = "Hailstorm",
             [13] = "Plummeting Hail",
             [14] = "Plunging Hail",
-            [15] = "Tempestuous Hail",            
+            [15] = "Tempestuous Hail",
         },
         ['ShroomPet'] = {
             --Druid Mushroom DOT Pet Line >= 84LVL --used for mana savings
@@ -467,12 +467,12 @@ return {
             [5] = "Sporali Assault",
             [6] = "Myconid Assault",
             [7] = "Polyporous Assault",
-            [8] = "Blast of Hypergrowth",            
+            [8] = "Blast of Hypergrowth",
         },
         ['IceDD'] = {
             -- Ice Nuke DD --Gap Filler
             [1] = "Moonfire",
-            [2] = "Frost",            
+            [2] = "Frost",
         },
         ['RemoteDD'] = {
             -- Spell vars Added for Bobcatts New Mode.While keeping originals Intact! for other modes.
@@ -486,7 +486,7 @@ return {
             [8] = "Remote Sunfire",
             [9] = "Remote Sunburst",
             [10] = "Remote Sunflare",
-            [11] = "Remote Manaflux",            
+            [11] = "Remote Manaflux",
         },
         ['SunMoonDot'] = {
             --, Line >= 1 LVL
@@ -531,7 +531,7 @@ return {
             [15] = "Spikecoat",
             [16] = "Bramblecoat",
             [17] = "Barbcoat",
-            [18] = "Thistlecoat",           
+            [18] = "Thistlecoat",
         },
         ['SelfManaRegen'] = {
             -- Self mana Regen Buff
@@ -547,7 +547,7 @@ return {
             [10] = "Mask of the Wild",
             [11] = "Mask of the Forest",
             [12] = "Mask of the Hunter",
-            [13] = "Mask of the Stalker",            
+            [13] = "Mask of the Stalker",
         },
         ['HPTypeOneGroup'] = {
             -- Opaline Group Health
@@ -568,7 +568,7 @@ return {
             [15] = "Protection of Diamond",
             [16] = "Protection of Steel",
             [17] = "Protection of Rock",
-            [18] = "Protection of Wood",           
+            [18] = "Protection of Wood",
         },
         ['TempHPBuff'] = {
             -- Temp Health -- Focus on Tank
@@ -591,11 +591,11 @@ return {
             [6] = "Talisman of the Indomitable",
             [7] = "Talisman of the Relentless",
             [8] = "Talisman of the Resolute",
-            [9] = "Talisman of the Stalwart", 
+            [9] = "Talisman of the Stalwart",
             [10] = "Pack Regeneration",
             [11] = "Pack Chloroplast",
-            [12] = "Regrowth of the Grove" ,
-            [13] = "Blessing of Oak" ,
+            [12] = "Regrowth of the Grove",
+            [13] = "Blessing of Oak",
             [14] = "Blessing of Replenishment",
         },
         ['AtkBuff'] = {
@@ -607,7 +607,7 @@ return {
             [5] = "Girdle of Karana",
             [6] = "Storm Strength",
             [7] = "Strength of Stone",
-            [8] = "Strength of Earth",            
+            [8] = "Strength of Earth",
         },
         ['GroupDmgShield'] = {
             -- Group Damage Shield -- Focus on the tank
@@ -656,7 +656,7 @@ return {
             [42] = "Shield of Spikes",
             [43] = "Shield of Brambles",
             [44] = "Shield of Barbs",
-            [45] = "Shield of Thistles",            
+            [45] = "Shield of Thistles",
         },
         ['MoveSpells'] = {
             -- Group Movement Series Spells -- Mix of group target and single target but will require the same dannet checks
@@ -672,7 +672,7 @@ return {
             [9] = "Spirit of Eagle",
             [10] = "Spirit of the Shrew",
             -- [] = "Scale of Wolf",
-            [11] = "Spirit of Wolf",            
+            [11] = "Spirit of Wolf",
         },
         ['ManaBear'] = {
             --Druid Mana Bear Growth Line
@@ -680,7 +680,7 @@ return {
             [1] = "Nurturing Growth",
             [2] = "Nourishing Growth",
             [3] = "Sustaining Growth",
-            [4] = "Bolstered Growth",            
+            [4] = "Bolstered Growth",
         },
         ['SingleDS'] = {
             --Single Target Damage Shield
@@ -723,18 +723,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DPS'] = {
@@ -756,18 +756,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Healer'] = {
@@ -789,18 +789,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['Hybrid'] = {
@@ -822,18 +822,18 @@ return {
                 },
             },
             ['Spells'] = {
-                [1] = { name="", gem=1 },
-                [2] = { name="", gem=2 },
-                [3] = { name="", gem=3},
-                [4] = { name="", gem=4},
-                [5] = { name="", gem=5 },
-                [6] = { name="", gem=6 },
-                [7] = { name="", gem=7 },
-                [8] = { name="", gem=8 },
-                [9] = { name="", gem=9 },
-                [10] = { name="", gem=10 },
-                [11] = { name="", gem=11 },
-                [12] = { name="", gem=12 },
+                [1] = { name = "", gem = 1 },
+                [2] = { name = "", gem = 2 },
+                [3] = { name = "", gem = 3 },
+                [4] = { name = "", gem = 4 },
+                [5] = { name = "", gem = 5 },
+                [6] = { name = "", gem = 6 },
+                [7] = { name = "", gem = 7 },
+                [8] = { name = "", gem = 8 },
+                [9] = { name = "", gem = 9 },
+                [10] = { name = "", gem = 10 },
+                [11] = { name = "", gem = 11 },
+                [12] = { name = "", gem = 12 },
             },
         },
         ['DefaultConfig'] = {
@@ -841,6 +841,3 @@ return {
         },
     },
 }
-
-
-
