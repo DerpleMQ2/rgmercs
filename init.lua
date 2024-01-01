@@ -160,8 +160,7 @@ local function RGInit(...)
         "MQ2AdvPath",
         "MQ2MoveUtils",
         "MQ2Nav",
-        "MQ2DanNet",
-        "MQ2SpawnMaster" })
+        "MQ2DanNet" })
 
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee" })
 
@@ -170,11 +169,23 @@ local function RGInit(...)
         if #unloaded == 1 then table.insert(unloadedPlugins, unloaded[1]) end
     end
 
-    local mainAssist = mq.TLO.Me.Name()
+    local mainAssist = RGMercUtils.GetTargetName()
+
+    if mainAssist:len() == 0 and mq.TLO.Group() then
+        mainAssist = mq.TLO.Group.MainAssist() or ""
+    end
+
+    for k, v in ipairs(RGMercConfig.ExpansionIDToName) do
+        RGMercsLogger.log_debug("\ayExpanions \at%s\ao[\am%d\ao]: %s", v, k, RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
+    end
 
     -- TODO: Can turn this into an options parser later.
     if ... then
         mainAssist = ...
+    end
+
+    if not mainAssist or mainAssist == "" then
+        mainAssist = mq.TLO.Me.CleanName()
     end
 
     mq.cmdf("/squelch /rez accept on")
