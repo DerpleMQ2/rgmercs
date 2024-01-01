@@ -1,6 +1,7 @@
-local mq     = require('mq')
-local ImGui  = require('ImGui')
-RGMercConfig = require('rgmercs.utils.rgmercs_config')
+local mq        = require('mq')
+local ImGui     = require('ImGui')
+local GitCommit = require('rgmercs.version')
+RGMercConfig    = require('rgmercs.utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 
 local RGMercsLogger = require("rgmercs.utils.rgmercs_logger")
@@ -100,6 +101,7 @@ local function RGMercsGUI()
             ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 1.0, 1.0, 1)
             ImGui.Text(string.format("RGMercs [%s/%s] running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig.Globals.CurLoadedChar,
                 RGMercConfig.Globals.CurLoadedClass))
+            ImGui.Text(string.format("Build: %s", GitCommit.commitId or "None"))
 
             if RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
@@ -119,7 +121,7 @@ local function RGMercsGUI()
                     ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
                     ImGui.Text("AutoTargetID: " .. tostring(RGMercConfig.Globals.AutoTargetID))
                     ImGui.Text("MA: " .. (RGMercConfig:GetAssistSpawn().CleanName() or "None"))
-                    ImGui.Text("Stuck To: " .. (mq.TLO.Stick.StickTargetName() or "None"))
+                    ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
                         local newSettings = RGMercConfig:GetSettings()
                         newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig)
