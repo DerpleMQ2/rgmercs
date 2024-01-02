@@ -36,6 +36,26 @@ function Utils.PrintGroupMessage(msg, ...)
     mq.cmdf("/dgt group_%s_%s %s", RGMercConfig.Globals.CurServer, mq.TLO.Group.Leader() or "None", output)
 end
 
+function Utils.ResolveDefaults(defaults, settings)
+    -- Setup Defaults
+    for k, v in pairs(defaults) do
+        settings[k] = settings[k] or v.Default
+        if type(settings[k]) ~= type(v.Default) then
+            RGMercsLogger.log_info("\ayData type of setting [\am%s\ay] has been deprecated -- resetting to default.", k)
+            settings[k] = v.Default
+        end
+    end
+
+    -- Remove Deprecated options
+    for k, _ in pairs(settings) do
+        if not defaults[k] then
+            settings[k] = nil
+            RGMercsLogger.log_info("\aySetting [\am%s\ay] has been deprecated -- removing from your config.", k)
+        end
+    end
+    return settings
+end
+
 function Utils.PopUp(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
@@ -226,8 +246,8 @@ function Utils.WaitCastFinish(target)
     end
 end
 
-function Utils.ManaCheck(config)
-    return mq.TLO.Me.PctMana() >= config.ManaToNuke
+function Utils.ManaCheck()
+    return mq.TLO.Me.PctMana() >= RGMercConfig:GetSettings().ManaToNuke
 end
 
 function Utils.MemorizeSpell(gem, spell)
@@ -332,7 +352,7 @@ function Utils.UseItem(itemName, targetId)
 
     local cmd = string.format("/useitem \"%s\"", itemName)
     mq.cmdf(cmd)
-    RGMercsLogger.log_debug("Running: \at'%s'", cmd)
+    RGMercsLogger.log_debug("Running: \at'%s' [%d]", cmd, item.CastTime())
 
     mq.delay(2)
 
@@ -340,6 +360,11 @@ function Utils.UseItem(itemName, targetId)
         -- slight delay for instant casts
         mq.delay(4)
     else
+        while not me.Casting.ID() do
+            RGMercsLogger.log_verbose("Waiting for item to start casting...")
+            mq.delay(100)
+            mq.doevents()
+        end
         mq.delay(item.CastTime(), function() return not me.Casting.ID() end)
 
         -- pick up any additonal server lag.
@@ -368,6 +393,9 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
     if e.type:lower() == "item" then
         local itemName = map[e.name]
+
+        if not itemName then itemName = e.name end
+
         Utils.UseItem(itemName, targetId)
         return
     end
@@ -624,7 +652,7 @@ function Utils.DetSpellCheck(spell)
 end
 
 function Utils.TargetHasBuff(spell)
-    return mq.TLO.Target() and mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() > 0
+    return mq.TLO.Target() and (mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
 end
 
 function Utils.GetTargetDistance()
@@ -719,7 +747,13 @@ function Utils.ShouldShrink()
 end
 
 function Utils.ShouldMount()
-    return RGMercConfig:GetSettings().DoMount and not RGMercConfig:GetSettings().DoMelee and RGMercConfig:GetSettings().MountItem:len() > 0
+    return not RGMercConfig:GetSettings().DoMelee and RGMercConfig:GetSettings().MountItem:len() > 0 and mq.TLO.Zone.Outdoor() and
+        ((RGMercConfig:GetSettings().DoMount == 1 and (mq.TLO.Me.Mount.ID() or 0) == 0) or
+            ((RGMercConfig:GetSettings().DoMount == 2 and mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
+end
+
+function Utils.ShouldDismount()
+    return RGMercConfig:GetSettings().DoMount ~= 1 and ((mq.TLO.Me.Mount.ID() or 0) > 0)
 end
 
 function Utils.ShouldKillTargetReset()
@@ -734,7 +768,6 @@ function Utils.AutoMed()
 
     if me.Class.ShortName():lower() == "brd" and me.Level() > 5 then return end
 
-    -- TODO: Add DoMount Check
     ---@diagnostic disable-next-line: undefined-field
     if me.Mount.ID() and not mq.TLO.Zone.Indoor() then
         RGMercsLogger.log_verbose("Sit check returning early due to mount.")
@@ -1246,7 +1279,7 @@ function Utils.GetXTHaterCount()
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.PctAggro() > 1 and xtarg.ID() ~= Utils.GetTargetID() then
+        if xtarg and xtarg.Aggressive() and xtarg.ID() ~= Utils.GetTargetID() then
             haterCount = haterCount + 1
         end
     end
@@ -1282,6 +1315,12 @@ end
 
 function Utils.IAmMA()
     return RGMercConfig:GetAssistId() == mq.TLO.Me.ID()
+end
+
+function Utils.IHaveAggro()
+    local target = mq.TLO.Target
+    local me     = mq.TLO.Me
+    return target() and target.AggroHolder() == me.CleanName()
 end
 
 function Utils.FindTargetCheck()
@@ -1340,6 +1379,19 @@ function Utils.PetAttack()
         mq.cmdf("/squelch /pet swarm")
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
     end
+end
+
+function Utils.DetGOMCheck(spell)
+    local me = mq.TLO.Me
+    return me.Song("Gift of Mana").ID() and me.Song("Gift of Mana").Base(3) >= spell.Level()
+end
+
+function Utils.DetGambitCheck()
+    local me = mq.TLO.Me
+    ---@type spell
+    local gambitSpell = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "GambitSpell")
+
+    return type(gambitSpell) == "userdata" and gambitSpell and gambitSpell() and (me.Song(gambitSpell.RankName()).ID() > 0)
 end
 
 function Utils.DetAACheck(aaId)
@@ -1703,12 +1755,12 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                     ImGui.TableNextColumn()
                     if type(settings[k]) == 'boolean' then
                         settings[k], pressed = Utils.RenderOptionToggle(k, "", settings[k])
-                        new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
+                        new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
                         any_pressed = any_pressed or pressed
                     elseif type(settings[k]) == 'number' then
                         settings[k], pressed = Utils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
                             defaults[k].Max)
-                        new_loadout = (pressed and (defaults[k].RequiresLoadoutChange or false))
+                        new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
                         any_pressed = any_pressed or pressed
                     elseif type(settings[k]) == 'string' then -- display only
                         ImGui.Text(settings[k])
@@ -1735,7 +1787,15 @@ function Utils.RenderSettings(settings, defaults, categories)
         table.insert(settingNames, k)
     end
 
-    table.sort(settingNames, function(k1, k2) return defaults[k1].Category < defaults[k2].Category and defaults[k1].DisplayName < defaults[k2].DisplayName end)
+    table.sort(settingNames,
+        function(k1, k2)
+            if defaults[k1].Category == defaults[k2].Category then
+                return defaults[k1].DisplayName < defaults[k2].DisplayName
+            else
+                return defaults[k1].Category <
+                    defaults[k2].Category
+            end
+        end)
 
     local catNames = categories and categories:toList() or { "", }
     table.sort(catNames)

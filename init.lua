@@ -198,6 +198,8 @@ local function RGInit(...)
 
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
 
+    RGMercModules:execAll("Init")
+
     if not RGMercConfig:GetSettings().DoTwist then
         local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist", })
         if #unloaded == 1 then table.insert(unloadedPlugins, unloaded[1]) end

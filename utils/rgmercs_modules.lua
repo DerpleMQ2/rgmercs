@@ -7,11 +7,9 @@ Modules.__index     = Modules
 function Modules.load()
     local newModules = setmetatable({
         modules = {
-            --Basic          = require("modules.basic").New(),
-            Movement     = require("modules.movement").New(),
-            Travel       = require("modules.travel").New(),
-            ShadowKnight = require("modules.shd").New(),
-            Bard         = require("modules.brd").New(),
+            Movement = require("modules.movement").New(),
+            Travel   = require("modules.travel").New(),
+            Class    = require("modules.class").New(),
         },
     }, Modules)
 
@@ -25,8 +23,7 @@ end
 function Modules:execModule(m, fn, ...)
     for name, module in pairs(self.modules) do
         if name == m then
-            module[fn](module, ...)
-            return
+            return module[fn](module, ...)
         end
     end
     RGMercsLogger.log_error("\arModule: \at%s\ar not found!", m)
