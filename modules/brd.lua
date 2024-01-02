@@ -99,6 +99,10 @@ function Module.New()
     return newModule
 end
 
+function Module:GetResolvedActionMapItem(item)
+    return self.ResolvedActionMap[item]
+end
+
 function Module:setCombatMode(mode)
     RGMercsLogger.log_debug("\aySettings Combat Mode to: \am%s", mode)
     if mode == "Tank" then

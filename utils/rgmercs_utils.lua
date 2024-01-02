@@ -436,13 +436,13 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
                 mq.delay(10)
                 mq.cmdf("/stopsong")
             else
-                RGMercsLogger.log_debug("CANT CAST AA - Casting Window Open")
+                RGMercsLogger.log_debug("\ayCANT CAST AA - Casting Window Open")
                 return
             end
         end
 
         if not mq.TLO.Me.AltAbilityReady(e.name)() then
-            RGMercsLogger.log_debug("\ayAbility %s is not ready!", e.name)
+            RGMercsLogger.log_verbose("\ayAbility %s is not ready!", e.name)
             return
         end
 
@@ -467,12 +467,13 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
         cmd = string.format("/alt act %d", s.ID())
 
+        RGMercsLogger.log_debug("\ayActivating AA: '%s' [t: %d]", cmd, me.AltAbility(e.name).Spell.MyCastTime.TotalSeconds())
         mq.cmdf(cmd)
 
-        mq.delay(5, function() return not Utils.AAReady(e.name) end)
+        mq.delay(5)
 
         if me.AltAbility(e.name).Spell.MyCastTime.TotalSeconds() > 0 then
-            Utils.WaitCastFinish(target)
+            mq.delay(string.format("%ds", me.AltAbility(e.name).Spell.MyCastTime.TotalSeconds()))
         end
 
         RGMercsLogger.log_debug("switching target back to old target after casting aa")
