@@ -848,7 +848,8 @@ return {
             gem = 1,
             spells = {
                 [1] = { name = string.format("%sClaw", RGMercModules:execModule("Class", "GetClassModeName")), },
-                [2] = { name = "StunSpell", },
+                [2] = { name = "FireClaw", },
+                [3] = { name = "StunSpell", },
             },
         },
         [2] = {
