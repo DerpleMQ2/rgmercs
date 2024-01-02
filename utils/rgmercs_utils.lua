@@ -231,7 +231,7 @@ function Utils.WaitCastFinish(target)
         maxWait = maxWait - 100
 
         if maxWait <= 0 then
-            local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d", mq.TLO.Me.Casting.ID(), maxWaitOrig,
+            local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d", (mq.TLO.Me.Casting.ID() or -1), maxWaitOrig,
                 mq.TLO.Window("CastingWindow").Open() and "TRUE" or "FALSE", RGMercConfig.Globals.AutoTargetID)
 
             RGMercsLogger.log_debug(msg)
