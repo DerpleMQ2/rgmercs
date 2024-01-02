@@ -580,8 +580,8 @@ return {
                 active_cond = function(self) return mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).ID()))() ~= nil end,
                 cond = function(self)
                     local selfHPBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
-                    return not selfHPBuff() or
-                        (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuff.Level() and RGMercUtils.SelfBuffAACheck("Etherealist's Unity")
+                    local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
+                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and RGMercUtils.SelfBuffAACheck("Etherealist's Unity")
                 end,
             },
             [2] = {
@@ -708,7 +708,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     local fireClaw = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "FireClaw")
-                    return not RGMercUtils.DetGambitCheck() and (not fireClaw or not fireClaw() or not mq.TLO.Me.SpellReady(fireClaw.RankName()))
+                    return not RGMercUtils.DetGambitCheck() and ((not fireClaw or not fireClaw()) or not mq.TLO.Me.SpellReady(fireClaw.RankName()))
                 end,
             },
             [20] = {
@@ -776,8 +776,8 @@ return {
                 active_cond = function(self) return mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).ID()))() ~= nil end,
                 cond = function(self)
                     local selfHPBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
-                    return not selfHPBuff() or
-                        (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuff.Level() and RGMercUtils.SelfBuffAACheck("Etherealist's Unity")
+                    local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
+                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and RGMercUtils.SelfBuffAACheck("Etherealist's Unity")
                 end,
             },
             [3] = {
@@ -803,8 +803,8 @@ return {
                 active_cond = function(self) return mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility("Improved Familiar").Spell.ID()))() ~= nil end,
                 cond = function(self)
                     local familiarBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
-                    return not familiarBuff() or
-                        (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) > familiarBuff.Level() and RGMercUtils.SelfBuffAACheck("Improved Familiar")
+                    local familiarBuffLevel = familiarBuff and familiarBuff() and familiarBuff.Level() or 0
+                    return (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) > familiarBuffLevel and RGMercUtils.SelfBuffAACheck("Improved Familiar")
                 end,
             },
             [6] = {

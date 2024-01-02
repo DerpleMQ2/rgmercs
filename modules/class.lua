@@ -97,7 +97,7 @@ function Module:Init()
 end
 
 function Module:GetResolvedActionMapItem(item)
-    if self.ReloadingLoadouts then return "" end
+    if self.ReloadingLoadouts then return nil end
     return self.ResolvedActionMap[item]
 end
 

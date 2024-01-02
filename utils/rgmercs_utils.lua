@@ -1391,7 +1391,7 @@ function Utils.DetGambitCheck()
     ---@type spell
     local gambitSpell = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "GambitSpell")
 
-    return type(gambitSpell) == "userdata" and gambitSpell and gambitSpell() and (me.Song(gambitSpell.RankName()).ID() > 0)
+    return gambitSpell and gambitSpell() and (me.Song(gambitSpell.RankName()).ID() > 0)
 end
 
 function Utils.DetAACheck(aaId)
