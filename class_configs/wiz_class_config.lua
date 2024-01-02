@@ -849,7 +849,9 @@ return {
             spells = {
                 [1] = { name = string.format("%sClaw", RGMercModules:execModule("Class", "GetClassModeName")), },
                 [2] = { name = "IceClaw", },
-                [3] = { name = "StunSpell", },
+                [3] = { name = "FireClaw", },
+                [4] = { name = "MagicClaw", },
+                [5] = { name = "StunSpell", },
             },
         },
         [2] = {
