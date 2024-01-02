@@ -3,7 +3,7 @@ local mq            = require('mq')
 local RGMercsLogger = require("utils.rgmercs_logger")
 local RGMercUtils   = require("utils.rgmercs_utils")
 
-local Module        = { _version = '0.1a', name = "Basic", author = 'Derple' }
+local Module        = { _version = '0.1a', name = "Basic", author = 'Derple', }
 Module.__index      = Module
 
 local function getConfigFileName()
@@ -38,12 +38,13 @@ function Module:LoadSettings()
 end
 
 function Module.New()
-    RGMercsLogger.log_info("Basic Combat Module Loaded.")
-    local newModule = setmetatable({ settings = {} }, Module)
-
-    newModule:LoadSettings()
-
+    local newModule = setmetatable({ settings = {}, }, Module)
     return newModule
+end
+
+function Module:Init()
+    RGMercsLogger.log_info("Basic Combat Module Loaded.")
+    self:LoadSettings()
 end
 
 function Module:Render()

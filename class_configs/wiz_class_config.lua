@@ -2,19 +2,21 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    ['Modes'] = {
-        [1] = 'Tank',
-        [2] = 'DPS',
-        [3] = 'Healer',
-        [4] = 'Hybrid',
+    _version          = "0.1a",
+    _author           = "Derple",
+    ['Modes']         = {
+        [1] = 'Combo',
+        [2] = 'Fire',
+        [3] = 'Ice',
+        [4] = 'Magic',
     },
-    ['ItemSets'] = {
+    ['ItemSets']      = {
         ['Epic'] = {
             [1] = "Staff of Phenomenal Power",
             [2] = "Staff of Prismatic Power",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']   = {
         ['AllianceSpell'] = {
             [1] = "Malarian Mantle",
             [2] = "Frostbound Conjunction",
@@ -528,7 +530,7 @@ return {
         },
     },
 
-    ['ChatBegList'] = {
+    ['ChatBegList']   = {
         ['WizBegs'] = {
             ['bindme'] = {
                 ['spell'] = "Bind Affinity",
@@ -558,141 +560,369 @@ return {
             },
         },
     },
-    ['Rotations'] = {
-        ['Tank'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    [1] = {},
-                },
-                ['Debuff'] = {
-                    [1] = {},
-                },
-                ['Heal'] = {
-                    [1] = {},
-                },
-                ['DPS'] = {
-                    [1] = {},
-                },
-                ['Downtime'] = {
-                    [1] = {},
-                },
-            },
-            ['Spells'] = {
-                [1] = { name = "", gem = 1 },
-                [2] = { name = "", gem = 2 },
-                [3] = { name = "", gem = 3 },
-                [4] = { name = "", gem = 4 },
-                [5] = { name = "", gem = 5 },
-                [6] = { name = "", gem = 6 },
-                [7] = { name = "", gem = 7 },
-                [8] = { name = "", gem = 8 },
-                [9] = { name = "", gem = 9 },
-                [10] = { name = "", gem = 10 },
-                [11] = { name = "", gem = 11 },
-                [12] = { name = "", gem = 12 },
-            },
-        },
+    ['Rotations']     = {
+        ['Burn'] = {},
+
+        --        |- AA Burn Section
+        --/call AddToRotation "${rotation_name}" "Arcane Whisper" AA            ${Parse[0,"( BURNCHECK && ${Target.PctHPs}>10 )"]}
+        --/call AddToRotation "${rotation_name}" "Silent Casting" AA            ${Parse[0,"( BURNCHECK )"]}
+        --/call AddToRotation "${rotation_name}" "Arcane Destruction" AA        ${Parse[0,"( !${Me.Song[Frenzied Devastation].ID} && BURNCHECK )"]}
+        --/call AddToRotation "${rotation_name}" "Arcane Fury" AA               ${Parse[0,"( (BURNCHECK && !${Me.Song[Chromatic Haze].ID} && !${Me.Song[Gift of Chromatic Haze].ID} && (${Me.Song[Arcane Destruction].ID} || ${Me.Song[Frenzied Devastation].ID})))"]}
+        --/call AddToRotation "${rotation_name}" "Improved Twincast" AA         ${Parse[0,"( (BURNCHECK && !${Me.Buff[Twincast].ID}) )"]}
+        --/call AddToRotation "${rotation_name}" "Mana Burn" AA                 ${Parse[0,"( (BURNCHECK && ${Target.BuffsPopulated} && !${Target.Buff[Mana Burn].ID}) && ${DoManaBurn[SETTINGVAL]} )"]}
+
+        ['Debuff'] = {},
+        ['Heal'] = {},
         ['DPS'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    [1] = {},
-                },
-                ['Debuff'] = {
-                    [1] = {},
-                },
-                ['Heal'] = {
-                    [1] = {},
-                },
-                ['DPS'] = {
-                    [1] = {},
-                },
-                ['Downtime'] = {
-                    [1] = {},
-                },
+            [1] = {
+                name = "Etherealist's Unity",
+                type = "AA",
+                active_cond = function(self) return mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).ID()))() ~= nil end,
+                cond = function(self)
+                    local selfHPBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
+                    return not selfHPBuff() or
+                        (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuff.Level() and RGMercUtils.SelfBuffAACheck("Etherealist's Unity")
+                end,
             },
-            ['Spells'] = {
-                [1] = { name = "", gem = 1 },
-                [2] = { name = "", gem = 2 },
-                [3] = { name = "", gem = 3 },
-                [4] = { name = "", gem = 4 },
-                [5] = { name = "", gem = 5 },
-                [6] = { name = "", gem = 6 },
-                [7] = { name = "", gem = 7 },
-                [8] = { name = "", gem = 8 },
-                [9] = { name = "", gem = 9 },
-                [10] = { name = "", gem = 10 },
-                [11] = { name = "", gem = 11 },
-                [12] = { name = "", gem = 12 },
+            [2] = {
+                name = "A Hole in Space",
+                type = "AA",
+                cond = function(self)
+                    return mq.TLO.Me.PctAggro() > 99 and RGMercUtils.IHaveAggro()
+                end,
+            },
+            [3] = {
+                name = "Mind Crash",
+                type = "AA",
+                cond = function(self)
+                    return mq.TLO.Me.PctAggro() > 85
+                end,
+            },
+            [4] = {
+                name = "Concussion",
+                type = "AA",
+                cond = function(self)
+                    return mq.TLO.Me.PctAggro() > self.settings.JoltAggro
+                end,
+            },
+            [5] = {
+                name = "JoltSpell",
+                type = "Spell",
+                cond = function(self)
+                    return mq.TLO.Me.PctAggro() > self.settings.JoltAggro
+                end,
+            },
+            [6] = {
+                name = "SelfRune1",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            [7] = {
+                name = "GambitSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct
+                end,
+            },
+            [8] = {
+                name = "FuseNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.DetGOMCheck(spell)
+                end,
+            },
+            [9] = {
+                name = "FireEtherealNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.DetGOMCheck(spell)
+                end,
+            },
+            [10] = {
+                name = "IceEtherealNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.DetGOMCheck(spell)
+                end,
+            },
+            [11] = {
+                name = "DichoSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.DetGOMCheck(spell)
+                end,
+            },
+            [12] = {
+                name = "CloudburstNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.DetGambitCheck() or ((mq.TLO.Me.Song("Evoker's Synergy I").ID() or 0) > 0)
+                end,
+            },
+            [13] = {
+                name = "WildNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.DetGambitCheck()
+                end,
+            },
+            [14] = {
+                name = "ChaosNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.DetGambitCheck()
+                end,
+            },
+            [15] = {
+                name = "TwincastSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.Me.Buff("Twincast").ID() == 0
+                end,
+            },
+            [16] = {
+                name = "VortexNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return not RGMercUtils.TargetHasBuff(spell)
+                end,
+            },
+            [17] = {
+                name = "DichoSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return not RGMercUtils.DetGambitCheck() and mq.TLO.Me.Buff("Twincast").ID() == 0 and not mq.TLO.Me.FindBuff("name Improved Twincast")
+                end,
+            },
+            [18] = {
+                name = "FireClaw",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.ManaCheck()
+                end,
+            },
+            [19] = {
+                name = "FuseNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    local fireClaw = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "FireClaw")
+                    return not RGMercUtils.DetGambitCheck() and (not fireClaw or not fireClaw() or not mq.TLO.Me.SpellReady(fireClaw.RankName()))
+                end,
+            },
+            [20] = {
+                name = "FireNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck()
+                end,
+            },
+            [21] = {
+                name = "IceNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck()
+                end,
+            },
+            [22] = {
+                name = "MagicNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck()
+                end,
+            },
+            [23] = {
+                name = "FastMagicNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.ManaCheck()
+                end,
+            },
+            [24] = {
+                name = "Force of Flame",
+                type = "AA",
+                cond = function(self)
+                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and not RGMercUtils.AAReady("Force of Will")
+                end,
+            },
+            [25] = {
+                name = "Force of Ice",
+                type = "AA",
+                cond = function(self)
+                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and RGMercUtils.AAReady("Force of Flame")
+                end,
+            },
+            [26] = {
+                name = "Force of Will",
+                type = "AA",
+                cond = function(self)
+                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and not RGMercUtils.AAReady("Force of Flame")
+                end,
             },
         },
-        ['Healer'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    [1] = {},
-                },
-                ['Debuff'] = {
-                    [1] = {},
-                },
-                ['Heal'] = {
-                    [1] = {},
-                },
-                ['DPS'] = {
-                    [1] = {},
-                },
-                ['Downtime'] = {
-                    [1] = {},
-                },
+        ['Downtime'] = {
+            [1] = {
+                name = "SelfHPBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                cond = function(self, spell)
+                    return (spell.Level() or 0) > (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) and RGMercUtils.SelfBuffCheck(spell)
+                end,
             },
-            ['Spells'] = {
-                [1] = { name = "", gem = 1 },
-                [2] = { name = "", gem = 2 },
-                [3] = { name = "", gem = 3 },
-                [4] = { name = "", gem = 4 },
-                [5] = { name = "", gem = 5 },
-                [6] = { name = "", gem = 6 },
-                [7] = { name = "", gem = 7 },
-                [8] = { name = "", gem = 8 },
-                [9] = { name = "", gem = 9 },
-                [10] = { name = "", gem = 10 },
-                [11] = { name = "", gem = 11 },
-                [12] = { name = "", gem = 12 },
+            [2] = {
+                name = "Etherealist's Unity",
+                type = "AA",
+                active_cond = function(self) return mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).ID()))() ~= nil end,
+                cond = function(self)
+                    local selfHPBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
+                    return not selfHPBuff() or
+                        (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuff.Level() and RGMercUtils.SelfBuffAACheck("Etherealist's Unity")
+                end,
+            },
+            [3] = {
+                name = "SelfRune1",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            [4] = {
+                name = "FamiliarBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                cond = function(self, spell)
+                    return spell.Stacks() and spell.Level() > (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) and
+                        mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() == nil
+                end,
+            },
+            [5] = {
+                name = "Improved Familiar",
+                type = "AA",
+                active_cond = function(self) return mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility("Improved Familiar").Spell.ID()))() ~= nil end,
+                cond = function(self)
+                    local familiarBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
+                    return not familiarBuff() or
+                        (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) > familiarBuff.Level() and RGMercUtils.SelfBuffAACheck("Improved Familiar")
+                end,
+            },
+            [6] = {
+                name = "Harvest of Druzzil",
+                type = "AA",
+                cond = function(self)
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct and RGMercUtils.AAReady("Harvest of Druzzil")
+                end,
+            },
+            [7] = {
+                name = "HarvestSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct and mq.TLO.Me.SpellReady(spell.RankName())
+                end,
+            },
+            [8] = {
+                name = mq.TLO.Me.Inventory("Chest").Name(),
+                type = "Item",
+                active_cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return item() and mq.TLO.Me.Song(item.Spell.RankName())() ~= nil
+                end,
+                cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return self.settings.DoChestClick and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                end,
+            },
+            [9] = {
+                name = RGMercConfig:GetSettings().ClarityPotion,
+                type = "Item",
+                cond = function(self)
+                    local item = mq.TLO.FindItem(RGMercConfig:GetSettings().ClarityPotion)
+                    return item() and item.Spell.Stacks() and item.TimerReady()
+                end,
             },
         },
-        ['Hybrid'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    [1] = {},
-                },
-                ['Debuff'] = {
-                    [1] = {},
-                },
-                ['Heal'] = {
-                    [1] = {},
-                },
-                ['DPS'] = {
-                    [1] = {},
-                },
-                ['Downtime'] = {
-                    [1] = {},
-                },
-            },
-            ['Spells'] = {
-                [1] = { name = "", gem = 1 },
-                [2] = { name = "", gem = 2 },
-                [3] = { name = "", gem = 3 },
-                [4] = { name = "", gem = 4 },
-                [5] = { name = "", gem = 5 },
-                [6] = { name = "", gem = 6 },
-                [7] = { name = "", gem = 7 },
-                [8] = { name = "", gem = 8 },
-                [9] = { name = "", gem = 9 },
-                [10] = { name = "", gem = 10 },
-                [11] = { name = "", gem = 11 },
-                [12] = { name = "", gem = 12 },
+    },
+    ['Spells']        = {
+        [1] = {
+            gem = 1,
+            spells = {
+                [1] = { name = string.format("%sClaw", RGMercModules:execModule("Class", "GetClassModeName")), },
+                [2] = { name = "StunSpell", },
             },
         },
-        ['DefaultConfig'] = {
-            ['Mode'] = '1',
+        [2] = {
+            gem = 2,
+            spells = {
+                [1] = { name = string.format("%sEtherealNuke", RGMercModules:execModule("Class", "GetClassModeName")), },
+                [2] = { name = string.format("%sNuke", RGMercModules:execModule("Class", "GetClassModeName")), },
+                [3] = { name = "FireEtherealNuke", },
+                [4] = { name = "FireNuke", },
+            },
         },
+        [3] = {
+            gem = 3,
+            spells = {
+                [1] = { name = "DichoSpell", },
+                [2] = {
+                    name = "MagicNuke",
+                    cond = function(self)
+                        return RGMercModules:execModule("Class", "GetClassModeName") ~= "Magic" -- Magic mode will put this elsewhere so load an ice nuke.
+                    end,
+                },
+                [3] = { name = "IceNuke", },
+            },
+        },
+        [4] = {
+            gem = 4,
+            spells = {
+                [1] = { name = "FuseNuke", },
+                [2] = {
+                    name = "IceNuke",
+                    cond = function(self)
+                        return RGMercModules:execModule("Class", "GetClassModeName") == "Fire" or RGMercModules:execModule("Class", "GetClassModeName") == "Combo"
+                    end,
+                },
+                [3] = {
+                    name = "FireNuke",
+                    cond = function(self)
+                        return RGMercModules:execModule("Class", "GetClassModeName") == "Ice" or RGMercModules:execModule("Class", "GetClassModeName") == "Magic"
+                    end,
+                },
+            },
+        },
+        [5] = { gem = 5, spells = { [1] = { name = "TwincastSpell", }, [2] = { name = "StunSpell", }, [3] = { name = "SnareSpell", }, [4] = { name = "RootSpell", }, }, },
+        [6] = { gem = 6, spells = { [1] = { name = "GambitSpell", }, [2] = { name = "HarvestSpell", }, }, },
+        [7] = { gem = 7, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { [1] = { name = "VortexNuke", }, [2] = { name = "FastMagicNuke", }, }, },
+        [8] = { gem = 8, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { [1] = { name = "JoltSpell", }, }, },
+        [9] = {
+            gem = 9,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                [1] = {
+                    name = "PetSpell",
+                    cond = function(self) return mq.TLO.Me.Level() < 79 end,
+                },
+                [2] = {
+                    name = "IceEtherealNuke",
+                    cond = function(self)
+                        return RGMercModules:execModule("Class", "GetClassModeName") ~= "Ice" -- Ice will load this elsewhere.
+                    end,
+                },
+                [3] = {
+                    name = "MagicEtherealNuke",
+                },
+            },
+        },
+        [10] = { gem = 10, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { [1] = { name = "FireRainLureNuke", }, }, },
+        [11] = { gem = 11, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { [1] = { name = "ChaosNuke", }, }, },
+        [12] = { gem = 12, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { [1] = { name = "CloudburstNuke", }, [2] = { name = "FireNuke", }, }, },
+        [13] = { gem = 13, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { [1] = { name = "FireNuke", }, [2] = { name = "IceNuke", }, [3] = { name = "MagicNuke", }, [4] = { name = "RootSpell", }, }, },
+    },
+    ['DefaultConfig'] = {
+        ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
+        ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['JoltAggro']    = { DisplayName = "Jolt Aggro Pct", Category = "Combat", Tooltip = "Aggro at which to use Jolt", Default = 65, Min = 1, Max = 100, },
+        ['WeaveAANukes'] = { DisplayName = "Weave AA Nukes", Category = "Combat", Tooltip = "Weave in AA Nukes", Default = true, },
     },
 }

@@ -3,7 +3,7 @@ local mq                           = require('mq')
 local RGMercsLogger                = require("utils.rgmercs_logger")
 local RGMercUtils                  = require("utils.rgmercs_utils")
 
-local Module                       = { _version = '0.1a', name = "Travel", author = 'Derple' }
+local Module                       = { _version = '0.1a', name = "Travel", author = 'Derple', }
 Module.__index                     = Module
 Module.TransportSpells             = {}
 Module.ButtonWidth                 = 150
@@ -98,19 +98,23 @@ function Module:RequestPorterInfo()
 end
 
 function Module.New()
+    local newModule = setmetatable({ settings = {}, }, Module)
+    return newModule
+end
+
+function Module:Init()
     RGMercsLogger.log_info("Travel Module Loaded.")
-    local newModule = setmetatable({ settings = {} }, Module)
 
     local className = mq.TLO.Me.Class.ShortName():lower()
-    newModule:LoadSettings()
+    self:LoadSettings()
 
     if className == "wiz" or className == "dru" then
-        newModule.TransportSpells                                                    = {}
-        newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar]                = {}
-        newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Class          = className
-        newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Name           = RGMercConfig.Globals.CurLoadedChar
-        newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs           = {}
-        newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames = {}
+        self.TransportSpells                                                    = {}
+        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar]                = {}
+        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Class          = className
+        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Name           = RGMercConfig.Globals.CurLoadedChar
+        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs           = {}
+        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames = {}
 
         for i = 1, RGMercConfig.Constants.SpellBookSlots do
             local spell = mq.TLO.Me.Book(i)
@@ -118,24 +122,22 @@ function Module.New()
                 RGMercsLogger.log_debug("\ayFound Transport Spell: <\ay%s\ay> => \at'%s'\ay \ao(%d) \ay[\am%s\ay]", spell.Subcategory(), spell.RankName(), spell.ID(),
                     spell.TargetType())
                 local subCat = spell.Subcategory()
-                newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] = newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] or {}
-                table.insert(newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat], { Name = spell.RankName(), Type = spell.TargetType() })
+                self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] or {}
+                table.insert(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat], { Name = spell.RankName(), Type = spell.TargetType(), })
             end
         end
 
-        for k in pairs(newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs) do
+        for k in pairs(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs) do
             table.insert(
-                newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames, k)
+                self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames, k)
         end
-        table.sort(newModule.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames)
+        table.sort(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames)
 
         -- notify everyone else of my state...
-        newModule:SendPorterInfo()
+        self:SendPorterInfo()
     end
 
-    newModule:CreatePorterList()
-
-    return newModule
+    self:CreatePorterList()
 end
 
 function Module:GetColorForType(type)

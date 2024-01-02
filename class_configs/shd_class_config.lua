@@ -63,7 +63,7 @@ local Tooltips    = {
 
 -- helper function for advanced logic to see if we want to use Dark Lord's Unity
 local function castDLU()
-    local shroudAction = RGMercModules:execModule("ShadowKnight", "GetResolvedActionMapItem", "Shroud")
+    local shroudAction = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "Shroud")
     if not shroudAction then return false end
 
     local res = shroudAction.Level() <=
@@ -667,8 +667,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.VOT,
                 active_cond = function(self) return mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility("Voice of Thule").Spell.ID()))() ~= nil end,
-                cond = function(
-                    self)
+                cond = function(self)
                     return RGMercUtils.SelfBuffAACheck("Voice of Thule")
                 end,
             },
@@ -928,7 +927,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Spearnuke,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() > self.settings.ManaToNuke
+                    return RGMercUtils.ManaCheck()
                 end,
             },
             [23] = {
@@ -1138,7 +1137,6 @@ local _ClassConfig = {
         ['DoAE']         = { DisplayName = "Use AE Taunts", Category = "Spells and Abilities", Tooltip = "Enable casting AE Taunt spells.", Default = true, },
         ['AeTauntCnt']   = { DisplayName = "AE Taunt Count", Category = "Spells and Abilities", Tooltip = "Minimum number of haters before using AE Taunt.", Default = 2, Min = 1, Max = 10, },
         ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
-        ['ManaToNuke']   = { DisplayName = "Mana to Nuke", Category = "Spells and Abilities", Tooltip = "Minimum % Mana in order to continue to cast nukes.", Default = 30, Min = 1, Max = 100, },
         ['FlashHP']      = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
         ['StartBigTap']  = { DisplayName = "Use Big Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100, },
         ['StartLifeTap'] = { DisplayName = "Use Life Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100, },

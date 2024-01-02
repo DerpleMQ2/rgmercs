@@ -71,12 +71,13 @@ function Module:LoadSettings()
 end
 
 function Module.New()
-    RGMercsLogger.log_info("Chase Module Loaded.")
     local newModule = setmetatable({ settings = {}, }, Module)
-
-    newModule:LoadSettings()
-
     return newModule
+end
+
+function Module:Init()
+    RGMercsLogger.log_info("Chase Module Loaded.")
+    self:LoadSettings()
 end
 
 function Module:ChaseOn(target)
@@ -301,7 +302,13 @@ function Module:GiveTime(combat_state)
         end
 
         if RGMercUtils.ShouldMount() then
+            RGMercsLogger.log_debug("\ayMounting...")
             RGMercUtils.UseItem(RGMercConfig:GetSettings().MountItem, mq.TLO.Me.ID())
+        end
+
+        if RGMercUtils.ShouldDismount() then
+            RGMercsLogger.log_debug("\ayDismounting...")
+            mq.cmdf("/dismount")
         end
     end
 
