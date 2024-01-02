@@ -615,7 +615,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
     end
 
     if steps then
-        RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, start_step, lastStepIdx)
+        RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, (start_step or -1), lastStepIdx)
     end
 
     return lastStepIdx
@@ -1383,7 +1383,7 @@ end
 
 function Utils.DetGOMCheck(spell)
     local me = mq.TLO.Me
-    return me.Song("Gift of Mana").ID() and me.Song("Gift of Mana").Base(3) >= spell.Level()
+    return me.Song("Gift of Mana").ID() and me.Song("Gift of Mana").Base(3)() >= (spell.Level() or 0)
 end
 
 function Utils.DetGambitCheck()
