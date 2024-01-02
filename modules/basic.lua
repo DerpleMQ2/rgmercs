@@ -64,6 +64,16 @@ function Module:OnDeath()
     -- Death Handler
 end
 
+---@param cmd string
+---@param ... string
+---@return boolean
+function Module:HandleBind(cmd, ...)
+    local params = ...
+    local handled = false
+    -- /rglua cmd handler
+    return handled
+end
+
 function Module:Shutdown()
     RGMercsLogger.log_info("Basic Combat Module UnLoaded.")
 end

@@ -7,7 +7,7 @@ local Set                      = require("mq.Set")
 
 local Module                   = { _version = '0.1a', name = "Movement", author = 'Derple', }
 Module.__index                 = Module
-
+Module.ModuleLoaded            = false
 Module.TempSettings            = {}
 Module.TempSettings.CampZoneId = 0
 
@@ -78,6 +78,7 @@ end
 function Module:Init()
     RGMercsLogger.log_info("Chase Module Loaded.")
     self:LoadSettings()
+    self.ModuleLoaded = true
 end
 
 function Module:ChaseOn(target)
@@ -210,64 +211,67 @@ end
 
 function Module:Render()
     ImGui.Text("Chase Module")
-    ImGui.Text(string.format("Chase Distance: %d", self.settings.ChaseDistance))
-    ImGui.Text(string.format("Chase LOS Required: %s", self.settings.LineOfSight and "On" or "Off"))
 
-    local pressed
-    local chaseSpawn = mq.TLO.Spawn("pc =" .. (self.settings.ChaseTarget or "NoOne"))
+    if self.settings and self.ModuleLoaded then
+        ImGui.Text(string.format("Chase Distance: %d", self.settings.ChaseDistance))
+        ImGui.Text(string.format("Chase LOS Required: %s", self.settings.LineOfSight and "On" or "Off"))
 
-    if ImGui.CollapsingHeader("Config Options") then
-        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
-        if pressed then
-            self:SaveSettings(true)
+        local pressed
+        local chaseSpawn = mq.TLO.Spawn("pc =" .. (self.settings.ChaseTarget or "NoOne"))
+
+        if ImGui.CollapsingHeader("Config Options") then
+            self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
+            if pressed then
+                self:SaveSettings(true)
+            end
         end
-    end
 
-    ImGui.Separator()
+        ImGui.Separator()
 
-    if chaseSpawn and chaseSpawn.ID() > 0 then
-        ImGui.Text(string.format("Chase Target: %s", self.settings.ChaseTarget))
-        ImGui.Indent()
-        ImGui.Text(string.format("Distance: %d", chaseSpawn.Distance()))
-        ImGui.Text(string.format("ID: %d", chaseSpawn.ID()))
-        ImGui.Text(string.format("LOS: "))
-        if chaseSpawn.LineOfSight() then
-            ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.8)
+        if chaseSpawn and chaseSpawn.ID() > 0 then
+            ImGui.Text(string.format("Chase Target: %s", self.settings.ChaseTarget))
+            ImGui.Indent()
+            ImGui.Text(string.format("Distance: %d", chaseSpawn.Distance()))
+            ImGui.Text(string.format("ID: %d", chaseSpawn.ID()))
+            ImGui.Text(string.format("LOS: "))
+            if chaseSpawn.LineOfSight() then
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.8)
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
+            end
+            ImGui.SameLine()
+            ImGui.Text(string.format("%s", chaseSpawn.LineOfSight() and ICONS.FA_EYE or ICONS.FA_EYE_SLASH))
+            ImGui.PopStyleColor(1)
+            ImGui.Unindent()
         else
+            ImGui.Indent()
             ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
+            ImGui.Text(string.format("Chase Target Invalid!"))
+            ImGui.PopStyleColor(1)
+            ImGui.Unindent()
         end
-        ImGui.SameLine()
-        ImGui.Text(string.format("%s", chaseSpawn.LineOfSight() and ICONS.FA_EYE or ICONS.FA_EYE_SLASH))
-        ImGui.PopStyleColor(1)
-        ImGui.Unindent()
-    else
-        ImGui.Indent()
-        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
-        ImGui.Text(string.format("Chase Target Invalid!"))
-        ImGui.PopStyleColor(1)
-        ImGui.Unindent()
-    end
 
-    ImGui.Separator()
+        ImGui.Separator()
 
-    if self.settings.ReturnToCamp then
-        local me = mq.TLO.Me
-        local distanceToCamp = mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0))()
-        ImGui.Text("Camp Location")
-        ImGui.Indent()
-        ImGui.Text(string.format("X: %d, Y: %d, Z: %d", self.TempSettings.AutoCampX or 0, self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampZ or 0))
-        if self.TempSettings.CampZoneId > 0 then
-            ImGui.Text(string.format("Distance to Camp: %d", distanceToCamp))
+        if self.settings.ReturnToCamp then
+            local me = mq.TLO.Me
+            local distanceToCamp = mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0))()
+            ImGui.Text("Camp Location")
+            ImGui.Indent()
+            ImGui.Text(string.format("X: %d, Y: %d, Z: %d", self.TempSettings.AutoCampX or 0, self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampZ or 0))
+            if self.TempSettings.CampZoneId > 0 then
+                ImGui.Text(string.format("Distance to Camp: %d", distanceToCamp))
+            end
+            ImGui.Unindent()
+            if ImGui.SmallButton("Set New Camp Here") then
+                self:CampOn()
+            end
         end
-        ImGui.Unindent()
-        if ImGui.SmallButton("Set New Camp Here") then
-            self:CampOn()
-        end
-    end
 
-    local state, pressed = RGMercUtils.RenderOptionToggle("##chase_om", "Chase On", self.settings.ChaseOn)
-    if pressed then
-        mq.cmdf("/rgl chase%s", state and "on" or "off")
+        local state, pressed = RGMercUtils.RenderOptionToggle("##chase_om", "Chase On", self.settings.ChaseOn)
+        if pressed then
+            mq.cmdf("/rgl chase%s", state and "on" or "off")
+        end
     end
 end
 
@@ -374,6 +378,30 @@ function Module:GiveTime(combat_state)
             self:Campfire()
         end
     end
+end
+
+---@param cmd string
+---@param ... string
+---@return boolean
+function Module:HandleBind(cmd, ...)
+    local params = ...
+    local handled = false
+
+    if cmd:lower() == "chaseon" then
+        self:ChaseOn(params)
+        handled = true
+    elseif cmd:lower() == "chaseoff" then
+        self:ChaseOff()
+        handled = true
+    elseif cmd:lower() == "campon" then
+        self:CampOn()
+        handled = true
+    elseif cmd:lower() == "campoff" then
+        self:ChaseOff()
+        handled = true
+    end
+
+    return handled
 end
 
 function Module:Shutdown()

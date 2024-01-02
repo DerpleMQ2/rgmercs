@@ -243,11 +243,21 @@ function Module:GiveTime(combat_state)
     end
 end
 
-function Module:Shutdown()
-    RGMercsLogger.log_info("Core Class Module UnLoaded.")
+function Module:OnDeath()
 end
 
-function Module:OnDeath()
+---@param cmd string
+---@param ... string
+---@return boolean
+function Module:HandleBind(cmd, ...)
+    local params = ...
+    local handled = false
+    -- /rglua cmd handler
+    return handled
+end
+
+function Module:Shutdown()
+    RGMercsLogger.log_info("Core Class Module UnLoaded.")
 end
 
 return Module

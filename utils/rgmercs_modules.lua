@@ -30,9 +30,13 @@ function Modules:execModule(m, fn, ...)
 end
 
 function Modules:execAll(fn, ...)
+    local ret = nil
     for n, m in pairs(self.modules) do
-        m[fn](m, ...)
+        local r = m[fn](m, ...)
+        ret = ret or r
     end
+
+    return ret
 end
 
 return Modules

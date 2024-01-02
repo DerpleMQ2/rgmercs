@@ -410,15 +410,9 @@ end)
 
 -- Binds
 local function bindHandler(cmd, ...)
-    if cmd:lower() == "chaseon" then
-        RGMercModules:execModule("Movement", "ChaseOn", ...)
-    elseif cmd:lower() == "chaseoff" then
-        RGMercModules:execModule("Movement", "ChaseOff", ...)
-    elseif cmd:lower() == "campon" then
-        RGMercModules:execModule("Movement", "CampOn", ...)
-    elseif cmd:lower() == "campoff" then
-        RGMercModules:execModule("Movement", "CampOff", ...)
-    else
+    local processed = RGMercModules:execAll("HandleBind", cmd, ...)
+
+    if not processed then
         RGMercsLogger.log_warning("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
     end
 end
