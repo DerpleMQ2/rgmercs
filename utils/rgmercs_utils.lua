@@ -497,7 +497,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
 
         -- Check for Reagents
         if not Utils.ReagentCheck(spell) then
-            RGMercsLogger.log_error("\arTRAGIC ERROR: Somehow I tried to cast a spell I didn't know: %s", spellName)
+            RGMercsLogger.log_verbose("\arTRAGIC ERROR: I tried to cast a spell spell I don't have Reagents for.", spellName)
             return false
         end
 
@@ -1548,11 +1548,13 @@ end
 function Utils.ReagentCheck(spell)
     if not spell or not spell() then return false end
 
-    if spell.ReagentID(1)() and mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then
+    if spell.ReagentID(1)() > 0 and mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then
+        RGMercsLogger.log_verbose("Missing Reagent: (%d)", spell.ReagentID(1)())
         return false
     end
 
-    if spell.NoExpendReagentID(1)() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() == 0 then
+    if spell.NoExpendReagentID(1)() > 0 and mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() == 0 then
+        RGMercsLogger.log_verbose("Missing NoExpendReagent: (%d)", spell.NoExpendReagentID(1)())
         return false
     end
 
