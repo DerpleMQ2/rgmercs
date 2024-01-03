@@ -118,7 +118,6 @@ end
 function Module:DestoryCampfire()
     mq.TLO.Window("FellowshipWnd").DoOpen()
     mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() end)
-    ---@diagnostic disable-next-line: undefined-field
     mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
     if mq.TLO.Me.Fellowship.Campfire() then
@@ -163,7 +162,6 @@ function Module:Campfire(camptype)
     for i = 1, spawnCount do
         local spawn = mq.TLO.NearestSpawn(i, "PC radius 50")
 
-        ---@diagnostic disable-next-line: redundant-parameter
         if spawn() and mq.TLO.Me.Fellowship.Member(spawn.CleanName()) then
             fellowCount = fellowCount + 1
         end
@@ -172,7 +170,6 @@ function Module:Campfire(camptype)
     if fellowCount >= 3 then
         mq.TLO.Window("FellowshipWnd").DoOpen()
         mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() end)
-        ---@diagnostic disable-next-line: undefined-field
         mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
         if mq.TLO.Me.Fellowship.Campfire() then
@@ -190,7 +187,6 @@ function Module:Campfire(camptype)
 
         mq.TLO.Window("FellowshipWnd").Child("FP_RefreshList").LeftMouseUp()
         mq.delay("1s")
-        ---@diagnostic disable-next-line: redundant-parameter
         mq.TLO.Window("FellowshipWnd").Child("FP_CampsiteKitList").Select(self.settings.MaintainCampfire or camptype)
         mq.delay("1s")
         mq.TLO.Window("FellowshipWnd").Child("FP_CreateCampsite").LeftMouseUp()
