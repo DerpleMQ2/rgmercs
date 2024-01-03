@@ -8,11 +8,13 @@ Module.__index                     = Module
 Module.TransportSpells             = {}
 Module.ButtonWidth                 = 150
 Module.ButtonHeight                = 25
+Module.FilterText                  = ""
 
 Module.TempSettings                = {}
 Module.TempSettings.ShouldRequest  = true
 Module.TempSettings.SelectedPorter = 1
 Module.TempSettings.PorterList     = {}
+Module.TempSettings.FilteredList   = {}
 
 local travelColors                 = {}
 travelColors["Group v2"]           = {}
@@ -77,6 +79,7 @@ function Module:TravelerUpdate(newData)
         self.TransportSpells[newData.Name] = newData
 
         self:CreatePorterList()
+        self:GenerateFilteredPortsList()
     end
 end
 
@@ -122,7 +125,7 @@ function Module:Init()
                     spell.TargetType())
                 local subCat = spell.Subcategory()
                 self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] or {}
-                table.insert(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat], { Name = spell.RankName(), Type = spell.TargetType(), })
+                table.insert(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat], { Name = spell.RankName(), Type = spell.TargetType(), SearchFields = string.format("%s,%s,%s,%s", spell.RankName(), spell.TargetType(), subCat, mq.TLO.Zone(subCat).ShortName()),  })
             end
         end
 
@@ -137,6 +140,7 @@ function Module:Init()
     end
 
     self:CreatePorterList()
+    self:GenerateFilteredPortsList()
 
     return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
@@ -148,13 +152,39 @@ function Module:GetColorForType(type)
         ((travelColors[type] and (travelColors[type]["b"] or 100) or 100) / 255), 1.0
 end
 
+function Module:GenerateFilteredPortsList()
+    self.TempSettings.FilteredList = {}
+    self.TempSettings.FilteredList.Tabs = {}
+    self.TempSettings.FilteredList.SortedTabNames = {}
+    for porter, data in ipairs(self.TransportSpells) do
+        if porter == self.TempSettings.PorterList[self.TempSettings.SelectedPorter] then
+            for subCat, spellData in pairs(data) do
+                if self.TempSettings.FilterText():len() <= 2 or data.SearchFields:find(self.TempSettings.FilterText) then
+                    self.TempSettings.FilteredSpells.Tabs[subCat] = self.TempSettings.FilteredSpells.Tabs[subCat] or {}
+                    table.insert(self.TempSettings.FilteredSpells.Tabs[subCat], spellData)
+                end
+            end
+        end
+    end
+
+    for k in pairs(self.TempSettings.FilteredSpells.Tabs) do
+        table.insert(self.TempSettings.FilteredSpells.SortedTabNames, k)
+    end
+    table.sort(self.TempSettings.FilteredSpells.SortedTabNames)
+end
+
 function Module:Render()
     local width = ImGui.GetWindowWidth()
     local buttonsPerRow = math.max(1, math.floor(width / self.ButtonWidth))
+    local changed = false
 
     ImGui.Text("Travel")
     if #self.TempSettings.PorterList > 0 then
-        self.TempSettings.SelectedPorter, _ = ImGui.Combo("Select Character", self.TempSettings.SelectedPorter, self.TempSettings.PorterList)
+        self.TempSettings.SelectedPorter, changed = ImGui.Combo("Select Character", self.TempSettings.SelectedPorter, self.TempSettings.PorterList)
+        if changed then
+            self:GenerateFilteredPortsList()
+        end
+
         local selectedPorter = self.TempSettings.PorterList[self.TempSettings.SelectedPorter]
         local groupedWithPorter = mq.TLO.Group.Member(selectedPorter)() and true or false
 
@@ -169,10 +199,19 @@ function Module:Render()
         ImGui.Text(groupedWithPorter and "Yes" or "No")
         ImGui.PopStyleColor()
 
+        ImGui.Separator()
+        ImGui.Text("Filter Ports: ")
+        ImGui.SameLine()
+        self.TempSettings.FilterText, changed = ImGui.InputText("##text_filter", self.TempSettings.FilterText)
+        if changed then
+            self:GenerateFilteredPortsList()
+        end
+
         if ImGui.BeginTabBar("Tabs", ImGuiTabBarFlags.FittingPolicyScroll) then
-            for _, k in ipairs(self.TransportSpells[selectedPorter].SortedTabNames) do
-                local v = self.TransportSpells[selectedPorter].Tabs[k]
-                ImGui.TableNextColumn()
+            for _, k in ipairs(self.TempSettings.FilteredList.SortedTabNames) do
+                local v = self.TempSettings.FilteredList.Tabs[k]
+                -- why is this here? ImGui.TableNextColumn()
+
                 if ImGui.BeginTabItem(k) then
                     ImGui.BeginTable("Buttons", buttonsPerRow)
                     for _, sv in ipairs(v) do
