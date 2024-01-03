@@ -60,7 +60,6 @@ function Module:LoadSettings()
         end
     end
 
-
     Module.TempSettings.RotationStates = {}
     for _, m in ipairs(self.ClassConfig.Modes) do table.insert(Module.TempSettings.RotationStates, m) end
 
@@ -75,6 +74,11 @@ function Module:LoadSettings()
         self:SaveSettings(true)
     else
         self.settings = config()
+    end
+
+    if not self.settings or not self.DefaultCategories or not self.DefaultConfig then
+        RGMercsLogger.log_error("Failed to Load Core Class Config for Classs: %s", RGMercConfig.Globals.CurLoadedClass)
+        return
     end
 
     -- Setup Defaults

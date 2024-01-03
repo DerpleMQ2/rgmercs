@@ -10,6 +10,10 @@ Module.__index                 = Module
 Module.ModuleLoaded            = false
 Module.TempSettings            = {}
 Module.TempSettings.CampZoneId = 0
+Module.TempSettings.Go2GGH     = 0
+
+Module.Constants               = {}
+Module.Constants.GGHZones      = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
 
 Module.DefaultConfig           = {
     ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = 60, Min = 10, Max = 150, },
@@ -282,6 +286,14 @@ function Module:ShouldFollow()
         (RGMercUtils.GetXTHaterCount() == 0 or (assistSpawn() and assistSpawn.Distance() > self.settings.ChaseDistance))
 end
 
+function Module:Go2GGH()
+    if not mq.TLO.Me.GuildID() or mq.TLO.Me.GuildID() == 0 then
+        RGMercsLogger.log_warning("\awNOTICE:\ax You're not in a guild!")
+        return
+    end
+    self.TempSettings.Go2GGH = 1
+end
+
 function Module:GiveTime(combat_state)
     if mq.TLO.Me.Dead() and self.settings.ChaseOn then
         RGMercsLogger.log_warning("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
@@ -289,6 +301,35 @@ function Module:GiveTime(combat_state)
         self.settings.ChaseOn = false
         self:SaveSettings()
         return
+    end
+
+    if self.TempSettings.Go2GGH >= 1 then
+        if self.TempSettings.Go2GGH == 1 then
+            if not self.Constants.GGHZones:contains(mq.TLO.Zone.ShortName():lower()) then
+                if not RGMercUtils.UseOrigin() then
+                    RGMercsLogger.log_warning("\awNOTICE:\ax Go2GGH Failed.")
+                    self.TempSettings.Go2GGH = 0
+                else
+                    self.TempSettings.Go2GGH = 2
+                end
+            else
+                -- in a known zone.
+                self.TempSettings.Go2GGH = 2
+            end
+        end
+
+        if self.TempSettings.Go2GGH == 2 then
+            if mq.TLO.Zone.ShortName():lower() == "guildhalllrg_int" or mq.TLO.Zone.ShortName():lower() == "guildhall" then
+                RGMercsLogger.log_debug("\a\ag--\atGoing to Pool \ag--")
+                mq.cmdf("/squelch /moveto loc 1 1 3")
+                RGMercsLogger.log_debug("\ag --> \atYou made it \ag<--")
+                self.TempSettings.Go2GGH = 0
+            elseif mq.TLO.Zone.ShortName():lower() ~= "guildlobby" and not mq.TLO.Navigation.Active() then
+                mq.cmdf("/squelch /travelto guildlobby")
+            elseif mq.TLO.Zone.ShortName():lower() == "guildlobby" and not mq.TLO.Navigation.Active() then
+                mq.cmdf("/squelch /nav door id 1 click")
+            end
+        end
     end
 
     if combat_state == "Downtime" then
@@ -388,6 +429,9 @@ function Module:HandleBind(cmd, ...)
         handled = true
     elseif cmd:lower() == "campoff" then
         self:ChaseOff()
+        handled = true
+    elseif cmd:lower() == "go2ggh" then
+        self:Go2GGH()
         handled = true
     end
 
