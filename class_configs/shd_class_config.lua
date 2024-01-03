@@ -574,6 +574,30 @@ local _ClassConfig = {
             [5] = "Ignominious Influence",
         },
     },
+    ['RotationOrder'] = {
+        -- Downtime doesn't have state because we run the whole rotation at once.
+        [1] = { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" end, },
+        [2] = {
+            name = 'Burn',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    RGMercUtils.BurnCheck(self.settings)
+            end,
+        },
+        [3] = {
+            name = 'DPS',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state ==
+                    "Combat"
+            end,
+        },
+    },
     ['Rotations']     = {
         ['Downtime'] = {
             [1] = {
