@@ -1,10 +1,13 @@
 -- Sample Basic Class Module
-local mq            = require('mq')
-local RGMercsLogger = require("utils.rgmercs_logger")
-local RGMercUtils   = require("utils.rgmercs_utils")
+local mq                 = require('mq')
+local RGMercsLogger      = require("utils.rgmercs_logger")
+local RGMercUtils        = require("utils.rgmercs_utils")
 
-local Module        = { _version = '0.1a', name = "Basic", author = 'Derple', }
-Module.__index      = Module
+local Module             = { _version = '0.1a', name = "Basic", author = 'Derple', }
+Module.__index           = Module
+Module.settings          = {}
+Module.DefaultConfig     = {}
+Module.DefaultCategories = {}
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -29,7 +32,6 @@ function Module:LoadSettings()
     if err or not config then
         RGMercsLogger.log_error("\ay[Basic]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
-        self.settings = {}
         self.settings.MyCheckbox = false
         self:SaveSettings(true)
     else
@@ -45,6 +47,8 @@ end
 function Module:Init()
     RGMercsLogger.log_info("Basic Combat Module Loaded.")
     self:LoadSettings()
+
+    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:Render()

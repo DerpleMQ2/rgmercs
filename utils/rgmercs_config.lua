@@ -37,6 +37,8 @@ Config.Constants.RGMezAnims     = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112
 Config.Constants.ModRods        = { [1] = "Modulation Shard", [2] = "Transvergence", [3] = "Modulation", [4] = "Modulating", }
 Config.Constants.SpellBookSlots = 1120
 
+Config.SubModuleSettings        = {}
+
 Config.ExpansionNameToID        = {
     ['EXPANSION_LEVEL_CLASSIC'] = 0, -- No Expansion
     ['EXPANSION_LEVEL_ROK'] = 1,     -- The Ruins of Kunark
@@ -128,7 +130,7 @@ Config.DefaultConfig = {
     ['FollowMarkTarget']  = { DisplayName = "Follow Mark Target", Category = "Targeting", Tooltip = "Auto target MA target Marks.", Default = false, },
 
     -- [ DEBUG ] --
-    ['LogLevel']          = { DisplayName = "Log Level", Category = "Debug", Tooltip = "0 = Errors, 1 = Warnings, 2 = Info, 3 = Debug, 4 = Verbose", Default = 2, Min = 0, Max = 4, },
+    ['LogLevel']          = { DisplayName = "Log Level", Category = "Debug", Tooltip = "1 = Errors, 2 = Warnings, 3 = Info, 4 = Debug, 5 = Verbose", Default = 3, Min = 1, Max = 5, },
 
     -- [ ASSIST ] --
     ['OutsideAssistList'] = { DisplayName = "List of Outsiders to Assist", Category = "Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {}, },
@@ -197,10 +199,6 @@ end
 
 function Config:GetAutoTarget()
     return mq.TLO.Spawn(string.format("id %d", self.Globals.AutoTargetID))
-end
-
-function Config:SetSettings(newSettings)
-    self.settings = newSettings
 end
 
 function Config:GetSettings()

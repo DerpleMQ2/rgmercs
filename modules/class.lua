@@ -4,18 +4,17 @@ local RGMercsLogger                = require("utils.rgmercs_logger")
 local RGMercUtils                  = require("utils.rgmercs_utils")
 local Set                          = require("mq.Set")
 
-local ClassConfig                  = nil
-
 local Module                       = { _version = '0.1a', name = "Class", author = 'Derple', }
 Module.__index                     = Module
 Module.LastPetCmd                  = 0
 Module.ModuleLoaded                = false
+Module.ShowFailedSpells            = false
 Module.ReloadingLoadouts           = true
 Module.SpellLoadOut                = {}
 Module.ResolvedActionMap           = {}
 Module.TempSettings                = {}
 Module.CombatState                 = "None"
-
+Module.ClassConfig                 = nil
 Module.DefaultCategories           = nil
 
 -- Track the state of rotations between frames
@@ -46,16 +45,16 @@ function Module:LoadSettings()
         if not config or err then
             RGMercsLogger.log_error("Failed to Load Custom Core Class Config: %s", custom_config_file)
         else
-            ClassConfig = config()
+            self.ClassConfig = config()
         end
     end
 
-    if not ClassConfig then
-        ClassConfig = require(string.format("class_configs.%s_class_config", RGMercConfig.Globals.CurLoadedClass:lower()))
+    if not self.ClassConfig then
+        self.ClassConfig = require(string.format("class_configs.%s_class_config", RGMercConfig.Globals.CurLoadedClass:lower()))
     end
 
     Module.DefaultCategories = Set.new({})
-    for _, v in pairs(ClassConfig.DefaultConfig or {}) do
+    for _, v in pairs(self.ClassConfig.DefaultConfig or {}) do
         if v.Type ~= "Custom" then
             Module.DefaultCategories:add(v.Category)
         end
@@ -63,10 +62,10 @@ function Module:LoadSettings()
 
 
     Module.TempSettings.RotationStates = {}
-    for _, m in ipairs(ClassConfig.Modes) do table.insert(Module.TempSettings.RotationStates, m) end
+    for _, m in ipairs(self.ClassConfig.Modes) do table.insert(Module.TempSettings.RotationStates, m) end
 
     RGMercsLogger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass, RGMercConfig.Globals.CurLoadedChar)
-    RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", ClassConfig._author, ClassConfig._version)
+    RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author, self.ClassConfig._version)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
@@ -79,7 +78,7 @@ function Module:LoadSettings()
     end
 
     -- Setup Defaults
-    self.settings = RGMercUtils.ResolveDefaults(ClassConfig.DefaultConfig, self.settings)
+    self.settings = RGMercUtils.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
 
     newCombatMode = true
 end
@@ -94,6 +93,8 @@ function Module:Init()
     self:LoadSettings()
 
     self.ModuleLoaded = true
+
+    return { settings = self.settings, defaults = self.ClassConfig.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:GetResolvedActionMapItem(item)
@@ -111,9 +112,9 @@ function Module:SetCombatMode(mode)
 
     self.ReloadingLoadouts = true
 
-    if ClassConfig then
+    if self.ClassConfig then
         self.ResolvedActionMap, self.SpellLoadOut = RGMercUtils.SetLoadOut(self,
-            ClassConfig.Spells, ClassConfig.ItemSets, ClassConfig.AbilitySets)
+            self.ClassConfig.Spells, self.ClassConfig.ItemSets, self.ClassConfig.AbilitySets)
     end
 
     self.ReloadingLoadouts = false
@@ -127,21 +128,20 @@ function Module:Render()
     local pressed = false
     local loadoutChange = false
 
-    if ClassConfig and self.ModuleLoaded then
+    if self.ClassConfig and self.ModuleLoaded then
         ImGui.Text("Mode: ")
         ImGui.SameLine()
-        RGMercUtils.Tooltip(ClassConfig.DefaultConfig.Mode.Tooltip)
-        self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, ClassConfig.Modes, #ClassConfig.Modes)
+        RGMercUtils.Tooltip(self.ClassConfig.DefaultConfig.Mode.Tooltip)
+        self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes, #self.ClassConfig.Modes)
         if pressed then
             self:SaveSettings(true)
             newCombatMode = true
         end
 
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, ClassConfig.DefaultConfig, self.DefaultCategories)
+            self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, self.ClassConfig.DefaultConfig, self.DefaultCategories)
             if pressed then
                 self:SaveSettings(true)
-                print(loadoutChange)
                 newCombatMode = newCombatMode or loadoutChange
             end
         end
@@ -161,7 +161,7 @@ function Module:Render()
         if not self.ReloadingLoadouts then
             if ImGui.CollapsingHeader("Rotations") then
                 local rotationNames = {}
-                for k, _ in pairs(ClassConfig.Rotations) do
+                for k, _ in pairs(self.ClassConfig.Rotations) do
                     table.insert(rotationNames, k)
                 end
                 table.sort(rotationNames)
@@ -172,8 +172,8 @@ function Module:Render()
                 for _, k in pairs(rotationNames) do
                     if ImGui.CollapsingHeader(k) then
                         ImGui.Indent()
-                        RGMercUtils.RenderRotationTable(self, k, ClassConfig.Rotations[k],
-                            self.ResolvedActionMap, self.TempSettings.RotationStates[k])
+                        Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, k, self.ClassConfig.Rotations[k],
+                            self.ResolvedActionMap, self.TempSettings.RotationStates[k], Module.ShowFailedSpells)
                         ImGui.Unindent()
                     end
                 end
@@ -192,11 +192,11 @@ function Module:ResetRotation()
 end
 
 function Module:GetRotationTable(mode)
-    if RGMercConfig.Globals.IsTanking and ClassConfig then
-        return ClassConfig.Rotations[mode]
+    if RGMercConfig.Globals.IsTanking and self.ClassConfig then
+        return self.ClassConfig.Rotations[mode]
     end
 
-    return ClassConfig and ClassConfig.Rotations[mode] or {}
+    return self.ClassConfig and self.ClassConfig.Rotations[mode] or {}
 end
 
 function Module:GetClassModeId()
@@ -204,20 +204,22 @@ function Module:GetClassModeId()
 end
 
 function Module:GetClassModeName()
-    return ClassConfig and ClassConfig.Modes[self.settings.Mode] or "None"
+    return self.ClassConfig and self.ClassConfig.Modes[self.settings.Mode] or "None"
 end
 
-function Module:GetClassSetting(s)
-    return self.settings[s]
+function Module:GetTheme()
+    if self.ClassConfig and self.ClassConfig.Themes then
+        return self.ClassConfig.Themes[self:GetClassModeName()]
+    end
 end
 
 function Module:GiveTime(combat_state)
-    if not ClassConfig then return end
+    if not self.ClassConfig then return end
 
     -- Main Module logic goes here.
     if newCombatMode then
-        RGMercsLogger.log_debug("New Combat Mode Requested: %s", ClassConfig.Modes[self.settings.Mode])
-        self:SetCombatMode(ClassConfig.Modes[self.settings.Mode])
+        RGMercsLogger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[self.settings.Mode])
+        self:SetCombatMode(self.ClassConfig.Modes[self.settings.Mode])
         newCombatMode = false
     end
 
