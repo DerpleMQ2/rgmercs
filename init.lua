@@ -96,22 +96,20 @@ end
 
 local function RGMercsGUI()
     local theme = GetTheme()
+    local themeStylePop = 0
     if openGUI and Alive() then
+        if theme ~= nil then
+            for _, t in pairs(theme) do
+                ImGui.PushStyleColor(t.element, t.color.r, t.color.g, t.color.b, t.color.a)
+                themeStylePop = themeStylePop + 1
+            end
+        end
+
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
         if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
-        local themeStylePop = 0
-
         if shouldDrawGUI then
             local pressed
-            if theme ~= nil then
-                for _, t in pairs(theme) do
-                    ImGui.PushStyleColor(t.element, t.color.r, t.color.g, t.color.b, t.color.a)
-                    themeStylePop = themeStylePop + 1
-                end
-            else
-                --ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 1.0, 1.0, 1)
-            end
 
             ImGui.Text(string.format("RGMercs [%s/%s] running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig.Globals.CurLoadedChar,
                 RGMercConfig.Globals.CurLoadedClass))
@@ -207,9 +205,6 @@ local function RGMercsGUI()
 
                 ImGui.EndTabBar();
             end
-            if themeStylePop > 0 then
-                ImGui.PopStyleColor(themeStylePop)
-            end
 
             ImGui.NewLine()
             ImGui.NewLine()
@@ -219,6 +214,9 @@ local function RGMercsGUI()
         end
 
         ImGui.End()
+        if themeStylePop > 0 then
+            ImGui.PopStyleColor(themeStylePop)
+        end
     end
 end
 
