@@ -604,18 +604,16 @@ local _ClassConfig = {
                 name = "Dark Lord's Unity (Azia)",
                 type = "AA",
                 tooltip = Tooltips.DLUA,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self)
-                    return castDLU() and
-                        not mq.TLO.Me.FindBuff("name " ..
-                            tostring(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).BaseName()))()
+                    return castDLU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).RankName())
                 end,
             },
             [2] = {
                 name = "Skin",
                 type = "Spell",
                 tooltip = Tooltips.Skin,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -624,7 +622,7 @@ local _ClassConfig = {
                 name = "Horror",
                 type = "Spell",
                 tooltip = Tooltips.Horror,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -633,7 +631,7 @@ local _ClassConfig = {
                 name = "Demeanor",
                 type = "Spell",
                 tooltip = Tooltips.Demeanor,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -642,7 +640,7 @@ local _ClassConfig = {
                 name = "CloakHP",
                 type = "Spell",
                 tooltip = Tooltips.CloakHP,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -651,7 +649,7 @@ local _ClassConfig = {
                 name = "SelfDS",
                 type = "Spell",
                 tooltip = Tooltips.SelfDS,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return not castDLU() and mq.TLO.Me.Level() <= 60 and RGMercUtils.ReagentCheck(spell) and
                         RGMercUtils.SelfBuffCheck(spell)
@@ -661,7 +659,7 @@ local _ClassConfig = {
                 name = "Shroud",
                 type = "Spell",
                 tooltip = Tooltips.Shroud,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -670,7 +668,7 @@ local _ClassConfig = {
                 name = "Covenant",
                 type = "Spell",
                 tooltip = Tooltips.Covenant,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -679,7 +677,7 @@ local _ClassConfig = {
                 name = "CallAtk",
                 type = "Spell",
                 tooltip = Tooltips.CallAtk,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -688,7 +686,7 @@ local _ClassConfig = {
                 name = "TempHP",
                 type = "Spell",
                 tooltip = Tooltips.TempHP,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -697,7 +695,7 @@ local _ClassConfig = {
                 name = "HealBurn",
                 type = "Spell",
                 tooltip = Tooltips.HealBurn,
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(
                     self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
@@ -707,7 +705,7 @@ local _ClassConfig = {
                 name = "Voice of Thule",
                 type = "AA",
                 tooltip = Tooltips.VOT,
-                active_cond = function(self) return mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility("Voice of Thule").Spell.ID()))() ~= nil end,
+                active_cond = function(self) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility("Voice of Thule").Spell.ID()) end,
                 cond = function(self)
                     return RGMercUtils.SelfBuffAACheck("Voice of Thule")
                 end,
@@ -958,8 +956,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Torrent,
                 cond = function(self, spell)
-                    return self.settings.DoTorrent and
-                        not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID()
+                    return self.settings.DoTorrent and not RGMercUtils.BuffActiveByID(spell.ID())
                 end,
             },
             [22] = {
@@ -976,7 +973,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.BondTap,
                 cond = function(self, spell)
                     return not self.settings.DoTorrent and
-                        not mq.TLO.Me.FindBuff("name " .. spell.Name() .. " Recourse").ID()
+                        not RGMercUtils.BuffActiveByName(spell.Name() .. " Recourse")
                 end,
             },
             -- TODO: Verify this logic, it seems wrong

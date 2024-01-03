@@ -414,15 +414,15 @@ function Utils.UseItem(itemName, targetId)
         return
     end
 
-    if me.FindBuff("id " .. tostring(item.Clicky.SpellID()))() then
+    if Utils.BuffActiveByID(item.Clicky.SpellID()) then
         return
     end
 
-    if me.FindBuff("id " .. tostring(item.Spell.ID()))() then
+    if Utils.BuffActiveByID(item.Spell.ID()) then
         return
     end
 
-    if me.Song(tostring(item.Spell.ID()))() then
+    if Utils.SongActive(item.Spell.RankName()) then
         return
     end
 
@@ -719,15 +719,15 @@ end
 ---@return boolean
 function Utils.SelfBuffCheck(spell)
     if not spell then return false end
-    local res = not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID() and spell.Stacks()
+    local res = not Utils.BuffActiveByID(spell.ID()) and spell.Stacks()
     return res
 end
 
 ---@param aaName string
 ---@return boolean
 function Utils.SelfBuffAACheck(aaName)
-    return mq.TLO.Me.AltAbilityReady(aaName)() and not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.ID())).ID() and
-        not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())).ID() and
+    return mq.TLO.Me.AltAbilityReady(aaName)() and not Utils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID()) and
+        not Utils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) and
         not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID() and
         mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName()).Stacks() and
         (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
@@ -737,21 +737,21 @@ end
 ---@param spell MQSpell
 ---@return boolean
 function Utils.DotSpellCheck(config, spell)
-    if not spell then return false end
-    return not mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() and spell.StacksTarget() and
-        Utils.GetTargetPctHPs() > config.HPStopDOT
+    if not spell or not spell() then return false end
+    return not Utils.TargetHasBuff(spell) and spell.StacksTarget() and Utils.GetTargetPctHPs() > config.HPStopDOT
 end
 
 ---@param spell MQSpell
 ---@return boolean
 function Utils.DetSpellCheck(spell)
-    if not spell then return false end
-    return not mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() and spell.StacksTarget()
+    if not spell or not spell() then return false end
+    return not Utils.TargetHasBuff(spell) and spell.StacksTarget()
 end
 
 ---@param spell MQSpell
 ---@return boolean
 function Utils.TargetHasBuff(spell)
+    if not spell or not spell() then return false end
     return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0) and true or false
 end
 
@@ -1593,7 +1593,7 @@ end
 ---@param buffId integer
 ---@return boolean
 function Utils.BuffActiveByID(buffId)
-    return ((mq.TLO.Me.FindBuff("id " .. buffId).ID() or 0) > 0)
+    return ((mq.TLO.Me.FindBuff("id " .. tostring(buffId)).ID() or 0) > 0)
 end
 
 ---@param spell MQSpell
@@ -1619,8 +1619,8 @@ function Utils.DetAACheck(aaId)
     local target = mq.TLO.Target
     local me     = mq.TLO.Me
 
-    return (not target.FindBuff("id " .. tostring(me.AltAbility(aaId).Spell.ID())).ID() and
-            not target.FindBuff("id " .. tostring(me.AltAbility(aaId).Spell.Trigger(1).ID()))) and
+    return (not Utils.TargetHasBuff(me.AltAbility(aaId).Spell) and
+            not Utils.TargetHasBuff(me.AltAbility(aaId).Spell.Trigger(1))) and
         (me.AltAbility(aaId).Spell.StacksTarget() or me.AltAbility(aaId).Spell.Trigger(1).StacksTarget())
 end
 
