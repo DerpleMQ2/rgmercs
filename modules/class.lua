@@ -61,7 +61,7 @@ function Module:LoadSettings()
     end
 
     Module.TempSettings.RotationStates = {}
-    for _, m in ipairs(self.ClassConfig.Modes) do table.insert(Module.TempSettings.RotationStates, m) end
+    for i, m in ipairs(self.ClassConfig.RotationOrder) do Module.TempSettings.RotationStates[i] = m end
 
     RGMercsLogger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass, RGMercConfig.Globals.CurLoadedChar)
     RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author, self.ClassConfig._version)
@@ -164,20 +164,14 @@ function Module:Render()
 
         if not self.ReloadingLoadouts then
             if ImGui.CollapsingHeader("Rotations") then
-                local rotationNames = {}
-                for k, _ in pairs(self.ClassConfig.Rotations) do
-                    table.insert(rotationNames, k)
-                end
-                table.sort(rotationNames)
-
                 ImGui.Indent()
                 RGMercUtils.RenderRotationTableKey()
 
-                for _, k in pairs(rotationNames) do
-                    if ImGui.CollapsingHeader(k) then
+                for _, r in ipairs(self.TempSettings.RotationStates) do
+                    if ImGui.CollapsingHeader(r.name) then
                         ImGui.Indent()
-                        Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, k, self.ClassConfig.Rotations[k],
-                            self.ResolvedActionMap, self.TempSettings.RotationStates[k], Module.ShowFailedSpells)
+                        Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.Rotations[r.name],
+                            self.ResolvedActionMap, r.state or 0, Module.ShowFailedSpells)
                         ImGui.Unindent()
                     end
                 end
@@ -190,8 +184,10 @@ function Module:Render()
 end
 
 function Module:ResetRotation()
-    for k, _ in pairs(self.TempSettings.RotationStates) do
-        self.TempSettings.RotationStates[k] = 1
+    for _, v in ipairs(self.TempSettings.RotationStates) do
+        if v.state then
+            v.state = 1
+        end
     end
 end
 
@@ -234,18 +230,20 @@ function Module:GiveTime(combat_state)
     self.CombatState = combat_state
 
     -- Downtime totaiton will just run a full rotation to completion
-    if self.CombatState == "Downtime" then
-        RGMercUtils.RunRotation(self, self:GetRotationTable("Downtime"), mq.TLO.Me.ID(), self.ResolvedActionMap, nil, nil, true)
 
-        if not self.settings.BurnAuto then self.settings.BurnSize = 0 end
-    else
-        if RGMercUtils.BurnCheck(self.settings) then
-            self.TempSettings.RotationStates.Burn = RGMercUtils.RunRotation(self, self:GetRotationTable("Burn"), RGMercConfig.Globals.AutoTargetID,
-                self.ResolvedActionMap, 1, self.TempSettings.RotationStates.Burn, false)
+    for _, r in ipairs(self.TempSettings.RotationStates) do
+        RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
+        if r.cond and r.cond(self, combat_state) then
+            RGMercsLogger.log_verbose("\ag:::RUN ROTATION::: => \at%s", r.name)
+            local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), r.targetId(),
+                self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
+
+            if r.state then r.state = newState end
         end
+    end
 
-        self.TempSettings.RotationStates.DPS = RGMercUtils.RunRotation(self, self:GetRotationTable("DPS"), RGMercConfig.Globals.AutoTargetID,
-            self.ResolvedActionMap, 1, self.TempSettings.RotationStates.DPS, false)
+    if self.CombatState == "Downtime" then
+        if not self.settings.BurnAuto then self.settings.BurnSize = 0 end
     end
 end
 

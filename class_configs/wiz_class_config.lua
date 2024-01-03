@@ -529,7 +529,6 @@ return {
             [6] = "Mana Weave",
         },
     },
-
     ['ChatBegList']   = {
         ['WizBegs'] = {
             ['bindme'] = {
@@ -560,19 +559,76 @@ return {
             },
         },
     },
+    ['RotationOrder'] = {
+        -- Downtime doesn't have state because we run the whole rotation at once.
+        [1] = { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" end, },
+        [2] = {
+            name = 'Burn',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    RGMercUtils.BurnCheck(self.settings)
+            end,
+        },
+        [3] = {
+            name = 'DPS',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state ==
+                    "Combat"
+            end,
+        },
+    },
     ['Rotations']     = {
-        ['Burn'] = {},
-
-        --        |- AA Burn Section
-        --/call AddToRotation "${rotation_name}" "Arcane Whisper" AA            ${Parse[0,"( BURNCHECK && ${Target.PctHPs}>10 )"]}
-        --/call AddToRotation "${rotation_name}" "Silent Casting" AA            ${Parse[0,"( BURNCHECK )"]}
-        --/call AddToRotation "${rotation_name}" "Arcane Destruction" AA        ${Parse[0,"( !${Me.Song[Frenzied Devastation].ID} && BURNCHECK )"]}
-        --/call AddToRotation "${rotation_name}" "Arcane Fury" AA               ${Parse[0,"( (BURNCHECK && !${Me.Song[Chromatic Haze].ID} && !${Me.Song[Gift of Chromatic Haze].ID} && (${Me.Song[Arcane Destruction].ID} || ${Me.Song[Frenzied Devastation].ID})))"]}
-        --/call AddToRotation "${rotation_name}" "Improved Twincast" AA         ${Parse[0,"( (BURNCHECK && !${Me.Buff[Twincast].ID}) )"]}
-        --/call AddToRotation "${rotation_name}" "Mana Burn" AA                 ${Parse[0,"( (BURNCHECK && ${Target.BuffsPopulated} && !${Target.Buff[Mana Burn].ID}) && ${DoManaBurn[SETTINGVAL]} )"]}
-
-        ['Debuff'] = {},
-        ['Heal'] = {},
+        ['Burn'] = {
+            [1] = {
+                name = "Arcane Whisper",
+                type = "AA",
+                cond = function(self)
+                    return RGMercUtils.GetTargetPctHPs() > 10
+                end,
+            },
+            [2] = {
+                name = "Silent Casting",
+                type = "AA",
+                cond = function(self)
+                    return true
+                end,
+            },
+            [3] = {
+                name = "Arcane Destruction",
+                type = "AA",
+                cond = function(self)
+                    return not RGMercUtils.SongActive("Frenzied Devastation")
+                end,
+            },
+            [4] = {
+                name = "Arcane Fury",
+                type = "AA",
+                cond = function(self)
+                    return (not RGMercUtils.SongActive("Chromatic Haze")) and (not RGMercUtils.SongActive("Gift of Chromatic Haze")) and
+                        ((RGMercUtils.SongActive("Arcane Destruction")) or (RGMercUtils.SongActive("Frenzied Devastation")))
+                end,
+            },
+            [5] = {
+                name = "Improved Twincast",
+                type = "AA",
+                cond = function(self)
+                    return not RGMercUtils.BuffActiveByName("Twincast")
+                end,
+            },
+            [6] = {
+                name = "Mana Burn",
+                type = "AA",
+                cond = function(self)
+                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and self.settings.DoManaBurn
+                end,
+            },
+        },
         ['DPS'] = {
             [1] = {
                 name = "Etherealist's Unity",

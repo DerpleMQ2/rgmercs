@@ -450,10 +450,12 @@ function Utils.UseItem(itemName, targetId)
         -- slight delay for instant casts
         mq.delay(4)
     else
-        while not me.Casting.ID() do
+        local maxWait = 1000
+        while maxWait > 0 and not me.Casting.ID() do
             RGMercsLogger.log_verbose("Waiting for item to start casting...")
             mq.delay(100)
             mq.doevents()
+            maxWait = maxWait - 100
         end
         mq.delay(item.CastTime(), function() return not me.Casting.ID() end)
 
@@ -486,23 +488,24 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         local spell = mq.TLO.Spell(spellName)
 
         if not spell() then
-            RGMercsLogger.log_error("\arTRAGIC ERROR: Somehow I tried to cast a spell That doesn't exist: %s", spellName)
+            RGMercsLogger.log_error("\arCasting Failed: Somehow I tried to cast a spell That doesn't exist: %s", spellName)
             return false
         end
         -- Check we actually have the spell -- Me.Book always needs to use RankName
         if not me.Book(spellName)() then
-            RGMercsLogger.log_error("\arTRAGIC ERROR: Somehow I tried to cast a spell I didn't know: %s", spellName)
+            RGMercsLogger.log_error("\arCasting Failed: Somehow I tried to cast a spell I didn't know: %s", spellName)
             return false
         end
 
         -- Check for Reagents
         if not Utils.ReagentCheck(spell) then
-            RGMercsLogger.log_verbose("\arTRAGIC ERROR: I tried to cast a spell spell I don't have Reagents for.", spellName)
+            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have Reagents for.", spellName)
             return false
         end
 
         -- Check for enough mana -- just in case something has changed by this point...
         if me.CurrentMana() < spell.Mana() then
+            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have mana for it.", spellName)
             return false
         end
 
@@ -510,6 +513,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
 
         -- If we're combat casting we need to both have the same swimming status
         if targetId == 0 or (target() and target.FeetWet() ~= me.FeetWet()) then
+            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.", spellName, targetId)
             return false
         end
 
@@ -525,6 +529,11 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             Utils.MemorizeSpell(USEGEM, spellName)
         end
 
+        if not me.Gem(spellName)() then
+            RGMercsLogger.log_debug("\arFailed to memorized %s - moving on...", spellName)
+            return false
+        end
+
         Utils.WaitCastReady(spellName)
 
         Utils.ActionPrep()
@@ -534,9 +543,12 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         RGMercsLogger.log_debug("Running: \at'%s'", cmd)
 
         Utils.WaitCastFinish(target)
+
+        return true
     end
 
-    return true
+    RGMercsLogger.log_verbose("\arCasting Failed: Invalid Spell Name")
+    return false
 end
 
 ---@param e table
@@ -565,7 +577,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
         local res = Utils.UseSpell(s.RankName(), targetId, bAllowMem)
 
-        RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", e.name, s, res and "\agSuccess" or "\arFailed!")
+        RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", e.name, s.RankName(), res and "\agSuccess" or "\arFailed!")
 
         return res
     end
@@ -651,10 +663,8 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
     local lastStepIdx    = 0
 
     for idx, entry in ipairs(r) do
-        if not steps or (steps and start_step and idx >= start_step) then
-            if steps then
-                RGMercsLogger.log_verbose("Doing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
-            end
+        if idx >= start_step then
+            RGMercsLogger.log_verbose("Doing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             lastStepIdx = idx
             if entry.cond then
                 local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
@@ -663,7 +673,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
                     if res == true then
                         stepsThisTime = stepsThisTime + 1
 
-                        if steps and stepsThisTime >= steps then
+                        if steps > 0 and stepsThisTime >= steps then
                             break
                         end
                     end
@@ -673,7 +683,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
                 if res == true then
                     stepsThisTime = stepsThisTime + 1
 
-                    if steps and stepsThisTime >= steps then
+                    if steps > 0 and stepsThisTime >= steps then
                         break
                     end
                 end
@@ -693,9 +703,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
         lastStepIdx = 1
     end
 
-    if steps then
-        RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, (start_step or -1), lastStepIdx)
-    end
+    RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, (start_step or -1), lastStepIdx)
 
     return lastStepIdx
 end
@@ -747,6 +755,12 @@ function Utils.TargetHasBuff(spell)
     return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0) and true or false
 end
 
+---@param buffName string
+---@return boolean
+function Utils.TargetHasBuffByName(buffName)
+    return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("name " .. buffName).ID() or 0) > 0) and true or false
+end
+
 ---@return integer
 function Utils.GetTargetDistance()
     return (mq.TLO.Target.Distance() or 9999)
@@ -790,7 +804,10 @@ end
 ---@param config table
 ---@return boolean
 function Utils.BurnCheck(config)
-    return ((config.BurnAuto and (Utils.GetXTHaterCount() >= config.BurnMobCount or (mq.TLO.Target.Named() and config.BurnNamed) or (config.BurnAlways and config.BurnAuto))) or (not config.BurnAuto and config.BurnSize))
+    local autoBurn = config.BurnAuto and ((Utils.GetXTHaterCount() >= config.BurnMobCount) or (Utils.IsNamed(mq.TLO.Target) and config.BurnNamed))
+    local alwaysBurn = (config.BurnAlways and config.BurnAuto)
+
+    return autoBurn or alwaysBurn
 end
 
 ---@param config table
@@ -1561,6 +1578,24 @@ function Utils.ReagentCheck(spell)
     return true
 end
 
+---@param songName string
+---@return boolean
+function Utils.SongActive(songName)
+    return ((mq.TLO.Me.Song(songName).ID() or 0) > 0)
+end
+
+---@param buffName string
+---@return boolean
+function Utils.BuffActiveByName(buffName)
+    return ((mq.TLO.Me.FindBuff("name " .. buffName).ID() or 0) > 0)
+end
+
+---@param buffId integer
+---@return boolean
+function Utils.BuffActiveByID(buffId)
+    return ((mq.TLO.Me.FindBuff("id " .. buffId).ID() or 0) > 0)
+end
+
 ---@param spell MQSpell
 ---@return boolean
 function Utils.DetGOMCheck(spell)
@@ -1819,14 +1854,15 @@ end
 ---@param showFailed boolean
 ---@return boolean
 function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
-    if ImGui.BeginTable("Rotation_" .. n, rotationState and 4 or 3, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
+    if ImGui.BeginTable("Rotation_" .. n, rotationState > 0 and 5 or 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
-        if rotationState then
+        if rotationState > 0 then
             ImGui.TableSetupColumn('Cur', ImGuiTableColumnFlags.WidthFixed, 20.0)
         end
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
-        ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthStretch, 250.0)
+        ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed, 250.0)
+        ImGui.TableSetupColumn('Resolved Action', ImGuiTableColumnFlags.WidthStretch, 250.0)
 
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
@@ -1834,7 +1870,7 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
         for idx, entry in ipairs(t) do
             ImGui.TableNextColumn()
             ImGui.Text(tostring(idx))
-            if rotationState then
+            if rotationState > 0 then
                 ImGui.TableNextColumn()
                 ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
                 if idx == rotationState then
@@ -1871,12 +1907,42 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
             local mappedAction = map[entry.name]
             if mappedAction then
                 if type(mappedAction) == "string" then
-                    ImGui.Text(entry.name .. " ==> " .. mappedAction)
+                    ImGui.Text(entry.name)
+                    ImGui.TableNextColumn()
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.2, 0.6, 1.0, 1.0)
+                    ImGui.Text(mappedAction)
+                    ImGui.PopStyleColor()
                 else
-                    ImGui.Text(entry.name .. " ==> " .. mappedAction.RankName() or mappedAction.Name())
+                    ImGui.Text(entry.name)
+                    ImGui.TableNextColumn()
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.2, 1.0, 1.0)
+                    ImGui.Text(mappedAction.RankName() or mappedAction.Name() or "None")
+                    ImGui.PopStyleColor()
                 end
             else
                 ImGui.Text(entry.name)
+                ImGui.TableNextColumn()
+                if entry.type:lower() == "cmd" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.9, .05, 1.0)
+                    ImGui.Text(entry.cmd)
+                    ImGui.PopStyleColor()
+                elseif entry.type:lower() == "spell" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.05, .05, 0.9)
+                    ImGui.Text("<Missing Spell>")
+                    ImGui.PopStyleColor()
+                elseif entry.type:lower() == "ability" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.65, .65, 1.0)
+                    ImGui.Text(entry.name)
+                    ImGui.PopStyleColor()
+                elseif entry.type:lower() == "aa" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.65, 0.65, 1.0, 1.0)
+                    ImGui.Text(entry.name)
+                    ImGui.PopStyleColor()
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, .8, 1.0)
+                    ImGui.Text(entry.name)
+                    ImGui.PopStyleColor()
+                end
             end
         end
 
