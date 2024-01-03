@@ -431,6 +431,7 @@ local function Main()
 end
 
 -- Global Messaging callback
+---@diagnostic disable-next-line: unused-local
 local script_actor = RGMercUtils.Actors.register(function(message)
     if message()["from"] == RGMercConfig.Globals.CurLoadedChar then return end
     if message()["script"] ~= RGMercUtils.ScriptName then return end
