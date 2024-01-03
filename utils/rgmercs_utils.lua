@@ -1229,7 +1229,7 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
                         if cur_spawn.Type():lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
 
                         if not Utils.IsPCSafe(t, checkName) then
-                            RGMercsLogger.log_info("\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax", cur_spawn.CleanName(), cur_spawn.AssistName())
+                            RGMercsLogger.log_debug("\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax", cur_spawn.CleanName(), cur_spawn.AssistName())
                             return true
                         end
                     end

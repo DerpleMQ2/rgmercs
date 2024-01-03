@@ -8,13 +8,13 @@ Module.__index                     = Module
 Module.TransportSpells             = {}
 Module.ButtonWidth                 = 150
 Module.ButtonHeight                = 25
-Module.FilterText                  = ""
 
 Module.TempSettings                = {}
 Module.TempSettings.ShouldRequest  = true
 Module.TempSettings.SelectedPorter = 1
 Module.TempSettings.PorterList     = {}
 Module.TempSettings.FilteredList   = {}
+Module.TempSettings.FilterText     = ""
 
 local travelColors                 = {}
 travelColors["Group v2"]           = {}
@@ -125,7 +125,12 @@ function Module:Init()
                     spell.TargetType())
                 local subCat = spell.Subcategory()
                 self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] or {}
-                table.insert(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat], { Name = spell.RankName(), Type = spell.TargetType(), SearchFields = string.format("%s,%s,%s,%s", spell.RankName(), spell.TargetType(), subCat, mq.TLO.Zone(subCat).ShortName()),  })
+                table.insert(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat],
+                    {
+                        Name = spell.RankName(),
+                        Type = spell.TargetType(),
+                        SearchFields = string.format("%s,%s,%s,%s", spell.RankName(), spell.TargetType(), subCat, spell.Extra()):lower(),
+                    })
             end
         end
 
@@ -156,26 +161,33 @@ function Module:GenerateFilteredPortsList()
     self.TempSettings.FilteredList = {}
     self.TempSettings.FilteredList.Tabs = {}
     self.TempSettings.FilteredList.SortedTabNames = {}
-    for porter, data in ipairs(self.TransportSpells) do
+    for porter, data in pairs(self.TransportSpells) do
         if porter == self.TempSettings.PorterList[self.TempSettings.SelectedPorter] then
-            for subCat, spellData in pairs(data) do
-                if self.TempSettings.FilterText():len() <= 2 or data.SearchFields:find(self.TempSettings.FilterText) then
-                    self.TempSettings.FilteredSpells.Tabs[subCat] = self.TempSettings.FilteredSpells.Tabs[subCat] or {}
-                    table.insert(self.TempSettings.FilteredSpells.Tabs[subCat], spellData)
+            for subCat, spellList in pairs(data.Tabs) do
+                for _, spellData in ipairs(spellList) do
+                    local s, _ = string.find(spellData.SearchFields, self.TempSettings.FilterText:lower())
+                    if self.TempSettings.FilterText:len() >= 1 and (s ~= nil) then
+                        self.TempSettings.FilteredList.Tabs[subCat] = self.TempSettings.FilteredList.Tabs[subCat] or {}
+                        table.insert(self.TempSettings.FilteredList.Tabs[subCat], spellData)
+                    elseif self.TempSettings.FilterText:len() < 1 then
+                        self.TempSettings.FilteredList.Tabs[subCat] = self.TempSettings.FilteredList.Tabs[subCat] or {}
+                        table.insert(self.TempSettings.FilteredList.Tabs[subCat], spellData)
+                    end
                 end
             end
         end
     end
 
-    for k in pairs(self.TempSettings.FilteredSpells.Tabs) do
-        table.insert(self.TempSettings.FilteredSpells.SortedTabNames, k)
+    for k, _ in pairs(self.TempSettings.FilteredList.Tabs) do
+        table.insert(self.TempSettings.FilteredList.SortedTabNames, k)
     end
-    table.sort(self.TempSettings.FilteredSpells.SortedTabNames)
+    table.sort(self.TempSettings.FilteredList.SortedTabNames)
 end
 
 function Module:Render()
     local width = ImGui.GetWindowWidth()
     local buttonsPerRow = math.max(1, math.floor(width / self.ButtonWidth))
+    ---@type boolean|nil
     local changed = false
 
     ImGui.Text("Travel")
@@ -209,12 +221,10 @@ function Module:Render()
 
         if ImGui.BeginTabBar("Tabs", ImGuiTabBarFlags.FittingPolicyScroll) then
             for _, k in ipairs(self.TempSettings.FilteredList.SortedTabNames) do
-                local v = self.TempSettings.FilteredList.Tabs[k]
                 -- why is this here? ImGui.TableNextColumn()
-
                 if ImGui.BeginTabItem(k) then
                     ImGui.BeginTable("Buttons", buttonsPerRow)
-                    for _, sv in ipairs(v) do
+                    for _, sv in ipairs(self.TempSettings.FilteredList.Tabs[k]) do
                         ImGui.TableNextColumn()
                         ImGui.PushStyleColor(ImGuiCol.Text, 0, 0, 0, 1)
                         ImGui.PushStyleColor(ImGuiCol.Button, self:GetColorForType(sv.Type))
