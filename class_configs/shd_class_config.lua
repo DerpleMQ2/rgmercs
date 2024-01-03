@@ -629,7 +629,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SelfDS,
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.RankName.ID()))() ~= nil end,
                 cond = function(self, spell)
-                    return not castDLU() and mq.TLO.Me.Level() <= 60 and mq.TLO.FindItemCount(spell.NoExpendReagentID(1))() > 0 and
+                    return not castDLU() and mq.TLO.Me.Level() <= 60 and RGMercUtils.ReagentCheck(spell) and
                         RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
@@ -695,8 +695,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
                 cond = function(
                     self, spell)
-                    return mq.TLO.Me.Pet.ID() == 0 and RGMercConfig:GetSettings().DoPet and
-                        mq.TLO.FindItemCount(spell.ReagentID(1))() > 0
+                    return mq.TLO.Me.Pet.ID() == 0 and RGMercConfig:GetSettings().DoPet and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             [14] = {

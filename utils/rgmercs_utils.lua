@@ -5,7 +5,6 @@ local ICONS         = require('mq.Icons')
 local ICON_SIZE     = 20
 local USEGEM        = mq.TLO.Me.NumGems()
 -- Global
-Memorizing          = false
 
 local Utils         = { _version = '0.2a', author = 'Derple', }
 Utils.__index       = Utils
@@ -15,6 +14,8 @@ Utils.LastZoneID    = 0
 Utils.NamedList     = {}
 Utils.ShowDownNamed = false
 
+---@param path string
+---@return boolean
 function Utils.file_exists(path)
     local f = io.open(path, "r")
     if f ~= nil then
@@ -25,10 +26,15 @@ function Utils.file_exists(path)
     end
 end
 
+---@param module string
+---@param event string
+---@param data table|nil
 function Utils.BroadcastUpdate(module, event, data)
     Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event, data = data, })
 end
 
+---@param msg string
+---@param ... any
 function Utils.PrintGroupMessage(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
@@ -36,6 +42,9 @@ function Utils.PrintGroupMessage(msg, ...)
     mq.cmdf("/dgt group_%s_%s %s", RGMercConfig.Globals.CurServer, mq.TLO.Group.Leader() or "None", output)
 end
 
+---@param defaults table
+---@param settings table
+---@return table
 function Utils.ResolveDefaults(defaults, settings)
     -- Setup Defaults
     for k, v in pairs(defaults) do
@@ -56,6 +65,8 @@ function Utils.ResolveDefaults(defaults, settings)
     return settings
 end
 
+---@param msg string
+---@param ... any
 function Utils.PopUp(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
@@ -63,6 +74,7 @@ function Utils.PopUp(msg, ...)
     mq.cmdf("/popup %s", output)
 end
 
+---@param targetId integer
 function Utils.SetTarget(targetId)
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if RGMercConfig:GetSettings().DoAutoTarget then
@@ -94,7 +106,6 @@ function Utils.HandleDeath()
 
     while mq.TLO.Me.Hovering() do
         if mq.TLO.Window("RespawnWnd").Open() and RGMercConfig:GetSettings().InstantRelease then
-            ---@diagnostic disable-next-line: redundant-parameter
             mq.TLO.Window("RespawnWnd").Child("RW_OptionsList").Select(1)
             mq.delay("1s")
             mq.TLO.Window("RespawnWnd").Child("RW_SelectButton").LeftMouseUp()
@@ -103,7 +114,6 @@ function Utils.HandleDeath()
         end
     end
 
-    ---@diagnostic disable-next-line: undefined-field
     mq.delay("1m", function() return (not mq.TLO.Me.Zoning()) end)
 
     if RGMercConfig:GetSettings().DoFellow then
@@ -151,20 +161,28 @@ function Utils.WelcomeMsg()
     RGMercsLogger.log_info("\aw use \ag /rg \aw for a list of commands")
 end
 
+---@param aaName string
+---@return boolean
 function Utils.CanUseAA(aaName)
     return mq.TLO.Me.AltAbility(aaName)() and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level() and mq.TLO.Me.AltAbility(aaName).Rank() > 0
 end
 
+---@param aaName string
+---@return boolean
 function Utils.AAReady(aaName)
-    return Utils.CanUseAA(aaName) and mq.TLO.Me.AltAbilityReady(aaName)
+    return Utils.CanUseAA(aaName) and mq.TLO.Me.AltAbilityReady(aaName)()
 end
 
+---@param name string
+---@return false
 function Utils.IsDisc(name)
     local spell = mq.TLO.Spell(name)
 
-    return spell() and spell.IsSkill() and spell.Duration() and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self"
+    return (spell() and spell.IsSkill() and spell.Duration() and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and true or false
 end
 
+---@param t table
+---@return string|nil
 function Utils.GetBestItem(t)
     local selectedItem = nil
 
@@ -184,6 +202,8 @@ function Utils.GetBestItem(t)
     return selectedItem
 end
 
+---@param t table
+---@return MQSpell|nil
 function Utils.GetBestSpell(t)
     local highestLevel = 0
     local selectedSpell = nil
@@ -206,7 +226,6 @@ function Utils.GetBestSpell(t)
     end
 
     if selectedSpell then
-        ---@diagnostic disable-next-line: undefined-field
         RGMercsLogger.log_debug("\agFound\ax %s level(%d) rank(%s)", selectedSpell.BaseName(), selectedSpell.Level(),
             selectedSpell.RankName())
     else
@@ -216,6 +235,7 @@ function Utils.GetBestSpell(t)
     return selectedSpell
 end
 
+---@param target MQSpawn
 function Utils.WaitCastFinish(target)
     local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime.TotalSeconds() or 0) + ((mq.TLO.EverQuest.Ping() * 2 / 100) + 1)) * 1000
     local maxWait = maxWaitOrig
@@ -246,10 +266,13 @@ function Utils.WaitCastFinish(target)
     end
 end
 
+---@return boolean
 function Utils.ManaCheck()
     return mq.TLO.Me.PctMana() >= RGMercConfig:GetSettings().ManaToNuke
 end
 
+---@param gem integer
+---@param spell string
 function Utils.MemorizeSpell(gem, spell)
     RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
     mq.cmdf("/memspell %d \"%s\"", gem, spell)
@@ -262,10 +285,12 @@ function Utils.MemorizeSpell(gem, spell)
     end
 end
 
+---@param spell string
 function Utils.CastReady(spell)
     return mq.TLO.Me.SpellReady(spell)()
 end
 
+---@param spell string
 function Utils.WaitCastReady(spell)
     while not mq.TLO.Me.SpellReady(spell)() do
         mq.delay(100)
@@ -360,10 +385,10 @@ function Utils.UseAA(aaName, targetId)
 
     RGMercsLogger.log_debug("switching target back to old target after casting aa")
     Utils.SetTarget(oldTargetId)
-
-    return
 end
 
+---@param itemName string
+---@param targetId integer
 function Utils.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
@@ -451,9 +476,75 @@ function Utils.UseItem(itemName, targetId)
     end
 end
 
-function Utils.ExecEntry(e, targetId, map, bAllowMem)
-    local cmd
+---@param spellName string
+---@param targetId integer
+---@param bAllowMem boolean
+---@return boolean
+function Utils.UseSpell(spellName, targetId, bAllowMem)
+    local me = mq.TLO.Me
+    if spellName then
+        local spell = mq.TLO.Spell(spellName)
 
+        if not spell() then
+            RGMercsLogger.log_error("\arTRAGIC ERROR: Somehow I tried to cast a spell That doesn't exist: %s", spellName)
+            return false
+        end
+        -- Check we actually have the spell -- Me.Book always needs to use RankName
+        if not me.Book(spellName)() then
+            RGMercsLogger.log_error("\arTRAGIC ERROR: Somehow I tried to cast a spell I didn't know: %s", spellName)
+            return false
+        end
+
+        -- Check for Reagents
+        if not Utils.ReagentCheck(spell) then
+            RGMercsLogger.log_error("\arTRAGIC ERROR: Somehow I tried to cast a spell I didn't know: %s", spellName)
+            return false
+        end
+
+        -- Check for enough mana -- just in case something has changed by this point...
+        if me.CurrentMana() < spell.Mana() then
+            return false
+        end
+
+        local target = mq.TLO.Spawn(targetId)
+
+        -- If we're combat casting we need to both have the same swimming status
+        if targetId == 0 or (target() and target.FeetWet() ~= me.FeetWet()) then
+            return false
+        end
+
+        Utils.WaitGlobalCoolDown()
+
+        if (Utils.GetXTHaterCount() > 0 or not bAllowMem) and (not Utils.CastReady(spellName) or not mq.TLO.Me.Gem(spellName)()) then
+            RGMercsLogger.log_debug("\ayI tried to cast %s but it was not ready and we are in combat - moving on.", spellName)
+            return false
+        end
+
+        if not me.Gem(spellName)() then
+            RGMercsLogger.log_debug("\ay%s is not memorized - meming!", spellName)
+            Utils.MemorizeSpell(USEGEM, spellName)
+        end
+
+        Utils.WaitCastReady(spellName)
+
+        Utils.ActionPrep()
+
+        local cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", spellName, targetId)
+        mq.cmdf(cmd)
+        RGMercsLogger.log_debug("Running: \at'%s'", cmd)
+
+        Utils.WaitCastFinish(target)
+    end
+
+    return true
+end
+
+---@param e table
+---@param targetId integer
+---@param map table
+---@param bAllowMem boolean
+---@return boolean
+function Utils.ExecEntry(e, targetId, map, bAllowMem)
     local me = mq.TLO.Me
 
     if e.type:lower() == "item" then
@@ -462,60 +553,26 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
         if not itemName then itemName = e.name end
 
         Utils.UseItem(itemName, targetId)
-        return
+        return true
     end
 
     if e.type:lower() == "spell" then
         local s = map[e.name]
-        RGMercsLogger.log_debug("%s - %s", e.name, s)
-        if s then
-            -- Check we actually have the spell -- Me.Book always needs to use RankName
-            if not me.Book(s.RankName())() then
-                RGMercsLogger.log_error("\arTRAGIC ERROR: Somehow I tried to cast a spell I didn't know: %s", s.Name())
-                return
-            end
 
-            -- Check for enough mana -- just in case something has changed by this point...
-            if me.CurrentMana() < s.Mana() then
-                return
-            end
-
-            local target = mq.TLO.Spawn(targetId)
-
-            -- If we're combat casting we need to both have the same swimming status
-            if targetId == 0 or (target() and target.FeetWet() ~= me.FeetWet()) then
-                return
-            end
-
-            Utils.WaitGlobalCoolDown()
-
-            if (Utils.GetXTHaterCount() > 0 or not bAllowMem) and (not Utils.CastReady(s.RankName()) or not mq.TLO.Me.Gem(s.RankName())()) then
-                RGMercsLogger.log_debug("\ayI tried to cast %s but it was not ready and we are in combat - moving on.", s.RankName())
-                return
-            end
-
-            if not me.Gem(s.RankName())() then
-                RGMercsLogger.log_debug("\ay%s is not memorized - meming!", s.RankName())
-                Utils.MemorizeSpell(USEGEM, s.RankName())
-            end
-
-            Utils.WaitCastReady(s.RankName())
-
-            Utils.ActionPrep()
-
-            cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", s.RankName(), targetId)
-            mq.cmdf(cmd)
-            RGMercsLogger.log_debug("Running: \at'%s'", cmd)
-
-            Utils.WaitCastFinish(target)
+        if not s or not s() then
+            return false
         end
 
-        return
+        local res = Utils.UseSpell(s.RankName(), targetId, bAllowMem)
+
+        RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", e.name, s, res and "\agSuccess" or "\arFailed!")
+
+        return res
     end
 
     if e.type:lower() == "aa" then
         Utils.UseAA(e.name, targetId)
-        return
+        return true
     end
 
     if e.type:lower() == "ability" then
@@ -523,13 +580,13 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
         mq.delay(8, function() return not me.AbilityReady(e.name) end)
         RGMercsLogger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", e.name)
 
-        return
+        return true
     end
 
     if e.type:lower() == "cmd" then
         mq.cmdf("/docommand %s", e.name)
         RGMercsLogger.log_debug("Calling command \ao =>> \ag %s \ao <<=", e.name)
-        return
+        return true
     end
 
     if e.type:lower() == "disc" then
@@ -537,18 +594,18 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
         if not discSpell then
             RGMercsLogger.log_debug("Dont have a DISC for \ao =>> \ag %s \ao <<=", e.name)
-            return
+            return false
         end
 
         RGMercsLogger.log_debug("Using DISC \ao =>> \ag %s [%s] \ao <<=", e.name, (discSpell() and discSpell.RankName() or "None"))
 
         if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
             RGMercsLogger.log_debug("CANT USE DISC - Casting Window Open")
-            return
+            return false
         end
 
         if me.CurrentEndurance() < discSpell.EnduranceCost() then
-            return
+            return false
         end
 
         RGMercsLogger.log_debug("Trying to use DISC: %s", discSpell.RankName())
@@ -574,10 +631,20 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
         RGMercsLogger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName())
 
-        return
+        return true
     end
+
+    return false
 end
 
+---@param s self
+---@param r table
+---@param targetId integer
+---@param map table
+---@param steps integer|nil
+---@param start_step integer|nil
+---@param bAllowMem boolean
+---@return integer
 function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
     local oldSpellInSlot = mq.TLO.Me.Gem(USEGEM)
     local stepsThisTime  = 0
@@ -592,19 +659,23 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
             if entry.cond then
                 local pass = entry.cond(s, map[entry.name] or mq.TLO.Spell(entry.name))
                 if pass == true then
-                    Utils.ExecEntry(entry, targetId, map, bAllowMem)
+                    local res = Utils.ExecEntry(entry, targetId, map, bAllowMem)
+                    if res == true then
+                        stepsThisTime = stepsThisTime + 1
+
+                        if steps and stepsThisTime >= steps then
+                            break
+                        end
+                    end
+                end
+            else
+                local res = Utils.ExecEntry(entry, targetId, map, bAllowMem)
+                if res == true then
                     stepsThisTime = stepsThisTime + 1
 
                     if steps and stepsThisTime >= steps then
                         break
                     end
-                end
-            else
-                Utils.ExecEntry(entry, targetId, map, bAllowMem)
-                stepsThisTime = stepsThisTime + 1
-
-                if steps and stepsThisTime >= steps then
-                    break
                 end
             end
         end
@@ -629,90 +700,120 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
     return lastStepIdx
 end
 
+---@param spell MQSpell
+---@return boolean
 function Utils.SelfBuffPetCheck(spell)
     if not spell then return false end
     return not mq.TLO.Me.PetBuff(spell.RankName())() and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
+---@param spell MQSpell
+---@return boolean
 function Utils.SelfBuffCheck(spell)
     if not spell then return false end
     local res = not mq.TLO.Me.FindBuff("id " .. tostring(spell.ID())).ID() and spell.Stacks()
     return res
 end
 
+---@param aaName string
+---@return boolean
 function Utils.SelfBuffAACheck(aaName)
-    return not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.ID())).ID() and
+    return mq.TLO.Me.AltAbilityReady(aaName)() and not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.ID())).ID() and
         not mq.TLO.Me.FindBuff("id " .. tostring(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())).ID() and
         not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID() and
         mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName()).Stacks() and
         (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
 end
 
+---@param config table
+---@param spell MQSpell
+---@return boolean
 function Utils.DotSpellCheck(config, spell)
     if not spell then return false end
     return not mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() and spell.StacksTarget() and
         Utils.GetTargetPctHPs() > config.HPStopDOT
 end
 
+---@param spell MQSpell
+---@return boolean
 function Utils.DetSpellCheck(spell)
     if not spell then return false end
     return not mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() and spell.StacksTarget()
 end
 
+---@param spell MQSpell
+---@return boolean
 function Utils.TargetHasBuff(spell)
-    return mq.TLO.Target() and (mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
+    return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0) and true or false
 end
 
+---@return integer
 function Utils.GetTargetDistance()
     return (mq.TLO.Target.Distance() or 9999)
 end
 
+---@return integer
 function Utils.GetTargetPctHPs()
     return (mq.TLO.Target.PctHPs() or 0)
 end
 
+---@return string
 function Utils.GetTargetName()
     return (mq.TLO.Target.Name() or "")
 end
 
+---@return integer
 function Utils.GetTargetID()
     return (mq.TLO.Target.ID() or 0)
 end
 
+---@return integer
 function Utils.GetTargetAggroPct()
-    ---@diagnostic disable-next-line: undefined-field
     return (mq.TLO.Target.PctAggro() or 0)
 end
 
+---@return boolean
 function Utils.GetTargetAggressive()
     return (mq.TLO.Target.Aggressive() or false)
 end
 
+---@return integer
 function Utils.GetGroupMainAssistID()
     return (mq.TLO.Group.MainAssist.ID() or 0)
 end
 
+---@return string
 function Utils.GetGroupMainAssistName()
     return (mq.TLO.Group.MainAssist.CleanName() or "")
 end
 
+---@param config table
+---@return boolean
 function Utils.BurnCheck(config)
     return ((config.BurnAuto and (Utils.GetXTHaterCount() >= config.BurnMobCount or (mq.TLO.Target.Named() and config.BurnNamed) or (config.BurnAlways and config.BurnAuto))) or (not config.BurnAuto and config.BurnSize))
 end
 
+---@param config table
+---@return boolean
 function Utils.SmallBurn(config)
     return config.BurnSize >= 1
 end
 
+---@param config table
+---@return boolean
 function Utils.MedBurn(config)
     return config.BurnSize >= 2
 end
 
+---@param config table
+---@return boolean
 function Utils.BigBurn(config)
     return config.BurnSize >= 3
 end
 
-function Utils.DoStick(config, assistId, targetId)
+---@param config table
+---@param targetId integer
+function Utils.DoStick(config, targetId)
     if config.StickHow:len() > 0 then
         mq.cmdf("/stick %s", config.StickHow)
     else
@@ -724,7 +825,11 @@ function Utils.DoStick(config, assistId, targetId)
     end
 end
 
-function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
+---@param config table
+---@param targetId integer
+---@param distance integer
+---@param bDontStick boolean
+function Utils.NavInCombat(config, targetId, distance, bDontStick)
     if not config.DoAutoEngage then return end
 
     if mq.TLO.Stick.Active() then
@@ -733,7 +838,6 @@ function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
 
     if mq.TLO.Navigation.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
         mq.cmdf("/nav id %d distance=%d log=off lineofsight=on", targetId, distance)
-        ---@diagnostic disable-next-line: undefined-field
         while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
             mq.delay(100)
         end
@@ -745,16 +849,18 @@ function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
     end
 
     if not bDontStick then
-        Utils.DoStick(config, assistId, targetId)
+        Utils.DoStick(config, targetId)
     end
 end
 
+---@return boolean
 function Utils.ShouldShrink()
     return RGMercConfig:GetSettings().DoShrink and mq.TLO.Me.Height() > 2 and RGMercConfig:GetSettings().ShrinkItem:len() > 0
 end
 
+---@return boolean
 function Utils.ShouldMount()
-    if RGMercConfig:GetSettings().DoMount == 0 then return end
+    if RGMercConfig:GetSettings().DoMount == 0 then return false end
 
     local passBasicChecks = not RGMercConfig:GetSettings().DoMelee and RGMercConfig:GetSettings().MountItem:len() > 0 and mq.TLO.Zone.Outdoor()
 
@@ -763,14 +869,16 @@ function Utils.ShouldMount()
     return passBasicChecks and passCheckMountOne or passCheckMountTwo
 end
 
+---@return boolean
 function Utils.ShouldDismount()
     return RGMercConfig:GetSettings().DoMount ~= 1 and ((mq.TLO.Me.Mount.ID() or 0) > 0)
 end
 
+---@return boolean
 function Utils.ShouldKillTargetReset()
     local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", RGMercConfig.Globals.AutoTargetID))
     local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", RGMercConfig.Globals.AutoTargetID))
-    return ((not killSpawn() or killSpawn.Dead()) or killCorpse()) and RGMercConfig.Globals.AutoTargetID > 0
+    return (((not killSpawn() or killSpawn.Dead()) or killCorpse()) and RGMercConfig.Globals.AutoTargetID > 0) and true or false
 end
 
 function Utils.AutoMed()
@@ -877,6 +985,7 @@ function Utils.ClickModRod()
     end
 end
 
+---@return boolean
 function Utils.DoBuffCheck()
     if not RGMercConfig:GetSettings().DoBuffs then return false end
 
@@ -891,10 +1000,11 @@ function Utils.DoBuffCheck()
     return true
 end
 
+---@return boolean
 function Utils.UseOrigin()
     if mq.TLO.FindItem("=Drunkard's Stein").ID() or 0 > 0 and mq.TLO.Me.ItemReady("=Drunkard's Stein") then
         RGMercsLogger.log_debug("\ag--\atFound a Drunkard's Stein, using that to get to PoK\ag--")
-        Utils.UseItem("Drunkard's Stein")
+        Utils.UseItem("Drunkard's Stein", mq.TLO.Me.ID())
         return true
     end
 
@@ -917,10 +1027,13 @@ function Utils.UseOrigin()
     return false
 end
 
+---@return boolean
 function Utils.DoCamp()
     return Utils.GetXTHaterCount() == 0 and RGMercConfig.Globals.AutoTargetID == 0
 end
 
+---@param config table
+---@param tempConfig table
 function Utils.AutoCampCheck(config, tempConfig)
     if not config.ReturnToCamp then return end
 
@@ -962,6 +1075,8 @@ function Utils.AutoCampCheck(config, tempConfig)
     end
 end
 
+---@param autoTargetId integer
+---@param preEngageRoutine fun()|nil
 function Utils.EngageTarget(autoTargetId, preEngageRoutine)
     local config = RGMercConfig:GetSettings()
 
@@ -987,11 +1102,11 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
                         preEngageRoutine()
                     end
 
-                    Utils.NavInCombat(config, assistId, autoTargetId, target.MaxRangeTo(), false)
+                    Utils.NavInCombat(config, autoTargetId, target.MaxRangeTo(), false)
                 else
                     mq.cmdf("/nav stop log=off")
                     if mq.TLO.Stick.Status():lower() == "off" then
-                        Utils.DoStick(config, assistId, autoTargetId)
+                        Utils.DoStick(config, autoTargetId)
                     end
 
                     if not mq.TLO.Me.Combat() then
@@ -1015,6 +1130,7 @@ function Utils.MercAssist()
     mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_CallForAssistButton").LeftMouseUp()
 end
 
+---@return boolean
 function Utils.MercEngage()
     local target = mq.TLO.Target
     local merc   = mq.TLO.Me.Mercenary
@@ -1037,10 +1153,14 @@ function Utils.KillPCPet()
     mq.cmdf("/dexecute %s /pet leave", problemPetOwner)
 end
 
+---@param name string
+---@return boolean
 function Utils.HaveExpansion(name)
     return mq.TLO.Me.HaveExpansion(RGMercConfig.ExpansionNameToID[name])
 end
 
+---@param spawn MQSpawn
+---@return boolean
 function Utils.IsNamed(spawn)
     if not spawn() then return false end
 
@@ -1051,6 +1171,9 @@ function Utils.IsNamed(spawn)
     return false
 end
 
+---@param t string: character type
+---@param name string
+---@return boolean
 function Utils.IsPCSafe(t, name)
     if mq.TLO.DanNet(name)() then return true end
 
@@ -1066,7 +1189,7 @@ function Utils.IsPCSafe(t, name)
     return false
 end
 
----@param spawn any
+---@param spawn MQSpawn
 ---@param radius number
 ---@return boolean
 function Utils.IsSpawnFightingStranger(spawn, radius)
@@ -1100,6 +1223,7 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
     return false
 end
 
+---@return boolean
 function Utils.DoCombatActions()
     if RGMercConfig.Globals.LastMove then return false end
     if RGMercConfig.Globals.AutoTargetID == 0 then return false end
@@ -1295,7 +1419,7 @@ function Utils.FindTarget()
             end
         else
             ---@diagnostic disable-next-line: undefined-field
-            RGMercConfig.Globals.AutoTargetID = mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID() or 0
+            RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
         end
     end
     --Target the new target we'll do another spawn check just in case. Given we just did our spawn checks,
@@ -1305,6 +1429,7 @@ function Utils.FindTarget()
     end
 end
 
+---@return integer
 function Utils.GetXTHaterCount()
     local xtCount = mq.TLO.Me.XTarget() or 0
     local haterCount = (Utils.GetTargetAggroPct() > 0 or Utils.GetTargetAggressive()) and 1 or 0
@@ -1345,16 +1470,19 @@ function Utils.SetControlToon()
     end
 end
 
+---@return boolean
 function Utils.IAmMA()
     return RGMercConfig:GetAssistId() == mq.TLO.Me.ID()
 end
 
+---@return boolean
 function Utils.IHaveAggro()
     local target = mq.TLO.Target
     local me     = mq.TLO.Me
-    return target() and target.AggroHolder() == me.CleanName()
+    return (target() and target.AggroHolder() == me.CleanName()) and true or false
 end
 
+---@return boolean
 function Utils.FindTargetCheck()
     local config = RGMercConfig:GetSettings()
 
@@ -1364,6 +1492,8 @@ function Utils.FindTargetCheck()
     return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget) and not RGMercConfig.Globals.BackOffFlag
 end
 
+---@param autoTargetId integer
+---@return boolean
 function Utils.OkToEngage(autoTargetId)
     local config = RGMercConfig:GetSettings()
 
@@ -1413,19 +1543,40 @@ function Utils.PetAttack()
     end
 end
 
+---@param spell MQSpell
+---@return boolean
+function Utils.ReagentCheck(spell)
+    if not spell or not spell() then return false end
+
+    if spell.ReagentID(1)() and mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then
+        return false
+    end
+
+    if spell.NoExpendReagentID(1)() and mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() == 0 then
+        return false
+    end
+
+    return true
+end
+
+---@param spell MQSpell
+---@return boolean
 function Utils.DetGOMCheck(spell)
     local me = mq.TLO.Me
     return me.Song("Gift of Mana").ID() and me.Song("Gift of Mana").Base(3)() >= (spell.Level() or 0)
 end
 
+---@return boolean
 function Utils.DetGambitCheck()
     local me = mq.TLO.Me
-    ---@type spell
+    ---@type MQSpell
     local gambitSpell = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "GambitSpell")
 
-    return gambitSpell and gambitSpell() and ((me.Song(gambitSpell.RankName()).ID() or 0) > 0)
+    return (gambitSpell and gambitSpell() and ((me.Song(gambitSpell.RankName()).ID() or 0) > 0)) and true or false
 end
 
+---@param aaId integer
+---@return boolean
 function Utils.DetAACheck(aaId)
     if Utils.GetTargetID() == 0 then return false end
     local target = mq.TLO.Target
@@ -1436,6 +1587,10 @@ function Utils.DetAACheck(aaId)
         (me.AltAbility(aaId).Spell.StacksTarget() or me.AltAbility(aaId).Spell.Trigger(1).StacksTarget())
 end
 
+---@param caller self
+---@param t table
+---@param itemSets table
+---@param abilitySets table
 function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
     local spellLoadOut = {}
     local resolvedActionMap = {}
@@ -1485,6 +1640,7 @@ function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
     return resolvedActionMap, spellLoadOut
 end
 
+---@param loc string
 function Utils.NavEnabledLoc(loc)
     ImGui.PushStyleColor(ImGuiCol.Text, 0.690, 0.553, 0.259, 1)
     ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.33, 0.33, 0.33, 0.5)
@@ -1501,6 +1657,7 @@ function Utils.NavEnabledLoc(loc)
     end
 end
 
+---@param desc string
 function Utils.Tooltip(desc)
     ImGui.SameLine()
     if ImGui.IsItemHovered() then
@@ -1574,6 +1731,8 @@ function Utils.RenderZoneNamed()
     end
 end
 
+---@param iconID integer
+---@param spell MQSpell
 function Utils.DrawInspectableSpellIcon(iconID, spell)
     local cursor_x, cursor_y = ImGui.GetCursorPos()
 
@@ -1592,6 +1751,7 @@ function Utils.DrawInspectableSpellIcon(iconID, spell)
     ImGui.PopID()
 end
 
+---@param t table
 function Utils.RenderLoadoutTable(t)
     if ImGui.BeginTable("Spells", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
@@ -1649,6 +1809,13 @@ function Utils.RenderRotationTableKey()
     end
 end
 
+---@param s self
+---@param n string
+---@param t table
+---@param map table
+---@param rotationState integer
+---@param showFailed boolean
+---@return boolean
 function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
     if ImGui.BeginTable("Rotation_" .. n, rotationState and 4 or 3, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
@@ -1701,11 +1868,10 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
             ImGui.TableNextColumn()
             local mappedAction = map[entry.name]
             if mappedAction then
-                if type(mappedAction) == "userdata" then
-                    ---@diagnostic disable-next-line: undefined-field
-                    ImGui.Text(entry.name .. " ==> " .. mappedAction.RankName() or mappedAction.Name())
-                else
+                if type(mappedAction) == "string" then
                     ImGui.Text(entry.name .. " ==> " .. mappedAction)
+                else
+                    ImGui.Text(entry.name .. " ==> " .. mappedAction.RankName() or mappedAction.Name())
                 end
             else
                 ImGui.Text(entry.name)
@@ -1718,6 +1884,11 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
     return showFailed
 end
 
+---@param id string
+---@param text string
+---@param on boolean
+---@return boolean: state
+---@return boolean: changed
 function Utils.RenderOptionToggle(id, text, on)
     local toggled = false
     local state   = on
@@ -1748,6 +1919,13 @@ function Utils.RenderOptionToggle(id, text, on)
     return state, toggled
 end
 
+---@param id string
+---@param text string
+---@param cur number
+---@param min number
+---@param max number
+---@return number: input
+---@return boolean: changed
 function Utils.RenderOptionNumber(id, text, cur, min, max)
     ImGui.PushID("##num_spin_" .. id)
     ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0.5, 0.5, 0.5, 1.0)
@@ -1766,6 +1944,13 @@ function Utils.RenderOptionNumber(id, text, cur, min, max)
     return input, changed
 end
 
+---@param settings table
+---@param settingNames table
+---@param defaults table
+---@param category string
+---@return table: settings
+---@return boolean: any_pressed
+---@return boolean: requires_new_loadout
 function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
     local any_pressed = false
     local new_loadout = false
@@ -1812,6 +1997,12 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
     return settings, any_pressed, new_loadout
 end
 
+---@param settings table
+---@param defaults table
+---@param categories table
+---@return table: settings
+---@return boolean: any_pressed
+---@return boolean: requires_new_loadout
 function Utils.RenderSettings(settings, defaults, categories)
     local any_pressed = false
     local new_loadout = false
@@ -1850,6 +2041,7 @@ function Utils.RenderSettings(settings, defaults, categories)
     return settings, any_pressed, new_loadout
 end
 
+---@param t table
 function Utils.LoadSpellLoadOut(t)
     local selectedRank = ""
 
@@ -1865,17 +2057,5 @@ function Utils.LoadSpellLoadOut(t)
         end
     end
 end
-
-mq.event('Being Memo', "Beginning to memorize #1#...", function(spell)
-    Memorizing = true
-end)
-
-mq.event('End Memo', "You have finished memorizing #1#", function(spell)
-    Memorizing = false
-end)
-
-mq.event('Abort Memo', "Aborting memorization of spell.", function()
-    Memorizing = false
-end)
 
 return Utils

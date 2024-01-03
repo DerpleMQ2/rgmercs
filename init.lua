@@ -307,7 +307,6 @@ local function RGInit(...)
 end
 
 local function Main()
-    ---@diagnostic disable-next-line: undefined-field
     if mq.TLO.Me.Zoning() then
         mq.delay(1000)
         return
@@ -432,7 +431,6 @@ local function Main()
 end
 
 -- Global Messaging callback
----@diagnostic disable-next-line: unused-local
 local script_actor = RGMercUtils.Actors.register(function(message)
     if message()["from"] == RGMercConfig.Globals.CurLoadedChar then return end
     if message()["script"] ~= RGMercUtils.ScriptName then return end

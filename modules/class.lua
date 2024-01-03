@@ -76,8 +76,8 @@ function Module:LoadSettings()
         self.settings = config()
     end
 
-    if not self.settings or not self.DefaultCategories or not self.DefaultConfig then
-        RGMercsLogger.log_error("Failed to Load Core Class Config for Classs: %s", RGMercConfig.Globals.CurLoadedClass)
+    if not self.settings or not self.DefaultCategories or not self.ClassConfig.DefaultConfig then
+        RGMercsLogger.log_error("\arFailed to Load Core Class Config for Classs: %s", RGMercConfig.Globals.CurLoadedClass)
         return
     end
 
