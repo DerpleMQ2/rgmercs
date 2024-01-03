@@ -57,17 +57,7 @@ function Module:LoadSettings()
     end
 
     -- Setup Defaults
-    for k, v in pairs(self.DefaultConfig) do
-        self.settings[k] = self.settings[k] or v.Default
-    end
-
-    -- Remove Deprecated options
-    for k, _ in pairs(self.settings) do
-        if not self.DefaultConfig[k] then
-            self.settings[k] = nil
-            RGMercsLogger.log_info("\aySettings [\am%s\ay] has been deprecated -- removing from your config.", k)
-        end
-    end
+    self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
 end
 
 function Module.New()
@@ -79,6 +69,7 @@ function Module:Init()
     RGMercsLogger.log_info("Chase Module Loaded.")
     self:LoadSettings()
     self.ModuleLoaded = true
+    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:ChaseOn(target)
@@ -342,8 +333,7 @@ function Module:GiveTime(combat_state)
         if mq.TLO.Me.Dead() then return end
         if not chaseSpawn() or chaseSpawn.Distance() < self.settings.ChaseDistance then return end
 
-        ---@diagnostic disable-next-line: undefined-field
-        local Nav = mq.TLO.Nav
+        local Nav = mq.TLO.Navigation
 
         -- Use MQ2Nav with moveto as a failover if we have a mesh. We'll use a nav
         -- command if the mesh is loaded and we have a path. If we don't have a path

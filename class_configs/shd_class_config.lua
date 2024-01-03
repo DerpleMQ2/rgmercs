@@ -81,6 +81,22 @@ local _ClassConfig = {
         [1] = 'Tank',
         [2] = 'DPS',
     },
+    ['Themes']        = {
+        ['Tank'] = {
+            { element = ImGuiCol.TableHeaderBg,  color = { r = 0.5, g = 0.05, b = 0.05, a = .8, }, },
+            { element = ImGuiCol.Tab,            color = { r = 0.2, g = 0.05, b = 0.05, a = .8, }, },
+            { element = ImGuiCol.TabActive,      color = { r = 0.5, g = 0.05, b = 0.05, a = .8, }, },
+            { element = ImGuiCol.TabHovered,     color = { r = 0.5, g = 0.05, b = 0.05, a = 1.0, }, },
+            { element = ImGuiCol.Header,         color = { r = 0.2, g = 0.05, b = 0.05, a = .8, }, },
+            { element = ImGuiCol.HeaderActive,   color = { r = 0.5, g = 0.05, b = 0.05, a = .8, }, },
+            { element = ImGuiCol.HeaderHovered,  color = { r = 0.5, g = 0.05, b = 0.05, a = 1.0, }, },
+            { element = ImGuiCol.Button,         color = { r = 0.2, g = 0.05, b = 0.05, a = .8, }, },
+            { element = ImGuiCol.ButtonActive,   color = { r = 0.5, g = 0.05, b = 0.05, a = .8, }, },
+            { element = ImGuiCol.ButtonHovered,  color = { r = 0.5, g = 0.05, b = 0.05, a = 1.0, }, },
+            { element = ImGuiCol.TextSelectedBg, color = { r = 0.2, g = 0.05, b = 0.05, a = .1, }, },
+            { element = ImGuiCol.FrameBg,        color = { r = 0.2, g = 0.05, b = 0.05, a = .8, }, },
+        },
+    },
     ['ItemSets']      = {
         ['Epic'] = {
             [1] = "Innoruuk's Dark Blessing",

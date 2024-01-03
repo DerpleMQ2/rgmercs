@@ -17,7 +17,6 @@ RGMercModules        = require("utils.rgmercs_modules").load()
 -- ImGui Variables
 local openGUI        = true
 local shouldDrawGUI  = true
-local BgOpacity      = tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0
 
 local curState       = "Downtime"
 
@@ -91,16 +90,29 @@ local function Alive()
     return mq.TLO.NearestSpawn('pc')() ~= nil
 end
 
+local function GetTheme()
+    return RGMercModules:execModule("Class", "GetTheme")
+end
+
 local function RGMercsGUI()
+    local theme = GetTheme()
     if openGUI and Alive() then
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
         if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
-        ImGui.SetNextWindowBgAlpha(BgOpacity)
+        local themeStylePop = 0
 
         if shouldDrawGUI then
             local pressed
-            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 1.0, 1.0, 1)
+            if theme ~= nil then
+                for _, t in pairs(theme) do
+                    ImGui.PushStyleColor(t.element, t.color.r, t.color.g, t.color.b, t.color.a)
+                    themeStylePop = themeStylePop + 1
+                end
+            else
+                --ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 1.0, 1.0, 1)
+            end
+
             ImGui.Text(string.format("RGMercs [%s/%s] running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig.Globals.CurLoadedChar,
                 RGMercConfig.Globals.CurLoadedClass))
             ImGui.Text(string.format("Build: %s", GitCommit.commitId or "None"))
@@ -125,13 +137,26 @@ local function RGMercsGUI()
                     ImGui.Text("MA: " .. (RGMercConfig:GetAssistSpawn().CleanName() or "None"))
                     ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
-                        local newSettings = RGMercConfig:GetSettings()
-                        newSettings, pressed, _ = RGMercUtils.RenderSettings(newSettings, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
+                        local settingsRef = RGMercConfig:GetSettings()
+                        settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
                         if pressed then
-                            RGMercConfig:SetSettings(newSettings)
                             RGMercConfig:SaveSettings(true)
                         end
                     end
+
+                    for n, s in pairs(RGMercConfig.SubModuleSettings) do
+                        ImGui.PushID(n .. "_config_hdr")
+                        if s and s.settings and s.defaults and s.categories then
+                            if ImGui.CollapsingHeader(string.format("%s: Config Options", n)) then
+                                s.settings, pressed, _ = RGMercUtils.RenderSettings(s.settings, s.defaults, s.categories)
+                                if pressed then
+                                    RGMercModules:execModule(n, "SaveSettings", true)
+                                end
+                            end
+                        end
+                        ImGui.PopID()
+                    end
+
                     if ImGui.CollapsingHeader("Zone Named") then
                         RGMercUtils.RenderZoneNamed()
                     end
@@ -160,17 +185,13 @@ local function RGMercsGUI()
 
                 ImGui.EndTabBar();
             end
-            ImGui.PopStyleColor(1)
+            if themeStylePop > 0 then
+                ImGui.PopStyleColor(themeStylePop)
+            end
 
             ImGui.NewLine()
             ImGui.NewLine()
             ImGui.Separator()
-
-            BgOpacity, pressed = ImGui.SliderFloat("BG Opacity", BgOpacity, 0, 1.0, "%.1f")
-            if pressed then
-                RGMercConfig:GetSettings().BgOpacity = tostring(BgOpacity)
-                RGMercConfig:SaveSettings(true)
-            end
 
             display_item_on_cursor()
         end
@@ -198,7 +219,8 @@ local function RGInit(...)
 
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
 
-    RGMercModules:execAll("Init")
+    -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
+    RGMercConfig.SubModuleSettings = RGMercModules:execAll("Init")
 
     if not RGMercConfig:GetSettings().DoTwist then
         local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist", })
@@ -346,7 +368,7 @@ local function Main()
     end
 
     if RGMercUtils.DoCamp() then
-        if mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
+        if RGMercConfig:GetSettings().DoMercenary and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
             mq.cmdf("/squelch /stance passive")
         end
     end
@@ -410,7 +432,10 @@ end)
 
 -- Binds
 local function bindHandler(cmd, ...)
-    local processed = RGMercModules:execAll("HandleBind", cmd, ...)
+    local results = RGMercModules:execAll("HandleBind", cmd, ...)
+
+    local processed = false
+    for _, r in pairs(results) do processed = processed or r end
 
     if not processed then
         RGMercsLogger.log_warning("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)

@@ -64,7 +64,6 @@ function Module:LoadSettings()
         RGMercsLogger.log_error("\ay[Travel]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self.settings = {}
-        self.settings.MyCheckbox = false
         self:SaveSettings(true)
     else
         self.settings = config()
@@ -138,6 +137,8 @@ function Module:Init()
     end
 
     self:CreatePorterList()
+
+    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:GetColorForType(type)

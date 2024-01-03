@@ -723,11 +723,10 @@ function Utils.NavInCombat(config, assistId, targetId, distance, bDontStick)
         mq.cmdf("/stick off")
     end
 
-    ---@diagnostic disable-next-line: undefined-field
-    if mq.TLO.Nav.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
+    if mq.TLO.Navigation.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
         mq.cmdf("/nav id %d distance=%d log=off lineofsight=on", targetId, distance)
         ---@diagnostic disable-next-line: undefined-field
-        while mq.TLO.Nav.Active() and mq.TLO.Nav.Velocity() > 0 do
+        while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
             mq.delay(100)
         end
     else
@@ -768,7 +767,6 @@ function Utils.AutoMed()
 
     if me.Class.ShortName():lower() == "brd" and me.Level() > 5 then return end
 
-    ---@diagnostic disable-next-line: undefined-field
     if me.Mount.ID() and not mq.TLO.Zone.Indoor() then
         RGMercsLogger.log_verbose("Sit check returning early due to mount.")
         return
@@ -777,8 +775,7 @@ function Utils.AutoMed()
     RGMercConfig:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
-    ---@diagnostic disable-next-line: undefined-field
-    if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Nav.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+    if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
         RGMercsLogger.log_verbose("Sit check returning early due to movement.")
         return
     end
@@ -875,8 +872,7 @@ function Utils.DoBuffCheck()
 
     if Utils.GetXTHaterCount() > 0 or RGMercConfig.Globals.AutoTargetID > 0 then return false end
 
-    ---@diagnostic disable-next-line: undefined-field
-    if (mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Nav.Active()) and mq.TLO.Me.Class.ShortName():lower() ~= "brd" then return false end
+    if (mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active()) and mq.TLO.Me.Class.ShortName():lower() ~= "brd" then return false end
 
     if RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
 
@@ -912,11 +908,9 @@ function Utils.AutoCampCheck(config, tempConfig)
 
     if distanceToCamp > 5 then
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
-        ---@diagnostic disable-next-line: undefined-field
-        if mq.TLO.Nav.PathExists(navTo)() then
+        if mq.TLO.Navigation.PathExists(navTo)() then
             mq.cmdf("/nav %s", navTo)
-            ---@diagnostic disable-next-line: undefined-field
-            while mq.TLO.Nav.Active() do
+            while mq.TLO.Navigation.Active() do
                 mq.delay(10)
                 mq.doevents()
             end
@@ -1617,7 +1611,7 @@ function Utils.RenderRotationTableKey()
     end
 end
 
-function Utils.RenderRotationTable(s, n, t, map, rotationState)
+function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
     if ImGui.BeginTable("Rotation_" .. n, rotationState and 4 or 3, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
@@ -1682,6 +1676,8 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState)
 
         ImGui.EndTable()
     end
+
+    return showFailed
 end
 
 function Utils.RenderOptionToggle(id, text, on)
