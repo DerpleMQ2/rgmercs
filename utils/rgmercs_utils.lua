@@ -299,6 +299,71 @@ function Utils.ActionPrep()
     end
 end
 
+---@param aaName string
+---@param targetId integer
+function Utils.UseAA(aaName, targetId)
+    local me = mq.TLO.Me
+    local oldTargetId = mq.TLO.Target.ID()
+
+    local aaAbility = mq.TLO.Me.AltAbility(aaName)
+
+    if not aaAbility() then
+        RGMercsLogger.log_verbose("\arYou dont have the AA: %s!", aaName)
+        return
+    end
+
+    if not mq.TLO.Me.AltAbilityReady(aaName) then
+        RGMercsLogger.log_verbose("\ayAbility %s is not ready!", aaName)
+        return
+    end
+
+    if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
+        if me.Class.ShortName():lower() == "brd" then
+            mq.delay("3s", function() return (not mq.TLO.Window("CastingWindow").Open()) end)
+            mq.delay(10)
+            mq.cmdf("/stopsong")
+        else
+            RGMercsLogger.log_debug("\ayCANT CAST AA - Casting Window Open")
+            return
+        end
+    end
+
+    local target = mq.TLO.Spawn(targetId)
+
+    -- If we're combat casting we need to both have the same swimming status
+    if target() and target.FeetWet() ~= me.FeetWet() then
+        return
+    end
+
+    Utils.ActionPrep()
+
+    if Utils.GetTargetID() ~= targetId and target() then
+        if me.Combat() and target.Type():lower() == "pc" then
+            RGMercsLogger.log_info("\awNOTICE:\ax Turning off autoattack to cast on a PC.")
+            mq.cmdf("/attack off")
+            mq.delay("2s", function() return not me.Combat() end)
+        end
+
+        Utils.SetTarget(targetId)
+    end
+
+    local cmd = string.format("/alt act %d", aaAbility.ID())
+
+    RGMercsLogger.log_debug("\ayActivating AA: '%s' [t: %d]", cmd, aaAbility.Spell.MyCastTime.TotalSeconds())
+    mq.cmdf(cmd)
+
+    mq.delay(5)
+
+    if aaAbility.Spell.MyCastTime.TotalSeconds() > 0 then
+        mq.delay(string.format("%ds", aaAbility.Spell.MyCastTime.TotalSeconds()))
+    end
+
+    RGMercsLogger.log_debug("switching target back to old target after casting aa")
+    Utils.SetTarget(oldTargetId)
+
+    return
+end
+
 function Utils.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
@@ -356,7 +421,7 @@ function Utils.UseItem(itemName, targetId)
 
     mq.delay(2)
 
-    if not item.CastTime() then
+    if not item.CastTime() or item.CastTime() == 0 then
         -- slight delay for instant casts
         mq.delay(4)
     else
@@ -449,64 +514,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
     end
 
     if e.type:lower() == "aa" then
-        local oldTarget = Utils.GetTargetID()
-
-        local s = mq.TLO.Me.AltAbility(e.name)
-
-        if not s then
-            RGMercsLogger.log_warning("\ayYou do not have the AA Ability: %s!", s.RankName())
-            return
-        end
-
-        if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
-            if me.Class.ShortName():lower() == "brd" then
-                mq.delay("3s", function() return (not mq.TLO.Window("CastingWindow").Open()) end)
-                mq.delay(10)
-                mq.cmdf("/stopsong")
-            else
-                RGMercsLogger.log_debug("\ayCANT CAST AA - Casting Window Open")
-                return
-            end
-        end
-
-        if not mq.TLO.Me.AltAbilityReady(e.name)() then
-            RGMercsLogger.log_verbose("\ayAbility %s is not ready!", e.name)
-            return
-        end
-
-        local target = mq.TLO.Spawn(targetId)
-
-        -- If we're combat casting we need to both have the same swimming status
-        if target() and target.FeetWet() ~= me.FeetWet() then
-            return
-        end
-
-        Utils.ActionPrep()
-
-        if Utils.GetTargetID() ~= targetId and target() then
-            if me.Combat() and target.Type():lower() == "pc" then
-                RGMercsLogger.log_info("\awNOTICE:\ax Turning off autoattack to cast on a PC.")
-                mq.cmdf("/attack off")
-                mq.delay("2s", function() return not me.Combat() end)
-            end
-
-            Utils.SetTarget(targetId)
-        end
-
-        cmd = string.format("/alt act %d", s.ID())
-
-        RGMercsLogger.log_debug("\ayActivating AA: '%s' [t: %d]", cmd, me.AltAbility(e.name).Spell.MyCastTime.TotalSeconds())
-        mq.cmdf(cmd)
-
-        mq.delay(5)
-
-        if me.AltAbility(e.name).Spell.MyCastTime.TotalSeconds() > 0 then
-            mq.delay(string.format("%ds", me.AltAbility(e.name).Spell.MyCastTime.TotalSeconds()))
-        end
-
-        RGMercsLogger.log_debug("switching target back to old target after casting aa")
-        Utils.SetTarget(oldTarget)
-
+        Utils.UseAA(e.name, targetId)
         return
     end
 
@@ -746,9 +754,13 @@ function Utils.ShouldShrink()
 end
 
 function Utils.ShouldMount()
-    return not RGMercConfig:GetSettings().DoMelee and RGMercConfig:GetSettings().MountItem:len() > 0 and mq.TLO.Zone.Outdoor() and
-        ((RGMercConfig:GetSettings().DoMount == 1 and (mq.TLO.Me.Mount.ID() or 0) == 0) or
-            ((RGMercConfig:GetSettings().DoMount == 2 and mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
+    if RGMercConfig:GetSettings().DoMount == 0 then return end
+
+    local passBasicChecks = not RGMercConfig:GetSettings().DoMelee and RGMercConfig:GetSettings().MountItem:len() > 0 and mq.TLO.Zone.Outdoor()
+
+    local passCheckMountOne = ((RGMercConfig:GetSettings().DoMount == 1 and (mq.TLO.Me.Mount.ID() or 0) == 0))
+    local passCheckMountTwo = ((RGMercConfig:GetSettings().DoMount == 2 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
+    return passBasicChecks and passCheckMountOne or passCheckMountTwo
 end
 
 function Utils.ShouldDismount()
@@ -877,6 +889,32 @@ function Utils.DoBuffCheck()
     if RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
 
     return true
+end
+
+function Utils.UseOrigin()
+    if mq.TLO.FindItem("=Drunkard's Stein").ID() or 0 > 0 and mq.TLO.Me.ItemReady("=Drunkard's Stein") then
+        RGMercsLogger.log_debug("\ag--\atFound a Drunkard's Stein, using that to get to PoK\ag--")
+        Utils.UseItem("Drunkard's Stein")
+        return true
+    end
+
+    if Utils.AAReady("Throne of Heroes") then
+        RGMercsLogger.log_debug("\ag--\atUsing Throne of Heroes to get to Guild Lobby\ag--")
+        RGMercsLogger.log_debug("\ag--\atAs you not within a zone we know\ag--")
+
+        Utils.UseAA("Throne of Heroes", mq.TLO.Me.ID())
+        return true
+    end
+
+    if Utils.AAReady("Origin") then
+        RGMercsLogger.log_debug("\ag--\atUsing Origin to get to Guild Lobby\ag--")
+        RGMercsLogger.log_debug("\ag--\atAs you not within a zone we know\ag--")
+
+        Utils.UseAA("Origin", mq.TLO.Me.ID())
+        return true
+    end
+
+    return false
 end
 
 function Utils.DoCamp()
