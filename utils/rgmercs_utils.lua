@@ -1208,6 +1208,25 @@ end
 function Utils.IsNamed(spawn)
     if not spawn() then return false end
 
+    if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() then
+        local oldTarget = mq.TLO.Target.ID()
+
+        if oldTarget ~= spawn.ID() then
+            mq.cmdf("/target id %d", spawn.ID())
+            mq.delay("3s", function() return mq.TLO.Target.ID() == spawn.ID() end)
+        end
+
+        ---@diagnostic disable-next-line: undefined-field
+        local ret = mq.TLO.SpawnMaster.HasTarget()
+
+        if oldTarget ~= mq.TLO.Target.ID() then
+            mq.cmdf("/target id %d", oldTarget)
+            mq.delay("3s", function() return mq.TLO.Target.ID() == oldTarget end)
+        end
+
+        return ret
+    end
+
     for _, n in ipairs(Utils.NamedList) do
         if spawn.Name() == n or spawn.CleanName() == n then return true end
     end
