@@ -114,8 +114,6 @@ function Utils.HandleDeath()
 
     RGMercModules:execAll("OnDeath")
 
-    -- TODO: Cancel pulling in OnDeath
-
     while mq.TLO.Me.Hovering() do
         if mq.TLO.Window("RespawnWnd").Open() and RGMercConfig:GetSettings().InstantRelease then
             mq.TLO.Window("RespawnWnd").Child("RW_OptionsList").Select(1)
@@ -1394,9 +1392,6 @@ function Utils.FindTarget()
     end
 
     -- Handle cases where our autotarget is no longer valid because it isn't a valid spawn or is dead.
-
-    -- TODO: Add pulling code here.
-
     if RGMercConfig.Globals.AutoTargetID ~= 0 then
         local autoSpawn = mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID))
         if not autoSpawn() or autoSpawn.Type():lower() == "corpse" then
@@ -1583,7 +1578,7 @@ function Utils.FindTargetCheck()
 
     RGMercsLogger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Utils.GetXTHaterCount(), Utils.IAmMA() and "TRUE" or "FALSE", config.FollowMarkTarget and "TRUE" or "FALSE",
         RGMercConfig.Globals.BackOffFlag and "FALSE" or "TRUE")
-    -- TODO: Add Do Pull logic
+
     return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget) and not RGMercConfig.Globals.BackOffFlag
 end
 
@@ -1608,7 +1603,7 @@ function Utils.OkToEngage(autoTargetId)
         return false
     end
 
-    if Utils.GetXTHaterCount() > 0 then -- TODO: or AutoTargetID and !BackOffFlag
+    if Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
         if Utils.GetTargetDistance() < config.AssistRange and (Utils.GetTargetPctHPs() < config.AutoAssistAt or RGMercConfig.Globals.IsTanking or assistId == mq.TLO.Me.ID()) then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_debug("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
