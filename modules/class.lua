@@ -265,7 +265,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Core Class Module UnLoaded.")
+    RGMercsLogger.log_info("Core Class Module Unloaded.")
 end
 
 return Module

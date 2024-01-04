@@ -86,7 +86,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Basic Combat Module UnLoaded.")
+    RGMercsLogger.log_info("Basic Combat Module Unloaded.")
 end
 
 return Module
