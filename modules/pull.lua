@@ -545,7 +545,7 @@ function Module:CheckForAbort(pullID)
 
     if pullID == 0 then return true end
 
-    RGMercsLogger.log_debug("Checking for abort on spawn id: %d", pullID)
+    RGMercsLogger.log_verbose("Checking for abort on spawn id: %d", pullID)
     local spawn = mq.TLO.Spawn(pullID)
 
     if not spawn or spawn.Dead() or not spawn.ID() or spawn.ID() == 0 then
