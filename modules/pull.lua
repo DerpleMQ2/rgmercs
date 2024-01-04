@@ -427,6 +427,7 @@ function Module:GiveTime(combat_stateModule)
             if RGMercUtils.GetXTHaterCount() > 0 then
                 RGMercsLogger.log_info("\awNOTICE:\ax Gained aggro -- aborting pull!")
                 -- TODO: if pull aborts then go back to camp
+                mq.cmdf("/nav stop")
                 return
             end
         end
