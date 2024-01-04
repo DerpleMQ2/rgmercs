@@ -156,6 +156,18 @@ function Module:Render()
     local pressed
 
     if self.ModuleLoaded then
+        if self.settings.DoPull then
+            ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
+        else
+            ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
+        end
+
+        if ImGui.Button(self.settings.DoPull and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
+            self.settings.DoPull = not self.settings.DoPull
+            self:SaveSettings(true)
+        end
+        ImGui.PopStyleColor()
+
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
         if pressed then
             self:SaveSettings(true)
