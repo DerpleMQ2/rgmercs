@@ -91,7 +91,7 @@ local _ClassConfig = {
             { element = ImGuiCol.Header,         color = { r = 0.2, g = 0.05, b = 0.05, a = .8, }, },
             { element = ImGuiCol.HeaderActive,   color = { r = 0.5, g = 0.05, b = 0.05, a = .8, }, },
             { element = ImGuiCol.HeaderHovered,  color = { r = 0.5, g = 0.05, b = 0.05, a = 1.0, }, },
-            { element = ImGuiCol.Button,         color = { r = 0.2, g = 0.05, b = 0.05, a = .8, }, },
+            { element = ImGuiCol.Button,         color = { r = 0.3, g = 0.05, b = 0.05, a = .8, }, },
             { element = ImGuiCol.ButtonActive,   color = { r = 0.5, g = 0.05, b = 0.05, a = .8, }, },
             { element = ImGuiCol.ButtonHovered,  color = { r = 0.5, g = 0.05, b = 0.05, a = 1.0, }, },
             { element = ImGuiCol.TextSelectedBg, color = { r = 0.2, g = 0.05, b = 0.05, a = .1, }, },

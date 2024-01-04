@@ -39,7 +39,12 @@ local function log(logLevel, output, ...)
 
 	mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), logLevels[logLevel].header, callerTracer, output))
 
-	printf('%s\a:%s\aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, callerTracer, logLeaderEnd, output)
+	if RGMercsConsole ~= nil then
+		local consoleText = string.format('[%s] %s', logLevels[logLevel].header, output)
+		RGMercsConsole:AppendText(consoleText)
+	end
+
+	printf('%s\aw:%s\aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, callerTracer, logLeaderEnd, output)
 end
 
 
