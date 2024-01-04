@@ -74,7 +74,7 @@ Module.TempSettings.ValidPullAbilities = {}
 Module.DefaultConfig                   = {
     ['DoPull']             = { DisplayName = "Enable Pulling", Category = "Pulling", Tooltip = "Enable pulling", Default = false, },
     ['PullAbility']        = { DisplayName = "Pull Ability", Category = "Pulling", Tooltip = "What should we pull with?", Default = 1, Type = "Custom", },
-    ['PullMode']           = { DisplayName = "Pull Mode", Category = "Pulling", Tooltip = "1 = Normal, 2 = Chain, 3 = Hunt, 4 = Farm", Default = 1, Min = 1, Max = 4, },
+    ['PullMode']           = { DisplayName = "Pull Mode", Category = "Pulling", Tooltip = "1 = Normal, 2 = Chain, 3 = Hunt, 4 = Farm", Type = "Custom", Default = 1, Min = 1, Max = 4, },
     ['ChainCount']         = { DisplayName = "Chain Count", Category = "Pulling", Tooltip = "Number of mobs in chain pull mode on xtarg before we stop pulling", Default = 3, Min = 1, Max = 100, },
     ['PullDelay']          = { DisplayName = "Pull Delay", Category = "Pulling", Tooltip = "Seconds between pulls", Default = 5, Min = 1, Max = 300, },
     ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pulling", Tooltip = "Distnace to pull", Default = 90, Min = 1, Max = 10000, },
@@ -156,9 +156,17 @@ function Module:Render()
     local pressed
 
     if self.ModuleLoaded then
+        self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
+        if pressed then
+            self:SaveSettings(true)
+        end
         if #self.TempSettings.ValidPullAbilities > 0 then
             self.settings.PullAbility, pressed = ImGui.Combo("Pull Ability", self.settings.PullAbility, self.TempSettings.ValidPullAbilities, #self.TempSettings.ValidPullAbilities)
+            if pressed then
+                self:SaveSettings(true)
+            end
         end
+
         local nextPull = self.settings.PullDelay - (os.clock() - self.TempSettings.LastPull)
         if nextPull < 0 then nextPull = 0 end
         if ImGui.BeginTable("PullState", 2, bit32.bor(ImGuiTableFlags.Borders)) then
