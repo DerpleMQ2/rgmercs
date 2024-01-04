@@ -17,12 +17,14 @@ RGMercModules        = require("utils.rgmercs_modules").load()
 -- ImGui Variables
 local openGUI        = true
 local shouldDrawGUI  = true
+local notifyZoning   = true
 
 local curState       = "Downtime"
 
 -- Icon Rendering
 local animItems      = mq.FindTextureAnimation("A_DragItem")
 local animBox        = mq.FindTextureAnimation("A_RecessedBox")
+--local derpImg        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/derp.png")
 
 -- Constants
 local ICON_WIDTH     = 45
@@ -106,6 +108,10 @@ local function RGMercsGUI()
         end
 
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
+
+        --ImGui.Image(derpImg:GetTextureID(), ImVec2(ImGui.GetWindowWidth(), ImGui.GetWindowHeight()))
+
+        --ImGui.SetCursorPos(0, 0)
         if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
         if shouldDrawGUI then
@@ -308,9 +314,15 @@ end
 
 local function Main()
     if mq.TLO.Me.Zoning() then
+        if notifyZoning then
+            RGMercModules:execAll("OnZone")
+            notifyZoning = false
+        end
         mq.delay(1000)
         return
     end
+
+    notifyZoning = true
 
     if RGMercConfig.Globals.PauseMain then
         mq.delay(1000)

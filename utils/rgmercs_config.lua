@@ -84,17 +84,17 @@ Config.DefaultConfig = {
     ['ShrinkItem']        = { DisplayName = "Shrink Item", Category = "Utilities", Tooltip = "Item to use to Shrink yourself", Default = "", },
     ['DoShrink']          = { DisplayName = "Do Shrink", Category = "Utilities", Tooltip = "Enable auto shrinking", Default = false, },
     ['PriorityHealing']   = { DisplayName = "Priority Healing", Category = "Utilities", Tooltip = "Prioritize Healing over Combat", Default = false, },
-    ['ModRodManaPct']     = { DisplayName = "Mod Rod Mana Pct", Category = "Utilities", Tooltip = "What Mana Pct to hit before using a rod.", Default = 30, Min = 1, Max = 99, },
+    ['ModRodManaPct']     = { DisplayName = "Mod Rod Mana %", Category = "Utilities", Tooltip = "What Mana % to hit before using a rod.", Default = 30, Min = 1, Max = 99, },
     ['ClarityPotion']     = { DisplayName = "Clarity Potion", Category = "Utilities", Tooltip = "Name of your Clarity Pot", Default = "Distillate of Clarity", },
 
     -- [ MEDITATION ] --
     ['DoMed']             = { DisplayName = "Do Meditate", Category = "Meditation", Tooltip = "0 = No Auto Med, 1 = Auto Med Out of Combat, 2 = Auto Med In Combat", Default = 1, Min = 0, Max = 2, },
-    ['HPMedPct']          = { DisplayName = "Med HP Pct", Category = "Meditation", Tooltip = "What HP Pct to hit before medding.", Default = 60, Min = 1, Max = 99, },
-    ['ManaMedPct']        = { DisplayName = "Med Mana Pct", Category = "Meditation", Tooltip = "What Mana Pct to hit before medding.", Default = 30, Min = 1, Max = 99, },
-    ['EndMedPct']         = { DisplayName = "Med Endurance Pct", Category = "Meditation", Tooltip = "What Endurance Pct to hit before medding.", Default = 30, Min = 1, Max = 99, },
-    ['ManaMedPctStop']    = { DisplayName = "Med Mana Pct Stop", Category = "Meditation", Tooltip = "What Mana Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
-    ['EndMedPctStop']     = { DisplayName = "Med Endurance Pct Stop", Category = "Meditation", Tooltip = "What Endurance Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
-    ['HPMedPctStop']      = { DisplayName = "Med HP Pct Stop", Category = "Meditation", Tooltip = "What HP Pct to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
+    ['HPMedPct']          = { DisplayName = "Med HP %", Category = "Meditation", Tooltip = "What HP % to hit before medding.", Default = 60, Min = 1, Max = 99, },
+    ['ManaMedPct']        = { DisplayName = "Med Mana %", Category = "Meditation", Tooltip = "What Mana % to hit before medding.", Default = 30, Min = 1, Max = 99, },
+    ['EndMedPct']         = { DisplayName = "Med Endurance %", Category = "Meditation", Tooltip = "What Endurance % to hit before medding.", Default = 30, Min = 1, Max = 99, },
+    ['ManaMedPctStop']    = { DisplayName = "Med Mana % Stop", Category = "Meditation", Tooltip = "What Mana % to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
+    ['EndMedPctStop']     = { DisplayName = "Med Endurance % Stop", Category = "Meditation", Tooltip = "What Endurance % to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
+    ['HPMedPctStop']      = { DisplayName = "Med HP % Stop", Category = "Meditation", Tooltip = "What HP % to hit before stopping medding.", Default = 90, Min = 1, Max = 99, },
 
     -- [ MERCENCARY ] --
     ['DoMercenary']       = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = true, },
