@@ -407,9 +407,7 @@ local function Main()
     end
 
     if RGMercUtils.DoBuffCheck() and not RGMercConfig:GetSettings().PriorityHealing then
-        -- TODO: Shrink Check
         -- TODO: Group Buffs
-        -- TODO: Pull Delay Handling
     end
 
     if RGMercConfig:GetSettings().DoModRod then
