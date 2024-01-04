@@ -113,7 +113,7 @@ end
 ---@return boolean # return to camp
 ---@return table # camp settings table
 function Module:GetCampData()
-    return self.settings.ReturnToCamp, self.TempSettings
+    return (self.settings.ReturnToCamp and self.TempSettings.CampZoneId == mq.TLO.Zone.ID()), self.TempSettings
 end
 
 function Module:CampOff()
