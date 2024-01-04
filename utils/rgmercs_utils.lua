@@ -1,9 +1,11 @@
 local mq            = require('mq')
+local Set           = require('mq.set')
 local RGMercsLogger = require("utils.rgmercs_logger")
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
 local ICONS         = require('mq.Icons')
 local ICON_SIZE     = 20
 local USEGEM        = mq.TLO.Me.NumGems()
+
 -- Global
 
 local Utils         = { _version = '0.2a', author = 'Derple', }
@@ -488,6 +490,14 @@ function Utils.UseItem(itemName, targetId)
     end
 end
 
+---@param abilityName string
+function Utils.UseAbility(abilityName)
+    local me = mq.TLO.Me
+    mq.cmdf("/doability %s", abilityName)
+    mq.delay(8, function() return not me.AbilityReady(abilityName) end)
+    RGMercsLogger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", abilityName)
+end
+
 ---@param spellName string
 ---@param targetId integer
 ---@param bAllowMem boolean
@@ -598,10 +608,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
     end
 
     if e.type:lower() == "ability" then
-        mq.cmdf("/doability %s", e.name)
-        mq.delay(8, function() return not me.AbilityReady(e.name) end)
-        RGMercsLogger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", e.name)
-
+        Utils.UseAbility(e.name)
         return true
     end
 
@@ -1081,6 +1088,9 @@ function Utils.AutoCampCheck(config, tempConfig)
     -- camped in a different zone.
     if tempConfig.CampZoneId ~= mq.TLO.Zone.ID() then return end
 
+    -- let pulling module handle camp decisions while it is enabled.
+    if RGMercConfig.SubModuleSettings.Pull.DoPull > 0 then return end
+
     local me = mq.TLO.Me
 
     local distanceToCamp = Utils.GetDistance(me.Y(), me.X(), tempConfig.AutoCampY, tempConfig.AutoCampX)
@@ -1239,16 +1249,16 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
 
             if cur_spawn() then
                 if cur_spawn.AssistName():len() > 0 then
-                    RGMercsLogger.log_debug("My Interest: %s =? Their Interest: %s", spawn.Name(), cur_spawn.AssistName())
+                    RGMercsLogger.log_verbose("My Interest: %s =? Their Interest: %s", spawn.Name(), cur_spawn.AssistName())
                     if cur_spawn.AssistName() == spawn.Name() then
-                        RGMercsLogger.log_debug("[%s] Fighting same mob as: %s Theirs: %s Ours: %s", t, cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
+                        RGMercsLogger.log_verbose("[%s] Fighting same mob as: %s Theirs: %s Ours: %s", t, cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
                         local checkName = cur_spawn.CleanName()
 
                         if cur_spawn.Type():lower() == "mercenary" then checkName = cur_spawn.Owner.CleanName() end
                         if cur_spawn.Type():lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
 
                         if not Utils.IsPCSafe(t, checkName) then
-                            RGMercsLogger.log_debug("\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax", cur_spawn.CleanName(), cur_spawn.AssistName())
+                            RGMercsLogger.log_verbose("\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax", cur_spawn.CleanName(), cur_spawn.AssistName())
                             return true
                         end
                     end
@@ -1288,7 +1298,7 @@ function Utils.MATargetScan(radius, zradius)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and xtSpawn.Type():lower() == "auto hater" and xtSpawn.ID() > 0 then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.Type():lower() == "auto hater" then
             RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
             if xtSpawn.Distance() <= radius then
                 -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
@@ -1480,6 +1490,42 @@ function Utils.GetXTHaterCount()
     return haterCount
 end
 
+---@return table # list of haters.
+function Utils.GetXTHaterIDs()
+    local xtCount = mq.TLO.Me.XTarget() or 0
+    local haters = {}
+
+    for i = 1, xtCount do
+        local xtarg = mq.TLO.Me.XTarget(i)
+        if xtarg and xtarg.Aggressive() and xtarg.ID() ~= Utils.GetTargetID() then
+            table.insert(haters, xtarg.ID())
+        end
+    end
+
+    return haters
+end
+
+---@param t table # Set of haters.
+---@return boolean
+function Utils.DiffXTHaterIDs(t)
+    local xtCount = mq.TLO.Me.XTarget() or 0
+
+    -- count is different things changed.
+    if #t ~= xtCount then return true end
+
+    local oldHaterSet = Set.new(t)
+
+    for i = 1, xtCount do
+        local xtarg = mq.TLO.Me.XTarget(i)
+        if xtarg and xtarg.Aggressive() and xtarg.ID() ~= Utils.GetTargetID() then
+            -- this target isn't in the old set.
+            if not oldHaterSet:contains(xtarg.ID()) then return true end
+        end
+    end
+
+    return false
+end
+
 ---@param spawnId number
 ---@return boolean
 function Utils.IsSpawnXHater(spawnId)
@@ -1575,17 +1621,15 @@ function Utils.OkToEngage(autoTargetId)
     return false
 end
 
-function Utils.PetAttack()
-    if not RGMercConfig:GetSettings().DoPet then return end
-
+function Utils.PetAttack(targetId)
     local pet = mq.TLO.Me.Pet
 
-    local target = RGMercConfig():GetAutoTarget()
+    local target = mq.TLO.Spawn(targetId)
 
     if not target() then return end
     if not pet() then return end
 
-    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" and (Utils.GetTargetPctHPs() <= RGMercConfig:GetSettings().PetEngagePct) then
+    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" then
         mq.cmdf("/squelch /pet attack")
         mq.cmdf("/squelch /pet swarm")
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
@@ -2062,8 +2106,8 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
     if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         for i = 1, numCols do
-            ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
             ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 150.0)
+            ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
         end
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
@@ -2071,6 +2115,9 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
         for _, k in ipairs(settingNames) do
             if defaults[k].Category == category then
                 if defaults[k].Type ~= "Custom" then
+                    ImGui.TableNextColumn()
+                    ImGui.Text((defaults[k].DisplayName or "None"))
+                    Utils.Tooltip(defaults[k].Tooltip)
                     ImGui.TableNextColumn()
                     if type(settings[k]) == 'boolean' then
                         settings[k], pressed = Utils.RenderOptionToggle(k, "", settings[k])
@@ -2085,9 +2132,6 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                         ImGui.Text(settings[k])
                         Utils.Tooltip(settings[k])
                     end
-                    ImGui.TableNextColumn()
-                    ImGui.Text((defaults[k].DisplayName or "None"))
-                    Utils.Tooltip(defaults[k].Tooltip)
                 end
             end
         end
