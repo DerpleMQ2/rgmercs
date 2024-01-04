@@ -33,6 +33,16 @@ function Utils.BroadcastUpdate(module, event, data)
     Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event, data = data, })
 end
 
+---@param time integer # in seconds
+---@return string
+function Utils.FormatTime(time)
+    local days = math.floor(time / 86400)
+    local hours = math.floor((time % 86400) / 3600)
+    local minutes = math.floor((time % 3600) / 60)
+    local seconds = math.floor((time % 60))
+    return string.format("%d:%02d:%02d:%02d", days, hours, minutes, seconds)
+end
+
 ---@param msg string
 ---@param ... any
 function Utils.PrintGroupMessage(msg, ...)
@@ -1044,6 +1054,15 @@ function Utils.UseOrigin()
     return false
 end
 
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@return number
+function Utils.GetDistance(x1, y1, x2, y2)
+    return mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", y1, x1, y2, x2))()
+end
+
 ---@return boolean
 function Utils.DoCamp()
     return Utils.GetXTHaterCount() == 0 and RGMercConfig.Globals.AutoTargetID == 0
@@ -1064,7 +1083,7 @@ function Utils.AutoCampCheck(config, tempConfig)
 
     local me = mq.TLO.Me
 
-    local distanceToCamp = mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", me.Y(), me.X(), tempConfig.AutoCampY, tempConfig.AutoCampX))()
+    local distanceToCamp = Utils.GetDistance(me.Y(), me.X(), tempConfig.AutoCampY, tempConfig.AutoCampX)
 
     if distanceToCamp >= 400 then
         Utils.PrintGroupMessage("I'm over 400 units from camp, not returning!")
@@ -1459,6 +1478,19 @@ function Utils.GetXTHaterCount()
     end
 
     return haterCount
+end
+
+---@param spawnId number
+---@return boolean
+function Utils.IsSpawnXHater(spawnId)
+    local xtCount = mq.TLO.Me.XTarget() or 0
+
+    for i = 1, xtCount do
+        local xtarg = mq.TLO.Me.XTarget(i)
+        if xtarg and xtarg.ID() == spawnId then return true end
+    end
+
+    return false
 end
 
 function Utils.SetControlToon()

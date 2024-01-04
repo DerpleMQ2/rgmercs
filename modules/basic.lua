@@ -37,6 +37,9 @@ function Module:LoadSettings()
     else
         self.settings = config()
     end
+
+    -- Setup Defaults
+    self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
 end
 
 function Module.New()
@@ -66,6 +69,10 @@ end
 
 function Module:OnDeath()
     -- Death Handler
+end
+
+function Module:OnZone()
+    -- Zone Handler
 end
 
 ---@param cmd string

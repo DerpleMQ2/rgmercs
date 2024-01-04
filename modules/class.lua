@@ -250,6 +250,10 @@ end
 function Module:OnDeath()
 end
 
+function Module:OnZone()
+    -- Zone Handler
+end
+
 ---@param cmd string
 ---@param ... string
 ---@return boolean

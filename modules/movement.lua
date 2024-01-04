@@ -110,6 +110,12 @@ function Module:CampOn()
     RGMercsLogger.log_info("\ayCamping On: (X: \at%d\ay ; Y: \at%d\ay)", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY)
 end
 
+---@return boolean # return to camp
+---@return table # camp settings table
+function Module:GetCampData()
+    return self.settings.ReturnToCamp, self.TempSettings
+end
+
 function Module:CampOff()
     self.settings.ReturnToCamp = false
     self:SaveSettings(true)
@@ -246,7 +252,7 @@ function Module:Render()
 
         if self.settings.ReturnToCamp then
             local me = mq.TLO.Me
-            local distanceToCamp = mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0))()
+            local distanceToCamp = RGMercUtils.GetDistance(me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0)
             ImGui.Text("Camp Location")
             ImGui.Indent()
             ImGui.Text(string.format("X: %d, Y: %d, Z: %d", self.TempSettings.AutoCampX or 0, self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampZ or 0))
@@ -270,7 +276,8 @@ function Module:OnDeath()
     if self.settings.ChaseTarget then
         RGMercsLogger.log_info("\awNOTICE:\ax You're dead. I'm not chasing %s anymore.", self.settings.ChaseTarget)
     end
-    self:ChaseOff()
+    self.settings.ChaseOn = false
+    self.settings.ChaseTarget = nil
 end
 
 function Module:ShouldFollow()
@@ -288,6 +295,10 @@ function Module:Go2GGH()
         return
     end
     self.TempSettings.Go2GGH = 1
+end
+
+function Module:OnZone()
+    self:CampOff()
 end
 
 function Module:GiveTime(combat_state)
@@ -424,7 +435,7 @@ function Module:HandleBind(cmd, ...)
         self:CampOn()
         handled = true
     elseif cmd:lower() == "campoff" then
-        self:ChaseOff()
+        self:CampOff()
         handled = true
     elseif cmd:lower() == "go2ggh" then
         self:Go2GGH()

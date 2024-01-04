@@ -10,6 +10,7 @@ function Modules.load()
             Movement = require("modules.movement").New(),
             Travel   = require("modules.travel").New(),
             Class    = require("modules.class").New(),
+            Pull     = require("modules.pull").New(),
         },
     }, Modules)
 

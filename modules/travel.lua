@@ -187,8 +187,7 @@ end
 function Module:Render()
     local width = ImGui.GetWindowWidth()
     local buttonsPerRow = math.max(1, math.floor(width / self.ButtonWidth))
-    ---@type boolean|nil
-    local changed = false
+    local changed
 
     ImGui.Text("Travel")
     if #self.TempSettings.PorterList > 0 then
@@ -261,6 +260,10 @@ end
 
 function Module:OnDeath()
     -- Death Handler
+end
+
+function Module:OnZone()
+    -- Zone Handler
 end
 
 ---@param cmd string
