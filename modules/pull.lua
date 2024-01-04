@@ -472,7 +472,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Pull Combat Module UnLoaded.")
+    RGMercsLogger.log_info("Pull Combat Module Unloaded.")
 end
 
 return Module

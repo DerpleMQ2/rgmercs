@@ -446,7 +446,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Chase Module UnLoaded.")
+    RGMercsLogger.log_info("Chase Module Unloaded.")
 end
 
 return Module
