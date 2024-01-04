@@ -4,6 +4,8 @@ local GitCommit = require('version')
 RGMercConfig    = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 
+RGMercsConsole = nil
+
 local RGMercsLogger = require("utils.rgmercs_logger")
 RGMercsLogger.set_log_level(RGMercConfig:GetSettings().LogLevel)
 
@@ -18,7 +20,6 @@ RGMercModules        = require("utils.rgmercs_modules").load()
 local openGUI        = true
 local shouldDrawGUI  = true
 local notifyZoning   = true
-
 local curState       = "Downtime"
 
 -- Icon Rendering
@@ -99,6 +100,13 @@ end
 local function RGMercsGUI()
     local theme = GetTheme()
     local themeStylePop = 0
+
+    if RGMercsConsole == nil then
+        RGMercsConsole = ImGui.ConsoleWidget.new("##RGMercsConsole")
+        RGMercsConsole.maxBufferLines = 100
+        RGMercsConsole.autoScroll = true
+    end
+
     if openGUI and Alive() then
         if theme ~= nil then
             for _, t in pairs(theme) do
@@ -127,7 +135,7 @@ local function RGMercsGUI()
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
             end
 
-            if ImGui.Button(RGMercConfig.Globals.PauseMain and "Unpause" or "Pause", 300, 40) then
+            if ImGui.Button(RGMercConfig.Globals.PauseMain and "Unpause" or "Pause", ImGui.GetWindowWidth(), 40) then
                 RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
             end
             ImGui.PopStyleColor()
@@ -217,6 +225,12 @@ local function RGMercsGUI()
             ImGui.Separator()
 
             display_item_on_cursor()
+        end
+
+        if RGMercsConsole then
+            if ImGui.CollapsingHeader("Debug Output", ImGuiTreeNodeFlags.DefaultOpen) then
+                RGMercsConsole:Render()
+            end
         end
 
         ImGui.End()
