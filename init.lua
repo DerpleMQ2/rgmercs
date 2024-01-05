@@ -132,6 +132,11 @@ local function RGMercsGUI()
         RGMercsConsole.autoScroll = true
     end
 
+    if mq.TLO.MacroQuest.GameState() == "CHARSELECT" then
+        openGUI = false
+        return
+    end
+
     if openGUI and Alive() then
         if theme ~= nil then
             for _, t in pairs(theme) do
@@ -145,12 +150,12 @@ local function RGMercsGUI()
         --ImGui.Image(derpImg:GetTextureID(), ImVec2(ImGui.GetWindowWidth(), ImGui.GetWindowHeight()))
 
         --ImGui.SetCursorPos(0, 0)
-        if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
         if shouldDrawGUI then
             local pressed
 
-            ImGui.Text(string.format("RGMercs [%s/%s] running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig.Globals.CurLoadedChar,
+            ImGui.Text(string.format("RGMercs [%s/%s] by: %s running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
+                RGMercConfig.Globals.CurLoadedChar,
                 RGMercConfig.Globals.CurLoadedClass))
             ImGui.Text(string.format("Build: %s", GitCommit.commitId or "None"))
 
