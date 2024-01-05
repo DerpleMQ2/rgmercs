@@ -87,6 +87,8 @@ Module.DefaultConfig                   = {
     ['GroupWatchStopPct']  = { DisplayName = "Group Watch %", Category = "Pulling", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 20, Min = 1, Max = 100, },
     ['PullHPPct']          = { DisplayName = "Pull HP %", Category = "Pulling", Tooltip = "Make sure you have at least this much HP %", Default = 20, Min = 1, Max = 100, },
     ['FarmWayPoints']      = { DisplayName = "Farming Waypoints", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
+    ['PullAllowList']      = { DisplayName = "Allow List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
+    ['PullDenyList']       = { DisplayName = "Deny List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
 
 }
 
@@ -150,6 +152,43 @@ function Module:Init()
     return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
+function Module:RenderMobList(displayName, settingName)
+    if ImGui.CollapsingHeader(string.format("Pull %s", displayName)) then
+        if mq.TLO.Target() and mq.TLO.Target.Type() == "NPC" then
+            ImGui.PushID("##_small_btn_allow_target_" .. settingName)
+            if ImGui.SmallButton(string.format("Add Target To %s", displayName)) then
+                self:AddMobToList(settingName, mq.TLO.Target.CleanName())
+            end
+            ImGui.PopID()
+        end
+
+        if ImGui.BeginTable("settingName", 4, bit32.bor(ImGuiTableFlags.Borders)) then
+            ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 40.0)
+            ImGui.TableSetupColumn('Count', (ImGuiTableColumnFlags.WidthFixed), 40.0)
+            ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 150.0)
+            ImGui.TableSetupColumn('Controls', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+            ImGui.TableHeadersRow()
+
+            for idx, mobName in ipairs(self.settings[settingName][mq.TLO.Zone.ShortName()] or {}) do
+                ImGui.TableNextColumn()
+                ImGui.Text(tostring(idx))
+                ImGui.TableNextColumn()
+                ImGui.Text(tostring(mq.TLO.SpawnCount(string.format("NPC %s", mobName))))
+                ImGui.TableNextColumn()
+                ImGui.Text(mobName)
+                ImGui.TableNextColumn()
+                ImGui.PushID("##_small_btn_delete_mob_" .. settingName .. tostring(idx))
+                if ImGui.SmallButton(ICONS.FA_TRASH) then
+                    self:DeleteMobFromList(settingName, idx)
+                end
+                ImGui.PopID()
+            end
+
+            ImGui.EndTable()
+        end
+    end
+end
+
 function Module:Render()
     ImGui.Text("Pull")
 
@@ -187,14 +226,15 @@ function Module:Render()
             ImGui.TableNextColumn()
             local stateData = PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
             if not stateData then
-                RGMercsLogger.log_error("StateData is nil for %d", self.TempSettings.PullState)
-                print(self.TempSettings.PullState)
-                ImGui.PushStyleColor(ImGuiCol.Text, 1, 1, 1, 1)
+                ImGui.PushStyleColor(ImGuiCol.Text, stateData.Color.r, stateData.Color.g, stateData.Color.b, stateData.Color.a)
+                ImGui.Text("Invalid State Data... This should auto resolve.")
+                ImGui.PopStyleColor()
             else
                 ImGui.PushStyleColor(ImGuiCol.Text, stateData.Color.r, stateData.Color.g, stateData.Color.b, stateData.Color.a)
+                ImGui.Text(stateData.Display .. " " .. stateData.Text)
+                ImGui.PopStyleColor()
             end
-            ImGui.Text(stateData.Display .. " " .. stateData.Text)
-            ImGui.PopStyleColor()
+
             ImGui.TableNextColumn()
             ImGui.Text("Should Pull")
             ImGui.TableNextColumn()
@@ -229,6 +269,14 @@ function Module:Render()
                 self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
             end
         end
+
+        ImGui.NewLine()
+        ImGui.Separator()
+        ImGui.Text("Note: Allow List will supersede Deny List")
+        self:RenderMobList("Allow List", "PullAllowList")
+        self:RenderMobList("Deny List", "PullDenyList")
+        ImGui.NewLine()
+        ImGui.Separator()
 
         if ImGui.CollapsingHeader("Farm Waypoints") then
             ImGui.PushID("##_small_btn_create_wp")
@@ -292,6 +340,43 @@ end
 ---@return table
 function Module:GetWPById(id)
     return (id <= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()]) and self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] or { x = 0, y = 0, z = 0, }
+end
+
+---@param listName string
+---@return boolean
+function Module:HaveList(listName)
+    return self.settings[listName][mq.TLO.Zone.ShortName()] and #self.settings[listName][mq.TLO.Zone.ShortName()] > 0
+end
+
+---@param listName string
+---@param mobName string
+---@param defaultNoList boolean # Default to return if there is no list.
+---@return boolean
+function Module:IsMobInList(listName, mobName, defaultNoList)
+    -- no list so everything is allowed.
+    if not self:HaveList(listName) then return defaultNoList end
+
+    for _, v in ipairs(self.settings[listName][mq.TLO.Zone.ShortName()]) do
+        if v == mobName then return true end
+    end
+
+    return false
+end
+
+---@param list string
+---@param mobName string
+function Module:AddMobToList(list, mobName)
+    self.settings[list][mq.TLO.Zone.ShortName()] = self.settings[list][mq.TLO.Zone.ShortName()] or {}
+    table.insert(self.settings[list][mq.TLO.Zone.ShortName()], mobName)
+    self:SaveSettings(true)
+end
+
+---@param list string
+---@param idx number
+function Module:DeleteMobFromList(list, idx)
+    self.settings[list][mq.TLO.Zone.ShortName()] = self.settings[list][mq.TLO.Zone.ShortName()] or {}
+    self.settings[list][mq.TLO.Zone.ShortName()][idx] = nil
+    self:SaveSettings(true)
 end
 
 function Module:IncrementWpId()
@@ -544,12 +629,30 @@ function Module:FindTarget()
                 RGMercsLogger.log_debug("\aoChecking Nav Pathing to %s (%d)", spawn.CleanName(), spawn.ID())
                 if mq.TLO.Navigation.PathExists("id " .. spawn.ID())() then
                     local distance = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
-                    RGMercsLogger.log_debug("\agNav Path Exists - Distance :: %d Radius :: %d", distance, pullRadius)
+                    RGMercsLogger.log_verbose("\agNav Path Exists - Distance :: %d Radius :: %d", distance, pullRadius)
                     if distance < pullRadius then
                         RGMercsLogger.log_debug("\agPotential Pull %s --> Distance %d", spawn.CleanName(), distance)
+                        local doInsert = true
 
-                        -- TODO check whitelist / blacklist
-                        table.insert(pullTargets, { spawn = spawn, distance = distance, })
+                        if self:HaveList("PullAllowList") then
+                            RGMercsLogger.log_debug("\ayHave Allow List to Check!")
+                            if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
+                                doInsert = false
+                            end
+                        elseif self:HaveList("PullDenyList") then
+                            RGMercsLogger.log_debug("\ayHave Deny List to Check!")
+                            if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
+                                doInsert = false
+                            end
+                        else
+                            RGMercsLogger.log_debug("\ayNo Allow/Deny List to Check!")
+                        end
+
+                        RGMercsLogger.log_debug("\ayInsert Allowed: %s", doInsert and "\agYes", "\arNo")
+
+                        if doInsert then
+                            table.insert(pullTargets, { spawn = spawn, distance = distance, })
+                        end
                     else
                         RGMercsLogger.log_debug("\ayPotential Pull %s is OOR --> Distance %d", spawn.CleanName(), distance)
                     end
@@ -627,8 +730,8 @@ end
 
 function Module:NavToWaypoint(loc, ignoreAggro)
     -- if DoMed is set it will take care of standing us up
-    if mq.TLO.Me.Sitting() and RGMercConfig:GetSettings().DoMed then
-        return
+    if mq.TLO.Me.Sitting() then
+        RGMercConfig.Globals.InMedState = false
     end
 
     mq.TLO.Me.Stand()
@@ -804,8 +907,8 @@ function Module:GiveTime(combat_stateModule)
     RGMercsLogger.log_debug("\ayRTB Location: %d %d %d", start_y, start_x, start_z)
 
     -- if DoMed is set it will take care of standing us up
-    if mq.TLO.Me.Sitting() and RGMercConfig:GetSettings().DoMed then
-        return
+    if mq.TLO.Me.Sitting() then
+        RGMercConfig.Globals.InMedState = false
     end
 
     mq.TLO.Me.Stand()

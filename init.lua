@@ -97,6 +97,31 @@ local function GetTheme()
     return RGMercModules:execModule("Class", "GetTheme")
 end
 
+local function RenderTarget()
+    ImGui.Text("Auto Target: ")
+    ImGui.SameLine()
+    if RGMercConfig.Globals.AutoTargetID == 0 then
+        ImGui.Text("None")
+        ImGui.ProgressBar(0, -1, 25)
+    else
+        local assistSpawn = RGMercConfig:GetAutoTarget()
+        local pctHPs = assistSpawn.PctHPs() or 0
+        if not pctHPs then pctHPs = 0 end
+        local ratioHPs = pctHPs / 100
+        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 1 - ratioHPs, ratioHPs, 0, 1)
+        if math.floor(assistSpawn.Distance() or 0) >= 350 then
+            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 0.0, 1)
+        else
+            ImGui.PushStyleColor(ImGuiCol.Text, 1, 1, 1, 1)
+        end
+        ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "", assistSpawn.ID() or 0, assistSpawn.Level() or 0,
+            assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
+        ImGui.ProgressBar(ratioHPs, -1, 25)
+
+        ImGui.PopStyleColor(2)
+    end
+end
+
 local function RGMercsGUI()
     local theme = GetTheme()
     local themeStylePop = 0
@@ -140,33 +165,14 @@ local function RGMercsGUI()
             end
             ImGui.PopStyleColor()
 
+            RenderTarget()
+
             if ImGui.BeginTabBar("RGMercsTabs") then
                 ImGui.SetItemDefaultFocus()
                 if ImGui.BeginTabItem("RGMercsMain") then
                     ImGui.Text("Current State: " .. curState)
                     ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
-                    ImGui.Text("Auto Target: ")
-                    ImGui.SameLine()
-                    if RGMercConfig.Globals.AutoTargetID == 0 then
-                        ImGui.Text("None")
-                        ImGui.ProgressBar(0, -1, 25)
-                    else
-                        local assistSpawn = RGMercConfig:GetAutoTarget()
-                        local pctHPs = assistSpawn.PctHPs() or 0
-                        if not pctHPs then pctHPs = 0 end
-                        local ratioHPs = pctHPs / 100
-                        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 1 - ratioHPs, ratioHPs, 0, 1)
-                        if math.floor(assistSpawn.Distance() or 0) >= 350 then
-                            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 0.0, 1)
-                        else
-                            ImGui.PushStyleColor(ImGuiCol.Text, 1, 1, 1, 1)
-                        end
-                        ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "", assistSpawn.ID() or 0, assistSpawn.Level() or 0,
-                            assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
-                        ImGui.ProgressBar(ratioHPs, -1, 25)
 
-                        ImGui.PopStyleColor(2)
-                    end
                     -- .. tostring(RGMercConfig.Globals.AutoTargetID))
                     ImGui.Text("MA: " .. (RGMercConfig:GetAssistSpawn().CleanName() or "None"))
                     ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
