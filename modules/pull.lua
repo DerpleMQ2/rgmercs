@@ -186,7 +186,13 @@ function Module:Render()
             ImGui.Text("Pull State")
             ImGui.TableNextColumn()
             local stateData = PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
-            ImGui.PushStyleColor(ImGuiCol.Text, stateData.Color.r, stateData.Color.g, stateData.Color.b, stateData.Color.a)
+            if not stateData then
+                RGMercsLogger.log_error("StateData is nil for %d", self.TempSettings.PullState)
+                print(self.TempSettings.PullState)
+                ImGui.PushStyleColor(ImGuiCol.Text, 1, 1, 1, 1)
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, stateData.Color.r, stateData.Color.g, stateData.Color.b, stateData.Color.a)
+            end
             ImGui.Text(stateData.Display .. " " .. stateData.Text)
             ImGui.PopStyleColor()
             ImGui.TableNextColumn()
@@ -213,7 +219,8 @@ function Module:Render()
             ImGui.Text("Current Farm WP ID")
             ImGui.TableNextColumn()
             local wpId = self:GetCurrentWpId()
-            ImGui.Text(wpId == 0 and "<None>" or string.format("%d [%s]", wpId, self:GetWPById(wpId)))
+            local wpData = self:GetWPById(wpId)
+            ImGui.Text(wpId == 0 and "<None>" or string.format("%d [y: %0.2f, x: %0.2f, z: %0.2f]", wpId, wpData.y, wpData.x, wpData.z))
             ImGui.EndTable()
         end
 
@@ -236,11 +243,11 @@ function Module:Render()
                 ImGui.TableSetupColumn('Controls', (ImGuiTableColumnFlags.WidthFixed), 80.0)
                 ImGui.TableHeadersRow()
 
-                for idx, loc in ipairs(self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] or {}) do
+                for idx, wpData in ipairs(self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] or {}) do
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(idx))
                     ImGui.TableNextColumn()
-                    ImGui.Text(loc)
+                    ImGui.Text(string.format("[y: %0.2f, x: %0.2f, z: %0.2f]", wpData.y, wpData.x, wpData.z))
                     ImGui.TableNextColumn()
                     ImGui.PushID("##_small_btn_delete_wp_" .. tostring(idx))
                     if ImGui.SmallButton(ICONS.FA_TRASH) then
@@ -280,8 +287,11 @@ function Module:GetCurrentWpId()
     return (self.TempSettings.CurrentWP <= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()]) and self.TempSettings.CurrentWP or 0
 end
 
+---comment
+---@param id number
+---@return table
 function Module:GetWPById(id)
-    return (id <= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()]) and self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] or "<None>"
+    return (id <= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()]) and self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] or { x = 0, y = 0, z = 0, }
 end
 
 function Module:IncrementWpId()
@@ -294,6 +304,7 @@ function Module:IncrementWpId()
     end
 end
 
+---@param id number
 function Module:MoveWayPointUp(id)
     local newId = id - 1
 
@@ -306,6 +317,7 @@ function Module:MoveWayPointUp(id)
     self:SaveSettings(true)
 end
 
+---@param id number
 function Module:MoveWayPointDown(id)
     local newId = id + 1
 
@@ -320,9 +332,10 @@ end
 
 function Module:CreateWayPointHere()
     self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] = self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] or {}
-    table.insert(self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()], mq.TLO.Me.LocYXZ())
+    table.insert(self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()], { x = mq.TLO.Me.X(), y = mq.TLO.Me.Y(), z = mq.TLO.Me.Z(), })
     self:SaveSettings(true)
-    RGMercsLogger.log_info("\axNew waypoint \at%d\ax created at location \ag%s", #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()], mq.TLO.Me.LocYXZ())
+    RGMercsLogger.log_info("\axNew waypoint \at%d\ax created at location \ag%02.f, %02.f, %02.f", #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()],
+        mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
 end
 
 function Module:DeleteWayPoint(idx)
@@ -496,11 +509,12 @@ function Module:FindTarget()
 
     if self:IsPullMode("Farm") then
         local wpId = self:GetCurrentWpId()
+        local wpData = self:GetWPById(wpId)
         RGMercsLogger.log_debug(
-            "FindTarget :: Mode: Farm :: pullradius %d pullzradius %d lowlvl %d highlvl %d use_only_nav 1 arc 0 xyz %s",
-            self.settings.PullRadiusFarm, self.settings.PullZRadius, self.settings.PullMinLevel, self.settings.PullMaxLevel, self:GetWPById(wpId))
+            "FindTarget :: Mode: Farm :: pullradius %d pullzradius %d lowlvl %d highlvl %d use_only_nav 1 arc 0 xyz %0.2f, %0.2f, %0.2f",
+            self.settings.PullRadiusFarm, self.settings.PullZRadius, self.settings.PullMinLevel, self.settings.PullMaxLevel, wpData.x, wpData.y, wpData.z)
 
-        pullSearchString = pullSearchString .. string.format(" loc %s", self:GetWPById(wpId))
+        pullSearchString = pullSearchString .. string.format(" loc  %0.2f, %0.2f, %0.2f", wpData.x, wpData.y, wpData.z)
     else
         RGMercsLogger.log_debug(
             "FindTarget :: Mode: %s :: pullradius %d pullzradius %d lowlvl %d highlvl %d use_only_nav 1 arc 0 xyz NA",
@@ -755,7 +769,9 @@ function Module:GiveTime(combat_stateModule)
         --/if (${SubDefined[${Zone.ShortName}_PreNav_${Pull_FarmWPNum}]}) /call ${Zone.ShortName}_PreNav_${Pull_FarmWPNum}
 
         self.TempSettings.PullState = PullStates.PULL_MOVING_TO_WP
-        if not self:NavToWaypoint(self:GetWPById(self:GetCurrentWpId())) then
+
+        local wpData = self:GetWPById(self:GetCurrentWpId())
+        if not self:NavToWaypoint(string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z)) then
             self.TempSettings.PullState = PullStates.PULL_NAVINTERRUPT
             return
         else
@@ -912,7 +928,7 @@ function Module:GiveTime(combat_stateModule)
                     mq.cmdf("/target ID %d", pullID)
                     mq.doevents()
 
-                    if pullAbility.Type():lower() == "ability" then
+                    if pullAbility.Type:lower() == "ability" then
                         if mq.TLO.Me.AbilityReady(pullAbility.id) then
                             RGMercUtils.UseAbility(pullAbility.id)
                         end
@@ -941,14 +957,14 @@ function Module:GiveTime(combat_stateModule)
         -- Nav back to camp.
         self.TempSettings.PullState = PullStates.PULL_RETURN_TO_CAMP
 
-        mq.cmdf("/nav locyxz %02f %02f %02f log=off", start_y, start_x, start_z)
+        mq.cmdf("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
         mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
 
         while mq.TLO.Navigation.Active() do
             if mq.TLO.Me.State():lower() == "feign" or mq.TLO.Me.Sitting() then
                 RGMercsLogger.log_debug("Standing up to Engage Target")
                 mq.TLO.Me.Stand()
-                mq.cmdf("/nav locyxz %02f %02f %02f log=off", start_y, start_x, start_z)
+                mq.cmdf("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
                 mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
             end
 

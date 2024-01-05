@@ -73,6 +73,14 @@ Config.ExpansionNameToID        = {
     ['EXPANSION_LEVEL_LS'] = 30,     -- Laurion's Song
 }
 
+Config.Constants.LogLevels      = {
+    [1] = "Errors",
+    [2] = "Warnings",
+    [3] = "Info",
+    [4] = "Debug",
+    [5] = "Verbose",
+}
+
 Config.ExpansionIDToName        = {}
 for k, v in pairs(Config.ExpansionNameToID) do Config.ExpansionIDToName[v] = k end
 
@@ -130,7 +138,7 @@ Config.DefaultConfig = {
     ['FollowMarkTarget']  = { DisplayName = "Follow Mark Target", Category = "Targeting", Tooltip = "Auto target MA target Marks.", Default = false, },
 
     -- [ DEBUG ] --
-    ['LogLevel']          = { DisplayName = "Log Level", Category = "Debug", Tooltip = "1 = Errors, 2 = Warnings, 3 = Info, 4 = Debug, 5 = Verbose", Default = 3, Min = 1, Max = 5, },
+    ['LogLevel']          = { DisplayName = "Log Level", Category = "Debug", Tooltip = "1 = Errors, 2 = Warnings, 3 = Info, 4 = Debug, 5 = Verbose", Type = "Custom", Default = 3, Min = 1, Max = 5, },
 
     -- [ ASSIST ] --
     ['OutsideAssistList'] = { DisplayName = "List of Outsiders to Assist", Category = "Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {}, },
