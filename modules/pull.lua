@@ -46,14 +46,14 @@ Module.TempSettings.PullState  = PullStates.PULL_IDLE
 
 Module.Constants               = {}
 Module.Constants.PullModes     = {
-    [1] = "Normal",
-    [2] = "Chain",
-    [3] = "Hunt",
-    [4] = "Farm",
+    "Normal",
+    "Chain",
+    "Hunt",
+    "Farm",
 }
 
 Module.Constants.PullAbilities = {
-    [1] = {
+    {
         id = "PetPull",
         Type = "Special",
         AbilityRange = 100,
@@ -62,8 +62,9 @@ Module.Constants.PullAbilities = {
             return RGMercConfig.Constants.RGPetClass:contains(RGMercConfig.Globals.CurLoadedClass)
         end,
     },
-    [2] = { id = "Taunt", Type = "Ability", DisplayName = "Taunt", AbilityRange = 10, cond = function(self) return mq.TLO.Me.Ability("Taunt")() ~= nil end, },
-    [3] = { id = "Ranged", Type = "Special", DisplayName = "Ranged", cond = function(self) return mq.TLO.Me.Inventory("ranged")() ~= nil end, },
+    { id = "Taunt",  Type = "Ability", DisplayName = "Taunt",  AbilityRange = 10,                                                       cond = function(self) return mq.TLO.Me
+        .Ability("Taunt")() ~= nil end, },
+    { id = "Ranged", Type = "Special", DisplayName = "Ranged", cond = function(self) return mq.TLO.Me.Inventory("ranged")() ~= nil end, },
 }
 
 local PullAbilityIDToName      = {}

@@ -3,6 +3,11 @@
 -- into your: MacroQuest/configs/rgmercs/class_configs/ directory
 -- so it is not patched over.
 
+-- [ NOTE ON ORDERING ] --
+-- Order matters! Lua will implicitly iterate everything in an array
+-- in order by default so always put the first thing you want checked
+-- towards the top of the list.
+
 local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
@@ -83,8 +88,8 @@ local _ClassConfig = {
     _version          = "0.1a",
     _author           = "Derple",
     ['Modes']         = {
-        [1] = 'Tank',
-        [2] = 'DPS',
+        'Tank',
+        'DPS',
     },
     ['Themes']        = {
         ['Tank'] = {
@@ -105,484 +110,484 @@ local _ClassConfig = {
     },
     ['ItemSets']      = {
         ['Epic'] = {
-            [1] = "Innoruuk's Dark Blessing",
-            [2] = "Innoruuk's Voice",
+            "Innoruuk's Dark Blessing",
+            "Innoruuk's Voice",
         },
     },
     ['AbilitySets']   = {
         ['Mantle'] = {
-            [1] = "Malarian Mantle",
-            [2] = "Gorgon Mantle",
-            [3] = "Recondite Mantle",
-            [4] = "Bonebrood Mantle",
-            [5] = "Doomscale Mantle",
-            [6] = "Krellnakor Mantle",
-            [7] = "Restless Mantle",
-            [8] = "Fyrthek Mantle",
-            [9] = "Geomimus Mantle",
+            "Malarian Mantle",
+            "Gorgon Mantle",
+            "Recondite Mantle",
+            "Bonebrood Mantle",
+            "Doomscale Mantle",
+            "Krellnakor Mantle",
+            "Restless Mantle",
+            "Fyrthek Mantle",
+            "Geomimus Mantle",
         },
         ['Carapace'] = {
-            [1] = "Soul Carapace",
-            [2] = "Umbral Carapace",
-            [3] = "Malarian Carapace",
-            [4] = "Gorgon Carapace",
-            [5] = "Sholothian Carapace",
-            [6] = "Grelleth's Carapace",
-            [7] = "Vizat's Carapace",
-            [8] = "Tylix's Carapace",
-            [9] = "Cadcane's Carapace",
-            [10] = "Xetheg's Carapace",
-            [11] = "Kanghammer's Carapace",
+            "Soul Carapace",
+            "Umbral Carapace",
+            "Malarian Carapace",
+            "Gorgon Carapace",
+            "Sholothian Carapace",
+            "Grelleth's Carapace",
+            "Vizat's Carapace",
+            "Tylix's Carapace",
+            "Cadcane's Carapace",
+            "Xetheg's Carapace",
+            "Kanghammer's Carapace",
         },
         ['EndRegen'] = {
-            [1] = "Second Wind",
-            [2] = "Third Wind",
-            [3] = "Fourth Wind",
-            [4] = "Respite",
-            [5] = "Reprieve",
-            [6] = "Rest",
-            [7] = "Breather",
-            [8] = "Hiatus",
-            [9] = "Relax",
-            [10] = "Night's Calming",
-            [11] = "Convalesce",
+            "Second Wind",
+            "Third Wind",
+            "Fourth Wind",
+            "Respite",
+            "Reprieve",
+            "Rest",
+            "Breather",
+            "Hiatus",
+            "Relax",
+            "Night's Calming",
+            "Convalesce",
         },
         ['Blade'] = {
-            [1] = "Incapacitating Blade",
-            [2] = "Grisly Blade",
-            [3] = "Gouging Blade",
-            [4] = "Gashing Blade",
-            [5] = "Lacerating Blade",
-            [6] = "Wounding Blade",
-            [7] = "Rending Blade",
+            "Incapacitating Blade",
+            "Grisly Blade",
+            "Gouging Blade",
+            "Gashing Blade",
+            "Lacerating Blade",
+            "Wounding Blade",
+            "Rending Blade",
         },
         ['Crimson'] = {
-            [1] = "Crimson Blade",
-            [2] = "Scarlet Blade",
-            [3] = "Carmine Blade",
-            [4] = "Claret Blade",
-            [5] = "Cerise Blade",
-            [6] = "Sanguine Blade",
-            [7] = "Incarnadine Blade",
+            "Crimson Blade",
+            "Scarlet Blade",
+            "Carmine Blade",
+            "Claret Blade",
+            "Cerise Blade",
+            "Sanguine Blade",
+            "Incarnadine Blade",
         },
         ['MeleeMit'] = {
-            [1] = "Withstand",
-            [2] = "Defy",
-            [3] = "Renounce",
-            [4] = "Reprove",
-            [5] = "Repel",
-            [6] = "Spurn",
-            [7] = "Thwart",
-            [8] = "Repudiate",
-            [9] = "Gird",
+            "Withstand",
+            "Defy",
+            "Renounce",
+            "Reprove",
+            "Repel",
+            "Spurn",
+            "Thwart",
+            "Repudiate",
+            "Gird",
         },
-        ['Deflection'] = { [1] = 'Deflection Discipline', },
-        ['LeechCurse'] = { [1] = 'Leechcurse Discipline', },
-        ['UnholyAura'] = { [1] = 'Unholy Aura Discipline', },
-        ['CurseGuard'] = { [1] = 'Cursed Guardian Discipline', },
+        ['Deflection'] = { 'Deflection Discipline', },
+        ['LeechCurse'] = { 'Leechcurse Discipline', },
+        ['UnholyAura'] = { 'Unholy Aura Discipline', },
+        ['CurseGuard'] = { 'Cursed Guardian Discipline', },
         ['PetSpell'] = {
-            [1] = "Leering Corpse",
-            [2] = "Bone Walk",
-            [3] = "Convoke Shadow",
-            [4] = "Restless Bones",
-            [5] = "Animate Dead",
-            [6] = "Summon Dead",
-            [7] = "Malignant Dead",
-            [8] = "Cackling Bones",
-            [9] = "Invoke Death",
-            [10] = "Son of Decay",
-            [11] = "Maladroit Minion",
-            [12] = "Minion of Sebilis",
-            [13] = "Minion of Fear",
-            [14] = "Minion of Sholoth",
-            [15] = "Minion of Grelleth",
-            [16] = "Minion of Vizat",
-            [17] = "Minion of T`Vem",
-            [18] = "Minion of Drendar",
-            [19] = "Minion of Itzal",
-            [20] = "Minion of Fandrel",
+            "Leering Corpse",
+            "Bone Walk",
+            "Convoke Shadow",
+            "Restless Bones",
+            "Animate Dead",
+            "Summon Dead",
+            "Malignant Dead",
+            "Cackling Bones",
+            "Invoke Death",
+            "Son of Decay",
+            "Maladroit Minion",
+            "Minion of Sebilis",
+            "Minion of Fear",
+            "Minion of Sholoth",
+            "Minion of Grelleth",
+            "Minion of Vizat",
+            "Minion of T`Vem",
+            "Minion of Drendar",
+            "Minion of Itzal",
+            "Minion of Fandrel",
         },
         ['PetHaste'] = {
-            [1] = "Gift of Fandrel",
-            [2] = "Gift of Itzal",
-            [3] = "Gift of Drendar",
-            [4] = "Gift of T`Vem",
-            [5] = "Gift of Lutzen",
-            [6] = "Gift of Urash",
-            [7] = "Gift of Dyalgem",
-            [8] = "Expatiate Death",
-            [9] = "Amplify Death",
-            [10] = "Rune of Decay",
-            [11] = "Augment Death",
-            [12] = "Strengthen Death",
+            "Gift of Fandrel",
+            "Gift of Itzal",
+            "Gift of Drendar",
+            "Gift of T`Vem",
+            "Gift of Lutzen",
+            "Gift of Urash",
+            "Gift of Dyalgem",
+            "Expatiate Death",
+            "Amplify Death",
+            "Rune of Decay",
+            "Augment Death",
+            "Strengthen Death",
         },
         ['Shroud'] = {
-            [1] = "Shroud of Death",
-            [2] = "Shroud of Chaos",
-            [3] = "Black Shroud",
-            [4] = "Shroud of Discord",
-            [5] = "Shroud of the Gloomborn",
-            [6] = "Shroud of the Blightborn",
-            [7] = "Shroud of the Plagueborne",
-            [8] = "Shroud of the Shadeborne",
-            [9] = "Shroud of the Darksworn",
-            [10] = "Shroud of the Doomscale",
-            [11] = "Shroud of the Krellnakor",
-            [12] = "Shroud of the Restless",
-            [13] = "Shroud of Zelinstein",
-            [14] = "Shroud of Rimeclaw",
+            "Shroud of Death",
+            "Shroud of Chaos",
+            "Black Shroud",
+            "Shroud of Discord",
+            "Shroud of the Gloomborn",
+            "Shroud of the Blightborn",
+            "Shroud of the Plagueborne",
+            "Shroud of the Shadeborne",
+            "Shroud of the Darksworn",
+            "Shroud of the Doomscale",
+            "Shroud of the Krellnakor",
+            "Shroud of the Restless",
+            "Shroud of Zelinstein",
+            "Shroud of Rimeclaw",
         },
         ['Horror'] = {
-            [1] = "Mental Horror",
-            [2] = "Marrowthirst Horror",
-            [3] = "Soulthirst Horror",
-            [4] = "Mindshear Horror",
-            [5] = "Amygdalan Horror",
-            [6] = "Sholothian Horror",
-            [7] = "Grelleth's Horror",
-            [8] = "Vizat's Horror",
-            [9] = "Tylix's Horror",
-            [10] = "Cadcane's Horror",
-            [11] = "Brightfeld's Horror",
-            [12] = "Mortimus' Horror",
+            "Mental Horror",
+            "Marrowthirst Horror",
+            "Soulthirst Horror",
+            "Mindshear Horror",
+            "Amygdalan Horror",
+            "Sholothian Horror",
+            "Grelleth's Horror",
+            "Vizat's Horror",
+            "Tylix's Horror",
+            "Cadcane's Horror",
+            "Brightfeld's Horror",
+            "Mortimus' Horror",
         },
         ['Skin'] = {
-            [1] = "Decrepit Skin",
-            [2] = "Umbral Skin",
-            [3] = "Malarian Skin",
-            [4] = "Gorgon Skin",
-            [5] = "Sholothian Skin",
-            [6] = "Grelleth's Skin",
-            [7] = "Vizat's Skin",
-            [8] = "Tylix's Skin",
-            [9] = "Cadcane's Skin",
-            [10] = "Xenacious' Skin",
-            [11] = "Krizad's Skin",
+            "Decrepit Skin",
+            "Umbral Skin",
+            "Malarian Skin",
+            "Gorgon Skin",
+            "Sholothian Skin",
+            "Grelleth's Skin",
+            "Vizat's Skin",
+            "Tylix's Skin",
+            "Cadcane's Skin",
+            "Xenacious' Skin",
+            "Krizad's Skin",
         },
         ['SelfDS'] = {
-            [1] = "Banshee Aura",
-            [2] = "Banshee Skin",
-            [3] = "Ghoul Skin",
-            [4] = "Zombie Skin",
-            [5] = "Helot Skin",
-            [6] = "Specter Skin",
-            [7] = "Tekuel Skin",
-            [8] = "Goblin Skin",
+            "Banshee Aura",
+            "Banshee Skin",
+            "Ghoul Skin",
+            "Zombie Skin",
+            "Helot Skin",
+            "Specter Skin",
+            "Tekuel Skin",
+            "Goblin Skin",
         },
         ['Demeanor'] = {
-            [1] = "Remorseless Demeanor",
-            [2] = "Impenitent Demeanor",
+            "Remorseless Demeanor",
+            "Impenitent Demeanor",
         },
         ['HealBurn'] = {
-            [1] = "Harmonious Disruption",
-            [2] = "Concordant Disruption",
-            [3] = "Confluent Disruption",
-            [4] = "Penumbral Disruption",
+            "Harmonious Disruption",
+            "Concordant Disruption",
+            "Confluent Disruption",
+            "Penumbral Disruption",
         },
         ['CloakHP'] = {
-            [1] = "Cloak of the Akheva",
-            [2] = "Cloak of Luclin",
-            [3] = "Cloak of Discord",
-            [4] = "Cloak of Corruption",
-            [5] = "Drape of Corruption",
-            [6] = "Drape of Korafax",
-            [7] = "Drape of Fear",
-            [8] = "Drape of the Sepulcher",
-            [9] = "Drape of the Fallen",
-            [10] = "Drape of the Wrathforged",
-            [11] = "Drape of the Magmaforged",
-            [12] = "Drape of the Iceforged",
-            [13] = "Drape of the Akheva",
-            [14] = "Drape of the Ankexfen",
+            "Cloak of the Akheva",
+            "Cloak of Luclin",
+            "Cloak of Discord",
+            "Cloak of Corruption",
+            "Drape of Corruption",
+            "Drape of Korafax",
+            "Drape of Fear",
+            "Drape of the Sepulcher",
+            "Drape of the Fallen",
+            "Drape of the Wrathforged",
+            "Drape of the Magmaforged",
+            "Drape of the Iceforged",
+            "Drape of the Akheva",
+            "Drape of the Ankexfen",
         },
         ['Covenant'] = {
-            [1] = "Grim Covenant",
-            [2] = "Venril's Covenant",
-            [3] = "Gixblat's Covenant",
-            [4] = "Worag's Covenant",
-            [5] = "Falhotep's Covenant",
-            [6] = "Livio's Covenant",
-            [7] = "Helot Covenant",
-            [8] = "Syl`Tor Covenant",
-            [9] = "Aten Ha Ra's Covenant",
-            [10] = "Kar's Covenant",
+            "Grim Covenant",
+            "Venril's Covenant",
+            "Gixblat's Covenant",
+            "Worag's Covenant",
+            "Falhotep's Covenant",
+            "Livio's Covenant",
+            "Helot Covenant",
+            "Syl`Tor Covenant",
+            "Aten Ha Ra's Covenant",
+            "Kar's Covenant",
         },
         ['CallAtk'] = {
-            [1] = "Call of Blight",
-            [2] = "Call of Darkness",
-            [3] = "Call of Dusk",
-            [4] = "Call of Shadow",
-            [5] = "Call of Gloomhaze",
-            [6] = "Call of Nightfall",
-            [7] = "Call of Twilight",
-            [8] = "Penumbral Call",
+            "Call of Blight",
+            "Call of Darkness",
+            "Call of Dusk",
+            "Call of Shadow",
+            "Call of Gloomhaze",
+            "Call of Nightfall",
+            "Call of Twilight",
+            "Penumbral Call",
         },
         ['AeTaunt'] = {
-            [1] = "Dread Gaze",
-            [2] = "Vilify",
-            [3] = "Revile",
-            [4] = "Burst of Spite",
-            [5] = "Loathing",
-            [6] = "Abhorrence",
-            [7] = "Antipathy",
-            [8] = "Animus",
+            "Dread Gaze",
+            "Vilify",
+            "Revile",
+            "Burst of Spite",
+            "Loathing",
+            "Abhorrence",
+            "Antipathy",
+            "Animus",
         },
         ['PoisonDot'] = {
-            [1] = "Blood of Pain",
-            [2] = "Blood of Hate",
-            [3] = "Blood of Discord",
-            [4] = "Blood of Inruku",
-            [5] = "Blood of the Blacktalon",
-            [6] = "Blood of the Blackwater",
-            [7] = "Blood of Laarthik",
-            [8] = "Blood of Malthiasiss",
-            [9] = "Blood of Korum",
-            [10] = "Blood of Ralstok",
-            [11] = "Blood of Bonemaw",
-            [12] = "Blood of Drakus",
-            [13] = "Blood of Ikatiar",
-            [14] = "Blood of Tearc",
-            [15] = "Blood of Shoru",
+            "Blood of Pain",
+            "Blood of Hate",
+            "Blood of Discord",
+            "Blood of Inruku",
+            "Blood of the Blacktalon",
+            "Blood of the Blackwater",
+            "Blood of Laarthik",
+            "Blood of Malthiasiss",
+            "Blood of Korum",
+            "Blood of Ralstok",
+            "Blood of Bonemaw",
+            "Blood of Drakus",
+            "Blood of Ikatiar",
+            "Blood of Tearc",
+            "Blood of Shoru",
         },
         ['Spearnuke'] = {
-            [1] = "Spike of Disease",
-            [2] = "Spear of Disease",
-            [3] = "Spear of Pain",
-            [4] = "Spear of Plague",
-            [5] = "Spear of Decay",
-            [6] = "Miasmic Spear",
-            [7] = "Spear of Muram",
-            [8] = "Rotroot Spear",
-            [9] = "Rotmarrow Spear",
-            [10] = "Malarian Spear",
-            [11] = "Gorgon Spear",
-            [12] = "Spear of Sholoth",
-            [13] = "Spear of Grelleth",
-            [14] = "Spear of Vizat",
-            [15] = "Spear of Tylix",
-            [16] = "Spear of Cadcane",
-            [17] = "Spear of Bloodwretch",
-            [18] = "Spear of Lazam",
+            "Spike of Disease",
+            "Spear of Disease",
+            "Spear of Pain",
+            "Spear of Plague",
+            "Spear of Decay",
+            "Miasmic Spear",
+            "Spear of Muram",
+            "Rotroot Spear",
+            "Rotmarrow Spear",
+            "Malarian Spear",
+            "Gorgon Spear",
+            "Spear of Sholoth",
+            "Spear of Grelleth",
+            "Spear of Vizat",
+            "Spear of Tylix",
+            "Spear of Cadcane",
+            "Spear of Bloodwretch",
+            "Spear of Lazam",
         },
         ['BondTap'] = {
-            [1] = "Bond of Tatalros",
-            [2] = "Bond of Bynn",
-            [3] = "Bond of Vulak",
-            [4] = "Bond of Xalgoz",
-            [5] = "Bond of Bonemaw",
-            [6] = "Bond of Ralstok",
-            [7] = "Bond of Korum",
-            [8] = "Bond of Malthiasiss",
-            [9] = "Bond of Laarthik",
-            [10] = "Bond of the Blackwater",
-            [11] = "Bond of the Blacktalon",
-            [12] = "Bond of Inruku",
-            [13] = "Bond of Death",
-            [14] = "Vampiric Curse",
+            "Bond of Tatalros",
+            "Bond of Bynn",
+            "Bond of Vulak",
+            "Bond of Xalgoz",
+            "Bond of Bonemaw",
+            "Bond of Ralstok",
+            "Bond of Korum",
+            "Bond of Malthiasiss",
+            "Bond of Laarthik",
+            "Bond of the Blackwater",
+            "Bond of the Blacktalon",
+            "Bond of Inruku",
+            "Bond of Death",
+            "Vampiric Curse",
         },
         ['DireTap'] = {
-            [1] = "Dire Implication",
-            [2] = "Dire Accusation",
-            [3] = "Dire Allegation",
-            [4] = "Dire Insinuation",
-            [5] = "Dire Declaration",
-            [6] = "Dire Testimony",
-            [7] = "Dire Indictment",
-            [8] = "Dire Censure",
-            [9] = "Dire Rebuke",
+            "Dire Implication",
+            "Dire Accusation",
+            "Dire Allegation",
+            "Dire Insinuation",
+            "Dire Declaration",
+            "Dire Testimony",
+            "Dire Indictment",
+            "Dire Censure",
+            "Dire Rebuke",
         },
         ['LifeTap'] = {
-            [1] = "Touch of Flariton",
-            [2] = "Touch of Txiki",
-            [3] = "Touch of the Wailing Three",
-            [4] = "Touch of the Soulbleeder",
-            [5] = "Touch of Lanys",
-            [6] = "Touch of Dyalgem",
-            [7] = "Touch of Urash",
-            [8] = "Touch of Falsin",
-            [9] = "Touch of Lutzen",
-            [10] = "Touch of T`Vem",
-            [11] = "Touch of Drendar",
-            [12] = "Touch of Severan",
-            [13] = "Touch of the Devourer",
-            [14] = "Touch of Draygun",
-            [15] = "Touch of Innoruuk",
-            [16] = "Touch of Volatis",
-            [17] = "Drain Soul",
-            [18] = "Drain Spirit",
-            [19] = "Spirit Tap",
-            [20] = "Siphon Life",
-            [21] = "Life Leech",
-            [22] = "Lifedraw",
-            [23] = "Lifespike",
-            [24] = "LifeTap",
+            "Touch of Flariton",
+            "Touch of Txiki",
+            "Touch of the Wailing Three",
+            "Touch of the Soulbleeder",
+            "Touch of Lanys",
+            "Touch of Dyalgem",
+            "Touch of Urash",
+            "Touch of Falsin",
+            "Touch of Lutzen",
+            "Touch of T`Vem",
+            "Touch of Drendar",
+            "Touch of Severan",
+            "Touch of the Devourer",
+            "Touch of Draygun",
+            "Touch of Innoruuk",
+            "Touch of Volatis",
+            "Drain Soul",
+            "Drain Spirit",
+            "Spirit Tap",
+            "Siphon Life",
+            "Life Leech",
+            "Lifedraw",
+            "Lifespike",
+            "LifeTap",
         },
         ['BuffTap'] = {
-            [1] = "Touch of Mortimus",
-            [2] = "Touch of Namdrows",
-            [3] = "Touch of Zlandicar",
-            [4] = "Touch of the Wailing Three",
-            [5] = "Touch of Kildrukaun",
-            [6] = "Touch of Tharoff",
-            [7] = "Touch of Iglum",
-            [8] = "Touch of Piqiorn",
-            [9] = "Touch of Klonda",
-            [10] = "Touch of Holmein",
-            [11] = "Touch of Hemofax",
-            [12] = "Siphon Strength",
-            [13] = "Despair",
-            [14] = "Scream of Hate",
-            [15] = "Scream of Pain",
-            [16] = "Shroud of Hate",
-            [17] = "Shroud of Pain",
-            [18] = "Abduction of Strength",
-            [19] = "Torrent of Hate",
-            [20] = "Torrent of Pain",
-            [21] = "Torrent of Fatigue",
-            [22] = "Aura of Pain",
-            [23] = "Aura of Hate",
-            [24] = "Theft of Pain",
-            [25] = "Theft of Hate",
-            [26] = "Theft of Agony",
+            "Touch of Mortimus",
+            "Touch of Namdrows",
+            "Touch of Zlandicar",
+            "Touch of the Wailing Three",
+            "Touch of Kildrukaun",
+            "Touch of Tharoff",
+            "Touch of Iglum",
+            "Touch of Piqiorn",
+            "Touch of Klonda",
+            "Touch of Holmein",
+            "Touch of Hemofax",
+            "Siphon Strength",
+            "Despair",
+            "Scream of Hate",
+            "Scream of Pain",
+            "Shroud of Hate",
+            "Shroud of Pain",
+            "Abduction of Strength",
+            "Torrent of Hate",
+            "Torrent of Pain",
+            "Torrent of Fatigue",
+            "Aura of Pain",
+            "Aura of Hate",
+            "Theft of Pain",
+            "Theft of Hate",
+            "Theft of Agony",
         },
         ['BiteTap'] = {
-            [1] = "Zevfeer's Bite",
-            [2] = "Inruku's Bite",
-            [3] = "Ancient: Bite of Muram",
-            [4] = "Blacktalon Bite",
-            [5] = "Blackwater Bite",
-            [6] = "Laarthik's Bite",
-            [7] = "Malthiasiss's Bite",
-            [8] = "Korum's Bite",
-            [9] = "Ralstok's Bite",
-            [10] = "Bonemaw's Bite",
-            [11] = "Xalgoz's Bite",
-            [12] = "Vulak's Bite",
-            [13] = "Cruor's Bite",
+            "Zevfeer's Bite",
+            "Inruku's Bite",
+            "Ancient: Bite of Muram",
+            "Blacktalon Bite",
+            "Blackwater Bite",
+            "Laarthik's Bite",
+            "Malthiasiss's Bite",
+            "Korum's Bite",
+            "Ralstok's Bite",
+            "Bonemaw's Bite",
+            "Xalgoz's Bite",
+            "Vulak's Bite",
+            "Cruor's Bite",
         },
         ['ForPower'] = {
-            [1] = "Challenge for Power",
-            [2] = "Trial for Power",
-            [3] = "Charge for Power",
-            [4] = "Confrontation for Power",
-            [5] = "Provocation for Power",
-            [6] = "Demand for Power",
-            [7] = "Impose for Power",
-            [8] = "Refute for Power",    -- TBL - 107
-            [9] = "Protest for Power",   -- TOV - 112
-            [10] = "Parlay for Power",   -- TOL - 117
-            [11] = "Petition for Power", -- LS - 122
+            "Challenge for Power",
+            "Trial for Power",
+            "Charge for Power",
+            "Confrontation for Power",
+            "Provocation for Power",
+            "Demand for Power",
+            "Impose for Power",
+            "Refute for Power",   -- TBL - 107
+            "Protest for Power",  -- TOV - 112
+            "Parlay for Power",   -- TOL - 117
+            "Petition for Power", -- LS - 122
         },
         ['Terror'] = {
-            [1] = "Terror of Darkness",
-            [2] = "Terror of Shadows",
-            [3] = "Terror of Death",
-            [4] = "Terror of Terris",
-            [5] = "Terror of Thule",
-            [6] = "Terror of Discord",
-            [7] = "Terror of Vergalid",
-            [8] = "Terror of the Soulbleeder",
-            [9] = "Terror of Jelvalak",
-            [10] = "Terror of Rerekalen",
-            [11] = "Terror of Desalin",
-            [12] = "Terror of Poira",
-            [13] = "Terror of Narus",
-            [14] = "Terror of Kra`Du",
-            [15] = "Terror of Mirenilla",
-            [16] = "Terror of Ander",
-            [17] = "Terror of Tarantis",
+            "Terror of Darkness",
+            "Terror of Shadows",
+            "Terror of Death",
+            "Terror of Terris",
+            "Terror of Thule",
+            "Terror of Discord",
+            "Terror of Vergalid",
+            "Terror of the Soulbleeder",
+            "Terror of Jelvalak",
+            "Terror of Rerekalen",
+            "Terror of Desalin",
+            "Terror of Poira",
+            "Terror of Narus",
+            "Terror of Kra`Du",
+            "Terror of Mirenilla",
+            "Terror of Ander",
+            "Terror of Tarantis",
         },
         ['TempHP'] = {
-            [1] = "Stormwall Stance",
-            [2] = "Defiant Stance",
-            [3] = "Staunch Stance",
-            [4] = "Steadfast Stance",
-            [5] = "Stoic Stance",
-            [6] = "Stubborn Stance",
-            [7] = "Steely Stance",
-            [8] = "Adamant Stance",
-            [9] = "Unwavering Stance",
+            "Stormwall Stance",
+            "Defiant Stance",
+            "Staunch Stance",
+            "Steadfast Stance",
+            "Stoic Stance",
+            "Stubborn Stance",
+            "Steely Stance",
+            "Adamant Stance",
+            "Unwavering Stance",
         },
         ['Dicho'] = {
-            [1] = "Dichotomic Fang",
-            [2] = "Dissident Fang",
-            [3] = "Composite Fang",
-            [4] = "Ecliptic Fang",
+            "Dichotomic Fang",
+            "Dissident Fang",
+            "Composite Fang",
+            "Ecliptic Fang",
         },
         ['Torrent'] = {
-            [1] = "Torrent of Hate",
-            [2] = "Torrent of Pain",
-            [3] = "Torrent of Agony",
-            [4] = "Torrent of Misery",
-            [5] = "Torrent of Suffering",
-            [6] = "Torrent of Anguish",
-            [7] = "Torrent of Melancholy",
-            [8] = "Torrent of Desolation",
+            "Torrent of Hate",
+            "Torrent of Pain",
+            "Torrent of Agony",
+            "Torrent of Misery",
+            "Torrent of Suffering",
+            "Torrent of Anguish",
+            "Torrent of Melancholy",
+            "Torrent of Desolation",
         },
         ['SnareDOT'] = {
-            [1] = "Clinging Darkness",
-            [2] = "Engulfing Darkness",
-            [3] = "Dooming Darkness",
-            [4] = "Cascading Darkness",
-            [5] = "Festering Darkness",
-            [6] = "Despairing Darkness",
-            [7] = "Suppurating Darkness",
-            [8] = "Smoldering Darkness",
-            [9] = "Spreading Darkness",
-            [10] = "Putrefying Darkness",
-            [11] = "Pestilent Darkness",
-            [12] = "Virulent Darkness",
-            [13] = "Vitriolic Darkness",
+            "Clinging Darkness",
+            "Engulfing Darkness",
+            "Dooming Darkness",
+            "Cascading Darkness",
+            "Festering Darkness",
+            "Despairing Darkness",
+            "Suppurating Darkness",
+            "Smoldering Darkness",
+            "Spreading Darkness",
+            "Putrefying Darkness",
+            "Pestilent Darkness",
+            "Virulent Darkness",
+            "Vitriolic Darkness",
         },
         ['Acrimony'] = {
-            [1] = "Undivided Acrimony",
-            [2] = "Unbroken Acrimony",
-            [3] = "Unflinching Acrimony",
-            [4] = "Unyielding Acrimony",
-            [5] = "Unending Acrimony",
-            [6] = "Unrelenting Acrimony",
-            [7] = "Unconditional Acrimony",
+            "Undivided Acrimony",
+            "Unbroken Acrimony",
+            "Unflinching Acrimony",
+            "Unyielding Acrimony",
+            "Unending Acrimony",
+            "Unrelenting Acrimony",
+            "Unconditional Acrimony",
         },
         ['SpiteStrike'] = {
-            [1] = "Spite of Ronak",
-            [2] = "Spite of Kra`Du",
-            [3] = "Spite of Mirenilla",
+            "Spite of Ronak",
+            "Spite of Kra`Du",
+            "Spite of Mirenilla",
         },
         ['ReflexStrike'] = {
-            [1] = "Reflexive Resentment",
-            [2] = "Reflexive Rancor",
-            [3] = "Reflexive Revulsion",
+            "Reflexive Resentment",
+            "Reflexive Rancor",
+            "Reflexive Revulsion",
         },
         ['DireDot'] = {
-            [1] = "Dire Constriction",
-            [2] = "Dire Restriction",
-            [3] = "Dire Stenosis",
-            [4] = "Dire Stricture",
-            [5] = "Dire Strangulation",
-            [6] = "Dire Coarctation",
-            [7] = "Dire Convulsion",
-            [8] = "Dire Seizure",
-            [9] = "Dire Squelch",
-            [10] = "Dark Constriction",
+            "Dire Constriction",
+            "Dire Restriction",
+            "Dire Stenosis",
+            "Dire Stricture",
+            "Dire Strangulation",
+            "Dire Coarctation",
+            "Dire Convulsion",
+            "Dire Seizure",
+            "Dire Squelch",
+            "Dark Constriction",
         },
         ['AllianceNuke'] = {
-            [1] = "Bloodletting Coalition",
-            [2] = "Bloodletting Alliance",
-            [3] = "Bloodletting Covenant",
-            [4] = "Bloodletting Conjunction",
+            "Bloodletting Coalition",
+            "Bloodletting Alliance",
+            "Bloodletting Covenant",
+            "Bloodletting Conjunction",
         },
         ['InfluenceDisc'] = {
-            [1] = "Insolent Influence",
-            [2] = "Impudent Influence",
-            [3] = "Impenitent Influence",
-            [4] = "Impertinent Influence",
-            [5] = "Ignominious Influence",
+            "Insolent Influence",
+            "Impudent Influence",
+            "Impenitent Influence",
+            "Impertinent Influence",
+            "Ignominious Influence",
         },
     },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        [1] = { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" end, },
-        [2] = {
+        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" end, },
+        {
             name = 'Burn',
             state = 1,
             steps = 1,
@@ -592,7 +597,7 @@ local _ClassConfig = {
                     RGMercUtils.BurnCheck(self.settings)
             end,
         },
-        [3] = {
+        {
             name = 'DPS',
             state = 1,
             steps = 1,
@@ -604,7 +609,7 @@ local _ClassConfig = {
     },
     ['Rotations']     = {
         ['Downtime'] = {
-            [1] = {
+            {
                 name = "Dark Lord's Unity (Azia)",
                 type = "AA",
                 tooltip = Tooltips.DLUA,
@@ -613,7 +618,7 @@ local _ClassConfig = {
                     return castDLU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).RankName())
                 end,
             },
-            [2] = {
+            {
                 name = "Skin",
                 type = "Spell",
                 tooltip = Tooltips.Skin,
@@ -622,7 +627,7 @@ local _ClassConfig = {
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [3] = {
+            {
                 name = "Horror",
                 type = "Spell",
                 tooltip = Tooltips.Horror,
@@ -631,7 +636,7 @@ local _ClassConfig = {
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [4] = {
+            {
                 name = "Demeanor",
                 type = "Spell",
                 tooltip = Tooltips.Demeanor,
@@ -640,7 +645,7 @@ local _ClassConfig = {
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [5] = {
+            {
                 name = "CloakHP",
                 type = "Spell",
                 tooltip = Tooltips.CloakHP,
@@ -649,7 +654,7 @@ local _ClassConfig = {
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [6] = {
+            {
                 name = "SelfDS",
                 type = "Spell",
                 tooltip = Tooltips.SelfDS,
@@ -659,7 +664,7 @@ local _ClassConfig = {
                         RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [7] = {
+            {
                 name = "Shroud",
                 type = "Spell",
                 tooltip = Tooltips.Shroud,
@@ -668,7 +673,7 @@ local _ClassConfig = {
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [8] = {
+            {
                 name = "Covenant",
                 type = "Spell",
                 tooltip = Tooltips.Covenant,
@@ -677,7 +682,7 @@ local _ClassConfig = {
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [9] = {
+            {
                 name = "CallAtk",
                 type = "Spell",
                 tooltip = Tooltips.CallAtk,
@@ -686,7 +691,7 @@ local _ClassConfig = {
                     return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [10] = {
+            {
                 name = "TempHP",
                 type = "Spell",
                 tooltip = Tooltips.TempHP,
@@ -695,7 +700,7 @@ local _ClassConfig = {
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [11] = {
+            {
                 name = "HealBurn",
                 type = "Spell",
                 tooltip = Tooltips.HealBurn,
@@ -705,7 +710,7 @@ local _ClassConfig = {
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
-            [12] = {
+            {
                 name = "Voice of Thule",
                 type = "AA",
                 tooltip = Tooltips.VOT,
@@ -714,7 +719,7 @@ local _ClassConfig = {
                     return RGMercUtils.SelfBuffAACheck("Voice of Thule")
                 end,
             },
-            [13] = {
+            {
                 name = "PetSpell",
                 type = "Spell",
                 tooltip = Tooltips.PetSpell,
@@ -724,7 +729,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.Pet.ID() == 0 and RGMercConfig:GetSettings().DoPet and RGMercUtils.ReagentCheck(spell)
                 end,
             },
-            [14] = {
+            {
                 name = "PetHaste",
                 type = "Spell",
                 tooltip = Tooltips.PetHaste,
@@ -735,7 +740,7 @@ local _ClassConfig = {
             },
         },
         ['Burn'] = {
-            [1] = {
+            {
                 name = "Acrimony",
                 type = "DISC",
                 tooltip = Tooltips.Acrimony,
@@ -743,7 +748,7 @@ local _ClassConfig = {
                     return RGMercUtils.IsNamed(mq.TLO.Target)
                 end,
             },
-            [2] = {
+            {
                 name = "SpiteStrike",
                 type = "DISC",
                 tooltip = Tooltips.SpikeStrike,
@@ -751,7 +756,7 @@ local _ClassConfig = {
                     return RGMercUtils.IsNamed(mq.TLO.Target)
                 end,
             },
-            [3] = {
+            {
                 name = "ReflexStrike",
                 type = "DISC",
                 tooltip = Tooltips.ReflexStrike,
@@ -759,7 +764,7 @@ local _ClassConfig = {
                     return RGMercUtils.IsNamed(mq.TLO.Target)
                 end,
             },
-            [4] = {
+            {
                 name = "Harm Touch",
                 type = "AA",
                 tooltip = Tooltips.HarmTouch,
@@ -768,9 +773,9 @@ local _ClassConfig = {
                         RGMercUtils.BigBurn(self.settings)
                 end,
             },
-            [5] = { name = "Thought Leech", type = "AA", tooltip = Tooltips.ThoughtLeech, },
-            [6] = { name = "Visage of Death", type = "AA", tooltip = Tooltips.VisageOfDeath, },
-            [7] = {
+            { name = "Thought Leech",   type = "AA", tooltip = Tooltips.ThoughtLeech, },
+            { name = "Visage of Death", type = "AA", tooltip = Tooltips.VisageOfDeath, },
+            {
                 name = "Leech Touch",
                 cond = function(self)
                     return mq.TLO.Me.PctHPs() < 50
@@ -778,12 +783,12 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.LeechTouch,
             },
-            [8] = { name = "T`Vyl's Resolve", type = "AA", tooltip = Tooltips.Tyvls, },
+            { name = "T`Vyl's Resolve", type = "AA", tooltip = Tooltips.Tyvls, },
         },
         ['Debuff'] = {},
         ['Heal'] = {},
         ['DPS'] = {
-            [1] = {
+            {
                 name = "ActivateShield",
                 type = "cmd",
                 tooltip = Tooltips.ActivateShield,
@@ -793,7 +798,7 @@ local _ClassConfig = {
                 end,
                 cmd = "/bandolier activate Shield",
             },
-            [2] = {
+            {
                 name = "Activate2HS",
                 type = "cmd",
                 tooltip = Tooltips.Activate2HS,
@@ -803,7 +808,7 @@ local _ClassConfig = {
                 end,
                 cmd = "/bandolier activate 2HS",
             },
-            [3] = {
+            {
                 name = "EndRegen",
                 type = "DISC",
                 tooltip = Tooltips.EndRegen,
@@ -811,7 +816,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
-            [4] = {
+            {
                 name = "Explosion of Hatred",
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfHatred,
@@ -820,7 +825,7 @@ local _ClassConfig = {
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                 end,
             },
-            [5] = {
+            {
                 name = "Explosion of Spite",
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfSpite,
@@ -829,7 +834,7 @@ local _ClassConfig = {
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                 end,
             },
-            [6] = {
+            {
                 name = "Taunt",
                 type = "Ability",
                 tooltip = Tooltips.Taunt,
@@ -839,7 +844,7 @@ local _ClassConfig = {
                         RGMercUtils.GetTargetDistance() < 30
                 end,
             },
-            [7] = {
+            {
                 name = "Terror",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
@@ -847,7 +852,7 @@ local _ClassConfig = {
                     return RGMercConfig.Globals.IsTanking and mq.TLO.Me.SecondaryPctAggro() > 60
                 end,
             },
-            [8] = {
+            {
                 name = "MeleeMit",
                 type = "DISC",
                 tooltip = Tooltips.MeleeMit,
@@ -855,7 +860,7 @@ local _ClassConfig = {
                     return RGMercConfig.Globals.IsTanking
                 end,
             },
-            [9] = {
+            {
                 name = "ForPower",
                 type = "Spell",
                 tooltip = Tooltips.ForPower,
@@ -863,7 +868,7 @@ local _ClassConfig = {
                     return RGMercConfig.Globals.IsTanking and RGMercUtils.DotSpellCheck(self.settings, spell)
                 end,
             },
-            [10] = {
+            {
                 name = "Encroaching Darknesss",
                 tooltip = Tooltips.EncroachingDarkness,
                 type = "AA",
@@ -871,7 +876,7 @@ local _ClassConfig = {
                     return self.settings.DoSnare and RGMercUtils.DetAACheck(826)
                 end,
             },
-            [11] = {
+            {
                 name = "SnareDOT",
                 type = "Spell",
                 tooltip = Tooltips.SnareDOT,
@@ -879,7 +884,7 @@ local _ClassConfig = {
                     return self.settings.DoSnare and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Me.AltAbility(826)()
                 end,
             },
-            [12] = {
+            {
                 name = "Epic",
                 type = "Item",
                 tooltip = Tooltips.Epic,
@@ -887,7 +892,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
                 end,
             },
-            [13] = {
+            {
                 name = "LeechCurse",
                 type = "DISC",
                 tooltip = Tooltips.LeechCurse,
@@ -895,7 +900,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and mq.TLO.Me.PctHPs() < 50
                 end,
             },
-            [14] = {
+            {
                 name = "Deflection",
                 type = "DISC",
                 tooltip = Tooltips.Deflection,
@@ -903,7 +908,7 @@ local _ClassConfig = {
                     return RGMercConfig.Globals.IsTanking and mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
                 end,
             },
-            [15] = {
+            {
                 name = "Mantle",
                 type = "DISC",
                 tooltip = Tooltips.Mantle,
@@ -912,7 +917,7 @@ local _ClassConfig = {
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
-            [16] = {
+            {
                 name = "Carapace",
                 type = "DISC",
                 tooltip = Tooltips.Carapace,
@@ -921,7 +926,7 @@ local _ClassConfig = {
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
-            [17] = {
+            {
                 name = "CurseGuard",
                 type = "DISC",
                 tooltip = Tooltips.CurseGuard,
@@ -930,7 +935,7 @@ local _ClassConfig = {
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
-            [18] = {
+            {
                 name = "UnholyAura",
                 type = "DISC",
                 tooltip = Tooltips.UnholyAura,
@@ -939,7 +944,7 @@ local _ClassConfig = {
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
-            [19] = {
+            {
                 name = "PoisonDot",
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
@@ -947,7 +952,7 @@ local _ClassConfig = {
                     return RGMercUtils.DotSpellCheck(self.settings, spell)
                 end,
             },
-            [20] = {
+            {
                 name = "DireDot",
                 type = "Spell",
                 tooltip = Tooltips.DireDot,
@@ -955,7 +960,7 @@ local _ClassConfig = {
                     return RGMercUtils.DotSpellCheck(self.settings, spell)
                 end,
             },
-            [21] = {
+            {
                 name = "Torrent",
                 type = "Spell",
                 tooltip = Tooltips.Torrent,
@@ -963,7 +968,7 @@ local _ClassConfig = {
                     return self.settings.DoTorrent and not RGMercUtils.BuffActiveByID(spell.ID())
                 end,
             },
-            [22] = {
+            {
                 name = "Spearnuke",
                 type = "Spell",
                 tooltip = Tooltips.Spearnuke,
@@ -971,7 +976,7 @@ local _ClassConfig = {
                     return RGMercUtils.ManaCheck()
                 end,
             },
-            [23] = {
+            {
                 name = "BondTap",
                 type = "Spell",
                 tooltip = Tooltips.BondTap,
@@ -981,7 +986,7 @@ local _ClassConfig = {
                 end,
             },
             -- TODO: Verify this logic, it seems wrong
-            [24] = {
+            {
                 name = "Vicious Bite of Chaos",
                 type = "AA",
                 tooltip = Tooltips.ViciousBiteOfChaos,
@@ -990,7 +995,7 @@ local _ClassConfig = {
                         RGMercUtils.GetTargetDistance() < 35
                 end,
             },
-            [25] = {
+            {
                 name = "Blade",
                 type = "Disc",
                 tooltip = Tooltips.Blade,
@@ -999,7 +1004,7 @@ local _ClassConfig = {
                         RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
                 end,
             },
-            [26] = {
+            {
                 name = "Crimson",
                 type = "Disc",
                 tooltip = Tooltips.Crimson,
@@ -1008,7 +1013,7 @@ local _ClassConfig = {
                         RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
                 end,
             },
-            [27] = {
+            {
                 name = "Dicho",
                 type = "Spell",
                 tooltip = Tooltips.Dicho,
@@ -1016,7 +1021,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap
                 end,
             },
-            [28] = {
+            {
                 name = "DireTap",
                 type = "Spell",
                 tooltip = Tooltips.DireTap,
@@ -1024,7 +1029,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap
                 end,
             },
-            [29] = {
+            {
                 name = "BuffTap",
                 type = "Spell",
                 tooltip = Tooltips.BuffTap,
@@ -1033,7 +1038,7 @@ local _ClassConfig = {
                         RGMercUtils.DetSpellCheck(spell)
                 end,
             },
-            [30] = {
+            {
                 name = "BiteTap",
                 type = "Spell",
                 tooltip = Tooltips.BiteTap,
@@ -1041,7 +1046,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
                 end,
             },
-            [31] = {
+            {
                 name = "LifeTap",
                 type = "Spell",
                 tooltip = Tooltips.LifeTap,
@@ -1049,7 +1054,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
                 end,
             },
-            [32] = {
+            {
                 name = "Bash",
                 type = "Ability",
                 tooltip = Tooltips.Bash,
@@ -1058,7 +1063,7 @@ local _ClassConfig = {
                         RGMercUtils.GetTargetDistance() < 30
                 end,
             },
-            [33] = {
+            {
                 name = "Slam",
                 type = "Ability",
                 tooltip = Tooltips.Slam,
@@ -1070,100 +1075,100 @@ local _ClassConfig = {
         },
     },
     ['Spells']        = {
-        [1] = {
+        {
             gem = 1,
             spells = {
-                [1] = { name = "Terror", },
+                { name = "Terror", },
             },
         },
-        [2] = {
+        {
             gem = 2,
             spells = {
-                [1] = { name = "ForPower", },
+                { name = "ForPower", },
             },
         },
-        [3] = {
+        {
             gem = 3,
             spells = {
-                [1] = { name = "LifeTap", },
+                { name = "LifeTap", },
             },
         },
-        [4] = {
+        {
             gem = 4,
             spells = {
-                [1] = { name = "BuffTap", },
+                { name = "BuffTap", },
             },
         },
-        [5] = {
+        {
             gem = 5,
             spells = {
-                [1] = {
+                {
                     name = "SnareDOT",
                     cond = function(self) return not mq.TLO.Me.AltAbility(826)() end,
                 },
-                [2] = { name = "BondTap", },
+                { name = "BondTap", },
             },
         },
-        [6] = {
+        {
             gem = 6,
             spells = {
-                [1] = { name = "AeTaunt", },
-                [2] = { name = "DireDot", },
-                [3] = { name = "Spearnuke", },
+                { name = "AeTaunt", },
+                { name = "DireDot", },
+                { name = "Spearnuke", },
             },
         },
-        [7] = {
+        {
             gem = 7,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                [1] = { name = "DireDot", },
-                [2] = { name = "Spearnuke", },
+                { name = "DireDot", },
+                { name = "Spearnuke", },
             },
         },
-        [8] = {
+        {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                [1] = { name = "AeTaunt", },
-                [2] = { name = "Spearnuke", },
-                [3] = { name = "BiteTap", },
+                { name = "AeTaunt", },
+                { name = "Spearnuke", },
+                { name = "BiteTap", },
             },
         },
-        [9] = {
+        {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                [1] = { name = "Skin", },
+                { name = "Skin", },
             },
         },
-        [10] = {
+        {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                [1] = { name = "BondTap", },
-                [2] = { name = "BiteTap", },
-                [3] = { name = "Spearnuke", },
+                { name = "BondTap", },
+                { name = "BiteTap", },
+                { name = "Spearnuke", },
             },
         },
-        [11] = {
+        {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                [1] = { name = "TempHP", },
+                { name = "TempHP", },
             },
         },
-        [12] = {
+        {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                [1] = { name = "DireTap", },
+                { name = "DireTap", },
             },
         },
-        [13] = {
+        {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                [1] = { name = "Dicho", },
+                { name = "Dicho", },
             },
         },
     },
