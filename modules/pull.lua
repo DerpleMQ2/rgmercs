@@ -82,7 +82,7 @@ Module.DefaultConfig                   = {
     ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pulling", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
     ['PullMinLevel']       = { DisplayName = "Pull Min Level", Category = "Pulling", Tooltip = "Min Level Mobs to consider pulling", Default = mq.TLO.Me.Level() - 3, Min = 1, Max = 150, },
     ['PullMaxLevel']       = { DisplayName = "Pull Max Level", Category = "Pulling", Tooltip = "Max Level Mobs to consider pulling", Default = mq.TLO.Me.Level() + 3, Min = 1, Max = 150, },
-    ['GroupWatch']         = { DisplayName = "Enable Group Watch", Category = "Pulling", Tooltip = "0 = Off, 1 = Healers, 2 = Everyone", Default = 1, Min = 1, Max = 2, },
+    ['GroupWatch']         = { DisplayName = "Enable Group Watch", Category = "Pulling", Tooltip = "0 = Off, 1 = Healers, 2 = Everyone", Default = 1, Min = 0, Max = 2, },
     ['GroupWatchStartPct'] = { DisplayName = "Group Watch %", Category = "Pulling", Tooltip = "If your group member is above [X]% resource, start pulls again.", Default = 80, Min = 1, Max = 100, },
     ['GroupWatchStopPct']  = { DisplayName = "Group Watch %", Category = "Pulling", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 20, Min = 1, Max = 100, },
     ['PullHPPct']          = { DisplayName = "Pull HP %", Category = "Pulling", Tooltip = "Make sure you have at least this much HP %", Default = 20, Min = 1, Max = 100, },
