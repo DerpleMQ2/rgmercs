@@ -220,19 +220,21 @@ function Utils.GetBestSpell(t)
 
     for _, s in ipairs(t or {}) do
         local spell = mq.TLO.Spell(s)
-        --RGMercsLogger.log_debug("Found %s level(%d) rank(%s)", s, spell.Level(), spell.RankName())
-        if spell.Level() <= mq.TLO.Me.Level() then
-            if mq.TLO.Me.Book(spell.RankName())() or mq.TLO.Me.CombatAbility(spell.RankName())() then
-                if spell.Level() > highestLevel then
-                    highestLevel = spell.Level()
-                    selectedSpell = spell
+        if spell() ~= nil then
+            --RGMercsLogger.log_debug("Found %s level(%d) rank(%s)", s, spell.Level(), spell.RankName())
+            if spell.Level() <= mq.TLO.Me.Level() then
+                if mq.TLO.Me.Book(spell.RankName())() or mq.TLO.Me.CombatAbility(spell.RankName())() then
+                    if spell.Level() > highestLevel then
+                        highestLevel = spell.Level()
+                        selectedSpell = spell
+                    end
+                else
+                    Utils.PrintGroupMessage(string.format(
+                        "%s \aw [%s] \ax \ar MISSING SPELL \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), s,
+                        spell.RankName(), spell.Level()))
                 end
-            else
-                Utils.PrintGroupMessage(string.format(
-                    "%s \aw [%s] \ax \ar MISSING SPELL \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), s,
-                    spell.RankName(), spell.Level()))
             end
-        end
+        end -- end if spell nil check
     end
 
     if selectedSpell then
@@ -1724,27 +1726,31 @@ function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
         if not g.cond or g.cond(caller, g.gem) then
             RGMercsLogger.log_debug("\ayGem \am%d\ay will be loaded.", g.gem)
 
-            for _, s in ipairs(g.spells) do
-                local spellName = s.name
-                RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, g.gem)
-                local bestSpell = resolvedActionMap[spellName]
-                if bestSpell then
-                    local bookSpell = mq.TLO.Me.Book(bestSpell.RankName())()
-                    local pass = not s.cond or s.cond(caller)
-                    local loadedSpell = spellsToLoad[bestSpell.RankName()] or false
+            if g ~= nil and g.spells ~= nil then
+                for _, s in ipairs(g.spells) do
+                    local spellName = s.name
+                    RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, g.gem)
+                    local bestSpell = resolvedActionMap[spellName]
+                    if bestSpell then
+                        local bookSpell = mq.TLO.Me.Book(bestSpell.RankName())()
+                        local pass = not s.cond or s.cond(caller)
+                        local loadedSpell = spellsToLoad[bestSpell.RankName()] or false
 
-                    if pass and bestSpell and bookSpell and not loadedSpell then
-                        RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will load \at%s\ax ==> \ag%s", g.gem, s.name, bestSpell.RankName())
-                        spellLoadOut[g.gem] = bestSpell
-                        spellsToLoad[bestSpell.RankName()] = true
-                        break
+                        if pass and bestSpell and bookSpell and not loadedSpell then
+                            RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will load \at%s\ax ==> \ag%s", g.gem, s.name, bestSpell.RankName())
+                            spellLoadOut[g.gem] = bestSpell
+                            spellsToLoad[bestSpell.RankName()] = true
+                            break
+                        else
+                            RGMercsLogger.log_debug("    ==> \ayGem \am%d will \arNOT\ay load \at%s (pass=%s, bestSpell=%s, bookSpell=%d, loadedSpell=%s)", g.gem, s.name,
+                                pass and "TRUE" or "FALSE", bestSpell and bestSpell.RankName() or "", bookSpell or -1, loadedSpell and "TRUE" or "FALSE")
+                        end
                     else
-                        RGMercsLogger.log_debug("    ==> \ayGem \am%d will \arNOT\ay load \at%s (pass=%s, bestSpell=%s, bookSpell=%d, loadedSpell=%s)", g.gem, s.name,
-                            pass and "TRUE" or "FALSE", bestSpell and bestSpell.RankName() or "", bookSpell or -1, loadedSpell and "TRUE" or "FALSE")
+                        RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will \arNOT\ay load \at%s\ax ==> \arNo Resolved Spell!", g.gem, s.name)
                     end
-                else
-                    RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will \arNOT\ay load \at%s\ax ==> \arNo Resolved Spell!", g.gem, s.name)
                 end
+            else
+                RGMercsLogger.log_debug("    ==> No Resolved Spell! class file not configured properly")
             end
         else
             RGMercsLogger.log_debug("\arGem %d will not be loaded.", g.gem)
