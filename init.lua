@@ -1,6 +1,7 @@
 local mq        = require('mq')
 local ImGui     = require('ImGui')
 local GitCommit = require('extras.version')
+
 RGMercConfig    = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 
@@ -9,12 +10,14 @@ RGMercsConsole = nil
 local RGMercsLogger = require("utils.rgmercs_logger")
 RGMercsLogger.set_log_level(RGMercConfig:GetSettings().LogLevel)
 
-local RGMercUtils    = require("utils.rgmercs_utils")
+local RGMercUtils = require("utils.rgmercs_utils")
 
-RGMercNameds         = require("utils.rgmercs_named")
+RGMercNameds      = require("utils.rgmercs_named")
 
 -- Initialize class-based moduldes
-RGMercModules        = require("utils.rgmercs_modules").load()
+RGMercModules     = require("utils.rgmercs_modules").load()
+
+require('utils.rgmercs_datatypes')
 
 -- ImGui Variables
 local openGUI        = true
@@ -454,7 +457,8 @@ local function Main()
 
     -- If target is not attackable then turn off attack
     local aggroCheck = not mq.TLO.Target.Aggressive()
-    local pcCheck = mq.TLO.Target.Type():lower() == "pc" or ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
+    local pcCheck = (mq.TLO.Target.Type() or "none"):lower() == "pc" or
+    ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
     local mercCheck = mq.TLO.Target.Type() == "mercenary"
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or aggroCheck or pcCheck or mercCheck) then
         RGMercsLogger.log_debug("\ayTarget type check failed \aw[\atinCombat(%s) taggroCheckFailed(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
