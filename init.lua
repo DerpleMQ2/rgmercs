@@ -497,9 +497,20 @@ end)
 
 -- Binds
 local function bindHandler(cmd, ...)
+    if cmd == "pause" then
+        RGMercConfig.Globals.PauseMain = true
+        return
+    end
+
+    if cmd == "unpause" then
+        RGMercConfig.Globals.PauseMain = false
+        return
+    end
+
     local results = RGMercModules:execAll("HandleBind", cmd, ...)
 
     local processed = false
+
     for _, r in pairs(results) do processed = processed or r end
 
     if not processed then
