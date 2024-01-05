@@ -225,11 +225,24 @@ local function RGMercsGUI()
             ImGui.Separator()
 
             display_item_on_cursor()
-        end
 
-        if RGMercsConsole then
-            if ImGui.CollapsingHeader("Debug Output", ImGuiTreeNodeFlags.DefaultOpen) then
-                RGMercsConsole:Render()
+            if RGMercsConsole then
+                local changed
+                RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level", RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
+                    #RGMercConfig.Constants.LogLevels)
+
+                if changed then
+                    RGMercConfig:SaveSettings(TutorialRequired)
+                end
+
+                if ImGui.CollapsingHeader("Debug Output", ImGuiTreeNodeFlags.DefaultOpen) then
+                    ImGui.PushItemWidth(ImGui.GetContentRegionAvailVec().x)
+                    local contentSizeX, contentSizeY = ImGui.GetContentRegionAvail()
+                    contentSizeY = contentSizeY
+                    ImGui.PushFont(ImGui.ConsoleFont)
+                    RGMercsConsole:Render(ImVec2(contentSizeX, contentSizeY))
+                    ImGui.PopFont()
+                end
             end
         end
 
@@ -453,6 +466,7 @@ local function Main()
 
     RGMercModules:execAll("GiveTime", curState)
 
+    mq.doevents()
     mq.delay(100)
 end
 
@@ -524,35 +538,18 @@ mq.event("CantSee", "You cannot see your target.", function()
     mq.flushevents("CantSee")
 end)
 
-local function tooFarHandler()
-    if RGMercConfig.Globals.BackOffFlag then return end
-    if mq.TLO.Stick.Active() then
-        mq.cmdf("/stick off")
-    end
-
-    if RGMercModules:execModule("Pull", "IsPullState", "PULL_PULLING") then
-        RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target!")
-        mq.cmdf("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
-        mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
-    else
-        RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
-        if RGMercConfig:GetSettings().DoAutoEngage then
-            if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
-                mq.cmdf("/squelch /face fast")
-                if RGMercConfig:GetSettings().DoMelee then
-                    RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
-                        (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                    RGMercUtils.NavInCombat(RGMercConfig:GetSettings(), mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
-                end
-            end
-        end
-    end
-    mq.flushevents("TooFar")
-end
-
-mq.event("TooFar", "Your target is too far away, get closer!", tooFarHandler)
-mq.event("TooFar", "You can't hit them from here.", tooFarHandler)
-mq.event("TooFar", "You are too far away#*#", tooFarHandler)
+mq.event("TooFar1", "#*#Your target is too far away, get closer!", function()
+    RGMercUtils.TooFarHandler()
+    mq.flushevents("TooFar1")
+end)
+mq.event("TooFar2", "#*#You can't hit them from here.", function()
+    RGMercUtils.TooFarHandler()
+    mq.flushevents("TooFar2")
+end)
+mq.event("TooFar3", "#*#You are too far away#*#", function()
+    RGMercUtils.TooFarHandler()
+    mq.flushevents("TooFar3")
+end)
 
 -- [ END EVENTS ] --
 

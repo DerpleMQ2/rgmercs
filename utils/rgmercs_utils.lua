@@ -1133,7 +1133,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
         mq.TLO.Me.Stand()
     end
 
-    if target() and target.ID() == autoTargetId and mq.TLO.Target.Distance() <= config.AssistRange then
+    if target() and (target.ID() or 0) == autoTargetId and (mq.TLO.Target.Distance() or 0) <= config.AssistRange then
         if config.DoMelee then
             if mq.TLO.Me.Sitting() then
                 mq.TLO.Me.Stand()
@@ -1315,7 +1315,7 @@ function Utils.MATargetScan(radius, zradius)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.Type():lower() == "auto hater" then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
             RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
             if xtSpawn.Distance() <= radius then
                 -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
@@ -2212,6 +2212,32 @@ function Utils.LoadSpellLoadOut(t)
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
             Utils.MemorizeSpell(gem, selectedRank)
+        end
+    end
+end
+
+function Utils.TooFarHandler()
+    RGMercsLogger.log_debug("tooFarHandler()")
+    if RGMercConfig.Globals.BackOffFlag then return end
+    if mq.TLO.Stick.Active() then
+        mq.cmdf("/stick off")
+    end
+
+    if RGMercModules:execModule("Pull", "IsPullState", "PULL_PULLING") then
+        RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target!")
+        mq.cmdf("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
+        mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
+    else
+        RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
+        if RGMercConfig:GetSettings().DoAutoEngage then
+            if Utils.OkToEngage(mq.TLO.Target.ID() or 0) then
+                mq.cmdf("/squelch /face fast")
+                if RGMercConfig:GetSettings().DoMelee then
+                    RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
+                        (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
+                    Utils.NavInCombat(RGMercConfig:GetSettings(), mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+                end
+            end
         end
     end
 end
