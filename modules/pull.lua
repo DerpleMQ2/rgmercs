@@ -1112,7 +1112,7 @@ end
 
 function Module:DoGetState()
     -- Reture a reasonable state if queried
-    return "Running..."
+    return PullStatesIDToName[self.TempSettings.PullState]
 end
 
 ---@param cmd string
