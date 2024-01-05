@@ -339,7 +339,9 @@ end
 ---@param id number
 ---@return table
 function Module:GetWPById(id)
-    return (id <= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()]) and self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] or { x = 0, y = 0, z = 0, }
+    return (self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] and
+            (id <= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()])) and
+        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] or { x = 0, y = 0, z = 0, }
 end
 
 ---@param listName string
