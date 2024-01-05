@@ -1,3 +1,8 @@
+-- [ README: Customization ] --
+-- If you want to make customizations to this file, please put it
+-- into your: MacroQuest/configs/rgmercs/class_configs/ directory
+-- so it is not patched over.
+
 local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
