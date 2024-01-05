@@ -62,7 +62,7 @@ Module.Constants.PullAbilities = {
             return RGMercConfig.Constants.RGPetClass:contains(RGMercConfig.Globals.CurLoadedClass)
         end,
     },
-    [2] = { id = "Taunt", Type = "Ability", DisplayName = "Taunt", AbilityRange = 30, cond = function(self) return mq.TLO.Me.Ability("Taunt")() ~= nil end, },
+    [2] = { id = "Taunt", Type = "Ability", DisplayName = "Taunt", AbilityRange = 10, cond = function(self) return mq.TLO.Me.Ability("Taunt")() ~= nil end, },
     [3] = { id = "Ranged", Type = "Special", DisplayName = "Ranged", cond = function(self) return mq.TLO.Me.Inventory("ranged")() ~= nil end, },
 }
 
