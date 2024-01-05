@@ -62,8 +62,16 @@ Module.Constants.PullAbilities = {
             return RGMercConfig.Constants.RGPetClass:contains(RGMercConfig.Globals.CurLoadedClass)
         end,
     },
-    { id = "Taunt",  Type = "Ability", DisplayName = "Taunt",  AbilityRange = 10,                                                       cond = function(self) return mq.TLO.Me
-        .Ability("Taunt")() ~= nil end, },
+    {
+        id = "Taunt",
+        Type = "Ability",
+        DisplayName = "Taunt",
+        AbilityRange = 10,
+        cond = function(self)
+            return mq.TLO.Me
+                .Ability("Taunt")() ~= nil
+        end,
+    },
     { id = "Ranged", Type = "Special", DisplayName = "Ranged", cond = function(self) return mq.TLO.Me.Inventory("ranged")() ~= nil end, },
 }
 
@@ -1095,6 +1103,11 @@ end
 function Module:OnZone()
     -- Zone Handler
     self.settings.DoPull = false
+end
+
+function Module:DoGetState()
+    -- Reture a reasonable state if queried
+    return "Running..."
 end
 
 ---@param cmd string
