@@ -1,5 +1,5 @@
 return {
-    'derple',
+    'Derple',
     'Morisato',
     'Greyn Artestre',
     'Postleaf',
