@@ -547,9 +547,11 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             return false
         end
 
+        local spellRequiredMem = false
         if not me.Gem(spellName)() then
             RGMercsLogger.log_debug("\ay%s is not memorized - meming!", spellName)
             Utils.MemorizeSpell(USEGEM, spellName, 5000)
+            spellRequiredMem = true
         end
 
         if not me.Gem(spellName)() then
@@ -557,7 +559,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             return false
         end
 
-        Utils.WaitCastReady(spellName, 5000)
+        Utils.WaitCastReady(spellName, spellRequiredMem and 5000 or (5 * 60 * 100))
 
         Utils.ActionPrep()
 
@@ -713,7 +715,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
 
     if oldSpellInSlot() and mq.TLO.Me.Gem(USEGEM)() ~= oldSpellInSlot.Name() then
         RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, USEGEM)
-        Utils.MemorizeSpell(USEGEM, oldSpellInSlot.Name(), 5000)
+        Utils.MemorizeSpell(USEGEM, oldSpellInSlot.Name(), 10000)
     end
 
     -- Move to the next step

@@ -1,39 +1,31 @@
 local mq = require 'mq'
 
----@class RGMercsType
+---@class RGMercsModuleType
 ---@field name string
 
 ---@type DataType
-local rgMercsType = mq.DataType.new('RGMercs', {
+local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
     Members = {
-        --- Data Member: Name retrieves the counter's name.
-        Name = function(_)
-            local ret = "RGMercs Modules Loaded: "
-            for _, m in pairs(RGMercModules:getModuleOrderedNames()) do
-                ret = ret .. m
-                ret = ret .. ", "
-            end
-            return 'string', ret
+        Name = function(_, self)
+            return 'string', string.format("RGMercs [Module: %s/%s] by: %s", self.name, self._version, self.author)
+        end,
+
+        State = function(_, self)
+            return 'string', self:DoGetState()
         end,
     },
 
     Methods = {
     },
 
-    ToString = function()
-        return string.format("RGMercs [%s/%s] by: %s running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
-            RGMercConfig.Globals.CurLoadedChar,
-            RGMercConfig.Globals.CurLoadedClass)
+    ToString = function(self)
+        return self.name
     end,
 })
 
----@type { [string]: RGMercsType }
-local rgMercsTLO = {}
-
----@return MQType
----@return RGMercsType
+---@return MQType, RGMercsModuleType
 local function RGMercsTLOHandler(param)
-    return rgMercsType, rgMercsTLO
+    return rgMercsModuleType, RGMercModules:getModule(param)
 end
 -- Register our TLO functions
 mq.AddTopLevelObject('RGMercs', RGMercsTLOHandler)
