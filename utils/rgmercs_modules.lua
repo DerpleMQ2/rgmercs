@@ -7,10 +7,18 @@ Modules.__index     = Modules
 function Modules.load()
     local newModules = setmetatable({
         modules = {
-            Movement = require("modules.movement").New(),
-            Travel   = require("modules.travel").New(),
-            Class    = require("modules.class").New(),
-            Pull     = require("modules.pull").New(),
+            Movement     = require("modules.movement").New(),
+            Travel       = require("modules.travel").New(),
+            Class        = require("modules.class").New(),
+            Pull         = require("modules.pull").New(),
+            Contributors = require("modules.contributors").New(),
+        },
+        module_order = {
+            [1] = "Class",
+            [2] = "Movement",
+            [3] = "Pull",
+            [4] = "Travel",
+            [5] = "Contributors",
         },
     }, Modules)
 
@@ -19,6 +27,10 @@ end
 
 function Modules:getModuleList()
     return self.modules
+end
+
+function Modules:getModuleOrderedNames()
+    return self.module_order
 end
 
 function Modules:execModule(m, fn, ...)
