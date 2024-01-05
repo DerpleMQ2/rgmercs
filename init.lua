@@ -60,15 +60,7 @@ end
 local function renderModulesTabs()
     if not RGMercConfig:SettingsLoaded() then return end
 
-    local tabNames = {}
-    for name, _ in pairs(RGMercModules:getModuleList()) do
-        table.insert(tabNames, name)
-    end
-
-    table.sort(tabNames)
-
-    for _, name in ipairs(tabNames) do
-        ImGui.TableNextColumn()
+    for _, name in ipairs(RGMercModules:getModuleOrderedNames()) do
         if ImGui.BeginTabItem(name) then
             RGMercModules:execModule(name, "Render")
             ImGui.EndTabItem()
@@ -172,7 +164,7 @@ local function RGMercsGUI()
 
             RenderTarget()
 
-            if ImGui.BeginTabBar("RGMercsTabs") then
+            if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.None) then
                 ImGui.SetItemDefaultFocus()
                 if ImGui.BeginTabItem("RGMercsMain") then
                     ImGui.Text("Current State: " .. curState)
@@ -458,6 +450,16 @@ local function Main()
 
     if RGMercUtils.ShouldKillTargetReset() then
         RGMercConfig.Globals.AutoTargetID = 0
+    end
+
+    -- If target is not attackable then turn off attack
+    local aggroCheck = not mq.TLO.Target.Aggressive()
+    local pcCheck = mq.TLO.Target.Type():lower() == "pc" or ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
+    local mercCheck = mq.TLO.Target.Type() == "mercenary"
+    if mq.TLO.Me.Combat() and (not mq.TLO.Target() or aggroCheck or pcCheck or mercCheck) then
+        RGMercsLogger.log_debug("\ayTarget type check failed \aw[\atinCombat(%s) taggroCheckFailed(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
+            mq.TLO.Me.Combat() and "True" or "False", aggroCheck and "True" or "False", pcCheck and "True" or "False", mercCheck and "True" or "False")
+        mq.cmdf("/attack off")
     end
 
     -- TODO: Fix Curing
