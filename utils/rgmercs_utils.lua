@@ -1208,23 +1208,9 @@ end
 function Utils.IsNamed(spawn)
     if not spawn() then return false end
 
-    if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() then
-        local oldTarget = mq.TLO.Target.ID()
-
-        if oldTarget ~= spawn.ID() then
-            mq.cmdf("/target id %d", spawn.ID())
-            mq.delay("3s", function() return mq.TLO.Target.ID() == spawn.ID() end)
-        end
-
-        ---@diagnostic disable-next-line: undefined-field
-        local ret = mq.TLO.SpawnMaster.HasTarget()
-
-        if oldTarget ~= mq.TLO.Target.ID() then
-            mq.cmdf("/target id %d", oldTarget)
-            mq.delay("3s", function() return mq.TLO.Target.ID() == oldTarget end)
-        end
-
-        return ret
+    ---@diagnostic disable-next-line: undefined-field
+    if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil then
+        return mq.TLO.SpawnMaster.HasSpawn(spawn.ID() or 0)
     end
 
     for _, n in ipairs(Utils.NamedList) do
@@ -1336,7 +1322,7 @@ function Utils.MATargetScan(radius, zradius)
                     return xtSpawn.ID()
                 end
 
-                if xtSpawn.Body.Name():lower() == "Giant" then
+                if (xtSpawn.Body.Name() or "none"):lower() == "Giant" then
                     return xtSpawn.ID()
                 end
 
