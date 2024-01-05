@@ -1304,7 +1304,7 @@ function Utils.MATargetScan(radius, zradius)
 
         if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
             RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
-            if xtSpawn.Distance() <= radius then
+            if (xtSpawn.Distance() or 999) <= radius then
                 -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                 -- get aggro data from the spawn data type.
                 if Utils.HaveExpansion("EXPANSION_LEVEL_ROF") then
@@ -1312,7 +1312,7 @@ function Utils.MATargetScan(radius, zradius)
                         -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
                         if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
                             RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]", xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
-                            return xtSpawn.ID()
+                            return xtSpawn.ID() or 0
                         end
                     end
                 end
@@ -1320,11 +1320,11 @@ function Utils.MATargetScan(radius, zradius)
                 -- If a name has take priority.
                 if Utils.IsNamed(xtSpawn) then
                     RGMercsLogger.log_verbose("Found Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
-                    return xtSpawn.ID()
+                    return xtSpawn.ID() or 0
                 end
 
                 if (xtSpawn.Body.Name() or "none"):lower() == "Giant" then
-                    return xtSpawn.ID()
+                    return xtSpawn.ID() or 0
                 end
 
                 if xtSpawn.PctHPs() < lowestHP then

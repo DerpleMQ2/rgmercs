@@ -598,8 +598,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
-                return combat_state ==
-                    "Combat"
+                return combat_state == "Combat"
             end,
         },
     },
