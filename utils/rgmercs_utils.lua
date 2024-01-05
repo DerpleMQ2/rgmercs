@@ -283,10 +283,10 @@ end
 
 ---@param gem integer
 ---@param spell string
-function Utils.MemorizeSpell(gem, spell)
+---@param maxWait number # max wait in ms
+function Utils.MemorizeSpell(gem, spell, maxWait)
     RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
     mq.cmdf("/memspell %d \"%s\"", gem, spell)
-    local maxWait = 5000
 
     while mq.TLO.Me.Gem(gem)() ~= spell and maxWait > 0 do
         RGMercsLogger.log_verbose("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
@@ -547,7 +547,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
 
         if not me.Gem(spellName)() then
             RGMercsLogger.log_debug("\ay%s is not memorized - meming!", spellName)
-            Utils.MemorizeSpell(USEGEM, spellName)
+            Utils.MemorizeSpell(USEGEM, spellName, 5000)
         end
 
         if not me.Gem(spellName)() then
@@ -711,7 +711,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
 
     if oldSpellInSlot() and mq.TLO.Me.Gem(USEGEM)() ~= oldSpellInSlot.Name() then
         RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, USEGEM)
-        Utils.MemorizeSpell(USEGEM, oldSpellInSlot.Name())
+        Utils.MemorizeSpell(USEGEM, oldSpellInSlot.Name(), 5000)
     end
 
     -- Move to the next step
@@ -2201,7 +2201,7 @@ function Utils.LoadSpellLoadOut(t)
         end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
-            Utils.MemorizeSpell(gem, selectedRank)
+            Utils.MemorizeSpell(gem, selectedRank, 7000)
         end
     end
 end
