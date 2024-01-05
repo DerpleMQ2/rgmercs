@@ -559,7 +559,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             return false
         end
 
-        Utils.WaitCastReady(spellName, spellRequiredMem and 5000 or (5 * 60 * 100))
+        Utils.WaitCastReady(spellName, spellRequiredMem and (5 * 60 * 100) or 5000)
 
         Utils.ActionPrep()
 
