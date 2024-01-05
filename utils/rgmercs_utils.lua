@@ -301,15 +301,18 @@ function Utils.CastReady(spell)
 end
 
 ---@param spell string
-function Utils.WaitCastReady(spell)
-    while not mq.TLO.Me.SpellReady(spell)() do
+---@param maxWait number # how many ms to wait before giving up
+function Utils.WaitCastReady(spell, maxWait)
+    while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
         mq.delay(100)
         mq.doevents()
         if Utils.GetXTHaterCount() > 0 then
             RGMercsLogger.log_debug("I was interruped by combat while waiting to cast %s.", spell)
             return
         end
-        --RGMercsLogger.log_debug("Waiting for spell '%s' to be ready...", spell)
+
+        maxWait = maxWait - 100
+        RGMercsLogger.log_verbose("Waiting for spell '%s' to be ready...", spell)
     end
 end
 
@@ -317,7 +320,7 @@ function Utils.WaitGlobalCoolDown()
     while mq.TLO.Me.SpellInCooldown() do
         mq.delay(100)
         mq.doevents()
-        --RGMercsLogger.log_debug("Waiting for spell '%s' to be ready...", spell)
+        RGMercsLogger.log_verbose("Waiting for Global Cooldown to be ready...")
     end
 end
 
@@ -552,7 +555,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             return false
         end
 
-        Utils.WaitCastReady(spellName)
+        Utils.WaitCastReady(spellName, 5000)
 
         Utils.ActionPrep()
 
