@@ -226,7 +226,7 @@ function Module:Render()
             ImGui.TableNextColumn()
             local stateData = PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
             if not stateData then
-                ImGui.PushStyleColor(ImGuiCol.Text, stateData.Color.r, stateData.Color.g, stateData.Color.b, stateData.Color.a)
+                ImGui.PushStyleColor(ImGuiCol.Text, 1, 1, 1, 1)
                 ImGui.Text("Invalid State Data... This should auto resolve.")
                 ImGui.PopStyleColor()
             else
