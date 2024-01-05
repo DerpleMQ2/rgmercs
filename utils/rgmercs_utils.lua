@@ -1210,6 +1210,7 @@ function Utils.IsNamed(spawn)
 
     ---@diagnostic disable-next-line: undefined-field
     if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil then
+        ---@diagnostic disable-next-line: undefined-field
         return mq.TLO.SpawnMaster.HasSpawn(spawn.ID() or 0)
     end
 
