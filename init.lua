@@ -1,6 +1,6 @@
 local mq        = require('mq')
 local ImGui     = require('ImGui')
-local GitCommit = require('version')
+local GitCommit = require('extras.version')
 RGMercConfig    = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 

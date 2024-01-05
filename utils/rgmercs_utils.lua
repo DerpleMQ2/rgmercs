@@ -1333,8 +1333,8 @@ function Utils.MATargetScan(radius, zradius)
                 end
 
                 if xtSpawn.PctHPs() < lowestHP then
-                    lowestHP = xtSpawn.PctHPs()
-                    killId = xtSpawn.ID()
+                    lowestHP = xtSpawn.PctHPs() or 0
+                    killId = xtSpawn.ID() or 0
                 end
             end
         end
