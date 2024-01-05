@@ -14,11 +14,11 @@ function Modules.load()
             Contributors = require("modules.contributors").New(),
         },
         module_order = {
-            [1] = "Class",
-            [2] = "Movement",
-            [3] = "Pull",
-            [4] = "Travel",
-            [5] = "Contributors",
+            "Class",
+            "Movement",
+            "Pull",
+            "Travel",
+            "Contributors",
         },
     }, Modules)
 

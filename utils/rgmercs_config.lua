@@ -34,7 +34,7 @@ Config.Constants.RGTank         = Set.new({ "WAR", "PAL", "SHD", })
 Config.Constants.RGModRod       = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD", })
 Config.Constants.RGPetClass     = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
 Config.Constants.RGMezAnims     = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
-Config.Constants.ModRods        = { [1] = "Modulation Shard", [2] = "Transvergence", [3] = "Modulation", [4] = "Modulating", }
+Config.Constants.ModRods        = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", }
 Config.Constants.SpellBookSlots = 1120
 
 Config.SubModuleSettings        = {}
@@ -74,11 +74,11 @@ Config.ExpansionNameToID        = {
 }
 
 Config.Constants.LogLevels      = {
-    [1] = "Errors",
-    [2] = "Warnings",
-    [3] = "Info",
-    [4] = "Debug",
-    [5] = "Verbose",
+    "Errors",
+    "Warnings",
+    "Info",
+    "Debug",
+    "Verbose",
 }
 
 Config.ExpansionIDToName        = {}
