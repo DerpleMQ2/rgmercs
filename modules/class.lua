@@ -1,8 +1,9 @@
 -- Sample Basic Class Module
-local mq                           = require('mq')
-local RGMercsLogger                = require("utils.rgmercs_logger")
-local RGMercUtils                  = require("utils.rgmercs_utils")
-local Set                          = require("mq.Set")
+local mq            = require('mq')
+local RGMercsLogger = require("utils.rgmercs_logger")
+local RGMercUtils   = require("utils.rgmercs_utils")
+local Set           = require("mq.Set")
+require('utils.rgmercs_datatypes')
 
 local Module                       = { _version = '0.1a', name = "Class", author = 'Derple', }
 Module.__index                     = Module
@@ -192,10 +193,6 @@ function Module:ResetRotation()
 end
 
 function Module:GetRotationTable(mode)
-    if RGMercConfig.Globals.IsTanking and self.ClassConfig then
-        return self.ClassConfig.Rotations[mode]
-    end
-
     return self.ClassConfig and self.ClassConfig.Rotations[mode] or {}
 end
 
@@ -252,6 +249,32 @@ end
 
 function Module:OnZone()
     -- Zone Handler
+end
+
+function Module:DoGetState()
+    -- Reture a reasonable state if queried
+    local actionMap = "Action Map\n"
+    actionMap = actionMap .. "-=-=-=-=-=\n"
+    for k, v in pairs(self.ResolvedActionMap) do
+        actionMap = actionMap .. string.format("%-20s ==> %s\n", k, (v.name or k))
+    end
+    local spellLoadout = "Spell Loadout\n-=-=-=-=-=-=-\n"
+
+    for g, s in pairs(self.SpellLoadOut) do
+        spellLoadout = spellLoadout .. string.format("[%-2d] :: %s\n", g, (s.RankName() or "None"))
+    end
+
+    local rotationStates = "Current Rotation States\n-=-=-=-=-=-=-=-\n"
+    for idx, r in ipairs(self.TempSettings.RotationStates) do
+        local actionEntry = self.ClassConfig.Rotations[r.name][r.state or 1]
+        rotationStates = rotationStates ..
+            string.format("[%d] %s :: %d :: Type: %s Action: %s\n", idx, r.name, r.state or 0, actionEntry.type,
+                self.ResolvedActionMap[actionEntry.name] and self.ResolvedActionMap[actionEntry.name] or actionEntry.name)
+    end
+
+    local state = string.format("Combat State: %s", self.CombatState)
+
+    return string.format("Class(%s)\n%s\n%s\n%s\n%s", RGMercConfig.Globals.CurLoadedClass, actionMap, spellLoadout, rotationStates, state)
 end
 
 ---@param cmd string

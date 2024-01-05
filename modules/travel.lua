@@ -266,6 +266,11 @@ function Module:OnZone()
     -- Zone Handler
 end
 
+function Module:DoGetState()
+    -- Reture a reasonable state if queried
+    return "Running..."
+end
+
 ---@param cmd string
 ---@param ... string
 ---@return boolean

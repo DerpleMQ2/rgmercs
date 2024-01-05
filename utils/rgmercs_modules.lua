@@ -33,6 +33,17 @@ function Modules:getModuleOrderedNames()
     return self.module_order
 end
 
+---@param m string
+---@return RGMercsModuleType|nil
+function Modules:getModule(m)
+    for name, module in pairs(self.modules) do
+        if name == m then
+            return module
+        end
+    end
+    return nil
+end
+
 function Modules:execModule(m, fn, ...)
     for name, module in pairs(self.modules) do
         if name == m then
