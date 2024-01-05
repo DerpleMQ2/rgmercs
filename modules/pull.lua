@@ -548,7 +548,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                     RGMercUtils.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
                     return false
                 end
-                if member.PctMana() < resourcePct then
+                if member.Class.CanCast() and member.PctMana() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
                     return false
                 end
@@ -688,6 +688,11 @@ function Module:CheckForAbort(pullID)
     if self.TempSettings.AbortPull then
         RGMercsLogger.log_debug("\ar ALERT: Aborting pull on user request. \ax")
         self.TempSettings.AbortPull = false
+        return true
+    end
+
+    if not self.settings.DoPull or RGMercConfig.Globals.PauseMain then
+        RGMercsLogger.log_debug("\ar ALERT: Pulling Disabled at user request. \ax")
         return true
     end
 
