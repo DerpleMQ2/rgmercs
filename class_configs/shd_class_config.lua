@@ -617,7 +617,7 @@ local _ClassConfig = {
                 name = "Dark Lord's Unity (Azia)",
                 type = "AA",
                 tooltip = Tooltips.DLUA,
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or 0) end,
                 cond = function(self, aaName)
                     return castDLU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName())
                 end,
