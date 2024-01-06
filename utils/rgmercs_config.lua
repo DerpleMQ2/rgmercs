@@ -21,7 +21,7 @@ Config.Globals.InMedState       = false
 Config.Globals.IsMezzing        = false
 Config.Globals.LastPetCmd       = 0
 Config.Globals.LastFaceTime     = 0
-Config.Globals.CurLoadedChar    = mq.TLO.Me.CleanName()
+Config.Globals.CurLoadedChar    = mq.TLO.Me.DisplayName()
 Config.Globals.CurLoadedClass   = mq.TLO.Me.Class.ShortName()
 Config.Globals.CurServer        = mq.TLO.EverQuest.Server():gsub(" ", "")
 
@@ -170,7 +170,7 @@ function Config:SaveSettings(doBroadcast)
 end
 
 function Config:LoadSettings()
-    self.Globals.CurLoadedChar  = mq.TLO.Me.CleanName()
+    self.Globals.CurLoadedChar  = mq.TLO.Me.DisplayName()
     self.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
     self.Globals.CurServer      = mq.TLO.EverQuest.Server():gsub(" ", "")
 
