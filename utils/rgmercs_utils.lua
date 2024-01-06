@@ -1282,7 +1282,7 @@ end
 
 ---@return boolean
 function Utils.DoCombatActions()
-    if RGMercConfig.Globals.LastMove then return false end
+    if not RGMercConfig.Globals.LastMove then return false end
     if RGMercConfig.Globals.AutoTargetID == 0 then return false end
     if Utils.GetXTHaterCount() == 0 then return false end
 
