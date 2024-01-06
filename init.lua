@@ -121,6 +121,11 @@ local function RenderTarget()
     end
 end
 
+---@return number
+local function GetMainOpacity()
+    return tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0
+end
+
 local function RGMercsGUI()
     local theme = GetTheme()
     local themeStylePop = 0
@@ -129,6 +134,9 @@ local function RGMercsGUI()
         RGMercsConsole = ImGui.ConsoleWidget.new("##RGMercsConsole")
         RGMercsConsole.maxBufferLines = 100
         RGMercsConsole.autoScroll = true
+        if RGMercsConsole.opacity then
+            RGMercsConsole.opacity = GetMainOpacity()
+        end
     end
 
     if mq.TLO.MacroQuest.GameState() == "CHARSELECT" then
@@ -144,7 +152,7 @@ local function RGMercsGUI()
             end
         end
 
-        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0) -- Main window opacity.
+        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
 
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
 
@@ -180,6 +188,9 @@ local function RGMercsGUI()
 
             if changed then
                 RGMercConfig:GetSettings().BgOpacity = tostring(newOpacity)
+                if RGMercsConsole.opacity then
+                    RGMercsConsole.opacity = GetMainOpacity()
+                end
                 RGMercConfig:SaveSettings(true)
             end
 
@@ -246,7 +257,6 @@ local function RGMercsGUI()
             ImGui.NewLine()
             ImGui.Separator()
 
-
             if RGMercsConsole then
                 local changed
                 RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level", RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
@@ -259,10 +269,14 @@ local function RGMercsGUI()
                 if ImGui.CollapsingHeader("Debug Output", ImGuiTreeNodeFlags.DefaultOpen) then
                     local cur_x, cur_y = ImGui.GetCursorPos()
                     local contentSizeX, contentSizeY = ImGui.GetContentRegionAvail()
-                    local scroll = ImGui.GetScrollY()
-                    ImGui.Dummy(contentSizeX, 410)
-                    ImGui.SetCursorPos(cur_x, cur_y)
-                    RGMercsConsole:Render(ImVec2(contentSizeX, math.min(400, contentSizeY + scroll)))
+                    if not RGMercsConsole.opacity then
+                        local scroll = ImGui.GetScrollY()
+                        ImGui.Dummy(contentSizeX, 410)
+                        ImGui.SetCursorPos(cur_x, cur_y)
+                        RGMercsConsole:Render(ImVec2(contentSizeX, math.min(400, contentSizeY + scroll)))
+                    else
+                        RGMercsConsole:Render(ImVec2(contentSizeX, math.max(200, (contentSizeY - 10))))
+                    end
                     ImGui.Separator()
                 end
             end
@@ -405,13 +419,16 @@ local function Main()
     RGMercUtils.SetControlToon()
 
     if RGMercUtils.FindTargetCheck() then
+        -- This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID
         RGMercUtils.FindTarget()
     end
 
-    if RGMercUtils.OkToEngage(RGMercUtils.GetTargetID()) then
-        RGMercUtils.EngageTarget(RGMercUtils.GetTargetID())
+    if RGMercUtils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
+        RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+        RGMercUtils.EngageTarget(RGMercConfig.Globals.AutoTargetID)
     else
-        if RGMercUtils.GetTargetID() > 0 then
+        if RGMercUtils.GetXTHaterCount() > 0 and RGMercUtils.GetTargetID() > 0 then
+            RGMercsLogger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
             RGMercUtils.ClearTarget()
         end
     end
@@ -425,6 +442,9 @@ local function Main()
         -- may have changed by this point.
         if RGMercUtils.FindTargetCheck() and (not RGMercConfig.Globals.IsHealing or not RGMercConfig.Globals.IsMezzing) then
             RGMercUtils.FindTarget()
+            if RGMercUtils.GetTargetID() ~= RGMercConfig.Globals.AutoTargetID then
+                RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+            end
         end
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
@@ -480,13 +500,12 @@ local function Main()
     end
 
     -- If target is not attackable then turn off attack
-    local aggroCheck = not mq.TLO.Target.Aggressive()
     local pcCheck = (mq.TLO.Target.Type() or "none"):lower() == "pc" or
         ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
     local mercCheck = mq.TLO.Target.Type() == "mercenary"
-    if mq.TLO.Me.Combat() and (not mq.TLO.Target() or aggroCheck or pcCheck or mercCheck) then
-        RGMercsLogger.log_debug("\ayTarget type check failed \aw[\atinCombat(%s) taggroCheckFailed(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
-            mq.TLO.Me.Combat() and "True" or "False", aggroCheck and "True" or "False", pcCheck and "True" or "False", mercCheck and "True" or "False")
+    if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
+        RGMercsLogger.log_debug("\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
+            RGMercUtils.BoolToString(mq.TLO.Me.Combat()), RGMercUtils.BoolToString(pcCheck), RGMercUtils.BoolToString(mercCheck))
         mq.cmdf("/attack off")
     end
 

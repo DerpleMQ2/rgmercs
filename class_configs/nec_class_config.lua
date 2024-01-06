@@ -1,19 +1,50 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+-- [ README: Customization ] --
+-- If you want to make customizations to this file, please put it
+-- into your: MacroQuest/configs/rgmercs/class_configs/ directory
+-- so it is not patched over.
 
-return {
-    ['Modes'] = {
-        ['Tank'] = 0,
-        ['DPS'] = 1,
-        ['TLP'] = 2,
+-- [ NOTE ON ORDERING ] --
+-- Order matters! Lua will implicitly iterate everything in an array
+-- in order by default so always put the first thing you want checked
+-- towards the top of the list.
+
+local mq           = require('mq')
+local RGMercUtils  = require("utils.rgmercs_utils")
+
+local _ClassConfig = {
+    _version          = "0.1a",
+    _author           = "Derple",
+    ['Modes']         = {
+        'DPS',
     },
-    ['ItemSets'] = {
+    ['Themes']        = {
+        ['DPS'] = {
+            { element = ImGuiCol.TitleBgActive,    color = { r = 0.5, g = 0.05, b = 1.0, a = .8, }, },
+            { element = ImGuiCol.TableHeaderBg,    color = { r = 0.4, g = 0.05, b = 0.8, a = .8, }, },
+            { element = ImGuiCol.Tab,              color = { r = 0.2, g = 0.05, b = 0.6, a = .8, }, },
+            { element = ImGuiCol.TabActive,        color = { r = 0.2, g = 0.05, b = 0.6, a = .8, }, },
+            { element = ImGuiCol.TabHovered,       color = { r = 0.2, g = 0.05, b = 0.6, a = 1.0, }, },
+            { element = ImGuiCol.Header,           color = { r = 0.1, g = 0.05, b = 0.5, a = .8, }, },
+            { element = ImGuiCol.HeaderActive,     color = { r = 0.2, g = 0.05, b = 0.6, a = .8, }, },
+            { element = ImGuiCol.HeaderHovered,    color = { r = 0.2, g = 0.05, b = 0.6, a = 1.0, }, },
+            { element = ImGuiCol.FrameBgHovered,   color = { r = 0.2, g = 0.05, b = 0.6, a = 0.7, }, },
+            { element = ImGuiCol.Button,           color = { r = 0.1, g = 0.05, b = 0.5, a = .8, }, },
+            { element = ImGuiCol.ButtonActive,     color = { r = 0.2, g = 0.05, b = 0.6, a = .8, }, },
+            { element = ImGuiCol.ButtonHovered,    color = { r = 0.2, g = 0.05, b = 0.6, a = 1.0, }, },
+            { element = ImGuiCol.TextSelectedBg,   color = { r = 0.1, g = 0.05, b = 0.5, a = .1, }, },
+            { element = ImGuiCol.FrameBg,          color = { r = 0.1, g = 0.05, b = 0.5, a = .8, }, },
+            { element = ImGuiCol.SliderGrab,       color = { r = 0.5, g = 0.05, b = 1.0, a = .8, }, },
+            { element = ImGuiCol.SliderGrabActive, color = { r = 0.5, g = 0.05, b = 1.0, a = .9, }, },
+            { element = ImGuiCol.FrameBgActive,    color = { r = 0.2, g = 0.05, b = 0.6, a = 1.0, }, },
+        },
+    },
+    ['ItemSets']      = {
         ['Epic'] = {
             "Deathwhisper",
             "Soulwhisper",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']   = {
         ['SelfHPBuff'] = {
             "Shield of Shadow",
             "Shield of Restless Ice",
@@ -529,141 +560,479 @@ return {
             "Focus Death",
         },
     },
-    ['Rotations'] = {
-        ['Tank'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
-            },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
-            },
+    ['RotationOrder'] = {
+        -- Downtime doesn't have state because we run the whole rotation at once.
+        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" end, },
+        {
+            name = 'Burn',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    RGMercUtils.BurnCheck()
+            end,
         },
-        ['DPS'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
-            },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
-            },
-        },
-        ['Healer'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
-            },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
-            },
-        },
-        ['Hybrid'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
-            },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
-            },
-        },
-        ['DefaultConfig'] = {
-            ['Mode'] = '1',
+        {
+            name = 'DPS',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
+            end,
         },
     },
+    ['Rotations']     = {
+        ['DPS'] = {
+            {
+                name = "Wake the Dead",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.SpawnCount("corpse radius 100")() > 5
+                end,
+            },
+            {
+                name = "Death Bloom",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctMana() < self.settings.DeathBloomPercent and mq.TLO.Me.PctHPs() > 50
+                end,
+            },
+            {
+                name = "Scent of Thule",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.GetXTHaterCount() > 1
+                end,
+            },
+            {
+                name = "Encroaching Darkness",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.GetTargetPctHPs() < 50
+                end,
+            },
+            {
+                name = "Dying Grasp",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctAggro() <= 50
+                end,
+            },
+            {
+                name = "Silent Casting",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.GetXTHaterCount() > 1
+                end,
+            },
+            {
+                name = "Life Burn",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctAggro() <= 25
+                end,
+            },
+            {
+                name = "ScentDebuff",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "ChaoticDebuff",
+                type = "Spell",
+                cond = function(self, spell) return not RGMercUtils.TargetHasBuff(spell) and spell.Trigger(2).StacksTarget() end,
+            },
+            {
+                name = "CripplingTap",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "DichoSpell",
+                type = "Spell",
+                cond = function(self, _) return true end,
+            },
+            {
+                name = "SwarmPet",
+                type = "Spell",
+                cond = function(self, _) return true end,
+            },
+            {
+                name = "SnareDOT",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) and self.settings.DoSnare end,
+            },
+            {
+                name = "Disease3",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Magic3",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "FireDot3",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Disease2",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Poison1",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Poison2",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Poison2_2",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Disease1",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Magic2_2",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Poison3",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Magic1",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "PoisonNuke2",
+                type = "Spell",
+                cond = function(self, _) return RGMercUtils.GetTargetPctHPs() > 50 and mq.TLO.Me.PctMana() > RGMercConfig:GetSettings().ManaToNuke end,
+            },
+            {
+                name = "PoisonNuke",
+                type = "Spell",
+                cond = function(self, _) return mq.TLO.Me.PctMana() > RGMercConfig:GetSettings().ManaToNuke end,
+            },
+            {
+                name = "HealthTaps",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "DurationTap",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "FireDot1",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "FireDot2",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "FireDot2_2",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "FireDot4",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "GroupLeech",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "Corruption1",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+            {
+                name = "DurationTap",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+            },
+        },
+        ['Burn'] = {
+            {
+                name = "Funeral Pyre",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Hand of Death",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Mercurial Torment",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Heretic's Twincast",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and not RGMercUtils.TargetHasBuffByName(aaName)
+                end,
+            },
+            {
+                name = "Gathering Dusk",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Swarm of Decay",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Companion's Fury",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Rise of Bones",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Forceful Rejuvenation",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Spire of Necromancy",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            --{
+            --    name = "BestowBuff",
+            --    type = "Spell",
+            --    active_cond = function(self, spell) return RGMercUtils.SongActive(spell.RankName()) end,
+            --    cond = function(self, spell) return not RGMercUtils.SongActive(spell.RankName()) end,
+            --},
+        },
+        ['Downtime'] = {
+            {
+                name = "Mortifier's Unity",
+                type = "AA",
+                active_cond = function(self) return RGMercUtils.BuffActiveByName("Shield of Darkness") and RGMercUtils.BuffActiveByName("Otherise") end,
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "SelfHPBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "SelfRune1",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "SelfSpellShield1",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "LichSpell",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell) return self.settings.DoLich and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.AAReady("Mortifier's Unity") end,
+            },
+            {
+                name = "Death Bloom",
+                type = "AA",
+                active_cond = function(self, aaName) return RGMercUtils.SongActive(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
+                cond = function(self, _) return mq.TLO.Me.PctMana() < self.settings.DeathBloomPercent end,
+            },
+            -- Leaving this out because it mems every 60s and thats wonky.
+            --{
+            --    name = "BestowBuff",
+            --    type = "Spell",
+            --    active_cond = function(self, spell) return RGMercUtils.SongActive(spell.RankName()) end,
+            --    cond = function(self, spell) return not RGMercUtils.SongActive(spell.RankName()) end,
+            --},
+            {
+                name = "PetHaste",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName) ~= nil end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
+            },
+            {
+                name = "PetBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName) ~= nil end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
+            },
+        },
+    },
+    ['Spells']        = {
+        {
+            gem = 1,
+            spells = {
+                { name = "Disease2", },
+                { name = "Poison3", },
+            },
+        },
+        {
+            gem = 2,
+            spells = {
+                { name = "Poison2",  cond = function(self) return mq.TLO.Me.Level() < 86 end, },
+                { name = "Poison1", },
+                { name = "FireDot2", },
+            },
+        },
+        {
+            gem = 3,
+            spells = {
+                { name = "FireDot2",   cond = function(self) return mq.TLO.Me.Level() < 51 end, },
+                { name = "Magic1", },
+                { name = "FireDot2_2", },
+            },
+        },
+        {
+            gem = 4,
+            spells = {
+                { name = "PoisonNuke",  cond = function(self) return mq.TLO.Me.Level() < 75 end, },
+                { name = "PoisonNuke2", },
+                { name = "Poison2_2", },
+            },
+        },
+        {
+            gem = 5,
+            spells = {
+                { name = "HealthTaps", },
+                { name = "Poison2", },
+            },
+        },
+        {
+            gem = 6,
+            spells = {
+                { name = "DurationTap", },
+                { name = "Magic2", },
+            },
+        },
+        {
+            gem = 7,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "ScentDebuff", cond = function(self) return mq.TLO.Me.Level() < 89 end, },
+                { name = "Disease3", },
+                { name = "Disease1", },
+                { name = "Disease", },
+            },
+        },
+        {
+            gem = 8,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "SnareDOT",   cond = function(self) return self.settings.DoSnare end, },
+                { name = "Magic1",     cond = function(self) return mq.TLO.Me.Level() > 70 and mq.TLO.Me.Level() < 87 end, },
+                { name = "Magic3", },
+                { name = "HealthTaps", },
+            },
+        },
+        {
+            gem = 9,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "FireDot2", cond = function(self) return mq.TLO.Me.Level() < 89 end, },
+                { name = "FireDot3", },
+                { name = "FDSpell", },
+            },
+        },
+        {
+            gem = 10,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "Poison3",  cond = function(self) return mq.TLO.Me.Level() < 85 end, },
+                { name = "SwarmPet", },
+            },
+        },
+        {
+            gem = 11,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "Poison3",       cond = function(self) return mq.TLO.Me.Level() < 93 end, },
+                { name = "ChaoticDebuff", },
+            },
+        },
+        {
+            gem = 12,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "DichoSpell", },
+            },
+        },
+        {
+            gem = 13,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "AllianceSpell", },
+            },
+        },
+    },
+    ['DefaultConfig'] = {
+        ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['DoLich']            = { DisplayName = "Cast Lich", Category = "Spells and Abilities", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
+        ['DeathBloomPercent'] = { DisplayName = "Death Bloom %", Category = "Spells and Abilities", Tooltip = "Mana % at which to cast Death Bloom", Default = 40, Min = 1, Max = 100, },
+        ['DoSnare']           = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
+    },
+
 }
+
+return _ClassConfig

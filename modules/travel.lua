@@ -229,11 +229,11 @@ function Module:Render()
                         ImGui.PushStyleColor(ImGuiCol.Button, self:GetColorForType(sv.Type))
                         if ImGui.Button(sv.Name, self.ButtonWidth, self.ButtonHeight) then
                             if sv.Type == "Single" then
-                                mq.cmdf("/dex " ..
-                                    selectedPorter .. " /casting \"" ..
-                                    sv.Name .. "\" -maxtries|10 -targetid|" .. RGMercUtils.GetTargetID())
+                                mq.cmdf(string.format("/dex %s /casting \"%s\" -maxtries|10 -targetid|%d gem%d", selectedPorter, sv.Name, RGMercUtils.GetTargetID(),
+                                    mq.TLO.Me.NumGems()))
                             else
                                 mq.cmdf("/dex " .. selectedPorter .. " /casting \"" .. sv.Name .. "\" -maxtries|10")
+                                mq.cmdf(string.format("/dex %s /casting \"%s\" -maxtries|10 gem%d", selectedPorter, sv.Name, mq.TLO.Me.NumGems()))
                             end
                         end
                         ImGui.PopStyleColor(2)
