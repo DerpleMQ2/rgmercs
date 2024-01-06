@@ -144,6 +144,8 @@ local function RGMercsGUI()
             end
         end
 
+        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0) -- Main window opacity.
+
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
 
         --ImGui.Image(derpImg:GetTextureID(), ImVec2(ImGui.GetWindowWidth(), ImGui.GetWindowHeight()))
@@ -170,6 +172,16 @@ local function RGMercsGUI()
             ImGui.PopStyleColor()
 
             RenderTarget()
+
+            ImGui.NewLine()
+            ImGui.Separator()
+
+            local newOpacity, changed = ImGui.SliderFloat("Opacity", tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0, 0.1, 1.0)
+
+            if changed then
+                RGMercConfig:GetSettings().BgOpacity = tostring(newOpacity)
+                RGMercConfig:SaveSettings(true)
+            end
 
             if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.None) then
                 ImGui.SetItemDefaultFocus()
@@ -262,6 +274,7 @@ local function RGMercsGUI()
         if themeStylePop > 0 then
             ImGui.PopStyleColor(themeStylePop)
         end
+        ImGui.PopStyleVar(1)
     end
 end
 
