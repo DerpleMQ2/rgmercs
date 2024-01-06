@@ -31,8 +31,8 @@ local animBox        = mq.FindTextureAnimation("A_RecessedBox")
 --local derpImg        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/derp.png")
 
 -- Constants
-local ICON_WIDTH     = 45
-local ICON_HEIGHT    = 45
+local ICON_WIDTH     = 40
+local ICON_HEIGHT    = 40
 local COUNT_X_OFFSET = 39
 local COUNT_Y_OFFSET = 23
 local EQ_ICON_OFFSET = 500
@@ -41,21 +41,25 @@ local EQ_ICON_OFFSET = 500
 local function display_item_on_cursor()
     if mq.TLO.Cursor() then
         local cursor_item = mq.TLO.Cursor -- this will be an MQ item, so don't forget to use () on the members!
-        local mouse_x, mouse_y = ImGui.GetMousePos()
+
+        local draw_list = ImGui.GetForegroundDrawList()
         local window_x, window_y = ImGui.GetWindowPos()
-        local icon_x = mouse_x - window_x + 10
-        local icon_y = mouse_y - window_y + 10
-        local stack_x = icon_x + COUNT_X_OFFSET
-        local stack_y = icon_y + COUNT_Y_OFFSET
-        local text_size = ImGui.CalcTextSize(tostring(cursor_item.Stack()))
-        ImGui.SetCursorPos(icon_x, icon_y)
+        local window_w, window_h = ImGui.GetWindowSize()
+        local mouse_x, mouse_y = ImGui.GetMousePos()
+
+        if mouse_x < window_x or mouse_x > window_x + window_w then return end
+        if mouse_y < window_y or mouse_y > window_y + window_h then return end
+
+        local icon_x = mouse_x + 10
+        local icon_y = mouse_y + 10
+        local stack_x = icon_x + COUNT_X_OFFSET + 10
+        local stack_y = (icon_y + COUNT_Y_OFFSET)
         animItems:SetTextureCell(cursor_item.Icon() - EQ_ICON_OFFSET)
-        ImGui.DrawTextureAnimation(animItems, ICON_WIDTH, ICON_HEIGHT)
+        draw_list:AddTextureAnimation(animItems, ImVec2(icon_x, icon_y), ImVec2(ICON_WIDTH, ICON_HEIGHT))
         if cursor_item.Stackable() then
-            ImGui.SetCursorPos(stack_x, stack_y)
-            ImGui.DrawTextureAnimation(animBox, text_size, ImGui.GetTextLineHeight())
-            ImGui.SetCursorPos(stack_x - text_size, stack_y)
-            ImGui.TextUnformatted(tostring(cursor_item.Stack()))
+            local text_size = ImGui.CalcTextSize(tostring(cursor_item.Stack()))
+            draw_list:AddTextureAnimation(animBox, ImVec2(stack_x, stack_y), ImVec2(text_size, ImGui.GetTextLineHeight()))
+            draw_list:AddText(ImVec2(stack_x, stack_y), IM_COL32(255, 255, 255, 255), tostring(cursor_item.Stack()))
         end
     end
 end
@@ -230,7 +234,6 @@ local function RGMercsGUI()
             ImGui.NewLine()
             ImGui.Separator()
 
-            display_item_on_cursor()
 
             if RGMercsConsole then
                 local changed
@@ -238,18 +241,21 @@ local function RGMercsGUI()
                     #RGMercConfig.Constants.LogLevels)
 
                 if changed then
-                    RGMercConfig:SaveSettings(TutorialRequired)
+                    RGMercConfig:SaveSettings(true)
                 end
 
                 if ImGui.CollapsingHeader("Debug Output", ImGuiTreeNodeFlags.DefaultOpen) then
-                    ImGui.PushItemWidth(ImGui.GetContentRegionAvailVec().x)
+                    local cur_x, cur_y = ImGui.GetCursorPos()
                     local contentSizeX, contentSizeY = ImGui.GetContentRegionAvail()
-                    contentSizeY = contentSizeY
-                    ImGui.PushFont(ImGui.ConsoleFont)
-                    RGMercsConsole:Render(ImVec2(contentSizeX, contentSizeY))
-                    ImGui.PopFont()
+                    local scroll = ImGui.GetScrollY()
+                    ImGui.Dummy(contentSizeX, 410)
+                    ImGui.SetCursorPos(cur_x, cur_y)
+                    RGMercsConsole:Render(ImVec2(contentSizeX, math.min(400, contentSizeY + scroll)))
+                    ImGui.Separator()
                 end
             end
+
+            display_item_on_cursor()
         end
 
         ImGui.End()
@@ -458,7 +464,7 @@ local function Main()
     -- If target is not attackable then turn off attack
     local aggroCheck = not mq.TLO.Target.Aggressive()
     local pcCheck = (mq.TLO.Target.Type() or "none"):lower() == "pc" or
-    ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
+        ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
     local mercCheck = mq.TLO.Target.Type() == "mercenary"
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or aggroCheck or pcCheck or mercCheck) then
         RGMercsLogger.log_debug("\ayTarget type check failed \aw[\atinCombat(%s) taggroCheckFailed(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
