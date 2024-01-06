@@ -396,6 +396,10 @@ local function Main()
 
     if RGMercUtils.OkToEngage(RGMercUtils.GetTargetID()) then
         RGMercUtils.EngageTarget(RGMercUtils.GetTargetID())
+    else
+        if RGMercUtils.GetTargetID() > 0 then
+            RGMercUtils.ClearTarget()
+        end
     end
 
     -- TODO: Write Healing Module
