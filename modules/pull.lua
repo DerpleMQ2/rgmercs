@@ -786,7 +786,7 @@ function Module:GiveTime(combat_stateModule)
         return
     end
 
-    local returnToCamp, campData = RGMercModules:execModule("Movement", "GetCampData")
+    local campData = RGMercModules:execModule("Movement", "GetCampData")
 
     if self.settings.PullAbility == PullAbilityIDToName.PetPull and (mq.TLO.Me.Pet.ID() or 0) == 0 then
         RGMercUtils.PrintGroupMessage("Need to create a new pet to throw as mob fodder.")
@@ -808,12 +808,12 @@ function Module:GiveTime(combat_stateModule)
     self.TempSettings.LastPull = os.clock()
 
     if self.settings.GroupWatch == 1 then
-        if not self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData, returnToCamp) then
+        if not self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData.campSettings, campData.returnToCamp) then
             self.TempSettings.PullState = PullStates.PULL_GROUPWATCH_WAIT
             return
         end
     elseif self.settings.GroupWatch == 2 then
-        if not self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData, returnToCamp) then
+        if not self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData.campSettings, campData.returnToCamp) then
             self.TempSettings.PullState = PullStates.PULL_GROUPWATCH_WAIT
             return
         end
@@ -913,11 +913,11 @@ function Module:GiveTime(combat_stateModule)
     local start_y = mq.TLO.Me.Y()
     local start_z = mq.TLO.Me.Z()
 
-    if returnToCamp then
+    if campData.returnToCamp then
         RGMercsLogger.log_debug("\ayStoring Camp info to return to")
-        start_x = campData.CampX
-        start_y = campData.CampY
-        start_z = campData.CampZ
+        start_x = campData.campSettings.CampX
+        start_y = campData.campSettings.CampY
+        start_z = campData.campSettings.CampZ
     end
 
     RGMercsLogger.log_debug("\ayRTB Location: %d %d %d", start_y, start_x, start_z)

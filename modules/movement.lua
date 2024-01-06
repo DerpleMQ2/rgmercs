@@ -110,10 +110,9 @@ function Module:CampOn()
     RGMercsLogger.log_info("\ayCamping On: (X: \at%d\ay ; Y: \at%d\ay)", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY)
 end
 
----@return boolean # return to camp
 ---@return table # camp settings table
 function Module:GetCampData()
-    return (self.settings.ReturnToCamp and self.TempSettings.CampZoneId == mq.TLO.Zone.ID()), self.TempSettings
+    return { returnToCamp = (self.settings.ReturnToCamp and self.TempSettings.CampZoneId == mq.TLO.Zone.ID()), campSettings = self.TempSettings, }
 end
 
 function Module:CampOff()

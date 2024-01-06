@@ -114,7 +114,7 @@ Config.DefaultConfig = {
     -- [ COMBAT ] --
     ['SafeTargeting']     = { DisplayName = "Use Safe Targeting", Category = "Combat", Tooltip = "Do not target mobs that are fighting others.", Default = true, },
     ['AssistOutside']     = { DisplayName = "Assist Outside of Group", Category = "Combat", Tooltip = "Allow assisting characters outside of your group.", Default = false, },
-    ['AssistRange']       = { DisplayName = "Assist Range", Category = "Combat", Tooltip = "Distance to the target before you engage.", Default = 45, Min = 15, Max = 200, },
+    ['AssistRange']       = { DisplayName = "Assist Range", Category = "Combat", Tooltip = "Distance to the target before you engage.", Default = Config.Constants.RGCasters:contains(Config.Globals.CurLoadedClass) and 90 or 45, Min = 15, Max = 200, },
     ['MAScanZRange']      = { DisplayName = "Main Assist Scan ZRange", Category = "Combat", Tooltip = "Distance in Z direction to look for targets.", Default = 45, Min = 15, Max = 200, },
     ['AutoAssistAt']      = { DisplayName = "Auto Assist At", Category = "Combat", Tooltip = "Melee attack when target hits [x] HP %.", Default = 98, Min = 1, Max = 100, },
     ['StickHow']          = { DisplayName = "Stick How", Category = "Combat", Tooltip = "Custom /stick command", Type = "Custom", Default = "", },
@@ -142,6 +142,14 @@ Config.DefaultConfig = {
 
     -- [ ASSIST ] --
     ['OutsideAssistList'] = { DisplayName = "List of Outsiders to Assist", Category = "Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {}, },
+
+    -- [ BURNS ] --
+    ['DoBurn']            = { DisplayName = "Do Burn", Category = "Burns", Tooltip = "Put character in 'burn' mode", Default = false, },
+    ['BurnSize']          = { DisplayName = "Do Burn Size", Category = "Burns", Tooltip = "0=Off, 1=Small, 2=Medium, 3=Large", Default = 1, Min = 0, Max = 3, },
+    ['BurnAuto']          = { DisplayName = "Auto Burn", Category = "Burns", Tooltip = "Automatically burn", Default = false, },
+    ['BurnAlways']        = { DisplayName = "Auto Burn Always", Category = "Burns", Tooltip = "Always Burn", Default = false, },
+    ['BurnMobCount']      = { DisplayName = "Auto Burn Mob Count", Category = "Burns", Tooltip = "Number of haters before we start burning.", Default = 3, Min = 1, Max = 10, },
+    ['BurnNamed']         = { DisplayName = "Auto Burn Named", Category = "Burns", Tooltip = "Automatically burn named mobs.", Default = false, },
 
     -- [ UI ] --
     ['BgOpacity']         = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = "1.0", },
@@ -186,10 +194,6 @@ function Config:LoadSettings()
         needSave = true
     else
         self.settings = config()
-    end
-
-    if tonumber(self.settings.BgOpacity) == 0 then
-        self.settings.BgOpacity = "1.0"
     end
 
     self.settings = RGMercUtils.ResolveDefaults(Config.DefaultConfig, self.settings)
@@ -240,7 +244,7 @@ function Config:StoreLastMove()
         self.Globals.LastMove.Sitting = me.Sitting()
         self.Globals.LastMove.TimeSinceMove = 0
     else
-        self.Globals.LastMove.TimeSinceMove = (mq.TLO.EverQuest.Running() - self.Globals.LastMove.TimeSinceMove) / 1000
+        self.Globals.LastMove.TimeSinceMove = os.clock() - self.Globals.LastMove.TimeSinceMove
     end
 end
 

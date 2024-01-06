@@ -598,7 +598,7 @@ local _ClassConfig = {
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck(self.settings)
+                    RGMercUtils.BurnCheck()
             end,
         },
         {
@@ -618,8 +618,8 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.DLUA,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self)
-                    return castDLU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Trigger(1).RankName())
+                cond = function(self, aaName)
+                    return castDLU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName())
                 end,
             },
             {
@@ -718,9 +718,9 @@ local _ClassConfig = {
                 name = "Voice of Thule",
                 type = "AA",
                 tooltip = Tooltips.VOT,
-                active_cond = function(self) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility("Voice of Thule").Spell.ID()) end,
-                cond = function(self)
-                    return RGMercUtils.SelfBuffAACheck("Voice of Thule")
+                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID()) end,
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -772,7 +772,7 @@ local _ClassConfig = {
                 name = "Harm Touch",
                 type = "AA",
                 tooltip = Tooltips.HarmTouch,
-                cond = function(self)
+                cond = function(self, _)
                     return (self.settings.BurnAuto and RGMercUtils.IsNamed(mq.TLO.Target)) or
                         RGMercUtils.BigBurn(self.settings)
                 end,
@@ -824,7 +824,7 @@ local _ClassConfig = {
                 name = "Explosion of Hatred",
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfHatred,
-                cond = function(self)
+                cond = function(self, _)
                     return RGMercConfig.Globals.IsTanking and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                 end,
@@ -833,7 +833,7 @@ local _ClassConfig = {
                 name = "Explosion of Spite",
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfSpite,
-                cond = function(self)
+                cond = function(self, _)
                     return RGMercConfig.Globals.IsTanking and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                 end,
@@ -842,8 +842,8 @@ local _ClassConfig = {
                 name = "Taunt",
                 type = "Ability",
                 tooltip = Tooltips.Taunt,
-                cond = function(self)
-                    return RGMercConfig.Globals.IsTanking and mq.TLO.Me.AbilityReady("Taunt")() and
+                cond = function(self, abilityName)
+                    return RGMercConfig.Globals.IsTanking and mq.TLO.Me.AbilityReady(abilityName)() and
                         mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
                         RGMercUtils.GetTargetDistance() < 30
                 end,
@@ -860,7 +860,7 @@ local _ClassConfig = {
                 name = "MeleeMit",
                 type = "DISC",
                 tooltip = Tooltips.MeleeMit,
-                cond = function(self, spell)
+                cond = function(self, _)
                     return RGMercConfig.Globals.IsTanking
                 end,
             },
@@ -1181,7 +1181,6 @@ local _ClassConfig = {
         ['DoTorrent']    = { DisplayName = "Cast Torrents", Category = "Spells and Abilities", Tooltip = "Enable casting Torrent spells.", RequiresLoadoutChange = true, Default = true, },
         ['DoDireTap']    = { DisplayName = "Cast Dire Taps", Category = "Spells and Abilities", Tooltip = "Enable casting Dire Tap spells.", RequiresLoadoutChange = true, Default = true, },
         ['DoBandolier']  = { DisplayName = "Use Bandolier", Category = "Equipment", Tooltip = "Enable Swapping of items using the bandolier.", Default = false, },
-        ['DoBurn']       = { DisplayName = "Enable Burning", Category = "Spells and Abilities", Tooltip = "Put character in 'burn' mode", Default = false, },
         ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
         ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
         ['DoAE']         = { DisplayName = "Use AE Taunts", Category = "Spells and Abilities", Tooltip = "Enable casting AE Taunt spells.", Default = true, },
@@ -1190,10 +1189,6 @@ local _ClassConfig = {
         ['FlashHP']      = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
         ['StartBigTap']  = { DisplayName = "Use Big Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100, },
         ['StartLifeTap'] = { DisplayName = "Use Life Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100, },
-        ['BurnSize']     = { DisplayName = "Burn Size", Category = "Combat", Tooltip = "0=Off, 1=Small, 2=Medium, 3=Large", Default = 1, Min = 0, Max = 3, },
-        ['BurnAuto']     = { DisplayName = "Auto Burn", Category = "Combat", Tooltip = "Automatically burn", Default = false, },
-        ['BurnMobCount'] = { DisplayName = "Burn Mob Count", Category = "Combat", Tooltip = "Number of haters before we start burning.", Default = 3, Min = 1, Max = 10, },
-        ['BurnNamed']    = { DisplayName = "Burn Named", Category = "Combat", Tooltip = "Automatically burn named mobs.", Default = false, },
     },
 }
 
