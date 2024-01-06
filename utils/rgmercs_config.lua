@@ -144,7 +144,7 @@ Config.DefaultConfig = {
     ['OutsideAssistList'] = { DisplayName = "List of Outsiders to Assist", Category = "Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {}, },
 
     -- [ UI ] --
-    ['BgOpacity']         = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = 1.0, },
+    ['BgOpacity']         = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = "1.0", },
 }
 
 Config.DefaultCategories = Set.new({})
@@ -186,6 +186,10 @@ function Config:LoadSettings()
         needSave = true
     else
         self.settings = config()
+    end
+
+    if tonumber(self.settings.BgOpacity) == 0 then
+        self.settings.BgOpacity = "1.0"
     end
 
     self.settings = RGMercUtils.ResolveDefaults(Config.DefaultConfig, self.settings)
