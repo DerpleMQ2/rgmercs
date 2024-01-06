@@ -62,7 +62,7 @@ function Module:LoadSettings()
     end
 
     Module.TempSettings.RotationStates = {}
-    for i, m in ipairs(self.ClassConfig.RotationOrder) do Module.TempSettings.RotationStates[i] = m end
+    for i, m in ipairs(self.ClassConfig.RotationOrder or {}) do Module.TempSettings.RotationStates[i] = m end
 
     RGMercsLogger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass, RGMercConfig.Globals.CurLoadedChar)
     RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author, self.ClassConfig._version)
