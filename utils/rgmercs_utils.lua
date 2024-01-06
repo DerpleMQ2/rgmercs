@@ -1606,6 +1606,16 @@ function Utils.OkToEngage(autoTargetId)
 
     if not target() then return false end
 
+    local aggroCheck = not target.Aggressive()
+    local pcCheck = (target.Type() or "none"):lower() == "pc" or
+        ((target.Type() or "none"):lower() == "pet" and (target.Master.Type() or "none"):lower() == "pc")
+    local mercCheck = target.Type() == "mercenary"
+    if aggroCheck or pcCheck or mercCheck then
+        RGMercsLogger.log_debug("\ayTarget type check failed \aw[\ataggroCheckFailed(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay",
+            aggroCheck and "True" or "False", pcCheck and "True" or "False", mercCheck and "True" or "False")
+        return false
+    end
+
     if Utils.GetTargetID() ~= autoTargetId then
         RGMercsLogger.log_debug("%d != %d --> Not Engageing", target.ID() or 0, autoTargetId)
         return false
