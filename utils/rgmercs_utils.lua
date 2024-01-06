@@ -673,6 +673,16 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
     return false
 end
 
+function Utils.GetEntryConditionArg(map, entry)
+    local condArg = map[entry.name] or mq.TLO.Spell(entry.name)()
+
+    if condArg == nil or entry.type == "aa" then
+        condArg = entry.name
+    end
+
+    return condArg
+end
+
 ---@param s self
 ---@param r table
 ---@param targetId integer
@@ -691,9 +701,9 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
             RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             lastStepIdx = idx
             if entry.cond then
-                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s)", entry.name, entry.type,
-                    (map[entry.name] or mq.TLO.Spell(entry.name)) or entry.name)
-                local pass = entry.cond(s, (map[entry.name] or mq.TLO.Spell(entry.name)) or entry.name)
+                local condArg = Utils.GetEntryConditionArg(map, entry)
+                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s)", entry.name, entry.type, condArg)
+                local pass = entry.cond(s, condArg)
                 if pass == true then
                     local res = Utils.ExecEntry(entry, targetId, map, bAllowMem)
                     if res == true then
@@ -2016,8 +2026,9 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
             end
             ImGui.TableNextColumn()
             if entry.cond then
-                local pass = entry.cond(s, (map[entry.name] or mq.TLO.Spell(entry.name)) or entry.name)
-                local active = entry.active_cond and entry.active_cond(s, (map[entry.name] or mq.TLO.Spell(entry.name)) or entry.name) or false
+                local condArg = Utils.GetEntryConditionArg(map, entry)
+                local pass = entry.cond(s, condArg)
+                local active = entry.active_cond and entry.active_cond(s, condArg) or false
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
