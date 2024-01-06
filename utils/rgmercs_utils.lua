@@ -674,8 +674,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 end
 
 function Utils.GetEntryConditionArg(map, entry)
-    local condArg = map[entry.name] or mq.TLO.Spell(entry.name)()
-
+    local condArg = map[entry.name] or mq.TLO.Spell(entry.name)
     if condArg == nil or entry.type:lower() == "aa" then
         condArg = entry.name
     end

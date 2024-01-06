@@ -255,8 +255,28 @@ function Module:DoGetState()
     -- Reture a reasonable state if queried
     local actionMap = "Action Map\n"
     actionMap = actionMap .. "-=-=-=-=-=\n"
-    for k, v in pairs(self.ResolvedActionMap) do
-        actionMap = actionMap .. string.format("%-20s ==> %s\n", k, (v.name or k))
+    for k, entry in pairs(self.ResolvedActionMap) do
+        local mappedAction = entry
+
+        if mappedAction then
+            if type(mappedAction) ~= "string" then
+                mappedAction = mappedAction.RankName()
+            end
+        else
+            if entry.type:lower() == "cmd" then
+                mappedAction = entry.cmd
+            elseif entry.type:lower() == "spell" then
+                mappedAction = "<Missing Spell>"
+            elseif entry.type:lower() == "ability" then
+                mappedAction = entry.name
+            elseif entry.type:lower() == "aa" then
+                mappedAction = entry.name
+            else
+                mappedAction = entry.name
+            end
+        end
+
+        actionMap = actionMap .. string.format("%-20s ==> %s\n", k, mappedAction)
     end
     local spellLoadout = "Spell Loadout\n-=-=-=-=-=-=-\n"
 
