@@ -61,7 +61,8 @@ end
 function Utils.ResolveDefaults(defaults, settings)
     -- Setup Defaults
     for k, v in pairs(defaults) do
-        settings[k] = settings[k] or v.Default
+        if settings[k] == nil then settings[k] = v.Default end
+
         if type(settings[k]) ~= type(v.Default) then
             RGMercsLogger.log_info("\ayData type of setting [\am%s\ay] has been deprecated -- resetting to default.", k)
             settings[k] = v.Default
@@ -886,7 +887,7 @@ function Utils.DoStick(config, targetId)
         mq.cmdf("/stick %s", config.StickHow)
     else
         if Utils.IAmMA() then
-            mq.cmdf("/stick 20 id %d moveback uw", targetId)
+            mq.cmdf("/stick 20 id %d %s uw", targetId, RGMercConfig:GetSettings().MovebackWhenTank and "moveback" or "")
         else
             mq.cmdf("/stick 20 id %d behindonce moveback uw", targetId)
         end
