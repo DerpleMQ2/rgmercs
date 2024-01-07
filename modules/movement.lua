@@ -397,8 +397,8 @@ function Module:GiveTime(combat_state)
                     mq.delay("3s", function() return mq.TLO.Navigation.Active() end)
 
                     if not Nav.Active() and chaseSpawn.Distance() > self.settings.ChaseDistance then
-                        RGMercsLogger.log_verbose("\awNOTICE:\ax Nav might have failed going to try to moveto.")
-                        mq.cmdf("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
+                        RGMercsLogger.log_verbose("\awNOTICE:\ax Nav might have failed.")
+                        --mq.cmdf("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
                     end
                 else
                     -- Assuming no line of site problems.
