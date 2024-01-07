@@ -25,7 +25,7 @@ local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
 
 ---@return MQType, RGMercsModuleType
 local function RGMercsTLOHandler(param)
-    return rgMercsModuleType, RGMercModules:getModule(param)
+    return rgMercsModuleType, RGMercModules:GetModule(param)
 end
 -- Register our TLO functions
 mq.AddTopLevelObject('RGMercs', RGMercsTLOHandler)

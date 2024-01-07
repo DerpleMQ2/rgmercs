@@ -73,7 +73,7 @@ local Tooltips    = {
 
 -- helper function for advanced logic to see if we want to use Dark Lord's Unity
 local function castDLU()
-    local shroudAction = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "Shroud")
+    local shroudAction = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "Shroud")
     if not shroudAction then return false end
 
     local res = shroudAction.Level() <=
