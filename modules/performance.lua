@@ -1,27 +1,32 @@
 -- Sample Performance Monitor Class Module
-local mq                 = require('mq')
-local RGMercsLogger      = require("utils.rgmercs_logger")
-local RGMercUtils        = require("utils.rgmercs_utils")
-local ImPlot             = require('ImPlot')
-local Set                = require('mq.Set')
+local mq                  = require('mq')
+local RGMercsLogger       = require("utils.rgmercs_logger")
+local RGMercUtils         = require("utils.rgmercs_utils")
+local ImPlot              = require('ImPlot')
+local Set                 = require('mq.Set')
 
-local Module             = { _version = '0.1a', _name = "Performance", _author = 'Derple', }
-Module.__index           = Module
-Module.settings          = {}
-Module.DefaultConfig     = {}
-Module.DefaultCategories = {}
-Module.MaxFrame          = 50
-Module.MaxFrameStep      = 5.0
-Module.GoalMax           = 0
-Module.xAxes             = {}
-Module.SettingsLoaded    = false
-Module.LastExtentsCheck  = os.clock()
+local Module              = { _version = '0.1a', _name = "Performance", _author = 'Derple', }
+Module.__index            = Module
+Module.settings           = {}
+Module.DefaultConfig      = {}
+Module.DefaultCategories  = {}
+Module.MaxFrame           = 50
+Module.MaxFrameStep       = 5.0
+Module.GoalMaxFrameTime   = 0
+Module.CurMaxMaxFrameTime = 0
+Module.xAxes              = {}
+Module.SettingsLoaded     = false
+Module.FrameTimes         = {}
+Module.MaxFrameTime       = 0
+Module.LastExtentsCheck   = os.clock()
 
-Module.DefaultConfig     = {
-    ['FramesToStore'] = { DisplayName = "Frame Storage #", Category = "Monitoring", Tooltip = "The number of frametimes to keep in history.", Default = 100, Min = 10, Max = 500, Step = 5, },
+Module.DefaultConfig      = {
+    ['FramesToStore']        = { DisplayName = "Frame Storage #", Category = "Monitoring", Tooltip = "The number of frametimes to keep in history.", Default = 100, Min = 10, Max = 500, Step = 5, },
+    ['EnablePerfMonitoring'] = { DisplayName = "Enable Performance Monitoring", Category = "Monitoring", Tooltip = "Might cause some lag so only use if you want it", Default = false, },
+    ['PlotFillLines']        = { DisplayName = "Enable Fill Lines", Category = "Graph", Tooltip = "Fill in the Plot Lines", Default = true, },
 }
 
-Module.DefaultCategories = Set.new({})
+Module.DefaultCategories  = Set.new({})
 for _, v in pairs(Module.DefaultConfig) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
@@ -82,20 +87,20 @@ function Module:Render()
     if not self.SettingsLoaded then return end
 
     if os.clock() - self.LastExtentsCheck > 0.01 then
-        self.GoalMax = 0
+        self.GoalMaxFrameTime = 0
         self.LastExtentsCheck = os.clock()
-        for _, times in pairs(RGMercModules.FrameTimes) do
-            for _, t in ipairs(times) do
-                if t > self.GoalMax then
-                    self.GoalMax = math.ceil(t / self.MaxFrameStep) * self.MaxFrameStep
+        for _, times in pairs(self.FrameTimes) do
+            for _, t in ipairs(times.frameTimes) do
+                if t > self.GoalMaxFrameTime then
+                    self.GoalMaxFrameTime = math.ceil(t / self.MaxFrameStep) * self.MaxFrameStep
                 end
             end
         end
     end
 
     -- converge on new max recalc min and maxes
-    if RGMercModules:GetMaxFrameTime() < self.GoalMax then RGMercModules:SetMaxFrameTime(RGMercModules:GetMaxFrameTime() + 1) end
-    if RGMercModules:GetMaxFrameTime() > self.GoalMax then RGMercModules:SetMaxFrameTime(RGMercModules:GetMaxFrameTime() - 1) end
+    if self.CurMaxMaxFrameTime < self.GoalMaxFrameTime then self.CurMaxMaxFrameTime = self.CurMaxMaxFrameTime + 1 end
+    if self.CurMaxMaxFrameTime > self.GoalMaxFrameTime then self.CurMaxMaxFrameTime = self.CurMaxMaxFrameTime - 1 end
 
     if self.settings.FramesToStore ~= #self.xAxes then
         self.xAxes = {}
@@ -104,11 +109,12 @@ function Module:Render()
 
     if ImPlot.BeginPlot("Frame Times for RGMercs Modules") then
         ImPlot.SetupAxes("Frame #", "Frame Time (ms)")
-        ImPlot.SetupAxesLimits(1, self.settings.FramesToStore, 0, RGMercModules:GetMaxFrameTime(), ImPlotCond.Always)
+        ImPlot.SetupAxesLimits(1, self.settings.FramesToStore, 0, self.CurMaxMaxFrameTime, ImPlotCond.Always)
 
-        for module, times in pairs(RGMercModules.FrameTimes) do
-            if times then
-                ImPlot.PlotLine(module, self.xAxes, times, #times)
+        for _, module in pairs(RGMercModules:GetModuleOrderedNames()) do
+            if self.FrameTimes[module] and not self.FrameTimes[module].mutexLock then
+                local frameTimes = self.FrameTimes[module].frameTimes or {}
+                ImPlot.PlotLine(module, self.xAxes, frameTimes, #frameTimes, self.settings.PlotFillLines and ImPlotLineFlags.Shaded or ImPlotLineFlags.None)
             end
         end
 
@@ -124,11 +130,30 @@ function Module:Render()
 end
 
 function Module:GiveTime(combat_state)
-    if RGMercModules:GetFramesToStore() ~= self.settings.FramesToStore then
-        RGMercModules:SetFramesToStore(self.settings.FramesToStore)
-    end
+end
 
-    local newHigh = 0 --RGMercModules:GetMaxFrameTime()
+function Module:OnFrameExec(module, frameTime)
+    if not self.settings.EnablePerfMonitoring then return end
+
+    if not self.FrameTimes[module] then self.FrameTimes[module] = { mutexLock = false, frameTimes = {}, } end
+
+    table.insert(self.FrameTimes[module].frameTimes, frameTime)
+
+    if frameTime > self.MaxFrameTime then self.MaxFrameTime = frameTime end
+
+    local totalFramesStore = #self.FrameTimes[module].frameTimes
+
+    if totalFramesStore > self.settings.FramesToStore then
+        -- let's clean up some memory
+        local oldTimes = self.FrameTimes[module].frameTimes
+        local startPoint = (#oldTimes - self.settings.FramesToStore) + 1
+        self.FrameTimes[module].mutexLock = true
+        self.FrameTimes[module].frameTimes = {}
+        for i = startPoint, (#oldTimes) do
+            self.FrameTimes[module].frameTimes[(i - startPoint) + 1] = oldTimes[i]
+        end
+        self.FrameTimes[module].mutexLock = false
+    end
 end
 
 function Module:OnDeath()
@@ -140,17 +165,9 @@ function Module:OnZone()
 end
 
 function Module:DoGetState()
-    -- Reture a reasonable state if queried
-    local ret = ""
+    if not self.settings.EnablePerfMonitoring then return "Disabled" end
 
-    for module, times in pairs(RGMercModules.FrameTimes) do
-        ret = ret .. string.format("<%s>\n", module)
-        for i, v in ipairs(times) do
-            ret = ret .. string.format("[%d] :: %d\n", i, v)
-        end
-        ret = ret .. string.format("\n", module)
-    end
-    return ret
+    return "Enabled"
 end
 
 ---@param cmd string
