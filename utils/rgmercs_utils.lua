@@ -1653,7 +1653,7 @@ function Utils.OkToEngage(autoTargetId)
     end
 
     if Utils.GetTargetID() ~= autoTargetId then
-        RGMercsLogger.log_debug("%d != %d --> Not Engageing", target.ID() or 0, autoTargetId)
+        RGMercsLogger.log_verbose("%d != %d --> Not Engaging", target.ID() or 0, autoTargetId)
         return false
     end
 
