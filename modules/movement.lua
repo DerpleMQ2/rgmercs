@@ -388,7 +388,7 @@ function Module:GiveTime(combat_state)
         -- are missing with minimal issues.
         if Nav.MeshLoaded() then
             if not Nav.Active() then
-                if Nav.PathExists("id " .. chaseSpawn.ID()) then
+                if Nav.PathExists("id " .. chaseSpawn.ID())() then
                     local navCmd = string.format("/squelch /nav id %d log=critical distance %d lineofsight=%s", chaseSpawn.ID(),
                         self.settings.ChaseDistance, self.settings.RequireLoS and "on" or "off")
                     RGMercsLogger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", self.settings.ChaseTarget, navCmd)
