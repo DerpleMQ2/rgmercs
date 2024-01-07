@@ -213,6 +213,9 @@ end
 function Module:GiveTime(combat_state)
     if not self.ClassConfig then return end
 
+    -- dead... whoops
+    if mq.TLO.Me.Hovering() then return end
+
     -- Main Module logic goes here.
     if newCombatMode then
         RGMercsLogger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[self.settings.Mode])

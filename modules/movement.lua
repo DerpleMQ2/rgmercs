@@ -11,6 +11,7 @@ Module.ModuleLoaded            = false
 Module.TempSettings            = {}
 Module.TempSettings.CampZoneId = 0
 Module.TempSettings.Go2GGH     = 0
+Module.TempSettings.LastCmd    = ""
 
 Module.Constants               = {}
 Module.Constants.GGHZones      = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
@@ -92,6 +93,17 @@ function Module:ChaseOn(target)
     else
         RGMercsLogger.log_warning("\ayWarning:\ax Not a valid chase target!")
     end
+end
+
+function Module:RunCmd(cmd, ...)
+    local formattedCmd = cmd
+
+    if ... ~= nil then
+        formattedCmd = string.format(cmd, ...)
+    end
+
+    self.TempSettings.LastCmd = formattedCmd
+    mq.cmdf(formattedCmd)
 end
 
 function Module:ChaseOff()
@@ -266,8 +278,11 @@ function Module:Render()
 
         local state, pressed = RGMercUtils.RenderOptionToggle("##chase_om", "Chase On", self.settings.ChaseOn)
         if pressed then
-            mq.cmdf("/rgl chase%s", state and "on" or "off")
+            self:RunCmd("/rgl chase%s", state and "on" or "off")
         end
+
+        ImGui.Separator()
+        ImGui.Text("Last Movement Command: %s", self.TempSettings.LastCmd)
     end
 end
 
@@ -301,7 +316,7 @@ function Module:OnZone()
 end
 
 function Module:GiveTime(combat_state)
-    if mq.TLO.Me.Dead() and self.settings.ChaseOn then
+    if mq.TLO.Me.Hovering() and self.settings.ChaseOn then
         RGMercsLogger.log_warning("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
             self.settings.ChaseTarget)
         self.settings.ChaseOn = false
@@ -327,13 +342,13 @@ function Module:GiveTime(combat_state)
         if self.TempSettings.Go2GGH == 2 then
             if mq.TLO.Zone.ShortName():lower() == "guildhalllrg_int" or mq.TLO.Zone.ShortName():lower() == "guildhall" then
                 RGMercsLogger.log_debug("\a\ag--\atGoing to Pool \ag--")
-                mq.cmdf("/squelch /moveto loc 1 1 3")
+                self:RunCmd("/squelch /moveto loc 1 1 3")
                 RGMercsLogger.log_debug("\ag --> \atYou made it \ag<--")
                 self.TempSettings.Go2GGH = 0
             elseif mq.TLO.Zone.ShortName():lower() ~= "guildlobby" and not mq.TLO.Navigation.Active() then
-                mq.cmdf("/squelch /travelto guildlobby")
+                self:RunCmd("/squelch /travelto guildlobby")
             elseif mq.TLO.Zone.ShortName():lower() == "guildlobby" and not mq.TLO.Navigation.Active() then
-                mq.cmdf("/squelch /nav door id 1 click")
+                self:RunCmd("/squelch /nav door id 1 click")
             end
         end
     end
@@ -350,7 +365,7 @@ function Module:GiveTime(combat_state)
 
         if RGMercUtils.ShouldDismount() then
             RGMercsLogger.log_debug("\ayDismounting...")
-            mq.cmdf("/dismount")
+            self:RunCmd("/dismount")
         end
     end
 
@@ -392,31 +407,31 @@ function Module:GiveTime(combat_state)
                     local navCmd = string.format("/squelch /nav id %d log=critical distance %d lineofsight=%s", chaseSpawn.ID(),
                         self.settings.ChaseDistance, self.settings.RequireLoS and "on" or "off")
                     RGMercsLogger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", self.settings.ChaseTarget, navCmd)
-                    mq.cmdf(navCmd)
+                    self:RunCmd(navCmd)
 
                     mq.delay("3s", function() return mq.TLO.Navigation.Active() end)
 
                     if not Nav.Active() and chaseSpawn.Distance() > self.settings.ChaseDistance then
                         RGMercsLogger.log_verbose("\awNOTICE:\ax Nav might have failed.")
-                        --mq.cmdf("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
+                        --self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
                     end
                 else
                     -- Assuming no line of site problems.
                     -- Moveto underwater style until 20 units away
                     RGMercsLogger.log_verbose("\awNOTICE:\ax Chase Target %s Has no nav path, trying /moveto", self.settings.ChaseTarget)
-                    mq.cmdf("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
+                    self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
                 end
             end
         elseif chaseSpawn.Distance() > self.settings.ChaseDistance and chaseSpawn.Distance() < 400 then
             -- If we don't have a mesh we're using afollow as legacy RG behavior.
             RGMercsLogger.log_debug("\awNOTICE:\ax Chase Target %s but no nav mesh - using afollow instead", self.settings.ChaseTarget)
-            mq.cmdf("/squelch /afollow spawn %d", chaseSpawn.ID())
-            mq.cmdf("/squelch /afollow %d", self.settings.ChaseDistance)
+            self:RunCmd("/squelch /afollow spawn %d", chaseSpawn.ID())
+            self:RunCmd("/squelch /afollow %d", self.settings.ChaseDistance)
 
             mq.delay("2s")
 
             if chaseSpawn.Distance() < self.settings.ChaseDistance then
-                mq.cmdf("/squelch /afollow off")
+                self:RunCmd("/squelch /afollow off")
             end
         end
     end
