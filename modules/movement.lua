@@ -389,16 +389,27 @@ function Module:GiveTime(combat_state)
         if Nav.MeshLoaded() then
             if not Nav.Active() then
                 if Nav.PathExists("id " .. chaseSpawn.ID()) then
-                    mq.cmdf("/squelch /nav id %d | log=critical distance %d lineofsight=%s", chaseSpawn.ID(),
+                    local navCmd = string.format("/squelch /nav id %d log=critical distance %d lineofsight=%s", chaseSpawn.ID(),
                         self.settings.ChaseDistance, self.settings.RequireLoS and "on" or "off")
+                    RGMercsLogger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", self.settings.ChaseTarget, navCmd)
+                    mq.cmdf(navCmd)
+
+                    mq.delay("3s", function() return mq.TLO.Navigation.Active() end)
+
+                    if not Nav.Active() and chaseSpawn.Distance() > self.settings.ChaseDistance then
+                        RGMercsLogger.log_verbose("\awNOTICE:\ax Nav might have failed going to try to moveto.")
+                        mq.cmdf("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
+                    end
                 else
                     -- Assuming no line of site problems.
                     -- Moveto underwater style until 20 units away
+                    RGMercsLogger.log_verbose("\awNOTICE:\ax Chase Target %s Has no nav path, trying /moveto", self.settings.ChaseTarget)
                     mq.cmdf("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
                 end
             end
         elseif chaseSpawn.Distance() > self.settings.ChaseDistance and chaseSpawn.Distance() < 400 then
             -- If we don't have a mesh we're using afollow as legacy RG behavior.
+            RGMercsLogger.log_debug("\awNOTICE:\ax Chase Target %s but no nav mesh - using afollow instead", self.settings.ChaseTarget)
             mq.cmdf("/squelch /afollow spawn %d", chaseSpawn.ID())
             mq.cmdf("/squelch /afollow %d", self.settings.ChaseDistance)
 
