@@ -7,7 +7,7 @@ local mq = require 'mq'
 local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
     Members = {
         Name = function(_, self)
-            return 'string', string.format("RGMercs [Module: %s/%s] by: %s", self.name, self._version, self.author)
+            return 'string', string.format("RGMercs [Module: %s/%s] by: %s", self._name, self._version, self._author)
         end,
 
         State = function(_, self)
@@ -19,7 +19,7 @@ local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
     },
 
     ToString = function(self)
-        return self.name
+        return self._name
     end,
 })
 

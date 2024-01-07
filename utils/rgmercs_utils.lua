@@ -8,7 +8,7 @@ local USEGEM        = mq.TLO.Me.NumGems()
 
 -- Global
 
-local Utils         = { _version = '0.2a', author = 'Derple', }
+local Utils         = { _version = '0.2a', _name = "RGMercUtils", _author = 'Derple', }
 Utils.__index       = Utils
 Utils.Actors        = require('actors')
 Utils.ScriptName    = "RGMercs"

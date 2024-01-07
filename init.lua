@@ -393,11 +393,6 @@ local function Main()
 
     notifyZoning = true
 
-    if RGMercConfig.Globals.PauseMain then
-        mq.delay(1000)
-        return
-    end
-
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
         if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
@@ -406,6 +401,14 @@ local function Main()
         end
     else
         curState = "Downtime"
+    end
+
+    if RGMercConfig.Globals.PauseMain then
+        mq.delay(1000)
+        if RGMercConfig:GetSettings().RunMovePaused then
+            RGMercModules:execModule("Movement", "GiveTime", curState)
+        end
+        return
     end
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end

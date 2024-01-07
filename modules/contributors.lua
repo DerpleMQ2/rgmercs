@@ -3,7 +3,7 @@ local mq                 = require('mq')
 local RGMercsLogger      = require("utils.rgmercs_logger")
 local RGMercUtils        = require("utils.rgmercs_utils")
 
-local Module             = { _version = '0.1a', name = "Contributors", author = 'Derple', }
+local Module             = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
 Module.__index           = Module
 Module.settings          = {}
 Module.DefaultConfig     = {}

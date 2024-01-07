@@ -3,7 +3,7 @@ local mq                           = require('mq')
 local RGMercsLogger                = require("utils.rgmercs_logger")
 local RGMercUtils                  = require("utils.rgmercs_utils")
 
-local Module                       = { _version = '0.1a', name = "Travel", author = 'Derple', }
+local Module                       = { _version = '0.1a', _name = "Travel", _author = 'Derple', }
 Module.__index                     = Module
 Module.TransportSpells             = {}
 Module.ButtonWidth                 = 150
@@ -46,14 +46,14 @@ local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module.name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast then
-        RGMercUtils.BroadcastUpdate(self.name, "LoadSettings")
+        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
@@ -92,11 +92,11 @@ end
 
 function Module:SendPorterInfo()
     RGMercsLogger.log_debug("\atBroadcasting TravelerUpdate")
-    RGMercUtils.BroadcastUpdate(self.name, "TravelerUpdate", self.TransportSpells[RGMercConfig.Globals.CurLoadedChar])
+    RGMercUtils.BroadcastUpdate(self._name, "TravelerUpdate", self.TransportSpells[RGMercConfig.Globals.CurLoadedChar])
 end
 
 function Module:RequestPorterInfo()
-    RGMercUtils.BroadcastUpdate(self.name, "SendPorterInfo")
+    RGMercUtils.BroadcastUpdate(self._name, "SendPorterInfo")
 end
 
 function Module.New()

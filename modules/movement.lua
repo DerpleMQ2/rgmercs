@@ -5,7 +5,7 @@ local RGMercUtils              = require("utils.rgmercs_utils")
 local ICONS                    = require('mq.Icons')
 local Set                      = require("mq.Set")
 
-local Module                   = { _version = '0.1a', name = "Movement", author = 'Derple', }
+local Module                   = { _version = '0.1a', _name = "Movement", _author = 'Derple', }
 Module.__index                 = Module
 Module.ModuleLoaded            = false
 Module.TempSettings            = {}
@@ -37,14 +37,14 @@ local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module.name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast then
-        RGMercUtils.BroadcastUpdate(self.name, "LoadSettings")
+        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 

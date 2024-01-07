@@ -1,9 +1,10 @@
--- Sample Basic Class Module
+-- Sample Performance Monitor Class Module
 local mq                 = require('mq')
 local RGMercsLogger      = require("utils.rgmercs_logger")
 local RGMercUtils        = require("utils.rgmercs_utils")
+local ImPlot             = require('ImPlot')
 
-local Module             = { _version = '0.1a', _name = "Basic", _author = 'Derple', }
+local Module             = { _version = '0.1a', _name = "Performance", _author = 'Derple', }
 Module.__index           = Module
 Module.settings          = {}
 Module.DefaultConfig     = {}
@@ -25,12 +26,12 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("Basic Combat Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_info("Performance Monitor Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[Basic]: Unable to load global settings file(%s), creating a new one!",
+        RGMercsLogger.log_error("\ay[Performance Monitor]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self.settings.MyCheckbox = false
         self:SaveSettings(true)
@@ -48,18 +49,32 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_info("Basic Combat Module Loaded.")
+    RGMercsLogger.log_info("Performance Monitor Module Loaded.")
     self:LoadSettings()
 
     return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:Render()
-    ImGui.Text("Basic Combat Modules")
+    ImGui.Text("Performance Monitor Modules")
     local pressed
-    self.settings.MyCheckbox, pressed = ImGui.Checkbox("I am a Checkbox", self.settings.MyCheckbox)
-    if pressed then
-        self:SaveSettings()
+
+    if ImPlot.BeginPlot("Frame Times for RGMercs Modules") then
+        ImPlot.SetupAxes("FrameNum", "FrameSeconds")
+        ImPlot.SetupAxesLimits(1, RGMercModules.FramesToStore, 0, 50, ImPlotCond.Always)
+        local xAxis = {}
+
+        for module, times in pairs(RGMercModules.FrameTimes) do
+            if #xAxis == 0 then
+                for i, _ in ipairs(times or { 1, }) do table.insert(xAxis, i) end
+            end
+
+            if times then
+                ImPlot.PlotLine(module, xAxis, times, #times)
+            end
+        end
+
+        ImPlot.EndPlot()
     end
 end
 
@@ -77,7 +92,16 @@ end
 
 function Module:DoGetState()
     -- Reture a reasonable state if queried
-    return "Running..."
+    local ret = ""
+
+    for module, times in pairs(RGMercModules.FrameTimes) do
+        ret = ret .. string.format("<%s>\n", module)
+        for i, v in ipairs(times) do
+            ret = ret .. string.format("[%d] :: %d\n", i, v)
+        end
+        ret = ret .. string.format("\n", module)
+    end
+    return ret
 end
 
 ---@param cmd string
@@ -91,7 +115,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Basic Combat Module Unloaded.")
+    RGMercsLogger.log_info("Performance Monitor Module Unloaded.")
 end
 
 return Module
