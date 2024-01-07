@@ -564,6 +564,13 @@ local _ClassConfig = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
         {
+            name = 'Safety',
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
+            end,
+        },
+        {
             name = 'Burn',
             state = 1,
             steps = 1,
@@ -584,6 +591,31 @@ local _ClassConfig = {
         },
     },
     ['Rotations']     = {
+        ['Safety'] = {
+            {
+                name = "Death Peace",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < 75 --and (mq.TLO.Me.PctAggro() > 80 or mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID())
+                end,
+            },
+            {
+                name = "Harm Shield",
+                type = "AA",
+                cond = function(self, aaName)
+                    return mq.TLO.Me.State():lower() ~= "feign" and RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() > 75 and
+                        (mq.TLO.Me.PctAggro() > 80 or mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID())
+                end,
+            },
+            {
+                name = "Stand Back Up",
+                type = "cmd",
+                cond = function(self)
+                    return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
+                end,
+                cmd = "/stand",
+            },
+        },
         ['DPS'] = {
             {
                 name = "Wake the Dead",
@@ -861,6 +893,14 @@ local _ClassConfig = {
             --},
         },
         ['Downtime'] = {
+            {
+                name = "Stand Back Up",
+                type = "cmd",
+                cond = function(self)
+                    return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
+                end,
+                cmd = "/stand",
+            },
             {
                 name = "Mortifier's Unity",
                 type = "AA",

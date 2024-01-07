@@ -621,7 +621,7 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
     end
 
     if e.type:lower() == "cmd" then
-        mq.cmdf("/docommand %s", e.name)
+        mq.cmdf("/docommand %s", e.cmd)
         RGMercsLogger.log_debug("Calling command \ao =>> \ag %s \ao <<=", e.name)
         return true
     end
