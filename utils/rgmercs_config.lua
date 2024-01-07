@@ -225,6 +225,10 @@ function Config:SettingsLoaded()
     return self.settings ~= nil
 end
 
+function Config:GetTimeSinceLastMove()
+    return os.clock() - self.Globals.LastMove.TimeAtMove
+end
+
 function Config:StoreLastMove()
     local me = mq.TLO.Me
 
@@ -242,9 +246,7 @@ function Config:StoreLastMove()
         self.Globals.LastMove.Z = me.Z()
         self.Globals.LastMove.Heading = me.Heading.Degrees()
         self.Globals.LastMove.Sitting = me.Sitting()
-        self.Globals.LastMove.TimeSinceMove = 0
-    else
-        self.Globals.LastMove.TimeSinceMove = os.clock() - self.Globals.LastMove.TimeSinceMove
+        self.Globals.LastMove.TimeAtMove = os.clock()
     end
 end
 

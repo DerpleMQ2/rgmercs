@@ -376,6 +376,9 @@ local function RGInit(...)
         RGMercUtils.PopUp(string.format("Assisting: %s NOTICE: Group MainAssist [%s] != Your Assist Target [%s]. Is This On Purpose?", mainAssist,
             RGMercUtils.GetGroupMainAssistName(), mainAssist))
     end
+
+    -- store initial positioning data.
+    RGMercConfig:StoreLastMove()
 end
 
 local function Main()
