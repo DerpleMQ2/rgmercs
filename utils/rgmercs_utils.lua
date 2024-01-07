@@ -981,8 +981,7 @@ function Utils.AutoMed()
     local forcestand = false
 
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
-    RGMercsLogger.log_verbose("Testing Sit and time since last move: %d", RGMercConfig.Globals.LastMove.TimeSinceMove)
-    if RGMercConfig.Globals.LastMove.TimeSinceMove < math.random(7, 12) then return end
+    if RGMercConfig:GetTimeSinceLastMove() < math.random(7, 12) then return end
 
     if RGMercConfig.Constants.RGHybrid:contains(me.Class.ShortName()) then
         -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
