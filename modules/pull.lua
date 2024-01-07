@@ -203,6 +203,9 @@ function Module:Render()
 
     local pressed
 
+    -- dead... whoops
+    if mq.TLO.Me.Hovering() then return end
+
     if self.ModuleLoaded then
         if self.settings.DoPull then
             ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
