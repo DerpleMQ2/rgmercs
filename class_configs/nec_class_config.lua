@@ -580,7 +580,7 @@ local _ClassConfig = {
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck()
+                    RGMercUtils.BurnCheck() and mq.TLO.Me.State():lower() ~= "feign"
             end,
         },
         {
@@ -589,7 +589,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and mq.TLO.Me.State():lower() ~= "feign"
             end,
         },
     },
@@ -934,8 +934,10 @@ local _ClassConfig = {
                 name = "LichSpell",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell) return self.settings.DoLich and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.AAReady("Mortifier's Unity") and
-                    mq.TLO.Me.PctHPs() > 30 end,
+                cond = function(self, spell)
+                    return self.settings.DoLich and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.AAReady("Mortifier's Unity") and
+                        mq.TLO.Me.PctHPs() > 30
+                end,
             },
             {
                 name = "Death Bloom",
