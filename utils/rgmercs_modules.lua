@@ -1,10 +1,7 @@
-local RGMercsLogger  = require("utils.rgmercs_logger")
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-local Module         = { _version = '0.1a', _author = 'Derple', }
-Module.__index       = Module
-Module.FrameTimes    = {}
-Module.FramesToStore = 100
-Module.MaxFrameTime  = 0
+local Module        = { _version = '0.1a', _author = 'Derple', }
+Module.__index      = Module
 
 ---@return any
 function Module.load()
@@ -27,10 +24,6 @@ function Module.load()
         },
     }, Module)
 
-    for name, _ in pairs(newModule.modules) do
-        newModule.FrameTimes[name] = {}
-    end
-
     return newModule
 end
 
@@ -40,26 +33,6 @@ end
 
 function Module:GetModuleOrderedNames()
     return self.module_order
-end
-
----@return number
-function Module:GetMaxFrameTime()
-    return self.MaxFrameTime
-end
-
----@param f number
-function Module:SetMaxFrameTime(f)
-    self.MaxFrameTime = f
-end
-
----@return number
-function Module:GetFramesToStore()
-    return self.FramesToStore
-end
-
----@param f number
-function Module:SetFramesToStore(f)
-    self.FramesToStore = f
 end
 
 ---@param m string
@@ -91,14 +64,8 @@ function Module:ExecAll(fn, ...)
 
         if fn == "GiveTime" then
             local frameTime = (os.clock() * 1000) - startTime
-            table.insert(self.FrameTimes[n], frameTime)
-            if #self.FrameTimes[n] > self.FramesToStore then
-                local oldTimes = { unpack(self.FrameTimes[n]), }
-                self.FrameTimes[n] = {}
-                local startPoint = (#oldTimes - self.FramesToStore) + 1
-                for i = startPoint, (#oldTimes) do
-                    self.FrameTimes[n][(i - startPoint) + 1] = oldTimes[i]
-                end
+            if self.modules.Performance then
+                self.modules.Performance:OnFrameExec(n, frameTime)
             end
         end
     end
