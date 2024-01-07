@@ -566,7 +566,7 @@ return {
     },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" end, },
+        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
         {
             name = 'Burn',
             state = 1,

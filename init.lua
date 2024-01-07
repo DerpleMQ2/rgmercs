@@ -564,6 +564,18 @@ local function bindHandler(cmd, ...)
         return
     end
 
+    if cmd == "yes" then
+        mq.cmdf("/dggaexecute /notify LargeDialogWindow LDW_YesButton leftmouseup")
+        mq.cmdf("/dggaexecute /notify LargeDialogWindow LDW_OkButton leftmouseup")
+        mq.cmdf("/dggaexecute /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
+        mq.cmdf("/dggaexecute /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
+        mq.cmdf("/dggaexecute /notify TradeWND TRDW_Trade_Button leftmouseup")
+        mq.cmdf("/dggaexecute /notify GiveWnd GVW_Give_Button leftmouseup ")
+        mq.cmdf("/dggaexecute /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
+        mq.cmdf("/dggaexecute /notify RaidWindow RAID_AcceptButton leftmouseup")
+        return
+    end
+
     local results = RGMercModules:execAll("HandleBind", cmd, ...)
 
     local processed = false

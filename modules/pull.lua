@@ -691,7 +691,7 @@ function Module:CheckForAbort(pullID)
         return true
     end
 
-    if not self.settings.DoPull or RGMercConfig.Globals.PauseMain then
+    if (not self.settings.DoPull and self.TempSettings.TargetSpawnID == 0) or RGMercConfig.Globals.PauseMain then
         RGMercsLogger.log_debug("\ar ALERT: Pulling Disabled at user request. \ax")
         return true
     end
@@ -777,7 +777,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 end
 
 function Module:GiveTime(combat_stateModule)
-    if not self.settings.DoPull then return end
+    if not self.settings.DoPull and self.TempSettings.TargetSpawnID == 0 then return end
 
     if not mq.TLO.Navigation.MeshLoaded() then
         RGMercsLogger.log_debug("\ar ERROR: There's no mesh for this zone. Can't pull. \ax")
