@@ -934,13 +934,14 @@ local _ClassConfig = {
                 name = "LichSpell",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell) return self.settings.DoLich and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.AAReady("Mortifier's Unity") end,
+                cond = function(self, spell) return self.settings.DoLich and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.AAReady("Mortifier's Unity") and
+                    mq.TLO.Me.PctHPs() > 30 end,
             },
             {
                 name = "Death Bloom",
                 type = "AA",
                 active_cond = function(self, aaName) return RGMercUtils.SongActive(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
-                cond = function(self, _) return mq.TLO.Me.PctMana() < self.settings.DeathBloomPercent end,
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctMana() < self.settings.DeathBloomPercent end,
             },
             -- Leaving this out because it mems every 60s and thats wonky.
             --{
