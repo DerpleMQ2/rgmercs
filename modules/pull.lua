@@ -216,6 +216,13 @@ function Module:Render()
         end
         ImGui.PopStyleColor()
 
+        if mq.TLO.Target() and mq.TLO.Target.Type() == "NPC" then
+            ImGui.SameLine()
+            if ImGui.Button("Pull Target " .. ICONS.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
+                self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
+            end
+        end
+
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
         if pressed then
             self:SaveSettings(true)
@@ -271,12 +278,6 @@ function Module:Render()
             local wpData = self:GetWPById(wpId)
             ImGui.Text(wpId == 0 and "<None>" or string.format("%d [y: %0.2f, x: %0.2f, z: %0.2f]", wpId, wpData.y, wpData.x, wpData.z))
             ImGui.EndTable()
-        end
-
-        if mq.TLO.Target() and mq.TLO.Target.Type() == "NPC" then
-            if ImGui.SmallButton("Pull Target") then
-                self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
-            end
         end
 
         ImGui.NewLine()
