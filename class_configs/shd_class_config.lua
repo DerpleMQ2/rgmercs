@@ -821,6 +821,15 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "AeTaunt",
+                type = "Spell",
+                tooltip = Tooltips.AeTaunt,
+                cond = function(self, spell)
+                    return RGMercConfig.Globals.IsTanking and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
+                        RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
+                end,
+            },
+            {
                 name = "Explosion of Hatred",
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfHatred,
@@ -1082,97 +1091,93 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
-                { name = "Terror", },
+                { name = "DireDot", },
             },
         },
         {
             gem = 2,
             spells = {
-                { name = "ForPower", },
+                { name = "Spearnuke", },
             },
         },
         {
             gem = 3,
             spells = {
-                { name = "LifeTap", },
+                { name = "Torrent", cond = function(self) return self.settings.DoTorrent end, },
+                { name = "BondTap", },
             },
         },
         {
             gem = 4,
             spells = {
-                { name = "BuffTap", },
+                {
+                    name = "SnareDOT",
+                    cond = function(self) return mq.TLO.Me.AltAbility("Encroaching Darkness")() == nil end,
+                },
+                { name = "DireTap", },
+                { name = "AeTaunt", },
             },
         },
         {
             gem = 5,
             spells = {
-                {
-                    name = "SnareDOT",
-                    cond = function(self) return not mq.TLO.Me.AltAbility(826)() end,
-                },
-                { name = "BondTap", },
+                { name = "LifeTap", },
             },
         },
         {
             gem = 6,
             spells = {
-                { name = "AeTaunt", },
-                { name = "DireDot", },
-                { name = "Spearnuke", },
+                { name = "BuffTap", },
             },
         },
         {
             gem = 7,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "DireDot", },
-                { name = "Spearnuke", },
+                { name = "BiteTap", },
             },
         },
         {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "AeTaunt", },
-                { name = "Spearnuke", },
-                { name = "BiteTap", },
+                { name = "AeTaunt",  cond = function(self) return self.settings.DoAE and mq.TLO.Me.AltAbility("Explosion of Hatred")() == nil end, },
+                { name = "ForPower", },
             },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Skin", },
+                { name = "Terror", },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "BondTap", },
-                { name = "BiteTap", },
-                { name = "Spearnuke", },
+                { name = "TempHP", },
             },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "TempHP", },
+                { name = "Skin", },
             },
         },
         {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "DireTap", },
+                { name = "Dicho", },
             },
         },
         {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Dicho", },
+
             },
         },
     },

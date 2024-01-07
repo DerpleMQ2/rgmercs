@@ -1813,8 +1813,12 @@ function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
                 RGMercsLogger.log_debug("    ==> No Resolved Spell! class file not configured properly")
             end
         else
-            RGMercsLogger.log_debug("\arGem %d will not be loaded.", g.gem)
+            RGMercsLogger.log_debug("\agGem %d will not be loaded.", g.gem)
         end
+    end
+
+    if #spellLoadOut >= mq.TLO.Me.NumGems() then
+        RGMercsLogger.log_error("\arYour spell loadout count is the same as your number of gems. This might cause your character to sit and remem often! Consider fixing this!")
     end
 
     return resolvedActionMap, spellLoadOut
