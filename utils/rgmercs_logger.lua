@@ -37,7 +37,10 @@ local function log(logLevel, output, ...)
 
 	if (... ~= nil) then output = string.format(output, ...) end
 
-	mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), logLevels[logLevel].header, callerTracer, output))
+	-- only log out warnings and errors
+	if logLevels[logLevel].level <= 2 then
+		mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), logLevels[logLevel].header, callerTracer, output))
+	end
 
 	if RGMercsConsole ~= nil then
 		local consoleText = string.format('[%s] %s', logLevels[logLevel].header, output)
