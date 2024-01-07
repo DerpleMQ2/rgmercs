@@ -60,7 +60,7 @@ function Module:Render()
     local pressed
 
     if ImPlot.BeginPlot("Frame Times for RGMercs Modules") then
-        ImPlot.SetupAxes("FrameNum", "FrameSeconds")
+        ImPlot.SetupAxes("Frame #", "Frame Time (ms)")
         ImPlot.SetupAxesLimits(1, RGMercModules.FramesToStore, 0, 50, ImPlotCond.Always)
         local xAxis = {}
 
