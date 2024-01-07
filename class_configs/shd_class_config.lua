@@ -1091,6 +1091,8 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
+                -- On a TLP we might not have 9 gem slots so load Terror here
+                { name = "Terror",  cond = function(self) return mq.TLO.Me.NumGems() <= 8 end, },
                 { name = "DireDot", },
             },
         },
