@@ -5,7 +5,7 @@ local RGMercUtils   = require("utils.rgmercs_utils")
 local Set           = require("mq.Set")
 require('utils.rgmercs_datatypes')
 
-local Module                       = { _version = '0.1a', name = "Class", author = 'Derple', }
+local Module                       = { _version = '0.1a', _name = "Class", _author = 'Derple', }
 Module.__index                     = Module
 Module.LastPetCmd                  = 0
 Module.ModuleLoaded                = false
@@ -26,14 +26,14 @@ local newCombatMode                = false
 local function getConfigFileName()
     return mq.configDir ..
         '/rgmercs/PCConfigs/' ..
-        Module.name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+        Module._name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast then
-        RGMercUtils.BroadcastUpdate(self.name, "LoadSettings")
+        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
