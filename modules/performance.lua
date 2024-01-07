@@ -1,27 +1,67 @@
 -- Sample Performance Monitor Class Module
-local mq                  = require('mq')
-local RGMercsLogger       = require("utils.rgmercs_logger")
-local RGMercUtils         = require("utils.rgmercs_utils")
-local ImPlot              = require('ImPlot')
-local Set                 = require('mq.Set')
+local mq              = require('mq')
+local RGMercsLogger   = require("utils.rgmercs_logger")
+local RGMercUtils     = require("utils.rgmercs_utils")
+local ImPlot          = require('ImPlot')
+local Set             = require('mq.Set')
+
+---@class ScrollingBuffer
+---@field MaxSize number
+---@field Offset number
+---@field DataX number[]
+---@field DataY number[]
+local ScrollingBuffer = {}
+
+---@param max_size? number
+---@return ScrollingBuffer
+function ScrollingBuffer:new(max_size)
+    max_size = max_size or 2000
+    local newObject = setmetatable({}, self)
+    self.__index = self
+    newObject.MaxSize = max_size
+    newObject.Offset = 1
+    newObject.DataX = {}
+    newObject.DataY = {}
+    return newObject
+end
+
+---@param x number
+---@param y number
+function ScrollingBuffer:AddPoint(x, y)
+    if #self.DataX < self.MaxSize then
+        table.insert(self.DataX, x)
+        table.insert(self.DataY, y)
+    else
+        self.DataX[self.Offset] = x
+        self.DataY[self.Offset] = y
+        self.Offset = self.Offset + 1
+        if self.Offset > self.MaxSize then
+            self.Offset = 1
+        end
+    end
+end
+
+function ScrollingBuffer:Erase()
+    self.DataX = {}
+    self.DataY = {}
+end
 
 local Module              = { _version = '0.1a', _name = "Performance", _author = 'Derple', }
 Module.__index            = Module
 Module.settings           = {}
 Module.DefaultConfig      = {}
 Module.DefaultCategories  = {}
-Module.MaxFrame           = 50
 Module.MaxFrameStep       = 5.0
 Module.GoalMaxFrameTime   = 0
 Module.CurMaxMaxFrameTime = 0
 Module.xAxes              = {}
 Module.SettingsLoaded     = false
-Module.FrameTimes         = {}
+Module.FrameTimingData    = {}
 Module.MaxFrameTime       = 0
 Module.LastExtentsCheck   = os.clock()
 
 Module.DefaultConfig      = {
-    ['FramesToStore']        = { DisplayName = "Frame Storage #", Category = "Monitoring", Tooltip = "The number of frametimes to keep in history.", Default = 100, Min = 10, Max = 500, Step = 5, },
+    ['SecondsToStore']       = { DisplayName = "Seconds to Store", Category = "Monitoring", Tooltip = "The number of Seconds to keep in history.", Type = "Custom", Default = 30, Min = 10, Max = 120, Step = 5, },
     ['EnablePerfMonitoring'] = { DisplayName = "Enable Performance Monitoring", Category = "Monitoring", Tooltip = "Might cause some lag so only use if you want it", Default = false, },
     ['PlotFillLines']        = { DisplayName = "Enable Fill Lines", Category = "Graph", Tooltip = "Fill in the Plot Lines", Default = true, },
 }
@@ -83,16 +123,17 @@ end
 function Module:Render()
     ImGui.Text("Performance Monitor Modules")
     local pressed
-
     if not self.SettingsLoaded then return end
 
     if os.clock() - self.LastExtentsCheck > 0.01 then
         self.GoalMaxFrameTime = 0
         self.LastExtentsCheck = os.clock()
-        for _, times in pairs(self.FrameTimes) do
-            for _, t in ipairs(times.frameTimes) do
-                if t > self.GoalMaxFrameTime then
-                    self.GoalMaxFrameTime = math.ceil(t / self.MaxFrameStep) * self.MaxFrameStep
+        for _, data in pairs(self.FrameTimingData) do
+            for idx, time in ipairs(data.frameTimes.DataY) do
+                -- is this entry visible?
+                local visible = data.frameTimes.DataX[idx] > os.clock() - self.settings.SecondsToStore and data.frameTimes.DataX[idx] < os.clock()
+                if visible and time > self.GoalMaxFrameTime then
+                    self.GoalMaxFrameTime = math.ceil(time / self.MaxFrameStep) * self.MaxFrameStep
                 end
             end
         end
@@ -102,19 +143,20 @@ function Module:Render()
     if self.CurMaxMaxFrameTime < self.GoalMaxFrameTime then self.CurMaxMaxFrameTime = self.CurMaxMaxFrameTime + 1 end
     if self.CurMaxMaxFrameTime > self.GoalMaxFrameTime then self.CurMaxMaxFrameTime = self.CurMaxMaxFrameTime - 1 end
 
-    if self.settings.FramesToStore ~= #self.xAxes then
-        self.xAxes = {}
-        for i = 1, self.settings.FramesToStore do table.insert(self.xAxes, i) end
-    end
-
     if ImPlot.BeginPlot("Frame Times for RGMercs Modules") then
-        ImPlot.SetupAxes("Frame #", "Frame Time (ms)")
-        ImPlot.SetupAxesLimits(1, self.settings.FramesToStore, 0, self.CurMaxMaxFrameTime, ImPlotCond.Always)
+        ImPlot.SetupAxes("Time (s)", "Frame Time (ms)")
+        ImPlot.SetupAxisLimits(ImAxis.X1, os.clock() - self.settings.SecondsToStore, os.clock(), ImGuiCond.Always)
+        ImPlot.SetupAxisLimits(ImAxis.Y1, 1, self.CurMaxMaxFrameTime, ImGuiCond.Always)
 
         for _, module in pairs(RGMercModules:GetModuleOrderedNames()) do
-            if self.FrameTimes[module] and not self.FrameTimes[module].mutexLock then
-                local frameTimes = self.FrameTimes[module].frameTimes or {}
-                ImPlot.PlotLine(module, self.xAxes, frameTimes, #frameTimes, self.settings.PlotFillLines and ImPlotLineFlags.Shaded or ImPlotLineFlags.None)
+            if self.FrameTimingData[module] and not self.FrameTimingData[module].mutexLock then
+                local framData = self.FrameTimingData[module]
+
+                if framData then
+                    ImPlot.PlotLine(module, framData.frameTimes.DataX, framData.frameTimes.DataY, #framData.frameTimes.DataX,
+                        self.settings.PlotFillLines and ImPlotLineFlags.Shaded or ImPlotLineFlags.None,
+                        framData.frameTimes.Offset - 1)
+                end
             end
         end
 
@@ -122,9 +164,17 @@ function Module:Render()
     end
 
     if ImGui.CollapsingHeader("Config Options") then
+        self.settings.SecondsToStore, pressed = ImGui.SliderInt(self.DefaultConfig.SecondsToStore.DisplayName, self.settings.SecondsToStore, self.DefaultConfig.SecondsToStore.Min,
+            self.DefaultConfig.SecondsToStore
+            .Max,
+            "%d s")
+        if pressed then
+            self:SaveSettings(false)
+        end
+
         self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
         if pressed then
-            self:SaveSettings(true)
+            self:SaveSettings(false)
         end
     end
 end
@@ -135,25 +185,10 @@ end
 function Module:OnFrameExec(module, frameTime)
     if not self.settings.EnablePerfMonitoring then return end
 
-    if not self.FrameTimes[module] then self.FrameTimes[module] = { mutexLock = false, frameTimes = {}, } end
+    if not self.FrameTimingData[module] then self.FrameTimingData[module] = { mutexLock = false, lastFrame = os.clock(), frameTimes = ScrollingBuffer:new(), } end
 
-    table.insert(self.FrameTimes[module].frameTimes, frameTime)
-
-    if frameTime > self.MaxFrameTime then self.MaxFrameTime = frameTime end
-
-    local totalFramesStore = #self.FrameTimes[module].frameTimes
-
-    if totalFramesStore > self.settings.FramesToStore then
-        -- let's clean up some memory
-        local oldTimes = self.FrameTimes[module].frameTimes
-        local startPoint = (#oldTimes - self.settings.FramesToStore) + 1
-        self.FrameTimes[module].mutexLock = true
-        self.FrameTimes[module].frameTimes = {}
-        for i = startPoint, (#oldTimes) do
-            self.FrameTimes[module].frameTimes[(i - startPoint) + 1] = oldTimes[i]
-        end
-        self.FrameTimes[module].mutexLock = false
-    end
+    self.FrameTimingData[module].lastFrame = os.clock()
+    self.FrameTimingData[module].frameTimes:AddPoint(os.clock(), frameTime)
 end
 
 function Module:OnDeath()
