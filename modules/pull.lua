@@ -790,7 +790,7 @@ function Module:GiveTime(combat_stateModule)
         return
     end
 
-    local campData = RGMercModules:execModule("Movement", "GetCampData")
+    local campData = RGMercModules:ExecModule("Movement", "GetCampData")
 
     if self.settings.PullAbility == PullAbilityIDToName.PetPull and (mq.TLO.Me.Pet.ID() or 0) == 0 then
         RGMercUtils.PrintGroupMessage("Need to create a new pet to throw as mob fodder.")

@@ -640,7 +640,7 @@ return {
                 type = "AA",
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
                 cond = function(self, aaName)
-                    local selfHPBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
+                    local selfHPBuff = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
                     local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
                     return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
@@ -768,7 +768,7 @@ return {
                 name = "FuseNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    local fireClaw = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "FireClaw")
+                    local fireClaw = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "FireClaw")
                     return not RGMercUtils.DetGambitCheck() and ((not fireClaw or not fireClaw()) or not mq.TLO.Me.SpellReady(fireClaw.RankName()))
                 end,
             },
@@ -836,7 +836,7 @@ return {
                 type = "AA",
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
                 cond = function(self, aaName)
-                    local selfHPBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
+                    local selfHPBuff = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
                     local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
                     return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
@@ -862,7 +862,7 @@ return {
                 type = "AA",
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID()) end,
                 cond = function(self, aaName)
-                    local familiarBuff = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
+                    local familiarBuff = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
                     local familiarBuffLevel = familiarBuff and familiarBuff() and familiarBuff.Level() or 0
                     return (mq.TLO.Me.AltAbility(aaName).Spell.Level() or 0) > familiarBuffLevel and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
@@ -907,7 +907,7 @@ return {
         {
             gem = 1,
             spells = {
-                { name = string.format("%sClaw", RGMercModules:execModule("Class", "GetClassModeName")), },
+                { name = string.format("%sClaw", RGMercModules:ExecModule("Class", "GetClassModeName")), },
                 { name = "IceClaw", },
                 { name = "FireClaw", },
                 { name = "MagicClaw", },
@@ -917,8 +917,8 @@ return {
         {
             gem = 2,
             spells = {
-                { name = string.format("%sEtherealNuke", RGMercModules:execModule("Class", "GetClassModeName")), },
-                { name = string.format("%sNuke", RGMercModules:execModule("Class", "GetClassModeName")), },
+                { name = string.format("%sEtherealNuke", RGMercModules:ExecModule("Class", "GetClassModeName")), },
+                { name = string.format("%sNuke", RGMercModules:ExecModule("Class", "GetClassModeName")), },
                 { name = "FireEtherealNuke", },
                 { name = "FireNuke", },
             },
@@ -930,7 +930,7 @@ return {
                 {
                     name = "MagicNuke",
                     cond = function(self)
-                        return RGMercModules:execModule("Class", "GetClassModeName") ~= "Magic" -- Magic mode will put this elsewhere so load an ice nuke.
+                        return RGMercModules:ExecModule("Class", "GetClassModeName") ~= "Magic" -- Magic mode will put this elsewhere so load an ice nuke.
                     end,
                 },
                 { name = "IceNuke", },
@@ -943,13 +943,13 @@ return {
                 {
                     name = "IceNuke",
                     cond = function(self)
-                        return RGMercModules:execModule("Class", "GetClassModeName") == "Fire" or RGMercModules:execModule("Class", "GetClassModeName") == "Combo"
+                        return RGMercModules:ExecModule("Class", "GetClassModeName") == "Fire" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Combo"
                     end,
                 },
                 {
                     name = "FireNuke",
                     cond = function(self)
-                        return RGMercModules:execModule("Class", "GetClassModeName") == "Ice" or RGMercModules:execModule("Class", "GetClassModeName") == "Magic"
+                        return RGMercModules:ExecModule("Class", "GetClassModeName") == "Ice" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Magic"
                     end,
                 },
             },
@@ -969,7 +969,7 @@ return {
                 {
                     name = "IceEtherealNuke",
                     cond = function(self)
-                        return RGMercModules:execModule("Class", "GetClassModeName") ~= "Ice" -- Ice will load this elsewhere.
+                        return RGMercModules:ExecModule("Class", "GetClassModeName") ~= "Ice" -- Ice will load this elsewhere.
                     end,
                 },
                 {

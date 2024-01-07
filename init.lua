@@ -67,9 +67,9 @@ end
 local function renderModulesTabs()
     if not RGMercConfig:SettingsLoaded() then return end
 
-    for _, name in ipairs(RGMercModules:getModuleOrderedNames()) do
+    for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
         if ImGui.BeginTabItem(name) then
-            RGMercModules:execModule(name, "Render")
+            RGMercModules:ExecModule(name, "Render")
             ImGui.EndTabItem()
         end
     end
@@ -93,7 +93,7 @@ local function Alive()
 end
 
 local function GetTheme()
-    return RGMercModules:execModule("Class", "GetTheme")
+    return RGMercModules:ExecModule("Class", "GetTheme")
 end
 
 local function RenderTarget()
@@ -217,7 +217,7 @@ local function RGMercsGUI()
                             if ImGui.CollapsingHeader(string.format("%s: Config Options", n)) then
                                 s.settings, pressed, _ = RGMercUtils.RenderSettings(s.settings, s.defaults, s.categories)
                                 if pressed then
-                                    RGMercModules:execModule(n, "SaveSettings", true)
+                                    RGMercModules:ExecModule(n, "SaveSettings", true)
                                 end
                             end
                         end
@@ -312,7 +312,7 @@ local function RGInit(...)
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
 
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
-    RGMercConfig.SubModuleSettings = RGMercModules:execAll("Init")
+    RGMercConfig.SubModuleSettings = RGMercModules:ExecAll("Init")
 
     if not RGMercConfig:GetSettings().DoTwist then
         local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist", })
@@ -384,7 +384,7 @@ end
 local function Main()
     if mq.TLO.Me.Zoning() then
         if notifyZoning then
-            RGMercModules:execAll("OnZone")
+            RGMercModules:ExecAll("OnZone")
             notifyZoning = false
         end
         mq.delay(1000)
@@ -406,7 +406,7 @@ local function Main()
     if RGMercConfig.Globals.PauseMain then
         mq.delay(1000)
         if RGMercConfig:GetSettings().RunMovePaused then
-            RGMercModules:execModule("Movement", "GiveTime", curState)
+            RGMercModules:ExecModule("Movement", "GiveTime", curState)
         end
         return
     end
@@ -415,7 +415,7 @@ local function Main()
 
     if RGMercConfig.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() then
         RGMercConfig:LoadSettings()
-        RGMercModules:execAll("LoadSettings")
+        RGMercModules:ExecAll("LoadSettings")
     end
 
     RGMercConfig:StoreLastMove()
@@ -530,7 +530,7 @@ local function Main()
         end
     end
 
-    RGMercModules:execAll("GiveTime", curState)
+    RGMercModules:ExecAll("GiveTime", curState)
 
     mq.doevents()
     mq.delay(100)
@@ -550,7 +550,7 @@ local script_actor = RGMercUtils.Actors.register(function(message)
         if message()["module"] == "main" then
             RGMercConfig:LoadSettings()
         else
-            RGMercModules:execModule(message()["module"], message()["event"], message()["data"])
+            RGMercModules:ExecModule(message()["module"], message()["event"], message()["data"])
         end
     end
 end)
@@ -579,7 +579,7 @@ local function bindHandler(cmd, ...)
         return
     end
 
-    local results = RGMercModules:execAll("HandleBind", cmd, ...)
+    local results = RGMercModules:ExecAll("HandleBind", cmd, ...)
 
     local processed = false
 
@@ -600,7 +600,7 @@ mq.event("CantSee", "You cannot see your target.", function()
         mq.cmdf("/stick off")
     end
 
-    if RGMercModules:execModule("Pull", "IsPullState", "PULL_PULLING") then
+    if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and Cannot see our target!")
         mq.cmdf("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
@@ -650,4 +650,4 @@ while openGUI do
     mq.delay(10)
 end
 
-RGMercModules:execAll("Shutdown")
+RGMercModules:ExecAll("Shutdown")

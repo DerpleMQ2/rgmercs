@@ -3,12 +3,30 @@ local mq                 = require('mq')
 local RGMercsLogger      = require("utils.rgmercs_logger")
 local RGMercUtils        = require("utils.rgmercs_utils")
 local ImPlot             = require('ImPlot')
+local Set                = require('mq.Set')
 
 local Module             = { _version = '0.1a', _name = "Performance", _author = 'Derple', }
 Module.__index           = Module
 Module.settings          = {}
 Module.DefaultConfig     = {}
 Module.DefaultCategories = {}
+Module.MaxFrame          = 50
+Module.MaxFrameStep      = 5.0
+Module.GoalMax           = 0
+Module.xAxes             = {}
+Module.SettingsLoaded    = false
+Module.LastExtentsCheck  = os.clock()
+
+Module.DefaultConfig     = {
+    ['FramesToStore'] = { DisplayName = "Frame Storage #", Category = "Monitoring", Tooltip = "The number of frametimes to keep in history.", Default = 100, Min = 10, Max = 500, Step = 5, },
+}
+
+Module.DefaultCategories = Set.new({})
+for _, v in pairs(Module.DefaultConfig) do
+    if v.Type ~= "Custom" then
+        Module.DefaultCategories:add(v.Category)
+    end
+end
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -41,6 +59,8 @@ function Module:LoadSettings()
 
     -- Setup Defaults
     self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+
+    self.SettingsLoaded = true
 end
 
 function Module.New()
@@ -59,27 +79,56 @@ function Module:Render()
     ImGui.Text("Performance Monitor Modules")
     local pressed
 
+    if not self.SettingsLoaded then return end
+
+    if os.clock() - self.LastExtentsCheck > 0.01 then
+        self.GoalMax = 0
+        self.LastExtentsCheck = os.clock()
+        for _, times in pairs(RGMercModules.FrameTimes) do
+            for _, t in ipairs(times) do
+                if t > self.GoalMax then
+                    self.GoalMax = math.ceil(t / self.MaxFrameStep) * self.MaxFrameStep
+                end
+            end
+        end
+    end
+
+    -- converge on new max recalc min and maxes
+    if RGMercModules:GetMaxFrameTime() < self.GoalMax then RGMercModules:SetMaxFrameTime(RGMercModules:GetMaxFrameTime() + 1) end
+    if RGMercModules:GetMaxFrameTime() > self.GoalMax then RGMercModules:SetMaxFrameTime(RGMercModules:GetMaxFrameTime() - 1) end
+
+    if self.settings.FramesToStore ~= #self.xAxes then
+        self.xAxes = {}
+        for i = 1, self.settings.FramesToStore do table.insert(self.xAxes, i) end
+    end
+
     if ImPlot.BeginPlot("Frame Times for RGMercs Modules") then
         ImPlot.SetupAxes("Frame #", "Frame Time (ms)")
-        ImPlot.SetupAxesLimits(1, RGMercModules.FramesToStore, 0, 50, ImPlotCond.Always)
-        local xAxis = {}
+        ImPlot.SetupAxesLimits(1, self.settings.FramesToStore, 0, RGMercModules:GetMaxFrameTime(), ImPlotCond.Always)
 
         for module, times in pairs(RGMercModules.FrameTimes) do
-            if #xAxis == 0 then
-                for i, _ in ipairs(times or { 1, }) do table.insert(xAxis, i) end
-            end
-
             if times then
-                ImPlot.PlotLine(module, xAxis, times, #times)
+                ImPlot.PlotLine(module, self.xAxes, times, #times)
             end
         end
 
         ImPlot.EndPlot()
     end
+
+    if ImGui.CollapsingHeader("Config Options") then
+        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
+        if pressed then
+            self:SaveSettings(true)
+        end
+    end
 end
 
 function Module:GiveTime(combat_state)
-    -- Main Module logic goes here.
+    if RGMercModules:GetFramesToStore() ~= self.settings.FramesToStore then
+        RGMercModules:SetFramesToStore(self.settings.FramesToStore)
+    end
+
+    local newHigh = 0 --RGMercModules:GetMaxFrameTime()
 end
 
 function Module:OnDeath()

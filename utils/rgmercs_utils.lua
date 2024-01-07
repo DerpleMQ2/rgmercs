@@ -115,7 +115,7 @@ function Utils.HandleDeath()
 
     Utils.ClearTarget()
 
-    RGMercModules:execAll("OnDeath")
+    RGMercModules:ExecAll("OnDeath")
 
     while mq.TLO.Me.Hovering() do
         if mq.TLO.Window("RespawnWnd").Open() and RGMercConfig:GetSettings().InstantRelease then
@@ -1746,7 +1746,7 @@ end
 function Utils.DetGambitCheck()
     local me = mq.TLO.Me
     ---@type MQSpell
-    local gambitSpell = RGMercModules:execModule("Class", "GetResolvedActionMapItem", "GambitSpell")
+    local gambitSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "GambitSpell")
 
     return (gambitSpell and gambitSpell() and ((me.Song(gambitSpell.RankName()).ID() or 0) > 0)) and true or false
 end
@@ -2136,15 +2136,16 @@ end
 ---@param cur number
 ---@param min number
 ---@param max number
+---@param step number?
 ---@return number: input
 ---@return boolean: changed
-function Utils.RenderOptionNumber(id, text, cur, min, max)
+function Utils.RenderOptionNumber(id, text, cur, min, max, step)
     ImGui.PushID("##num_spin_" .. id)
     ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0.5, 0.5, 0.5, 1.0)
     ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.5, 0.5, 0.5, 0.8)
     ImGui.PushStyleColor(ImGuiCol.Button, 1.0, 1.0, 1.0, 0.2)
     ImGui.PushStyleColor(ImGuiCol.FrameBg, 1.0, 1.0, 1.0, 0)
-    local input, changed = ImGui.InputInt(text, cur)
+    local input, changed = ImGui.InputInt(text, cur, step)
     ImGui.PopStyleColor(4)
     ImGui.PopID()
 
@@ -2193,7 +2194,7 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                         any_pressed = any_pressed or pressed
                     elseif type(settings[k]) == 'number' then
                         settings[k], pressed = Utils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
-                            defaults[k].Max)
+                            defaults[k].Max, defaults[k].Step or 1)
                         new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
                         any_pressed = any_pressed or pressed
                     elseif type(settings[k]) == 'string' then -- display only
@@ -2277,7 +2278,7 @@ function Utils.TooFarHandler()
         mq.cmdf("/stick off")
     end
 
-    if RGMercModules:execModule("Pull", "IsPullState", "PULL_PULLING") then
+    if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target!")
         mq.cmdf("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
