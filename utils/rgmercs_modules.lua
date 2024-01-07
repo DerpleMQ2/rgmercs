@@ -3,7 +3,7 @@ local RGMercsLogger  = require("utils.rgmercs_logger")
 local Module         = { _version = '0.1a', _author = 'Derple', }
 Module.__index       = Module
 Module.FrameTimes    = {}
-Module.FramesToStore = 5
+Module.FramesToStore = 100
 
 ---@return any
 function Module.load()
