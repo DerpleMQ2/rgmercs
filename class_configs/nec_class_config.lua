@@ -564,6 +564,9 @@ local _ClassConfig = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
         {
+            -- this will always run first in combat to check for things like FD or stand up
+            -- if you add to it make sure it remains pretty short because everythign will be
+            -- evalutated before we move to combat.
             name = 'Safety',
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
