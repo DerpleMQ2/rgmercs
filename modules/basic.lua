@@ -19,7 +19,7 @@ end
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
-    if doBroadcast then
+    if doBroadcast == true then
         RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
@@ -33,7 +33,7 @@ function Module:LoadSettings()
         RGMercsLogger.log_error("\ay[Basic]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self.settings.MyCheckbox = false
-        self:SaveSettings(true)
+        self:SaveSettings(false)
     else
         self.settings = config()
     end
