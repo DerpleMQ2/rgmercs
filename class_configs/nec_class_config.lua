@@ -953,15 +953,49 @@ local _ClassConfig = {
             --    cond = function(self, spell) return not RGMercUtils.SongActive(spell.RankName()) end,
             --},
             {
+                name = "PetSpellWar",
+                type = "Spell",
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == "war" end,
+                pre_activate = function(self, spell)
+                    if mq.TLO.Me.Pet.ID() > 0 then
+                        mq.cmdf("/pet leave")
+                    end
+                end,
+                cond = function(self, spell) return self.settings.PetType == 1 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "war") end,
+                post_activate = function(self, spell)
+                    local pet = mq.TLO.Me.Pet
+                    if pet.ID() > 0 then
+                        RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
+                    end
+                end,
+            },
+            {
+                name = "PetSpellRog",
+                type = "Spell",
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == "rog" end,
+                pre_activate = function(self, spell)
+                    if mq.TLO.Me.Pet.ID() > 0 then
+                        mq.cmdf("/pet leave")
+                    end
+                end,
+                cond = function(self, _) return self.settings.PetType == 2 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "rog") end,
+                post_activate = function(self, spell)
+                    local pet = mq.TLO.Me.Pet
+                    if pet.ID() > 0 then
+                        RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
+                    end
+                end,
+            },
+            {
                 name = "PetHaste",
                 type = "Spell",
-                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName) ~= nil end,
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
                 cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
             },
             {
                 name = "PetBuff",
                 type = "Spell",
-                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName) ~= nil end,
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
                 cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
             },
         },
@@ -1074,6 +1108,7 @@ local _ClassConfig = {
     },
     ['DefaultConfig'] = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['PetType']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "1 = War, 2 = Rog", Type = "Combo", ComboOptions = { 'War', 'Rog', }, Default = 1, Min = 1, Max = 2, },
         ['DoLich']            = { DisplayName = "Cast Lich", Category = "Spells and Abilities", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
         ['DeathBloomPercent'] = { DisplayName = "Death Bloom %", Category = "Spells and Abilities", Tooltip = "Mana % at which to cast Death Bloom", Default = 40, Min = 1, Max = 100, },
         ['DoSnare']           = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
