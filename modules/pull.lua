@@ -529,7 +529,7 @@ function Module:FarmFullInvActions()
 
     RGMercsLogger.log_error("\arStopping Pulls - Bags are full!")
     self.settings.DoPull = 0
-    mq.cmdf("/beep")
+    RGMercUtils.DoCmd("/beep")
 end
 
 ---comment
@@ -756,21 +756,21 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
     mq.TLO.Me.Stand()
 
-    mq.cmdf("/nav locyxz %s, log=off", loc)
+    RGMercUtils.DoCmd("/nav locyxz %s, log=off", loc)
     mq.delay("2s")
 
     while mq.TLO.Navigation.Active() do
         RGMercsLogger.log_verbose("NavToWaypoint Aggro Count: %d", RGMercUtils.GetXTHaterCount())
 
         if RGMercUtils.GetXTHaterCount() > 0 and not ignoreAggro then
-            mq.cmdf("/nav stop log=off")
+            RGMercUtils.DoCmd("/nav stop log=off")
             return false
         end
 
         if mq.TLO.Navigation.Velocity() == 0 then
             RGMercsLogger.log_warning("NavToWaypoint Velocity is 0 - Are we stuck?")
             if mq.TLO.Navigation.Paused() then
-                mq.cmdf("/nav pause log=off")
+                RGMercUtils.DoCmd("/nav pause log=off")
             end
         end
 
@@ -939,7 +939,7 @@ function Module:GiveTime(combat_stateModule)
     local pullAbility = self.Constants.PullAbilities[self.settings.PullAbility]
     local startingXTargs = RGMercUtils.GetXTHaterIDs()
 
-    mq.cmdf("/nav id %d distance=%d lineofsight=%s log=off", pullID, pullAbility.AbilityRange, "off")
+    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", pullID, pullAbility.AbilityRange, "off")
 
     mq.delay(1000)
 
@@ -1018,22 +1018,22 @@ function Module:GiveTime(combat_stateModule)
                 end
 
                 if RGMercUtils.CanUseAA("Companion's Discipline") then
-                    mq.cmdf("/squelch /pet ghold on")
+                    RGMercUtils.DoCmd("/squelch /pet ghold on")
                 end
-                mq.cmdf("/squelch /pet back off")
+                RGMercUtils.DoCmd("/squelch /pet back off")
                 mq.delay("1s", function() return (mq.TLO.Pet.PlayerState() or 0) == 0 end)
-                mq.cmdf("/squelch /pet follow")
+                RGMercUtils.DoCmd("/squelch /pet follow")
             elseif self.settings.PullAbility == PullAbilityIDToName.Ranged then -- Ranged pull
                 -- Make sure we're looking straight ahead at our mob and delay
                 -- until we're facing them.
-                mq.cmdf("/look 0")
+                RGMercUtils.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn(self) do
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
-                    mq.cmdf("/ranged %d", pullID)
+                    RGMercUtils.DoCmd("/ranged %d", pullID)
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
@@ -1048,7 +1048,7 @@ function Module:GiveTime(combat_stateModule)
                 mq.delay(5)
                 while not successFn(self) do
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
-                    mq.cmdf("/target ID %d", pullID)
+                    RGMercUtils.DoCmd("/target ID %d", pullID)
                     mq.doevents()
 
                     if pullAbility.Type:lower() == "ability" then
@@ -1072,7 +1072,7 @@ function Module:GiveTime(combat_stateModule)
         end
     else
         RGMercsLogger.log_debug("\arNOTICE:\ax Pull Aborted!")
-        mq.cmdf("/nav stop log=off")
+        RGMercUtils.DoCmd("/nav stop log=off")
         mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
     end
 
@@ -1080,14 +1080,14 @@ function Module:GiveTime(combat_stateModule)
         -- Nav back to camp.
         self.TempSettings.PullState = PullStates.PULL_RETURN_TO_CAMP
 
-        mq.cmdf("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
+        RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
         mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
 
         while mq.TLO.Navigation.Active() do
             if mq.TLO.Me.State():lower() == "feign" or mq.TLO.Me.Sitting() then
                 RGMercsLogger.log_debug("Standing up to Engage Target")
                 mq.TLO.Me.Stand()
-                mq.cmdf("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
+                RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
                 mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
             end
 
@@ -1095,7 +1095,7 @@ function Module:GiveTime(combat_stateModule)
             mq.delay(10)
         end
 
-        mq.cmdf("/face id %d", pullID)
+        RGMercUtils.DoCmd("/face id %d", pullID)
 
         -- TODO PostPullCampFunc()
     end

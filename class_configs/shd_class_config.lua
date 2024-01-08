@@ -804,7 +804,7 @@ local _ClassConfig = {
                         mq.TLO.Me.Bandolier("Shield").Index() and RGMercUtils.IsTanking()
                 end,
                 cmd = function()
-                    mq.cmdf("/bandolier activate Shield")
+                    RGMercUtils.DoCmd("/bandolier activate Shield")
                     return true
                 end,
 
@@ -818,7 +818,7 @@ local _ClassConfig = {
                         mq.TLO.Me.Bandolier("2HS").Index() and not RGMercUtils.IsTanking()
                 end,
                 cmd = function()
-                    mq.cmdf("/bandolier activate 2HS")
+                    RGMercUtils.DoCmd("/bandolier activate 2HS")
                     return true
                 end,
             },
