@@ -697,117 +697,117 @@ local _ClassConfig = {
             {
                 name = "SnareDOT",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) and self.settings.DoSnare end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) and self.settings.DoSnare end,
             },
             {
                 name = "Disease3",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Magic3",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "FireDot3",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Disease2",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Poison1",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Poison2",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Poison2_2",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Disease1",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Magic2_2",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Poison3",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Magic1",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "PoisonNuke2",
                 type = "Spell",
-                cond = function(self, _) return RGMercUtils.GetTargetPctHPs() > 50 and mq.TLO.Me.PctMana() > RGMercConfig:GetSettings().ManaToNuke end,
+                cond = function(self, _) return RGMercUtils.GetTargetPctHPs() > 50 and RGMercUtils.ManaCheck() end,
             },
             {
                 name = "PoisonNuke",
                 type = "Spell",
-                cond = function(self, _) return mq.TLO.Me.PctMana() > RGMercConfig:GetSettings().ManaToNuke end,
+                cond = function(self, _) return RGMercUtils.ManaCheck() end,
             },
             {
                 name = "HealthTaps",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "DurationTap",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "FireDot1",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "FireDot2",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "FireDot2_2",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "FireDot4",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "GroupLeech",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "Corruption1",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
             {
                 name = "DurationTap",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
             },
         },
         ['Burn'] = {
@@ -962,9 +962,9 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, spell) return self.settings.PetType == 1 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "war") end,
-                post_activate = function(self, spell)
+                post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
-                    if pet.ID() > 0 then
+                    if success and pet.ID() > 0 then
                         RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
                     end
                 end,
@@ -979,9 +979,9 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, _) return self.settings.PetType == 2 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "rog") end,
-                post_activate = function(self, spell)
+                post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
-                    if pet.ID() > 0 then
+                    if success and pet.ID() > 0 then
                         RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
                     end
                 end,
@@ -1112,6 +1112,7 @@ local _ClassConfig = {
         ['DoLich']            = { DisplayName = "Cast Lich", Category = "Spells and Abilities", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
         ['DeathBloomPercent'] = { DisplayName = "Death Bloom %", Category = "Spells and Abilities", Tooltip = "Mana % at which to cast Death Bloom", Default = 40, Min = 1, Max = 100, },
         ['DoSnare']           = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
+        ['HPStopDOT']         = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
     },
 
 }

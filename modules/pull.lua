@@ -579,7 +579,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                 end
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
-                    if member.ID() == RGMercConfig:GetAssistId() then
+                    if member.ID() == RGMercUtils.GetMainAssistId() then
                         if returnToCamp and RGMercUtils.GetDistance(member.Y(), member.X(), campData.AutoCampX, campData.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(), campData.AutoCampY,
                                 campData.AutoCampX, campData.AutoCampZ, RGMercConfig.SubModuleSettings.settings.Movement.settings.AutoCampRadius)
