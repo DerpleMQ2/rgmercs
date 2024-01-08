@@ -2417,42 +2417,4 @@ function Utils.LoadSpellLoadOut(t)
     end
 end
 
-function Utils.TooFarHandler()
-    RGMercsLogger.log_debug("tooFarHandler()")
-    if RGMercConfig.Globals.BackOffFlag then return end
-    if mq.TLO.Stick.Active() then
-        Utils.DoCmd("/stick off")
-    end
-
-    if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-        RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target!")
-        Utils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
-        mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
-    else
-        RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
-        if RGMercConfig:GetSettings().DoAutoEngage then
-            if Utils.OkToEngage(mq.TLO.Target.ID() or 0) then
-                Utils.DoCmd("/squelch /face fast")
-                if RGMercConfig:GetSettings().DoMelee then
-                    RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
-                        (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                    Utils.NavInCombat(RGMercConfig:GetSettings(), mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
-                end
-            end
-        end
-    end
-end
-
-mq.event('Being Memo', "Beginning to memorize #1#...", function(spell)
-    Utils.Memorizing = true
-end)
-
-mq.event('End Memo', "You have finished memorizing #1#", function(spell)
-    Utils.Memorizing = false
-end)
-
-mq.event('Abort Memo', "Aborting memorization of spell.", function()
-    Utils.Memorizing = false
-end)
-
 return Utils
