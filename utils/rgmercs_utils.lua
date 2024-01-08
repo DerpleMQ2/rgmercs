@@ -130,10 +130,10 @@ function Utils.HandleDeath()
     mq.delay("1m", function() return (not mq.TLO.Me.Zoning()) end)
 
     if RGMercConfig:GetSettings().DoFellow then
-        if mq.TLO.FindItem("Fellowship Registration Insignia").Timer() == 0 then
+        if mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() == 0 then
             mq.delay("30s", function() return (mq.TLO.Me.CombatState():lower() == "active") end)
             mq.cmdf("/useitem \"Fellowship Registration Insignia\"")
-            mq.delay("2s", function() return (mq.TLO.FindItem("Fellowship Registration Insignia").Timer() ~= 0) end)
+            mq.delay("2s", function() return (mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() ~= 0) end)
         else
             RGMercsLogger.log_error("\aw Bummer, Insignia on cooldown, you must really suck at this game...")
         end
@@ -625,6 +625,19 @@ function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
         ret = true
     end
 
+    -- different from items in that they are configured by the user instead of the class.
+    if e.type:lower() == "clickyitem" then
+        local itemName = s.settings[e.name]
+
+        if not itemName or itemName:len() == 0 then
+            ret = false
+            RGMercsLogger.log_debug("Unable to find item: %s", itemName)
+        else
+            Utils.UseItem(itemName, targetId)
+            ret = true
+        end
+    end
+
     if e.type:lower() == "spell" then
         local spell = map[e.name]
 
@@ -647,29 +660,32 @@ function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
         ret = true
     end
 
-    if e.type:lower() == "cmd" then
-        mq.cmdf("/docommand %s", e.cmd)
-        RGMercsLogger.log_debug("Calling command \ao =>> \ag %s \ao <<=", e.name)
-        ret = true
+    if e.type:lower() == "customfunc" then
+        if e.cmd then
+            ret = e.cmd()
+        else
+            ret = false
+        end
+        RGMercsLogger.log_debug("Calling command \ao =>> \ag %s \ao <<= Ret => %s", e.name, Utils.BoolToString(ret))
     end
 
-    if e.type:lower() == "disc" then
+    if e.type:lower() == "Disc" then
         local discSpell = map[e.name]
 
         if not discSpell then
-            RGMercsLogger.log_debug("Dont have a DISC for \ao =>> \ag %s \ao <<=", e.name)
+            RGMercsLogger.log_debug("Dont have a Disc for \ao =>> \ag %s \ao <<=", e.name)
             ret = false
         else
-            RGMercsLogger.log_debug("Using DISC \ao =>> \ag %s [%s] \ao <<=", e.name, (discSpell() and discSpell.RankName() or "None"))
+            RGMercsLogger.log_debug("Using Disc \ao =>> \ag %s [%s] \ao <<=", e.name, (discSpell() and discSpell.RankName() or "None"))
 
             if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
-                RGMercsLogger.log_debug("CANT USE DISC - Casting Window Open")
+                RGMercsLogger.log_debug("CANT USE Disc - Casting Window Open")
                 ret = false
             else
                 if me.CurrentEndurance() < discSpell.EnduranceCost() then
                     ret = false
                 else
-                    RGMercsLogger.log_debug("Trying to use DISC: %s", discSpell.RankName())
+                    RGMercsLogger.log_debug("Trying to use Disc: %s", discSpell.RankName())
 
                     Utils.ActionPrep()
 
@@ -844,6 +860,11 @@ end
 ---@return boolean
 function Utils.TargetHasBuffByName(buffName)
     return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("name " .. buffName).ID() or 0) > 0) and true or false
+end
+
+---@return integer
+function Utils.GetTargetLevel()
+    return (mq.TLO.Target.Level() or 0)
 end
 
 ---@return integer
@@ -2146,9 +2167,9 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
             else
                 ImGui.Text(entry.name)
                 ImGui.TableNextColumn()
-                if entry.type:lower() == "cmd" then
+                if entry.type:lower() == "customfunc" then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.9, .05, 1.0)
-                    ImGui.Text(entry.cmd)
+                    ImGui.Text("<<Custom Func>>")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "spell" then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.05, .05, 0.9)
@@ -2275,6 +2296,22 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                     ImGui.PopID()
                     new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
                     any_pressed = any_pressed or (pressed or false)
+                elseif defaults[k].Type == "ClickyItem" then
+                    -- make a drag and drop target
+                    ImGui.TableNextColumn()
+                    ImGui.Text((defaults[k].DisplayName or "None"))
+                    ImGui.TableNextColumn()
+                    ImGui.PushID(k .. "__btn")
+                    if ImGui.SmallButton(settings[k]:len() > 0 and settings[k] or "[Drop Here]") then
+                        if mq.TLO.Cursor() then
+                            settings[k] = mq.TLO.Cursor.Name()
+                            pressed = true
+                        end
+                    end
+                    Utils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
+                    new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
+                    any_pressed = any_pressed or (pressed or false)
+                    ImGui.PopID()
                 elseif defaults[k].Type ~= "Custom" then
                     ImGui.TableNextColumn()
                     ImGui.Text((defaults[k].DisplayName or "None"))

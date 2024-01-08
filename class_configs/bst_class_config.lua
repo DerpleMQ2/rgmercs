@@ -599,7 +599,7 @@ return {
             "Reflexive Riving",
         },
         ['Vindisc'] = {
-            -- Vindication DISC
+            -- Vindication Disc
             "Al`ele's Vindication",
             "Venon's Vindication",
             "Ikatiar's Vindication",

@@ -228,22 +228,6 @@ local function RGMercsGUI()
                         RGMercUtils.RenderZoneNamed()
                     end
 
-                    if ImGui.CollapsingHeader("Custom Items") then
-                        local dropped, newItem = renderDragDropForItem("Drop Mount Item")
-                        if dropped then
-                            RGMercsLogger.log_debug("New item dropped: %s", newItem)
-                            RGMercConfig:GetSettings().MountItem = newItem
-                            RGMercConfig:SaveSettings(false)
-                        end
-
-                        dropped, newItem = renderDragDropForItem("Drop Shrink Item")
-                        if dropped then
-                            RGMercsLogger.log_debug("New item dropped: %s", newItem)
-                            RGMercConfig:GetSettings().ShrinkItem = newItem
-                            RGMercConfig:SaveSettings(false)
-                        end
-                    end
-
                     ImGui.EndTabItem()
                 end
 
