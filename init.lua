@@ -2,6 +2,7 @@ local mq        = require('mq')
 local ImGui     = require('ImGui')
 local GitCommit = require('extras.version')
 
+RGMercsBinds    = require('utils.rgmercs_binds')
 RGMercConfig    = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 
@@ -323,29 +324,29 @@ local function RGInit(...)
         mainAssist = mq.TLO.Me.CleanName()
     end
 
-    mq.cmdf("/squelch /rez accept on")
-    mq.cmdf("/squelch /rez pct 90")
+    RGMercUtils.DoCmd("/squelch /rez accept on")
+    RGMercUtils.DoCmd("/squelch /rez pct 90")
 
     if mq.TLO.Plugin("MQ2DanNet")() then
-        mq.cmdf("/squelch /dnet commandecho off")
+        RGMercUtils.DoCmd("/squelch /dnet commandecho off")
     end
 
-    mq.cmdf("/stick set breakontarget on")
+    RGMercUtils.DoCmd("/stick set breakontarget on")
 
     -- TODO: Chat Begs
 
     RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host If it exists! (/%s pause on)", mq.TLO.Me.Class.ShortName())
-    mq.cmdf("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
+    RGMercUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
 
     if RGMercUtils.CanUseAA("Companion's Discipline") then
-        mq.cmdf("/pet ghold on")
+        RGMercUtils.DoCmd("/pet ghold on")
     else
-        mq.cmdf("/pet hold on")
+        RGMercUtils.DoCmd("/pet hold on")
     end
 
     if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
         RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
-        mq.cmdf("/autoinventory")
+        RGMercUtils.DoCmd("/autoinventory")
     end
 
     RGMercUtils.WelcomeMsg()
@@ -382,7 +383,7 @@ local function Main()
         curState = "Combat"
         if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
             RGMercConfig.Globals.LastFaceTime = os.clock()
-            mq.cmdf("/squelch /face")
+            RGMercUtils.DoCmd("/squelch /face")
         end
     else
         curState = "Downtime"
@@ -450,17 +451,17 @@ local function Main()
             if merc() and merc.ID() then
                 if RGMercUtils.MercEngage() then
                     if merc.Class.ShortName():lower() == "war" and merc.Stance():lower() ~= "aggressive" then
-                        mq.cmdf("/squelch /stance aggressive")
+                        RGMercUtils.DoCmd("/squelch /stance aggressive")
                     end
 
                     if merc.Class.ShortName():lower() ~= "war" and merc.Stance():lower() ~= "balanced" then
-                        mq.cmdf("/squelch /stance balanced")
+                        RGMercUtils.DoCmd("/squelch /stance balanced")
                     end
 
                     RGMercUtils.MercAssist()
                 else
                     if merc.Class.ShortName():lower() ~= "clr" and merc.Stance():lower() ~= "passive" then
-                        mq.cmdf("/squelch /stance passive")
+                        RGMercUtils.DoCmd("/squelch /stance passive")
                     end
                 end
             end
@@ -469,7 +470,7 @@ local function Main()
 
     if RGMercUtils.DoCamp() then
         if RGMercConfig:GetSettings().DoMercenary and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
-            mq.cmdf("/squelch /stance passive")
+            RGMercUtils.DoCmd("/squelch /stance passive")
         end
     end
 
@@ -496,7 +497,7 @@ local function Main()
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
         RGMercsLogger.log_debug("\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
             RGMercUtils.BoolToString(mq.TLO.Me.Combat()), RGMercUtils.BoolToString(pcCheck), RGMercUtils.BoolToString(mercCheck))
-        mq.cmdf("/attack off")
+        RGMercUtils.DoCmd("/attack off")
     end
 
     -- TODO: Fix Curing
@@ -541,26 +542,8 @@ end)
 
 -- Binds
 local function bindHandler(cmd, ...)
-    if cmd == "pause" then
-        RGMercConfig.Globals.PauseMain = true
-        return
-    end
-
-    if cmd == "unpause" then
-        RGMercConfig.Globals.PauseMain = false
-        return
-    end
-
-    if cmd == "yes" then
-        mq.cmdf("/dggaexecute /notify LargeDialogWindow LDW_YesButton leftmouseup")
-        mq.cmdf("/dggaexecute /notify LargeDialogWindow LDW_OkButton leftmouseup")
-        mq.cmdf("/dggaexecute /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
-        mq.cmdf("/dggaexecute /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
-        mq.cmdf("/dggaexecute /notify TradeWND TRDW_Trade_Button leftmouseup")
-        mq.cmdf("/dggaexecute /notify GiveWnd GVW_Give_Button leftmouseup ")
-        mq.cmdf("/dggaexecute /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
-        mq.cmdf("/dggaexecute /notify RaidWindow RAID_AcceptButton leftmouseup")
-        return
+    if RGMercsBinds.Handlers[cmd] then
+        return RGMercsBinds.Handlers[cmd].handler(...)
     end
 
     local results = RGMercModules:ExecAll("HandleBind", cmd, ...)
@@ -581,12 +564,12 @@ mq.event("CantSee", "You cannot see your target.", function()
     if RGMercConfig.Globals.BackOffFlag then return end
 
     if mq.TLO.Stick.Active() then
-        mq.cmdf("/stick off")
+        RGMercUtils.DoCmd("/stick off")
     end
 
     if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and Cannot see our target!")
-        mq.cmdf("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.5)
+        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
 
         -- TODO: Do we need this?
@@ -599,7 +582,7 @@ mq.event("CantSee", "You cannot see your target.", function()
         RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target!")
         if RGMercConfig:GetSettings().DoAutoEngage then
             if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
-                mq.cmdf("/squelch /face fast")
+                RGMercUtils.DoCmd("/squelch /face fast")
                 if RGMercConfig:GetSettings().DoMelee then
                     RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
                         (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)

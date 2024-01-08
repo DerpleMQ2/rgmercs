@@ -103,7 +103,7 @@ function Module:RunCmd(cmd, ...)
     end
 
     self.TempSettings.LastCmd = formattedCmd
-    mq.cmdf(formattedCmd)
+    RGMercUtils.DoCmd(formattedCmd)
 end
 
 function Module:ChaseOff()

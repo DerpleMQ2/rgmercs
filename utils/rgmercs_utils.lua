@@ -52,7 +52,7 @@ function Utils.PrintGroupMessage(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
 
-    mq.cmdf("/dgt group_%s_%s %s", RGMercConfig.Globals.CurServer, mq.TLO.Group.Leader() or "None", output)
+    Utils.DoCmd("/dgt group_%s_%s %s", RGMercConfig.Globals.CurServer, mq.TLO.Group.Leader() or "None", output)
 end
 
 ---@param defaults table
@@ -86,7 +86,7 @@ function Utils.PopUp(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
 
-    mq.cmdf("/popup %s", output)
+    Utils.DoCmd("/popup %s", output)
 end
 
 ---@param targetId integer
@@ -94,7 +94,7 @@ function Utils.SetTarget(targetId)
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if RGMercConfig:GetSettings().DoAutoTarget then
         if Utils.GetTargetID() ~= targetId then
-            mq.cmdf("/target id %d", targetId)
+            Utils.DoCmd("/target id %d", targetId)
             mq.delay(10)
         end
     end
@@ -105,8 +105,8 @@ function Utils.ClearTarget()
     if RGMercConfig:GetSettings().DoAutoTarget then
         RGMercConfig.Globals.AutoTargetID = 0
         RGMercConfig.Globals.BurnNow = false
-        if mq.TLO.Stick.Status():lower() == "on" then mq.cmdf("/stick off") end
-        mq.cmdf("/target clear")
+        if mq.TLO.Stick.Status():lower() == "on" then Utils.DoCmd("/stick off") end
+        Utils.DoCmd("/target clear")
     end
 end
 
@@ -132,7 +132,7 @@ function Utils.HandleDeath()
     if RGMercConfig:GetSettings().DoFellow then
         if mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() == 0 then
             mq.delay("30s", function() return (mq.TLO.Me.CombatState():lower() == "active") end)
-            mq.cmdf("/useitem \"Fellowship Registration Insignia\"")
+            Utils.DoCmd("/useitem \"Fellowship Registration Insignia\"")
             mq.delay("2s", function() return (mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() ~= 0) end)
         else
             RGMercsLogger.log_error("\aw Bummer, Insignia on cooldown, you must really suck at this game...")
@@ -144,7 +144,7 @@ end
 function Utils.CheckPlugins(t)
     for _, p in pairs(t) do
         if not mq.TLO.Plugin(p)() then
-            mq.cmdf("/squelch /plugin %s noauto", p)
+            Utils.DoCmd("/squelch /plugin %s noauto", p)
             RGMercsLogger.log_info("\aw %s \ar not detected! \aw This macro requires it! Loading ...", p)
         end
     end
@@ -156,7 +156,7 @@ function Utils.UnCheckPlugins(t)
     local r = {}
     for _, p in pairs(t) do
         if mq.TLO.Plugin(p)() then
-            mq.cmdf("/squelch /plugin %s unload noauto", p)
+            Utils.DoCmd("/squelch /plugin %s unload noauto", p)
             RGMercsLogger.log_info("\ar %s detected! \aw Unloading it due to known conflicts with RGMercs!", p)
             table.insert(r, p)
         end
@@ -273,7 +273,7 @@ function Utils.WaitCastFinish(target)
             RGMercsLogger.log_debug(msg)
             Utils.PrintGroupMessage(msg)
 
-            --mq.cmdf("/alt act 511")
+            --Utils.DoCmd("/alt act 511")
             mq.TLO.Me.StopCast()
             return
         end
@@ -292,7 +292,7 @@ end
 ---@param maxWait number # max wait in ms
 function Utils.MemorizeSpell(gem, spell, maxWait)
     RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
-    mq.cmdf("/memspell %d \"%s\"", gem, spell)
+    Utils.DoCmd("/memspell %d \"%s\"", gem, spell)
 
     while mq.TLO.Me.Gem(gem)() ~= spell and maxWait > 0 do
         RGMercsLogger.log_verbose("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
@@ -365,7 +365,7 @@ function Utils.UseAA(aaName, targetId)
         if me.Class.ShortName():lower() == "brd" then
             mq.delay("3s", function() return (not mq.TLO.Window("CastingWindow").Open()) end)
             mq.delay(10)
-            mq.cmdf("/stopsong")
+            Utils.DoCmd("/stopsong")
         else
             RGMercsLogger.log_debug("\ayCANT CAST AA - Casting Window Open")
             return
@@ -384,7 +384,7 @@ function Utils.UseAA(aaName, targetId)
     if Utils.GetTargetID() ~= targetId and target() then
         if me.Combat() and target.Type():lower() == "pc" then
             RGMercsLogger.log_info("\awNOTICE:\ax Turning off autoattack to cast on a PC.")
-            mq.cmdf("/attack off")
+            Utils.DoCmd("/attack off")
             mq.delay("2s", function() return not me.Combat() end)
         end
 
@@ -394,7 +394,7 @@ function Utils.UseAA(aaName, targetId)
     local cmd = string.format("/alt act %d", aaAbility.ID())
 
     RGMercsLogger.log_debug("\ayActivating AA: '%s' [t: %d]", cmd, aaAbility.Spell.MyCastTime.TotalSeconds())
-    mq.cmdf(cmd)
+    Utils.DoCmd(cmd)
 
     mq.delay(5)
 
@@ -415,7 +415,7 @@ function Utils.UseItem(itemName, targetId)
         if me.Class.ShortName():lower() == "brd" then
             mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
             mq.delay(10)
-            mq.cmdf("/stopsong")
+            Utils.DoCmd("/stopsong")
         else
             RGMercsLogger.log_debug("\arCANT Use Item - Casting Window Open")
             return
@@ -453,14 +453,14 @@ function Utils.UseItem(itemName, targetId)
 
     local oldTargetId = Utils.GetTargetID()
     if targetId > 0 then
-        mq.cmdf("/target id %d", targetId)
+        Utils.DoCmd("/target id %d", targetId)
         mq.delay("2s", function() return Utils.GetTargetID() == targetId end)
     end
 
     RGMercsLogger.log_debug("\aw Using Item \ag %s", itemName)
 
     local cmd = string.format("/useitem \"%s\"", itemName)
-    mq.cmdf(cmd)
+    Utils.DoCmd(cmd)
     RGMercsLogger.log_debug("Running: \at'%s' [%d]", cmd, item.CastTime())
 
     mq.delay(2)
@@ -486,21 +486,21 @@ function Utils.UseItem(itemName, targetId)
     end
 
     if mq.TLO.Cursor.ID() then
-        mq.cmdf("/autoinv")
+        Utils.DoCmd("/autoinv")
     end
 
     if oldTargetId > 0 then
-        mq.cmdf("/target id %d", oldTargetId)
+        Utils.DoCmd("/target id %d", oldTargetId)
         mq.delay("2s", function() return Utils.GetTargetID() == oldTargetId end)
     else
-        mq.cmdf("/target clear")
+        Utils.DoCmd("/target clear")
     end
 end
 
 ---@param abilityName string
 function Utils.UseAbility(abilityName)
     local me = mq.TLO.Me
-    mq.cmdf("/doability %s", abilityName)
+    Utils.DoCmd("/doability %s", abilityName)
     mq.delay(8, function() return not me.AbilityReady(abilityName) end)
     RGMercsLogger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", abilityName)
 end
@@ -588,7 +588,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         Utils.ActionPrep()
 
         local cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", spellName, targetId)
-        mq.cmdf(cmd)
+        Utils.DoCmd(cmd)
         RGMercsLogger.log_debug("Running: \at'%s'", cmd)
 
         Utils.WaitCastFinish(target)
@@ -692,12 +692,12 @@ function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
                     if Utils.IsDisc(discSpell.RankName()) then
                         if me.ActiveDisc.ID() then
                             RGMercsLogger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName(), me.ActiveDisc.Name())
-                            mq.cmdf("/stopdisc")
+                            Utils.DoCmd("/stopdisc")
                             mq.delay(20, function() return not me.ActiveDisc.ID() end)
                         end
                     end
 
-                    mq.cmdf("/squelch /doability \"%s\"", discSpell.RankName())
+                    Utils.DoCmd("/squelch /doability \"%s\"", discSpell.RankName())
 
                     mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName()) and not me.Casting.ID()) end)
 
@@ -961,14 +961,21 @@ end
 ---@param targetId integer
 function Utils.DoStick(config, targetId)
     if config.StickHow:len() > 0 then
-        mq.cmdf("/stick %s", config.StickHow)
+        Utils.DoCmd("/stick %s", config.StickHow)
     else
         if Utils.IAmMA() then
-            mq.cmdf("/stick 20 id %d %s uw", targetId, RGMercConfig:GetSettings().MovebackWhenTank and "moveback" or "")
+            Utils.DoCmd("/stick 20 id %d %s uw", targetId, RGMercConfig:GetSettings().MovebackWhenTank and "moveback" or "")
         else
-            mq.cmdf("/stick 20 id %d behindonce moveback uw", targetId)
+            Utils.DoCmd("/stick 20 id %d behindonce moveback uw", targetId)
         end
     end
+end
+
+function Utils.DoCmd(cmd, ...)
+    local formatted = cmd
+    if ... ~= nil then formatted = string.format(cmd, ...) end
+    RGMercsLogger.log_debug("\atRGMercs \awsent MQ \amCommand\w: >> %s <<", formatted)
+    mq.cmdf(formatted)
 end
 
 ---@param config table
@@ -979,16 +986,16 @@ function Utils.NavInCombat(config, targetId, distance, bDontStick)
     if not config.DoAutoEngage then return end
 
     if mq.TLO.Stick.Active() then
-        mq.cmdf("/stick off")
+        Utils.DoCmd("/stick off")
     end
 
     if mq.TLO.Navigation.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
-        mq.cmdf("/nav id %d distance=%d log=off lineofsight=on", targetId, distance)
+        Utils.DoCmd("/nav id %d distance=%d log=off lineofsight=on", targetId, distance)
         while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
             mq.delay(100)
         end
     else
-        mq.cmdf("/moveto id %d uw mdist %d", targetId, distance)
+        Utils.DoCmd("/moveto id %d uw mdist %d", targetId, distance)
         while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveUtils.Stuck() do
             mq.delay(100)
         end
@@ -1150,7 +1157,7 @@ function Utils.ClickModRod()
     for _, itemName in ipairs(RGMercConfig.Constants.ModRods) do
         local item = mq.TLO.FindItem(itemName)
         if item() and item.Timer() == 0 then
-            mq.cmdf("/useitem \"%s\"", itemName)
+            Utils.DoCmd("/useitem \"%s\"", itemName)
             return
         end
     end
@@ -1234,7 +1241,7 @@ function Utils.AutoCampCheck(config, tempConfig)
 
     if distanceToCamp >= 400 then
         Utils.PrintGroupMessage("I'm over 400 units from camp, not returning!")
-        mq.cmdf("/rgl campoff")
+        Utils.DoCmd("/rgl campoff")
         return
     end
 
@@ -1243,13 +1250,13 @@ function Utils.AutoCampCheck(config, tempConfig)
     if distanceToCamp > 5 then
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
         if mq.TLO.Navigation.PathExists(navTo)() then
-            mq.cmdf("/nav %s", navTo)
+            Utils.DoCmd("/nav %s", navTo)
             while mq.TLO.Navigation.Active() do
                 mq.delay(10)
                 mq.doevents()
             end
         else
-            mq.cmdf("/moveto loc %d %d|on", tempConfig.AutoCampY, tempConfig.AutoCampX)
+            Utils.DoCmd("/moveto loc %d %d|on", tempConfig.AutoCampY, tempConfig.AutoCampX)
             while mq.TLO.MoveTo.Moving() do
                 mq.delay(10)
                 mq.doevents()
@@ -1287,25 +1294,25 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
 
                     Utils.NavInCombat(config, autoTargetId, target.MaxRangeTo(), false)
                 else
-                    mq.cmdf("/nav stop log=off")
+                    Utils.DoCmd("/nav stop log=off")
                     if mq.TLO.Stick.Status():lower() == "off" then
                         Utils.DoStick(config, autoTargetId)
                     end
 
                     if not mq.TLO.Me.Combat() then
                         RGMercsLogger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", target.CleanName())
-                        mq.cmdf("/keypress AUTOPRIM")
+                        Utils.DoCmd("/keypress AUTOPRIM")
                     end
                 end
             end
         end
     else
         if not config.DoMelee and RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
-            mq.cmdf("/stick pin 40")
+            Utils.DoCmd("/stick pin 40")
         end
 
         -- TODO: why are we doing this after turning stick on just now?
-        if mq.TLO.Stick.Status():lower() == "on" then mq.cmdf("/stick off") end
+        if mq.TLO.Stick.Status():lower() == "on" then Utils.DoCmd("/stick off") end
     end
 end
 
@@ -1333,7 +1340,7 @@ function Utils.KillPCPet()
     RGMercsLogger.log_warning("\arKilling your pet!")
     local problemPetOwner = mq.TLO.Spawn(string.format("id %d", mq.TLO.Me.XTarget(1).ID())).Master.CleanName()
 
-    mq.cmdf("/dexecute %s /pet leave", problemPetOwner)
+    Utils.DoCmd("/dexecute %s /pet leave", problemPetOwner)
 end
 
 ---@param name string
@@ -1685,14 +1692,14 @@ function Utils.SetControlToon()
 
                 if assistSpawn() then
                     RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
-                    mq.cmdf("/squelch /xtarget assist %d", assistSpawn.ID())
+                    Utils.DoCmd("/squelch /xtarget assist %d", assistSpawn.ID())
                     RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
                 end
             end
         else
             if not RGMercConfig.Globals.MainAssist or RGMercConfig.Globals.MainAssist:len() == 0 then
                 -- Use our Target hope for the best!
-                mq.cmdf("/squelch /xtarget assist %d", mq.TLO.Target.ID())
+                Utils.DoCmd("/squelch /xtarget assist %d", mq.TLO.Target.ID())
                 RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
             end
         end
@@ -1787,8 +1794,8 @@ function Utils.PetAttack(targetId)
     if not pet() then return end
 
     if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" then
-        mq.cmdf("/squelch /pet attack")
-        mq.cmdf("/squelch /pet swarm")
+        Utils.DoCmd("/squelch /pet attack")
+        Utils.DoCmd("/squelch /pet swarm")
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
     end
 end
@@ -1929,7 +1936,7 @@ function Utils.NavEnabledLoc(loc)
     ImGui.PopStyleColor(3)
     if loc ~= "0,0,0" then
         if navLoc and ImGui.IsMouseDoubleClicked(0) then
-            mq.cmdf('/nav locYXZ %s', loc)
+            Utils.DoCmd('/nav locYXZ %s', loc)
             printf('\ayNavigating to \ag%s', loc)
         end
 
@@ -1986,7 +1993,7 @@ function Utils.RenderZoneNamed()
                 ImGui.TableNextColumn()
                 local _, clicked = ImGui.Selectable(name, false)
                 if clicked then
-                    mq.cmdf("/target id %d", spawn() and spawn.ID() or 0)
+                    Utils.DoCmd("/target id %d", spawn() and spawn.ID() or 0)
                 end
                 ImGui.TableNextColumn()
                 if spawn() and spawn.PctHPs() > 0 then
@@ -2404,18 +2411,18 @@ function Utils.TooFarHandler()
     RGMercsLogger.log_debug("tooFarHandler()")
     if RGMercConfig.Globals.BackOffFlag then return end
     if mq.TLO.Stick.Active() then
-        mq.cmdf("/stick off")
+        Utils.DoCmd("/stick off")
     end
 
     if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target!")
-        mq.cmdf("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
+        Utils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
         if RGMercConfig:GetSettings().DoAutoEngage then
             if Utils.OkToEngage(mq.TLO.Target.ID() or 0) then
-                mq.cmdf("/squelch /face fast")
+                Utils.DoCmd("/squelch /face fast")
                 if RGMercConfig:GetSettings().DoMelee then
                     RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
                         (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)

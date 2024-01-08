@@ -617,7 +617,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
                 end,
                 cmd = function()
-                    mq.cmdf("/stand")
+                    RGMercUtils.DoCmd("/stand")
                     return true
                 end,
             },
@@ -906,7 +906,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
                 end,
                 cmd = function()
-                    mq.cmdf("/stand")
+                    RGMercUtils.DoCmd("/stand")
                     return true
                 end,
             },
@@ -964,7 +964,7 @@ local _ClassConfig = {
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == "war" end,
                 pre_activate = function(self, spell)
                     if mq.TLO.Me.Pet.ID() > 0 then
-                        mq.cmdf("/pet leave")
+                        RGMercUtils.DoCmd("/pet leave")
                     end
                 end,
                 cond = function(self, spell) return self.settings.PetType == 1 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "war") end,
@@ -981,7 +981,7 @@ local _ClassConfig = {
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == "rog" end,
                 pre_activate = function(self, spell)
                     if mq.TLO.Me.Pet.ID() > 0 then
-                        mq.cmdf("/pet leave")
+                        RGMercUtils.DoCmd("/pet leave")
                     end
                 end,
                 cond = function(self, _) return self.settings.PetType == 2 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "rog") end,
