@@ -974,7 +974,7 @@ end
 function Utils.DoCmd(cmd, ...)
     local formatted = cmd
     if ... ~= nil then formatted = string.format(cmd, ...) end
-    RGMercsLogger.log_debug("\atRGMercs \awsent MQ \amCommand\w: >> %s <<", formatted)
+    RGMercsLogger.log_debug("\atRGMercs \awsent MQ \amCommand\aw: >> %s <<", formatted)
     mq.cmdf(formatted)
 end
 
