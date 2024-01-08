@@ -591,6 +591,116 @@ local _ClassConfig = {
             "Eradicate Poison",
         },
     },
+    -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
+    -- of just slamming through the base ordered list.
+    -- These will run in order and exit after the first valid spell to cast
+    ['HealRotations'] = {
+        ["LowLevelHealPoint"] = {
+            cond = function(self, target) return mq.TLO.Me.Level() < 65 and (target.PctHPs() or 999) < 80 end,
+            state = 1,
+            steps = 1,
+            rotation = {
+                {
+                    name = "RecklessHeal1",
+                    type = "Spell",
+                    cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= self.settings.RecklessHealPct end,
+                },
+                {
+                    name = "GroupRenewalHoT",
+                    type = "Spell",
+                    cond = function(self, spell)
+                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint and self.settings.DoHOT and spell.StacksTarget() and
+                            not RGMercUtils.TargetHasBuff(spell)
+                    end,
+                },
+                {
+                    name = "Call of the Ancients",
+                    type = "AA",
+                    cond = function(self, aaName)
+                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint
+                    end,
+                },
+            },
+        },
+        ["GroupHealPoint"] = {
+            cond = function(self, target) return mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint) > RGMercConfig:GetSettings().GroupInjureCnt end,
+            state = 1,
+            steps = 1,
+            rotation = {
+                {
+                    name = "RecourseHeal",
+                    type = "Spell",
+                },
+            },
+        },
+        ["BigHealPoint"] = {
+            cond     = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().BigHealPoint end,
+            state    = 1,
+            steps    = 1,
+            rotation = {
+                {
+                    name = "InterventionHeal",
+                    type = "Spell",
+                },
+                {
+                    name = "Soothsayer's Intervention",
+                    type = "AA",
+                },
+            },
+        },
+        ["MainHealPoint"] = {
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().MainHealPoint end,
+            state = 1,
+            steps = 1,
+            rotation = {
+                {
+                    name = "RecourseHeal",
+                    type = "Spell",
+                    cond = function(self, _, target)
+                        return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                    end,
+                },
+                {
+                    name = "AESpiritualHeal",
+                    type = "Spell",
+                    cond = function(self, _, target)
+                        return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                    end,
+                },
+                {
+                    name = "GroupRenewalHoT",
+                    type = "Spell",
+                    cond = function(self, spell, target)
+                        return self.settings.DoHOT and spell.StacksTarget() and not RGMercUtils.TargetHasBuff(spell)
+                    end,
+                },
+                {
+                    name = "Spirit Guardian",
+                    type = "AA",
+                    cond = function(self, _, target)
+                        return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                    end,
+                },
+                {
+                    name = "RecklessHeal1",
+                    type = "Spell",
+                    cond = function(self, _, target) return (target.PctHPs() or 999) <= self.settings.RecklessHealPct end,
+                },
+                {
+                    name = "RecklessHeal2",
+                    type = "Spell",
+                    cond = function(self, _, target) return true end,
+                },
+                {
+                    name = "Soothsayer's Intervention",
+                    type = "AA",
+                    cond = function(self, _, target)
+                        return true
+                    end,
+                },
+            },
+        },
+    },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
@@ -636,117 +746,6 @@ local _ClassConfig = {
             end,
         },
 
-    },
-    -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
-    -- of just slamming through the base ordered list.
-    -- These will run in order and exit after the first valid spell to cast
-    ['HealPoints'] = {
-        {
-            name = "LowLevelHealPoint",
-            cond = function(self, target) return mq.TLO.Me.Level() < 65 and (target.PctHPs() or 999) < 80 end,
-            state = 1,
-            steps = 1,
-            rotation = {
-                {
-                    name = "RecklessHeal1",
-                    type = "Spell",
-                    cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= self.settings.RecklessHealPct end,
-                },
-                {
-                    name = "GroupRenewalHoT",
-                    type = "Spell",
-                    cond = function(self, spell)
-                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint and self.settings.DoHOT and spell.StacksTarget() and
-                            not RGMercUtils.TargetHasBuff(spell)
-                    end,
-                },
-                {
-                    name = "Call of the Ancients",
-                    type = "AA",
-                    cond = function(self, aaName)
-                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint
-                    end,
-                },
-            },
-        },
-        {
-            name = "GroupHealPoint",
-            cond = function(self, target) return mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint) > RGMercConfig:GetSettings().GroupInjureCnt end,
-            state = 1,
-            steps = 1,
-            rotation = {
-                {
-                    name = "RecourseHeal",
-                    type = "Spell",
-                },
-            },
-        },
-        {
-            name     = "BigHealPoint",
-            cond     = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().BigHealPoint end,
-            state    = 1,
-            steps    = 1,
-            rotation = {
-                {
-                    name = "InterventionHeal",
-                    type = "Spell",
-                },
-                {
-                    name = "Soothsayer's Intervention",
-                    type = "AA",
-                },
-            },
-        },
-        {
-            name = "MainHealPoint",
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().MainHealPoint end,
-            state = 1,
-            steps = 1,
-            rotation = {
-                {
-                    name = "RecourseHeal",
-                    type = "Spell",
-                    cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint end,
-                },
-                {
-                    name = "AESpiritualHeal",
-                    type = "Spell",
-                    cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint end,
-                },
-                {
-                    name = "GroupRenewalHoT",
-                    type = "Spell",
-                    cond = function(self, spell)
-                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint and self.settings.DoHOT and spell.StacksTarget() and
-                            not RGMercUtils.TargetHasBuff(spell)
-                    end,
-                },
-                {
-                    name = "Spirit Guardian",
-                    type = "AA",
-                    cond = function(self, aaName)
-                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint
-                    end,
-                },
-                {
-                    name = "RecklessHeal1",
-                    type = "Spell",
-                    cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= self.settings.RecklessHealPct end,
-                },
-                {
-                    name = "RecklessHeal2",
-                    type = "Spell",
-                    cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint end,
-                },
-                {
-                    name = "Soothsayer's Intervention",
-                    type = "AA",
-                    cond = function(self, aaName)
-                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint
-                    end,
-                },
-            },
-        },
     },
     ['Rotations'] = {
         ['Splash'] = {

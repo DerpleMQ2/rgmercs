@@ -5,23 +5,24 @@ local RGMercUtils   = require("utils.rgmercs_utils")
 local Set           = require("mq.Set")
 require('utils.rgmercs_datatypes')
 
-local Module                       = { _version = '0.1a', _name = "Class", _author = 'Derple', }
-Module.__index                     = Module
-Module.LastPetCmd                  = 0
-Module.ModuleLoaded                = false
-Module.ShowFailedSpells            = false
-Module.ReloadingLoadouts           = true
-Module.SpellLoadOut                = {}
-Module.ResolvedActionMap           = {}
-Module.TempSettings                = {}
-Module.CombatState                 = "None"
-Module.ClassConfig                 = nil
-Module.DefaultCategories           = nil
+local Module                              = { _version = '0.1a', _name = "Class", _author = 'Derple', }
+Module.__index                            = Module
+Module.LastPetCmd                         = 0
+Module.ModuleLoaded                       = false
+Module.ShowFailedSpells                   = false
+Module.ReloadingLoadouts                  = true
+Module.SpellLoadOut                       = {}
+Module.ResolvedActionMap                  = {}
+Module.TempSettings                       = {}
+Module.CombatState                        = "None"
+Module.ClassConfig                        = nil
+Module.DefaultCategories                  = nil
 
 -- Track the state of rotations between frames
-Module.TempSettings.RotationStates = {}
+Module.TempSettings.RotationStates        = {}
+Module.TempSettings.HealingRotationStates = {}
 
-local newCombatMode                = false
+local newCombatMode                       = false
 
 local function getConfigFileName()
     return mq.configDir ..
@@ -63,6 +64,10 @@ function Module:LoadSettings()
 
     Module.TempSettings.RotationStates = {}
     for i, m in ipairs(self.ClassConfig.RotationOrder or {}) do Module.TempSettings.RotationStates[i] = m end
+
+    -- these are different since they arent strickly ordered but based on conditions of the target.
+    Module.TempSettings.HealingRotationStates = {}
+    for n, m in pairs(self.ClassConfig.HealRotations or {}) do Module.TempSettings.HealingRotationStates[n] = m end
 
     RGMercsLogger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass, RGMercConfig.Globals.CurLoadedChar)
     RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author, self.ClassConfig._version)
@@ -174,6 +179,23 @@ function Module:Render()
                     if ImGui.CollapsingHeader(r.name) then
                         ImGui.Indent()
                         Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.Rotations[r.name],
+                            self.ResolvedActionMap, r.state or 0, Module.ShowFailedSpells)
+                        ImGui.Unindent()
+                    end
+                end
+                ImGui.Unindent()
+            end
+        end
+
+        if not self.ReloadingLoadouts then
+            if ImGui.CollapsingHeader("Healing Rotations") then
+                ImGui.Indent()
+                RGMercUtils.RenderRotationTableKey()
+
+                for n, r in pairs(self.TempSettings.HealingRotationStates) do
+                    if ImGui.CollapsingHeader(n) then
+                        ImGui.Indent()
+                        Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, n, r.rotation,
                             self.ResolvedActionMap, r.state or 0, Module.ShowFailedSpells)
                         ImGui.Unindent()
                     end
