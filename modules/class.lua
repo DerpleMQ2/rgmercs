@@ -67,7 +67,7 @@ function Module:LoadSettings()
 
     -- these are different since they arent strickly ordered but based on conditions of the target.
     Module.TempSettings.HealingRotationStates = {}
-    for n, m in pairs(self.ClassConfig.HealRotations or {}) do Module.TempSettings.HealingRotationStates[n] = m end
+    for i, m in pairs(self.ClassConfig.HealRotationOrder or {}) do Module.TempSettings.HealingRotationStates[i] = m end
 
     RGMercsLogger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass, RGMercConfig.Globals.CurLoadedChar)
     RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author, self.ClassConfig._version)
@@ -114,14 +114,6 @@ end
 
 function Module:SetCombatMode(mode)
     RGMercsLogger.log_debug("\aySettings Combat Mode to: \am%s", mode)
-    if mode == "Tank" then
-        RGMercConfig.Globals.IsTanking = true
-    elseif mode == "Heal" then
-        RGMercConfig.Globals.IsHealing = true
-    else
-        RGMercConfig.Globals.IsTanking = false
-    end
-
     self.ReloadingLoadouts = true
 
     if self.ClassConfig then
@@ -192,10 +184,10 @@ function Module:Render()
                 ImGui.Indent()
                 RGMercUtils.RenderRotationTableKey()
 
-                for n, r in pairs(self.TempSettings.HealingRotationStates) do
-                    if ImGui.CollapsingHeader(n) then
+                for _, r in pairs(self.TempSettings.HealingRotationStates) do
+                    if ImGui.CollapsingHeader(r.name) then
                         ImGui.Indent()
-                        Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, n, r.rotation,
+                        Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.HealRotations[r.name],
                             self.ResolvedActionMap, r.state or 0, Module.ShowFailedSpells)
                         ImGui.Unindent()
                     end
@@ -220,17 +212,213 @@ function Module:GetRotationTable(mode)
     return self.ClassConfig and self.ClassConfig.Rotations[mode] or {}
 end
 
+function Module:GetHealRotationTable(mode)
+    return self.ClassConfig and self.ClassConfig.HealRotations[mode] or {}
+end
+
+---@return number
 function Module:GetClassModeId()
     return self.settings.Mode
 end
 
+---@return string
 function Module:GetClassModeName()
     return self.ClassConfig and self.ClassConfig.Modes[self.settings.Mode] or "None"
+end
+
+---@param mode string
+---@return boolean
+function Module:IsModeActive(mode)
+    return Module:GetClassModeName():lower() == mode:lower()
+end
+
+---@return boolean
+function Module:IsTanking()
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsTanking then
+        return false
+    end
+    return self.ClassConfig.ModeChecks.IsTanking()
+end
+
+---@return boolean
+function Module:IsHealing()
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsHealing then
+        return false
+    end
+    return self.ClassConfig.ModeChecks.IsHealing()
+end
+
+---@return boolean
+function Module:IsCuring()
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsCuring then
+        return false
+    end
+    return self.ClassConfig.ModeChecks.IsCuring()
+end
+
+---@return boolean
+function Module:IsMezzing()
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsMezzing then
+        return false
+    end
+    return self.ClassConfig.ModeChecks.IsMezzing()
 end
 
 function Module:GetTheme()
     if self.ClassConfig and self.ClassConfig.Themes then
         return self.ClassConfig.Themes[self:GetClassModeName()]
+    end
+end
+
+--#define REZSEARCHGROUP 		"pccorpse group radius 100 zradius 50"
+--#define REZSEARCHME 		"pccorpse ${Me} radius 100 zradius 50"
+--#define OUTOFGROUPREZ       "pccorpse radius 100 zradius 50"
+function Module:OOGCheckAndRez()
+    local rezFilter = "pccorpse radius 100 zradius 50"
+    local rezCount = mq.TLO.SpawnCount(rezFilter)()
+
+    for i = 1, rezCount do
+        local rezSpawn = mq.TLO.NearestSpawn(i, rezFilter)
+
+        --/if ( ${tmp_corpse_name.Equal[${assistname}]} || ${OaList[SETTINGVAL].Find[${tmp_corpse_name}]} || ${Raid.Member[${tmp_corpse_name}].ID} || ${DanNet.Peers.Find[${tmp_corpse_name}]}) {
+        if rezSpawn() and (RGMercUtils.IsSafeName("pc", rezSpawn.DisplayName())) then
+            -- TODO: DoRez
+        end
+    end
+end
+
+function Module:FindWorstHurtGroupMember(minHPs)
+    local groupSize = mq.TLO.Group.Members()
+    local worstId = 0
+    local worstPct = minHPs
+
+    RGMercsLogger.log_verbose("\ayChecking for worst Hurt Group Members. Group Count: %d", groupSize)
+
+    for i = 1, groupSize do
+        local healTarget = mq.TLO.Group.Member(i)
+
+        if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
+            if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
+                if healTarget.PctHPs() < worstPct then
+                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                    worstPct = healTarget.PctHPs()
+                    worstId = healTarget.ID()
+                end
+
+                if RGMercConfig:GetSettings().DoPetHeals then
+                    if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
+                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(), healTarget.Pet.DisplayName())
+                        worstPct = healTarget.Pet.PctHPs()
+                        worstId = healTarget.Pet.ID()
+                    end
+                end
+            else
+                RGMercsLogger.log_verbose("\aySkipping %s because they are a zerker", healTarget.DisplayName())
+            end
+        end
+    end
+
+    if worstId > 0 then
+        RGMercsLogger.log_verbose("\agWorst hurt group member id is %d", worstId)
+    else
+        RGMercsLogger.log_verbose("\agNo one is hurt!")
+    end
+
+    return worstId
+end
+
+function Module:FindWorstHurtXT(minHPs)
+    local xtSize = mq.TLO.Me.XTargetSlots()
+    local worstId = 0
+    local worstPct = minHPs
+
+    RGMercsLogger.log_verbose("\ayChecking for worst Hurt XTargs. XT Slot Count: %d", xtSize)
+
+    for i = 1, xtSize do
+        local healTarget = mq.TLO.Me.XTarget(i)
+
+        if healTarget and healTarget() and healTarget.Type():lower() == "pc" then
+            if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
+                if healTarget.PctHPs() < worstPct then
+                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                    worstPct = healTarget.PctHPs()
+                    worstId = healTarget.ID()
+                end
+
+                if RGMercConfig:GetSettings().DoPetHeals then
+                    if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
+                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(), healTarget.Pet.DisplayName())
+                        worstPct = healTarget.Pet.PctHPs()
+                        worstId = healTarget.Pet.ID()
+                    end
+                end
+            else
+                RGMercsLogger.log_verbose("\aySkipping %s because they are a zerker", healTarget.DisplayName())
+            end
+        end
+    end
+
+    if worstId > 0 then
+        RGMercsLogger.log_verbose("\agWorst hurt xtarget id is %d", worstId)
+    else
+        RGMercsLogger.log_verbose("\agNo one is hurt!")
+    end
+
+    return worstId
+end
+
+function Module:HealById(id)
+    if id == 0 then return end
+    RGMercsLogger.log_verbose("\awHealById(%d)", id)
+
+    local healTarget = mq.TLO.Spawn(id)
+
+    if not healTarget or not healTarget() or healTarget.PctHPs() <= 0 then
+        RGMercsLogger.log_verbose("\ayHealById(%d):: Target is dead or in another zone bailing", id)
+        return
+    end
+
+    if healTarget.Type():lower() == "npc" then
+        RGMercsLogger.log_verbose("\ayHealById(%d):: Target is an NPC bailing", id)
+        return
+    end
+
+    RGMercsLogger.log_verbose("\awHealById(%d):: Finding best heal to use", id)
+
+    local selectedRotation = nil
+
+    for _, rotation in pairs(self.ClassConfig.HealRotationOrder) do
+        RGMercsLogger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id, rotation.name)
+        if not rotation.cond or rotation.cond(self, healTarget) then
+            RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw appropriate to use.", id, rotation.name)
+            -- since these are ordered by prioirty we can assume we are the best option.
+            selectedRotation = rotation
+            break
+        else
+            RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \aris NOT\aw appropriate to use.", id, rotation.name)
+        end
+    end
+
+    if selectedRotation == nil then
+        RGMercsLogger.log_verbose("\ayHealById(%d):: No appropriate heal rotation found. Bailling.", id)
+        return
+    end
+
+    local newState = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
+        self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0, false)
+
+    if selectedRotation.state then selectedRotation.state = newState end
+end
+
+function Module:RunHealRotation()
+    self:HealById(self:FindWorstHurtGroupMember(RGMercConfig:GetSettings().MaxHealPoint))
+
+    if RGMercConfig:GetSettings().AssistOutside then
+        self:HealById(self:FindWorstHurtXT(RGMercConfig:GetSettings().MaxHealPoint))
+    end
+
+    if mq.TLO.Me.PctHPs() < RGMercConfig:GetSettings().MaxHealPoint then
+        self:HealById(mq.TLO.Me.ID())
     end
 end
 
@@ -253,8 +441,19 @@ function Module:GiveTime(combat_state)
 
     self.CombatState = combat_state
 
-    -- Downtime totaiton will just run a full rotation to completion
+    -- Healing Happens reguardless of combat_state and happens first.
+    if self:IsHealing() then
+        -- TODO Check Rezes
+        if self.CombatState ~= "Downtime" or (not mq.TLO.Me.Invis() or RGMercConfig:GetSettings().BreakInvis) then
+            if RGMercConfig:GetSettings().AssistOutside then
+                self:OOGCheckAndRez()
+            end
+        end
 
+        self:RunHealRotation()
+    end
+
+    -- Downtime rotaiton will just run a full rotation to completion
     for _, r in ipairs(self.TempSettings.RotationStates) do
         RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
         if r.cond and r.cond(self, combat_state) then

@@ -87,6 +87,9 @@ end
 local _ClassConfig = {
     _version          = "0.1a",
     _author           = "Derple",
+    ['ModeChecks']    = {
+        IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
+    },
     ['Modes']         = {
         'Tank',
         'DPS',
@@ -798,7 +801,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ActivateShield,
                 cond = function(self)
                     return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
-                        mq.TLO.Me.Bandolier("Shield").Index() and RGMercConfig.Globals.IsTanking
+                        mq.TLO.Me.Bandolier("Shield").Index() and RGMercUtils.IsTanking()
                 end,
                 cmd = "/bandolier activate Shield",
             },
@@ -808,7 +811,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Activate2HS,
                 cond = function(self)
                     return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and
-                        mq.TLO.Me.Bandolier("2HS").Index() and not RGMercConfig.Globals.IsTanking
+                        mq.TLO.Me.Bandolier("2HS").Index() and not RGMercUtils.IsTanking()
                 end,
                 cmd = "/bandolier activate 2HS",
             },
@@ -825,7 +828,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.AeTaunt,
                 cond = function(self, spell)
-                    return RGMercConfig.Globals.IsTanking and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
+                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                 end,
             },
@@ -834,7 +837,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfHatred,
                 cond = function(self, _)
-                    return RGMercConfig.Globals.IsTanking and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
+                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                 end,
             },
@@ -843,7 +846,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfSpite,
                 cond = function(self, _)
-                    return RGMercConfig.Globals.IsTanking and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
+                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
                         RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
                 end,
             },
@@ -852,7 +855,7 @@ local _ClassConfig = {
                 type = "Ability",
                 tooltip = Tooltips.Taunt,
                 cond = function(self, abilityName)
-                    return RGMercConfig.Globals.IsTanking and mq.TLO.Me.AbilityReady(abilityName)() and
+                    return RGMercUtils.IsTanking() and mq.TLO.Me.AbilityReady(abilityName)() and
                         mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
                         RGMercUtils.GetTargetDistance() < 30
                 end,
@@ -862,7 +865,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 cond = function(self)
-                    return RGMercConfig.Globals.IsTanking and mq.TLO.Me.SecondaryPctAggro() > 60
+                    return RGMercUtils.IsTanking() and mq.TLO.Me.SecondaryPctAggro() > 60
                 end,
             },
             {
@@ -870,7 +873,7 @@ local _ClassConfig = {
                 type = "DISC",
                 tooltip = Tooltips.MeleeMit,
                 cond = function(self, _)
-                    return RGMercConfig.Globals.IsTanking
+                    return RGMercUtils.IsTanking()
                 end,
             },
             {
@@ -878,7 +881,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.ForPower,
                 cond = function(self, spell)
-                    return RGMercConfig.Globals.IsTanking and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
+                    return RGMercUtils.IsTanking() and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
                 end,
             },
             {
@@ -918,7 +921,7 @@ local _ClassConfig = {
                 type = "DISC",
                 tooltip = Tooltips.Deflection,
                 cond = function(self)
-                    return RGMercConfig.Globals.IsTanking and mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
+                    return RGMercUtils.IsTanking() and mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
                 end,
             },
             {
@@ -926,7 +929,7 @@ local _ClassConfig = {
                 type = "DISC",
                 tooltip = Tooltips.Mantle,
                 cond = function(self)
-                    return RGMercConfig.Globals.IsTanking and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                    return RGMercUtils.IsTanking() and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -935,7 +938,7 @@ local _ClassConfig = {
                 type = "DISC",
                 tooltip = Tooltips.Carapace,
                 cond = function(self)
-                    return RGMercConfig.Globals.IsTanking and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                    return RGMercUtils.IsTanking() and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -944,7 +947,7 @@ local _ClassConfig = {
                 type = "DISC",
                 tooltip = Tooltips.CurseGuard,
                 cond = function(self)
-                    return RGMercConfig.Globals.IsTanking and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
+                    return RGMercUtils.IsTanking() and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },

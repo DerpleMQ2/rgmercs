@@ -2,17 +2,21 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    ['Modes'] = {
+    ['ModeChecks']        = {
+        IsHealing = function() return true end,
+        IsCuring = function() return true end,
+    },
+    ['Modes']             = {
         'Heal',
         'Hybrid',
     },
-    ['ItemSets'] = {
+    ['ItemSets']          = {
         ['Epic'] = {
             "Crafted Talisman of Fates",
             "Blessed Spiritstaff of the Heyokah",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']       = {
         ["FocusSpell"] = {
             -- Focus Spell - Lower Levels Mix in Single Target, Higher Prefer Group Target
             "Inner Fire",                 -- Level 1 - Single
@@ -594,117 +598,125 @@ local _ClassConfig = {
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
     -- of just slamming through the base ordered list.
     -- These will run in order and exit after the first valid spell to cast
-    ['HealRotations'] = {
-        ["LowLevelHealPoint"] = {
-            cond = function(self, target) return mq.TLO.Me.Level() < 65 and (target.PctHPs() or 999) < 80 end,
+    ['HealRotationOrder'] = {
+        {
+            name = 'LowLevelHealPoint',
             state = 1,
             steps = 1,
-            rotation = {
-                {
-                    name = "RecklessHeal1",
-                    type = "Spell",
-                    cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= self.settings.RecklessHealPct end,
-                },
-                {
-                    name = "GroupRenewalHoT",
-                    type = "Spell",
-                    cond = function(self, spell)
-                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint and self.settings.DoHOT and spell.StacksTarget() and
-                            not RGMercUtils.TargetHasBuff(spell)
-                    end,
-                },
-                {
-                    name = "Call of the Ancients",
-                    type = "AA",
-                    cond = function(self, aaName)
-                        return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint
-                    end,
-                },
+            cond = function(self, target) return mq.TLO.Me.Level() < 65 and (target.PctHPs() or 999) < 80 end,
+        },
+        {
+            name  = 'BigHealPoint',
+            state = 1,
+            steps = 1,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().BigHealPoint end,
+        },
+        {
+            name = 'GroupHealPoint',
+            state = 1,
+            steps = 1,
+            cond = function(self, target) return mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt end,
+        },
+        {
+            name = 'MainHealPoint',
+            state = 1,
+            steps = 1,
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().MainHealPoint end,
+        },
+    },
+    ['HealRotations']     = {
+        ["LowLevelHealPoint"] = {
+            {
+                name = "RecklessHeal1",
+                type = "Spell",
+                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= self.settings.RecklessHealPct end,
+            },
+            {
+                name = "GroupRenewalHoT",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint and self.settings.DoHOT and spell.StacksTarget() and
+                        not RGMercUtils.TargetHasBuff(spell)
+                end,
+            },
+            {
+                name = "Call of the Ancients",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint
+                end,
             },
         },
         ["GroupHealPoint"] = {
-            cond = function(self, target) return mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint) > RGMercConfig:GetSettings().GroupInjureCnt end,
-            state = 1,
-            steps = 1,
-            rotation = {
-                {
-                    name = "RecourseHeal",
-                    type = "Spell",
-                },
+            {
+                name = "RecourseHeal",
+                type = "Spell",
             },
+
         },
         ["BigHealPoint"] = {
-            cond     = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().BigHealPoint end,
-            state    = 1,
-            steps    = 1,
-            rotation = {
-                {
-                    name = "InterventionHeal",
-                    type = "Spell",
-                },
-                {
-                    name = "Soothsayer's Intervention",
-                    type = "AA",
-                },
+            {
+                name = "InterventionHeal",
+                type = "Spell",
             },
+            {
+                name = "Soothsayer's Intervention",
+                type = "AA",
+            },
+
         },
         ["MainHealPoint"] = {
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().MainHealPoint end,
-            state = 1,
-            steps = 1,
-            rotation = {
-                {
-                    name = "RecourseHeal",
-                    type = "Spell",
-                    cond = function(self, _, target)
-                        return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
-                    end,
-                },
-                {
-                    name = "AESpiritualHeal",
-                    type = "Spell",
-                    cond = function(self, _, target)
-                        return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
-                    end,
-                },
-                {
-                    name = "GroupRenewalHoT",
-                    type = "Spell",
-                    cond = function(self, spell, target)
-                        return self.settings.DoHOT and spell.StacksTarget() and not RGMercUtils.TargetHasBuff(spell)
-                    end,
-                },
-                {
-                    name = "Spirit Guardian",
-                    type = "AA",
-                    cond = function(self, _, target)
-                        return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
-                    end,
-                },
-                {
-                    name = "RecklessHeal1",
-                    type = "Spell",
-                    cond = function(self, _, target) return (target.PctHPs() or 999) <= self.settings.RecklessHealPct end,
-                },
-                {
-                    name = "RecklessHeal2",
-                    type = "Spell",
-                    cond = function(self, _, target) return true end,
-                },
-                {
-                    name = "Soothsayer's Intervention",
-                    type = "AA",
-                    cond = function(self, _, target)
-                        return true
-                    end,
-                },
+            {
+                name = "RecourseHeal",
+                type = "Spell",
+                cond = function(self, _, target)
+                    return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                end,
             },
+            {
+                name = "AESpiritualHeal",
+                type = "Spell",
+                cond = function(self, _, target)
+                    return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                end,
+            },
+            {
+                name = "GroupRenewalHoT",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return self.settings.DoHOT and spell.StacksTarget() and not RGMercUtils.TargetHasBuff(spell)
+                end,
+            },
+            {
+                name = "Spirit Guardian",
+                type = "AA",
+                cond = function(self, _, target)
+                    return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                end,
+            },
+            {
+                name = "RecklessHeal1",
+                type = "Spell",
+                cond = function(self, _, target) return (target.PctHPs() or 999) <= self.settings.RecklessHealPct end,
+            },
+            {
+                name = "RecklessHeal2",
+                type = "Spell",
+                cond = function(self, _, target) return true end,
+            },
+            {
+                name = "Soothsayer's Intervention",
+                type = "AA",
+                cond = function(self, _, target)
+                    return true
+                end,
+            },
+
         },
     },
-    ['RotationOrder'] = {
+    ['RotationOrder']     = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
-        -- [ Rotation only run in Heal Mode ] --
         {
             name = 'Splash',
             state = 1,
@@ -712,10 +724,9 @@ local _ClassConfig = {
             targetId = function(self) return RGMercUtils.GetMainAssistId() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    self.ClassConfig.Modes[self.settings.Mode] == "Heal" and mq.TLO.Me.State():lower() ~= "feign"
+                    RGMercUtils.IsHealing() and mq.TLO.Me.State():lower() ~= "feign"
             end,
         },
-        -- [ Rotation only run in Hybrid Mode ] --
         {
             name = 'Debuff',
             state = 1,
@@ -747,7 +758,7 @@ local _ClassConfig = {
         },
 
     },
-    ['Rotations'] = {
+    ['Rotations']         = {
         ['Splash'] = {
             {
                 name = "TwinHealNuke",
@@ -828,7 +839,7 @@ local _ClassConfig = {
                 name = "Turgur's Swarm",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoSlow and not self.settings.DoAESlow and not RGMercUtils.TargetHasBuffByID(mq.TLO.Spell("Turgur's Swarm").Trigger(1).ID())
+                    return self.settings.DoSlow and not self.settings.DoAESlow and not RGMercUtils.TargetHasBuffByName(mq.TLO.Spell("Turgur's Swarm").Trigger(1).RankName())
                 end,
             },
             {
@@ -855,7 +866,7 @@ local _ClassConfig = {
             {
                 name = "AESpiritualHeal",
                 type = "Spell",
-                cond = function(self) return RGMercConfig.Globals.IsHealing and RGMercUtils.SongActive("Healing Twincast") end,
+                cond = function(self) return RGMercUtils.IsHealing() and RGMercUtils.SongActive("Healing Twincast") end,
             },
             {
                 name = "MeleeProcBuff",
@@ -1082,12 +1093,12 @@ local _ClassConfig = {
             },
         },
     },
-    ['Spells'] = {
+    ['Spells']            = {
         {
             gem = 1,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "RecklessHeal1", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "RecklessHeal1", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "RecklessHeal1", },
             },
@@ -1096,8 +1107,8 @@ local _ClassConfig = {
             gem = 2,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "SlowSpell",       cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" and mq.TLO.Me.AltAbility("Turgur's Swarm")() == nil end, },
-                { name = "RecklessHeal2",   cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "SlowSpell",       cond = function(self) return RGMercUtils.IsModeActive("Heal") and mq.TLO.Me.AltAbility("Turgur's Swarm")() == nil end, },
+                { name = "RecklessHeal2",   cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "FrostNuke", },
                 -- [ TLP FALL BACK ] --
@@ -1108,8 +1119,8 @@ local _ClassConfig = {
             gem = 3,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "RecourseHeal",    cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
-                { name = "GroupRenewalHoT", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "RecourseHeal",    cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "GroupRenewalHoT", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "RecourseHeal", },
                 { name = "GroupRenewalHoT", },
@@ -1122,7 +1133,7 @@ local _ClassConfig = {
             gem = 4,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "InterventionHeal", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "InterventionHeal", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "InterventionHeal", },
                 -- [ TLP FALL BACK ] --
@@ -1133,8 +1144,8 @@ local _ClassConfig = {
             gem = 5,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "ChaoticDoT", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
-                { name = "SaryrnDot",  cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "ChaoticDoT", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "SaryrnDot",  cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "ChaoticDoT", },
                 { name = "SaryrnDot", },
@@ -1147,7 +1158,7 @@ local _ClassConfig = {
             gem = 6,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "CanniSpell",       cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "CanniSpell",       cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "CanniSpell", },
                 -- [ TLP FALL BACK ] --
@@ -1159,7 +1170,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "GrowthBuff",   cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "GrowthBuff",   cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "SlowProcBuff", },
                 -- [ TLP FALL BACK ] --
@@ -1171,8 +1182,8 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "GroupRenewalHoT", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
-                { name = "FocusSpell",      cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "GroupRenewalHoT", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "FocusSpell",      cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "CurseDoT1", },
                 { name = "FocusSpell", },
@@ -1185,9 +1196,9 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "IcefixSpell", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
-                { name = "PandemicDot", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
-                { name = "UltorDot",    cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "IcefixSpell", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "PandemicDot", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "UltorDot",    cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "PandemicDot", },
                 { name = "UltorDot", },
@@ -1198,8 +1209,8 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "DichoSpell",    cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
-                { name = "MeleeProcBuff", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "DichoSpell",    cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "MeleeProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "DichoSpell", },
                 { name = "MeleeProcBuff", },
@@ -1210,7 +1221,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "AESpiritualHeal", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "AESpiritualHeal", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "CurseDoT2", },
             },
@@ -1220,7 +1231,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "TwinHealNuke", cond = function(self) return self.ClassConfig.Modes[self.settings.Mode] == "Heal" end, },
+                { name = "TwinHealNuke", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "IcefixSpell", },
                 { name = "PoisonNuke", },
@@ -1236,7 +1247,7 @@ local _ClassConfig = {
             },
         },
     },
-    ['DefaultConfig'] = {
+    ['DefaultConfig']     = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
         ['DoNuke']            = { DisplayName = "Cast Nukes", Category = "Spells and Abilities", Tooltip = "Use Nuke Spells", Default = true, },
         ['DoHOT']             = { DisplayName = "Cast HOTs", Category = "Spells and Abilities", Tooltip = "Use Heal Over Time Spells", Default = true, },
