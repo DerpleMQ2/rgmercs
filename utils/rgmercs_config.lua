@@ -174,7 +174,7 @@ function Config:SaveSettings(doBroadcast)
 
     RGMercsLogger.set_log_level(self.settings.LogLevel)
 
-    if doBroadcast then
+    if doBroadcast == true then
         RGMercUtils.BroadcastUpdate("main", "LoadSettings")
     end
 end
