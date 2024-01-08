@@ -3,6 +3,7 @@ local ImGui     = require('ImGui')
 local GitCommit = require('extras.version')
 
 RGMercsBinds    = require('utils.rgmercs_binds')
+RGMercsEvents   = require('utils.rgmercs_events')
 RGMercConfig    = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 
@@ -279,9 +280,6 @@ local function RGMercsGUI()
 end
 
 mq.imgui.init('RGMercsUI', RGMercsGUI)
-mq.bind('/rgmercsui', function()
-    openGUI = not openGUI
-end)
 
 -- End UI --
 local unloadedPlugins = {}
@@ -541,73 +539,8 @@ local script_actor = RGMercUtils.Actors.register(function(message)
 end)
 
 -- Binds
-local function bindHandler(cmd, ...)
-    if RGMercsBinds.Handlers[cmd] then
-        return RGMercsBinds.Handlers[cmd].handler(...)
-    end
 
-    local results = RGMercModules:ExecAll("HandleBind", cmd, ...)
-
-    local processed = false
-
-    for _, r in pairs(results) do processed = processed or r end
-
-    if not processed then
-        RGMercsLogger.log_warning("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
-    end
-end
-
-mq.bind("/rglua", bindHandler)
-
--- [ EVENTS ] --
-mq.event("CantSee", "You cannot see your target.", function()
-    if RGMercConfig.Globals.BackOffFlag then return end
-
-    if mq.TLO.Stick.Active() then
-        RGMercUtils.DoCmd("/stick off")
-    end
-
-    if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-        RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and Cannot see our target!")
-        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.5)
-        mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
-
-        -- TODO: Do we need this?
-        --while (${Navigation.Active} && ${XAssist.XTFullHaterCount} == 0) {
-        --CALLTRACE In while loop :: Navigation.Active ${Navigation.Active} :: XAssist ${XAssist.XTFullHaterCount}
-        --/doevents
-        --/delay 1 ${XAssist.XTFullHaterCount} > 0
-        --}
-    else
-        RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target!")
-        if RGMercConfig:GetSettings().DoAutoEngage then
-            if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
-                RGMercUtils.DoCmd("/squelch /face fast")
-                if RGMercConfig:GetSettings().DoMelee then
-                    RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
-                        (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                    RGMercUtils.NavInCombat(RGMercConfig:GetSettings(), mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
-                end
-            end
-        end
-    end
-    mq.flushevents("CantSee")
-end)
-
-mq.event("TooFar1", "#*#Your target is too far away, get closer!", function()
-    RGMercUtils.TooFarHandler()
-    mq.flushevents("TooFar1")
-end)
-mq.event("TooFar2", "#*#You can't hit them from here.", function()
-    RGMercUtils.TooFarHandler()
-    mq.flushevents("TooFar2")
-end)
-mq.event("TooFar3", "#*#You are too far away#*#", function()
-    RGMercUtils.TooFarHandler()
-    mq.flushevents("TooFar3")
-end)
-
--- [ END EVENTS ] --
+mq.bind("/rglua", RGMercsBinds.MainHandler)
 
 RGInit(...)
 

@@ -1,9 +1,24 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
-local Set           = require("mq.Set")
 
 local Bind          = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
+
+Bind.MainHandler    = function(cmd, ...)
+    if RGMercsBinds.Handlers[cmd] then
+        return RGMercsBinds.Handlers[cmd].handler(...)
+    end
+
+    local results = RGMercModules:ExecAll("HandleBind", cmd, ...)
+
+    local processed = false
+
+    for _, r in pairs(results) do processed = processed or r end
+
+    if not processed then
+        RGMercsLogger.log_warning("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
+    end
+end
 
 Bind.Handlers       = {
     ['qsay'] = {
