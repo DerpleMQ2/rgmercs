@@ -4,7 +4,6 @@ local RGMercsLogger = require("utils.rgmercs_logger")
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
 local ICONS         = require('mq.Icons')
 local ICON_SIZE     = 20
-local USEGEM        = mq.TLO.Me.NumGems()
 
 -- Global
 
@@ -16,6 +15,7 @@ Utils.LastZoneID    = 0
 Utils.NamedList     = {}
 Utils.ShowDownNamed = false
 Utils.Memorizing    = false
+Utils.UseGem        = mq.TLO.Me.NumGems()
 
 ---@param path string
 ---@return boolean
@@ -524,6 +524,23 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             return false
         end
 
+        local targetSpawn = mq.TLO.Spawn(targetId)
+
+        if targetSpawn() and targetSpawn.Type():lower() == "pc" then
+            -- check to see if this is too powerful a spell
+            local targetLevel    = targetSpawn.Level()
+            local spellLevel     = spell.Level()
+            local levelCheckPass = true
+            if targetLevel <= 45 and spellLevel > 50 then levelCheckPass = false end
+            if targetLevel <= 60 and spellLevel > 65 then levelCheckPass = false end
+            if targetLevel <= 65 and spellLevel > 95 then levelCheckPass = false end
+
+            if not levelCheckPass then
+                RGMercsLogger.log_error("\arCasting %s failed level check with target=%d and spell=%d", spellName, targetLevel, spellLevel)
+                return false
+            end
+        end
+
         -- Check for Reagents
         if not Utils.ReagentCheck(spell) then
             RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have Reagents for.", spellName)
@@ -554,7 +571,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         local spellRequiredMem = false
         if not me.Gem(spellName)() then
             RGMercsLogger.log_debug("\ay%s is not memorized - meming!", spellName)
-            Utils.MemorizeSpell(USEGEM, spellName, 5000)
+            Utils.MemorizeSpell(Utils.UseGem, spellName, 5000)
             spellRequiredMem = true
         end
 
@@ -707,7 +724,7 @@ end
 ---@param bAllowMem boolean
 ---@return integer
 function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
-    local oldSpellInSlot = mq.TLO.Me.Gem(USEGEM)
+    local oldSpellInSlot = mq.TLO.Me.Gem(Utils.UseGem)
     local stepsThisTime  = 0
     local lastStepIdx    = 0
 
@@ -743,9 +760,9 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
         end
     end
 
-    if oldSpellInSlot() and mq.TLO.Me.Gem(USEGEM)() ~= oldSpellInSlot.Name() then
-        RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, USEGEM)
-        Utils.MemorizeSpell(USEGEM, oldSpellInSlot.Name(), 10000)
+    if oldSpellInSlot() and mq.TLO.Me.Gem(Utils.UseGem)() ~= oldSpellInSlot.Name() then
+        RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, Utils.UseGem)
+        Utils.MemorizeSpell(Utils.UseGem, oldSpellInSlot.Name(), 10000)
     end
 
     -- Move to the next step
@@ -867,6 +884,32 @@ end
 ---@return string
 function Utils.GetGroupMainAssistName()
     return (mq.TLO.Group.MainAssist.CleanName() or "")
+end
+
+---@param mode string
+---@return boolean
+function Utils.IsModeActive(mode)
+    return RGMercModules:ExecModule("Class", "IsModeActive", mode)
+end
+
+---@return boolean
+function Utils.IsTanking()
+    return RGMercModules:ExecModule("Class", "IsTanking")
+end
+
+---@return boolean
+function Utils.IsHealing()
+    return RGMercModules:ExecModule("Class", "IsHealing")
+end
+
+---@return boolean
+function Utils.IsCuring()
+    return RGMercModules:ExecModule("Class", "IsCuring")
+end
+
+---@return boolean
+function Utils.IsMezzing()
+    return RGMercModules:ExecModule("Class", "IsMezzing")
 end
 
 ---@return boolean
@@ -1296,10 +1339,11 @@ function Utils.IsNamed(spawn)
     return false
 end
 
+--- Replaces IsPCSafe
 ---@param t string: character type
 ---@param name string
 ---@return boolean
-function Utils.IsPCSafe(t, name)
+function Utils.IsSafeName(t, name)
     if mq.TLO.DanNet(name)() then return true end
 
     for _, n in ipairs(RGMercConfig:GetSettings().OutsideAssistList) do
@@ -1336,7 +1380,7 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
                         if cur_spawn.Type():lower() == "mercenary" then checkName = cur_spawn.Owner.CleanName() end
                         if cur_spawn.Type():lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
 
-                        if not Utils.IsPCSafe(t, checkName) then
+                        if not Utils.IsSafeName(t, checkName) then
                             RGMercsLogger.log_verbose("\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax", cur_spawn.CleanName(), cur_spawn.AssistName())
                             return true
                         end
@@ -1383,7 +1427,7 @@ function Utils.MATargetScan(radius, zradius)
                 -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                 -- get aggro data from the spawn data type.
                 if Utils.HaveExpansion("EXPANSION_LEVEL_ROF") then
-                    if xtSpawn.PctAggro() < 100 and RGMercConfig.Globals.IsTanking then
+                    if xtSpawn.PctAggro() < 100 and Utils.IsTanking() then
                         -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
                         if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
                             RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]", xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
@@ -1694,7 +1738,7 @@ function Utils.OkToEngage(autoTargetId)
 
     if Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
         local distanceCheck = Utils.GetTargetDistance() < config.AssistRange
-        local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or RGMercConfig.Globals.IsTanking or Utils.IAmMA())
+        local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_debug("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
@@ -1800,6 +1844,9 @@ function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
     local spellLoadOut = {}
     local resolvedActionMap = {}
     local spellsToLoad = {}
+
+    Utils.UseGem = mq.TLO.Me.NumGems()
+
     -- Map AbilitySet Items and Load Them
     for k, t in pairs(itemSets) do
         RGMercsLogger.log_debug("Finding best item for Set: %s", k)

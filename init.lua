@@ -406,6 +406,7 @@ local function Main()
 
     if RGMercConfig.Globals.PauseMain then
         mq.delay(1000)
+        mq.doevents()
         if RGMercConfig:GetSettings().RunMovePaused then
             RGMercModules:ExecModule("Movement", "GiveTime", curState)
         end
@@ -440,14 +441,12 @@ local function Main()
         end
     end
 
-    -- TODO: Write Healing Module
-
     -- Handles state for when we're in combat
     if RGMercUtils.DoCombatActions() and not RGMercConfig:GetSettings().PriorityHealing then
         -- IsHealing or IsMezzing should re-determine their target as this point because they may
         -- have switched off to mez or heal after the initial find target check and the target
         -- may have changed by this point.
-        if RGMercUtils.FindTargetCheck() and (not RGMercConfig.Globals.IsHealing or not RGMercConfig.Globals.IsMezzing) then
+        if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing()) then
             RGMercUtils.FindTarget()
             if RGMercUtils.GetTargetID() ~= RGMercConfig.Globals.AutoTargetID then
                 RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
