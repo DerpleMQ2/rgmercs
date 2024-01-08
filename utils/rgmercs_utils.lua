@@ -12,6 +12,7 @@ Utils.__index       = Utils
 Utils.Actors        = require('actors')
 Utils.ScriptName    = "RGMercs"
 Utils.LastZoneID    = 0
+Utils.LastDoStick   = 0
 Utils.NamedList     = {}
 Utils.ShowDownNamed = false
 Utils.Memorizing    = false
@@ -402,8 +403,10 @@ function Utils.UseAA(aaName, targetId)
         mq.delay(string.format("%ds", aaAbility.Spell.MyCastTime.TotalSeconds()))
     end
 
-    RGMercsLogger.log_debug("switching target back to old target after casting aa")
-    Utils.SetTarget(oldTargetId)
+    if oldTargetId > 0 then
+        RGMercsLogger.log_debug("switching target back to old target after casting aa")
+        Utils.SetTarget(oldTargetId)
+    end
 end
 
 ---@param itemName string
@@ -960,6 +963,13 @@ end
 ---@param config table
 ---@param targetId integer
 function Utils.DoStick(config, targetId)
+    if os.clock() - Utils.LastDoStick < 4 then
+        RGMercsLogger.log_debug("\ayIgnoring DoStick because we just stuck less than 4 seconds ago - let's give it some time.")
+        return
+    end
+
+    Utils.LastDoStick = os.clock()
+
     if config.StickHow:len() > 0 then
         Utils.DoCmd("/stick %s", config.StickHow)
     else
