@@ -131,7 +131,7 @@ function Module:LoadSettings()
     if err or not config then
         RGMercsLogger.log_error("\ay[Pull]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
-        self:SaveSettings(true)
+        self:SaveSettings(false)
     else
         self.settings = config()
     end
@@ -215,7 +215,7 @@ function Module:Render()
 
         if ImGui.Button(self.settings.DoPull and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
             self.settings.DoPull = not self.settings.DoPull
-            self:SaveSettings(true)
+            self:SaveSettings(false)
         end
         ImGui.PopStyleColor()
 
@@ -228,12 +228,12 @@ function Module:Render()
 
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
         if pressed then
-            self:SaveSettings(true)
+            self:SaveSettings(false)
         end
         if #self.TempSettings.ValidPullAbilities > 0 then
             self.settings.PullAbility, pressed = ImGui.Combo("Pull Ability", self.settings.PullAbility, self.TempSettings.ValidPullAbilities, #self.TempSettings.ValidPullAbilities)
             if pressed then
-                self:SaveSettings(true)
+                self:SaveSettings(false)
             end
         end
 
@@ -337,7 +337,7 @@ function Module:Render()
     if ImGui.CollapsingHeader("Config Options") then
         self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
         if pressed then
-            self:SaveSettings(true)
+            self:SaveSettings(false)
         end
     end
 end
@@ -383,7 +383,7 @@ end
 function Module:AddMobToList(list, mobName)
     self.settings[list][mq.TLO.Zone.ShortName()] = self.settings[list][mq.TLO.Zone.ShortName()] or {}
     table.insert(self.settings[list][mq.TLO.Zone.ShortName()], mobName)
-    self:SaveSettings(true)
+    self:SaveSettings(false)
 end
 
 ---@param list string
@@ -391,7 +391,7 @@ end
 function Module:DeleteMobFromList(list, idx)
     self.settings[list][mq.TLO.Zone.ShortName()] = self.settings[list][mq.TLO.Zone.ShortName()] or {}
     self.settings[list][mq.TLO.Zone.ShortName()][idx] = nil
-    self:SaveSettings(true)
+    self:SaveSettings(false)
 end
 
 function Module:IncrementWpId()
@@ -414,7 +414,7 @@ function Module:MoveWayPointUp(id)
     local oldEntry = self:GetWPById(newId)
     self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId] = self:GetWPById(id)
     self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] = oldEntry
-    self:SaveSettings(true)
+    self:SaveSettings(false)
 end
 
 ---@param id number
@@ -427,13 +427,13 @@ function Module:MoveWayPointDown(id)
     local oldEntry = self:GetWPById(newId)
     self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId] = self:GetWPById(id)
     self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] = oldEntry
-    self:SaveSettings(true)
+    self:SaveSettings(false)
 end
 
 function Module:CreateWayPointHere()
     self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] = self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] or {}
     table.insert(self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()], { x = mq.TLO.Me.X(), y = mq.TLO.Me.Y(), z = mq.TLO.Me.Z(), })
-    self:SaveSettings(true)
+    self:SaveSettings(false)
     RGMercsLogger.log_info("\axNew waypoint \at%d\ax created at location \ag%02.f, %02.f, %02.f", #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()],
         mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z())
 end
@@ -442,7 +442,7 @@ function Module:DeleteWayPoint(idx)
     if idx >= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] then
         RGMercsLogger.log_info("\axWaypoint \at%d\ax at location \ag%s\ax - \arDeleted!\ax", idx, self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][idx])
         self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][idx] = nil
-        self:SaveSettings(true)
+        self:SaveSettings(false)
     else
         RGMercsLogger.log_error("\ar%d is not a valid waypoint ID!", idx)
     end

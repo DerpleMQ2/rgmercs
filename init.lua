@@ -155,7 +155,7 @@ local function RGMercsGUI()
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
 
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
-
+        ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
         --ImGui.Image(derpImg:GetTextureID(), ImVec2(ImGui.GetWindowWidth(), ImGui.GetWindowHeight()))
 
         --ImGui.SetCursorPos(0, 0)
@@ -191,7 +191,7 @@ local function RGMercsGUI()
                 if RGMercsConsole.opacity then
                     RGMercsConsole.opacity = GetMainOpacity()
                 end
-                RGMercConfig:SaveSettings(true)
+                RGMercConfig:SaveSettings(false)
             end
 
             if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.None) then
@@ -207,7 +207,7 @@ local function RGMercsGUI()
                         local settingsRef = RGMercConfig:GetSettings()
                         settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
                         if pressed then
-                            RGMercConfig:SaveSettings(true)
+                            RGMercConfig:SaveSettings(false)
                         end
                     end
 
@@ -233,14 +233,14 @@ local function RGMercsGUI()
                         if dropped then
                             RGMercsLogger.log_debug("New item dropped: %s", newItem)
                             RGMercConfig:GetSettings().MountItem = newItem
-                            RGMercConfig:SaveSettings(true)
+                            RGMercConfig:SaveSettings(false)
                         end
 
                         dropped, newItem = renderDragDropForItem("Drop Shrink Item")
                         if dropped then
                             RGMercsLogger.log_debug("New item dropped: %s", newItem)
                             RGMercConfig:GetSettings().ShrinkItem = newItem
-                            RGMercConfig:SaveSettings(true)
+                            RGMercConfig:SaveSettings(false)
                         end
                     end
 
@@ -263,7 +263,7 @@ local function RGMercsGUI()
                     #RGMercConfig.Constants.LogLevels)
 
                 if changed then
-                    RGMercConfig:SaveSettings(true)
+                    RGMercConfig:SaveSettings(false)
                 end
 
                 if ImGui.CollapsingHeader("Debug Output", ImGuiTreeNodeFlags.DefaultOpen) then
@@ -284,6 +284,7 @@ local function RGMercsGUI()
             display_item_on_cursor()
         end
 
+        ImGui.PopID()
         ImGui.End()
         if themeStylePop > 0 then
             ImGui.PopStyleColor(themeStylePop)

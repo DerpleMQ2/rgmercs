@@ -72,7 +72,7 @@ function Module:LoadSettings()
     if err or not config then
         RGMercsLogger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!", RGMercConfig.Globals.CurLoadedClass, settings_pickle_path)
         self.settings = {}
-        self:SaveSettings(true)
+        self:SaveSettings(false)
     else
         self.settings = config()
     end
@@ -139,14 +139,14 @@ function Module:Render()
         RGMercUtils.Tooltip(self.ClassConfig.DefaultConfig.Mode.Tooltip)
         self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes, #self.ClassConfig.Modes)
         if pressed then
-            self:SaveSettings(true)
+            self:SaveSettings(false)
             newCombatMode = true
         end
 
         if ImGui.CollapsingHeader("Config Options") then
             self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, self.ClassConfig.DefaultConfig, self.DefaultCategories)
             if pressed then
-                self:SaveSettings(true)
+                self:SaveSettings(false)
                 newCombatMode = newCombatMode or loadoutChange
             end
         end

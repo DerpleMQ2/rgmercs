@@ -201,7 +201,7 @@ function Config:LoadSettings()
     self.settings = RGMercUtils.ResolveDefaults(Config.DefaultConfig, self.settings)
 
     if needSave then
-        self:SaveSettings(true)
+        self:SaveSettings(false)
     end
 
     return true

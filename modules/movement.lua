@@ -87,7 +87,7 @@ function Module:ChaseOn(target)
     if chaseTarget() and chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
         self.settings.ChaseOn = true
         self.settings.ChaseTarget = chaseTarget.CleanName()
-        self:SaveSettings(true)
+        self:SaveSettings(false)
 
         RGMercsLogger.log_info("\ao Now Chasing \ag %s", chaseTarget.CleanName())
     else
@@ -109,7 +109,7 @@ end
 function Module:ChaseOff()
     self.settings.ChaseOn = false
     self.settings.ChaseTarget = nil
-    self:SaveSettings(true)
+    self:SaveSettings(false)
     RGMercsLogger.log_warning("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
 end
 
@@ -129,7 +129,7 @@ end
 
 function Module:CampOff()
     self.settings.ReturnToCamp = false
-    self:SaveSettings(true)
+    self:SaveSettings(false)
 end
 
 function Module:DestoryCampfire()
@@ -168,7 +168,7 @@ function Module:Campfire(camptype)
     if self.settings.MaintainCampfire then
         if mq.TLO.FindItemCount("Fellowship Campfire Materials") == 0 then
             self.settings.MaintainCampfire = 1
-            self:SaveSettings(true)
+            self:SaveSettings(false)
             RGMercsLogger.log_info("Fellowship Campfire Materials Not Found. Setting to Regular Fellowship.")
         end
     end
@@ -230,7 +230,7 @@ function Module:Render()
         if ImGui.CollapsingHeader("Config Options") then
             self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
             if pressed then
-                self:SaveSettings(true)
+                self:SaveSettings(false)
             end
         end
 

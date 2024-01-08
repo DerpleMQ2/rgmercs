@@ -233,7 +233,7 @@ function Utils.GetBestSpell(t)
                     end
                 else
                     Utils.PrintGroupMessage(string.format(
-                        "%s \aw [%s] \ax \ar MISSING SPELL \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), s,
+                        "%s \aw [%s] \ax \ar ! MISSING SPELL ! \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), s,
                         spell.RankName(), spell.Level()))
                 end
             end
@@ -257,6 +257,7 @@ function Utils.WaitCastFinish(target)
 
     ---@diagnostic disable-next-line: undefined-field
     while mq.TLO.Me.Casting() and (not mq.TLO.Cast.Ready()) do
+        RGMercsLogger.log_verbose("Waiting to Finish Casting...")
         mq.delay(100)
         if target() and Utils.GetTargetPctHPs() <= 0 or (Utils.GetTargetID() ~= target.ID()) then
             mq.TLO.Me.StopCast()
@@ -564,6 +565,9 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
 
         Utils.WaitCastReady(spellName, spellRequiredMem and (5 * 60 * 100) or 5000)
 
+        -- wait another little bit.
+        mq.delay(500)
+
         Utils.ActionPrep()
 
         local cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", spellName, targetId)
@@ -579,13 +583,21 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
     return false
 end
 
+---@param s self
 ---@param e table
 ---@param targetId integer
 ---@param map table
 ---@param bAllowMem boolean
 ---@return boolean
-function Utils.ExecEntry(e, targetId, map, bAllowMem)
+function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
     local me = mq.TLO.Me
+    local ret = false
+
+    -- Run pre-activates
+    if e.pre_activate then
+        RGMercsLogger.log_debug("Running Pre-Activate for %s", e.name)
+        e.pre_activate(s, Utils.GetEntryConditionArg(map, e))
+    end
 
     if e.type:lower() == "item" then
         local itemName = map[e.name]
@@ -593,37 +605,35 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
         if not itemName then itemName = e.name end
 
         Utils.UseItem(itemName, targetId)
-        return true
+        ret = true
     end
 
     if e.type:lower() == "spell" then
-        local s = map[e.name]
+        local spell = map[e.name]
 
-        if not s or not s() then
-            return false
+        if not spell or not spell() then
+            ret = false
+        else
+            ret = Utils.UseSpell(spell.RankName(), targetId, bAllowMem)
+
+            RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", e.name, spell.RankName(), ret and "\agSuccess" or "\arFailed!")
         end
-
-        local res = Utils.UseSpell(s.RankName(), targetId, bAllowMem)
-
-        RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", e.name, s.RankName(), res and "\agSuccess" or "\arFailed!")
-
-        return res
     end
 
     if e.type:lower() == "aa" then
         Utils.UseAA(e.name, targetId)
-        return true
+        ret = true
     end
 
     if e.type:lower() == "ability" then
         Utils.UseAbility(e.name)
-        return true
+        ret = true
     end
 
     if e.type:lower() == "cmd" then
         mq.cmdf("/docommand %s", e.cmd)
         RGMercsLogger.log_debug("Calling command \ao =>> \ag %s \ao <<=", e.name)
-        return true
+        ret = true
     end
 
     if e.type:lower() == "disc" then
@@ -631,47 +641,52 @@ function Utils.ExecEntry(e, targetId, map, bAllowMem)
 
         if not discSpell then
             RGMercsLogger.log_debug("Dont have a DISC for \ao =>> \ag %s \ao <<=", e.name)
-            return false
-        end
+            ret = false
+        else
+            RGMercsLogger.log_debug("Using DISC \ao =>> \ag %s [%s] \ao <<=", e.name, (discSpell() and discSpell.RankName() or "None"))
 
-        RGMercsLogger.log_debug("Using DISC \ao =>> \ag %s [%s] \ao <<=", e.name, (discSpell() and discSpell.RankName() or "None"))
+            if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
+                RGMercsLogger.log_debug("CANT USE DISC - Casting Window Open")
+                ret = false
+            else
+                if me.CurrentEndurance() < discSpell.EnduranceCost() then
+                    ret = false
+                else
+                    RGMercsLogger.log_debug("Trying to use DISC: %s", discSpell.RankName())
 
-        if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
-            RGMercsLogger.log_debug("CANT USE DISC - Casting Window Open")
-            return false
-        end
+                    Utils.ActionPrep()
 
-        if me.CurrentEndurance() < discSpell.EnduranceCost() then
-            return false
-        end
+                    if Utils.IsDisc(discSpell.RankName()) then
+                        if me.ActiveDisc.ID() then
+                            RGMercsLogger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName(), me.ActiveDisc.Name())
+                            mq.cmdf("/stopdisc")
+                            mq.delay(20, function() return not me.ActiveDisc.ID() end)
+                        end
+                    end
 
-        RGMercsLogger.log_debug("Trying to use DISC: %s", discSpell.RankName())
+                    mq.cmdf("/squelch /doability \"%s\"", discSpell.RankName())
 
-        Utils.ActionPrep()
+                    mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName()) and not me.Casting.ID()) end)
 
-        if Utils.IsDisc(discSpell.RankName()) then
-            if me.ActiveDisc.ID() then
-                RGMercsLogger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName(), me.ActiveDisc.Name())
-                mq.cmdf("/stopdisc")
-                mq.delay(20, function() return not me.ActiveDisc.ID() end)
+                    -- Is this even needed?
+                    if Utils.IsDisc(discSpell.RankName()) then
+                        mq.delay(20, function() return me.ActiveDisc.ID() end)
+                    end
+
+                    RGMercsLogger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName())
+
+                    ret = true
+                end
             end
         end
-
-        mq.cmdf("/squelch /doability \"%s\"", discSpell.RankName())
-
-        mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName()) and not me.Casting.ID()) end)
-
-        -- Is this even needed?
-        if Utils.IsDisc(discSpell.RankName()) then
-            mq.delay(20, function() return me.ActiveDisc.ID() end)
-        end
-
-        RGMercsLogger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName())
-
-        return true
     end
 
-    return false
+    if e.post_activate then
+        RGMercsLogger.log_debug("Running Post-Activate for %s", e.name)
+        e.post_activate(s, Utils.GetEntryConditionArg(map, e))
+    end
+
+    return ret
 end
 
 function Utils.GetEntryConditionArg(map, entry)
@@ -705,7 +720,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
                 RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s)", entry.name, entry.type, condArg)
                 local pass = entry.cond(s, condArg)
                 if pass == true then
-                    local res = Utils.ExecEntry(entry, targetId, map, bAllowMem)
+                    local res = Utils.ExecEntry(s, entry, targetId, map, bAllowMem)
                     if res == true then
                         stepsThisTime = stepsThisTime + 1
 
@@ -715,7 +730,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
                     end
                 end
             else
-                local res = Utils.ExecEntry(entry, targetId, map, bAllowMem)
+                local res = Utils.ExecEntry(s, entry, targetId, map, bAllowMem)
                 if res == true then
                     stepsThisTime = stepsThisTime + 1
 
@@ -748,7 +763,7 @@ end
 ---@return boolean
 function Utils.SelfBuffPetCheck(spell)
     if not spell or not spell() then return false end
-    return not mq.TLO.Me.PetBuff(spell.RankName())() and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
+    return (not mq.TLO.Me.PetBuff(spell.RankName())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
 ---@param spell MQSpell
@@ -1771,7 +1786,6 @@ function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
     local spellLoadOut = {}
     local resolvedActionMap = {}
     local spellsToLoad = {}
-
     -- Map AbilitySet Items and Load Them
     for k, t in pairs(itemSets) do
         RGMercsLogger.log_debug("Finding best item for Set: %s", k)
@@ -2171,6 +2185,7 @@ end
 function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
     local any_pressed = false
     local new_loadout = false
+    ---@type boolean|nil
     local pressed = false
     local renderWidth = 300
     local windowWidth = ImGui.GetWindowWidth()
@@ -2187,7 +2202,18 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
 
         for _, k in ipairs(settingNames) do
             if defaults[k].Category == category then
-                if defaults[k].Type ~= "Custom" then
+                if defaults[k].Type == "Combo" then
+                    -- build a combo box.
+                    ImGui.TableNextColumn()
+                    ImGui.Text((defaults[k].DisplayName or "None"))
+                    Utils.Tooltip(defaults[k].Tooltip)
+                    ImGui.TableNextColumn()
+                    ImGui.PushID("##combo_setting_" .. k)
+                    settings[k], pressed = ImGui.Combo("", settings[k], defaults[k].ComboOptions)
+                    ImGui.PopID()
+                    new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
+                    any_pressed = any_pressed or (pressed or false)
+                elseif defaults[k].Type ~= "Custom" then
                     ImGui.TableNextColumn()
                     ImGui.Text((defaults[k].DisplayName or "None"))
                     Utils.Tooltip(defaults[k].Tooltip)
