@@ -612,11 +612,14 @@ local _ClassConfig = {
             },
             {
                 name = "Stand Back Up",
-                type = "cmd",
+                type = "CustomFunc",
                 cond = function(self)
                     return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
                 end,
-                cmd = "/stand",
+                cmd = function()
+                    mq.cmdf("/stand")
+                    return true
+                end,
             },
         },
         ['DPS'] = {
@@ -898,11 +901,14 @@ local _ClassConfig = {
         ['Downtime'] = {
             {
                 name = "Stand Back Up",
-                type = "cmd",
+                type = "CustomFunc",
                 cond = function(self)
                     return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
                 end,
-                cmd = "/stand",
+                cmd = function()
+                    mq.cmdf("/stand")
+                    return true
+                end,
             },
             {
                 name = "Mortifier's Unity",

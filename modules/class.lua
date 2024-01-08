@@ -179,7 +179,7 @@ function Module:Render()
             end
         end
 
-        if not self.ReloadingLoadouts then
+        if not self.ReloadingLoadouts and #self.TempSettings.HealingRotationStates > 0 then
             if ImGui.CollapsingHeader("Healing Rotations") then
                 ImGui.Indent()
                 RGMercUtils.RenderRotationTableKey()
@@ -489,8 +489,8 @@ function Module:DoGetState()
                 mappedAction = mappedAction.RankName()
             end
         else
-            if entry.type:lower() == "cmd" then
-                mappedAction = entry.cmd
+            if entry.type:lower() == "customfunc" then
+                mappedAction = "cmd function"
             elseif entry.type:lower() == "spell" then
                 mappedAction = "<Missing Spell>"
             elseif entry.type:lower() == "ability" then

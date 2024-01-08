@@ -749,7 +749,7 @@ local _ClassConfig = {
         ['Burn'] = {
             {
                 name = "Acrimony",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.Acrimony,
                 cond = function(self)
                     return RGMercUtils.IsNamed(mq.TLO.Target)
@@ -757,7 +757,7 @@ local _ClassConfig = {
             },
             {
                 name = "SpiteStrike",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.SpikeStrike,
                 cond = function(self)
                     return RGMercUtils.IsNamed(mq.TLO.Target)
@@ -765,7 +765,7 @@ local _ClassConfig = {
             },
             {
                 name = "ReflexStrike",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.ReflexStrike,
                 cond = function(self)
                     return RGMercUtils.IsNamed(mq.TLO.Target)
@@ -797,27 +797,34 @@ local _ClassConfig = {
         ['DPS'] = {
             {
                 name = "ActivateShield",
-                type = "cmd",
+                type = "CustomFunc",
                 tooltip = Tooltips.ActivateShield,
                 cond = function(self)
                     return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
                         mq.TLO.Me.Bandolier("Shield").Index() and RGMercUtils.IsTanking()
                 end,
-                cmd = "/bandolier activate Shield",
+                cmd = function()
+                    mq.cmdf("/bandolier activate Shield")
+                    return true
+                end,
+
             },
             {
                 name = "Activate2HS",
-                type = "cmd",
+                type = "CustomFunc",
                 tooltip = Tooltips.Activate2HS,
                 cond = function(self)
                     return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and
                         mq.TLO.Me.Bandolier("2HS").Index() and not RGMercUtils.IsTanking()
                 end,
-                cmd = "/bandolier activate 2HS",
+                cmd = function()
+                    mq.cmdf("/bandolier activate 2HS")
+                    return true
+                end,
             },
             {
                 name = "EndRegen",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.EndRegen,
                 cond = function(self)
                     return mq.TLO.Me.PctEndurance() < 15
@@ -870,7 +877,7 @@ local _ClassConfig = {
             },
             {
                 name = "MeleeMit",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.MeleeMit,
                 cond = function(self, _)
                     return RGMercUtils.IsTanking()
@@ -910,7 +917,7 @@ local _ClassConfig = {
             },
             {
                 name = "LeechCurse",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.LeechCurse,
                 cond = function(self)
                     return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and mq.TLO.Me.PctHPs() < 50
@@ -918,7 +925,7 @@ local _ClassConfig = {
             },
             {
                 name = "Deflection",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.Deflection,
                 cond = function(self)
                     return RGMercUtils.IsTanking() and mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
@@ -926,7 +933,7 @@ local _ClassConfig = {
             },
             {
                 name = "Mantle",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.Mantle,
                 cond = function(self)
                     return RGMercUtils.IsTanking() and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
@@ -935,7 +942,7 @@ local _ClassConfig = {
             },
             {
                 name = "Carapace",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.Carapace,
                 cond = function(self)
                     return RGMercUtils.IsTanking() and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
@@ -944,7 +951,7 @@ local _ClassConfig = {
             },
             {
                 name = "CurseGuard",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.CurseGuard,
                 cond = function(self)
                     return RGMercUtils.IsTanking() and (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and
@@ -953,7 +960,7 @@ local _ClassConfig = {
             },
             {
                 name = "UnholyAura",
-                type = "DISC",
+                type = "Disc",
                 tooltip = Tooltips.UnholyAura,
                 cond = function(self)
                     return (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2) and

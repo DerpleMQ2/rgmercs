@@ -2,17 +2,18 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    ['Modes'] = {
-        ['DPS'] = 0,
-        ['TLP'] = 2,
+    _version          = "0.1a",
+    _author           = "Derple",
+    ['Modes']         = {
+        'DPS',
     },
-    ['ItemSets'] = {
+    ['ItemSets']      = {
         ['Epic'] = {
             "Fatestealer",
             "Nightshade, Blade of Entropy",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']   = {
         ["ConditionedReflexes"] = {
             "Conditioned Reflexes",
             "Practiced Reflexes",
@@ -136,6 +137,9 @@ return {
             "Third Wind",  -- Level 77
             "Second Wind", -- Level 72
         },
+        ["CounterattackDiscipline"] = {
+            "Counterattack Discipline",
+        },
         ["EdgeDisc"] = {
             "Reckless Edge Discipline", -- Level 121
             "Ragged Edge Discipline",   -- Level 107
@@ -200,141 +204,309 @@ return {
             "Poisonous Conjunction", -- Level 103
         },
     },
-    ['Rotations'] = {
-        ['Tank'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+    ['RotationOrder'] = {
+        -- Downtime doesn't have state because we run the whole rotation at once.
+        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
+        {
+            name = 'Burn',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    RGMercUtils.BurnCheck()
+            end,
+        },
+        {
+            name = 'Evasion',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.IAmMA() and RGMercUtils.GetMainAssistPctHPs() > 0 and mq.TLO.Me.PctAggro() > 90
+            end,
+        },
+        {
+            name = 'DPS',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
+            end,
+        },
+    },
+    ['Rotations']     = {
+        ['Burn'] = {
+            {
+                name = "Shadow's Flanking",
+                type = "AA",
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "Focused Rake's Rampage",
+                type = "AA",
+            },
+            {
+                name = "Rogue's Fury",
+                type = "AA",
+            },
+            {
+                name = "Spire of the Rake",
+                type = "AA",
+            },
+            {
+                name = mq.TLO.Me.Inventory("Chest").Name(),
+                type = "Item",
+                active_cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return item() and mq.TLO.Me.Song(item.Spell.RankName())() ~= nil
+                end,
+                cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return self.settings.DoChestClick and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                end,
+            },
+            {
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    local item = mq.TLO.FindItem(itemName)
+                    return item and item() and self.settings.DoEpic and item.Spell.Stacks() and item.TimerReady()
+                end,
+            },
+            {
+                name = "Pinpoint",
+                type = "Disc",
+            },
+            {
+                name = "Frenzied",
+                type = "Disc",
+                cond = function(self, discName)
+                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discName)
+                end,
+            },
+            {
+                name = "Twisted",
+                type = "Disc",
+                cond = function(self, discName)
+                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discName)
+                end,
+            },
+            {
+                name = "AimDisc",
+                type = "Disc",
+                cond = function(self, discName)
+                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                end,
+            },
+            {
+                name = "Executioner",
+                type = "Disc",
+                cond = function(self, discName)
+                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                end,
+            },
+            {
+                name = "Executioner2",
+                type = "Disc",
+                cond = function(self, discName)
+                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                end,
+            },
+            {
+                name = "EdgeDisc",
+                type = "Disc",
+                cond = function(self, discName)
+                    return not mq.TLO.Me.ActiveDisc.ID()
+                end,
+            },
+            {
+                name = "AspDisc",
+                type = "Disc",
+                cond = function(self, discName)
+                    return not mq.TLO.Me.ActiveDisc.ID()
+                end,
             },
         },
         ['DPS'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+            {
+                name = "Backstab",
+                type = "Ability",
+                cond = function(self, _)
+                    return RGMercUtils.CanUseAA("Chaotic Stab")
+                end,
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            -- if we dont have CS then make sure we are behind.
+            {
+                name = "Backstab",
+                type = "Ability",
+                cond = function(self, _)
+                    return not RGMercUtils.CanUseAA("Chaotic Stab") and mq.TLO.Stick.Behind()
+                end,
             },
-        },
-        ['Healer'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+            {
+                name = "EndRegen",
+                type = "Disc",
+                cond = function(self, _)
+                    return mq.TLO.Me.PctEndurance() < 21
+                end,
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "Ambush",
+                type = "Disc",
+                cond = function(self, discName)
+                    local discSpell = mq.TLO.Spell(discName)
+                    return mq.TLO.Me.PctEndurance() >= 5 and
+                        RGMercUtils.GetTargetPctHPs() >= 90 and
+                        RGMercUtils.GetTargetDistance() < 50 and
+                        (discSpell() and RGMercUtils.GetTargetLevel() <= discSpell.Level()) and
+                        mq.TLO.Me.CombatState():lower() ~= "combat"
+                end,
             },
-        },
-        ['Hybrid'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+            {
+                name = "AimDisc",
+                type = "Disc",
+                cond = function(self, _)
+                    return mq.TLO.Me.ActiveDisc.ID() == nil
+                end,
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "Vision",
+                type = "Disc",
+                cond = function(self, discName)
+                    return RGMercUtils.SongActive(discName)
+                end,
+            },
+            {
+                name = "Pinpoint",
+                type = "Disc",
+            },
+            {
+                name = "Jugular",
+                type = "Disc",
+                cond = function(self, discName)
+                    local discSpell = mq.TLO.Spell(discName)
+                    return (discSpell() and discSpell.Level() <= 82) and mq.TLO.Me.CombatState():lower() ~= "combat"
+                end,
+            },
+            {
+                name = "FellStrike",
+                type = "Disc",
+                cond = function(self, _)
+                    return mq.TLO.Me.Level() <= 20
+                end,
+            },
+            {
+                name = "Slice",
+                type = "Disc",
+            },
+            {
+                name = "Twisted Shank",
+                type = "AA",
+            },
+            {
+                name = "Ligament Slice",
+                type = "AA",
+            },
+            {
+                name = "PoisonName",
+                type = "ClickyItem",
+                cond = function(self, _)
+                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
+                        not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
+                end,
             },
         },
-        ['DefaultConfig'] = {
-            ['Mode'] = '1',
+        ['Evasion'] = {
+            {
+                name = "Escape",
+                type = "AA",
+            },
+            {
+                name = "CounterattackDiscipline",
+                type = "Disc",
+            },
+            {
+                name = "Tumble",
+                type = "AA",
+            },
+            {
+                name = "Phantom",
+                type = "Disc",
+            },
         },
+        ['Downtime'] = {
+            {
+                name = "EndRegen",
+                type = "Disc",
+                cond = function(self, _)
+                    return mq.TLO.Me.PctEndurance() < 21
+                end,
+            },
+            {
+                name = "PoisonClicky",
+                type = "ClickyItem",
+                active_cond = function(self, _)
+                    return (mq.TLO.FindItemCount(self.settings.PoisonName)() or 0) >= self.settings.PoisonItemCount
+                end,
+                cond = function(self, _)
+                    return (mq.TLO.FindItemCount(self.settings.PoisonName)() or 0) < self.settings.PoisonItemCount and
+                        mq.TLO.FindItem(self.settings.PoisonClicky)() and
+                        mq.TLO.FindItem(self.settings.PoisonClicky).Timer() == 0
+                end,
+            },
+            {
+                name = "PoisonName",
+                type = "ClickyItem",
+                active_cond = function(self, _)
+                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    return poisonItem and poisonItem() and RGMercUtils.BuffActiveByID(poisonItem.Spell.ID() or 0)
+                end,
+                cond = function(self, _)
+                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
+                        not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
+                end,
+            },
+            {
+                name = "Hide & Sneak",
+                type = "CustomFunc",
+                active_cond = function(self)
+                    return mq.TLO.Me.Invis() and mq.TLO.Me.Sneaking()
+                end,
+                cond = function(self)
+                    return self.settings.DoHideSneak
+                end,
+                cmd = function()
+                    if mq.TLO.Me.AbilityReady("hide") then mq.cmdf("/doability hide") end
+                    if mq.TLO.Me.AbilityReady("sneak") then mq.cmdf("/doability sneak") end
+                    return true
+                end,
+            },
+        },
+    },
+    ['Spells']        = {
+        { name = "", gem = 1, },
+        { name = "", gem = 2, },
+        { name = "", gem = 3, },
+        { name = "", gem = 4, },
+        { name = "", gem = 5, },
+        { name = "", gem = 6, },
+        { name = "", gem = 7, },
+        { name = "", gem = 8, },
+        { name = "", gem = 9, },
+        { name = "", gem = 10, },
+        { name = "", gem = 11, },
+        { name = "", gem = 12, },
+    },
+    ['DefaultConfig'] = {
+        ['Mode']            = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['PoisonName']      = { DisplayName = "Poison Item", Category = "Poison", Tooltip = "Click the poison you want to use here", Type = "ClickyItem", Default = "", },
+        ['PoisonClicky']    = { DisplayName = "Poison Clicky", Category = "Poison", Tooltip = "Click the poison summoner you want to use here", Type = "ClickyItem", Default = "", },
+        ['PoisonItemCount'] = { DisplayName = "Poison Item Count", Category = "Poison", Tooltip = "Min number of poison before we start summoning more", Default = 3, Min = 1, Max = 50, },
+        ['DoChestClick']    = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoEpic']          = { DisplayName = "Do Epic Click", Category = "Utilities", Tooltip = "Click your epic item", Default = true, },
+        ['DoHideSneak']     = { DisplayName = "Do Hide/Sneak Click", Category = "Utilities", Tooltip = "Use Hide/Sneak during Downtime", Default = true, },
     },
 }
