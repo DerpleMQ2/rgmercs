@@ -717,8 +717,9 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
             lastStepIdx = idx
             if entry.cond then
                 local condArg = Utils.GetEntryConditionArg(map, entry)
-                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s)", entry.name, entry.type, condArg)
-                local pass = entry.cond(s, condArg)
+                local condTarg = mq.TLO.Spawn(targetId)
+                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s)", entry.name, entry.type, condArg, condTarg.CleanName() or "None")
+                local pass = entry.cond(s, condArg, condTarg)
                 if pass == true then
                     local res = Utils.ExecEntry(s, entry, targetId, map, bAllowMem)
                     if res == true then
@@ -938,7 +939,7 @@ function Utils.GetMainAssistId()
     return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist)).ID() or 0
 end
 
-function Utils.GetAssistPctHPs()
+function Utils.GetMainAssistPctHPs()
     return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist)).PctHPs() or 0
 end
 
@@ -2056,9 +2057,10 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
             end
             ImGui.TableNextColumn()
             if entry.cond then
-                local condArg = Utils.GetEntryConditionArg(map, entry)
-                local pass = entry.cond(s, condArg)
-                local active = entry.active_cond and entry.active_cond(s, condArg) or false
+                local condArg  = Utils.GetEntryConditionArg(map, entry)
+                local condTarg = mq.TLO.Target
+                local pass     = entry.cond(s, condArg, condTarg)
+                local active   = entry.active_cond and entry.active_cond(s, condArg) or false
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
