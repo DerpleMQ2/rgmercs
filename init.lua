@@ -103,7 +103,7 @@ local function RenderTarget()
         ImGui.Text("None")
         ImGui.ProgressBar(0, -1, 25)
     else
-        local assistSpawn = RGMercConfig:GetAutoTarget()
+        local assistSpawn = RGMercUtils.GetAutoTarget()
         local pctHPs = assistSpawn.PctHPs() or 0
         if not pctHPs then pctHPs = 0 end
         local ratioHPs = pctHPs / 100
@@ -201,7 +201,7 @@ local function RGMercsGUI()
                     ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
 
                     -- .. tostring(RGMercConfig.Globals.AutoTargetID))
-                    ImGui.Text("MA: " .. (RGMercConfig:GetAssistSpawn().CleanName() or "None"))
+                    ImGui.Text("MA: " .. (RGMercUtils.GetMainAssistSpawn().CleanName() or "None"))
                     ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
                         local settingsRef = RGMercConfig:GetSettings()
@@ -369,7 +369,7 @@ local function RGInit(...)
     if mainAssist:len() > 0 then
         RGMercConfig.Globals.MainAssist = mainAssist
         RGMercUtils.PopUp("Targetting %s for Main Assist", RGMercConfig.Globals.MainAssist)
-        RGMercUtils.SetTarget(RGMercConfig:GetAssistId())
+        RGMercUtils.SetTarget(RGMercUtils.GetMainAssistId())
         RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist, RGMercConfig:GetSettings().AutoAssistAt)
     end
 

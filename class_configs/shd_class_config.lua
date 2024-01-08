@@ -773,8 +773,8 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.HarmTouch,
                 cond = function(self, _)
-                    return (self.settings.BurnAuto and RGMercUtils.IsNamed(mq.TLO.Target)) or
-                        RGMercUtils.BigBurn(self.settings)
+                    return (RGMercConfig:GetSettings().BurnAuto and RGMercUtils.IsNamed(mq.TLO.Target)) or
+                        RGMercUtils.BigBurn()
                 end,
             },
             { name = "Thought Leech",   type = "AA", tooltip = Tooltips.ThoughtLeech, },
@@ -878,7 +878,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.ForPower,
                 cond = function(self, spell)
-                    return RGMercConfig.Globals.IsTanking and RGMercUtils.DotSpellCheck(self.settings, spell)
+                    return RGMercConfig.Globals.IsTanking and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
                 end,
             },
             {
@@ -962,7 +962,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(self.settings, spell)
+                    return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
                 end,
             },
             {
@@ -970,7 +970,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.DireDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(self.settings, spell)
+                    return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
                 end,
             },
             {

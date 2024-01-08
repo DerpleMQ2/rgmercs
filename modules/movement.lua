@@ -78,7 +78,7 @@ function Module:Init()
 end
 
 function Module:ChaseOn(target)
-    local chaseTarget = RGMercConfig:GetAssistSpawn() or mq.TLO.Target
+    local chaseTarget = RGMercUtils.GetMainAssistSpawn() or mq.TLO.Target
 
     if target then
         chaseTarget = mq.TLO.Spawn("pc =" .. target)
@@ -296,7 +296,7 @@ end
 
 function Module:ShouldFollow()
     local me = mq.TLO.Me
-    local assistSpawn = RGMercConfig:GetAssistSpawn()
+    local assistSpawn = RGMercUtils.GetMainAssistSpawn()
 
     return not mq.TLO.MoveTo.Moving() and
         (not me.Casting.ID() or me.Class.ShortName():lower() == "brd") and

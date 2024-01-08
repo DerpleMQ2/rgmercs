@@ -683,7 +683,7 @@ function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
 
     if e.post_activate then
         RGMercsLogger.log_debug("Running Post-Activate for %s", e.name)
-        e.post_activate(s, Utils.GetEntryConditionArg(map, e))
+        e.post_activate(s, Utils.GetEntryConditionArg(map, e), ret)
     end
 
     return ret
@@ -800,12 +800,12 @@ function Utils.SelfBuffAACheck(aaName)
     return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks and triggerStacks
 end
 
----@param config table
+---@param hpStopDots number # when to stop dots.
 ---@param spell MQSpell
 ---@return boolean
-function Utils.DotSpellCheck(config, spell)
+function Utils.DotSpellCheck(hpStopDots, spell)
     if not spell or not spell() then return false end
-    return not Utils.TargetHasBuff(spell) and spell.StacksTarget() and Utils.GetTargetPctHPs() > config.HPStopDOT
+    return not Utils.TargetHasBuff(spell) and spell.StacksTarget() and Utils.GetTargetPctHPs() > hpStopDots
 end
 
 ---@param spell MQSpell
@@ -877,22 +877,19 @@ function Utils.BurnCheck()
     return autoBurn or alwaysBurn
 end
 
----@param config table
 ---@return boolean
-function Utils.SmallBurn(config)
-    return config.BurnSize >= 1
+function Utils.SmallBurn()
+    return RGMercConfig:GetSettings().BurnSize >= 1
 end
 
----@param config table
 ---@return boolean
-function Utils.MedBurn(config)
-    return config.BurnSize >= 2
+function Utils.MedBurn()
+    return RGMercConfig:GetSettings().BurnSize >= 2
 end
 
----@param config table
 ---@return boolean
-function Utils.BigBurn(config)
-    return config.BurnSize >= 3
+function Utils.BigBurn()
+    return RGMercConfig:GetSettings().BurnSize >= 3
 end
 
 ---@param config table
@@ -935,6 +932,22 @@ function Utils.NavInCombat(config, targetId, distance, bDontStick)
     if not bDontStick then
         Utils.DoStick(config, targetId)
     end
+end
+
+function Utils.GetMainAssistId()
+    return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist)).ID() or 0
+end
+
+function Utils.GetAssistPctHPs()
+    return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist)).PctHPs() or 0
+end
+
+function Utils.GetMainAssistSpawn()
+    return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist))
+end
+
+function Utils.GetAutoTarget()
+    return mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID))
 end
 
 ---@return boolean
@@ -1188,7 +1201,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
     if not config.DoAutoEngage then return end
 
     local target = mq.TLO.Target
-    local assistId = RGMercConfig:GetAssistId()
+    local assistId = Utils.GetMainAssistId()
 
     if mq.TLO.Me.State():lower() == "feign" and mq.TLO.Me.Class.ShortName():lower() ~= "mnk" then
         mq.TLO.Me.Stand()
@@ -1517,7 +1530,7 @@ function Utils.FindTarget()
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
         if RGMercConfig:GetSettings().AssistOutside then
-            local assist = mq.TLO.Spawn(RGMercConfig:GetAssistId())
+            local assist = mq.TLO.Spawn(Utils.GetMainAssistId())
             local assistTarget = mq.TLO.Spawn(assist.AssistName())
 
             RGMercsLogger.log_verbose("FindTarget Assisting %s [%d] -- Target Agressive: %s", RGMercConfig.Globals.MainAssist, assist.ID(),
@@ -1619,14 +1632,14 @@ function Utils.SetControlToon()
         end
     end
 
-    if RGMercConfig:GetAssistId() ~= Utils.GetGroupMainAssistID() and Utils.GetGroupMainAssistID() > 0 then
+    if Utils.GetMainAssistId() ~= Utils.GetGroupMainAssistID() and Utils.GetGroupMainAssistID() > 0 then
         RGMercConfig.Globals.MainAssist = Utils.GetGroupMainAssistName()
     end
 end
 
 ---@return boolean
 function Utils.IAmMA()
-    return RGMercConfig:GetAssistId() == mq.TLO.Me.ID()
+    return Utils.GetMainAssistId() == mq.TLO.Me.ID()
 end
 
 ---@return boolean
@@ -1653,7 +1666,7 @@ function Utils.OkToEngage(autoTargetId)
 
     if not config.DoAutoEngage then return false end
     local target = mq.TLO.Target
-    local assistId = RGMercConfig:GetAssistId()
+    local assistId = Utils.GetMainAssistId()
 
     if not target() then return false end
 

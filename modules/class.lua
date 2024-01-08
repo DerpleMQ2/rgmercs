@@ -111,6 +111,8 @@ function Module:SetCombatMode(mode)
     RGMercsLogger.log_debug("\aySettings Combat Mode to: \am%s", mode)
     if mode == "Tank" then
         RGMercConfig.Globals.IsTanking = true
+    elseif mode == "Heal" then
+        RGMercConfig.Globals.IsHealing = true
     else
         RGMercConfig.Globals.IsTanking = false
     end
@@ -243,7 +245,7 @@ function Module:GiveTime(combat_state)
     end
 
     if self.CombatState == "Downtime" then
-        if not self.settings.BurnAuto then self.settings.BurnSize = 0 end
+        if not RGMercConfig:GetSettings().BurnAuto then RGMercConfig:GetSettings().BurnSize = 0 end
     end
 end
 
