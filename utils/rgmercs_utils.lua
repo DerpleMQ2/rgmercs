@@ -1,6 +1,5 @@
 local mq            = require('mq')
 local Set           = require('mq.set')
-local RGMercsLogger = require("utils.rgmercs_logger")
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
 local ICONS         = require('mq.Icons')
 local ICON_SIZE     = 20
@@ -181,10 +180,21 @@ function Utils.CanUseAA(aaName)
     return mq.TLO.Me.AltAbility(aaName)() and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level() and mq.TLO.Me.AltAbility(aaName).Rank() > 0
 end
 
+---@return boolean
+function Utils.CanAlliance()
+    return true
+end
+
 ---@param aaName string
 ---@return boolean
 function Utils.AAReady(aaName)
     return Utils.CanUseAA(aaName) and mq.TLO.Me.AltAbilityReady(aaName)()
+end
+
+---@param aaName string
+---@return number
+function Utils.AARank(aaName)
+    return Utils.CanUseAA(aaName) and mq.TLO.Me.AltAbility(aaName).Rank() or 0
 end
 
 ---@param name string
@@ -193,6 +203,69 @@ function Utils.IsDisc(name)
     local spell = mq.TLO.Spell(name)
 
     return (spell() and spell.IsSkill() and spell.Duration() and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and true or false
+end
+
+---@return boolean
+function Utils.PCSpellReady(spell)
+    if not spell or string.len(spell) == 0 then return false end
+    local me = mq.TLO.Me
+    local spell = mq.TLO.Spell(spell)
+
+    if not spell or not spell() then return false end
+
+    if me.Stunned() then return false end
+
+    return me.CurrentMana() > spell.Mana() and (me.Casting.ID() or 0) == 0 and me.Book(spell.RankName())() ~= nil and not me.Moving()
+end
+
+function Utils.GiveTo(toId, itemName, count)
+    if toId ~= mq.TLO.Target.ID() then
+        Utils.SetTarget(toId)
+    end
+
+    if not mq.TLO.Target() then
+        RGMercsLogger.log_error("\arGiveTo but unable to target %d!", toId)
+        return
+    end
+
+    if mq.TLO.Target.Distance() >= 25 then
+        RGMercsLogger.log_debug("\arGiveTo but Target is too far away - moving closer!")
+        Utils.DoCmd("/nav id %d |log=off dist=10")
+
+        mq.delay("10s", function() return mq.TLO.Navigation.Active() end)
+    end
+
+    while not mq.TLO.Cursor.ID() do
+        Utils.DoCmd("/shift itemnotify \"%s\", leftmouseup", itemName)
+        mq.delay(20, function() return mq.TLO.Cursor.ID() ~= nil end)
+    end
+
+    while mq.TLO.Cursor.ID() do
+        Utils.DoCmd("/nomodkey /click left target")
+        mq.delay(20, function() return mq.TLO.Cursor.ID() == nil end)
+    end
+
+    -- Click OK on trade window and wait for it to go away
+    if mq.TLO.Target.Type():lower() == "pc" then
+        mq.delay("5s", function() return mq.TLO.Window("TradeWnd").Open() end)
+        mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()
+        mq.delay("5s", function() return not mq.TLO.Window("TradeWnd").Open() end)
+    else
+        mq.delay("5s", function() return mq.TLO.Window("GiveWnd").Open() end)
+        mq.TLO.Window("GiveWnd").Child("GVW_Give_Button").LeftMouseUp()
+        mq.delay("5s", function() return not mq.TLO.Window("GiveWnd").Open() end)
+    end
+
+    -- We're giving something to a pet. In this case if the pet gives it back,
+    -- get rid of it.
+    if mq.TLO.Target.Type():lower() == "pet" then
+        mq.delay("2s")
+        if (mq.TLO.Cursor.ID() or 0) > 0 and mq.TLO.Cursor.NoRent() then
+            RGMercsLogger.log_debug("\arGiveTo Pet return item - that ingreat!")
+            Utils.DoCmd("/destroy")
+            mq.delay("10s", function() return mq.TLO.Cursor.ID() == nil end)
+        end
+    end
 end
 
 ---@param t table
@@ -218,7 +291,7 @@ end
 
 ---@param t table
 ---@return MQSpell|nil
-function Utils.GetBestSpell(t)
+function Utils.GetBestSpell(t, alreadyResolvedMap)
     local highestLevel = 0
     local selectedSpell = nil
 
@@ -229,8 +302,18 @@ function Utils.GetBestSpell(t)
             if spell.Level() <= mq.TLO.Me.Level() then
                 if mq.TLO.Me.Book(spell.RankName())() or mq.TLO.Me.CombatAbility(spell.RankName())() then
                     if spell.Level() > highestLevel then
-                        highestLevel = spell.Level()
-                        selectedSpell = spell
+                        -- make sure we havent already found this one.
+                        local alreadyUsed = false
+                        for k, v in pairs(alreadyResolvedMap) do
+                            if v.ID() == spell.ID() then
+                                alreadyUsed = true
+                            end
+                        end
+
+                        if not alreadyUsed then
+                            highestLevel = spell.Level()
+                            selectedSpell = spell
+                        end
                     end
                 else
                     Utils.PrintGroupMessage(string.format(
@@ -514,6 +597,7 @@ end
 ---@return boolean
 function Utils.UseSpell(spellName, targetId, bAllowMem)
     local me = mq.TLO.Me
+    RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, Utils.BoolToString(bAllowMem))
     if spellName then
         local spell = mq.TLO.Spell(spellName)
 
@@ -613,6 +697,8 @@ function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
     local me = mq.TLO.Me
     local ret = false
 
+    if e.type == nil then return false end -- bad data.
+
     -- Run pre-activates
     if e.pre_activate then
         RGMercsLogger.log_debug("Running Pre-Activate for %s", e.name)
@@ -664,8 +750,8 @@ function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
     end
 
     if e.type:lower() == "customfunc" then
-        if e.cmd then
-            ret = e.cmd()
+        if e.custom_func then
+            ret = e.custom_func(s)
         else
             ret = false
         end
@@ -727,7 +813,7 @@ end
 
 function Utils.GetEntryConditionArg(map, entry)
     local condArg = map[entry.name] or mq.TLO.Spell(entry.name)
-    if condArg == nil or entry.type:lower() == "aa" then
+    if entry.type:lower() ~= "spell" and (condArg == nil or condArg() == nil or entry.type:lower() == "aa") then
         condArg = entry.name
     end
 
@@ -754,8 +840,9 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
             if entry.cond then
                 local condArg = Utils.GetEntryConditionArg(map, entry)
                 local condTarg = mq.TLO.Spawn(targetId)
-                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s)", entry.name, entry.type, condArg, condTarg.CleanName() or "None")
                 local pass = entry.cond(s, condArg, condTarg)
+                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s", entry.name, entry.type, condArg,
+                    condTarg.CleanName() or "None", Utils.BoolToString(pass))
                 if pass == true then
                     local res = Utils.ExecEntry(s, entry, targetId, map, bAllowMem)
                     if res == true then
@@ -806,7 +893,8 @@ end
 ---@param spell MQSpell
 ---@return boolean
 function Utils.SelfBuffCheck(spell)
-    if not spell then return false end
+    if type(spell) == "string" then return Utils.BuffActiveByName(spell) end
+    if not spell or not spell() then return false end
     local res = not Utils.BuffActiveByID(spell.ID()) and spell.Stacks()
     return res
 end
@@ -862,6 +950,7 @@ end
 ---@param buffName string
 ---@return boolean
 function Utils.TargetHasBuffByName(buffName)
+    if buffName == nil then return false end
     return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("name " .. buffName).ID() or 0) > 0) and true or false
 end
 
@@ -1892,7 +1981,7 @@ function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
     end
     for k, t in pairs(abilitySets) do
         RGMercsLogger.log_debug("\ayFinding best spell for Set: \am%s", k)
-        resolvedActionMap[k] = Utils.GetBestSpell(t)
+        resolvedActionMap[k] = Utils.GetBestSpell(t, resolvedActionMap)
     end
 
     for _, g in ipairs(t) do

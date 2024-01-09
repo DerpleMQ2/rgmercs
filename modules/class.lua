@@ -1,8 +1,7 @@
 -- Sample Basic Class Module
-local mq            = require('mq')
-local RGMercsLogger = require("utils.rgmercs_logger")
-local RGMercUtils   = require("utils.rgmercs_utils")
-local Set           = require("mq.Set")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
+local Set         = require("mq.Set")
 require('utils.rgmercs_datatypes')
 
 local Module                              = { _version = '0.1a', _name = "Class", _author = 'Derple', }
@@ -32,6 +31,9 @@ end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
+
+    -- set dynamic names.
+    self:SetDynamicNames()
 
     if doBroadcast == true then
         RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
@@ -104,7 +106,20 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
+    -- set dynamic names.
+    self:SetDynamicNames()
+
     return { settings = self.settings, defaults = self.ClassConfig.DefaultConfig, categories = self.DefaultCategories, }
+end
+
+function Module:SetDynamicNames()
+    for _, data in pairs(self.ClassConfig.Rotations) do
+        for _, r in ipairs(data) do
+            if r.name_func then
+                r.name = r.name_func(self)
+            end
+        end
+    end
 end
 
 function Module:GetResolvedActionMapItem(item)
@@ -214,6 +229,14 @@ end
 
 function Module:GetHealRotationTable(mode)
     return self.ClassConfig and self.ClassConfig.HealRotations[mode] or {}
+end
+
+function Module:GetSetting(setting)
+    return self.ModuleLoaded and self.settings[setting] or ""
+end
+
+function Module:GetDefaultConfig(config)
+    return self.ModuleLoaded and self.ClassConfig[config] or nil
 end
 
 ---@return number

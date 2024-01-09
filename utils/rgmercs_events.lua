@@ -1,7 +1,6 @@
-local mq            = require('mq')
-local RGMercUtils   = require("utils.rgmercs_utils")
-local RGMercsLogger = require("utils.rgmercs_logger")
-local Set           = require("mq.Set")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
+local Set         = require("mq.Set")
 
 mq.event("CantSee", "You cannot see your target.", function()
     if RGMercConfig.Globals.BackOffFlag then return end

@@ -1,7 +1,5 @@
-local RGMercsLogger = require("utils.rgmercs_logger")
-
-local Module        = { _version = '0.1a', _author = 'Derple', }
-Module.__index      = Module
+local Module   = { _version = '0.1a', _author = 'Derple', }
+Module.__index = Module
 
 ---@return any
 function Module.load()

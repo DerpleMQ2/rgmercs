@@ -4,12 +4,12 @@ local GitCommit = require('extras.version')
 
 RGMercsBinds    = require('utils.rgmercs_binds')
 RGMercsEvents   = require('utils.rgmercs_events')
+RGMercsLogger   = require("utils.rgmercs_logger")
 RGMercConfig    = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 
 RGMercsConsole = nil
 
-local RGMercsLogger = require("utils.rgmercs_logger")
 RGMercsLogger.set_log_level(RGMercConfig:GetSettings().LogLevel)
 
 local RGMercUtils = require("utils.rgmercs_utils")

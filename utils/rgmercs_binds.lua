@@ -1,10 +1,9 @@
-local mq            = require('mq')
-local RGMercUtils   = require("utils.rgmercs_utils")
-local RGMercsLogger = require("utils.rgmercs_logger")
+local mq          = require('mq')
+local RGMercUtils = require("utils.rgmercs_utils")
 
-local Bind          = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
+local Bind        = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
 
-Bind.MainHandler    = function(cmd, ...)
+Bind.MainHandler  = function(cmd, ...)
     if RGMercsBinds.Handlers[cmd] then
         return RGMercsBinds.Handlers[cmd].handler(...)
     end
@@ -20,7 +19,7 @@ Bind.MainHandler    = function(cmd, ...)
     end
 end
 
-Bind.Handlers       = {
+Bind.Handlers     = {
     ['qsay'] = {
         usage = "/rgl qsay <text>",
         about = "All RGMercs will target your target and say your <text>",

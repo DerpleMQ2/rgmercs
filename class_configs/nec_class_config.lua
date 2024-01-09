@@ -616,7 +616,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
                 end,
-                cmd = function()
+                custom_func = function(_)
                     RGMercUtils.DoCmd("/stand")
                     return true
                 end,
@@ -905,7 +905,7 @@ local _ClassConfig = {
                 cond = function(self)
                     return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
                 end,
-                cmd = function()
+                custom_func = function(_)
                     RGMercUtils.DoCmd("/stand")
                     return true
                 end,
