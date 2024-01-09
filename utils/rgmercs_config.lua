@@ -1,6 +1,5 @@
 local mq                        = require('mq')
 local RGMercUtils               = require("utils.rgmercs_utils")
-local RGMercsLogger             = require("utils.rgmercs_logger")
 local Set                       = require("mq.Set")
 
 local Config                    = { _version = '0.5a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Greyn', }
@@ -119,6 +118,7 @@ Config.DefaultConfig = {
     ['AllowMezBreak']     = { DisplayName = "Allow Mez Break", Category = "Combat", Tooltip = "Allow Mez Breaking.", Default = false, },
     ['InstantRelease']    = { DisplayName = "Instant Release", Category = "Combat", Tooltip = "Instantly release when you die.", Default = false, },
     ['DoAutoTarget']      = { DisplayName = "Auto Target", Category = "Combat", Tooltip = "Automatically change targets.", Default = true, },
+    ['DoAlliance']        = { DisplayName = "Do Alliance", Category = "Combat", Tooltip = "Automatically cast Alliance spells.", Default = true, },
     ['DoModRod']          = { DisplayName = "Do Mod Rod", Category = "Combat", Tooltip = "Auto use Mod Rods if we have them", Default = true, },
     ['StayOnTarget']      = { DisplayName = "Stay On Target", Category = "Combat", Tooltip = "Stick to your target. Default: true; Tank Mode Defaults: false. false allows intelligent target swapping based on aggro/named/ etc.", Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
     ['DoAutoEngage']      = { DisplayName = "Auto Engage", Category = "Combat", Tooltip = "Automatically engage targets.", Default = true, },

@@ -1,6 +1,5 @@
 -- Sample Basic Class Module
 local mq                       = require('mq')
-local RGMercsLogger            = require("utils.rgmercs_logger")
 local RGMercUtils              = require("utils.rgmercs_utils")
 local ICONS                    = require('mq.Icons')
 local Set                      = require("mq.Set")

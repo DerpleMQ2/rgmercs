@@ -803,7 +803,7 @@ local _ClassConfig = {
                     return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
                         mq.TLO.Me.Bandolier("Shield").Index() and RGMercUtils.IsTanking()
                 end,
-                cmd = function()
+                custom_func = function(_)
                     RGMercUtils.DoCmd("/bandolier activate Shield")
                     return true
                 end,
@@ -817,7 +817,7 @@ local _ClassConfig = {
                     return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and
                         mq.TLO.Me.Bandolier("2HS").Index() and not RGMercUtils.IsTanking()
                 end,
-                cmd = function()
+                custom_func = function(_)
                     RGMercUtils.DoCmd("/bandolier activate 2HS")
                     return true
                 end,

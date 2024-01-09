@@ -478,7 +478,7 @@ return {
                 cond = function(self)
                     return self.settings.DoHideSneak
                 end,
-                cmd = function()
+                custom_func = function(_)
                     if mq.TLO.Me.AbilityReady("hide") then RGMercUtils.DoCmd("/doability hide") end
                     if mq.TLO.Me.AbilityReady("sneak") then RGMercUtils.DoCmd("/doability sneak") end
                     return true

@@ -1,6 +1,5 @@
 -- Sample Pull Class Module
 local mq                          = require('mq')
-local RGMercsLogger               = require("utils.rgmercs_logger")
 local RGMercUtils                 = require("utils.rgmercs_utils")
 local Set                         = require("mq.Set")
 local ICONS                       = require('mq.Icons')
