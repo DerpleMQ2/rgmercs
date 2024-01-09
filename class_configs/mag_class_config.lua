@@ -1342,7 +1342,7 @@ _ClassConfig      = {
                 name = "AllianceBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return spell() and RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
                         RGMercConfig:GetSettings().DoAlliance and RGMercUtils.CanAlliance()
                 end,
             },
