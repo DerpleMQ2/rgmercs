@@ -138,6 +138,10 @@ function Module:SetCombatMode(mode)
 
     self.ReloadingLoadouts = false
     RGMercUtils.LoadSpellLoadOut(self.SpellLoadOut)
+
+    if self.ClassConfig.OnModeChange then
+        self.ClassConfig.OnModeChange(self, mode)
+    end
 end
 
 function Module:Render()

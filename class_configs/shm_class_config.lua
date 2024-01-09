@@ -724,7 +724,7 @@ local _ClassConfig = {
             targetId = function(self) return RGMercUtils.GetMainAssistId() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.IsHealing() and mq.TLO.Me.State():lower() ~= "feign"
+                    RGMercUtils.IsHealing() and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -734,7 +734,7 @@ local _ClassConfig = {
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and mq.TLO.Me.State():lower() ~= "feign"
+                    self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -744,7 +744,7 @@ local _ClassConfig = {
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and mq.TLO.Me.State():lower() ~= "feign"
+                    RGMercUtils.BurnCheck() and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -753,7 +753,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and mq.TLO.Me.State():lower() ~= "feign"
+                return combat_state == "Combat" and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
             end,
         },
 

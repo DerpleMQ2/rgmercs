@@ -580,7 +580,7 @@ local _ClassConfig = {
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and mq.TLO.Me.State():lower() ~= "feign"
+                    RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -589,7 +589,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.State():lower() ~= "feign"
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
     },
@@ -606,7 +606,7 @@ local _ClassConfig = {
                 name = "Harm Shield",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.State():lower() ~= "feign" and RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() > 75 and
+                    return not RGMercUtils.Feigning() and RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() > 75 and
                         (mq.TLO.Me.PctAggro() > 80 or mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID())
                 end,
             },
