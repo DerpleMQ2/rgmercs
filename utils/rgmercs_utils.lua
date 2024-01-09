@@ -1815,6 +1815,11 @@ function Utils.IAmMA()
 end
 
 ---@return boolean
+function Utils.Feigning()
+    return mq.TLO.Me.State():lower() == "feign"
+end
+
+---@return boolean
 function Utils.IHaveAggro()
     local target = mq.TLO.Target
     local me     = mq.TLO.Me
@@ -1933,6 +1938,12 @@ end
 ---@return boolean
 function Utils.BuffActiveByID(buffId)
     return ((mq.TLO.Me.FindBuff("id " .. tostring(buffId)).ID() or 0) > 0)
+end
+
+---@param auraName string
+---@return boolean
+function Utils.AuraActiveByName(auraName)
+    return string.find(mq.TLO.Me.Aura(1)() or "", auraName) ~= nil
 end
 
 ---@param spell MQSpell

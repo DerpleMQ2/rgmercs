@@ -12,6 +12,14 @@ _ClassConfig      = {
         'Fire',
         'PetTank',
     },
+    ['OnModeChange']      = function(self, mode)
+        if mode == "PetTank" then
+            RGMercUtils.DoCmd("/pet taunt on")
+            RGMercUtils.DoCmd("/pet resume on")
+        else
+            RGMercUtils.DoCmd("/pet taunt off")
+        end
+    end,
     ['ItemSets']          = {
         ['Epic'] = {
             "Focus of Primal Elements",
@@ -767,7 +775,7 @@ _ClassConfig      = {
             name = 'PetHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, _) return mq.TLO.Me.Pet.PctHPs() < self.settings.PetHealPct end,
+            cond = function(self, _) return (mq.TLO.Me.Pet.PctHPs() or 100) < self.settings.PetHealPct end,
         },
     },
     ['HealRotations']     = {
@@ -794,7 +802,16 @@ _ClassConfig      = {
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and mq.TLO.Me.State():lower() ~= "feign"
+                    RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'Debuff',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -803,7 +820,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.State():lower() ~= "feign" and RGMercUtils.IsModeActive("PetTank")
+                return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.IsModeActive("PetTank")
             end,
         },
         {
@@ -812,7 +829,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.State():lower() ~= "feign"
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
     },
@@ -1033,7 +1050,6 @@ _ClassConfig      = {
                 return true
             end,
         },
-
         ['Pet Management'] = {
             {
                 name = "Pet Management",
@@ -1348,8 +1364,37 @@ _ClassConfig      = {
             },
 
         },
+        ['Debuff'] = {
+            {
+                name = "Malaise",
+                type = "AA",
+                cond = function(self, aaName)
+                    return self.settings.DoMalo and RGMercUtils.DetAACheck(aaName)
+                end,
+            },
+            {
+                name = "MaloDebuff",
+                type = "Spell",
+                cond = function(self, spell)
+                    return self.settings.DoMalo and RGMercUtils.DetSpellCheck(spell)
+                end,
+            },
+            {
+                name = "Malaise",
+                type = "Wind of Malaise",
+                cond = function(self, aaName)
+                    return self.settings.DoMalo and self.settings.doAEMalo and RGMercUtils.DetAACheck(aaName)
+                end,
+            },
+        },
         ['Downtime'] = {
-
+            {
+                name = "PetAura",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.AuraActiveByName(spell.BaseName())
+                end,
+            },
         },
     },
     ['Spells']            = {
@@ -1375,6 +1420,8 @@ _ClassConfig      = {
         ['ModRodManaPct'] = { DisplayName = "Mod Rod Mana %", Category = "Pet", Tooltip = "Use Mod Rod at [X]% Mana", Default = 70, Min = 1, Max = 99, },
         ['DoForce']       = { DisplayName = "Do Force", Category = "Spells & Abilities", Tooltip = "Use Force of Elements AA", Default = true, },
         ['DoChestClick']  = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoMalo']        = { DisplayName = "Cast Malo", Category = "Debuffs", Tooltip = "Do Malo Spells/AAs", Default = true, },
+        ['DoAEMalo']      = { DisplayName = "Cast AE Malo", Category = "Debuffs", Tooltip = "Do AE Malo Spells/AAs", Default = false, },
     },
 }
 
