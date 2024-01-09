@@ -16,8 +16,15 @@ _ClassConfig      = {
         if mode == "PetTank" then
             RGMercUtils.DoCmd("/pet taunt on")
             RGMercUtils.DoCmd("/pet resume on")
+            RGMercUtils:GetSettings().AutoAssistAt  = 100
+            RGMercUtils:GetSettings().StayOnTarget  = false
+            RGMercUtils:GetSettings().DoAutoEngage  = true
+            RGMercUtils:GetSettings().DoAutoTarget  = true
+            RGMercUtils:GetSettings().AllowMezBreak = true
         else
             RGMercUtils.DoCmd("/pet taunt off")
+            RGMercUtils:GetSettings().AutoAssistAt = 98
+            RGMercUtils:GetSettings().StayOnTarget = true
         end
     end,
     ['ItemSets']          = {
@@ -789,7 +796,23 @@ _ClassConfig      = {
     },
     ['RotationOrder']     = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
+        {
+            name = 'Downtime',
+            targetId = function(self) return mq.TLO.Me.ID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
+        -- Run downtime twice - again for our pet
+        {
+            name = 'Downtime',
+            targetId = function(self) return mq.TLO.Me.Pet.ID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck() and mq.TLO.Me.Pet.ID() > 0
+            end,
+        },
         {
             name = 'Pet Management',
             targetId = function(self) return mq.TLO.Me.ID() end,
@@ -833,223 +856,261 @@ _ClassConfig      = {
             end,
         },
     },
-    ['Rotations']         = {
-        -- Really the meat of this class.
-        ['HelperFunctions'] = {
-            summon_pet_toy = function(self, type)
-                local petToyResolvedSpell = self.ResolvedActionMap[string.format("Pet%sSummon", type)]
+    -- Really the meat of this class.
+    ['HelperFunctions']   = {
+        user_tu_spell = function(self, aaName)
+            local shroudSpell = self.ResolvedActionMap['ShroudSpell']
+            local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
+            if not shroudSpell or not shroudSpell() or not aaSpell or not aaSpell() or not RGMercUtils.CanUseAA(aaName) then return false end
+            -- do we need to lookup the spell basename here? I dont think so but if this doesn't fire right take a look.
+            if shroudSpell.Level() > aaSpell.Level() then return false end
+            return true
+        end,
+        give_pet_toys = function(self, petId)
+            self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Weapon", petId)
+            if self.settings.DoPetArmor then
+                self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Armor", petId)
+            end
+            if self.settings.DoPetHeirlooms then
+                self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Heirlooms", petId)
+            end
+        end,
+        handle_pet_toys = function(self)
+            if mq.TLO.Me.FreeInventory()() < 2 or mq.TLO.Me.Level() < 73 then return false end
+            if mq.TLO.Me.CombatState():lower() ~= "combat" then
+                self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
+            end
+        end,
+        group_toys = function(self)
+            -- first Things first see if i can even Make Pet toys. if i am To Low Level or have no Inventory Return
+            if mq.TLO.Me.FreeInventory()() < 2 or mq.TLO.Me.Level() < 73 then return false end
 
-                if not petToyResolvedSpell or not petToyResolvedSpell() then
-                    RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed to resolve Pet%sSummon item type!", type)
-                    return false
-                end
-
-                if mq.TLO.Me.Level() < petToyResolvedSpell.Level() then
-                    return false
-                end
-
-                if not RGMercUtils.PCSpellReady(petToyResolvedSpell.RankName()) then
-                    RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed PCSpellReady() Check!", type)
-                    return false
-                end
-
-                -- find a slot for the item
-                local openSlot = 0
-                for i = 1, 10 do
-                    if mq.TLO.InvSlot("pack" .. tostring(i)).Item.Container() == nil and mq.TLO.InvSlot("pack" .. tostring(i)).Item.ID() == nil then
-                        openSlot = i
-                        break
+            -- Check if the Groups pet need toys by checking if the pet has weapons.
+            -- If they Are Not a Mage - Also Give them Armor
+            for i = 1, mq.TLO.Group.Members() do
+                local member = mq.TLO.Group.Member(i)
+                if member and member() and member.Pet.ID() > 0 and member.Pet.Equipment("primary")() == nil then
+                    if mq.TLO.Me.CombatState():lower() ~= "combat" then
+                        self.ClassConfig.HelperFunctions.give_pet_toys(self, member.Pet.ID())
                     end
                 end
+            end
+        end,
+        summon_pet_toy = function(self, type, targetId)
+            local petToyResolvedSpell = self.ResolvedActionMap[string.format("Pet%sSummon", type)]
 
-                if openSlot == 0 then
-                    RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed to find open top level inv slot!", openSlot)
-                    return
+            if not petToyResolvedSpell or not petToyResolvedSpell() then
+                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed to resolve Pet%sSummon item type!", type)
+                return false
+            end
+
+            if mq.TLO.Me.Level() < petToyResolvedSpell.Level() then
+                return false
+            end
+
+            if not RGMercUtils.PCSpellReady(petToyResolvedSpell.RankName()) then
+                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed PCSpellReady() Check!", type)
+                return false
+            end
+
+            -- find a slot for the item
+            local openSlot = 0
+            for i = 1, 10 do
+                if mq.TLO.InvSlot("pack" .. tostring(i)).Item.Container() == nil and mq.TLO.InvSlot("pack" .. tostring(i)).Item.ID() == nil then
+                    openSlot = i
+                    break
                 end
+            end
 
-                RGMercsLogger.log_debug("summon_pet_toy() ==> \agUsing PackID=%d", openSlot)
+            if openSlot == 0 then
+                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed to find open top level inv slot!", openSlot)
+                return
+            end
 
-                RGMercUtils.UseSpell(petToyResolvedSpell.RankName(), mq.TLO.Me.ID(), RGMercUtils.GetXTHaterCount() == 0)
+            RGMercsLogger.log_debug("summon_pet_toy() ==> \agUsing PackID=%d", openSlot)
 
+            RGMercUtils.UseSpell(petToyResolvedSpell.RankName(), mq.TLO.Me.ID(), RGMercUtils.GetXTHaterCount() == 0)
+
+            mq.delay("5s", function() return (mq.TLO.Cursor.ID() or 0) > 0 end)
+
+            if (mq.TLO.Cursor.ID() or 0) == 0 then return false end
+
+            local packName = string.format("pack%d", openSlot)
+
+            while mq.TLO.Cursor.ID() do
+                RGMercUtils.DoCmd("/shiftkey /itemnotify %s leftmouseup", packName)
+                mq.delay("1s", function() return mq.TLO.Cursor.ID() == nil end)
+            end
+
+            -- What happens if the bag is a Folded Pack
+            while string.find(mq.TLO.InvSlot(packName).Item.Name(), "Folded Pack") ~= nil do
+                RGMercUtils.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
+                -- Folded backs end up on our cursor.
                 mq.delay("5s", function() return (mq.TLO.Cursor.ID() or 0) > 0 end)
-
-                if (mq.TLO.Cursor.ID() or 0) == 0 then return false end
-
-                local packName = string.format("pack%d", openSlot)
-
+                -- Drop the unfolded pack back in our inventory
                 while mq.TLO.Cursor.ID() do
-                    RGMercUtils.DoCmd("/shiftkey /itemnotify %s leftmouseup", packName)
+                    RGMercUtils.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
                     mq.delay("1s", function() return mq.TLO.Cursor.ID() == nil end)
                 end
+            end
 
-                -- What happens if the bag is a Folded Pack
-                while string.find(mq.TLO.InvSlot(packName).Item.Name(), "Folded Pack") ~= nil do
-                    RGMercUtils.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
-                    -- Folded backs end up on our cursor.
-                    mq.delay("5s", function() return (mq.TLO.Cursor.ID() or 0) > 0 end)
-                    -- Drop the unfolded pack back in our inventory
-                    while mq.TLO.Cursor.ID() do
-                        RGMercUtils.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
-                        mq.delay("1s", function() return mq.TLO.Cursor.ID() == nil end)
+            -- Hand Toy off to the Pet
+            -- Open our pack
+            RGMercUtils.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
+
+            -- TODO: Need a condition to check if the pack window has opened
+            mq.delay("1s")
+
+            if type == "Armor" or type == "Heirloom" then
+                -- Loop through each item in our bag and give it to the pet
+                for i = 1, mq.TLO.InvSlot(packName).Item.Container() do
+                    if mq.TLO.InvSlot(packName).Item.Item(i).Name() ~= nil then
+                        RGMercUtils.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
                     end
                 end
-
-                -- Hand Toy off to the Pet
-                -- Open our pack
-                RGMercUtils.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
-
-                -- TODO: Need a condition to check if the pack window has opened
-                mq.delay("1s")
-
-                if type == "Armor" or type == "Heirloom" then
-                    -- Loop through each item in our bag and give it to the pet
-                    for i = 1, mq.TLO.InvSlot(packName).Item.Container() do
-                        if mq.TLO.InvSlot(packName).Item.Item(i).Name() ~= nil then
-                            RGMercUtils.GiveTo(mq.TLO.Me.Pet.ID(), mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
-                        end
-                    end
-                else
-                    -- Must be a weapon
-                    -- Hand Weapons off to the pet
-                    local itemsToGive = { 2, 4, }
-                    if self.ClassConfig.Modes[self.settings.Mode] == "PetTank" then
-                        -- If we're pet tanking, give the pet the hate swords in bag slots
-                        -- 7 and 8. At higher levels this only ends up with one aggro swords
-                        -- so perhaps there's a way of generalizing later.
-                        itemsToGive = { 7, 8, }
-                    end
-                    for _, i in itemsToGive do
-                        RGMercsLogger.log_debug("Item Name %s", mq.TLO.InvSlot(packName).Item.Item(i).Name())
-                        RGMercUtils.GiveTo(mq.TLO.Me.Pet.ID(), mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
-                    end
+            else
+                -- Must be a weapon
+                -- Hand Weapons off to the pet
+                local itemsToGive = { 2, 4, }
+                if self.ClassConfig.Modes[self.settings.Mode] == "PetTank" then
+                    -- If we're pet tanking, give the pet the hate swords in bag slots
+                    -- 7 and 8. At higher levels this only ends up with one aggro swords
+                    -- so perhaps there's a way of generalizing later.
+                    itemsToGive = { 7, 8, }
                 end
-
-                -- Delete the satchel if it's still there
-                if mq.TLO.InvSlot(packName).Item.ID() ~= nil then
-                    RGMercUtils.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
-                    mq.delay("5s", function() return mq.TLO.Cursor.ID() ~= nil end)
-
-                    -- Just double check and make sure it's a temporary
-                    if mq.TLO.Cursor.ID() and mq.TLO.Cursor.NoRent() then
-                        RGMercUtils.DoCmd("/destroy")
-                        mq.delay(30, function() return mq.TLO.Cursor.ID() == nil end)
-                    end
+                for _, i in itemsToGive do
+                    RGMercsLogger.log_debug("Item Name %s", mq.TLO.InvSlot(packName).Item.Item(i).Name())
+                    RGMercUtils.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
                 end
-            end,
-            pet_toys = function(self)
-                RGMercsLogger.log_debug("pet_toys()")
-                if mq.TLO.Me.Pet.Equipment("Primary")() == nil then
-                    -- Handle Pet Toys
-                    if mq.TLO.Me.FreeInventory() < 2 then
-                        RGMercsLogger.log_debug("pet_toys() ==> \arFailed not enough Inv Slots Free!")
-                        return false
-                    end
+            end
 
-                    -- Given we detect based on pet weapons, and the pet weapons spell we'll use
-                    -- starts at level 73, there's no point right now in doing anything if we're
-                    -- lower level than 73.
-                    if mq.TLO.Me.Level() < 73 then
-                        return false
-                    end
+            -- Delete the satchel if it's still there
+            if mq.TLO.InvSlot(packName).Item.ID() ~= nil then
+                RGMercUtils.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
+                mq.delay("5s", function() return mq.TLO.Cursor.ID() ~= nil end)
 
-                    RGMercsLogger.log_debug("HandlingPetToys()  ==> Summoning Weapons")
-                    if mq.TLO.Me.CombatState():lower() ~= "combat" then
-                        self.ClassConfig.Rotations.HelperFunctions.summon_pet_toy(self, "Weapon")
-                    end
+                -- Just double check and make sure it's a temporary
+                if mq.TLO.Cursor.ID() and mq.TLO.Cursor.NoRent() then
+                    RGMercUtils.DoCmd("/destroy")
+                    mq.delay(30, function() return mq.TLO.Cursor.ID() == nil end)
                 end
-                return true
-            end,
-            summon_pet_func = function(self)
-                local petSpellVar = string.format("%sPetSpell", self.ClassConfig.DefaultConfig.PetType.ComboOptions[self.settings.PetType])
-                local resolvedPetSpell = self.ResolvedActionMap[petSpellVar]
-
-                if not resolvedPetSpell then
-                    RGMercsLogger.log_error("No valid pet spell found for type: %s", petSpellVar)
+            end
+        end,
+        pet_toys = function(self)
+            RGMercsLogger.log_debug("pet_toys()")
+            if mq.TLO.Me.Pet.Equipment("Primary")() == nil then
+                -- Handle Pet Toys
+                if mq.TLO.Me.FreeInventory() < 2 then
+                    RGMercsLogger.log_debug("pet_toys() ==> \arFailed not enough Inv Slots Free!")
                     return false
                 end
 
-                if mq.TLO.FindItemCount("Malachite")() > 0 then
-                    return RGMercUtils.UseSpell(resolvedPetSpell.RankName(), mq.TLO.Me.ID(), self.CombatState == "Downtime")
-                else
-                    RGMercsLogger.log_error("\ayYou don't have \agMalachite\ay. And you call yourself a mage?")
-                    RGMercConfig:GetSettings().DoPet = false
-                    return false
-                end
-            end,
-            pet_management_func = function(self)
-                if not RGMercConfig:GetSettings().DoPet or (RGMercUtils.CanUseAA("Companion's Suspension)") and not RGMercUtils.AAReady("Companion's Suspension")) then
+                -- Given we detect based on pet weapons, and the pet weapons spell we'll use
+                -- starts at level 73, there's no point right now in doing anything if we're
+                -- lower level than 73.
+                if mq.TLO.Me.Level() < 73 then
                     return false
                 end
 
-                -- Low Level Check - In 2 cases You're too lowlevel to Know Suspend companion and have no pet or You've Turned off Usepocket pet.
-                if mq.TLO.Me.Pet.ID() == 0 and (not RGMercUtils.CanUseAA("Companion's Suspension") or not self.settings.DoPocketPet) then
-                    if not self.ClassConfig.Rotations.HelperFunctions.summon_pet_func(self) then
-                        RGMercsLogger.log_debug("\arPetManagement - Case 0 -> Summon Failed")
-                        return false
-                    end
+                RGMercsLogger.log_debug("HandlingPetToys()  ==> Summoning Weapons")
+                if mq.TLO.Me.CombatState():lower() ~= "combat" then
+                    self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Weapon", mq.TLO.Me.Pet.ID())
                 end
+            end
+            return true
+        end,
+        summon_pet = function(self)
+            local petSpellVar = string.format("%sPetSpell", self.ClassConfig.DefaultConfig.PetType.ComboOptions[self.settings.PetType])
+            local resolvedPetSpell = self.ResolvedActionMap[petSpellVar]
 
-                -- Pocket Pet Stuff Begins. -  Added Check for DoPocketPet to be Positive Rather than Assuming
-                if self.settings.DoPocketPet then
-                    if self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetXTHaterCount() > 0 then
-                        RGMercUtils.UseAA("Companion's Suspension", 0)
-                        self.TempSettings.PocketPet = false
-                        return true
-                    end
+            if not resolvedPetSpell then
+                RGMercsLogger.log_error("No valid pet spell found for type: %s", petSpellVar)
+                return false
+            end
 
-                    -- Case 1 - No pocket pet and no pet up
-                    if not self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetXTHaterCount() == 0 then
-                        RGMercsLogger.log_debug("\ayPetManagement - Case 1 no Pocket Pet and no Pet")
-                        if not self.ClassConfig.Rotations.HelperFunctions.summon_pet_func(self) then
-                            RGMercsLogger.log_debug("\arPetManagement - Case 1 -> Summon Failed")
-                            return false
-                        end
+            if mq.TLO.FindItemCount("Malachite")() > 0 then
+                return RGMercUtils.UseSpell(resolvedPetSpell.RankName(), mq.TLO.Me.ID(), self.CombatState == "Downtime")
+            else
+                RGMercsLogger.log_error("\ayYou don't have \agMalachite\ay. And you call yourself a mage?")
+                RGMercConfig:GetSettings().DoPet = false
+                return false
+            end
+        end,
+        pet_management = function(self)
+            if not RGMercConfig:GetSettings().DoPet or (RGMercUtils.CanUseAA("Companion's Suspension)") and not RGMercUtils.AAReady("Companion's Suspension")) then
+                return false
+            end
 
-                        if RGMercUtils.AARank("Companion's Suspension") > 2 then
-                            -- Need to buff
-                            local resolvedPetHasteSpell = self.ResolvedActionMap["PetHaste"]
-                            RGMercUtils.UseSpell(resolvedPetHasteSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
-                            local resolvedPetBuffSpell = self.ResolvedActionMap["PetIceFlame"]
-                            RGMercUtils.UseSpell(resolvedPetBuffSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
-                            if mq.TLO.Me.Pet.ID() then
-                                self.ClassConfig.Rotations.HelperFunctions.pet_toys(self)
-                            end
-                            RGMercUtils.UseAA("Companion's Suspension", 0)
-                            self.TempSettings.PocketPet = true
-                        end
-
-                        return true
-                    end
+            -- Low Level Check - In 2 cases You're too lowlevel to Know Suspend companion and have no pet or You've Turned off Usepocket pet.
+            if mq.TLO.Me.Pet.ID() == 0 and (not RGMercUtils.CanUseAA("Companion's Suspension") or not self.settings.DoPocketPet) then
+                if not self.ClassConfig.HelperFunctions.summon_pet(self) then
+                    RGMercsLogger.log_debug("\arPetManagement - Case 0 -> Summon Failed")
+                    return false
                 end
-                -- Case 2 - No pocket pet and pet up
-                if not self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) > 0 and RGMercUtils.GetXTHaterCount() == 0 then
-                    RGMercsLogger.log_debug("\ayPetManagement - Case 2 no Pocket Pet But Pet is up - pocketing")
+            end
+
+            -- Pocket Pet Stuff Begins. -  Added Check for DoPocketPet to be Positive Rather than Assuming
+            if self.settings.DoPocketPet then
+                if self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetXTHaterCount() > 0 then
                     RGMercUtils.UseAA("Companion's Suspension", 0)
-                    if (mq.TLO.Me.Pet.ID() or 0) == 0 then
-                        if not self.ClassConfig.Rotations.HelperFunctions.summon_pet_func(self) then
-                            RGMercsLogger.log_debug("\arPetManagement - Case 2 -> Summon Failed")
-                            return false
-                        end
-                    end
-                    self.TempSettings.PocketPet = true
-
+                    self.TempSettings.PocketPet = false
                     return true
                 end
 
-                -- Case 3 - Pocket Pet and no pet up
-                if self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) == 0 and RGMercUtils.GetXTHaterCount() == 0 then
-                    RGMercsLogger.log_debug("\ayPetManagement - Case 3 Pocket Pet But No Pet is up")
-                    if not self.ClassConfig.Rotations.HelperFunctions.summon_pet_func(self) then
-                        RGMercsLogger.log_debug("\arPetManagement - Case 3 -> Summon Failed")
+                -- Case 1 - No pocket pet and no pet up
+                if not self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetXTHaterCount() == 0 then
+                    RGMercsLogger.log_debug("\ayPetManagement - Case 1 no Pocket Pet and no Pet")
+                    if not self.ClassConfig.HelperFunctions.summon_pet(self) then
+                        RGMercsLogger.log_debug("\arPetManagement - Case 1 -> Summon Failed")
                         return false
                     end
 
+                    if RGMercUtils.AARank("Companion's Suspension") > 2 then
+                        -- Need to buff
+                        local resolvedPetHasteSpell = self.ResolvedActionMap["PetHaste"]
+                        RGMercUtils.UseSpell(resolvedPetHasteSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
+                        local resolvedPetBuffSpell = self.ResolvedActionMap["PetIceFlame"]
+                        RGMercUtils.UseSpell(resolvedPetBuffSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
+                        if mq.TLO.Me.Pet.ID() then
+                            self.ClassConfig.HelperFunctions.pet_toys(self)
+                        end
+                        RGMercUtils.UseAA("Companion's Suspension", 0)
+                        self.TempSettings.PocketPet = true
+                    end
+
                     return true
+                end
+            end
+            -- Case 2 - No pocket pet and pet up
+            if not self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) > 0 and RGMercUtils.GetXTHaterCount() == 0 then
+                RGMercsLogger.log_debug("\ayPetManagement - Case 2 no Pocket Pet But Pet is up - pocketing")
+                RGMercUtils.UseAA("Companion's Suspension", 0)
+                if (mq.TLO.Me.Pet.ID() or 0) == 0 then
+                    if not self.ClassConfig.HelperFunctions.summon_pet(self) then
+                        RGMercsLogger.log_debug("\arPetManagement - Case 2 -> Summon Failed")
+                        return false
+                    end
+                end
+                self.TempSettings.PocketPet = true
+
+                return true
+            end
+
+            -- Case 3 - Pocket Pet and no pet up
+            if self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) == 0 and RGMercUtils.GetXTHaterCount() == 0 then
+                RGMercsLogger.log_debug("\ayPetManagement - Case 3 Pocket Pet But No Pet is up")
+                if not self.ClassConfig.HelperFunctions.summon_pet(self) then
+                    RGMercsLogger.log_debug("\arPetManagement - Case 3 -> Summon Failed")
+                    return false
                 end
 
                 return true
-            end,
-        },
+            end
+
+            return true
+        end,
+    },
+    ['Rotations']         = {
         ['Pet Management'] = {
             {
                 name = "Pet Management",
@@ -1061,7 +1122,7 @@ _ClassConfig      = {
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
                     return mq.TLO.Me.Pet.ID() == 0 and RGMercConfig:GetSettings().DoPet and (self.TempSettings.PocketPet or RGMercUtils.GetXTHaterCount() == 0)
                 end,
-                custom_func = function(self) return self.ClassConfig.Rotations.HelperFunctions.summon_pet_func(self) end,
+                custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
             },
         },
         ['Burn'] = {
@@ -1389,10 +1450,220 @@ _ClassConfig      = {
         },
         ['Downtime'] = {
             {
+                name = "HandlePetToys",
+                type = "CustomFunc",
+                custom_func = function(self)
+                    return self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
+                end,
+            },
+            {
+                name = "HandleGroupToys",
+                type = "CustomFunc",
+                custom_func = function(self)
+                    return self.ClassConfig.HelperFunctions.group_toys and self.ClassConfig.HelperFunctions.group_toys(self) or false
+                end,
+            },
+            {
                 name = "PetAura",
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.AuraActiveByName(spell.BaseName())
+                end,
+            },
+            {
+                name = "Elemental Conversion",
+                type = "AA",
+                cond = function(self, aaName)
+                    return mq.TLO.Me.PctMana() <= self.settings.GatherManaPct and RGMercUtils.AAReady(aaName) and mq.TLO.Me.Pet.ID() > 0
+                end,
+            },
+            {
+                name = "Forceful Rejuvenation",
+                type = "AA",
+                cond = function(self, aaName)
+                    return mq.TLO.Me.PctMana() <= self.settings.GatherManaPct and not mq.TLO.Me.SpellReady(self.ResolvedActionMap['GatherMana'] or "")() and
+                        RGMercUtils.AAReady(aaName) and mq.TLO.Me.Pet.ID() > 0
+                end,
+            },
+            {
+                name = "ManaRodSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    local modRodSpell = self.ResolvedActionMap['ManaRodSummon']
+                    if not modRodSpell or not modRodSpell() then return false end
+                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)).Name()
+                    return self.settings.SummonModRods and (mq.TLO.Me.AltAbility("Summon Modulation Shard").ID() or 0) == 0 and
+                        mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
+                        (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+            },
+            {
+                name = "Summon Modulation Shard",
+                type = "AA",
+                cond = function(self, aaName)
+                    local modRodSpell = mq.TLO.Spell(aaName)
+                    if not modRodSpell or not modRodSpell() then return false end
+                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)).Name()
+                    return self.settings.SummonModRods and
+                        mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
+                        (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+            },
+            --{
+            --    name = "Thaumaturge's Unity",
+            --    type = "AA",
+            --    cond = function(self, aaName)
+            --        local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
+            --        if not aaSpell or not aaSpell() then return false end
+            --        return self.ClassConfig.HelperFunctions.user_tu_spell(self, aaName) and RGMercUtils.BuffActiveByName(aaSpell.Trigger(1).BaseName())
+            --    end,
+            --},
+            --{
+            --    name = "ManaRegenBuff",
+            --    type = "Spell",
+            --    cond = function(self, spell)
+            --        return not self.ClassConfig.HelperFunctions.user_tu_spell(self, "Thaumaturge's Unity") and RGMercUtils.SelfBuffCheck(spell)
+            --    end,
+            --},
+            --{
+            --    name = "SelfShield",
+            --    type = "Spell",
+            --    cond = function(self, spell)
+            --        return not self.ClassConfig.HelperFunctions.user_tu_spell(self, "Thaumaturge's Unity") and RGMercUtils.SelfBuffCheck(spell)
+            --    end,
+            --},
+            {
+                name = "SelfManaRodSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+            },
+            {
+                name = "GatherMana",
+                type = "Spell",
+                cond = function(self, spell)
+                    return spell and spell() and mq.TLO.Me.PctMana() <= self.settings.GatherManaPct and RGMercUtils.PCSpellReady(spell) and mq.TLO.Me.SpellReady(spell.Name() or "")
+                end,
+            },
+            {
+                name = "ManaRegenBuff",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "SelfShield",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "Thaumaturge's Unity",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "FireOrbSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                end,
+            },
+            {
+                name = "EarthPetItemSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                end,
+            },
+            {
+                name = "FirePetItemSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                end,
+            },
+            {
+                name = "LongDurDmgShield",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "PetManaConv",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast()() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
+                end,
+            },
+            {
+                name = "Elemental Form",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")() and mq.TLO.FindItem(itemName).TimerReady() and
+                        mq.TLO.Me.Pet.ID() > 0
+                end,
+            },
+            {
+                name = "PetIceFlame",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetHaste",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "LongDurDmgShield",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell) and mq.TLO.Me.AltAbility("Companions Discipline")
+                end,
+            },
+            {
+                name = "Second Wind Ward",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName))
+                end,
+            },
+            {
+                name = "Host in the Shell",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                end,
+            },
+            {
+                name = "Companion's Aegis",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                end,
+            },
+            {
+                name = "Companion's Intervening Divine Aura",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
                 end,
             },
         },
@@ -1412,16 +1683,20 @@ _ClassConfig      = {
         { name = "", gem = 12, },
     },
     ['DefaultConfig']     = {
-        ['Mode']          = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
-        ['DoPocketPet']   = { DisplayName = "Do Pocket Pet", Category = "Pet", Tooltip = "Pocket your pet during downtime", Default = true, },
-        ['PetType']       = { DisplayName = "Pet Type", Category = "Pet", Tooltip = "1 = Fire, 2 = Water, 3 = Earth, 4 = Air", Type = "Combo", ComboOptions = { 'Fire', 'Water', 'Earth', 'Air', }, Default = 1, Min = 1, Max = 4, },
-        ['PetHealPct']    = { DisplayName = "Pet Heal %", Category = "Pet", Tooltip = "Heal pet at [X]% HPs", Default = 80, Min = 1, Max = 99, },
-        ['SelfModRod']    = { DisplayName = "Self Mod Rod Item", Category = "Mana", Tooltip = "Click the modrod clicky you want to use here", Type = "ClickyItem", Default = "", },
-        ['ModRodManaPct'] = { DisplayName = "Mod Rod Mana %", Category = "Pet", Tooltip = "Use Mod Rod at [X]% Mana", Default = 70, Min = 1, Max = 99, },
-        ['DoForce']       = { DisplayName = "Do Force", Category = "Spells & Abilities", Tooltip = "Use Force of Elements AA", Default = true, },
-        ['DoChestClick']  = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
-        ['DoMalo']        = { DisplayName = "Cast Malo", Category = "Debuffs", Tooltip = "Do Malo Spells/AAs", Default = true, },
-        ['DoAEMalo']      = { DisplayName = "Cast AE Malo", Category = "Debuffs", Tooltip = "Do AE Malo Spells/AAs", Default = false, },
+        ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['DoPocketPet']    = { DisplayName = "Do Pocket Pet", Category = "Pet", Tooltip = "Pocket your pet during downtime", Default = true, },
+        ['DoPetArmor']     = { DisplayName = "Do Pet Armor", Category = "Pet", Tooltip = "Summon Armor for Pets", Default = true, },
+        ['PetType']        = { DisplayName = "Pet Type", Category = "Pet", Tooltip = "1 = Fire, 2 = Water, 3 = Earth, 4 = Air", Type = "Combo", ComboOptions = { 'Fire', 'Water', 'Earth', 'Air', }, Default = 1, Min = 1, Max = 4, },
+        ['DoPetHeirlooms'] = { DisplayName = "Do Pet Heirlooms", Category = "Pet", Tooltip = "Summon Heirlooms for Pets", Default = true, },
+        ['PetHealPct']     = { DisplayName = "Pet Heal %", Category = "Pet", Tooltip = "Heal pet at [X]% HPs", Default = 80, Min = 1, Max = 99, },
+        ['SelfModRod']     = { DisplayName = "Self Mod Rod Item", Category = "Mana", Tooltip = "Click the modrod clicky you want to use here", Type = "ClickyItem", Default = "", },
+        ['SummonModRods']  = { DisplayName = "Summon Mod Rods", Category = "Mana", Tooltip = "Summon Mod Rods", Default = true, },
+        ['GatherManaPct']  = { DisplayName = "Gather Mana %", Category = "Mana", Tooltip = "When to use Gather Mana", Default = 70, Min = 1, Max = 99, },
+        ['ModRodManaPct']  = { DisplayName = "Mod Rod Mana %", Category = "Pet", Tooltip = "Use Mod Rod at [X]% Mana", Default = 70, Min = 1, Max = 99, },
+        ['DoForce']        = { DisplayName = "Do Force", Category = "Spells & Abilities", Tooltip = "Use Force of Elements AA", Default = true, },
+        ['DoChestClick']   = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoMalo']         = { DisplayName = "Cast Malo", Category = "Debuffs", Tooltip = "Do Malo Spells/AAs", Default = true, },
+        ['DoAEMalo']       = { DisplayName = "Cast AE Malo", Category = "Debuffs", Tooltip = "Do AE Malo Spells/AAs", Default = false, },
     },
 }
 
