@@ -198,7 +198,7 @@ function Utils.AARank(aaName)
 end
 
 ---@param name string
----@return false
+---@return boolean
 function Utils.IsDisc(name)
     local spell = mq.TLO.Spell(name)
 
