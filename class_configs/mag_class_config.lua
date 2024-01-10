@@ -1152,6 +1152,7 @@ _ClassConfig      = {
             RGMercsLogger.log_debug("pet_toys()")
             if (mq.TLO.Me.Pet.Equipment("Primary")() or 0) == 0 then
                 -- Handle Pet Toys
+                RGMercsLogger.log_verbose("pet_toys() ==> \arFailed pet already has weapons!")
                 if mq.TLO.Me.FreeInventory() < 2 then
                     RGMercsLogger.log_debug("pet_toys() ==> \arFailed not enough Inv Slots Free!")
                     return false
