@@ -877,6 +877,7 @@ _ClassConfig      = {
         end,
         handle_pet_toys = function(self)
             if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
+
             if mq.TLO.Me.CombatState():lower() ~= "combat" then
                 self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
             end
@@ -884,6 +885,7 @@ _ClassConfig      = {
         group_toys = function(self)
             -- first Things first see if i can even Make Pet toys. if i am To Low Level or have no Inventory Return
             if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
+
 
             -- Check if the Groups pet need toys by checking if the pet has weapons.
             -- If they Are Not a Mage - Also Give them Armor
@@ -978,6 +980,7 @@ _ClassConfig      = {
                     -- so perhaps there's a way of generalizing later.
                     itemsToGive = { 7, 8, }
                 end
+
                 for _, i in ipairs(itemsToGive) do
                     RGMercsLogger.log_debug("Item Name %s", mq.TLO.InvSlot(packName).Item.Item(i).Name())
                     RGMercUtils.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
@@ -1468,6 +1471,202 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell)
                     return mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.AuraActiveByName(spell.BaseName())
+                end,
+            },
+            {
+                name = "Elemental Conversion",
+                type = "AA",
+                cond = function(self, aaName)
+                    return mq.TLO.Me.PctMana() <= self.settings.GatherManaPct and RGMercUtils.AAReady(aaName) and mq.TLO.Me.Pet.ID() > 0
+                end,
+            },
+            {
+                name = "Forceful Rejuvenation",
+                type = "AA",
+                cond = function(self, aaName)
+                    return mq.TLO.Me.PctMana() <= self.settings.GatherManaPct and not mq.TLO.Me.SpellReady(self.ResolvedActionMap['GatherMana'] or "")() and
+                        RGMercUtils.AAReady(aaName) and mq.TLO.Me.Pet.ID() > 0
+                end,
+            },
+            {
+                name = "ManaRodSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    local modRodSpell = self.ResolvedActionMap['ManaRodSummon']
+                    if not modRodSpell or not modRodSpell() then return false end
+                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)).Name()
+                    return self.settings.SummonModRods and (mq.TLO.Me.AltAbility("Summon Modulation Shard").ID() or 0) == 0 and
+                        mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
+                        (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+            },
+            {
+                name = "Summon Modulation Shard",
+                type = "AA",
+                cond = function(self, aaName)
+                    local modRodSpell = mq.TLO.Spell(aaName)
+                    if not modRodSpell or not modRodSpell() then return false end
+                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)).Name()
+                    return self.settings.SummonModRods and
+                        mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
+                        (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+            },
+            --{
+            --    name = "Thaumaturge's Unity",
+            --    type = "AA",
+            --    cond = function(self, aaName)
+            --        local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
+            --        if not aaSpell or not aaSpell() then return false end
+            --        return self.ClassConfig.HelperFunctions.user_tu_spell(self, aaName) and RGMercUtils.BuffActiveByName(aaSpell.Trigger(1).BaseName())
+            --    end,
+            --},
+            --{
+            --    name = "ManaRegenBuff",
+            --    type = "Spell",
+            --    cond = function(self, spell)
+            --        return not self.ClassConfig.HelperFunctions.user_tu_spell(self, "Thaumaturge's Unity") and RGMercUtils.SelfBuffCheck(spell)
+            --    end,
+            --},
+            --{
+            --    name = "SelfShield",
+            --    type = "Spell",
+            --    cond = function(self, spell)
+            --        return not self.ClassConfig.HelperFunctions.user_tu_spell(self, "Thaumaturge's Unity") and RGMercUtils.SelfBuffCheck(spell)
+            --    end,
+            --},
+            {
+                name = "SelfManaRodSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+            },
+            {
+                name = "GatherMana",
+                type = "Spell",
+                cond = function(self, spell)
+                    return spell and spell() and mq.TLO.Me.PctMana() <= self.settings.GatherManaPct and RGMercUtils.PCSpellReady(spell) and mq.TLO.Me.SpellReady(spell.Name() or "")
+                end,
+            },
+            {
+                name = "ManaRegenBuff",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "SelfShield",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "Thaumaturge's Unity",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "FireOrbSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                end,
+            },
+            {
+                name = "EarthPetItemSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                end,
+            },
+            {
+                name = "FirePetItemSummon",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                end,
+            },
+            {
+                name = "LongDurDmgShield",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "PetManaConv",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast()() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
+                end,
+            },
+            {
+                name = "Elemental Form",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")() and mq.TLO.FindItem(itemName).TimerReady() and
+                        mq.TLO.Me.Pet.ID() > 0
+                end,
+            },
+            {
+                name = "PetIceFlame",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetHaste",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "LongDurDmgShield",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell) and mq.TLO.Me.AltAbility("Companions Discipline")
+                end,
+            },
+            {
+                name = "Second Wind Ward",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName))
+                end,
+            },
+            {
+                name = "Host in the Shell",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                end,
+            },
+            {
+                name = "Companion's Aegis",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                end,
+            },
+            {
+                name = "Companion's Intervening Divine Aura",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
                 end,
             },
             {

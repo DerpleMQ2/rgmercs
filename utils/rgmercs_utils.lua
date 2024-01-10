@@ -687,36 +687,36 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
     return false
 end
 
----@param s self
----@param e table
----@param targetId integer
----@param map table
----@param bAllowMem boolean
+---@param caller self               # caller object to pass back into condition checks
+---@param entry table               # entry to execute
+---@param targetId integer          # target id for this entry
+---@param resolvedActionMap table   # map of AbilitySet items to resolved spells and abilities
+---@param bAllowMem boolean         # allow memorization of spells if needed.
 ---@return boolean
-function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
+function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
     local me = mq.TLO.Me
     local ret = false
 
-    if e.type == nil then return false end -- bad data.
+    if entry.type == nil then return false end -- bad data.
 
     -- Run pre-activates
-    if e.pre_activate then
-        RGMercsLogger.log_debug("Running Pre-Activate for %s", e.name)
-        e.pre_activate(s, Utils.GetEntryConditionArg(map, e))
+    if entry.pre_activate then
+        RGMercsLogger.log_debug("Running Pre-Activate for %s", entry.name)
+        entry.pre_activate(caller, Utils.GetEntryConditionArg(resolvedActionMap, entry))
     end
 
-    if e.type:lower() == "item" then
-        local itemName = map[e.name]
+    if entry.type:lower() == "item" then
+        local itemName = resolvedActionMap[entry.name]
 
-        if not itemName then itemName = e.name end
+        if not itemName then itemName = entry.name end
 
         Utils.UseItem(itemName, targetId)
         ret = true
     end
 
     -- different from items in that they are configured by the user instead of the class.
-    if e.type:lower() == "clickyitem" then
-        local itemName = s.settings[e.name]
+    if entry.type:lower() == "clickyitem" then
+        local itemName = caller.settings[entry.name]
 
         if not itemName or itemName:len() == 0 then
             ret = false
@@ -727,45 +727,45 @@ function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
         end
     end
 
-    if e.type:lower() == "spell" then
-        local spell = map[e.name]
+    if entry.type:lower() == "spell" then
+        local spell = resolvedActionMap[entry.name]
 
         if not spell or not spell() then
             ret = false
         else
             ret = Utils.UseSpell(spell.RankName(), targetId, bAllowMem)
 
-            RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", e.name, spell.RankName(), ret and "\agSuccess" or "\arFailed!")
+            RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", entry.name, spell.RankName(), ret and "\agSuccess" or "\arFailed!")
         end
     end
 
-    if e.type:lower() == "aa" then
-        Utils.UseAA(e.name, targetId)
+    if entry.type:lower() == "aa" then
+        Utils.UseAA(entry.name, targetId)
         ret = true
     end
 
-    if e.type:lower() == "ability" then
-        Utils.UseAbility(e.name)
+    if entry.type:lower() == "ability" then
+        Utils.UseAbility(entry.name)
         ret = true
     end
 
-    if e.type:lower() == "customfunc" then
-        if e.custom_func then
-            ret = e.custom_func(s)
+    if entry.type:lower() == "customfunc" then
+        if entry.custom_func then
+            ret = entry.custom_func(caller)
         else
             ret = false
         end
-        RGMercsLogger.log_debug("Calling command \ao =>> \ag %s \ao <<= Ret => %s", e.name, Utils.BoolToString(ret))
+        RGMercsLogger.log_debug("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, Utils.BoolToString(ret))
     end
 
-    if e.type:lower() == "Disc" then
-        local discSpell = map[e.name]
+    if entry.type:lower() == "Disc" then
+        local discSpell = resolvedActionMap[entry.name]
 
         if not discSpell then
-            RGMercsLogger.log_debug("Dont have a Disc for \ao =>> \ag %s \ao <<=", e.name)
+            RGMercsLogger.log_debug("Dont have a Disc for \ao =>> \ag %s \ao <<=", entry.name)
             ret = false
         else
-            RGMercsLogger.log_debug("Using Disc \ao =>> \ag %s [%s] \ao <<=", e.name, (discSpell() and discSpell.RankName() or "None"))
+            RGMercsLogger.log_debug("Using Disc \ao =>> \ag %s [%s] \ao <<=", entry.name, (discSpell() and discSpell.RankName() or "None"))
 
             if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
                 RGMercsLogger.log_debug("CANT USE Disc - Casting Window Open")
@@ -803,9 +803,9 @@ function Utils.ExecEntry(s, e, targetId, map, bAllowMem)
         end
     end
 
-    if e.post_activate then
-        RGMercsLogger.log_debug("Running Post-Activate for %s", e.name)
-        e.post_activate(s, Utils.GetEntryConditionArg(map, e), ret)
+    if entry.post_activate then
+        RGMercsLogger.log_debug("Running Post-Activate for %s", entry.name)
+        entry.post_activate(caller, Utils.GetEntryConditionArg(resolvedActionMap, entry), ret)
     end
 
     return ret
@@ -820,31 +820,31 @@ function Utils.GetEntryConditionArg(map, entry)
     return condArg
 end
 
----@param s self
----@param r table
----@param targetId integer
----@param map table
----@param steps integer|nil
----@param start_step integer|nil
----@param bAllowMem boolean
+---@param caller self #caller's self object to pass back into class config conditions
+---@param rotationTable table #rotation table to run through
+---@param targetId integer # target to cast on
+---@param resolvedActionMap table #mapping of the class AbilitySet names to what spell or ability they resolved to
+---@param steps integer|nil # number of success steps before we yeild back control - if nil we will run the whole rotation
+---@param start_step integer|nil # setp to start on
+---@param bAllowMem boolean # allow memorization of spells
 ---@return integer
-function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
+function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem)
     local oldSpellInSlot = mq.TLO.Me.Gem(Utils.UseGem)
     local stepsThisTime  = 0
     local lastStepIdx    = 0
 
-    for idx, entry in ipairs(r) do
+    for idx, entry in ipairs(rotationTable) do
         if idx >= start_step then
             RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             lastStepIdx = idx
             if entry.cond then
-                local condArg = Utils.GetEntryConditionArg(map, entry)
+                local condArg = Utils.GetEntryConditionArg(resolvedActionMap, entry)
                 local condTarg = mq.TLO.Spawn(targetId)
-                local pass = entry.cond(s, condArg, condTarg)
+                local pass = entry.cond(caller, condArg, condTarg)
                 RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s", entry.name, entry.type, condArg,
                     condTarg.CleanName() or "None", Utils.BoolToString(pass))
                 if pass == true then
-                    local res = Utils.ExecEntry(s, entry, targetId, map, bAllowMem)
+                    local res = Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
                     if res == true then
                         stepsThisTime = stepsThisTime + 1
 
@@ -854,7 +854,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
                     end
                 end
             else
-                local res = Utils.ExecEntry(s, entry, targetId, map, bAllowMem)
+                local res = Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
                 if res == true then
                     stepsThisTime = stepsThisTime + 1
 
@@ -874,7 +874,7 @@ function Utils.RunRotation(s, r, targetId, map, steps, start_step, bAllowMem)
     -- Move to the next step
     lastStepIdx = lastStepIdx + 1
 
-    if lastStepIdx > #r then
+    if lastStepIdx > #rotationTable then
         lastStepIdx = 1
     end
 
@@ -2206,15 +2206,15 @@ function Utils.RenderRotationTableKey()
     end
 end
 
----@param s self
----@param n string
----@param t table
----@param map table
----@param rotationState integer
----@param showFailed boolean
+---@param caller self               # self object of the caller to pass back into coditions
+---@param name string               # name of the rotation table
+---@param rotationTable table       # rotation Table to render
+---@param resolvedActionMap table   # map of AbilitySet items to resolved spells and abilities
+---@param rotationState integer     # current state
+---@param showFailed boolean        # show items that fail their conitionals
 ---@return boolean
-function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
-    if ImGui.BeginTable("Rotation_" .. n, rotationState > 0 and 5 or 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
+function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMap, rotationState, showFailed)
+    if ImGui.BeginTable("Rotation_" .. name, rotationState > 0 and 5 or 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
         if rotationState > 0 then
@@ -2227,7 +2227,7 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for idx, entry in ipairs(t) do
+        for idx, entry in ipairs(rotationTable) do
             ImGui.TableNextColumn()
             ImGui.Text(tostring(idx))
             if rotationState > 0 then
@@ -2242,10 +2242,10 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
             end
             ImGui.TableNextColumn()
             if entry.cond then
-                local condArg  = Utils.GetEntryConditionArg(map, entry)
+                local condArg  = Utils.GetEntryConditionArg(resolvedActionMap, entry)
                 local condTarg = mq.TLO.Target
-                local pass     = entry.cond(s, condArg, condTarg)
-                local active   = entry.active_cond and entry.active_cond(s, condArg) or false
+                local pass     = entry.cond(caller, condArg, condTarg)
+                local active   = entry.active_cond and entry.active_cond(caller, condArg) or false
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
@@ -2266,7 +2266,7 @@ function Utils.RenderRotationTable(s, n, t, map, rotationState, showFailed)
                 Utils.Tooltip(entry.tooltip)
             end
             ImGui.TableNextColumn()
-            local mappedAction = map[entry.name]
+            local mappedAction = resolvedActionMap[entry.name]
             if mappedAction then
                 if type(mappedAction) == "string" then
                     ImGui.Text(entry.name)
@@ -2355,8 +2355,8 @@ end
 ---@param min number
 ---@param max number
 ---@param step number?
----@return number: input
----@return boolean: changed
+---@return number   # input
+---@return boolean  # changed
 function Utils.RenderOptionNumber(id, text, cur, min, max, step)
     ImGui.PushID("##num_spin_" .. id)
     ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0.5, 0.5, 0.5, 1.0)
@@ -2379,9 +2379,9 @@ end
 ---@param settingNames table
 ---@param defaults table
 ---@param category string
----@return table: settings
----@return boolean: any_pressed
----@return boolean: requires_new_loadout
+---@return table   # settings
+---@return boolean # any_pressed
+---@return boolean # requires_new_loadout
 function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
     local any_pressed = false
     local new_loadout = false
