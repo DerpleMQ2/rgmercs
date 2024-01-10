@@ -47,6 +47,13 @@ return {
             "Duelist Discipline",      -- Level 59
             "Kinesthetics Discipline", -- Level 57
         },
+        ["Executioner2"] = {
+            "Executioner Discipline",  -- Level 100
+            "Eradicator's Discipline", -- Level 95
+            "Assassin Discipline",     -- Level 75
+            "Duelist Discipline",      -- Level 59
+            "Kinesthetics Discipline", -- Level 57
+        },
         ["Twisted"] = {
             "Twisted Chance Discipline", -- Level 65
             "Deadeye Discipline",        -- Level 54

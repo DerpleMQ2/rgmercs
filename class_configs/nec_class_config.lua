@@ -409,6 +409,24 @@ local _ClassConfig = {
             "Venom of the Snake",
             "Poison Bolt",
         },
+        ['Poison2_2'] = {
+            ---Poison2 >=LVL1 (DOT)
+            "Hemorrhagic Venom",
+            "Crystal Crawler Venom",
+            "Polybiad Venom",
+            "Glistenwing Venom",
+            "Binaesa Venom",
+            "Naeya Venom",
+            "Argendev's Venom",
+            "Slitheren Venom",
+            "Venonscale Venom",
+            "Vakk`dra's Sickly Mists",
+            "Blood of Thule",
+            "Envenomed Bolt",
+            "Chilling Embrace",
+            "Venom of the Snake",
+            "Poison Bolt",
+        },
         ['Poison3'] = {
             ---Poison3 >= LVL79 DOT
             "Zelnithak's Pallid Haze",
