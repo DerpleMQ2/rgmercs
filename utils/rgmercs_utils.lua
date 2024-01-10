@@ -289,14 +289,14 @@ function Utils.GetBestItem(t)
     return selectedItem
 end
 
----@param t table
+---@param spellList table
 ---@return MQSpell|nil
-function Utils.GetBestSpell(t, alreadyResolvedMap)
+function Utils.GetBestSpell(spellList, alreadyResolvedMap)
     local highestLevel = 0
     local selectedSpell = nil
 
-    for _, s in ipairs(t or {}) do
-        local spell = mq.TLO.Spell(s)
+    for _, spellName in ipairs(spellList or {}) do
+        local spell = mq.TLO.Spell(spellName)
         if spell() ~= nil then
             --RGMercsLogger.log_debug("Found %s level(%d) rank(%s)", s, spell.Level(), spell.RankName())
             if spell.Level() <= mq.TLO.Me.Level() then
@@ -304,8 +304,10 @@ function Utils.GetBestSpell(t, alreadyResolvedMap)
                     if spell.Level() > highestLevel then
                         -- make sure we havent already found this one.
                         local alreadyUsed = false
-                        for k, v in pairs(alreadyResolvedMap) do
-                            if v.ID() == spell.ID() then
+                        for unresolvedName, resolvedSpell in pairs(alreadyResolvedMap) do
+                            RGMercsLogger.log_debug("Checking if unresolvedItem(%s) with spell(%s) matches new spell(%s)",
+                                unresolvedName, resolvedSpell.RankName() or "None", spell.RankName() or "None")
+                            if resolvedSpell.ID() == spell.ID() then
                                 alreadyUsed = true
                             end
                         end
@@ -1975,10 +1977,10 @@ function Utils.DetAACheck(aaId)
 end
 
 ---@param caller self
----@param t table
+---@param spellGemList table
 ---@param itemSets table
 ---@param abilitySets table
-function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
+function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
     local spellLoadOut = {}
     local resolvedActionMap = {}
     local spellsToLoad = {}
@@ -1986,16 +1988,16 @@ function Utils.SetLoadOut(caller, t, itemSets, abilitySets)
     Utils.UseGem = mq.TLO.Me.NumGems()
 
     -- Map AbilitySet Items and Load Them
-    for k, t in pairs(itemSets) do
-        RGMercsLogger.log_debug("Finding best item for Set: %s", k)
-        resolvedActionMap[k] = Utils.GetBestItem(t)
+    for unresolvedName, itemTable in pairs(itemSets) do
+        RGMercsLogger.log_debug("Finding best item for Set: %s", unresolvedName)
+        resolvedActionMap[unresolvedName] = Utils.GetBestItem(itemTable)
     end
-    for k, t in pairs(abilitySets) do
-        RGMercsLogger.log_debug("\ayFinding best spell for Set: \am%s", k)
-        resolvedActionMap[k] = Utils.GetBestSpell(t, resolvedActionMap)
+    for unresolvedName, spellTable in pairs(abilitySets) do
+        RGMercsLogger.log_debug("\ayFinding best spell for Set: \am%s", unresolvedName)
+        resolvedActionMap[unresolvedName] = Utils.GetBestSpell(spellTable, resolvedActionMap)
     end
 
-    for _, g in ipairs(t) do
+    for _, g in ipairs(spellGemList) do
         if not g.cond or g.cond(caller, g.gem) then
             RGMercsLogger.log_debug("\ayGem \am%d\ay will be loaded.", g.gem)
 
