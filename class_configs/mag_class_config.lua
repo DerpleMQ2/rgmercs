@@ -1016,7 +1016,7 @@ _ClassConfig      = {
         end,
         handle_pet_toys = function(self)
             if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
-            if (mq.TLO.Me.Pet.Equipment("Primary")()) or 0 ~= 0 then return false end
+            if (mq.TLO.Me.Pet.Equipment("Primary")() or 0) ~= 0 then return false end
 
             if mq.TLO.Me.CombatState():lower() ~= "combat" then
                 return self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
