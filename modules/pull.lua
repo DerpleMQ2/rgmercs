@@ -303,7 +303,8 @@ function Module:Render()
                 ImGui.TableSetupColumn('Controls', (ImGuiTableColumnFlags.WidthFixed), 80.0)
                 ImGui.TableHeadersRow()
 
-                for idx, wpData in ipairs(self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] or {}) do
+                local waypointList = self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] or {}
+                for idx, wpData in ipairs(waypointList) do
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(idx))
                     ImGui.TableNextColumn()
@@ -316,14 +317,22 @@ function Module:Render()
                     ImGui.PopID()
                     ImGui.SameLine()
                     ImGui.PushID("##_small_btn_up_wp_" .. tostring(idx))
-                    if ImGui.SmallButton(ICONS.FA_CHEVRON_UP) then
-                        self:MoveWayPointUp(idx)
+                    if idx == 1 then
+                        ImGui.InvisibleButton(ICONS.FA_CHEVRON_UP, ImVec2(22, 1))
+                    else
+                        if ImGui.SmallButton(ICONS.FA_CHEVRON_UP) then
+                            self:MoveWayPointUp(idx)
+                        end
                     end
                     ImGui.PopID()
                     ImGui.SameLine()
                     ImGui.PushID("##_small_btn_dn_wp_" .. tostring(idx))
-                    if ImGui.SmallButton(ICONS.FA_CHEVRON_DOWN) then
-                        self:MoveWayPointDown(idx)
+                    if idx == #waypointList then
+                        ImGui.InvisibleButton(ICONS.FA_CHEVRON_DOWN, ImVec2(22, 1))
+                    else
+                        if ImGui.SmallButton(ICONS.FA_CHEVRON_DOWN) then
+                            self:MoveWayPointDown(idx)
+                        end
                     end
                     ImGui.PopID()
                 end
