@@ -1317,34 +1317,42 @@ _ClassConfig      = {
             {
                 name = "Companion's Fury",
                 type = "AA",
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
             },
             {
                 name = "Host of the Elements",
                 type = "AA",
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
             },
             {
                 name = "Spire of Elements",
                 type = "AA",
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
             },
             {
                 name = "Heart of Skyfire",
                 type = "AA",
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
             },
             {
                 name = "Thaumaturge's Focus",
                 type = "AA",
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
             },
             {
                 name = "Focus of Arcanum",
                 type = "AA",
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
             },
             {
                 name = "Improved Twincast",
                 type = "AA",
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
             },
             {
                 name = "Servant of Ro",
                 type = "AA",
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
             },
         },
         ['DPS PET'] = {
@@ -1468,8 +1476,8 @@ _ClassConfig      = {
             {
                 name = "Force of Elements",
                 type = "AA",
-                cond = function(self, _)
-                    return self.settings.DoForce
+                cond = function(self, aaName)
+                    return self.settings.DoForce and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1545,8 +1553,8 @@ _ClassConfig      = {
             {
                 name = "Turned Summoned",
                 type = "AA",
-                cond = function(self, _)
-                    return mq.TLO.Target.ID() > 0 and mq.TLO.Target.Body.Name():lower() == "undead pet"
+                cond = function(self, aaName)
+                    return mq.TLO.Target.ID() > 0 and mq.TLO.Target.Body.Name():lower() == "undead pet" and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1574,7 +1582,7 @@ _ClassConfig      = {
                 name = "Malaise",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoMalo and RGMercUtils.DetAACheck(aaName)
+                    return self.settings.DoMalo and RGMercUtils.DetAACheck(aaName) and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1650,7 +1658,7 @@ _ClassConfig      = {
                     self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)).Name()
                     return self.settings.SummonModRods and
                         mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
-                        (mq.TLO.Cursor.ID() or 0) == 0
+                        (mq.TLO.Cursor.ID() or 0) == 0 and RGMercUtils.AAReady(aaName)
                 end,
             },
             --{
@@ -1708,7 +1716,7 @@ _ClassConfig      = {
                 name = "Thaumaturge's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1750,7 +1758,7 @@ _ClassConfig      = {
                 name = "Elemental Form",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1786,28 +1794,28 @@ _ClassConfig      = {
                 name = "Second Wind Ward",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName))
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
                 name = "Host in the Shell",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Aegis",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Intervening Divine Aura",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1846,7 +1854,7 @@ _ClassConfig      = {
                     self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)).Name()
                     return self.settings.SummonModRods and
                         mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
-                        (mq.TLO.Cursor.ID() or 0) == 0
+                        (mq.TLO.Cursor.ID() or 0) == 0 and RGMercUtils.AAReady(aaName)
                 end,
             },
             --{
@@ -1904,7 +1912,7 @@ _ClassConfig      = {
                 name = "Thaumaturge's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1946,7 +1954,7 @@ _ClassConfig      = {
                 name = "Elemental Form",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1982,28 +1990,28 @@ _ClassConfig      = {
                 name = "Second Wind Ward",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName))
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
                 name = "Host in the Shell",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Aegis",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Intervening Divine Aura",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank")
+                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and self:IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
                 end,
             },
         },
