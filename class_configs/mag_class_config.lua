@@ -1016,7 +1016,7 @@ _ClassConfig      = {
         end,
         handle_pet_toys = function(self)
             if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
-            if mq.TLO.Me.Pet.Equipment("Primary")() ~= nil then return false end
+            if (mq.TLO.Me.Pet.Equipment("Primary")()) or 0 ~= 0 then return false end
 
             if mq.TLO.Me.CombatState():lower() ~= "combat" then
                 return self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
@@ -1032,7 +1032,7 @@ _ClassConfig      = {
             -- If they Are Not a Mage - Also Give them Armor
             for i = 1, mq.TLO.Group.Members() do
                 local member = mq.TLO.Group.Member(i)
-                if member and member() and member.Pet.ID() > 0 and member.Pet.Equipment("primary")() == nil then
+                if member and member() and member.Pet.ID() > 0 and (member.Pet.Equipment("primary")() or 0) == 0 then
                     if mq.TLO.Me.CombatState():lower() ~= "combat" then
                         self.ClassConfig.HelperFunctions.give_pet_toys(self, member.Pet.ID())
                     end
@@ -1142,7 +1142,7 @@ _ClassConfig      = {
         end,
         pet_toys = function(self)
             RGMercsLogger.log_debug("pet_toys()")
-            if mq.TLO.Me.Pet.Equipment("Primary")() == nil then
+            if (mq.TLO.Me.Pet.Equipment("Primary")() or 0) == 0 then
                 -- Handle Pet Toys
                 if mq.TLO.Me.FreeInventory() < 2 then
                     RGMercsLogger.log_debug("pet_toys() ==> \arFailed not enough Inv Slots Free!")
