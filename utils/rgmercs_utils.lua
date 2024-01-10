@@ -305,7 +305,7 @@ function Utils.GetBestSpell(spellList, alreadyResolvedMap)
                         -- make sure we havent already found this one.
                         local alreadyUsed = false
                         for unresolvedName, resolvedSpell in pairs(alreadyResolvedMap) do
-                            if type(resolvedSpell) ~= string and resolvedSpell.ID() == spell.ID() then
+                            if type(resolvedSpell) ~= "string" and resolvedSpell.ID() == spell.ID() then
                                 alreadyUsed = true
                             end
                         end
