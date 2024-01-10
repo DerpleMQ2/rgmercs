@@ -276,6 +276,25 @@ _ClassConfig      = {
             "Meteoric Bolt",
             "Iron Bolt",
         },
+        ['MagicBoltNuke1'] = {
+            -- Magic Bolt Nukes
+            "Luclinite Bolt",
+            "Komatiite Bolt",
+            "Korascian Bolt",
+            "Meteoric Bolt",
+            "Iron Bolt",
+        },
+        ['MagicBoltNuke2'] = {
+            -- Magic Bolt Nukes
+            "Luclinite Bolt",
+            "Komatiite Bolt",
+            "Korascian Bolt",
+            "Meteoric Bolt",
+            "Iron Bolt",
+        },
+        ['TwinCast'] = {
+            "Twincast",
+        },
         ['BeamNuke'] = {
             -- Beam Frontal AOE Spell*
             "Beam of Molten Dacite",

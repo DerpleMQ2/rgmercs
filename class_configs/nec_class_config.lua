@@ -234,6 +234,26 @@ local _ClassConfig = {
             "Boil Blood",
             "Heat Blood",
         },
+        ['FireDot2_2'] = {
+            ---FireDot2 >= LVL10
+            "Pyre of Va Xakra",
+            "Pyre of Klraggek",
+            "Pyre of the Shadewarden",
+            "Pyre of Jorobb",
+            "Pyre of Marnek",
+            "Pyre of Hazarak",
+            "Pyre of Nos",
+            "Soul Reaper's Pyre",
+            "Reaver's Pyre",
+            "Ashengate Pyre",
+            "Dread Pyre",
+            "Night Fire",
+            "Funeral Pyre of Kelador",
+            "Pyrocruor",
+            "Ignite Blood",
+            "Boil Blood",
+            "Heat Blood",
+        },
         ['FireDot3'] = {
             ---FireDot3 >= LVL88 (QuickDOT)
             "Thall Va Kelun's Flashblaze",
@@ -271,6 +291,22 @@ local _ClassConfig = {
             "Splurt",
         },
         ['Magic2'] = {
+            ---Magic2 >=LVL67 DOT
+            "Extinction",
+            "Oblivion",
+            "Inevitable End",
+            "Annihilation",
+            "Termination",
+            "Doom",
+            "Demise",
+            "Mortal Coil",
+            "Anathema of Life",
+            "Curse of Mortality",
+            "Ancient: Curse of Mori",
+            "Dark Nightmare",
+            "Horror",
+        },
+        ['Magic2_2'] = {
             ---Magic2 >=LVL67 DOT
             "Extinction",
             "Oblivion",

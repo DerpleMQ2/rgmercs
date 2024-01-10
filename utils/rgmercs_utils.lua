@@ -2003,6 +2003,12 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                 for _, s in ipairs(g.spells) do
                     local spellName = s.name
                     RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, g.gem)
+                    if abilitySets[spellName] == nil then
+                        -- this means we put a varname into our spell table that we didn't define in the ability list.
+                        RGMercsLogger.log_error(
+                            "\ar ***!!!*** \awLoadout Var [\at%s\aw] has no entry in the AbilitySet list! \arThis is a bug in the class config please report this!",
+                            spellName)
+                    end
                     local bestSpell = resolvedActionMap[spellName]
                     if bestSpell then
                         local bookSpell = mq.TLO.Me.Book(bestSpell.RankName())()
@@ -2011,7 +2017,7 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
 
                         if pass and bestSpell and bookSpell and not loadedSpell then
                             RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will load \at%s\ax ==> \ag%s", g.gem, s.name, bestSpell.RankName())
-                            spellLoadOut[g.gem] = bestSpell
+                            spellLoadOut[g.gem] = { selectedSpellData = s, spell = bestSpell, }
                             spellsToLoad[bestSpell.RankName()] = true
                             break
                         else
@@ -2148,29 +2154,29 @@ function Utils.DrawInspectableSpellIcon(iconID, spell)
     ImGui.PopID()
 end
 
----@param t table
-function Utils.RenderLoadoutTable(t)
+---@param loadoutTable table
+function Utils.RenderLoadoutTable(loadoutTable)
     if ImGui.BeginTable("Spells", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('Icon', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Gem', (ImGuiTableColumnFlags.WidthFixed), 20.0)
-        ImGui.TableSetupColumn('Base Name', (ImGuiTableColumnFlags.WidthFixed), 150.0)
+        ImGui.TableSetupColumn('Var Name', (ImGuiTableColumnFlags.WidthFixed), 150.0)
         ImGui.TableSetupColumn('Level', ImGuiTableColumnFlags.None, 20.0)
         ImGui.TableSetupColumn('Rank Name', ImGuiTableColumnFlags.None, 150.0)
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for gem, spell in pairs(t) do
+        for gem, loadoutData in pairs(loadoutTable) do
             ImGui.TableNextColumn()
-            Utils.DrawInspectableSpellIcon(spell.SpellIcon(), spell)
+            Utils.DrawInspectableSpellIcon(loadoutData.spell.SpellIcon(), loadoutData.spell)
             ImGui.TableNextColumn()
             ImGui.Text(tostring(gem))
             ImGui.TableNextColumn()
-            ImGui.Text(spell.BaseName())
+            ImGui.Text(loadoutData.selectedSpellData.name or "")
             ImGui.TableNextColumn()
-            ImGui.Text(tostring(spell.Level()))
+            ImGui.Text(tostring(loadoutData.spell.Level()))
             ImGui.TableNextColumn()
-            ImGui.Text(spell.RankName())
+            ImGui.Text(loadoutData.spell.RankName())
         end
 
         ImGui.EndTable()
@@ -2500,15 +2506,15 @@ function Utils.RenderSettings(settings, defaults, categories)
     return settings, any_pressed, new_loadout
 end
 
----@param t table
-function Utils.LoadSpellLoadOut(t)
+---@param spellLoadOut table
+function Utils.LoadSpellLoadOut(spellLoadOut)
     local selectedRank = ""
 
-    for gem, spell in pairs(t) do
+    for gem, loadoutData in pairs(spellLoadOut) do
         if mq.TLO.Me.SpellRankCap() > 1 then
-            selectedRank = spell.RankName()
+            selectedRank = loadoutData.spell.RankName()
         else
-            selectedRank = spell.BaseName()
+            selectedRank = loadoutData.spell.BaseName()
         end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
