@@ -2032,10 +2032,12 @@ _ClassConfig      = {
         {
             gem = 3,
             spells = {
-                { name = "FireNuke2",   cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
-                { name = "ChaoticNuke", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
-                { name = "SwarmPet",    cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 70 end, },
-                { name = "FireNuke1",   cond = function(self) return true end, },
+                { name = "FireNuke2",     cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "ChaoticNuke",   cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
+                { name = "SwarmPet",      cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 70 end, },
+                { name = "FireNuke1",     cond = function(self) return true end, },
+                { name = "MagicRainNuke", cond = function(self) return self.settings.DoMagicNuke end, },
+                { name = "RainNuke",      cond = function(self) return true end, },
             },
         },
         {
