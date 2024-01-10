@@ -192,6 +192,12 @@ function Utils.AAReady(aaName)
 end
 
 ---@param aaName string
+---@return boolean
+function Utils.AbilityReady(aaName)
+    return mq.TLO.Me.AbilityReady(aaName)()
+end
+
+---@param aaName string
 ---@return number
 function Utils.AARank(aaName)
     return Utils.CanUseAA(aaName) and mq.TLO.Me.AltAbility(aaName).Rank() or 0
@@ -740,13 +746,21 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
     end
 
     if entry.type:lower() == "aa" then
-        Utils.UseAA(entry.name, targetId)
-        ret = true
+        if Utils.AAReady(entry.name) then
+            Utils.UseAA(entry.name, targetId)
+            ret = true
+        else
+            ret = false
+        end
     end
 
     if entry.type:lower() == "ability" then
-        Utils.UseAbility(entry.name)
-        ret = true
+        if Utils.AbilityReady(entry.name) then
+            Utils.UseAbility(entry.name)
+            ret = true
+        else
+            ret = false
+        end
     end
 
     if entry.type:lower() == "customfunc" then
