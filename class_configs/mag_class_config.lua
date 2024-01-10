@@ -1541,7 +1541,7 @@ _ClassConfig      = {
                 name = "SelfManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
                 end,
             },
             {
@@ -1576,21 +1576,21 @@ _ClassConfig      = {
                 name = "FireOrbSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
                 end,
             },
             {
                 name = "EarthPetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
                 end,
             },
             {
                 name = "FirePetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
                 end,
             },
             {
@@ -1604,7 +1604,7 @@ _ClassConfig      = {
                 name = "PetManaConv",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast()() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
+                    return RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
@@ -1737,7 +1737,7 @@ _ClassConfig      = {
                 name = "SelfManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
                 end,
             },
             {
@@ -1772,21 +1772,21 @@ _ClassConfig      = {
                 name = "FireOrbSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
                 end,
             },
             {
                 name = "EarthPetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
                 end,
             },
             {
                 name = "FirePetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1).Name() or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
                 end,
             },
             {
@@ -1800,7 +1800,7 @@ _ClassConfig      = {
                 name = "PetManaConv",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast()() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
+                    return RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {

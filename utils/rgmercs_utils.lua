@@ -305,9 +305,7 @@ function Utils.GetBestSpell(spellList, alreadyResolvedMap)
                         -- make sure we havent already found this one.
                         local alreadyUsed = false
                         for unresolvedName, resolvedSpell in pairs(alreadyResolvedMap) do
-                            RGMercsLogger.log_debug("Checking if unresolvedItem(%s) with spell(%s) matches new spell(%s)",
-                                unresolvedName, resolvedSpell() or "None", spell() or "None")
-                            if resolvedSpell.ID() == spell.ID() then
+                            if type(resolvedSpell) ~= string and resolvedSpell.ID() == spell.ID() then
                                 alreadyUsed = true
                             end
                         end
@@ -319,7 +317,7 @@ function Utils.GetBestSpell(spellList, alreadyResolvedMap)
                     end
                 else
                     Utils.PrintGroupMessage(string.format(
-                        "%s \aw [%s] \ax \ar ! MISSING SPELL ! \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), s,
+                        "%s \aw [%s] \ax \ar ! MISSING SPELL ! \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), spellName,
                         spell.RankName(), spell.Level()))
                 end
             end
