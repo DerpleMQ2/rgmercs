@@ -1743,7 +1743,7 @@ _ClassConfig      = {
                 name = "PetManaConv",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
+                    return not RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
@@ -1939,7 +1939,7 @@ _ClassConfig      = {
                 name = "PetManaConv",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
+                    return not RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
