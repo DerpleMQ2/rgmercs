@@ -236,7 +236,7 @@ function Utils.GiveTo(toId, itemName, count)
     end
 
     while not mq.TLO.Cursor.ID() do
-        Utils.DoCmd("/shift itemnotify \"%s\", leftmouseup", itemName)
+        Utils.DoCmd("/shift /itemnotify \"%s\" leftmouseup", itemName)
         mq.delay(20, function() return mq.TLO.Cursor.ID() ~= nil end)
     end
 

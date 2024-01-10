@@ -16,15 +16,15 @@ _ClassConfig      = {
         if mode == "PetTank" then
             RGMercUtils.DoCmd("/pet taunt on")
             RGMercUtils.DoCmd("/pet resume on")
-            RGMercUtils:GetSettings().AutoAssistAt  = 100
-            RGMercUtils:GetSettings().StayOnTarget  = false
-            RGMercUtils:GetSettings().DoAutoEngage  = true
-            RGMercUtils:GetSettings().DoAutoTarget  = true
-            RGMercUtils:GetSettings().AllowMezBreak = true
+            RGMercConfig:GetSettings().AutoAssistAt  = 100
+            RGMercConfig:GetSettings().StayOnTarget  = false
+            RGMercConfig:GetSettings().DoAutoEngage  = true
+            RGMercConfig:GetSettings().DoAutoTarget  = true
+            RGMercConfig:GetSettings().AllowMezBreak = true
         else
             RGMercUtils.DoCmd("/pet taunt off")
-            RGMercUtils:GetSettings().AutoAssistAt = 98
-            RGMercUtils:GetSettings().StayOnTarget = true
+            RGMercConfig:GetSettings().AutoAssistAt = 98
+            RGMercConfig:GetSettings().StayOnTarget = true
         end
     end,
     ['ItemSets']          = {
@@ -795,6 +795,11 @@ _ClassConfig      = {
         },
     },
     ['RotationOrder']     = {
+        {
+            name = 'Pet Management',
+            targetId = function(self) return mq.TLO.Me.ID() end,
+            cond = function(self, combat_state) return true end,
+        },
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
@@ -812,11 +817,6 @@ _ClassConfig      = {
                 return combat_state == "Downtime" and
                     RGMercUtils.DoBuffCheck() and mq.TLO.Me.Pet.ID() > 0
             end,
-        },
-        {
-            name = 'Pet Management',
-            targetId = function(self) return mq.TLO.Me.ID() end,
-            cond = function(self, combat_state) return true end,
         },
         {
             name = 'Burn',
@@ -876,14 +876,14 @@ _ClassConfig      = {
             end
         end,
         handle_pet_toys = function(self)
-            if mq.TLO.Me.FreeInventory()() < 2 or mq.TLO.Me.Level() < 73 then return false end
+            if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
             if mq.TLO.Me.CombatState():lower() ~= "combat" then
                 self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
             end
         end,
         group_toys = function(self)
             -- first Things first see if i can even Make Pet toys. if i am To Low Level or have no Inventory Return
-            if mq.TLO.Me.FreeInventory()() < 2 or mq.TLO.Me.Level() < 73 then return false end
+            if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
 
             -- Check if the Groups pet need toys by checking if the pet has weapons.
             -- If they Are Not a Mage - Also Give them Armor
@@ -978,7 +978,7 @@ _ClassConfig      = {
                     -- so perhaps there's a way of generalizing later.
                     itemsToGive = { 7, 8, }
                 end
-                for _, i in itemsToGive do
+                for _, i in ipairs(itemsToGive) do
                     RGMercsLogger.log_debug("Item Name %s", mq.TLO.InvSlot(packName).Item.Item(i).Name())
                     RGMercUtils.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
                 end
@@ -1453,7 +1453,7 @@ _ClassConfig      = {
                 name = "HandlePetToys",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    return self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
+                    return mq.TLO.Me.Pet.ID() > 0 and self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
                 end,
             },
             {
@@ -1467,7 +1467,7 @@ _ClassConfig      = {
                 name = "PetAura",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.AuraActiveByName(spell.BaseName())
+                    return mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.AuraActiveByName(spell.BaseName())
                 end,
             },
             {
@@ -1669,18 +1669,128 @@ _ClassConfig      = {
         },
     },
     ['Spells']            = {
-        { name = "", gem = 1, },
-        { name = "", gem = 2, },
-        { name = "", gem = 3, },
-        { name = "", gem = 4, },
-        { name = "", gem = 5, },
-        { name = "", gem = 6, },
-        { name = "", gem = 7, },
-        { name = "", gem = 8, },
-        { name = "", gem = 9, },
-        { name = "", gem = 10, },
-        { name = "", gem = 11, },
-        { name = "", gem = 12, },
+        {
+            gem = 1,
+            spells = {
+                { name = "FireNuke1",  cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "SpearNuke",  cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
+                { name = "MagicNuke1", cond = function(self) return self.settings.DoMagicNuke end, },
+                { name = "SpearNuke",  cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
+                { name = "FireNuke1",  cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 2,
+            spells = {
+                { name = "FireBoltNuke", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "SwarmPet",     cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
+                { name = "MagicNuke2",   cond = function(self) return self.settings.DoMagicNuke end, },
+                { name = "ChaoticNuke",  cond = function(self) return mq.TLO.Me.Level() >= 69 end, },
+                { name = "FireNuke2",    cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 3,
+            spells = {
+                { name = "FireNuke2",   cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "ChaoticNuke", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
+                { name = "SwarmPet",    cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 70 end, },
+                { name = "FireNuke1",   cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 4,
+            spells = {
+                { name = "LongDurDmgShield", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "FireNuke2",        cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() >= 70 and mq.TLO.Me.Level() <= 72 end, },
+                { name = "PetStanceSpell",   cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() >= 73 end, },
+                { name = "MagicBoltNuke1",   cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 98 end, },
+                { name = "VolleyNuke",       cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
+                { name = "MagicNuke1",       cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 5,
+            spells = {
+                { name = "PetHealSpell",   cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "MagicBoltNuke2", cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 103 end, },
+                { name = "SpearNuke",      cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
+                { name = "MagicNuke2",     cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 6,
+            spells = {
+                { name = "ManaRodSummon",    cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 77 end, },
+                { name = "PetPromisedSpell", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 77 end, },
+                { name = "MaloNuke",         cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 100 end, },
+                {
+                    name = "AllianceBuff",
+                    cond = function(self)
+                        return RGMercConfig:GetSettings().DoAlliance and mq.TLO.Me.Level() >= 75 and
+                            ((mq.TLO.Me.Ability("Malaise").ID() or 0) > 0 or not self.settings.DoMalo)
+                    end,
+                },
+                {
+                    name = "FireOrbSummon",
+                    cond = function(self)
+                        return not RGMercConfig:GetSettings().DoAlliance and mq.TLO.Me.Level() >= 75 and
+                            ((mq.TLO.Me.Ability("Malaise").ID() or 0) > 0 or not self.settings.DoMalo)
+                    end,
+                },
+                { name = "MaloDebuff", cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 7,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+
+                { name = "AirPetSpell",       cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "SelfManaRodSummon", },
+            },
+        },
+        {
+            gem = 8,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "ShortDurDmgShield", cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "PetHealSpell", },
+            },
+        },
+        {
+            gem = 9,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "FireShroud", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() < 90 end, },
+                { name = "GatherMana", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() >= 90 end, },
+                { name = "DichoSpell", },
+            },
+        },
+        {
+            gem = 10,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "PetManaNuke", cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "TwinCast", },
+            },
+        },
+        {
+            gem = 11,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "SurgeDS1",    cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "PetManaNuke", },
+            },
+        },
+        {
+            gem = 12,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "SurgeDS2",   cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "GatherMana", },
+            },
+        },
     },
     ['DefaultConfig']     = {
         ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
@@ -1694,6 +1804,7 @@ _ClassConfig      = {
         ['GatherManaPct']  = { DisplayName = "Gather Mana %", Category = "Mana", Tooltip = "When to use Gather Mana", Default = 70, Min = 1, Max = 99, },
         ['ModRodManaPct']  = { DisplayName = "Mod Rod Mana %", Category = "Pet", Tooltip = "Use Mod Rod at [X]% Mana", Default = 70, Min = 1, Max = 99, },
         ['DoForce']        = { DisplayName = "Do Force", Category = "Spells & Abilities", Tooltip = "Use Force of Elements AA", Default = true, },
+        ['DoMagicNuke']    = { DisplayName = "Do Magic Nuke", Category = "Spells & Abilities", Tooltip = "Use Magic nukes instead of Fire", Default = false, },
         ['DoChestClick']   = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoMalo']         = { DisplayName = "Cast Malo", Category = "Debuffs", Tooltip = "Do Malo Spells/AAs", Default = true, },
         ['DoAEMalo']       = { DisplayName = "Cast AE Malo", Category = "Debuffs", Tooltip = "Do AE Malo Spells/AAs", Default = false, },
