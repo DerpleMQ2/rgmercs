@@ -14,6 +14,10 @@
 			"indent_size": "4",
 			"trailing_table_separator": "always",
 			"align_function_params": "true"
-		}
+		},
+		"mq-defs.etag": "W/\"6fc709f85c5fa264e32528b5c31da6213aa872c7f93e046ad8300f2c7315b9c6\"",
+		"Lua.workspace.library": [
+			"c:\\Users\\nandor\\AppData\\Roaming\\Code\\User\\globalStorage\\zenithcodeforge.mq-defs\\file-downloader-downloads\\macroquest\\mq-definitions-master"
+		]
 	}
 }
