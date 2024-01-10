@@ -813,7 +813,7 @@ end
 
 function Utils.GetEntryConditionArg(map, entry)
     local condArg = map[entry.name] or mq.TLO.Spell(entry.name)
-    if entry.type:lower() ~= "spell" and (condArg == nil or condArg() == nil or entry.type:lower() == "aa") then
+    if entry.type:lower() ~= "spell" and (condArg == nil or entry.type:lower() == "aa") then
         condArg = entry.name
     end
 
