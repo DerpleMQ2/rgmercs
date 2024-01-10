@@ -306,7 +306,7 @@ function Utils.GetBestSpell(spellList, alreadyResolvedMap)
                         local alreadyUsed = false
                         for unresolvedName, resolvedSpell in pairs(alreadyResolvedMap) do
                             RGMercsLogger.log_debug("Checking if unresolvedItem(%s) with spell(%s) matches new spell(%s)",
-                                unresolvedName, resolvedSpell.RankName() or "None", spell.RankName() or "None")
+                                unresolvedName, resolvedSpell() or "None", spell() or "None")
                             if resolvedSpell.ID() == spell.ID() then
                                 alreadyUsed = true
                             end
