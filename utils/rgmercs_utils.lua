@@ -755,7 +755,7 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
         else
             ret = false
         end
-        RGMercsLogger.log_debug("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, Utils.BoolToString(ret))
+        --RGMercsLogger.log_verbose("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, Utils.BoolToString(ret))
     end
 
     if entry.type:lower() == "Disc" then

@@ -2035,7 +2035,7 @@ _ClassConfig      = {
             spells = {
                 { name = "PetHealSpell",   cond = function(self) return self.IsModeActive("PetTank") end, },
                 { name = "MagicBoltNuke2", cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 103 end, },
-                { name = "SpearNuke",      cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
+                { name = "SpearNuke2",     cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
                 { name = "MagicNuke2",     cond = function(self) return true end, },
             },
         },
