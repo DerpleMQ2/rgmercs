@@ -1148,30 +1148,6 @@ _ClassConfig      = {
                 end
             end
         end,
-        pet_toys = function(self)
-            RGMercsLogger.log_debug("pet_toys()")
-            if (mq.TLO.Me.Pet.Equipment("Primary")() or 0) == 0 then
-                -- Handle Pet Toys
-                RGMercsLogger.log_verbose("pet_toys() ==> \arFailed pet already has weapons!")
-                if mq.TLO.Me.FreeInventory() < 2 then
-                    RGMercsLogger.log_debug("pet_toys() ==> \arFailed not enough Inv Slots Free!")
-                    return false
-                end
-
-                -- Given we detect based on pet weapons, and the pet weapons spell we'll use
-                -- starts at level 73, there's no point right now in doing anything if we're
-                -- lower level than 73.
-                if mq.TLO.Me.Level() < 73 then
-                    return false
-                end
-
-                RGMercsLogger.log_debug("HandlingPetToys()  ==> Summoning Weapons")
-                if mq.TLO.Me.CombatState():lower() ~= "combat" then
-                    self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Weapon", mq.TLO.Me.Pet.ID())
-                end
-            end
-            return true
-        end,
         summon_pet = function(self)
             local petSpellVar = string.format("%sPetSpell", self.ClassConfig.DefaultConfig.PetType.ComboOptions[self.settings.PetType])
             local resolvedPetSpell = self.ResolvedActionMap[petSpellVar]
@@ -1225,7 +1201,7 @@ _ClassConfig      = {
                         local resolvedPetBuffSpell = self.ResolvedActionMap["PetIceFlame"]
                         RGMercUtils.UseSpell(resolvedPetBuffSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
                         if mq.TLO.Me.Pet.ID() then
-                            self.ClassConfig.HelperFunctions.pet_toys(self)
+                            self.ClassConfig.HelperFunctions.handle_pet_toys(self)
                         end
                         RGMercUtils.UseAA("Companion's Suspension", 0)
                         self.TempSettings.PocketPet = true
