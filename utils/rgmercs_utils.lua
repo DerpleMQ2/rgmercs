@@ -410,6 +410,9 @@ function Utils.WaitCastReady(spell, maxWait)
         maxWait = maxWait - 100
         RGMercsLogger.log_verbose("Waiting for spell '%s' to be ready...", spell)
     end
+
+    -- account for lag
+    mq.delay(500)
 end
 
 function Utils.WaitGlobalCoolDown()
