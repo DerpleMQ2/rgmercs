@@ -877,10 +877,12 @@ _ClassConfig      = {
         end,
         handle_pet_toys = function(self)
             if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
+            if mq.TLO.Me.Pet.Equipment("Primary")() ~= nil then return false end
 
             if mq.TLO.Me.CombatState():lower() ~= "combat" then
-                self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
+                return self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
             end
+            return false
         end,
         group_toys = function(self)
             -- first Things first see if i can even Make Pet toys. if i am To Low Level or have no Inventory Return
