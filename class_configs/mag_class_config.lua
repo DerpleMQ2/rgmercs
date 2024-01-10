@@ -1054,7 +1054,8 @@ _ClassConfig      = {
             end
 
             if mq.TLO.Me.Level() < petToyResolvedSpell.Level() then
-                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed your level is below the pet toy spell level: %d!", petToyResolvedSpell.Level())
+                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed your level is below the pet toy spell(%s) level: %d!", petToyResolvedSpell.RankName(),
+                    petToyResolvedSpell.Level())
                 return false
             end
 
