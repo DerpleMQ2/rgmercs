@@ -8,10 +8,10 @@
 -- in order by default so always put the first thing you want checked
 -- towards the top of the list.
 
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq           = require('mq')
+local RGMercUtils  = require("utils.rgmercs_utils")
 
-local Tooltips    = {
+local Tooltips     = {
     Mantle              = "Spell Line: Melee Absorb Proc",
     Carapace            = "Spell Line: Melee Absorb Proc",
     EndRegen            = "Discipline Line: Endurance Regen",
@@ -71,30 +71,17 @@ local Tooltips    = {
     Slam                = "Use Slam Ability",
 }
 
--- helper function for advanced logic to see if we want to use Dark Lord's Unity
-local function castDLU()
-    local shroudAction = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "Shroud")
-    if not shroudAction then return false end
-
-    local res = shroudAction.Level() <=
-        (mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Level() or 0) and
-        mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").MinLevel() <= mq.TLO.Me.Level() and
-        mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Rank() > 0
-
-    return res
-end
-
 local _ClassConfig = {
-    _version          = "0.1a",
-    _author           = "Derple",
-    ['ModeChecks']    = {
+    _version            = "0.1a",
+    _author             = "Derple",
+    ['ModeChecks']      = {
         IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
     },
-    ['Modes']         = {
+    ['Modes']           = {
         'Tank',
         'DPS',
     },
-    ['Themes']        = {
+    ['Themes']          = {
         ['Tank'] = {
             { element = ImGuiCol.TitleBgActive,    color = { r = 0.5, g = 0.05, b = 0.05, a = .8, }, },
             { element = ImGuiCol.TableHeaderBg,    color = { r = 0.5, g = 0.05, b = 0.05, a = .8, }, },
@@ -115,13 +102,13 @@ local _ClassConfig = {
             { element = ImGuiCol.FrameBgActive,    color = { r = 0.5, g = 0.05, b = 0.05, a = 1.0, }, },
         },
     },
-    ['ItemSets']      = {
+    ['ItemSets']        = {
         ['Epic'] = {
             "Innoruuk's Dark Blessing",
             "Innoruuk's Voice",
         },
     },
-    ['AbilitySets']   = {
+    ['AbilitySets']     = {
         ['Mantle'] = {
             "Malarian Mantle",
             "Gorgon Mantle",
@@ -591,7 +578,21 @@ local _ClassConfig = {
             "Ignominious Influence",
         },
     },
-    ['RotationOrder'] = {
+    ['HelperFunctions'] = {
+        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
+        castDLU = function(self)
+            local shroudAction = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "Shroud")
+            if not shroudAction then return false end
+
+            local res = shroudAction.Level() <=
+                (mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Level() or 0) and
+                mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").MinLevel() <= mq.TLO.Me.Level() and
+                mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Rank() > 0
+
+            return res
+        end,
+    },
+    ['RotationOrder']   = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
         {
@@ -614,7 +615,7 @@ local _ClassConfig = {
             end,
         },
     },
-    ['Rotations']     = {
+    ['Rotations']       = {
         ['Downtime'] = {
             {
                 name = "Dark Lord's Unity (Azia)",
@@ -622,7 +623,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.DLUA,
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or 0) end,
                 cond = function(self, aaName)
-                    return castDLU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName())
+                    return self.ClassConfig.HelperFunctions.castDLU(self) and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName())
                 end,
             },
             {
@@ -640,7 +641,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Horror,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -649,7 +650,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Demeanor,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -658,7 +659,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.CloakHP,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -667,7 +668,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SelfDS,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castDLU() and mq.TLO.Me.Level() <= 60 and RGMercUtils.ReagentCheck(spell) and
+                    return not self.ClassConfig.HelperFunctions.castDLU(self) and mq.TLO.Me.Level() <= 60 and RGMercUtils.ReagentCheck(spell) and
                         RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
@@ -677,7 +678,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Shroud,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -686,7 +687,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Covenant,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -695,7 +696,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.CallAtk,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castDLU() and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1097,7 +1098,7 @@ local _ClassConfig = {
             },
         },
     },
-    ['Spells']        = {
+    ['Spells']          = {
         {
             gem = 1,
             spells = {
@@ -1193,7 +1194,7 @@ local _ClassConfig = {
             },
         },
     },
-    ['DefaultConfig'] = {
+    ['DefaultConfig']   = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
         ['DoTorrent']    = { DisplayName = "Cast Torrents", Category = "Spells and Abilities", Tooltip = "Enable casting Torrent spells.", RequiresLoadoutChange = true, Default = true, },
         ['DoDireTap']    = { DisplayName = "Cast Dire Taps", Category = "Spells and Abilities", Tooltip = "Enable casting Dire Tap spells.", RequiresLoadoutChange = true, Default = true, },
