@@ -1015,8 +1015,14 @@ _ClassConfig      = {
             end
         end,
         handle_pet_toys = function(self)
-            if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then return false end
-            if (mq.TLO.Me.Pet.Equipment("Primary")() or 0) ~= 0 then return false end
+            if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then
+                RGMercsLogger.log_debug("handle_pet_toys() ==> \arFailed your level is below 73 or you dont have inv slots open!")
+                return false
+            end
+            if (mq.TLO.Me.Pet.Equipment("Primary")() or 0) ~= 0 then
+                RGMercsLogger.log_verbose("handle_pet_toys() ==> \arFailed your pet already has weapons!")
+                return false
+            end
 
             if mq.TLO.Me.CombatState():lower() ~= "combat" then
                 return self.ClassConfig.HelperFunctions.give_pet_toys(self, mq.TLO.Me.Pet.ID())
@@ -1048,6 +1054,7 @@ _ClassConfig      = {
             end
 
             if mq.TLO.Me.Level() < petToyResolvedSpell.Level() then
+                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed your level is below the pet toy spell level: %d!", petToyResolvedSpell.Level())
                 return false
             end
 
