@@ -7,6 +7,7 @@ require('utils.rgmercs_datatypes')
 local Module                              = { _version = '0.1a', _name = "Class", _author = 'Derple', }
 Module.__index                            = Module
 Module.LastPetCmd                         = 0
+Module.RezTimers                          = {}
 Module.ModuleLoaded                       = false
 Module.ShowFailedSpells                   = false
 Module.ReloadingLoadouts                  = true
@@ -16,6 +17,10 @@ Module.TempSettings                       = {}
 Module.CombatState                        = "None"
 Module.ClassConfig                        = nil
 Module.DefaultCategories                  = nil
+
+Module.Constants                          = {}
+Module.Constants.RezSearchGroup           = "pccorpse group radius 100 zradius 50"
+Module.Constants.RezSearchOutOfGroup      = "pccorpse radius 100 zradius 50"
 
 -- Track the state of rotations between frames
 Module.TempSettings.RotationStates        = {}
@@ -298,19 +303,54 @@ function Module:GetTheme()
     end
 end
 
---#define REZSEARCHGROUP 		"pccorpse group radius 100 zradius 50"
---#define REZSEARCHME 		"pccorpse ${Me} radius 100 zradius 50"
---#define OUTOFGROUPREZ       "pccorpse radius 100 zradius 50"
-function Module:OOGCheckAndRez()
-    local rezFilter = "pccorpse radius 100 zradius 50"
-    local rezCount = mq.TLO.SpawnCount(rezFilter)()
+function Module:SelfCheckAndRez()
+    local rezSearch = string.format("pccorpse %d radius 100 zradius 50", mq.TLO.Me.ID())
+    local rezCount = mq.TLO.SpawnCount(rezSearch)()
 
     for i = 1, rezCount do
-        local rezSpawn = mq.TLO.NearestSpawn(i, rezFilter)
+        local rezSpawn = mq.TLO.NearestSpawn(i, rezSearch)
 
-        --/if ( ${tmp_corpse_name.Equal[${assistname}]} || ${OaList[SETTINGVAL].Find[${tmp_corpse_name}]} || ${Raid.Member[${tmp_corpse_name}].ID} || ${DanNet.Peers.Find[${tmp_corpse_name}]}) {
+        if rezSpawn() then
+            if self.ClassConfig.HelperFunctions.DoRez then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                    self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                end
+            end
+        end
+    end
+end
+
+function Module:IGCheckAndRez()
+    local rezCount = mq.TLO.SpawnCount(self.Constants.RezSearchGroup)()
+
+    for i = 1, rezCount do
+        local rezSpawn = mq.TLO.NearestSpawn(i, self.Constants.RezSearchGroup)
+
+        if rezSpawn() then
+            if self.ClassConfig.HelperFunctions.DoRez then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                    self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                end
+            end
+        end
+    end
+end
+
+function Module:OOGCheckAndRez()
+    local rezCount = mq.TLO.SpawnCount(self.Constants.RezSearchOutOfGroup)()
+
+    for i = 1, rezCount do
+        local rezSpawn = mq.TLO.NearestSpawn(i, self.Constants.RezSearchOutOfGroup)
+
         if rezSpawn() and (RGMercUtils.IsSafeName("pc", rezSpawn.DisplayName())) then
-            -- TODO: DoRez
+            if self.ClassConfig.HelperFunctions.DoRez then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                    self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                end
+            end
         end
     end
 end
@@ -473,6 +513,10 @@ function Module:GiveTime(combat_state)
     if self:IsHealing() then
         -- TODO Check Rezes
         if self.CombatState ~= "Downtime" or (not mq.TLO.Me.Invis() or RGMercConfig:GetSettings().BreakInvis) then
+            self:IGCheckAndRez()
+
+            self:SelfCheckAndRez()
+
             if RGMercConfig:GetSettings().AssistOutside then
                 self:OOGCheckAndRez()
             end

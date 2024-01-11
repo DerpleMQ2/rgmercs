@@ -1,7 +1,7 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq           = require('mq')
+local RGMercUtils  = require("utils.rgmercs_utils")
 
-local _ClassConfig =  {
+local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
@@ -10,13 +10,13 @@ local _ClassConfig =  {
         'Heal',
         'Hybrid',
     },
-    ['ItemSets'] = {
+    ['ItemSets']          = {
         ['Epic'] = {
             "Harmony of the Soul",
-            "Aegis of Superior Divinity",          
+            "Aegis of Superior Divinity",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']       = {
         ['wardspell'] = {
             -----Ward Spell Slot 1 or Heal over time for low level
             "Celestial Remedy",
@@ -682,7 +682,7 @@ local _ClassConfig =  {
                 type = "spell",
                 cond = function(self, spell)
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and self.settings.DoHOT and spell.StacksTarget() and
-                    not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
+                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
                 end,
             },
             {
@@ -710,7 +710,7 @@ local _ClassConfig =  {
                 type = "spell",
                 cond = function(self, spell)
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and self.settings.DoHOT and spell.StacksTarget() and
-                    not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
+                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
                 end,
             },
         },
@@ -858,8 +858,8 @@ local _ClassConfig =  {
             gem = 2,
             spells = {
                 -- [ HEAL MODE ] --
-                -- Macro chooses 2 remedy heals for gem 1 and 2, need method to choose second best from list                
-                { name = "remedyheal",   cond = function(self) return true end, },
+                -- Macro chooses 2 remedy heals for gem 1 and 2, need method to choose second best from list
+                { name = "remedyheal", cond = function(self) return true end, },
             },
         },
         {
@@ -867,7 +867,7 @@ local _ClassConfig =  {
             spells = {
                 -- [ HEAL MODE ] --
                 -- Note: Something wrong with RGMercUtils.IsModeActive, its returning false
-                { name = "patchheal",    cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "patchheal", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 { name = "SingleHot", cond = function(self) return true end, },
             },
         },
@@ -889,7 +889,7 @@ local _ClassConfig =  {
             gem = 6,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "Icespellcure",       cond = function(self) return true end, },
+                { name = "Icespellcure", cond = function(self) return true end, },
             },
         },
         {
@@ -897,7 +897,7 @@ local _ClassConfig =  {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "GroupHot",   cond = function(self) return true end, },
+                { name = "GroupHot", cond = function(self) return true end, },
             },
         },
         {
@@ -921,7 +921,7 @@ local _ClassConfig =  {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "nukeheal",    cond = function(self) return true end, },
+                { name = "nukeheal", cond = function(self) return true end, },
             },
         },
         {
@@ -948,35 +948,34 @@ local _ClassConfig =  {
                 { name = "GroupHealProcBuff", cond = function(self) return true end, },
             },
         },
-    },-- spells config
+    }, -- spells config
     ['DefaultConfig']     = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
         ['DoHOT']             = { DisplayName = "Cast HOTs", Category = "Spells and Abilities", Tooltip = "Use Heal Over Time Spells", Default = true, },
-        ['DoCure']             = { DisplayName = "Cast Cure SPells", Category = "Spells and Abilities", Tooltip = "Use Cure Spells", Default = true, },
-        ['DoProm']             = { DisplayName = "Cast Promised Heal Spells", Category = "Spells and Abilities", Tooltip = "Use Prom Spells", Default = true, },
-        ['DoClutchHeal']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['DoBattleRez']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['DoAutoWard']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },        
-        ['MainHealPoint']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 95, Min=1, Max=99, },
-        ['BigHealPoint']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 80, Min=1, Max=99, },
-        ['GroupHealPoint']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 85, Min=1, Max=99, },
-        ['ClutchHealPoint']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 34, Min=1, Max=99, },
-        ['GroupInjureCnt']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 2, Min=1, Max=6 },
-        ['DoNuke']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['Manatonuke']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 60, Min=1, Max=100, },
-        ['NukePct']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 90, Min=1, Max=100, },
-        ['DoReverseDS']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['DoQp']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['QPManaPCT']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 40, Min=1, Max=99, },
-        ['VetManaPCT']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 70, Min=1, Max=99, },
-        ['DivineBuffOn']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
-        ['DoDruid']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
-        ['DoCh']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
-        ['TLPStartHealPoint']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 90, Min=1, Max=99, },
-        ['CompHealPoint']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 65, Min=1, Max=99, },
-        ['LightHealPoint']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 65, Min=1, Max=99, },
-        ['RemedyHealPoint']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 80, Min=1, Max=99, },
-        ['DoSymbol']             = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
+        ['DoCure']            = { DisplayName = "Cast Cure SPells", Category = "Spells and Abilities", Tooltip = "Use Cure Spells", Default = true, },
+        ['DoProm']            = { DisplayName = "Cast Promised Heal Spells", Category = "Spells and Abilities", Tooltip = "Use Prom Spells", Default = true, },
+        ['DoClutchHeal']      = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
+        ['DoAutoWard']        = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
+        ['MainHealPoint']     = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 95, Min = 1, Max = 99, },
+        ['BigHealPoint']      = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 80, Min = 1, Max = 99, },
+        ['GroupHealPoint']    = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 85, Min = 1, Max = 99, },
+        ['ClutchHealPoint']   = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 34, Min = 1, Max = 99, },
+        ['GroupInjureCnt']    = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 2, Min = 1, Max = 6, },
+        ['DoNuke']            = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
+        ['Manatonuke']        = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 60, Min = 1, Max = 100, },
+        ['NukePct']           = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 90, Min = 1, Max = 100, },
+        ['DoReverseDS']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
+        ['DoQp']              = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
+        ['QPManaPCT']         = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 40, Min = 1, Max = 99, },
+        ['VetManaPCT']        = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 70, Min = 1, Max = 99, },
+        ['DivineBuffOn']      = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
+        ['DoDruid']           = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
+        ['DoCh']              = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
+        ['TLPStartHealPoint'] = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 90, Min = 1, Max = 99, },
+        ['CompHealPoint']     = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
+        ['LightHealPoint']    = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
+        ['RemedyHealPoint']   = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 80, Min = 1, Max = 99, },
+        ['DoSymbol']          = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
     }, -- end DefaultConfig
 }
 

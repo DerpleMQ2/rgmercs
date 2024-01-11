@@ -140,6 +140,10 @@ Config.DefaultConfig = {
     ['DoPetHeals']        = { DisplayName = "Do Pet Heals", Category = "Heals", Tooltip = "Heal Pets?", Default = false, },
     ['MaxHealPoint']      = { DisplayName = "Max Heal Point", Category = "Heals", Tooltip = "The point at which you stop healing.", Default = 90, Min = 1, Max = 99, },
 
+    -- [ REZ ] --
+    ['RetryRezDelay']     = { DisplayName = "Retry Rez Delay", Category = "Rez", Tooltip = "Time in seconds of how often to try to rez a corpse.", Default = 6, Min = 1, Max = 60, },
+    ['DoBattleRez']       = { DisplayName = "Cast Spells", Category = "Rez", Tooltip = "Use Spells", Default = true, },
+
     -- [ FELLOWSHIP ] --
     ['DoFellow']          = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = true, },
 
