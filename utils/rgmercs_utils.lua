@@ -1718,11 +1718,16 @@ function Utils.FindTarget()
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
         if RGMercConfig:GetSettings().AssistOutside then
-            local assist = Utils.GetMainAssistSpawn()
-            local assistTarget = mq.TLO.Spawn(assist.AssistName())
+            local queryCmd = string.format("/dquery %s -q Target.ID", RGMercConfig.Globals.MainAssist)
+            mq.cmdf(queryCmd)
+            local queryResult = mq.TLO.DanNet.Q()
 
-            RGMercsLogger.log_verbose("FindTarget Assisting %s [%d] -- Target Agressive: %s", RGMercConfig.Globals.MainAssist, assist.ID(),
-                Utils.BoolToString(assistTarget.Aggressive()))
+            local assistTarget = mq.TLO.Spawn(queryResult)
+            if queryResult then
+                RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s", assistTarget.CleanName() or "None")
+            end
+
+            RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist, Utils.BoolToString(assistTarget.Aggressive()))
 
             if assistTarget() and assistTarget.Aggressive() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
                 RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(), assistTarget.ID())
@@ -1732,6 +1737,10 @@ function Utils.FindTarget()
             ---@diagnostic disable-next-line: undefined-field
             RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
         end
+    end
+
+    if RGMercConfig.Globals.AutoTargetID and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
+        Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
     end
 end
 
@@ -1805,7 +1814,7 @@ function Utils.SetControlToon()
             for _, name in ipairs(RGMercConfig:GetSettings().OutsideAssistList) do
                 local assistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
 
-                if assistSpawn() then
+                if assistSpawn() and assistSpawn.ID() ~= Utils.GetMainAssistId() then
                     RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
                     --TODO: NOT A VALID BASE CMD Utils.DoCmd("/squelch /xtarget assist %d", assistSpawn.ID())
                     RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
@@ -1849,25 +1858,25 @@ function Utils.FindTargetCheck()
     RGMercsLogger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Utils.GetXTHaterCount(), Utils.BoolToString(Utils.IAmMA()), Utils.BoolToString(config.FollowMarkTarget),
         Utils.BoolToString(RGMercConfig.Globals.BackOffFlag))
 
-    -- our MA out of group has a valid target for us.
-    local assist = Utils.GetMainAssistSpawn()
-    if (mq.TLO.Target.ID() == 0 or mq.TLO.Target.Dead() or mq.TLO.Target.ID() == Utils.GetGroupMainAssistID()) and assist and assist() then
-        assist.DoTarget()
-        mq.delay("1s", function() return mq.TLO.Target.ID() == assist.ID() end)
-        local assistTarget = mq.TLO.Spawn(mq.TLO.Me.TargetOfTarget()) --assist.DoTarget() --mq.TLO.Spawn("%s", assist.AssistName())
+    local OATarget = false
 
-        RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target :: %s", assistTarget.CleanName() or "None")
-        if assistTarget and assistTarget() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
-            RGMercsLogger.log_verbose("\agFindTargetCheck OA MA has A target")
-            return true
-        else
-            RGMercsLogger.log_verbose("\aoFindTargetCheck OA MA has no target")
+    -- our MA out of group has a valid target for us.
+    if RGMercConfig:GetSettings().AssistOutside then
+        local queryCmd = string.format("/dquery %s -q Target.ID", RGMercConfig.Globals.MainAssist)
+        mq.cmdf(queryCmd)
+        local queryResult = mq.TLO.DanNet.Q()
+
+        local assistTarget = mq.TLO.Spawn(queryResult)
+        if queryResult then
+            RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s", assistTarget.CleanName() or "None")
         end
-    else
-        RGMercsLogger.log_verbose("\arFindTargetCheck OA MA doesnt exist")
+
+        if assistTarget and assistTarget() then
+            OATarget = true
+        end
     end
 
-    return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget) and not RGMercConfig.Globals.BackOffFlag
+    return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget or OATarget) and not RGMercConfig.Globals.BackOffFlag
 end
 
 ---@param autoTargetId integer
@@ -1902,7 +1911,7 @@ function Utils.OkToEngage(autoTargetId)
         return false
     end
 
-    if Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
+    if not RGMercConfig.Globals.BackOffFlag then --Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
         local distanceCheck = Utils.GetTargetDistance() < config.AssistRange
         local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
