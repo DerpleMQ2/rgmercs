@@ -204,6 +204,11 @@ local function RGMercsGUI()
 
                     -- .. tostring(RGMercConfig.Globals.AutoTargetID))
                     ImGui.Text("MA: " .. (RGMercUtils.GetMainAssistSpawn().CleanName() or "None"))
+                    if mq.TLO.Target.ID() > 0 and mq.TLO.Target.Type():lower() == "pc" and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
+                        if ImGui.SmallButton("Set MA to Current Target") then
+                            RGMercConfig.Globals.AutoTargetID = mq.TLO.Target.ID()
+                        end
+                    end
                     ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
                         local settingsRef = RGMercConfig:GetSettings()
@@ -377,6 +382,15 @@ local function Main()
 
     notifyZoning = true
 
+    if RGMercConfig.Globals.PauseMain then
+        mq.delay(1000)
+        mq.doevents()
+        if RGMercConfig:GetSettings().RunMovePaused then
+            RGMercModules:ExecModule("Movement", "GiveTime", curState)
+        end
+        return
+    end
+
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
         if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
@@ -385,15 +399,6 @@ local function Main()
         end
     else
         curState = "Downtime"
-    end
-
-    if RGMercConfig.Globals.PauseMain then
-        mq.delay(1000)
-        mq.doevents()
-        if RGMercConfig:GetSettings().RunMovePaused then
-            RGMercModules:ExecModule("Movement", "GiveTime", curState)
-        end
-        return
     end
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end

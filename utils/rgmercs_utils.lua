@@ -1389,7 +1389,6 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
     if not config.DoAutoEngage then return end
 
     local target = mq.TLO.Target
-    local assistId = Utils.GetMainAssistId()
 
     if mq.TLO.Me.State():lower() == "feign" and mq.TLO.Me.Class.ShortName():lower() ~= "mnk" then
         mq.TLO.Me.Stand()
@@ -1401,7 +1400,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
                 mq.TLO.Me.Stand()
             end
 
-            if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or assistId == mq.TLO.Me.ID()) and Utils.GetTargetPctHPs() > 0 then
+            if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IAmMA()) and Utils.GetTargetPctHPs() > 0 then
                 if target.Distance() > target.MaxRangeTo() then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(), target.MaxRangeTo())
                     if preEngageRoutine then
@@ -1719,7 +1718,7 @@ function Utils.FindTarget()
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
         if RGMercConfig:GetSettings().AssistOutside then
-            local assist = mq.TLO.Spawn(Utils.GetMainAssistId())
+            local assist = Utils.GetMainAssistSpawn()
             local assistTarget = mq.TLO.Spawn(assist.AssistName())
 
             RGMercsLogger.log_verbose("FindTarget Assisting %s [%d] -- Target Agressive: %s", RGMercConfig.Globals.MainAssist, assist.ID(),
@@ -1808,14 +1807,14 @@ function Utils.SetControlToon()
 
                 if assistSpawn() then
                     RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
-                    Utils.DoCmd("/squelch /xtarget assist %d", assistSpawn.ID())
+                    --TODO: NOT A VALID BASE CMD Utils.DoCmd("/squelch /xtarget assist %d", assistSpawn.ID())
                     RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
                 end
             end
         else
             if not RGMercConfig.Globals.MainAssist or RGMercConfig.Globals.MainAssist:len() == 0 then
                 -- Use our Target hope for the best!
-                Utils.DoCmd("/squelch /xtarget assist %d", mq.TLO.Target.ID())
+                --TODO: NOT A VALID BASE CMD Utils.DoCmd("/squelch /xtarget assist %d", mq.TLO.Target.ID())
                 RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
             end
         end
@@ -1849,6 +1848,15 @@ function Utils.FindTargetCheck()
 
     RGMercsLogger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Utils.GetXTHaterCount(), Utils.BoolToString(Utils.IAmMA()), Utils.BoolToString(config.FollowMarkTarget),
         Utils.BoolToString(RGMercConfig.Globals.BackOffFlag))
+
+    -- our MA out of group has a valid target for us.
+    local assist = Utils.GetMainAssistSpawn()
+    if assist and assist() and assist.AssistName() ~= nil then
+        local assistTarget = mq.TLO.Spawn(assist.AssistName())
+        if assistTarget and assistTarget() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
+            return true
+        end
+    end
 
     return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget) and not RGMercConfig.Globals.BackOffFlag
 end

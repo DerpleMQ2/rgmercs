@@ -985,10 +985,26 @@ return {
                 },
             },
         },
-        { gem = 10, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { { name = "FireRainLureNuke", }, }, },
-        { gem = 11, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { { name = "ChaosNuke", }, }, },
-        { gem = 12, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { { name = "CloudburstNuke", }, { name = "FireNuke", }, }, },
-        { gem = 13, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end, spells = { { name = "FireNuke", }, { name = "IceNuke", }, { name = "MagicNuke", }, { name = "RootSpell", }, }, },
+        {
+            gem = 10,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = { { name = "FireRainLureNuke", }, },
+        },
+        {
+            gem = 11,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = { { name = "ChaosNuke", }, },
+        },
+        {
+            gem = 12,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = { { name = "CloudburstNuke", }, { name = "FireNuke", }, },
+        },
+        {
+            gem = 13,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = { { name = "FireNuke", }, { name = "IceNuke", }, { name = "MagicNuke", }, { name = "RootSpell", }, },
+        },
     },
     ['DefaultConfig'] = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
