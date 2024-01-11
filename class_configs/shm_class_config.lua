@@ -647,6 +647,49 @@ local _ClassConfig = {
             "Eradicate Poison",
         },
     },
+    ['HelperFunctions']   = {
+        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
+        DoRez = function(self, corpseId)
+            if not RGMercUtils.PCSpellReady("Incarnate Anew") and
+                not mq.TLO.FindItem("Staff of Forbidden Rites")() and
+                not RGMercUtils.CanUseAA("Rejuvenation of Spirit") and
+                not RGMercUtils.CanUseAA("Call of the Wild") then
+                return false
+            end
+
+            RGMercUtils.SetTarget(corpseId)
+
+            local target = mq.TLO.Target
+
+            if not target or not target() then return false end
+
+            if mq.TLO.Target.Distance() > 25 then
+                RGMercUtils.DoCmd("/corpse")
+            end
+
+            local targetClass = target.Class.ShortName()
+
+            if mq.TLO.Me.CombatState():lower() == "combat" and (targetClass == "dru" or targetClass == "clr" or RGMercConfig:GetSettings().DoBattleRez) then
+                if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
+                    return RGMercUtils.UseItem("Staff of Forbidden Rites", corpseId)
+                end
+
+                if RGMercUtils.AAReady("Call of the Wild") then
+                    return RGMercUtils.UseAA("Call of the Wild", corpseId)
+                end
+            else
+                if RGMercUtils.CanUseAA("Rejuvenation of Spirit") then
+                    return RGMercUtils.UseAA("Rejuvenation of Spirit", corpseId)
+                end
+
+                if RGMercUtils.PCSpellReady("Incarnate Anew") then
+                    return RGMercUtils.UseSpell("Incarnate Anew", corpseId, true)
+                end
+            end
+
+            return false
+        end,
+    },
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
     -- of just slamming through the base ordered list.
     -- These will run in order and exit after the first valid spell to cast
