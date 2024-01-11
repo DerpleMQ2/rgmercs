@@ -245,20 +245,18 @@ end
 
 ---@return number
 function Module:GetClassModeId()
-    if not self.ModuleLoaded then return 0 end
+    if not self.settings then return 0 end
     return self.settings.Mode
 end
 
 ---@return string
 function Module:GetClassModeName()
-    if not self.ModuleLoaded then return "None" end
     return self.ClassConfig and self.ClassConfig.Modes[self.settings.Mode] or "None"
 end
 
 ---@param mode string
 ---@return boolean
 function Module:IsModeActive(mode)
-    if not self.ModuleLoaded then return false end
     return Module:GetClassModeName():lower() == mode:lower()
 end
 

@@ -2018,6 +2018,7 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
 
             if g ~= nil and g.spells ~= nil then
                 for _, s in ipairs(g.spells) do
+                    if s.name_func then s.name = s.name_func(caller) end
                     local spellName = s.name
                     RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, g.gem)
                     if abilitySets[spellName] == nil then
