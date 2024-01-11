@@ -447,9 +447,9 @@ function Module:CreateWayPointHere()
 end
 
 function Module:DeleteWayPoint(idx)
-    if idx >= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] then
-        RGMercsLogger.log_info("\axWaypoint \at%d\ax at location \ag%s\ax - \arDeleted!\ax", idx, self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][idx])
-        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][idx] = nil
+    if idx <= #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] then
+        RGMercsLogger.log_info("\axWaypoint \at%d\ax at location \ag%s\ax - \arDeleted!\ax", idx, self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][idx].Loc)
+        table.remove(self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()], idx)
         self:SaveSettings(false)
     else
         RGMercsLogger.log_error("\ar%d is not a valid waypoint ID!", idx)

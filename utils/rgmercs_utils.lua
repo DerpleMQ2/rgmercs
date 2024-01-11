@@ -1851,11 +1851,20 @@ function Utils.FindTargetCheck()
 
     -- our MA out of group has a valid target for us.
     local assist = Utils.GetMainAssistSpawn()
-    if assist and assist() and assist.AssistName() ~= nil then
-        local assistTarget = mq.TLO.Spawn(assist.AssistName())
+    if (mq.TLO.Target.ID() == 0 or mq.TLO.Target.Dead() or mq.TLO.Target.ID() == Utils.GetGroupMainAssistID()) and assist and assist() then
+        assist.DoTarget()
+        mq.delay("1s", function() return mq.TLO.Target.ID() == assist.ID() end)
+        local assistTarget = mq.TLO.Spawn(mq.TLO.Me.TargetOfTarget()) --assist.DoTarget() --mq.TLO.Spawn("%s", assist.AssistName())
+
+        RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target :: %s", assistTarget.CleanName() or "None")
         if assistTarget and assistTarget() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
+            RGMercsLogger.log_verbose("\agFindTargetCheck OA MA has A target")
             return true
+        else
+            RGMercsLogger.log_verbose("\aoFindTargetCheck OA MA has no target")
         end
+    else
+        RGMercsLogger.log_verbose("\arFindTargetCheck OA MA doesnt exist")
     end
 
     return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget) and not RGMercConfig.Globals.BackOffFlag
@@ -2095,6 +2104,123 @@ function Utils.Tooltip(desc)
         ImGui.Text(desc)
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
+    end
+end
+
+---@param name string
+function Utils.AddOA(name)
+    table.insert(RGMercConfig:GetSettings().OutsideAssistList, name)
+    RGMercConfig:SaveSettings(false)
+end
+
+function Utils.DeleteOA(idx)
+    if idx <= #RGMercConfig:GetSettings().OutsideAssistList then
+        RGMercsLogger.log_info("\axOutside Assist \at%s\ax \ag%s\ax - \arDeleted!\ax", idx, RGMercConfig:GetSettings().OutsideAssistList[idx])
+        table.remove(RGMercConfig:GetSettings().OutsideAssistList, idx)
+        --RGMercConfig:GetSettings().OutsideAssistList[idx] = nil
+        RGMercConfig:SaveSettings(false)
+    else
+        RGMercsLogger.log_error("\ar%d is not a valid OA ID!", idx)
+    end
+end
+
+---@param id number
+function Utils.MoveOAUp(id)
+    local newId = id - 1
+
+    if newId < 1 then return end
+    if id > #RGMercConfig:GetSettings().OutsideAssistList then return end
+
+    local oldEntry                                      = RGMercConfig:GetSettings().OutsideAssistList[newId]
+    RGMercConfig:GetSettings().OutsideAssistList[newId] = RGMercConfig:GetSettings().OutsideAssistList[id]
+    RGMercConfig:GetSettings().OutsideAssistList[id]    = oldEntry
+    RGMercConfig:SaveSettings(false)
+end
+
+---@param id number
+function Utils.MoveOADown(id)
+    local newId = id + 1
+
+    if id < 1 then return end
+    if newId > #RGMercConfig:GetSettings().OutsideAssistList then return end
+
+    local oldEntry                                      = RGMercConfig:GetSettings().OutsideAssistList[newId]
+    RGMercConfig:GetSettings().OutsideAssistList[newId] = RGMercConfig:GetSettings().OutsideAssistList[id]
+    RGMercConfig:GetSettings().OutsideAssistList[id]    = oldEntry
+    RGMercConfig:SaveSettings(false)
+end
+
+function Utils.RenderOAList()
+    if mq.TLO.Target.ID() > 0 then
+        ImGui.PushID("##_small_btn_create_oa")
+        if ImGui.SmallButton("Add Target as OA") then
+            Utils.AddOA(mq.TLO.Target.DisplayName())
+        end
+        ImGui.PopID()
+    end
+    if ImGui.BeginTable("OAList Nameds", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+
+        ImGui.TableSetupColumn('ID', (ImGuiTableColumnFlags.WidthFixed), 20.0)
+        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
+        ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
+        ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthStretch), 150.0)
+        ImGui.TableSetupColumn('Controls', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        for idx, name in ipairs(RGMercConfig:GetSettings().OutsideAssistList or {}) do
+            local spawn = mq.TLO.Spawn(string.format("PC =%s", name))
+            ImGui.TableNextColumn()
+            ImGui.Text(tostring(idx))
+            ImGui.TableNextColumn()
+            local _, clicked = ImGui.Selectable(name, false)
+            if clicked then
+                Utils.DoCmd("/target id %d", spawn() and spawn.ID() or 0)
+            end
+            ImGui.TableNextColumn()
+            if spawn() and spawn.ID() > 0 then
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
+                ImGui.Text(tostring(math.ceil(spawn.Distance())))
+                ImGui.PopStyleColor()
+                ImGui.TableNextColumn()
+                Utils.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
+                ImGui.Text("0")
+                ImGui.PopStyleColor()
+                ImGui.TableNextColumn()
+                ImGui.Text("0")
+            end
+            ImGui.TableNextColumn()
+            ImGui.PushID("##_small_btn_delete_oa_" .. tostring(idx))
+            if ImGui.SmallButton(ICONS.FA_TRASH) then
+                Utils.DeleteOA(idx)
+            end
+            ImGui.PopID()
+            ImGui.SameLine()
+            ImGui.PushID("##_small_btn_up_oa_" .. tostring(idx))
+            if idx == 1 then
+                ImGui.InvisibleButton(ICONS.FA_CHEVRON_UP, ImVec2(22, 1))
+            else
+                if ImGui.SmallButton(ICONS.FA_CHEVRON_UP) then
+                    Utils.MoveOAUp(idx)
+                end
+            end
+            ImGui.PopID()
+            ImGui.SameLine()
+            ImGui.PushID("##_small_btn_dn_oa_" .. tostring(idx))
+            if idx == #RGMercConfig:GetSettings().OutsideAssistList then
+                ImGui.InvisibleButton(ICONS.FA_CHEVRON_DOWN, ImVec2(22, 1))
+            else
+                if ImGui.SmallButton(ICONS.FA_CHEVRON_DOWN) then
+                    Utils.MoveOADown(idx)
+                end
+            end
+            ImGui.PopID()
+        end
+
+        ImGui.EndTable()
     end
 end
 
