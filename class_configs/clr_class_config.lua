@@ -619,6 +619,34 @@ local _ClassConfig = {
         },
 
     }, -- end AbilitySets
+    ['HelperFunctions']   = {
+        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
+        DoRez = function(self, corpseId)
+            if RGMercConfig:GetSettings().DoBattleRez or RGMercUtils.DoBuffCheck() then
+                RGMercUtils.SetTarget(corpseId)
+
+                local target = mq.TLO.Target
+
+                if not target or not target() then return false end
+
+                if mq.TLO.Target.Distance() > 25 then
+                    RGMercUtils.DoCmd("/corpse")
+                end
+
+                if RGMercUtils.AAReady("Blessing of Resurrection") then
+                    return RGMercUtils.UseAA("Blessing of Resurrection", corpseId)
+                end
+
+                if mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
+                    RGMercUtils.UseItem("Water Sprinkler of Nem Ankh", corpseId)
+                end
+
+                if RGMercUtils.PCSpellReady(self.ResolvedActionMap['RezSpell']) and RGMercUtils.GetXTHaterCount() == 0 and not RGMercUtils.CanUseAA("Blessing of Resurrection") then
+                    RGMercUtils.UseSpell(self.ResolvedActionMap['RezSpell'], corpseId, true)
+                end
+            end
+        end,
+    },
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
     -- of just slamming through the base ordered list.
     -- These will run in order and exit after the first valid spell to cast
