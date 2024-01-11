@@ -231,6 +231,9 @@ local function RGMercsGUI()
                         ImGui.PopID()
                     end
 
+                    if ImGui.CollapsingHeader("Outside Assist List") then
+                        RGMercUtils.RenderOAList()
+                    end
                     if ImGui.CollapsingHeader("Zone Named") then
                         RGMercUtils.RenderZoneNamed()
                     end
