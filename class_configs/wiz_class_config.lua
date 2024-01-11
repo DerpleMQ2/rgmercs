@@ -907,7 +907,7 @@ return {
         {
             gem = 1,
             spells = {
-                { name = string.format("%sClaw", RGMercModules:ExecModule("Class", "GetClassModeName")), },
+                { name_func = function(self) return string.format("%sClaw", self:GetClassModeName()) end, },
                 { name = "IceClaw", },
                 { name = "FireClaw", },
                 { name = "MagicClaw", },
@@ -917,8 +917,8 @@ return {
         {
             gem = 2,
             spells = {
-                { name = string.format("%sEtherealNuke", RGMercModules:ExecModule("Class", "GetClassModeName")), },
-                { name = string.format("%sNuke", RGMercModules:ExecModule("Class", "GetClassModeName")), },
+                { name_func = function(self) return string.format("%sEtherealNuke", self:GetClassModeName()) end, },
+                { name_func = function(self) return string.format("%sNuke", self:GetClassModeName()) end, },
                 { name = "FireEtherealNuke", },
                 { name = "FireNuke", },
             },
@@ -956,8 +956,16 @@ return {
         },
         { gem = 5, spells = { { name = "TwincastSpell", }, { name = "StunSpell", }, { name = "SnareSpell", }, { name = "RootSpell", }, }, },
         { gem = 6, spells = { { name = "GambitSpell", }, { name = "HarvestSpell", }, }, },
-        { gem = 7, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,                                                      spells = { { name = "VortexNuke", }, { name = "FastMagicNuke", }, }, },
-        { gem = 8, cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,                                                      spells = { { name = "JoltSpell", }, }, },
+        {
+            gem = 7,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = { { name = "VortexNuke", }, { name = "FastMagicNuke", }, },
+        },
+        {
+            gem = 8,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = { { name = "JoltSpell", }, },
+        },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
