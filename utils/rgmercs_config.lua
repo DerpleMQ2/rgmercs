@@ -36,37 +36,37 @@ Config.Constants.SpellBookSlots = 1120
 Config.SubModuleSettings        = {}
 
 Config.ExpansionNameToID        = {
-    ['EXPANSION_LEVEL_CLASSIC'] = 0, -- No Expansion
-    ['EXPANSION_LEVEL_ROK'] = 1,     -- The Ruins of Kunark
-    ['EXPANSION_LEVEL_SOV'] = 2,     -- The Scars of Velious
-    ['EXPANSION_LEVEL_SOL'] = 3,     -- The Shadows of Luclin
-    ['EXPANSION_LEVEL_POP'] = 4,     -- The Planes of Power
-    ['EXPANSION_LEVEL_LOY'] = 5,     -- The Legacy of Ykesha
-    ['EXPANSION_LEVEL_LDON'] = 6,    -- Lost Dungeons of Norrath
-    ['EXPANSION_LEVEL_GOD'] = 7,     -- Gates of Discord
-    ['EXPANSION_LEVEL_OOW'] = 8,     -- Omens of War
-    ['EXPANSION_LEVEL_DON'] = 9,     -- Dragons of Norrath
-    ['EXPANSION_LEVEL_DODH'] = 10,   -- Depths of Darkhollow
-    ['EXPANSION_LEVEL_POR'] = 11,    -- Prophecy of Ro
-    ['EXPANSION_LEVEL_TSS'] = 12,    -- The Serpent's Spine
-    ['EXPANSION_LEVEL_TBS'] = 13,    -- The Buried Sea
-    ['EXPANSION_LEVEL_SOF'] = 14,    -- Secrets of Faydwer
-    ['EXPANSION_LEVEL_SOD'] = 15,    -- Seeds of Destruction
-    ['EXPANSION_LEVEL_UF'] = 16,     -- Underfoot
-    ['EXPANSION_LEVEL_HOT'] = 17,    -- House of Thule
-    ['EXPANSION_LEVEL_VOA'] = 18,    -- Veil of Alaris
-    ['EXPANSION_LEVEL_ROF'] = 19,    -- Rain of Fear
-    ['EXPANSION_LEVEL_COTF'] = 20,   -- Call of the Forsaken
-    ['EXPANSION_LEVEL_TDS'] = 21,    -- The Darkened Sea
-    ['EXPANSION_LEVEL_TBM'] = 22,    -- The Broken Mirror
-    ['EXPANSION_LEVEL_EOK'] = 23,    -- Empires of Kunark
-    ['EXPANSION_LEVEL_ROS'] = 24,    -- Ring of Scale
-    ['EXPANSION_LEVEL_TBL'] = 25,    -- The Burning Lands
-    ['EXPANSION_LEVEL_TOV'] = 26,    -- Torment of Velious
-    ['EXPANSION_LEVEL_COV'] = 27,    -- Claws of Veeshan
-    ['EXPANSION_LEVEL_TOL'] = 28,    -- Terror of Luclin
-    ['EXPANSION_LEVEL_NOS'] = 29,    -- Night of Shadows
-    ['EXPANSION_LEVEL_LS'] = 30,     -- Laurion's Song
+    ['EXPANSION_LEVEL_CLASSIC'] = 0,  -- No Expansion
+    ['EXPANSION_LEVEL_ROK']     = 1,  -- The Ruins of Kunark
+    ['EXPANSION_LEVEL_SOV']     = 2,  -- The Scars of Velious
+    ['EXPANSION_LEVEL_SOL']     = 3,  -- The Shadows of Luclin
+    ['EXPANSION_LEVEL_POP']     = 4,  -- The Planes of Power
+    ['EXPANSION_LEVEL_LOY']     = 5,  -- The Legacy of Ykesha
+    ['EXPANSION_LEVEL_LDON']    = 6,  -- Lost Dungeons of Norrath
+    ['EXPANSION_LEVEL_GOD']     = 7,  -- Gates of Discord
+    ['EXPANSION_LEVEL_OOW']     = 8,  -- Omens of War
+    ['EXPANSION_LEVEL_DON']     = 9,  -- Dragons of Norrath
+    ['EXPANSION_LEVEL_DODH']    = 10, -- Depths of Darkhollow
+    ['EXPANSION_LEVEL_POR']     = 11, -- Prophecy of Ro
+    ['EXPANSION_LEVEL_TSS']     = 12, -- The Serpent's Spine
+    ['EXPANSION_LEVEL_TBS']     = 13, -- The Buried Sea
+    ['EXPANSION_LEVEL_SOF']     = 14, -- Secrets of Faydwer
+    ['EXPANSION_LEVEL_SOD']     = 15, -- Seeds of Destruction
+    ['EXPANSION_LEVEL_UF']      = 16, -- Underfoot
+    ['EXPANSION_LEVEL_HOT']     = 17, -- House of Thule
+    ['EXPANSION_LEVEL_VOA']     = 18, -- Veil of Alaris
+    ['EXPANSION_LEVEL_ROF']     = 19, -- Rain of Fear
+    ['EXPANSION_LEVEL_COTF']    = 20, -- Call of the Forsaken
+    ['EXPANSION_LEVEL_TDS']     = 21, -- The Darkened Sea
+    ['EXPANSION_LEVEL_TBM']     = 22, -- The Broken Mirror
+    ['EXPANSION_LEVEL_EOK']     = 23, -- Empires of Kunark
+    ['EXPANSION_LEVEL_ROS']     = 24, -- Ring of Scale
+    ['EXPANSION_LEVEL_TBL']     = 25, -- The Burning Lands
+    ['EXPANSION_LEVEL_TOV']     = 26, -- Torment of Velious
+    ['EXPANSION_LEVEL_COV']     = 27, -- Claws of Veeshan
+    ['EXPANSION_LEVEL_TOL']     = 28, -- Terror of Luclin
+    ['EXPANSION_LEVEL_NOS']     = 29, -- Night of Shadows
+    ['EXPANSION_LEVEL_LS']      = 30, -- Laurion's Song
 }
 
 Config.Constants.LogLevels      = {
@@ -142,7 +142,22 @@ Config.DefaultConfig = {
 
     -- [ REZ ] --
     ['RetryRezDelay']     = { DisplayName = "Retry Rez Delay", Category = "Rez", Tooltip = "Time in seconds of how often to try to rez a corpse.", Default = 6, Min = 1, Max = 60, },
-    ['DoBattleRez']       = { DisplayName = "Cast Spells", Category = "Rez", Tooltip = "Use Spells", Default = true, },
+    ['DoBattleRez']       = { DisplayName = "Do Battle Rez", Category = "Rez", Tooltip = "Use Rez while in combat", Default = true, },
+
+    -- [ MEZ ] --
+    ['MezAECount']        = { DisplayName = "Mez AE Count", Category = "Mez", Tooltip = "Mez if you have more than [X] on xtarget", Default = 3, Min = 1, Max = 20, },
+    ['AutoLevelRange']    = { DisplayName = "Auto Level Range", Category = "Mez", Default = true, Tooltip = "Set to enable automatic mez level detection based on spells.", },
+    ['MezOn']             = { DisplayName = "Mez On", Category = "Mez", Default = true, Tooltip = "Set to use mez spells.", },
+    ['UseSingleTgtMez']   = { DisplayName = "Use Single Tgt Mez", Category = "Mez", Default = true, Tooltip = "Set to enable use of single target mez spells/songs. Default: 1.", },
+    ['MezAnnounce']       = { DisplayName = "Mez Announce", Category = "Mez", Default = true, Tooltip = "Set to announce mez casts.", },
+    ['MezStartCount']     = { DisplayName = "Mez Start Count", Category = "Mez", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Mez spells. ( Default 2 )", },
+    ['MaxMezCount']       = { DisplayName = "Max Mez Count", Category = "Mez", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", },
+    ['MezRadius']         = { DisplayName = "Mez Radius", Category = "Mez", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Mezing, An area twice this size is monitored for aggro mobs", },
+    ['MezZRadius']        = { DisplayName = "Mez ZRadius", Category = "Mez", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start mezzing. An area twice this size is monitored for aggro mobs. If you're enchanter is not mezzing on hills -- increase this value.", },
+    ['MezMinLevel']       = { DisplayName = "Mez Min Level", Category = "Mez", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Mez - Below this lvl are ignored. 0 means no mobs ignored.", },
+    ['MezMaxLevel']       = { DisplayName = "Mez Max Level", Category = "Mez", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Mez - Above this lvl are ignored. 0 means no mobs ignored.", },
+    ['MezStopHPs']        = { DisplayName = "Mez Stop HPs", Category = "Mez", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to mez", },
+    ['UseAEAAMez']        = { DisplayName = "Use AE AAMez", Category = "Mez", Default = false, Tooltip = "Toggle 0/1 to use Area Effect AA Mez (Default: 0).", },
 
     -- [ FELLOWSHIP ] --
     ['DoFellow']          = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = true, },

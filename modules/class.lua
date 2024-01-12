@@ -6,11 +6,8 @@ require('utils.rgmercs_datatypes')
 
 local Module                              = { _version = '0.1a', _name = "Class", _author = 'Derple', }
 Module.__index                            = Module
-Module.LastPetCmd                         = 0
-Module.RezTimers                          = {}
+
 Module.ModuleLoaded                       = false
-Module.ShowFailedSpells                   = false
-Module.ReloadingLoadouts                  = true
 Module.SpellLoadOut                       = {}
 Module.ResolvedActionMap                  = {}
 Module.TempSettings                       = {}
@@ -25,8 +22,11 @@ Module.Constants.RezSearchOutOfGroup      = "pccorpse radius 100 zradius 50"
 -- Track the state of rotations between frames
 Module.TempSettings.RotationStates        = {}
 Module.TempSettings.HealingRotationStates = {}
-
-local newCombatMode                       = false
+Module.TempSettings.RezTimers             = {}
+Module.TempSettings.BardAEMezTimer        = 0
+Module.TempSettings.ShowFailedSpells      = false
+Module.TempSettings.ReloadingLoadouts     = true
+Module.TempSettings.newCombatMode         = false
 
 local function getConfigFileName()
     return mq.configDir ..
@@ -97,7 +97,7 @@ function Module:LoadSettings()
     -- Setup Defaults
     self.settings = RGMercUtils.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
 
-    newCombatMode = true
+    self.TempSettings.newCombatMode = true
 end
 
 function Module.New()
@@ -128,20 +128,20 @@ function Module:SetDynamicNames()
 end
 
 function Module:GetResolvedActionMapItem(item)
-    if self.ReloadingLoadouts then return nil end
+    if self.TempSettings.ReloadingLoadouts then return nil end
     return self.ResolvedActionMap[item]
 end
 
 function Module:SetCombatMode(mode)
     RGMercsLogger.log_debug("\aySettings Combat Mode to: \am%s", mode)
-    self.ReloadingLoadouts = true
+    self.TempSettings.ReloadingLoadouts = true
 
     if self.ClassConfig then
         self.ResolvedActionMap, self.SpellLoadOut = RGMercUtils.SetLoadOut(self,
             self.ClassConfig.Spells, self.ClassConfig.ItemSets, self.ClassConfig.AbilitySets)
     end
 
-    self.ReloadingLoadouts = false
+    self.TempSettings.ReloadingLoadouts = false
     RGMercUtils.LoadSpellLoadOut(self.SpellLoadOut)
 
     if self.ClassConfig.OnModeChange then
@@ -163,14 +163,14 @@ function Module:Render()
         self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes, #self.ClassConfig.Modes)
         if pressed then
             self:SaveSettings(false)
-            newCombatMode = true
+            self.TempSettings.newCombatMode = true
         end
 
         if ImGui.CollapsingHeader("Config Options") then
             self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, self.ClassConfig.DefaultConfig, self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
-                newCombatMode = newCombatMode or loadoutChange
+                self.TempSettings.newCombatMode = self.TempSettings.newCombatMode or loadoutChange
             end
         end
 
@@ -186,7 +186,7 @@ function Module:Render()
             ImGui.Separator()
         end
 
-        if not self.ReloadingLoadouts then
+        if not self.TempSettings.ReloadingLoadouts then
             if ImGui.CollapsingHeader("Rotations") then
                 ImGui.Indent()
                 RGMercUtils.RenderRotationTableKey()
@@ -194,8 +194,8 @@ function Module:Render()
                 for _, r in ipairs(self.TempSettings.RotationStates) do
                     if ImGui.CollapsingHeader(r.name) then
                         ImGui.Indent()
-                        Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.Rotations[r.name],
-                            self.ResolvedActionMap, r.state or 0, Module.ShowFailedSpells)
+                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.Rotations[r.name],
+                            self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
                         ImGui.Unindent()
                     end
                 end
@@ -203,7 +203,7 @@ function Module:Render()
             end
         end
 
-        if not self.ReloadingLoadouts and #self.TempSettings.HealingRotationStates > 0 then
+        if not self.TempSettings.ReloadingLoadouts and #self.TempSettings.HealingRotationStates > 0 then
             if ImGui.CollapsingHeader("Healing Rotations") then
                 ImGui.Indent()
                 RGMercUtils.RenderRotationTableKey()
@@ -211,8 +211,8 @@ function Module:Render()
                 for _, r in pairs(self.TempSettings.HealingRotationStates) do
                     if ImGui.CollapsingHeader(r.name) then
                         ImGui.Indent()
-                        Module.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.HealRotations[r.name],
-                            self.ResolvedActionMap, r.state or 0, Module.ShowFailedSpells)
+                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.HealRotations[r.name],
+                            self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
                         ImGui.Unindent()
                     end
                 end
@@ -256,6 +256,7 @@ end
 
 ---@return string
 function Module:GetClassModeName()
+    if not self.settings then return "None" end
     return self.ClassConfig and self.ClassConfig.Modes[self.settings.Mode] or "None"
 end
 
@@ -312,9 +313,9 @@ function Module:SelfCheckAndRez()
 
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
-                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
         end
@@ -329,9 +330,9 @@ function Module:IGCheckAndRez()
 
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
-                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
         end
@@ -346,12 +347,85 @@ function Module:OOGCheckAndRez()
 
         if rezSpawn() and (RGMercUtils.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
-                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
         end
+    end
+end
+
+function Module:AEMezCheck()
+    local settings = RGMercConfig:GetSettings()
+    local mezNPCFilter = string.format("npc radius %d targetable los playerstate 4", settings.MezRadius)
+    local mezNPCPetFilter = string.format("npcpet radius %d targetable los playerstate 4", settings.MezRadius)
+    local aeCount = mq.TLO.SpawnCount(mezNPCFilter)() + mq.TLO.SpawnCount(mezNPCPetFilter)()
+
+    local mezSpell = self.ResolvedActionMap['MezAESpell']
+
+    if not mezSpell or not mezSpell() then return end
+
+    -- Make sure the mobs of concern are within rang
+    if aeCount < settings.MezAECount then return end
+
+    -- Get the nearest spawn meeting our npc search criteria
+    local nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCFilter)
+    if not nearestSpawn or nearestSpawn() then
+        nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCPetFilter)
+    end
+
+    if not nearestSpawn or nearestSpawn() then
+        return
+    end
+
+    -- Next make sure casting our AE won't anger ore mobs -- I'm lazy and not checking the AERange of the AA. I'm gonna assume if the
+    -- AERange of the normal spell will piss them off, then the AA probably would too.
+    local angryMobCount = mq.TLO.SpawnCount(string.format("npc xtarhater loc %0.2f, %0.2f radius %d", nearestSpawn.X(), nearestSpawn.Y(), mezSpell.AERange()))()
+    local chillMobCount = mq.TLO.SpawnCount(string.format("npc loc %0.2f, %0.2f radius %d", nearestSpawn.X(), nearestSpawn.Y(), mezSpell.AERange()))()
+
+    -- Checking to see if we are auto attacking, or if we are actively casting a spell
+    -- purpose for this is to catch auto attacking enchaters (who have lost their mind)
+    -- And bards who never are not casting.
+    if angryMobCount >= chillMobCount then
+        if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() ~= nil then
+            RGMercsLogger.log_debug("\awNOTICE:\ax Stopping Singing so I can cast AE mez.")
+            RGMercUtils.DoCmd("/stopcast")
+            RGMercUtils.DoCmd("/stopsong")
+        end
+
+        -- Call MezNow and pass the AE flag and allow it to use the AA if the Spell isn't ready.
+        -- This won't effect bards at all.
+        -- We target autoassist id as we don't want to swap targets and we want to continue meleeing
+        RGMercsLogger.log_debug("\awNOTICE:\ax Re-targeting to our main assist's mob.")
+        RGMercUtils.SetControlToon()
+
+        if RGMercUtils.FindTargetCheck() then
+            RGMercUtils.FindTarget()
+            RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+        end
+    end
+end
+
+function Module:UpdateMezList()
+end
+
+function Module:ProcessMezList()
+end
+
+function Module:DoMez()
+    if RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSettings().MezAECount and
+        ((mq.TLO.Me.Class.ShortName():lower() == "brd" and self.TempSettings.BardAEMezTimer == 0) or
+            (mq.TLO.Me.SpellReady(self.ResolvedActionMap['MezAESpell'])() or RGMercUtils.AAReady("Beam of Slumber"))) then
+        self:AEMezCheck()
+    end
+
+    if RGMercUtils.GetXTHaterCount() > RGMercConfig:GetSettings().MezStartCount then
+        self:UpdateMezList()
+    end
+
+    if mq.TLO.Me.Class.ShortName():lower() == "brd" or mq.TLO.Me.SpellReady(self.ResolvedActionMap['MezSpell'])() and #self.TempSettings.MezTracker >= 1 then
+        self:ProcessMezList()
     end
 end
 
@@ -497,10 +571,10 @@ function Module:GiveTime(combat_state)
     if mq.TLO.Me.Hovering() then return end
 
     -- Main Module logic goes here.
-    if newCombatMode then
+    if self.TempSettings.newCombatMode then
         RGMercsLogger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[self.settings.Mode])
         self:SetCombatMode(self.ClassConfig.Modes[self.settings.Mode])
-        newCombatMode = false
+        self.TempSettings.newCombatMode = false
     end
 
     if self.CombatState ~= combat_state and combat_state == "Downtime" then
