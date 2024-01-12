@@ -1,20 +1,66 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq           = require('mq')
+local RGMercUtils  = require("utils.rgmercs_utils")
 
-return {
-    ['Modes'] = {
-        'Tank',
+local Tooltips     = {
+    Epic             = 'Item: Casts Epic Weapon Ability',
+    BardRunBuff      = "Song Line: Movement Speed Modifier",
+    MainAriaSong     = "Song Line: Spell Focus Modifier",
+    SufferingSong    = "Song Line Line: Melee Proc With Agro Reduction",
+    SprySonataSong   = "Song Line: Magic Asorb AC Increase Mitigate Damage Shield Resist Spells",
+    PsalmSong        = "Song Line: Spell Damage Focus Haste v3",
+    CrescendoSong    = "Song Line: Group v2 Increase Hit Points and Mana",
+    ArcaneSong       = "Song Line: Caster Spell Proc",
+    InsultSong       = "Song Line: Single Target DD",
+    DichoSong        = "Song Line: Triggers Psalm of Empowerment and Psalm of Potential H/M/E Increase Melee and Caster Dam Increase",
+    BardDPSAura      = "Aura Line: OverHaste, Melee/Caster DPS",
+    BardRegenAura    = "Aura Line: HP/Mana Regen",
+    PulseRegenSong   = "Song Line: HP/Mana/Endurence Regen Increases Healing Yield",
+    ChorusRegenSong  = "Song Line: AE HP/Mana Regen",
+    CantataRegenSong = "Song Line: Group HP/Mana Regen",
+    WarMarchSong     = "Song Line: Melee Haste + DS + STR/ATK Increase",
+    CasterAriaSong   = "Song Line: Fire DD Damage Increase + Effiency",
+    SlowSong         = "Song Line: Melee Attack Slow",
+    AESlowSong       = "Song Line: PBAE Melee Attack Slow",
+    AccelerandoSong  = "Song Line: Reduce Cast Time (Beneficial Only) Agro Reduction Modifier",
+    SpitefulSong     = "Song Line: Increase AC Agro Increase Proc",
+    RecklessSong     = "Song Line: Increase Crit Heal and Crit HoT",
+    FateSong         = "Song Line: Cold DD Damage Increae + Effiency",
+    DotSong          = "Song Line:  DoT Damage Songs",
+    CureSong         = "Song Line: Single Target Cure Poison Disease and Corruption",
+    AllianceSong     = "Song Line: Mob Debuff Increase Insult Damage for other Bards",
+    CharmSong        = "Song Line: Charm Mob",
+    ReflexStrike     = "Disc Line: Attack 4 times to restore Mana to Group",
+    ChordsAE         = "Song Line: PBAE Damage if Target isn't moving",
+    LowAriaSong      = "Song Line: Warsong and BattleCry prior to combination of effects into Aria",
+    AmpSong          = "Song Line: Increase Singing Skill",
+    DispelSong       = "Song Line: Dispell",
+    ResistSong       = "Song Line: Group Resist Increase",
+    MezSong          = "Song Line: Single Target Mez",
+    MezAESong        = "Song Line: PBAE Mez",
+    Bellow           = "AA: Stuns Initial DD Damage and Increases Resist Modifier on Mob Concludes with DD",
+    Spire            = "AA: Lowers Incoming Melee Damage and Increases Melee and Spell Damage",
+    FuneralDirge     = "AA: DD and Increases Melee Damage to Target",
+    FierceEye        = "AA: Increases Base Melee Damage and Increase Melee Crit Damage and Increase Proc Rate and Increase Crit Chance on Spells",
+    QuickTime        = "AA: Hundred Hands Effect and Increase Melee Hit and Increase Atk",
+    BladedSong       = "AA: Reverse Damage Shield",
+    Jonthans         = "Song Line: Self-only Haste Melee Damage Modifier Melee Min Damage Modifier Proc Modifier",
+}
+
+local _ClassConfig = {
+    _version          = "0.1a",
+    _author           = "Tiddliestix",
+
+    ['Modes']         = {
         'DPS',
-        'Healer',
         'Hybrid',
     },
-    ['ItemSets'] = {
+    ['ItemSets']      = {
         ['Epic'] = {
-            "Innoruuk's Dark Blessing",
-            "Innoruuk's Voice",
+            "Blade of Vesagran",
+            "Priismatic Dragon Blade",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']   = {
         ['BardRunBuff'] = {
             -- Bard RunSpeed
             "Selo's Accelerato",
@@ -187,6 +233,17 @@ return {
             "Cantata of Soothing",
             "Hymn of Restoration",
         },
+        ['CantataRegenSong'] = {
+            -- CantataRegenSong - Level Range 6 - 113
+            "Cantata of Rodcet",
+            "Cantata of Restoration",
+            "Erollisi's Cantata",
+            "Cantata of Life",
+            "Wind of Marr",
+            "Cantata of Replenishment",
+            "Cantata of Soothing",
+            "Hymn of Restoration",
+        },
         ['WarMarchSong'] = {
             -- WarMarchSong Level Range 10 - 114
             "War March of Centien Xi Va Xakra",
@@ -354,7 +411,8 @@ return {
             "Fufil's Diminishing Dirge",
             "Fufil's Curtailing Chant",
         },
-        ['CureSpell'] = {
+        ['CureSong'] = {
+            -- Multiple Missing --
             "Aria of Absolution",
         },
         ['AllianceSong'] = {
@@ -407,8 +465,8 @@ return {
             "Psalm of the Restless",
             "Psalm of the Pious",
         },
-        ['MezSpell'] = {
-            -- MezSpell - Level Range 15 - 114
+        ['MezSong'] = {
+            -- MezSong - Level Range 15 - 114
             "Slumber of the Diabo",
             -- [] = "Lullaby of Nightfall",
             -- [] = "Lullaby of Zburator",
@@ -441,8 +499,8 @@ return {
             "Crission's Pixie Strike",
             "Kelin's Lucid Lullaby",
         },
-        ['MezAESpell'] = {
-            -- MezAESpell - Level Range 85 - 115 **
+        ['MezAESong'] = {
+            -- MezAESong - Level Range 85 - 115 **
             "Wave of Nocturn",
             "Wave of Sleep",
             "Wave of Somnolence",
@@ -453,141 +511,94 @@ return {
             "Wave of Slumber",
         },
     },
-    ['Rotations'] = {
-        ['Tank'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
-            },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
-            },
+    ['Rotations']     = {
+        ['Burn'] = {
+        },
+        ['Debuff'] = {
+        },
+        ['Heal'] = {
         },
         ['DPS'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
-            },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
-            },
         },
-        ['Healer'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
-            },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
-            },
-        },
-        ['Hybrid'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
-            },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
-            },
-        },
-        ['DefaultConfig'] = {
-            ['Mode'] = '1',
+        ['Downtime'] = {
         },
     },
+    ['Spells']        = {
+        {
+            gem = 1,
+            spells = {
+                -- { name = "NAME FROM ABILITY SET LIST", cond = function(self) return mq.TLO.Me.Level() < 86 end, },
+            },
+        },
+        {
+            gem = 2,
+            spells = {
+            },
+        },
+        {
+            gem = 3,
+            spells = {
+            },
+        },
+        {
+            gem = 4,
+            spells = {
+            },
+        },
+        {
+            gem = 5,
+            spells = {
+            },
+        },
+        {
+            gem = 6,
+            spells = {
+            },
+        },
+        {
+            gem = 7,
+            spells = {
+            },
+        },
+        {
+            gem = 8,
+            spells = {
+            },
+        },
+        {
+            gem = 9,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+            },
+        },
+        {
+            gem = 10,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+            },
+        },
+        {
+            gem = 11,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+            },
+        },
+        {
+            gem = 12,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+            },
+        },
+        {
+            gem = 13,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+            },
+        },
+    },
+    ['DefaultConfig'] = {
+        ['Mode'] = '1',
+    },
+
 }
+return _ClassConfig
