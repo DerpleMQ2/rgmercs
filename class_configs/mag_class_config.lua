@@ -2005,8 +2005,8 @@ _ClassConfig      = {
         {
             gem = 1,
             spells = {
-                { name = "FireNuke1",  cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
-                { name = "SpearNuke",  cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
+                { name = "FireNuke1",  cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "SpearNuke",  cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
                 { name = "MagicNuke1", cond = function(self) return self.settings.DoMagicNuke end, },
                 { name = "SpearNuke",  cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
                 { name = "FireNuke1",  cond = function(self) return true end, },
@@ -2015,8 +2015,8 @@ _ClassConfig      = {
         {
             gem = 2,
             spells = {
-                { name = "FireBoltNuke", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
-                { name = "SwarmPet",     cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
+                { name = "FireBoltNuke", cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "SwarmPet",     cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
                 { name = "MagicNuke2",   cond = function(self) return self.settings.DoMagicNuke end, },
                 { name = "ChaoticNuke",  cond = function(self) return mq.TLO.Me.Level() >= 69 end, },
                 { name = "FireNuke2",    cond = function(self) return true end, },
@@ -2025,8 +2025,8 @@ _ClassConfig      = {
         {
             gem = 3,
             spells = {
-                { name = "FireNuke2",     cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
-                { name = "ChaoticNuke",   cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
+                { name = "FireNuke2",     cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "ChaoticNuke",   cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
                 { name = "SwarmPet",      cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 70 end, },
                 { name = "FireNuke1",     cond = function(self) return true end, },
                 { name = "MagicRainNuke", cond = function(self) return self.settings.DoMagicNuke end, },
@@ -2036,9 +2036,9 @@ _ClassConfig      = {
         {
             gem = 4,
             spells = {
-                { name = "LongDurDmgShield", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
-                { name = "FireNuke2",        cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() >= 70 and mq.TLO.Me.Level() <= 72 end, },
-                { name = "PetStanceSpell",   cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() >= 73 end, },
+                { name = "LongDurDmgShield", cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
+                { name = "FireNuke2",        cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() >= 70 and mq.TLO.Me.Level() <= 72 end, },
+                { name = "PetStanceSpell",   cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() >= 73 end, },
                 { name = "MagicBoltNuke1",   cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 98 end, },
                 { name = "VolleyNuke",       cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
                 { name = "MagicNuke1",       cond = function(self) return true end, },
@@ -2047,7 +2047,7 @@ _ClassConfig      = {
         {
             gem = 5,
             spells = {
-                { name = "PetHealSpell",   cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "PetHealSpell",   cond = function(self) return self:IsModeActive("PetTank") end, },
                 { name = "MagicBoltNuke2", cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 103 end, },
                 { name = "SpearNuke2",     cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
                 { name = "MagicNuke2",     cond = function(self) return true end, },
@@ -2056,8 +2056,8 @@ _ClassConfig      = {
         {
             gem = 6,
             spells = {
-                { name = "ManaRodSummon",    cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 77 end, },
-                { name = "PetPromisedSpell", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() > 77 end, },
+                { name = "ManaRodSummon",    cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() <= 77 end, },
+                { name = "PetPromisedSpell", cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() > 77 end, },
                 { name = "MaloNuke",         cond = function(self) return self.settings.DoMagicNuke and mq.TLO.Me.Level() >= 100 end, },
                 {
                     name = "AllianceBuff",
@@ -2081,7 +2081,7 @@ _ClassConfig      = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
 
-                { name = "AirPetSpell",       cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "AirPetSpell",       cond = function(self) return self:IsModeActive("PetTank") end, },
                 { name = "SelfManaRodSummon", },
             },
         },
@@ -2089,7 +2089,7 @@ _ClassConfig      = {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "ShortDurDmgShield", cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "ShortDurDmgShield", cond = function(self) return self:IsModeActive("PetTank") end, },
                 { name = "PetHealSpell", },
             },
         },
@@ -2097,8 +2097,8 @@ _ClassConfig      = {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "FireShroud", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() < 90 end, },
-                { name = "GatherMana", cond = function(self) return self.IsModeActive("PetTank") and mq.TLO.Me.Level() >= 90 end, },
+                { name = "FireShroud", cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() < 90 end, },
+                { name = "GatherMana", cond = function(self) return self:IsModeActive("PetTank") and mq.TLO.Me.Level() >= 90 end, },
                 { name = "DichoSpell", },
             },
         },
@@ -2106,7 +2106,7 @@ _ClassConfig      = {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "PetManaNuke", cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "PetManaNuke", cond = function(self) return self:IsModeActive("PetTank") end, },
                 { name = "TwinCast", },
             },
         },
@@ -2114,7 +2114,7 @@ _ClassConfig      = {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SurgeDS1",    cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "SurgeDS1",    cond = function(self) return self:IsModeActive("PetTank") end, },
                 { name = "PetManaNuke", },
             },
         },
@@ -2122,7 +2122,7 @@ _ClassConfig      = {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SurgeDS2",   cond = function(self) return self.IsModeActive("PetTank") end, },
+                { name = "SurgeDS2",   cond = function(self) return self:IsModeActive("PetTank") end, },
                 { name = "GatherMana", },
             },
         },
