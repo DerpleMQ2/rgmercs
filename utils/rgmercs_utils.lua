@@ -1037,9 +1037,9 @@ function Utils.SelfBuffCheck(spell)
         RGMercsLogger.log_verbose("\arSelfBuffCheck() Spell Invalid")
         return false
     end
-    local res = not Utils.BuffActiveByID(spell.ID()) and spell.Stacks()
+    local res = not Utils.BuffActiveByID(spell.RankName.ID()) and spell.Stacks()
 
-    RGMercsLogger.log_verbose("\arSelfBuffCheck(%s/%d) Spell Obj => %s", spell.RankName(), spell.ID(), Utils.BoolToString(res))
+    RGMercsLogger.log_verbose("\arSelfBuffCheck(%s/%d) Spell Obj => %s", spell.RankName(), spell.RankName.ID(), Utils.BoolToString(res))
 
     return res
 end
