@@ -4,7 +4,9 @@ local helpers = {}
 
 function helpers.query(peer, query, timeout)
     mq.cmdf('/dquery %s -q "%s"', peer, query)
-    mq.delay(timeout or 1000, function() return mq.TLO.DanNet(peer).Q(query).Received() > 0 end)
+    if timeout > 0 then
+        mq.delay(timeout or 1000, function() return mq.TLO.DanNet(peer).Q(query).Received() > 0 end)
+    end
     local value = mq.TLO.DanNet(peer).Q(query)()
     RGMercsLogger.log_debug('\ayQuerying - mq.TLO.DanNet(%s).Q(%s) = %s', peer, query, value)
     return value
