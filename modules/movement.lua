@@ -298,7 +298,7 @@ function Module:ShouldFollow()
     local assistSpawn = RGMercUtils.GetMainAssistSpawn()
 
     return not mq.TLO.MoveTo.Moving() and
-        (not me.Casting.ID() or me.Class.ShortName():lower() == "brd") and
+        (not me.Casting.ID() or RGMercUtils.MyClassIs("brd")) and
         (RGMercUtils.GetXTHaterCount() == 0 or (assistSpawn() and assistSpawn.Distance() > self.settings.ChaseDistance))
 end
 

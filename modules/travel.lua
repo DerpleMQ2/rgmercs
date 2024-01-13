@@ -109,7 +109,7 @@ function Module:Init()
     local className = mq.TLO.Me.Class.ShortName():lower()
     self:LoadSettings()
 
-    if className == "wiz" or className == "dru" then
+    if RGMercUtils.MyClassIs("wiz") or RGMercUtils.MyClassIs("dru") then
         self.TransportSpells                                                    = {}
         self.TransportSpells[RGMercConfig.Globals.CurLoadedChar]                = {}
         self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Class          = className

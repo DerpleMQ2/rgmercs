@@ -91,6 +91,7 @@ end
 
 ---@param targetId integer
 function Utils.SetTarget(targetId)
+    if targetId == mq.TLO.Target.ID() then return end
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if RGMercConfig:GetSettings().DoAutoTarget then
         if Utils.GetTargetID() ~= targetId then
@@ -222,6 +223,35 @@ function Utils.PCSpellReady(spell)
     if me.Stunned() then return false end
 
     return me.CurrentMana() > spell.Mana() and (me.Casting.ID() or 0) == 0 and me.Book(spell.RankName())() ~= nil and not me.Moving()
+end
+
+---@return boolean
+function Utils.NPCSpellReady(spell, targetId, healingSpell)
+    if not spell or string.len(spell) == 0 then return false end
+    local me = mq.TLO.Me
+    local spell = mq.TLO.Spell(spell)
+
+    if targetId == 0 then targetId = mq.TLO.Target.ID() end
+
+    if not spell or not spell() then return false end
+
+    if me.Stunned() then return false end
+
+    local target = mq.TLO.Spawn(targetId)
+
+    if not target or not target() then return false end
+
+    if me.SpellReady(spell.RankName()) and me.CurrentMana() >= spell.Mana() then
+        if not me.Moving() and not me.Casting.ID() and target.Type():lower() ~= "corpse" then
+            if target.LineOfSight() then
+                return true
+            elseif healingSpell then
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
 function Utils.GiveTo(toId, itemName, count)
@@ -455,7 +485,7 @@ function Utils.UseAA(aaName, targetId)
     end
 
     if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
-        if me.Class.ShortName():lower() == "brd" then
+        if Utils.MyClassIs("brd") then
             mq.delay("3s", function() return (not mq.TLO.Window("CastingWindow").Open()) end)
             mq.delay(10)
             Utils.DoCmd("/stopsong")
@@ -507,7 +537,7 @@ function Utils.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
     if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
-        if me.Class.ShortName():lower() == "brd" then
+        if Utils.MyClassIs("brd") then
             mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
             mq.delay(10)
             Utils.DoCmd("/stopsong")
@@ -942,6 +972,22 @@ function Utils.SelfBuffAACheck(aaName)
     return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks and triggerStacks
 end
 
+---@return string
+function Utils.GetLastCastResultName()
+    return RGMercConfig.Constants.CastResultsIdToName[RGMercConfig.Globals.CastResult]
+end
+
+---@return number
+function Utils.GetLastCastResultId()
+    return RGMercConfig.Globals.CastResult
+end
+
+---@param result number
+function Utils.SetLastCastResult(result)
+    RGMercsLogger.log_debug("\awSet Last Cast Result => \ag%s", RGMercConfig.Constants.CastResultsIdToName[result])
+    RGMercConfig.Globals.CastResult = result
+end
+
 ---@param hpStopDots number # when to stop dots.
 ---@param spell MQSpell
 ---@return boolean
@@ -1287,7 +1333,7 @@ function Utils.DoBuffCheck()
 
     if Utils.GetXTHaterCount() > 0 or RGMercConfig.Globals.AutoTargetID > 0 then return false end
 
-    if (mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active()) and mq.TLO.Me.Class.ShortName():lower() ~= "brd" then return false end
+    if (mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active()) and not Utils.MyClassIs("brd") then return false end
 
     if RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
 
@@ -1340,7 +1386,7 @@ end
 function Utils.AutoCampCheck(config, tempConfig)
     if not config.ReturnToCamp then return end
 
-    if mq.TLO.Me.Casting.ID() and mq.TLO.Me.Class.ShortName():lower() ~= "brd" then return end
+    if mq.TLO.Me.Casting.ID() and not Utils.MyClassIs("brd") then return end
 
     -- chasing a toon dont use camnp.
     if config.ChaseOn then return end
@@ -1390,7 +1436,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
 
     local target = mq.TLO.Target
 
-    if mq.TLO.Me.State():lower() == "feign" and mq.TLO.Me.Class.ShortName():lower() ~= "mnk" then
+    if mq.TLO.Me.State():lower() == "feign" and not Utils.MyClassIs("mnk") then
         mq.TLO.Me.Stand()
     end
 
@@ -1462,6 +1508,12 @@ end
 ---@return boolean
 function Utils.HaveExpansion(name)
     return mq.TLO.Me.HaveExpansion(RGMercConfig.ExpansionNameToID[name])
+end
+
+---@param class string
+---@return boolean
+function Utils.MyClassIs(class)
+    return mq.TLO.Me.Class.ShortName():lower() == class:lower()
 end
 
 ---@param spawn MQSpawn
@@ -1739,8 +1791,16 @@ function Utils.FindTarget()
         end
     end
 
-    if RGMercConfig.Globals.AutoTargetID and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
+    if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
         Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+    end
+end
+
+function Utils.HandleMezAnnounce(msg)
+    if RGMercConfig:GetSettings().MezAnnounce then
+        Utils.PrintGroupMessage(msg)
+    else
+        RGMercsLogger.log_debug(msg)
     end
 end
 
@@ -1916,7 +1976,7 @@ function Utils.OkToEngage(autoTargetId)
         local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
-                RGMercsLogger.log_debug("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
+                RGMercsLogger.log_verbose("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
                     target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId, mq.TLO.Me.ID())
             end
             return true
@@ -2589,6 +2649,13 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                     if ImGui.SmallButton(settings[k]:len() > 0 and settings[k] or "[Drop Here]") then
                         if mq.TLO.Cursor() then
                             settings[k] = mq.TLO.Cursor.Name()
+                            pressed = true
+                        end
+                    end
+                    ImGui.SameLine()
+                    if ImGui.SmallButton(ICONS.MD_CLEAR) then
+                        if mq.TLO.Cursor() then
+                            settings[k] = ""
                             pressed = true
                         end
                     end

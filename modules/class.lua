@@ -23,10 +23,9 @@ Module.Constants.RezSearchOutOfGroup      = "pccorpse radius 100 zradius 50"
 Module.TempSettings.RotationStates        = {}
 Module.TempSettings.HealingRotationStates = {}
 Module.TempSettings.RezTimers             = {}
-Module.TempSettings.BardAEMezTimer        = 0
 Module.TempSettings.ShowFailedSpells      = false
 Module.TempSettings.ReloadingLoadouts     = true
-Module.TempSettings.newCombatMode         = false
+Module.TempSettings.NewCombatMode         = false
 
 local function getConfigFileName()
     return mq.configDir ..
@@ -97,7 +96,7 @@ function Module:LoadSettings()
     -- Setup Defaults
     self.settings = RGMercUtils.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
 
-    self.TempSettings.newCombatMode = true
+    self.TempSettings.NewCombatMode = true
 end
 
 function Module.New()
@@ -163,14 +162,14 @@ function Module:Render()
         self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes, #self.ClassConfig.Modes)
         if pressed then
             self:SaveSettings(false)
-            self.TempSettings.newCombatMode = true
+            self.TempSettings.NewCombatMode = true
         end
 
         if ImGui.CollapsingHeader("Config Options") then
             self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, self.ClassConfig.DefaultConfig, self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
-                self.TempSettings.newCombatMode = self.TempSettings.newCombatMode or loadoutChange
+                self.TempSettings.NewCombatMode = self.TempSettings.NewCombatMode or loadoutChange
             end
         end
 
@@ -356,79 +355,6 @@ function Module:OOGCheckAndRez()
     end
 end
 
-function Module:AEMezCheck()
-    local settings = RGMercConfig:GetSettings()
-    local mezNPCFilter = string.format("npc radius %d targetable los playerstate 4", settings.MezRadius)
-    local mezNPCPetFilter = string.format("npcpet radius %d targetable los playerstate 4", settings.MezRadius)
-    local aeCount = mq.TLO.SpawnCount(mezNPCFilter)() + mq.TLO.SpawnCount(mezNPCPetFilter)()
-
-    local mezSpell = self.ResolvedActionMap['MezAESpell']
-
-    if not mezSpell or not mezSpell() then return end
-
-    -- Make sure the mobs of concern are within rang
-    if aeCount < settings.MezAECount then return end
-
-    -- Get the nearest spawn meeting our npc search criteria
-    local nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCFilter)
-    if not nearestSpawn or nearestSpawn() then
-        nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCPetFilter)
-    end
-
-    if not nearestSpawn or nearestSpawn() then
-        return
-    end
-
-    -- Next make sure casting our AE won't anger ore mobs -- I'm lazy and not checking the AERange of the AA. I'm gonna assume if the
-    -- AERange of the normal spell will piss them off, then the AA probably would too.
-    local angryMobCount = mq.TLO.SpawnCount(string.format("npc xtarhater loc %0.2f, %0.2f radius %d", nearestSpawn.X(), nearestSpawn.Y(), mezSpell.AERange()))()
-    local chillMobCount = mq.TLO.SpawnCount(string.format("npc loc %0.2f, %0.2f radius %d", nearestSpawn.X(), nearestSpawn.Y(), mezSpell.AERange()))()
-
-    -- Checking to see if we are auto attacking, or if we are actively casting a spell
-    -- purpose for this is to catch auto attacking enchaters (who have lost their mind)
-    -- And bards who never are not casting.
-    if angryMobCount >= chillMobCount then
-        if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() ~= nil then
-            RGMercsLogger.log_debug("\awNOTICE:\ax Stopping Singing so I can cast AE mez.")
-            RGMercUtils.DoCmd("/stopcast")
-            RGMercUtils.DoCmd("/stopsong")
-        end
-
-        -- Call MezNow and pass the AE flag and allow it to use the AA if the Spell isn't ready.
-        -- This won't effect bards at all.
-        -- We target autoassist id as we don't want to swap targets and we want to continue meleeing
-        RGMercsLogger.log_debug("\awNOTICE:\ax Re-targeting to our main assist's mob.")
-        RGMercUtils.SetControlToon()
-
-        if RGMercUtils.FindTargetCheck() then
-            RGMercUtils.FindTarget()
-            RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
-        end
-    end
-end
-
-function Module:UpdateMezList()
-end
-
-function Module:ProcessMezList()
-end
-
-function Module:DoMez()
-    if RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSettings().MezAECount and
-        ((mq.TLO.Me.Class.ShortName():lower() == "brd" and self.TempSettings.BardAEMezTimer == 0) or
-            (mq.TLO.Me.SpellReady(self.ResolvedActionMap['MezAESpell'])() or RGMercUtils.AAReady("Beam of Slumber"))) then
-        self:AEMezCheck()
-    end
-
-    if RGMercUtils.GetXTHaterCount() > RGMercConfig:GetSettings().MezStartCount then
-        self:UpdateMezList()
-    end
-
-    if mq.TLO.Me.Class.ShortName():lower() == "brd" or mq.TLO.Me.SpellReady(self.ResolvedActionMap['MezSpell'])() and #self.TempSettings.MezTracker >= 1 then
-        self:ProcessMezList()
-    end
-end
-
 function Module:FindWorstHurtGroupMember(minHPs)
     local groupSize = mq.TLO.Group.Members()
     local worstId = 0
@@ -571,10 +497,10 @@ function Module:GiveTime(combat_state)
     if mq.TLO.Me.Hovering() then return end
 
     -- Main Module logic goes here.
-    if self.TempSettings.newCombatMode then
+    if self.TempSettings.NewCombatMode then
         RGMercsLogger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[self.settings.Mode])
         self:SetCombatMode(self.ClassConfig.Modes[self.settings.Mode])
-        self.TempSettings.newCombatMode = false
+        self.TempSettings.NewCombatMode = false
     end
 
     if self.CombatState ~= combat_state and combat_state == "Downtime" then

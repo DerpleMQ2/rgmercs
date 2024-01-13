@@ -1,41 +1,71 @@
-local mq                        = require('mq')
-local RGMercUtils               = require("utils.rgmercs_utils")
-local Set                       = require("mq.Set")
+local mq                             = require('mq')
+local RGMercUtils                    = require("utils.rgmercs_utils")
+local Set                            = require("mq.Set")
 
-local Config                    = { _version = '0.5a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Greyn', }
-Config.__index                  = Config
-Config.settings                 = {}
+local Config                         = { _version = '0.5a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Greyn', }
+Config.__index                       = Config
+Config.settings                      = {}
 
 -- Global State
-Config.Globals                  = {}
-Config.Globals.MainAssist       = ""
-Config.Globals.AutoTargetID     = 0
-Config.Globals.BurnNow          = false
-Config.Globals.PauseMain        = false
-Config.Globals.LastMove         = nil
-Config.Globals.BackOffFlag      = false
-Config.Globals.InMedState       = false
-Config.Globals.LastPetCmd       = 0
-Config.Globals.LastFaceTime     = 0
-Config.Globals.CurLoadedChar    = mq.TLO.Me.DisplayName()
-Config.Globals.CurLoadedClass   = mq.TLO.Me.Class.ShortName()
-Config.Globals.CurServer        = mq.TLO.EverQuest.Server():gsub(" ", "")
+Config.Globals                       = {}
+Config.Globals.MainAssist            = ""
+Config.Globals.AutoTargetID          = 0
+Config.Globals.BurnNow               = false
+Config.Globals.PauseMain             = false
+Config.Globals.LastMove              = nil
+Config.Globals.BackOffFlag           = false
+Config.Globals.InMedState            = false
+Config.Globals.LastPetCmd            = 0
+Config.Globals.LastFaceTime          = 0
+Config.Globals.CurLoadedChar         = mq.TLO.Me.DisplayName()
+Config.Globals.CurLoadedClass        = mq.TLO.Me.Class.ShortName()
+Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
+Config.Globals.CastResult            = 0
 
 -- Constants
-Config.Constants                = {}
-Config.Constants.RGCasters      = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD", "SHM", "WIZ", })
-Config.Constants.RGMelee        = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
-Config.Constants.RGHybrid       = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
-Config.Constants.RGTank         = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGModRod       = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD", })
-Config.Constants.RGPetClass     = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
-Config.Constants.RGMezAnims     = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
-Config.Constants.ModRods        = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", }
-Config.Constants.SpellBookSlots = 1120
+Config.Constants                     = {}
+Config.Constants.RGCasters           = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD", "SHM", "WIZ", })
+Config.Constants.RGMelee             = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
+Config.Constants.RGHybrid            = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
+Config.Constants.RGTank              = Set.new({ "WAR", "PAL", "SHD", })
+Config.Constants.RGModRod            = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD", })
+Config.Constants.RGPetClass          = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
+Config.Constants.RGMezAnims          = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
+Config.Constants.ModRods             = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", }
+Config.Constants.SpellBookSlots      = 1120
 
-Config.SubModuleSettings        = {}
+Config.Constants.CastResults         = {
+    ['CAST_RESULT_NONE'] = 0,
+    ['CAST_SUCCESS']     = 1,
+    ['CAST_BLOCKED']     = 2,
+    ['CAST_IMMUNE']      = 3,
+    ['CAST_FDFAIL']      = 4,
+    ['CAST_COMPONENTS']  = 5,
+    ['CAST_CANNOTSEE']   = 6,
+    ['CAST_TAKEHOLD']    = 7,
+    ['CAST_STUNNED']     = 8,
+    ['CAST_STANDING']    = 9,
+    ['CAST_RESISTED']    = 10,
+    ['CAST_RECOVER']     = 11,
+    ['CAST_PENDING']     = 12,
+    ['CAST_OUTDOORS']    = 13,
+    ['CAST_OUTOFRANGE']  = 14,
+    ['CAST_OUTOFMANA']   = 15,
+    ['CAST_NOTREADY']    = 16,
+    ['CAST_NOTARGET']    = 17,
+    ['CAST_INTERRUPTED'] = 18,
+    ['CAST_FIZZLE']      = 19,
+    ['CAST_DISTRACTED']  = 20,
+    ['CAST_COLLAPSE']    = 21,
+    ['CAST_OVERWRITTEN'] = 22,
+}
 
-Config.ExpansionNameToID        = {
+Config.Constants.CastResultsIdToName = {}
+for k, v in pairs(Config.Constants.CastResults) do Config.Constants.CastResultsIdToName[v] = k end
+
+Config.SubModuleSettings   = {}
+
+Config.ExpansionNameToID   = {
     ['EXPANSION_LEVEL_CLASSIC'] = 0,  -- No Expansion
     ['EXPANSION_LEVEL_ROK']     = 1,  -- The Ruins of Kunark
     ['EXPANSION_LEVEL_SOV']     = 2,  -- The Scars of Velious
@@ -69,7 +99,7 @@ Config.ExpansionNameToID        = {
     ['EXPANSION_LEVEL_LS']      = 30, -- Laurion's Song
 }
 
-Config.Constants.LogLevels      = {
+Config.Constants.LogLevels = {
     "Errors",
     "Warnings",
     "Info",
@@ -77,7 +107,7 @@ Config.Constants.LogLevels      = {
     "Verbose",
 }
 
-Config.ExpansionIDToName        = {}
+Config.ExpansionIDToName   = {}
 for k, v in pairs(Config.ExpansionNameToID) do Config.ExpansionIDToName[v] = k end
 
 -- Defaults
@@ -143,21 +173,6 @@ Config.DefaultConfig = {
     -- [ REZ ] --
     ['RetryRezDelay']     = { DisplayName = "Retry Rez Delay", Category = "Rez", Tooltip = "Time in seconds of how often to try to rez a corpse.", Default = 6, Min = 1, Max = 60, },
     ['DoBattleRez']       = { DisplayName = "Do Battle Rez", Category = "Rez", Tooltip = "Use Rez while in combat", Default = true, },
-
-    -- [ MEZ ] --
-    ['MezAECount']        = { DisplayName = "Mez AE Count", Category = "Mez", Tooltip = "Mez if you have more than [X] on xtarget", Default = 3, Min = 1, Max = 20, },
-    ['AutoLevelRange']    = { DisplayName = "Auto Level Range", Category = "Mez", Default = true, Tooltip = "Set to enable automatic mez level detection based on spells.", },
-    ['MezOn']             = { DisplayName = "Mez On", Category = "Mez", Default = true, Tooltip = "Set to use mez spells.", },
-    ['UseSingleTgtMez']   = { DisplayName = "Use Single Tgt Mez", Category = "Mez", Default = true, Tooltip = "Set to enable use of single target mez spells/songs. Default: 1.", },
-    ['MezAnnounce']       = { DisplayName = "Mez Announce", Category = "Mez", Default = true, Tooltip = "Set to announce mez casts.", },
-    ['MezStartCount']     = { DisplayName = "Mez Start Count", Category = "Mez", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Mez spells. ( Default 2 )", },
-    ['MaxMezCount']       = { DisplayName = "Max Mez Count", Category = "Mez", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", },
-    ['MezRadius']         = { DisplayName = "Mez Radius", Category = "Mez", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Mezing, An area twice this size is monitored for aggro mobs", },
-    ['MezZRadius']        = { DisplayName = "Mez ZRadius", Category = "Mez", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start mezzing. An area twice this size is monitored for aggro mobs. If you're enchanter is not mezzing on hills -- increase this value.", },
-    ['MezMinLevel']       = { DisplayName = "Mez Min Level", Category = "Mez", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Mez - Below this lvl are ignored. 0 means no mobs ignored.", },
-    ['MezMaxLevel']       = { DisplayName = "Mez Max Level", Category = "Mez", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Mez - Above this lvl are ignored. 0 means no mobs ignored.", },
-    ['MezStopHPs']        = { DisplayName = "Mez Stop HPs", Category = "Mez", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to mez", },
-    ['UseAEAAMez']        = { DisplayName = "Use AE AAMez", Category = "Mez", Default = false, Tooltip = "Toggle 0/1 to use Area Effect AA Mez (Default: 0).", },
 
     -- [ FELLOWSHIP ] --
     ['DoFellow']          = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = true, },
