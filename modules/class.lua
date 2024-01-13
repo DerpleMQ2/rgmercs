@@ -114,7 +114,7 @@ function Module:Init()
     -- set dynamic names.
     self:SetDynamicNames()
 
-    return { settings = self.settings, defaults = self.ClassConfig.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, settings = self.settings, defaults = self.ClassConfig.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:SetDynamicNames()
@@ -159,7 +159,7 @@ function Module:Render()
     if self.ClassConfig and self.ModuleLoaded then
         ImGui.Text("Mode: ")
         ImGui.SameLine()
-        RGMercUtils.Tooltip(self.ClassConfig.DefaultConfig.Mode.Tooltip)
+        RGMercUtils.Tooltip(self, self.ClassConfig.DefaultConfig.Mode.Tooltip)
         self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes, #self.ClassConfig.Modes)
         if pressed then
             self:SaveSettings(false)
@@ -167,7 +167,7 @@ function Module:Render()
         end
 
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, self.ClassConfig.DefaultConfig, self.DefaultCategories)
+            self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self, self.settings, self.ClassConfig.DefaultConfig, self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
                 self.TempSettings.NewCombatMode = self.TempSettings.NewCombatMode or loadoutChange

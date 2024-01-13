@@ -1203,7 +1203,8 @@ local _ClassConfig = {
     },
     ['DefaultConfig']   = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
-        ['DoTorrent']    = { DisplayName = "Cast Torrents", Category = "Spells and Abilities", Tooltip = "Enable casting Torrent spells.", RequiresLoadoutChange = true, Default = true, },
+        ['DoTorrent']    = { DisplayName = "Cast Torrents", Category = "Spells and Abilities", Tooltip = function(self) return mq.TLO.Spell(self.ResolvedActionMap['Torrent'])
+            .Description() end, RequiresLoadoutChange = true, Default = true, },
         ['DoDireTap']    = { DisplayName = "Cast Dire Taps", Category = "Spells and Abilities", Tooltip = "Enable casting Dire Tap spells.", RequiresLoadoutChange = true, Default = true, },
         ['DoBandolier']  = { DisplayName = "Use Bandolier", Category = "Equipment", Tooltip = "Enable Swapping of items using the bandolier.", Default = false, },
         ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },

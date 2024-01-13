@@ -2271,17 +2271,21 @@ function Utils.NavEnabledLoc(loc)
             printf('\ayNavigating to \ag%s', loc)
         end
 
-        Utils.Tooltip("Double click to Nav")
+        Utils.Tooltip(nil, "Double click to Nav")
     end
 end
 
 ---@param desc string
-function Utils.Tooltip(desc)
+function Utils.Tooltip(caller, desc)
     ImGui.SameLine()
     if ImGui.IsItemHovered() then
         ImGui.BeginTooltip()
         ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0)
-        ImGui.Text(desc)
+        if type(desc) == "function" then
+            ImGui.Text(desc(caller))
+        else
+            ImGui.Text(desc)
+        end
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
     end
@@ -2601,7 +2605,7 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
             end
             ImGui.PopStyleColor()
             if entry.tooltip then
-                Utils.Tooltip(entry.tooltip)
+                Utils.Tooltip(caller, entry.tooltip)
             end
             ImGui.TableNextColumn()
             local mappedAction = resolvedActionMap[entry.name]
@@ -2713,6 +2717,7 @@ function Utils.RenderOptionNumber(id, text, cur, min, max, step)
     return input, changed
 end
 
+---@param caller self
 ---@param settings table
 ---@param settingNames table
 ---@param defaults table
@@ -2720,7 +2725,7 @@ end
 ---@return table   # settings
 ---@return boolean # any_pressed
 ---@return boolean # requires_new_loadout
-function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
+function Utils.RenderSettingsTable(caller, settings, settingNames, defaults, category)
     local any_pressed = false
     local new_loadout = false
     ---@type boolean|nil
@@ -2745,7 +2750,7 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                         -- build a combo box.
                         ImGui.TableNextColumn()
                         ImGui.Text((defaults[k].DisplayName or "None"))
-                        Utils.Tooltip(defaults[k].Tooltip)
+                        Utils.Tooltip(caller, defaults[k].Tooltip)
                         ImGui.TableNextColumn()
                         ImGui.PushID("##combo_setting_" .. k)
                         settings[k], pressed = ImGui.Combo("", settings[k], defaults[k].ComboOptions)
@@ -2771,14 +2776,14 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                                 pressed = true
                             end
                         end
-                        Utils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
+                        Utils.Tooltip(caller, string.format("Drop a new item here to replace\n%s", settings[k]))
                         new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
                         any_pressed = any_pressed or (pressed or false)
                         ImGui.PopID()
                     elseif defaults[k].Type ~= "Custom" then
                         ImGui.TableNextColumn()
                         ImGui.Text((defaults[k].DisplayName or "None"))
-                        Utils.Tooltip(defaults[k].Tooltip)
+                        Utils.Tooltip(caller, defaults[k].Tooltip)
                         ImGui.TableNextColumn()
                         if type(settings[k]) == 'boolean' then
                             settings[k], pressed = Utils.RenderOptionToggle(k, "", settings[k])
@@ -2791,7 +2796,7 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                             any_pressed = any_pressed or pressed
                         elseif type(settings[k]) == 'string' then -- display only
                             ImGui.Text(settings[k])
-                            Utils.Tooltip(settings[k])
+                            Utils.Tooltip(caller, settings[k])
                         end
                     end
                 end
@@ -2809,7 +2814,7 @@ end
 ---@return table: settings
 ---@return boolean: any_pressed
 ---@return boolean: requires_new_loadout
-function Utils.RenderSettings(settings, defaults, categories)
+function Utils.RenderSettings(caller, settings, defaults, categories)
     local any_pressed = false
     local new_loadout = false
 
@@ -2849,7 +2854,7 @@ function Utils.RenderSettings(settings, defaults, categories)
                 if ImGui.BeginTabItem(c) then
                     local cat_pressed = false
 
-                    settings, cat_pressed, new_loadout = Utils.RenderSettingsTable(settings, settingNames, defaults, c)
+                    settings, cat_pressed, new_loadout = Utils.RenderSettingsTable(caller, settings, settingNames, defaults, c)
                     any_pressed = any_pressed or cat_pressed
                     ImGui.EndTabItem()
                 end

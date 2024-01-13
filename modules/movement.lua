@@ -73,7 +73,7 @@ function Module:Init()
     RGMercsLogger.log_info("Chase Module Loaded.")
     self:LoadSettings()
     self.ModuleLoaded = true
-    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:ChaseOn(target)
@@ -227,7 +227,7 @@ function Module:Render()
         local chaseSpawn = mq.TLO.Spawn("pc =" .. (self.settings.ChaseTarget or "NoOne"))
 
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
+            self.settings, pressed, _ = RGMercUtils.RenderSettings(self, self.settings, self.DefaultConfig, self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
             end

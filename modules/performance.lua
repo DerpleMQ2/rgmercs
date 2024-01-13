@@ -116,7 +116,7 @@ function Module:Init()
     RGMercsLogger.log_info("Performance Monitor Module Loaded.")
     self:LoadSettings()
 
-    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:Render()
@@ -171,7 +171,7 @@ function Module:Render()
             self:SaveSettings(false)
         end
 
-        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
+        self.settings, pressed, _ = RGMercUtils.RenderSettings(self, self.settings, self.DefaultConfig, self.DefaultCategories)
         if pressed then
             self:SaveSettings(false)
         end
