@@ -1029,9 +1029,18 @@ end
 ---@param spell MQSpell
 ---@return boolean
 function Utils.SelfBuffCheck(spell)
-    if type(spell) == "string" then return Utils.BuffActiveByName(spell) end
-    if not spell or not spell() then return false end
+    if type(spell) == "string" then
+        RGMercsLogger.log_verbose("\agSelfBuffCheck(%s) string", spell)
+        return Utils.BuffActiveByName(spell)
+    end
+    if not spell or not spell() then
+        RGMercsLogger.log_verbose("\arSelfBuffCheck() Spell Invalid")
+        return false
+    end
     local res = not Utils.BuffActiveByID(spell.ID()) and spell.Stacks()
+
+    RGMercsLogger.log_verbose("\arSelfBuffCheck(%s/%d) Spell Obj => %s", spell.RankName(), spell.ID(), Utils.BoolToString(res))
+
     return res
 end
 
