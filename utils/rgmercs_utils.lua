@@ -669,7 +669,8 @@ end
 ---@param spell MQSpell
 ---@param targetId number
 ---@param targetName string
-function Utils.CheckPCNeedsBuff(spell, targetId, targetName)
+---@param uiCheck boolean # UI Cannot do DanNet checks.
+function Utils.CheckPCNeedsBuff(spell, targetId, targetName, uiCheck)
     if targetId == mq.TLO.Me.ID() then
         return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() == nil
     elseif mq.TLO.DanNet(targetName)() == nil then
@@ -679,7 +680,7 @@ function Utils.CheckPCNeedsBuff(spell, targetId, targetName)
         return mq.TLO.Target.FindBuff("id " .. tostring(spell.ID()))() == nil
     else
         -- DanNet
-        local ret = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spell.ID()), 1000)
+        local ret = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spell.ID()), uiCheck and 0 or 1000)
 
         return (ret == "NULL") or not ret
     end
@@ -965,7 +966,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
             if entry.cond then
                 local condArg = Utils.GetEntryConditionArg(resolvedActionMap, entry)
                 local condTarg = mq.TLO.Spawn(targetId)
-                local pass = entry.cond(caller, condArg, condTarg)
+                local pass = entry.cond(caller, condArg, condTarg, false)
                 RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s", entry.name, entry.type, condArg,
                     condTarg.CleanName() or "None", Utils.BoolToString(pass))
                 if pass == true then
@@ -974,6 +975,11 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
                         stepsThisTime = stepsThisTime + 1
 
                         if steps > 0 and stepsThisTime >= steps then
+                            break
+                        end
+
+                        if steps == 0 and Utils.GetXTHaterCount() > 0 then
+                            RGMercsLogger.log_verbose("\arStopping Rotation Due to combat!")
                             break
                         end
                     end
@@ -986,12 +992,17 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
                     if steps > 0 and stepsThisTime >= steps then
                         break
                     end
+
+                    if steps == 0 and Utils.GetXTHaterCount() > 0 then
+                        RGMercsLogger.log_verbose("\arStopping Rotation Due to combat!")
+                        break
+                    end
                 end
             end
         end
     end
 
-    if oldSpellInSlot() and mq.TLO.Me.Gem(Utils.UseGem)() ~= oldSpellInSlot.Name() then
+    if Utils.GetXTHaterCount() == 0 and oldSpellInSlot() and mq.TLO.Me.Gem(Utils.UseGem)() ~= oldSpellInSlot.Name() then
         RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, Utils.UseGem)
         Utils.MemorizeSpell(Utils.UseGem, oldSpellInSlot.Name(), 10000)
     end
@@ -2560,7 +2571,7 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
             if entry.cond then
                 local condArg  = Utils.GetEntryConditionArg(resolvedActionMap, entry)
                 local condTarg = mq.TLO.Target
-                local pass     = entry.cond(caller, condArg, condTarg)
+                local pass     = entry.cond(caller, condArg, condTarg, true)
                 local active   = entry.active_cond and entry.active_cond(caller, condArg) or false
 
                 if active == true then

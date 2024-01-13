@@ -942,24 +942,24 @@ local _ClassConfig = {
                 name = "ManaRegen",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
                 end,
             },
             {
                 name = "HasteBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
                 end,
             },
             {
@@ -985,7 +985,7 @@ local _ClassConfig = {
         },
         ['DPS'] = {
             {
-                name = "Glyphy Spray",
+                name = "Glyph Spray",
                 type = "AA",
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
@@ -1151,7 +1151,7 @@ local _ClassConfig = {
                 name = "ManaDrainSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Target.CurrentMana() > 10
+                    return (mq.TLO.Target.CurrentMana() or 0) > 10
                 end,
             },
         },
