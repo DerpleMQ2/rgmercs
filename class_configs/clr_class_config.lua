@@ -191,6 +191,30 @@ local _ClassConfig = {
             "Atoned Intervention",
             "Avowed Intervention",
         },
+        ['healnuke1'] = {
+            -- Heal Tank and Nuke Tanks Target -- Intervention Lines
+            "Holy Intervention",
+            "Celestial Intervention",
+            "Elysian Intervention",
+            "Virtuous Intervention",
+            "Mystical Intervention",
+            "Merciful Intervention",
+            "Sincere Intervention",
+            "Atoned Intervention",
+            "Avowed Intervention",
+        },
+        ['healnuke2'] = {
+            -- Heal Tank and Nuke Tanks Target -- Intervention Lines
+            "Holy Intervention",
+            "Celestial Intervention",
+            "Elysian Intervention",
+            "Virtuous Intervention",
+            "Mystical Intervention",
+            "Merciful Intervention",
+            "Sincere Intervention",
+            "Atoned Intervention",
+            "Avowed Intervention",
+        },
         ['nukeheal'] = {
             -- Nuke Target and Heal Tank -  Dps Heals
             "Holy Contravention",
@@ -744,36 +768,133 @@ local _ClassConfig = {
         },
         ["GroupHealPoint"] = {
             {
-                name = "RecourseHeal",
-                type = "Spell",
-            },
-
-        },
-        ["BigHealPoint"] = {
-            {
-                name = "InterventionHeal",
-                type = "Spell",
-            },
-            {
-                name = "Soothsayer's Intervention",
-                type = "AA",
-            },
-
-        },
-        ["MainHealPoint"] = {
-            {
                 name = "groupfastheal",
                 type = "Spell",
                 cond = function(self, _, target)
-                    return (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                    return true
+                end,
+            },
+            {
+                name = "groupheal",
+                type = "Spell",
+                cond = function(self, _, target)
+                    return true
+                end,
+            },
+            {
+                name = "GroupHot",
+                type = "Spell",
+                cond = function(self, _, target)
+                    return true
+                end,
+            },
+            {
+                name = "Celestial Regeneration",
+                type = "AA",
+                cond = function(self, _, target)
+                    return true
+                end,
+            },
+            {
+                name = "Beacon of Life",
+                type = "AA",
+                cond = function(self, _, target)
+                    return true
+                end,
+            },
+            {
+                name = "Exquisite Benediction",
+                type = "AA",
+                cond = function(self, _, target)
+                    return true
+                end,
+            },
+        },
+        ["BigHealPoint"] = {
+            {
+                name = "Divine Arbitration",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Burst of Life",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "ClutchHeal",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return self.settings.DoClutchHeal and ((mq.TLO.Me.Level() <= 87 and RGMercUtils.GetTargetPctHPs() < 45) or RGMercUtils.GetTargetPctHPs() < 35)
+                end,
+            },
+            {
+                name = "patchheal1",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return true
+                end,
+            },
+        },
+        ["MainHealPoint"] = {
+            {
+                name = "Focused Celestial Regeneration",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.AAReady(aaName) and (RGMercUtils.GetTargetDistance() < RGMercConfig:GetSettings().AssistRange)
+                end,
+            },
+            {
+                name = "SingleHot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return self.settings.DoHOT and not target.CachedBuff(spell.RankName())()
+                end,
+            },
+            {
+                name = "healnuke1",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return self.settings.DoNuke and RGMercUtils.GetTargetPctHPs() < self.settings.NukePct
+                end,
+            },
+            {
+                name = "healnuke2",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return self.settings.DoNuke and RGMercUtils.GetTargetPctHPs() < self.settings.NukePct
+                end,
+            },
+            {
+                name = "remedyheal1",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return true
+                end,
+            },
+            {
+                name = "remedyheal2",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return true
                 end,
             },
         },
     }, -- end HealRotations
     ['RotationOrder']     = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return { mq.TLO.Me.ID(), } end, cond = function(self, combat_state) return combat_state == "Downtime" and
-            RGMercUtils.DoBuffCheck() end, },
+        {
+            name = 'Downtime',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
         {
             name = 'Splash',
             state = 1,
@@ -985,13 +1106,8 @@ local _ClassConfig = {
         ['DoProm']            = { DisplayName = "Cast Promised Heal Spells", Category = "Spells and Abilities", Tooltip = "Use Prom Spells", Default = true, },
         ['DoClutchHeal']      = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
         ['DoAutoWard']        = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['MainHealPoint']     = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 95, Min = 1, Max = 99, },
-        ['BigHealPoint']      = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 80, Min = 1, Max = 99, },
-        ['GroupHealPoint']    = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 85, Min = 1, Max = 99, },
         ['ClutchHealPoint']   = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 34, Min = 1, Max = 99, },
-        ['GroupInjureCnt']    = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 2, Min = 1, Max = 6, },
         ['DoNuke']            = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['Manatonuke']        = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 60, Min = 1, Max = 100, },
         ['NukePct']           = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 90, Min = 1, Max = 100, },
         ['DoReverseDS']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
         ['DoQp']              = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
