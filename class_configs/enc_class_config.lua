@@ -988,7 +988,7 @@ local _ClassConfig = {
                 name = "Glyphy Spray",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
                         RGMercUtils.GetMainAssistPctHPs() < 45 and RGMercUtils.GetMainAssistPctHPs() > 5
                 end,
@@ -998,7 +998,7 @@ local _ClassConfig = {
                 name = "Reactive Rune",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
                         RGMercUtils.GetMainAssistPctHPs() < 45 and RGMercUtils.GetMainAssistPctHPs() > 5
                 end,
@@ -1008,7 +1008,7 @@ local _ClassConfig = {
                 name = "Self Stasis",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30
                 end,
 
@@ -1017,7 +1017,7 @@ local _ClassConfig = {
                 name = "Dimensional Instability",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30
                 end,
 
@@ -1026,7 +1026,7 @@ local _ClassConfig = {
                 name = "Beguiler's Directed Banishment",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 40
                 end,
 
@@ -1035,7 +1035,7 @@ local _ClassConfig = {
                 name = "Beguiler's Banishment",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 50 and
                         mq.TLO.SpawnCount("npc radius 20")() > 2
                 end,
@@ -1045,7 +1045,7 @@ local _ClassConfig = {
                 name = "Doppelganger",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 60
                 end,
 
@@ -1054,7 +1054,7 @@ local _ClassConfig = {
                 name = "Phantasmal Opponent",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 60
                 end,
 
@@ -1063,7 +1063,7 @@ local _ClassConfig = {
                 name = "Dimensional Shield",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 80
                 end,
 
@@ -1072,7 +1072,7 @@ local _ClassConfig = {
                 name = "Arcane Whisper",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.PctAggro() >= 90
                 end,
 
@@ -1081,7 +1081,7 @@ local _ClassConfig = {
                 name = "Silent Casting",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return mq.TLO.Me.PctAggro() >= 90
                 end,
 
@@ -1090,7 +1090,7 @@ local _ClassConfig = {
                 name = "Focus of Arcanum",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return true
                 end,
 
