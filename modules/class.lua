@@ -313,9 +313,9 @@ function Module:SelfCheckAndRez()
 
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
-                    self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
         end
@@ -330,9 +330,9 @@ function Module:IGCheckAndRez()
 
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
-                    self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
         end
@@ -347,9 +347,9 @@ function Module:OOGCheckAndRez()
 
         if rezSpawn() and (RGMercUtils.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
-                    self.TempSettings.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
         end
