@@ -227,7 +227,7 @@ function Module:Render()
         local chaseSpawn = mq.TLO.Spawn("pc =" .. (self.settings.ChaseTarget or "NoOne"))
 
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, _ = RGMercUtils.RenderSettings(self, self.settings, self.DefaultConfig, self.DefaultCategories)
+            self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
             end
