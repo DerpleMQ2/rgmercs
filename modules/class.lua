@@ -22,6 +22,7 @@ Module.Constants.RezSearchOutOfGroup      = "pccorpse radius 100 zradius 50"
 -- Track the state of rotations between frames
 Module.TempSettings.RotationStates        = {}
 Module.TempSettings.HealingRotationStates = {}
+Module.TempSettings.RotationTimers        = {}
 Module.TempSettings.RezTimers             = {}
 Module.TempSettings.ShowFailedSpells      = false
 Module.TempSettings.ReloadingLoadouts     = true
@@ -528,12 +529,29 @@ function Module:GiveTime(combat_state)
     -- Downtime rotaiton will just run a full rotation to completion
     for _, r in ipairs(self.TempSettings.RotationStates) do
         RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
-        if r.cond and r.cond(self, combat_state) then
-            RGMercsLogger.log_verbose("\ag:::RUN ROTATION::: => \at%s", r.name)
-            local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), r.targetId(),
-                self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
+        local timeCheck = true
+        if r.timer then
+            self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or os.clock()
+            if os.clock() - self.TempSettings.RotationTimers[r.name] < r.timer then
+                timeCheck = false
+            end
+        end
+        if timeCheck then
+            for _, targetId in ipairs(r.targetId()) do
+                if r.cond and r.cond(self, combat_state) then
+                    RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
+                    local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
+                        self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
 
-            if r.state then r.state = newState end
+                    if r.state then r.state = newState end
+
+                    self.TempSettings.RotationTimers[r.name] = os.clock()
+                end
+            end
+        else
+            RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
+                RGMercUtils.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
+                RGMercUtils.FormatTime(r.timer - (os.clock() - self.TempSettings.RotationTimers[r.name])))
         end
     end
 

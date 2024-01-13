@@ -1,21 +1,22 @@
-local mq            = require('mq')
-local Set           = require('mq.set')
-local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
-local ICONS         = require('mq.Icons')
-local ICON_SIZE     = 20
+local mq                 = require('mq')
+local Set                = require('mq.set')
+local animSpellGems      = mq.FindTextureAnimation('A_SpellGems')
+local ICONS              = require('mq.Icons')
+local ICON_SIZE          = 20
 
 -- Global
 
-local Utils         = { _version = '0.2a', _name = "RGMercUtils", _author = 'Derple', }
-Utils.__index       = Utils
-Utils.Actors        = require('actors')
-Utils.ScriptName    = "RGMercs"
-Utils.LastZoneID    = 0
-Utils.LastDoStick   = 0
-Utils.NamedList     = {}
-Utils.ShowDownNamed = false
-Utils.Memorizing    = false
-Utils.UseGem        = mq.TLO.Me.NumGems()
+local Utils              = { _version = '0.2a', _name = "RGMercUtils", _author = 'Derple', }
+Utils.__index            = Utils
+Utils.Actors             = require('actors')
+Utils.ScriptName         = "RGMercs"
+Utils.LastZoneID         = 0
+Utils.LastDoStick        = 0
+Utils.NamedList          = {}
+Utils.ShowDownNamed      = false
+Utils.ShowAdvancedConfig = false
+Utils.Memorizing         = false
+Utils.UseGem             = mq.TLO.Me.NumGems()
 
 ---@param path string
 ---@return boolean
@@ -212,13 +213,11 @@ function Utils.IsDisc(name)
     return (spell() and spell.IsSkill() and spell.Duration() and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and true or false
 end
 
+---@param spell MQSpell
 ---@return boolean
 function Utils.PCSpellReady(spell)
-    if not spell or string.len(spell) == 0 then return false end
-    local me = mq.TLO.Me
-    local spell = mq.TLO.Spell(spell)
-
     if not spell or not spell() then return false end
+    local me = mq.TLO.Me
 
     if me.Stunned() then return false end
 
@@ -227,7 +226,6 @@ end
 
 ---@return boolean
 function Utils.NPCSpellReady(spell, targetId, healingSpell)
-    if not spell or string.len(spell) == 0 then return false end
     local me = mq.TLO.Me
     local spell = mq.TLO.Spell(spell)
 
@@ -243,6 +241,34 @@ function Utils.NPCSpellReady(spell, targetId, healingSpell)
 
     if me.SpellReady(spell.RankName()) and me.CurrentMana() >= spell.Mana() then
         if not me.Moving() and not me.Casting.ID() and target.Type():lower() ~= "corpse" then
+            if target.LineOfSight() then
+                return true
+            elseif healingSpell then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+---@return boolean
+function Utils.NPCAAReady(aaName, targetId, healingSpell)
+    local me = mq.TLO.Me
+    local ability = mq.TLO.Me.AltAbility(aaName)
+
+    if targetId == 0 then targetId = mq.TLO.Target.ID() end
+
+    if not ability or not ability() then return false end
+
+    if me.Stunned() then return false end
+
+    local target = mq.TLO.Spawn(targetId)
+
+    if not target or not target() or target.Dead() then return false end
+
+    if Utils.AAReady(aaName) and me.CurrentMana() >= ability.Spell.Mana() and me.CurrentEndurance() >= ability.Spell.EnduranceCost() then
+        if Utils.MyClassIs("brd") or (not me.Moving() and not me.Casting.ID()) then
             if target.LineOfSight() then
                 return true
             elseif healingSpell then
@@ -1223,7 +1249,7 @@ end
 
 function Utils.AutoMed()
     local me = mq.TLO.Me
-    if not RGMercConfig:GetSettings().DoMed then return end
+    if RGMercConfig:GetSettings().DoMed == 1 then return end
 
     if me.Class.ShortName():lower() == "brd" and me.Level() > 5 then return end
 
@@ -1292,7 +1318,7 @@ function Utils.AutoMed()
             forcesit = false
             forcestand = true
         end
-        if RGMercConfig:GetSettings().DoMed ~= 2 then
+        if RGMercConfig:GetSettings().DoMed ~= 3 then
             forcesit = false
             forcestand = true
         end
@@ -1772,7 +1798,7 @@ function Utils.FindTarget()
         if RGMercConfig:GetSettings().AssistOutside then
             local queryCmd = string.format("/dquery %s -q Target.ID", RGMercConfig.Globals.MainAssist)
             mq.cmdf(queryCmd)
-            local queryResult = mq.TLO.DanNet.Q()
+            local queryResult = tostring(mq.TLO.DanNet.Q())
 
             local assistTarget = mq.TLO.Spawn(queryResult)
             if queryResult then
@@ -1924,7 +1950,7 @@ function Utils.FindTargetCheck()
     if RGMercConfig:GetSettings().AssistOutside then
         local queryCmd = string.format("/dquery %s -q Target.ID", RGMercConfig.Globals.MainAssist)
         mq.cmdf(queryCmd)
-        local queryResult = mq.TLO.DanNet.Q()
+        local queryResult = tostring(mq.TLO.DanNet.Q())
 
         local assistTarget = mq.TLO.Spawn(queryResult)
         if queryResult then
@@ -2046,7 +2072,10 @@ end
 ---@param auraName string
 ---@return boolean
 function Utils.AuraActiveByName(auraName)
-    return string.find(mq.TLO.Me.Aura(1)() or "", auraName) ~= nil
+    local auraOne = string.find(mq.TLO.Me.Aura(1)() or "", auraName) ~= nil
+    local auraTwo = string.find(mq.TLO.Me.Aura(2)() or "", auraName) ~= nil
+
+    return auraOne or auraTwo
 end
 
 ---@param spell MQSpell
@@ -2628,58 +2657,60 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
         ImGui.TableHeadersRow()
 
         for _, k in ipairs(settingNames) do
-            if defaults[k].Category == category then
-                if defaults[k].Type == "Combo" then
-                    -- build a combo box.
-                    ImGui.TableNextColumn()
-                    ImGui.Text((defaults[k].DisplayName or "None"))
-                    Utils.Tooltip(defaults[k].Tooltip)
-                    ImGui.TableNextColumn()
-                    ImGui.PushID("##combo_setting_" .. k)
-                    settings[k], pressed = ImGui.Combo("", settings[k], defaults[k].ComboOptions)
-                    ImGui.PopID()
-                    new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
-                    any_pressed = any_pressed or (pressed or false)
-                elseif defaults[k].Type == "ClickyItem" then
-                    -- make a drag and drop target
-                    ImGui.TableNextColumn()
-                    ImGui.Text((defaults[k].DisplayName or "None"))
-                    ImGui.TableNextColumn()
-                    ImGui.PushID(k .. "__btn")
-                    if ImGui.SmallButton(settings[k]:len() > 0 and settings[k] or "[Drop Here]") then
-                        if mq.TLO.Cursor() then
-                            settings[k] = mq.TLO.Cursor.Name()
-                            pressed = true
+            if Utils.ShowAdvancedConfig or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
+                if defaults[k].Category == category then
+                    if defaults[k].Type == "Combo" then
+                        -- build a combo box.
+                        ImGui.TableNextColumn()
+                        ImGui.Text((defaults[k].DisplayName or "None"))
+                        Utils.Tooltip(defaults[k].Tooltip)
+                        ImGui.TableNextColumn()
+                        ImGui.PushID("##combo_setting_" .. k)
+                        settings[k], pressed = ImGui.Combo("", settings[k], defaults[k].ComboOptions)
+                        ImGui.PopID()
+                        new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
+                        any_pressed = any_pressed or (pressed or false)
+                    elseif defaults[k].Type == "ClickyItem" then
+                        -- make a drag and drop target
+                        ImGui.TableNextColumn()
+                        ImGui.Text((defaults[k].DisplayName or "None"))
+                        ImGui.TableNextColumn()
+                        ImGui.PushID(k .. "__btn")
+                        if ImGui.SmallButton(settings[k]:len() > 0 and settings[k] or "[Drop Here]") then
+                            if mq.TLO.Cursor() then
+                                settings[k] = mq.TLO.Cursor.Name()
+                                pressed = true
+                            end
                         end
-                    end
-                    ImGui.SameLine()
-                    if ImGui.SmallButton(ICONS.MD_CLEAR) then
-                        if mq.TLO.Cursor() then
-                            settings[k] = ""
-                            pressed = true
+                        ImGui.SameLine()
+                        if ImGui.SmallButton(ICONS.MD_CLEAR) then
+                            if mq.TLO.Cursor() then
+                                settings[k] = ""
+                                pressed = true
+                            end
                         end
-                    end
-                    Utils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
-                    new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
-                    any_pressed = any_pressed or (pressed or false)
-                    ImGui.PopID()
-                elseif defaults[k].Type ~= "Custom" then
-                    ImGui.TableNextColumn()
-                    ImGui.Text((defaults[k].DisplayName or "None"))
-                    Utils.Tooltip(defaults[k].Tooltip)
-                    ImGui.TableNextColumn()
-                    if type(settings[k]) == 'boolean' then
-                        settings[k], pressed = Utils.RenderOptionToggle(k, "", settings[k])
-                        new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
-                        any_pressed = any_pressed or pressed
-                    elseif type(settings[k]) == 'number' then
-                        settings[k], pressed = Utils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
-                            defaults[k].Max, defaults[k].Step or 1)
-                        new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
-                        any_pressed = any_pressed or pressed
-                    elseif type(settings[k]) == 'string' then -- display only
-                        ImGui.Text(settings[k])
-                        Utils.Tooltip(settings[k])
+                        Utils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
+                        new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
+                        any_pressed = any_pressed or (pressed or false)
+                        ImGui.PopID()
+                    elseif defaults[k].Type ~= "Custom" then
+                        ImGui.TableNextColumn()
+                        ImGui.Text((defaults[k].DisplayName or "None"))
+                        Utils.Tooltip(defaults[k].Tooltip)
+                        ImGui.TableNextColumn()
+                        if type(settings[k]) == 'boolean' then
+                            settings[k], pressed = Utils.RenderOptionToggle(k, "", settings[k])
+                            new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
+                            any_pressed = any_pressed or pressed
+                        elseif type(settings[k]) == 'number' then
+                            settings[k], pressed = Utils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
+                                defaults[k].Max, defaults[k].Step or 1)
+                            new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
+                            any_pressed = any_pressed or pressed
+                        elseif type(settings[k]) == 'string' then -- display only
+                            ImGui.Text(settings[k])
+                            Utils.Tooltip(settings[k])
+                        end
                     end
                 end
             end
@@ -2718,14 +2749,28 @@ function Utils.RenderSettings(settings, defaults, categories)
     local catNames = categories and categories:toList() or { "", }
     table.sort(catNames)
 
+    Utils.ShowAdvancedConfig, _ = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options", Utils.ShowAdvancedConfig)
+
     if ImGui.BeginTabBar("Settings_Categories") then
         for _, c in ipairs(catNames) do
-            if ImGui.BeginTabItem(c) then
-                local cat_pressed = false
+            local shouldShow = false
+            for _, k in ipairs(settingNames) do
+                if defaults[k].Category == c then
+                    if Utils.ShowAdvancedConfig or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
+                        shouldShow = true
+                        break
+                    end
+                end
+            end
 
-                settings, cat_pressed, new_loadout = Utils.RenderSettingsTable(settings, settingNames, defaults, c)
-                any_pressed = any_pressed or cat_pressed
-                ImGui.EndTabItem()
+            if shouldShow then
+                if ImGui.BeginTabItem(c) then
+                    local cat_pressed = false
+
+                    settings, cat_pressed, new_loadout = Utils.RenderSettingsTable(settings, settingNames, defaults, c)
+                    any_pressed = any_pressed or cat_pressed
+                    ImGui.EndTabItem()
+                end
             end
         end
         ImGui.EndTabBar()

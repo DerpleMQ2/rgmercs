@@ -1,6 +1,7 @@
 local mq        = require('mq')
 local ImGui     = require('ImGui')
 local GitCommit = require('extras.version')
+DanNet          = require('lib.dannet.helpers')
 
 RGMercsBinds    = require('utils.rgmercs_binds')
 RGMercsEvents   = require('utils.rgmercs_events')
@@ -488,7 +489,7 @@ local function Main()
         RGMercUtils.ClickModRod()
     end
 
-    if RGMercConfig:GetSettings().DoMed then
+    if RGMercConfig:GetSettings().DoMed >= 2 then
         RGMercUtils.AutoMed()
     end
 
