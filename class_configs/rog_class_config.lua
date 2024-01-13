@@ -213,8 +213,14 @@ return {
     },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return { mq.TLO.Me.ID(), } end, cond = function(self, combat_state) return combat_state == "Downtime" and
-            RGMercUtils.DoBuffCheck() end, },
+        {
+            name = 'Downtime',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
         {
             name = 'Burn',
             state = 1,
@@ -289,49 +295,49 @@ return {
             {
                 name = "Frenzied",
                 type = "Disc",
-                cond = function(self, discName)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discName)
+                cond = function(self, discSpell)
+                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell)
                 end,
             },
             {
                 name = "Twisted",
                 type = "Disc",
-                cond = function(self, discName)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discName)
+                cond = function(self, discSpell)
+                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell)
                 end,
             },
             {
                 name = "AimDisc",
                 type = "Disc",
-                cond = function(self, discName)
+                cond = function(self, discSpell)
                     return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Executioner",
                 type = "Disc",
-                cond = function(self, discName)
+                cond = function(self, discSpell)
                     return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Executioner2",
                 type = "Disc",
-                cond = function(self, discName)
+                cond = function(self, discSpell)
                     return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "EdgeDisc",
                 type = "Disc",
-                cond = function(self, discName)
+                cond = function(self, discSpell)
                     return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "AspDisc",
                 type = "Disc",
-                cond = function(self, discName)
+                cond = function(self, discSpell)
                     return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -362,8 +368,8 @@ return {
             {
                 name = "Ambush",
                 type = "Disc",
-                cond = function(self, discName)
-                    local discSpell = mq.TLO.Spell(discName)
+                cond = function(self, discSpell)
+                    local discSpell = mq.TLO.Spell(discSpell)
                     return mq.TLO.Me.PctEndurance() >= 5 and
                         RGMercUtils.GetTargetPctHPs() >= 90 and
                         RGMercUtils.GetTargetDistance() < 50 and
@@ -381,8 +387,8 @@ return {
             {
                 name = "Vision",
                 type = "Disc",
-                cond = function(self, discName)
-                    return RGMercUtils.SongActive(discName)
+                cond = function(self, discSpell)
+                    return RGMercUtils.SongActive(discSpell)
                 end,
             },
             {
@@ -392,8 +398,8 @@ return {
             {
                 name = "Jugular",
                 type = "Disc",
-                cond = function(self, discName)
-                    local discSpell = mq.TLO.Spell(discName)
+                cond = function(self, discSpell)
+                    local discSpell = mq.TLO.Spell(discSpell)
                     return (discSpell() and discSpell.Level() <= 82) and mq.TLO.Me.CombatState():lower() ~= "combat"
                 end,
             },

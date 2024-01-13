@@ -224,6 +224,21 @@ function Utils.PCSpellReady(spell)
     return me.CurrentMana() > spell.Mana() and (me.Casting.ID() or 0) == 0 and me.Book(spell.RankName())() ~= nil and not me.Moving()
 end
 
+---@param discSpell MQSpell
+---@return boolean
+function Utils.PCDiscReady(discSpell)
+    if not discSpell or not discSpell() then return false end
+    RGMercsLogger.log_verbose("PCDiscReady(%s)", discSpell.RankName() or "None")
+    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName()) and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
+end
+
+---@param aaName string
+---@return boolean
+function Utils.PCAAReady(aaName)
+    local spell = mq.TLO.Me.AltAbility(aaName).Spell
+    return Utils.AAReady(aaName) and mq.TLO.Me.CurrentMana() >= (spell.Mana() or 0) or mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0)
+end
+
 ---@return boolean
 function Utils.NPCSpellReady(spell, targetId, healingSpell)
     local me = mq.TLO.Me
@@ -366,7 +381,7 @@ function Utils.GetBestSpell(spellList, alreadyResolvedMap)
                     if spell.Level() > highestLevel then
                         -- make sure we havent already found this one.
                         local alreadyUsed = false
-                        for unresolvedName, resolvedSpell in pairs(alreadyResolvedMap) do
+                        for _, resolvedSpell in pairs(alreadyResolvedMap) do
                             if type(resolvedSpell) ~= "string" and resolvedSpell.ID() == spell.ID() then
                                 alreadyUsed = true
                             end
@@ -494,6 +509,7 @@ end
 
 ---@param aaName string
 ---@param targetId integer
+---@return boolean
 function Utils.UseAA(aaName, targetId)
     local me = mq.TLO.Me
     local oldTargetId = mq.TLO.Target.ID()
@@ -502,12 +518,12 @@ function Utils.UseAA(aaName, targetId)
 
     if not aaAbility() then
         RGMercsLogger.log_verbose("\arYou dont have the AA: %s!", aaName)
-        return
+        return false
     end
 
     if not mq.TLO.Me.AltAbilityReady(aaName) then
         RGMercsLogger.log_verbose("\ayAbility %s is not ready!", aaName)
-        return
+        return false
     end
 
     if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
@@ -517,7 +533,7 @@ function Utils.UseAA(aaName, targetId)
             Utils.DoCmd("/stopsong")
         else
             RGMercsLogger.log_debug("\ayCANT CAST AA - Casting Window Open")
-            return
+            return false
         end
     end
 
@@ -525,7 +541,7 @@ function Utils.UseAA(aaName, targetId)
 
     -- If we're combat casting we need to both have the same swimming status
     if target() and target.FeetWet() ~= me.FeetWet() then
-        return
+        return false
     end
 
     Utils.ActionPrep()
@@ -555,6 +571,8 @@ function Utils.UseAA(aaName, targetId)
         RGMercsLogger.log_debug("switching target back to old target after casting aa")
         Utils.SetTarget(oldTargetId)
     end
+
+    return true
 end
 
 ---@param itemName string
@@ -654,6 +672,49 @@ function Utils.UseAbility(abilityName)
     Utils.DoCmd("/doability %s", abilityName)
     mq.delay(8, function() return not me.AbilityReady(abilityName) end)
     RGMercsLogger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", abilityName)
+end
+
+---@param discSpell MQSpell
+---@param targetId integer
+---@return boolean
+function Utils.UseDisc(discSpell, targetId)
+    local me = mq.TLO.Me
+
+    if not discSpell or not discSpell() then return false end
+
+    if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
+        RGMercsLogger.log_debug("CANT USE Disc - Casting Window Open")
+        return false
+    else
+        if me.CurrentEndurance() < discSpell.EnduranceCost() then
+            return false
+        else
+            RGMercsLogger.log_debug("Trying to use Disc: %s", discSpell.RankName())
+
+            Utils.ActionPrep()
+
+            if Utils.IsDisc(discSpell.RankName()) then
+                if me.ActiveDisc.ID() then
+                    RGMercsLogger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName(), me.ActiveDisc.Name())
+                    Utils.DoCmd("/stopdisc")
+                    mq.delay(20, function() return not me.ActiveDisc.ID() end)
+                end
+            end
+
+            Utils.DoCmd("/squelch /doability \"%s\"", discSpell.RankName())
+
+            mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName()) and not me.Casting.ID()) end)
+
+            -- Is this even needed?
+            if Utils.IsDisc(discSpell.RankName()) then
+                mq.delay(20, function() return me.ActiveDisc.ID() end)
+            end
+
+            RGMercsLogger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName())
+
+            return true
+        end
+    end
 end
 
 ---@param spellName string
@@ -831,48 +892,14 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
         --RGMercsLogger.log_verbose("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, Utils.BoolToString(ret))
     end
 
-    if entry.type:lower() == "Disc" then
+    if entry.type:lower() == "disc" then
         local discSpell = resolvedActionMap[entry.name]
-
         if not discSpell then
             RGMercsLogger.log_debug("Dont have a Disc for \ao =>> \ag %s \ao <<=", entry.name)
             ret = false
         else
             RGMercsLogger.log_debug("Using Disc \ao =>> \ag %s [%s] \ao <<=", entry.name, (discSpell() and discSpell.RankName() or "None"))
-
-            if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
-                RGMercsLogger.log_debug("CANT USE Disc - Casting Window Open")
-                ret = false
-            else
-                if me.CurrentEndurance() < discSpell.EnduranceCost() then
-                    ret = false
-                else
-                    RGMercsLogger.log_debug("Trying to use Disc: %s", discSpell.RankName())
-
-                    Utils.ActionPrep()
-
-                    if Utils.IsDisc(discSpell.RankName()) then
-                        if me.ActiveDisc.ID() then
-                            RGMercsLogger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName(), me.ActiveDisc.Name())
-                            Utils.DoCmd("/stopdisc")
-                            mq.delay(20, function() return not me.ActiveDisc.ID() end)
-                        end
-                    end
-
-                    Utils.DoCmd("/squelch /doability \"%s\"", discSpell.RankName())
-
-                    mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName()) and not me.Casting.ID()) end)
-
-                    -- Is this even needed?
-                    if Utils.IsDisc(discSpell.RankName()) then
-                        mq.delay(20, function() return me.ActiveDisc.ID() end)
-                    end
-
-                    RGMercsLogger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName())
-
-                    ret = true
-                end
-            end
+            ret = Utils.UseDisc(discSpell, targetId)
         end
     end
 
@@ -2054,12 +2081,20 @@ end
 ---@param songName string
 ---@return boolean
 function Utils.SongActive(songName)
+    if type(songName) ~= "string" then
+        RGMercsLogger.log_error("\arUtils.SongActive was passed a non-string songname! %s", type(songName))
+        return false
+    end
     return ((mq.TLO.Me.Song(songName).ID() or 0) > 0)
 end
 
 ---@param buffName string
 ---@return boolean
 function Utils.BuffActiveByName(buffName)
+    if type(buffName) ~= "string" then
+        RGMercsLogger.log_error("\arUtils.BuffActiveByName was passed a non-string buffname! %s", type(buffName))
+        return false
+    end
     return ((mq.TLO.Me.FindBuff("name " .. buffName).ID() or 0) > 0)
 end
 
@@ -2127,7 +2162,7 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
         resolvedActionMap[unresolvedName] = Utils.GetBestSpell(spellTable, resolvedActionMap)
     end
 
-    for _, g in ipairs(spellGemList) do
+    for _, g in ipairs(spellGemList or {}) do
         if not g.cond or g.cond(caller, g.gem) then
             RGMercsLogger.log_debug("\ayGem \am%d\ay will be loaded.", g.gem)
 

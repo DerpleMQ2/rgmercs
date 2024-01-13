@@ -15,6 +15,7 @@ function helpers.observe(peer, query, timeout)
         mq.cmdf('/dobserve %s -q "%s"', peer, query)
         RGMercsLogger.log_debug('\ayAdding Observer - mq.TLO.DanNet(%s).O(%s)', peer, query)
     end
+    ---@diagnostic disable-next-line: undefined-field
     mq.delay(timeout or 1000, function() return mq.TLO.DanNet(peer).O(query).Received() > 0 end)
     local value = mq.TLO.DanNet(peer).O(query)()
     RGMercsLogger.log_debug('\ayObserving - mq.TLO.DanNet(%s).O(%s) = %s', peer, query, value)
