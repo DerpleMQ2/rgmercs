@@ -1106,7 +1106,7 @@ local _ClassConfig = {
                 name = "Bite of Tashani",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return self.settings.DoTash and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
                 end,
 
@@ -1211,7 +1211,7 @@ local _ClassConfig = {
                 name = "Bite of Tashani",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return self.settings.DoTash and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
                 end,
 
@@ -1227,7 +1227,7 @@ local _ClassConfig = {
                 name = "Enveloping Helix",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return self.settings.DoSlow and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and RGMercUtils.GetXTHaterCount() > 2 and mq.TLO.Target.Slowed() == nil
                 end,
             },
@@ -1235,7 +1235,7 @@ local _ClassConfig = {
                 name = "Slowing Helix",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not mq.TLO.Target.ID() > 0 then return false end
+                    if mq.TLO.Target.ID() <= 0 then return false end
                     return self.settings.DoSlow and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
                         (not RGMercUtils.NPCAAReady("Enveloping Helix", mq.TLO.Target.ID(), false) or
                             RGMercUtils.GetXTHaterCount() > 2) and mq.TLO.Target.Slowed() == nil
