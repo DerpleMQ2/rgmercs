@@ -1037,8 +1037,10 @@ function Utils.SelfBuffCheck(spell)
         RGMercsLogger.log_verbose("\arSelfBuffCheck() Spell Invalid")
         return false
     end
+    ---@diagnostic disable-next-line: undefined-field
     local res = not Utils.BuffActiveByID(spell.RankName.ID()) and spell.Stacks()
 
+    ---@diagnostic disable-next-line: undefined-field
     RGMercsLogger.log_verbose("\arSelfBuffCheck(%s/%d) Spell Obj => %s", spell.RankName(), spell.RankName.ID(), Utils.BoolToString(res))
 
     return res
