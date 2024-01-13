@@ -743,6 +743,12 @@ end
 function Utils.UseSpell(spellName, targetId, bAllowMem)
     local me = mq.TLO.Me
     RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, Utils.BoolToString(bAllowMem))
+
+    if me.Moving() then
+        RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s) -- Failed because I am moving", spellName, targetId, Utils.BoolToString(bAllowMem))
+        return false
+    end
+
     if spellName then
         local spell = mq.TLO.Spell(spellName)
 
