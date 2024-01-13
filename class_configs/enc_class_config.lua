@@ -944,17 +944,22 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     if not target or not target() then return false end
-                    -- dont handle mercs for now.
-                    if target.Type():lower() == "mercenary" then return false end
-
-                    if target.ID() == mq.TLO.Me.ID() then return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() == nil end
 
                     if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
 
-                    -- need to rely on DanNet for this next part.
-                    local needBuff = DanNet.query(target.CleanName(), string.format("Me.FindBuff[id %d]", spell.ID()), 1000)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
+                end,
+            },
+            {
+                name = "HasteBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target)
+                    if not target or not target() then return false end
 
-                    return needBuff == "NULL"
+                    if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
                 end,
             },
             {
@@ -971,7 +976,8 @@ local _ClassConfig = {
                     if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
 
                     -- need to rely on DanNet for this next part.
-                    local needBuff = DanNet.query(target.CleanName(), string.format("Me.FindBuff[id %d]", spell.ID()), 1000)
+                    local needBuff = false
+                    DanNet.query(target.CleanName(), string.format("Me.FindBuff[id %d]", spell.ID()), 1000)
 
                     return needBuff == "NULL"
                 end,
