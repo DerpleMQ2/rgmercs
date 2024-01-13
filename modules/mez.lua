@@ -97,7 +97,7 @@ function Module:Render()
 
     if self.ModuleLoaded then
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, _ = RGMercUtils.RenderSettings(self, self.settings, self.DefaultConfig, self.DefaultCategories)
+            self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
             end

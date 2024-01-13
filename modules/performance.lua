@@ -171,7 +171,7 @@ function Module:Render()
             self:SaveSettings(false)
         end
 
-        self.settings, pressed, _ = RGMercUtils.RenderSettings(self, self.settings, self.DefaultConfig, self.DefaultCategories)
+        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
         if pressed then
             self:SaveSettings(false)
         end
