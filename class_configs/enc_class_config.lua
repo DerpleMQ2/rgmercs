@@ -963,23 +963,52 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "HasteBuff",
+                name = "GroupSpellShield",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
                     if not target or not target() then return false end
-                    -- dont handle mercs for now.
-                    if target.Type():lower() == "mercenary" then return false end
 
-                    if target.ID() == mq.TLO.Me.ID() then return false end
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "GroupDoTShield",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "GroupAuspiceBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "NdtBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not self.settings.DoNDTBuff then return false end
+                    if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
 
-                    -- need to rely on DanNet for this next part.
-                    local needBuff = false
-                    DanNet.query(target.CleanName(), string.format("Me.FindBuff[id %d]", spell.ID()), 1000)
-
-                    return needBuff == "NULL"
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
                 end,
             },
         },
@@ -1370,6 +1399,7 @@ local _ClassConfig = {
         ['DoSlow']        = { DisplayName = "Cast Slow", Category = "Spells and Abilities", Tooltip = "Enable casting Slow spells.", Default = true, },
         ['DoCripple']     = { DisplayName = "Cast Cripple", Category = "Spells and Abilities", Tooltip = "Enable casting Cripple spells.", Default = true, },
         ['DoDicho']       = { DisplayName = "Cast Dicho", Category = "Spells and Abilities", Tooltip = "Enable casting Dicho spells.", Default = true, },
+        ['DoNDTBuff']     = { DisplayName = "Cast NDT", Category = "Spells and Abilities", Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).", Default = true, },
         ['DoStripBuff']   = { DisplayName = "Do Strip Buffs", Category = "Spells and Abilities", Tooltip = "Enable casting buff canceler spells.", Default = true, },
     },
 }
