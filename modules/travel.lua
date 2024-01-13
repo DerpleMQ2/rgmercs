@@ -146,7 +146,7 @@ function Module:Init()
     self:CreatePorterList()
     self:GenerateFilteredPortsList()
 
-    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:GetColorForType(type)

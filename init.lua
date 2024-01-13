@@ -213,7 +213,7 @@ local function RGMercsGUI()
                     ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
                         local settingsRef = RGMercConfig:GetSettings()
-                        settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
+                        settingsRef, pressed, _ = RGMercUtils.RenderSettings(nil, settingsRef, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
                         if pressed then
                             RGMercConfig:SaveSettings(false)
                         end
@@ -223,7 +223,7 @@ local function RGMercsGUI()
                         ImGui.PushID(n .. "_config_hdr")
                         if s and s.settings and s.defaults and s.categories then
                             if ImGui.CollapsingHeader(string.format("%s: Config Options", n)) then
-                                s.settings, pressed, _ = RGMercUtils.RenderSettings(s.settings, s.defaults, s.categories)
+                                s.settings, pressed, _ = RGMercUtils.RenderSettings(s.self, s.settings, s.defaults, s.categories)
                                 if pressed then
                                     RGMercModules:ExecModule(n, "SaveSettings", true)
                                 end
