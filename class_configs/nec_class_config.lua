@@ -616,13 +616,14 @@ local _ClassConfig = {
     },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
+        { name = 'Downtime', targetId = function(self) return { mq.TLO.Me.ID(), } end, cond = function(self, combat_state) return combat_state == "Downtime" and
+            RGMercUtils.DoBuffCheck() end, },
         {
             -- this will always run first in combat to check for things like FD or stand up
             -- if you add to it make sure it remains pretty short because everythign will be
             -- evalutated before we move to combat.
             name = 'Safety',
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -631,7 +632,7 @@ local _ClassConfig = {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
@@ -641,7 +642,7 @@ local _ClassConfig = {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,

@@ -650,7 +650,7 @@ local _ClassConfig = {
     ['HelperFunctions']   = {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         DoRez = function(self, corpseId)
-            if not RGMercUtils.PCSpellReady("Incarnate Anew") and
+            if not RGMercUtils.PCSpellReady(mq.TLO.Spell("Incarnate Anew")) and
                 not mq.TLO.FindItem("Staff of Forbidden Rites")() and
                 not RGMercUtils.CanUseAA("Rejuvenation of Spirit") and
                 not RGMercUtils.CanUseAA("Call of the Wild") then
@@ -682,7 +682,7 @@ local _ClassConfig = {
                     return RGMercUtils.UseAA("Rejuvenation of Spirit", corpseId)
                 end
 
-                if RGMercUtils.PCSpellReady("Incarnate Anew") then
+                if RGMercUtils.PCSpellReady(mq.TLO.Spell("Incarnate Anew")) then
                     return RGMercUtils.UseSpell("Incarnate Anew", corpseId, true)
                 end
             end
@@ -811,12 +811,19 @@ local _ClassConfig = {
     },
     ['RotationOrder']     = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
+        {
+            name = 'Downtime',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
         {
             name = 'Splash',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercUtils.GetMainAssistId() end,
+            targetId = function(self) return { RGMercUtils.GetMainAssistId(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.IsHealing() and not RGMercUtils.Feigning()
@@ -826,7 +833,7 @@ local _ClassConfig = {
             name = 'Debuff',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
@@ -836,7 +843,7 @@ local _ClassConfig = {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.BurnCheck() and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
@@ -846,7 +853,7 @@ local _ClassConfig = {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
             end,

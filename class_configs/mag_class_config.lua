@@ -929,20 +929,20 @@ _ClassConfig      = {
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.PCSpellReady(spell.RankName()) end,
+                cond = function(self, spell) return RGMercUtils.PCSpellReady(spell) end,
             },
         },
     },
     ['RotationOrder']     = {
         {
             name = 'Pet Management',
-            targetId = function(self) return mq.TLO.Me.ID() end,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state) return true end,
         },
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
-            targetId = function(self) return mq.TLO.Me.ID() end,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     RGMercUtils.DoBuffCheck()
@@ -951,7 +951,7 @@ _ClassConfig      = {
         -- Run downtime twice - again for our pet
         {
             name = 'Downtime',
-            targetId = function(self) return mq.TLO.Me.Pet.ID() end,
+            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     RGMercUtils.DoBuffCheck() and mq.TLO.Me.Pet.ID() > 0
@@ -961,7 +961,7 @@ _ClassConfig      = {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
@@ -971,7 +971,7 @@ _ClassConfig      = {
             name = 'Debuff',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
@@ -980,7 +980,7 @@ _ClassConfig      = {
             name = 'DPS PET',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.IsModeActive("PetTank")
             end,
@@ -989,7 +989,7 @@ _ClassConfig      = {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
@@ -1059,7 +1059,7 @@ _ClassConfig      = {
                 return false
             end
 
-            if not RGMercUtils.PCSpellReady(petToyResolvedSpell.RankName()) then
+            if not RGMercUtils.PCSpellReady(petToyResolvedSpell) then
                 RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed PCSpellReady() Check!", type)
                 return false
             end
@@ -2063,14 +2063,14 @@ _ClassConfig      = {
                     name = "AllianceBuff",
                     cond = function(self)
                         return RGMercConfig:GetSettings().DoAlliance and mq.TLO.Me.Level() >= 75 and
-                            ((mq.TLO.Me.Ability("Malaise").ID() or 0) > 0 or not self.settings.DoMalo)
+                            ((mq.TLO.Me.AltAbility("Malaise").ID() or 0) > 0 or not self.settings.DoMalo)
                     end,
                 },
                 {
                     name = "FireOrbSummon",
                     cond = function(self)
                         return not RGMercConfig:GetSettings().DoAlliance and mq.TLO.Me.Level() >= 75 and
-                            ((mq.TLO.Me.Ability("Malaise").ID() or 0) > 0 or not self.settings.DoMalo)
+                            ((mq.TLO.Me.AltAbility("Malaise").ID() or 0) > 0 or not self.settings.DoMalo)
                     end,
                 },
                 { name = "MaloDebuff", cond = function(self) return true end, },
