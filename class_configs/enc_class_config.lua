@@ -7,8 +7,6 @@ local _ClassConfig = {
         IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
     },
     ['Modes']         = {
-        'Mori',
-        'Charm',
         'Mez',
     },
     ['ItemSets']      = {
@@ -841,8 +839,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -851,8 +848,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -861,7 +857,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
 
@@ -1431,7 +1427,7 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode']          = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
+        ['Mode']          = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['DoLearners']    = { DisplayName = "Do Learners", Category = "Spells & Abilities", Tooltip = "Set to use the Learner's Aura instead of the Mana Regen Aura.", Default = false, },
         ['DoTash']        = { DisplayName = "Do Tash", Category = "Spells & Abilities", Tooltip = "Cast Tash Spells", Default = true, },
         ['DoTwincastDPS'] = { DisplayName = "Do Twincast DPS", Category = "Spells & Abilities", Tooltip = "Cast Twincast during DPS rotation", Default = true, },
