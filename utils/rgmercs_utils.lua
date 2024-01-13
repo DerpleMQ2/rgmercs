@@ -2264,6 +2264,12 @@ function Utils.GetDynamicTooltipForSpell(action)
     return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None", resolvedItem.Description() or "None")
 end
 
+function Utils.GetDynamicTooltipForAA(action)
+    local resolvedItem = mq.TLO.Spell(action)
+
+    return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None", resolvedItem.Description() or "None")
+end
+
 ---@param loc string
 function Utils.NavEnabledLoc(loc)
     ImGui.PushStyleColor(ImGuiCol.Text, 0.690, 0.553, 0.259, 1)
