@@ -666,6 +666,25 @@ function Utils.UseItem(itemName, targetId)
     end
 end
 
+---@param spell MQSpell
+---@param targetId number
+---@param targetName string
+function Utils.CheckPCNeedsBuff(spell, targetId, targetName)
+    if targetId == mq.TLO.Me.ID() then
+        return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() == nil
+    elseif mq.TLO.DanNet(targetName)() == nil then
+        -- Target.
+        Utils.SetTarget(targetId)
+        mq.delay("2s", function() return mq.TLO.Target.BuffsPopulated() end)
+        return mq.TLO.Target.FindBuff("id " .. tostring(spell.ID()))() == nil
+    else
+        -- DanNet
+        local ret = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spell.ID()), 1000)
+
+        return (ret == "NULL") or not ret
+    end
+end
+
 ---@param abilityName string
 function Utils.UseAbility(abilityName)
     local me = mq.TLO.Me
