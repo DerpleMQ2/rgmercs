@@ -942,19 +942,10 @@ _ClassConfig      = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
-            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.ID(), mq.TLO.Me.Pet.ID(), } or { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     RGMercUtils.DoBuffCheck()
-            end,
-        },
-        -- Run downtime twice - again for our pet
-        {
-            name = 'Downtime',
-            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
-            cond = function(self, combat_state)
-                return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck() and mq.TLO.Me.Pet.ID() > 0
             end,
         },
         {
@@ -1750,7 +1741,7 @@ _ClassConfig      = {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")() and mq.TLO.FindItem(itemName).TimerReady() and
+                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")() and mq.TLO.FindItem(itemName).TimerReady() == 0 and
                         mq.TLO.Me.Pet.ID() > 0
                 end,
             },
