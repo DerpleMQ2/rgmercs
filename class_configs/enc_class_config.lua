@@ -1011,6 +1011,46 @@ local _ClassConfig = {
                     return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
                 end,
             },
+            {
+                name = "SingleRune",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "GroupRune",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not self.DoGroupAbsorb then return false end
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "AggroRune",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not self.settings.DoAggroRune then return false end
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
         },
         ['DPS'] = {
             {
@@ -1400,6 +1440,8 @@ local _ClassConfig = {
         ['DoCripple']     = { DisplayName = "Cast Cripple", Category = "Spells and Abilities", Tooltip = "Enable casting Cripple spells.", Default = true, },
         ['DoDicho']       = { DisplayName = "Cast Dicho", Category = "Spells and Abilities", Tooltip = "Enable casting Dicho spells.", Default = true, },
         ['DoNDTBuff']     = { DisplayName = "Cast NDT", Category = "Spells and Abilities", Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).", Default = true, },
+        ['DoGroupAbsorb'] = { DisplayName = "Do Group Absorb", Category = "Spells and Abilities", Tooltip = "Enable casting the Group Absorb line with -Hate Proc.", Default = true, },
+        ['DoAggroRune']   = { DisplayName = "Do Aggro Rune", Category = "Spells and Abilities", Tooltip = "Enable casting the Tank Aggro Rune", Default = true, },
         ['DoStripBuff']   = { DisplayName = "Do Strip Buffs", Category = "Spells and Abilities", Tooltip = "Enable casting buff canceler spells.", Default = true, },
     },
 }
