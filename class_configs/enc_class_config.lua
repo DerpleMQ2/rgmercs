@@ -1116,7 +1116,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return self.settings.DoTwincastDPS and not RGMercUtils.BuffActiveByID(spell.ID()) and not RGMercUtils.BuffActiveByName("Improved Twincast") and
-                        not RGMercModules("Mez", "IsMezImmune", mq.TLO.Target.ID())
+                        not RGMercModules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID())
                 end,
             },
             {
