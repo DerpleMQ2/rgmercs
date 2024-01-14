@@ -2,6 +2,8 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
+    _version          = "0.1a",
+    _author           = "Derple",
     ['ModeChecks']    = {
         IsMezzing = function() return true end,
         IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,

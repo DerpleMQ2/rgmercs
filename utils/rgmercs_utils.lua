@@ -2267,6 +2267,7 @@ end
 function Utils.GetDynamicTooltipForAA(action)
     local resolvedItem = mq.TLO.Spell(action)
 
+    ---@diagnostic disable-next-line: undefined-field
     return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None", resolvedItem.Description() or "None")
 end
 
