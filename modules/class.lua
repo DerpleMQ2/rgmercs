@@ -149,6 +149,10 @@ function Module:SetCombatMode(mode)
     end
 end
 
+function Module:ShouldRender()
+    return true
+end
+
 function Module:Render()
     ImGui.Text("Core Class Modules")
 

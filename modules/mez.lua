@@ -89,6 +89,10 @@ function Module:Init()
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
+function Module:ShouldRender()
+    return RGMercUtils.IsMezzing()
+end
+
 function Module:Render()
     ImGui.Text("Mez Module")
 

@@ -3,10 +3,7 @@ local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['Modes'] = {
-        'Tank',
         'DPS',
-        'Healer',
-        'Hybrid',
     },
     ['ItemSets'] = {
         ['Epic'] = {
@@ -741,7 +738,7 @@ return {
             },
         },
         ['DefaultConfig'] = {
-            ['Mode'] = '1',
+            ['Mode'] = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         },
     },
 }

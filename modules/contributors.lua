@@ -57,6 +57,10 @@ function Module:RenderName(name)
     end
 end
 
+function Module:ShouldRender()
+    return true
+end
+
 function Module:Render()
     ImGui.Text("Contributors - Thank You!")
 
