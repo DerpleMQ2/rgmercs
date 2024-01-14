@@ -264,8 +264,8 @@ end
 
 ---@return string
 function Module:GetClassModeName()
-    if not self.settings then return "None" end
-    return self.ClassConfig and self.ClassConfig.Modes[self.settings.Mode] or "None"
+    if not self.settings or not self.ClassConfig then return "None" end
+    return self.ClassConfig.Modes[self.settings.Mode] or "None"
 end
 
 ---@param mode string
@@ -276,7 +276,7 @@ function Module:IsModeActive(mode)
         RGMercsLogger.log_error("\arIsModeActive(%s) ==> Invalid Mode Type!", mode)
         return false
     end
-    return Module:GetClassModeName():lower() == mode:lower()
+    return self:GetClassModeName():lower() == mode:lower()
 end
 
 ---@return boolean
