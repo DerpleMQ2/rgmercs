@@ -114,7 +114,7 @@ for k, v in pairs(Config.ExpansionNameToID) do Config.ExpansionIDToName[v] = k e
 Config.DefaultConfig = {
     -- [ UTILITIES ] --
     ['MountItem']         = { DisplayName = "Mount Item", Category = "Utilities", Tooltip = "Item to use to cast Mount", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
-    ['DoMount']           = { DisplayName = "Do Mount", Category = "Utilities", Tooltip = "0 = Disabled, 1 = Enabled, 2 = Dismount but Keep Buff", Default = 0, Min = 0, Max = 2, ConfigType = "Normal", },
+    ['DoMount']           = { DisplayName = "Do Mount", Category = "Utilities", Tooltip = "0 = Disabled, 1 = Enabled, 2 = Dismount but Keep Buff", Type = "Combo", ComboOptions = { 'Off', 'Mount', 'Buff Only', }, Default = 1, Min = 1, Max = 3, ConfigType = "Normal", },
     ['ShrinkItem']        = { DisplayName = "Shrink Item", Category = "Utilities", Tooltip = "Item to use to Shrink yourself", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
     ['DoShrink']          = { DisplayName = "Do Shrink", Category = "Utilities", Tooltip = "Enable auto shrinking", Default = false, ConfigType = "Normal", },
     ['PriorityHealing']   = { DisplayName = "Priority Healing", Category = "Utilities", Tooltip = "Prioritize Healing over Combat", Default = false, ConfigType = "Advanced", },
