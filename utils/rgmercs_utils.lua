@@ -1291,12 +1291,12 @@ end
 
 ---@return boolean
 function Utils.ShouldMount()
-    if RGMercConfig:GetSettings().DoMount == 0 then return false end
+    if RGMercConfig:GetSettings().DoMount == 1 then return false end
 
     local passBasicChecks = not RGMercConfig:GetSettings().DoMelee and RGMercConfig:GetSettings().MountItem:len() > 0 and mq.TLO.Zone.Outdoor()
 
-    local passCheckMountOne = ((RGMercConfig:GetSettings().DoMount == 1 and (mq.TLO.Me.Mount.ID() or 0) == 0))
-    local passCheckMountTwo = ((RGMercConfig:GetSettings().DoMount == 2 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
+    local passCheckMountOne = ((RGMercConfig:GetSettings().DoMount == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0))
+    local passCheckMountTwo = ((RGMercConfig:GetSettings().DoMount == 3 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
     local passMountItemGivesBlessing = true
 
     if passCheckMountTwo then
@@ -1311,7 +1311,7 @@ end
 
 ---@return boolean
 function Utils.ShouldDismount()
-    return RGMercConfig:GetSettings().DoMount ~= 1 and ((mq.TLO.Me.Mount.ID() or 0) > 0)
+    return RGMercConfig:GetSettings().DoMount ~= 2 and ((mq.TLO.Me.Mount.ID() or 0) > 0)
 end
 
 ---@return boolean
