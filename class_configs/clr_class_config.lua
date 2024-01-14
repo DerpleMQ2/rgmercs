@@ -679,7 +679,7 @@ local _ClassConfig = {
             name = 'LowLevelHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return mq.TLO.Me.Level() < 85 and (target.PctHPs() or 999) < self.settings.LightHealPoint end,
+            cond = function(self, target) return mq.TLO.Me.Level() < 85 and (target.PctHPs() or 999) < RGMercUtils.GetSetting('LightHealPoint') end,
         },
         {
             name  = 'BigHealPoint',
@@ -707,7 +707,7 @@ local _ClassConfig = {
             {
                 name = "Divine Arbitration",
                 type = "AA",
-                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= self.settings.LightHealPoint end,
+                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('LightHealPoint') end,
             },
             -- To Do: next in rotation is the epic
             -- To Do: next in rotation is the tacvihammer, but it didnt work in rgmercs mac
@@ -717,7 +717,7 @@ local _ClassConfig = {
                 name = "Celestial Regeneration",
                 type = "AA",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and self.settings.DoHOT and spell.StacksTarget() and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
                         not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
                 end,
             },
@@ -725,7 +725,7 @@ local _ClassConfig = {
                 name = "Exquisite Benediction",
                 type = "AA",
                 cond = function(self, aaName) -- note: Is aaName the correct arg here? or should be 'spell'?
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and self.settings.DoHOT and aaName.StacksTarget() and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and RGMercUtils.GetSetting('DoHOT') and aaName.StacksTarget() and
                         not RGMercUtils.TargetHasBuff(aaName) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
                 end,
             },
@@ -733,35 +733,35 @@ local _ClassConfig = {
                 name = "groupheal",
                 type = "spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and self.settings.DoHOT and spell.StacksTarget() and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
                         not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
                 end,
             },
             {
                 name = "patchheal",
                 type = "spell",
-                cond = function(self, _, target) return (target.PctHPs() or 999) <= self.settings.LightHealPoint end,
+                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('LightHealPoint') end,
             },
             {
                 name = "remedyheal",
                 type = "spell",
-                cond = function(self, _, target) return (target.PctHPs() or 999) <= self.settings.RemedyHealPoint end,
+                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('RemedyHealPoint') end,
             },
             {
                 name = "remedyheal",
                 type = "spell",
-                cond = function(self, _, target) return (target.PctHPs() or 999) <= self.settings.RemedyHealPoint end,
+                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('RemedyHealPoint') end,
             },
             {
                 name = "CompHeal",
                 type = "spell",
-                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= self.settings.CompHealPoint end,
+                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('CompHealPoint') end,
             },
             {
                 name = "wardspell",
                 type = "spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and self.settings.DoHOT and spell.StacksTarget() and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
                         not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
                 end,
             },
@@ -829,7 +829,7 @@ local _ClassConfig = {
                 name = "ClutchHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return self.settings.DoClutchHeal and ((mq.TLO.Me.Level() <= 87 and RGMercUtils.GetTargetPctHPs() < 45) or RGMercUtils.GetTargetPctHPs() < 35)
+                    return RGMercUtils.GetSetting('DoClutchHeal') and ((mq.TLO.Me.Level() <= 87 and RGMercUtils.GetTargetPctHPs() < 45) or RGMercUtils.GetTargetPctHPs() < 35)
                 end,
             },
             {
@@ -852,21 +852,21 @@ local _ClassConfig = {
                 name = "SingleHot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return self.settings.DoHOT and not target.CachedBuff(spell.RankName())()
+                    return RGMercUtils.GetSetting('DoHOT') and not target.CachedBuff(spell.RankName())()
                 end,
             },
             {
                 name = "healnuke1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return self.settings.DoNuke and RGMercUtils.GetTargetPctHPs() < self.settings.NukePct
+                    return RGMercUtils.GetSetting('DoNuke') and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct')
                 end,
             },
             {
                 name = "healnuke2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return self.settings.DoNuke and RGMercUtils.GetTargetPctHPs() < self.settings.NukePct
+                    return RGMercUtils.GetSetting('DoNuke') and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct')
                 end,
             },
             {
@@ -912,7 +912,7 @@ local _ClassConfig = {
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                    RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -922,7 +922,7 @@ local _ClassConfig = {
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                    RGMercUtils.BurnCheck() and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -931,7 +931,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
             end,
         },
 

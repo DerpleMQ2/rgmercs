@@ -924,13 +924,13 @@ local _ClassConfig = {
                 name = "AuraBuff2",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell) return not self.settings.DoLearners and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell) return not RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
             },
             {
                 name = "AuraBuff3",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell) return self.settings.DoLearners and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell) return RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
             },
 
         },
@@ -1001,7 +1001,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target, uiCheck)
-                    if not self.settings.DoNDTBuff then return false end
+                    if not RGMercUtils.GetSetting('DoNDTBuff') then return false end
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
@@ -1041,7 +1041,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target, uiCheck)
-                    if not self.settings.DoAggroRune then return false end
+                    if not RGMercUtils.GetSetting('DoAggroRune') then return false end
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
@@ -1166,7 +1166,7 @@ local _ClassConfig = {
                 name = "TashSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoTash and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
                 end,
             },
             {
@@ -1174,7 +1174,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
-                    return self.settings.DoTash and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
                 end,
 
             },
@@ -1182,7 +1182,7 @@ local _ClassConfig = {
                 name = "TwinCast",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoTwincastDPS and not RGMercUtils.BuffActiveByID(spell.ID()) and not RGMercUtils.BuffActiveByName("Improved Twincast") and
+                    return RGMercUtils.GetSetting('DoTwincastDPS') and not RGMercUtils.BuffActiveByID(spell.ID()) and not RGMercUtils.BuffActiveByName("Improved Twincast") and
                         not RGMercModules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID())
                 end,
             },
@@ -1190,14 +1190,14 @@ local _ClassConfig = {
                 name = "DoTSpell1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoDot and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoDot') and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoDicho and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoDicho') and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1271,7 +1271,7 @@ local _ClassConfig = {
                 name = "TashSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoTash and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
                 end,
             },
             {
@@ -1279,7 +1279,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
-                    return self.settings.DoTash and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
                 end,
 
             },
@@ -1287,7 +1287,7 @@ local _ClassConfig = {
                 name = "StripBuffSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoStripBuff and mq.TLO.Target.Beneficial()
+                    return RGMercUtils.GetSetting('DoStripBuff') and mq.TLO.Target.Beneficial()
                 end,
             },
             {
@@ -1295,7 +1295,8 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
-                    return self.settings.DoSlow and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and RGMercUtils.GetXTHaterCount() > 2 and mq.TLO.Target.Slowed() == nil
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and RGMercUtils.GetXTHaterCount() > 2 and
+                    mq.TLO.Target.Slowed() == nil
                 end,
             },
             {
@@ -1303,7 +1304,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
-                    return self.settings.DoSlow and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
                         (not RGMercUtils.NPCAAReady("Enveloping Helix", mq.TLO.Target.ID(), false) or
                             RGMercUtils.GetXTHaterCount() > 2) and mq.TLO.Target.Slowed() == nil
                 end,
@@ -1312,21 +1313,21 @@ local _ClassConfig = {
                 name = "CripSlowSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (self.settings.DoSlow or self.settings.DoCripple) and RGMercUtils.DetSpellCheck(spell)
+                    return (RGMercUtils.GetSetting('DoSlow') or RGMercUtils.GetSetting('DoCripple')) and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "SlowSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoSlow and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "CrippleSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoSlow and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1386,8 +1387,8 @@ local _ClassConfig = {
         {
             gem = 8,
             spells = {
-                { name = "CrippleSpell",   cond = function(self) return self.settings.DoCripple and mq.TLO.Me.Level() < 88 end, },
-                { name = "StripBuffSpell", cond = function(self) return self.settings.DoStripBuff end, },
+                { name = "CrippleSpell",   cond = function(self) return RGMercUtils.GetSetting('DoCripple') and mq.TLO.Me.Level() < 88 end, },
+                { name = "StripBuffSpell", cond = function(self) return RGMercUtils.GetSetting('DoStripBuff') end, },
                 { name = "NukeSpell2",     cond = function(self) return true end, },
             },
         },

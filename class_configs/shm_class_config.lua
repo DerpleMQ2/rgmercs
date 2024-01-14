@@ -726,13 +726,13 @@ local _ClassConfig = {
             {
                 name = "RecklessHeal1",
                 type = "Spell",
-                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= self.settings.RecklessHealPct end,
+                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('RecklessHealPct') end,
             },
             {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint and self.settings.DoHOT and spell.StacksTarget() and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
                         not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
@@ -781,7 +781,7 @@ local _ClassConfig = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return self.settings.DoHOT and spell.StacksTarget() and not RGMercUtils.TargetHasBuff(spell)
+                    return RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
             {
@@ -794,7 +794,7 @@ local _ClassConfig = {
             {
                 name = "RecklessHeal1",
                 type = "Spell",
-                cond = function(self, _, target) return (target.PctHPs() or 999) <= self.settings.RecklessHealPct end,
+                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('RecklessHealPct') end,
             },
             {
                 name = "RecklessHeal2",
@@ -838,7 +838,7 @@ local _ClassConfig = {
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                    RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -848,7 +848,7 @@ local _ClassConfig = {
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                    RGMercUtils.BurnCheck() and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -857,7 +857,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and self.ClassConfig.Modes[self.settings.Mode] == "Hybrid" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
             end,
         },
 
@@ -908,62 +908,63 @@ local _ClassConfig = {
             {
                 name = "UltorDot",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) and RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck() end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck() end,
             },
         },
         ['Debuff'] = {
             {
                 name = "AEMaloSpell",
                 type = "Spell",
-                cond = function(self, _) return self.settings.DoMalo and self.settings.DoAEMalo end,
+                cond = function(self, _) return RGMercUtils.GetSetting('DoMalo') and RGMercUtils.GetSetting('DoAEMalo') end,
             },
             {
                 name = "MaloSpell",
                 type = "Spell",
-                cond = function(self, spell) return self.settings.DoMalo and RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.GetSetting('DoMalo') and RGMercUtils.DetSpellCheck(spell) end,
             },
             {
                 name = "AESlowSpell",
                 type = "Spell",
-                cond = function(self, _) return self.settings.DoSlow and self.settings.DoAESlow end,
+                cond = function(self, _) return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.GetSetting('DoAESlow') end,
             },
             {
                 name = "SlowSpell",
                 type = "Spell",
-                cond = function(self, spell) return self.settings.DoSlow and RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) end,
             },
             {
                 name = "Turgur's Virulent Swarm",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoSlow and self.settings.DoAESlow
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.GetSetting('DoAESlow')
                 end,
             },
             {
                 name = "Turgur's Swarm",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoSlow and not self.settings.DoAESlow and not RGMercUtils.TargetHasBuffByName(mq.TLO.Spell("Turgur's Swarm").Trigger(1).RankName())
+                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.GetSetting('DoAESlow') and
+                        not RGMercUtils.TargetHasBuffByName(mq.TLO.Spell("Turgur's Swarm").Trigger(1).RankName())
                 end,
             },
             {
                 name = "Wind of Malaise",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoMalo and self.settings.DoAEMalo
+                    return RGMercUtils.GetSetting('DoMalo') and RGMercUtils.GetSetting('DoAEMalo')
                 end,
             },
             {
                 name = "Malaise",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoMalo and not self.settings.DoAEMalo
+                    return RGMercUtils.GetSetting('DoMalo') and not RGMercUtils.GetSetting('DoAEMalo')
                 end,
             },
             {
                 name = "DieaseSlow",
                 type = "Spell",
-                cond = function(self, spell) return self.settings.DoSlow and RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) end,
             },
         },
         ['DPS'] = {
@@ -981,18 +982,18 @@ local _ClassConfig = {
                 name = "Cannibalization",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoAACani and RGMercUtils.AAReady(aaName) and
-                        mq.TLO.Me.PctMana() < self.settings.AACanniManaPct and
-                        mq.TLO.Me.PctHPs() >= self.settings.AACanniMinHP
+                    return RGMercUtils.GetSetting('DoAACani') and RGMercUtils.AAReady(aaName) and
+                        mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('AACanniManaPct') and
+                        mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('AACanniMinHP')
                 end,
             },
             {
                 name = "CanniSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoSpellCani and RGMercUtils.CastReady(spell.RankName()) and
-                        mq.TLO.Me.PctMana() < self.settings.SpellCanniManaPct and
-                        mq.TLO.Me.PctHPs() >= self.settings.SpellCanniMinHP
+                    return RGMercUtils.GetSetting('DoSpellCani') and RGMercUtils.CastReady(spell.RankName()) and
+                        mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('SpellCanniManaPct') and
+                        mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('SpellCanniMinHP')
                 end,
             },
             {
@@ -1017,60 +1018,60 @@ local _ClassConfig = {
             {
                 name = "PandemicDot",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) and RGMercUtils.DetGOMCheck(spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and RGMercUtils.DetGOMCheck(spell) end,
             },
             {
                 name = "CurseDoT2",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
             },
             {
                 name = "CurseDoT1",
                 type = "Spell",
                 -- first check is for live second is for TLP
                 cond = function(self, spell)
-                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)) or
+                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)) or
                         (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercConfig:GetSettings().BurnAuto or RGMercUtils.SmallBurn()))
                 end,
             },
             {
                 name = "ChaoticDoT",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) and mq.TLO.Me.PctMana() > 50 end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and mq.TLO.Me.PctMana() > 50 end,
             },
             {
                 name = "PandemicDot",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) and mq.TLO.Me.PctMana() > 50 end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and mq.TLO.Me.PctMana() > 50 end,
             },
             {
                 name = "FastPoisonDoT",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
             },
             {
                 name = "SaryrnDot",
                 type = "Spell",
                 -- first check is for live second is for TLP
                 cond = function(self, spell)
-                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)) or
+                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)) or
                         (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercConfig:GetSettings().BurnAuto or RGMercUtils.SmallBurn()))
                 end,
             },
             {
                 name = "FastDiseaseDoT",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
             },
             {
                 name = "UltorDot",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
             },
             {
                 name = "MaloDot",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
             },
             {
                 name = "PoisonNuke",
@@ -1088,7 +1089,7 @@ local _ClassConfig = {
                     if mq.TLO.Me.Level() > 65 then
                         return true
                     end
-                    return RGMercConfig:GetSettings().BurnAuto or RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck() and self.settings.DoNuke
+                    return RGMercConfig:GetSettings().BurnAuto or RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoNuke')
                 end,
             },
         },
@@ -1115,18 +1116,18 @@ local _ClassConfig = {
                 name = "Cannibalization",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoAACani and RGMercUtils.AAReady(aaName) and
-                        mq.TLO.Me.PctMana() < self.settings.AACanniManaPct and
-                        mq.TLO.Me.PctHPs() >= self.settings.AACanniMinHP
+                    return RGMercUtils.GetSetting('DoAACani') and RGMercUtils.AAReady(aaName) and
+                        mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('AACanniManaPct') and
+                        mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('AACanniMinHP')
                 end,
             },
             {
                 name = "CanniSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoSpellCani and RGMercUtils.CastReady(spell.RankName()) and
-                        mq.TLO.Me.PctMana() < self.settings.SpellCanniManaPct and
-                        mq.TLO.Me.PctHPs() >= self.settings.SpellCanniMinHP
+                    return RGMercUtils.GetSetting('DoSpellCani') and RGMercUtils.CastReady(spell.RankName()) and
+                        mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('SpellCanniManaPct') and
+                        mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('SpellCanniMinHP')
                 end,
             },
             {
@@ -1134,7 +1135,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return mq.TLO.Me.Aura(aaName)() ~= nil end,
                 cond = function(self, aaName)
-                    return self.settings.DoAura and not RGMercUtils.SongActive(aaName) and mq.TLO.Me.Aura(aaName)() == nil
+                    return RGMercUtils.GetSetting('DoAura') and not RGMercUtils.SongActive(aaName) and mq.TLO.Me.Aura(aaName)() == nil
                 end,
             },
             {
@@ -1142,7 +1143,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
                 cond = function(self, aaName)
-                    return self.settings.DoHaste and not mq.TLO.Me.Haste() and RGMercUtils.SelfBuffAACheck(aaName)
+                    return RGMercUtils.GetSetting('DoHaste') and not mq.TLO.Me.Haste() and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1150,7 +1151,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell)
-                    return self.settings.DoRunSpeed and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.CanUseAA("Lupine Spirit")
+                    return RGMercUtils.GetSetting('DoRunSpeed') and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.CanUseAA("Lupine Spirit")
                 end,
             },
             {
@@ -1158,7 +1159,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
                 cond = function(self, aaName)
-                    return self.settings.DoRunSpeed and RGMercUtils.CanUseAA(aaName) and RGMercUtils.SelfBuffAACheck(aaName) and
+                    return RGMercUtils.GetSetting('DoRunSpeed') and RGMercUtils.CanUseAA(aaName) and RGMercUtils.SelfBuffAACheck(aaName) and
                         not mq.TLO.Me.FindBuff("id " .. mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
                 end,
             },
@@ -1229,7 +1230,7 @@ local _ClassConfig = {
                 { name = "RecourseHeal", },
                 { name = "GroupRenewalHoT", },
                 -- [ TLP FALL BACK ] --
-                { name = "CurseDoT1",       cond = function(self) return self.settings.DoMagicDot end, },
+                { name = "CurseDoT1",       cond = function(self) return RGMercUtils.GetSetting('DoMagicDot') end, },
                 { name = "SaryrnDot", },
             },
         },
@@ -1254,7 +1255,7 @@ local _ClassConfig = {
                 { name = "ChaoticDoT", },
                 { name = "SaryrnDot", },
                 -- [ TLP FALL BACK ] --
-                { name = "DieaseSlow", cond = function(self) return self.settings.DoDieaseSlow end, },
+                { name = "DieaseSlow", cond = function(self) return RGMercUtils.GetSetting('DoDieaseSlow') end, },
                 { name = "SlowSpell", },
             },
         },

@@ -371,10 +371,10 @@ return {
                 name = "SummonAxes",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    if not self.settings.SummonAxes then return false end
+                    if not RGMercUtils.GetSetting('SummonAxes') then return false end
                     if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['AutoAxe1'])) then return false end
-                    if mq.TLO.FindItemCount(self.ResolvedActionMap['AutoAxe1'].Name())() > self.settings.AutoAxeCount then return false end
-                    if self.settings.AutoAxeCount == 0 then return false end
+                    if mq.TLO.FindItemCount(self.ResolvedActionMap['AutoAxe1'].Name())() > RGMercUtils.GetSetting('AutoAxeCount') then return false end
+                    if RGMercUtils.GetSetting('AutoAxeCount') == 0 then return false end
                     local spell = mq.TLO.Spell(self.ResolvedActionMap['AutoAxe1'].Name())
                     if not spell or not spell() then return false end
                     if mq.TLO.FindItemBankCount(spell.ReagentID(1)())() == 0 then return false end
@@ -388,10 +388,10 @@ return {
                 name = "SummonAxes2",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    if not self.settings.SummonAxes2 then return false end
+                    if not RGMercUtils.GetSetting('SummonAxes2') then return false end
                     if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['AutoAxe2'])) then return false end
-                    if mq.TLO.FindItemCount(self.ResolvedActionMap['AutoAxe2'].Name())() > self.settings.AutoAxe2Count then return false end
-                    if self.settings.AutoAxe2Count == 0 then return false end
+                    if mq.TLO.FindItemCount(self.ResolvedActionMap['AutoAxe2'].Name())() > RGMercUtils.GetSetting('AutoAxe2Count') then return false end
+                    if RGMercUtils.GetSetting('AutoAxe2Count') == 0 then return false end
                     local spell = mq.TLO.Spell(self.ResolvedActionMap['AutoAxe2'].Name())
                     if not spell or not spell() then return false end
                     if mq.TLO.FindItemBankCount(spell.ReagentID(1)())() == 0 then return false end
@@ -405,10 +405,10 @@ return {
                 name = "SummonDichoAxe",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    if not self.settings.SummonDichoAxes then return false end
+                    if not RGMercUtils.GetSetting('SummonDichoAxes') then return false end
                     if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['DichoAxe'])) then return false end
-                    if mq.TLO.FindItemCount(self.ResolvedActionMap['DichoAxe'].Name())() > self.settings.DichoAxeCount then return false end
-                    if self.settings.DichoAxeCount == 0 then return false end
+                    if mq.TLO.FindItemCount(self.ResolvedActionMap['DichoAxe'].Name())() > RGMercUtils.GetSetting('DichoAxeCount') then return false end
+                    if RGMercUtils.GetSetting('DichoAxeCount') == 0 then return false end
                     local spell = mq.TLO.Spell(self.ResolvedActionMap['DichoAxe'].Name())
                     if not spell or not spell() then return false end
                     if mq.TLO.FindItemBankCount(spell.ReagentID(1)())() == 0 then return false end
@@ -565,14 +565,14 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     local epicItem = mq.TLO.FindItem(itemName)
-                    return self.settings.DoEpic and epicItem() and epicItem.Spell.Stacks() and epicItem.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and epicItem.TimerReady() == 0
                 end,
             },
             {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return self.settings.DoBattleLeap and not RGMercUtils.SongActive("Battle Leap Warcry") and not RGMercUtils.SongActive("Group Bestial Alignment")
+                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActive("Battle Leap Warcry") and not RGMercUtils.SongActive("Group Bestial Alignment")
                 end,
             },
             {
@@ -650,14 +650,14 @@ return {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return self.settings.DoIntimidate and mq.TLO.Me.AbilityReady(abilityName)()
+                    return RGMercUtils.GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
                 end,
             },
             {
                 name = "AESlice",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return self.settings.DoAoe and RGMercUtils.PCDiscReady(discSpell)
+                    return RGMercUtils.GetSetting('DoAoe') and RGMercUtils.PCDiscReady(discSpell)
                 end,
             },
             {
@@ -736,7 +736,7 @@ return {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return self.settings.DoIntimidate and mq.TLO.Me.AbilityReady(abilityName)()
+                    return RGMercUtils.GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
                 end,
             },
         },

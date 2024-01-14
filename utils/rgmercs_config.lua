@@ -212,7 +212,7 @@ end
 function Config:SaveSettings(doBroadcast)
     mq.pickle(self:GetConfigFileName(), self.settings)
 
-    RGMercsLogger.set_log_level(self.settings.LogLevel)
+    RGMercsLogger.set_log_level(RGMercUtils.GetSetting('LogLevel'))
 
     if doBroadcast == true then
         RGMercUtils.BroadcastUpdate("main", "LoadSettings")

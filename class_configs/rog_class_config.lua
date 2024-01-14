@@ -277,7 +277,7 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return self.settings.DoChestClick and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
@@ -285,7 +285,7 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     local item = mq.TLO.FindItem(itemName)
-                    return item and item() and self.settings.DoEpic and item.Spell.Stacks() and item.TimerReady()
+                    return item and item() and RGMercUtils.GetSetting('DoEpic') and item.Spell.Stacks() and item.TimerReady()
                 end,
             },
             {
@@ -426,7 +426,7 @@ return {
                 name = "PoisonName",
                 type = "ClickyItem",
                 cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
                         not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
                 end,
@@ -462,23 +462,23 @@ return {
                 name = "PoisonClicky",
                 type = "ClickyItem",
                 active_cond = function(self, _)
-                    return (mq.TLO.FindItemCount(self.settings.PoisonName)() or 0) >= self.settings.PoisonItemCount
+                    return (mq.TLO.FindItemCount(RGMercUtils.GetSetting('PoisonName'))() or 0) >= RGMercUtils.GetSetting('PoisonItemCount')
                 end,
                 cond = function(self, _)
-                    return (mq.TLO.FindItemCount(self.settings.PoisonName)() or 0) < self.settings.PoisonItemCount and
-                        mq.TLO.FindItem(self.settings.PoisonClicky)() and
-                        mq.TLO.FindItem(self.settings.PoisonClicky).Timer() == 0
+                    return (mq.TLO.FindItemCount(RGMercUtils.GetSetting('PoisonName'))() or 0) < RGMercUtils.GetSetting('PoisonItemCount') and
+                        mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonClicky'))() and
+                        mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonClicky')).Timer() == 0
                 end,
             },
             {
                 name = "PoisonName",
                 type = "ClickyItem",
                 active_cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and RGMercUtils.BuffActiveByID(poisonItem.Spell.ID() or 0)
                 end,
                 cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
                         not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
                 end,
@@ -490,7 +490,7 @@ return {
                     return mq.TLO.Me.Invis() and mq.TLO.Me.Sneaking()
                 end,
                 cond = function(self)
-                    return self.settings.DoHideSneak
+                    return RGMercUtils.GetSetting('DoHideSneak')
                 end,
                 custom_func = function(_)
                     if mq.TLO.Me.AbilityReady("hide") then RGMercUtils.DoCmd("/doability hide") end
