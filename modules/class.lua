@@ -271,7 +271,8 @@ end
 ---@param mode string
 ---@return boolean
 function Module:IsModeActive(mode)
-    if self.ClassConfig.Modes[mode] == nil then
+    local modeSet = Set.new(self.ClassConfig.Modes)
+    if not modeSet:contains(mode) then
         RGMercsLogger.log_error("\arIsModeActive(%s) ==> Invalid Mode Type!", mode)
         return false
     end
