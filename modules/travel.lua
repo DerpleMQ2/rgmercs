@@ -183,6 +183,10 @@ function Module:GenerateFilteredPortsList()
     table.sort(self.TempSettings.FilteredList.SortedTabNames)
 end
 
+function Module:ShouldRender()
+    return #self.TempSettings.PorterList > 0
+end
+
 function Module:Render()
     local width = ImGui.GetWindowWidth()
     local buttonsPerRow = math.max(1, math.floor(width / self.ButtonWidth))

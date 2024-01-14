@@ -119,6 +119,10 @@ function Module:Init()
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
+function Module:ShouldRender()
+    return true
+end
+
 function Module:Render()
     ImGui.Text("Performance Monitor Modules")
     local pressed

@@ -216,6 +216,10 @@ function Module:Campfire(camptype)
     end
 end
 
+function Module:ShouldRender()
+    return true
+end
+
 function Module:Render()
     ImGui.Text("Chase Module")
 

@@ -71,24 +71,13 @@ local function renderModulesTabs()
     if not RGMercConfig:SettingsLoaded() then return end
 
     for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
-        if ImGui.BeginTabItem(name) then
-            RGMercModules:ExecModule(name, "Render")
-            ImGui.EndTabItem()
+        if RGMercModules:ExecModule(name, "ShouldRender") then
+            if ImGui.BeginTabItem(name) then
+                RGMercModules:ExecModule(name, "Render")
+                ImGui.EndTabItem()
+            end
         end
     end
-end
-
-local function renderDragDropForItem(label)
-    ImGui.Text(label)
-    ImGui.PushID(label .. "__btn")
-    if ImGui.Button("HERE", ICON_WIDTH, ICON_HEIGHT) then
-        if mq.TLO.Cursor() then
-            return true, mq.TLO.Cursor.Name()
-        end
-        return false, ""
-    end
-    ImGui.PopID()
-    return false, ""
 end
 
 local function Alive()
@@ -220,16 +209,18 @@ local function RGMercsGUI()
                     end
 
                     for n, s in pairs(RGMercConfig.SubModuleSettings) do
-                        ImGui.PushID(n .. "_config_hdr")
-                        if s and s.settings and s.defaults and s.categories then
-                            if ImGui.CollapsingHeader(string.format("%s: Config Options", n)) then
-                                s.settings, pressed, _ = RGMercUtils.RenderSettings(s.settings, s.defaults, s.categories)
-                                if pressed then
-                                    RGMercModules:ExecModule(n, "SaveSettings", true)
+                        if RGMercModules:ExecModule(n, "ShouldRender") then
+                            ImGui.PushID(n .. "_config_hdr")
+                            if s and s.settings and s.defaults and s.categories then
+                                if ImGui.CollapsingHeader(string.format("%s: Config Options", n)) then
+                                    s.settings, pressed, _ = RGMercUtils.RenderSettings(s.settings, s.defaults, s.categories)
+                                    if pressed then
+                                        RGMercModules:ExecModule(n, "SaveSettings", true)
+                                    end
                                 end
                             end
+                            ImGui.PopID()
                         end
-                        ImGui.PopID()
                     end
 
                     if ImGui.CollapsingHeader("Outside Assist List") then
