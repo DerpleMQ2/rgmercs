@@ -1052,6 +1052,28 @@ function Utils.BoolToString(b)
     return b and "TRUE" or "FALSE"
 end
 
+---Returns a setting from either the global or a module setting table.
+---@param setting string #name of setting to get
+---@return any|nil
+function Utils.GetSetting(setting)
+    local ret = { module = "Base", value = RGMercConfig:GetSettings()[setting], }
+
+    -- if we found it in the Global table we should alert if it is duplicated anywhere
+    -- else as that could get confusing.
+    for name, data in pairs(RGMercConfig.SubModuleSettings) do
+        if data.settings[setting] ~= nil then
+            if not ret.value then
+                ret = { module = name, value = data.settings[setting], }
+            else
+                RGMercsLogger.log_error("\ay[Setting] \arError: Key %s exists in multipe settings tables: \aw%s arand \aw%s! Returning first but this should be fixed!", setting,
+                    ret.name, name)
+            end
+        end
+    end
+    RGMercsLogger.log_verbose("\ag[Setting] \at%s \agfound in module \am%s", setting, ret.module)
+    return ret.value
+end
+
 ---@param aaName string
 ---@return boolean
 function Utils.SelfBuffAACheck(aaName)
@@ -1117,39 +1139,59 @@ function Utils.TargetHasBuffByName(buffName)
     return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("name " .. buffName).ID() or 0) > 0) and true or false
 end
 
----@return integer
-function Utils.GetTargetLevel()
-    return (mq.TLO.Target.Level() or 0)
+---@param target MQTarget|nil
+---@return number
+function Utils.GetTargetLevel(target)
+    return (target and target.Level() or (mq.TLO.Target.Level() or 0))
 end
 
----@return integer
-function Utils.GetTargetDistance()
-    return (mq.TLO.Target.Distance() or 9999)
+---@param target MQTarget|nil
+---@return number
+function Utils.GetTargetDistance(target)
+    return (target and target.Distance() or (mq.TLO.Target.Distance() or 9999))
 end
 
----@return integer
-function Utils.GetTargetPctHPs()
-    return (mq.TLO.Target.PctHPs() or 0)
+---@param target MQTarget|nil
+---@return number
+function Utils.GetTargetPctHPs(target)
+    return (target and target.PctHPs() or (mq.TLO.Target.PctHPs() or 0))
 end
 
+---@param target MQTarget|nil
 ---@return string
-function Utils.GetTargetName()
-    return (mq.TLO.Target.Name() or "")
+function Utils.GetTargetName(target)
+    return (target and target.Name() or (mq.TLO.Target.Name() or ""))
 end
 
----@return integer
-function Utils.GetTargetID()
-    return (mq.TLO.Target.ID() or 0)
+---@param target MQTarget|nil
+---@return number
+function Utils.GetTargetID(target)
+    return (target and target.ID() or (mq.TLO.Target.ID() or 0))
 end
 
----@return integer
-function Utils.GetTargetAggroPct()
-    return (mq.TLO.Target.PctAggro() or 0)
+---@param target MQTarget|nil
+---@return number
+function Utils.GetTargetAggroPct(target)
+    return (target and target.PctAggro() or (mq.TLO.Target.PctAggro() or 0))
 end
 
+---@param target MQTarget|nil
 ---@return boolean
-function Utils.GetTargetAggressive()
-    return (mq.TLO.Target.Aggressive() or false)
+function Utils.GetTargetAggressive(target)
+    return (target and target.Aggressive() or (mq.TLO.Target.Aggressive() or false))
+end
+
+---@param target MQTarget|nil
+---@return number
+function Utils.GetTargetSlowedPct(target)
+    -- no valid target
+    if (not target or not target()) and not mq.TLO.Target then return 0 end
+    -- passed in target valid but not slowed
+    if target and target() and not target.Slowed() then return 0 end
+    -- implied target valid but not slowed
+    if mq.TLO.Target and not mq.TLO.Target.Slowed() then return 0 end
+
+    return ((target and target() and target.Slowed.SlowPct()) or (mq.TLO.Target.Slowed.SlowPct() or 0))
 end
 
 ---@return integer

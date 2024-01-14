@@ -793,7 +793,7 @@ return {
                 type = "Item",
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and self.settings.DoChestClick and item() and item.Spell.Stacks() and
+                    return RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and
                         item.TimerReady() == 0
                 end,
             },
@@ -831,16 +831,17 @@ return {
                 name = "SlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return self.settings.DoSlow and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget() and
-                        spell.SlowPct() > (target.Slowed.SlowPct() or 0)
+                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                        spell.StacksTarget() and
+                        spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct(target))
                 end,
             },
             {
                 name = "Sha's Reprisal",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return self.settings.DoSlow and not RGMercUtils.TargetHasBuffByName(aaName) and
-                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (target.Slowed.SlowPct() or 0)
+                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.TargetHasBuffByName(aaName) and
+                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (RGMercUtils.GetTargetSlowedPct(target))
                 end,
             },
         },
@@ -900,14 +901,14 @@ return {
                 name = "SingleClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not self.settings.DoAoe
+                    return not RGMercUtils.GetSetting('DoAoe')
                 end,
             },
             {
                 name = "AEClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return self.settings.DoAoe
+                    return RGMercUtils.GetSetting('DoAoe')
                 end,
             },
             {
@@ -970,14 +971,14 @@ return {
                 name = "Colddot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
+                    return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
                 end,
             },
             {
                 name = "Blooddot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
+                    return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
                 end,
             },
         },
@@ -986,7 +987,7 @@ return {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoRunSpeed and not RGMercUtils.TargetHasBuffByName(spell.RankName())
+                    return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuffByName(spell.RankName())
                 end,
             },
             {
@@ -1082,7 +1083,7 @@ return {
             --    name = "VerifyFerocity",
             --    type = "CustomFunc",
             --    custom_func = function(self, targetId)
-            --        if not self.settings.DoCombatFero or not RGMercUtils.NPCSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
+            --        if not RGMercUtils.GetSetting('DoCombatFero') or not RGMercUtils.NPCSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
             --        -- TODO: Ferocity List?
             --        return false
             --    end,
@@ -1093,7 +1094,7 @@ return {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return self.settings.DoEpic and
+                    return RGMercUtils.GetSetting('DoEpic') and
                         mq.TLO.FindItem(itemName)() and (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil or mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
                 end,
             },
@@ -1102,7 +1103,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     local slowProc = self.ResolvedActionMap['PetSlowProc']
-                    return self.settings.DoSnare and (slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
+                    return RGMercUtils.GetSetting('DoSnare') and (slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
                         mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName())() == nil
                 end,
             },
@@ -1117,28 +1118,28 @@ return {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoRunSpeed and RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercUtils.GetSetting('DoRunSpeed') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetOffenseBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not self.settings.DoTankPet) and RGMercUtils.SelfBuffPetCheck(spell)
+                    return (not RGMercUtils.GetSetting('DoTankPet')) and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetDefenseBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoTankPet and RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercUtils.GetSetting('DoTankPet') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetSlowProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return self.settings.DoPetSlow and RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercUtils.GetSetting('DoPetSlow') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1152,7 +1153,7 @@ return {
                 name = "PetDamageProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not self.settings.DoTankPet) and RGMercUtils.SelfBuffPetCheck(spell)
+                    return (not RGMercUtils.GetSetting('DoTankPet')) and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1173,7 +1174,7 @@ return {
                 name = "PetGrowl",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not self.settings.DoSwarmPet) and not RGMercUtils.SongActive(spell.RankName())
+                    return (not RGMercUtils.GetSetting('DoSwarmPet')) and not RGMercUtils.SongActive(spell.RankName())
                 end,
             },
         },
@@ -1219,15 +1220,15 @@ return {
         {
             gem = 7,
             spells = {
-                { name = "SlowSpell",  cond = function(self) return self.settings.DoSlow end, },
-                { name = "EndemicDot", cond = function(self) return self.settings.DoDot end, },
+                { name = "SlowSpell",  cond = function(self) return RGMercUtils.GetSetting('DoSlow') end, },
+                { name = "EndemicDot", cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
             },
         },
         {
             gem = 8,
             spells = {
                 { name = "PoiBite", },
-                { name = "SwarmPet", cond = function(self) return self.settings.DoSwarmPet end, },
+                { name = "SwarmPet", cond = function(self) return RGMercUtils.GetSetting('DoSwarmPet') end, },
                 { name = "PetGrowl", },
             },
         },
@@ -1236,7 +1237,7 @@ return {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "PoiBite", },
-                { name = "SwarmPet", cond = function(self) return self.settings.DoSwarmPet end, },
+                { name = "SwarmPet", cond = function(self) return RGMercUtils.GetSetting('DoSwarmPet') end, },
                 { name = "PetGrowl", },
             },
         },

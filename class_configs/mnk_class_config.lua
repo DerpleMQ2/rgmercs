@@ -589,7 +589,7 @@ local _ClassConfig = {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return self.settings.DoIntimidation
+                    return RGMercUtils.GetSetting('DoIntimidation')
                         and RGMercUtils.AbilityReady(abilityName)
                 end,
             },

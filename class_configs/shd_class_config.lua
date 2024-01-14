@@ -808,7 +808,7 @@ local _ClassConfig = {
                 type = "CustomFunc",
                 tooltip = Tooltips.ActivateShield,
                 cond = function(self)
-                    return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("Shield").Active() and
+                    return RGMercUtils.GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Shield").Active() and
                         mq.TLO.Me.Bandolier("Shield").Index() and RGMercUtils.IsTanking()
                 end,
                 custom_func = function(_)
@@ -822,7 +822,7 @@ local _ClassConfig = {
                 type = "CustomFunc",
                 tooltip = Tooltips.Activate2HS,
                 cond = function(self)
-                    return self.settings.DoBandolier and not mq.TLO.Me.Bandolier("2HS").Active() and
+                    return RGMercUtils.GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("2HS").Active() and
                         mq.TLO.Me.Bandolier("2HS").Index() and not RGMercUtils.IsTanking()
                 end,
                 custom_func = function(_)
@@ -843,8 +843,8 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.AeTaunt,
                 cond = function(self, spell)
-                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
-                        RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
+                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
+                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
                 end,
             },
             {
@@ -852,8 +852,8 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfHatred,
                 cond = function(self, _)
-                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
-                        RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
+                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
+                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
                 end,
             },
             {
@@ -861,8 +861,8 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfSpite,
                 cond = function(self, _)
-                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= self.settings.AeTauntCnt and
-                        RGMercUtils.GetXTHaterCount() >= self.settings.AeTauntCnt
+                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
+                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
                 end,
             },
             {
@@ -896,7 +896,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.ForPower,
                 cond = function(self, spell)
-                    return RGMercUtils.IsTanking() and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
+                    return RGMercUtils.IsTanking() and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
                 end,
             },
             {
@@ -904,7 +904,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.EncroachingDarkness,
                 type = "AA",
                 cond = function(self)
-                    return self.settings.DoSnare and RGMercUtils.DetAACheck(826)
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetAACheck(826)
                 end,
             },
             {
@@ -912,7 +912,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.SnareDOT,
                 cond = function(self, spell)
-                    return self.settings.DoSnare and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Me.AltAbility(826)()
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Me.AltAbility(826)()
                 end,
             },
             {
@@ -980,7 +980,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
+                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
                 end,
             },
             {
@@ -988,7 +988,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.DireDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
+                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
                 end,
             },
             {
@@ -996,7 +996,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Torrent,
                 cond = function(self, spell)
-                    return self.settings.DoTorrent and not RGMercUtils.BuffActiveByID(spell.ID())
+                    return RGMercUtils.GetSetting('DoTorrent') and not RGMercUtils.BuffActiveByID(spell.ID())
                 end,
             },
             {
@@ -1012,7 +1012,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.BondTap,
                 cond = function(self, spell)
-                    return not self.settings.DoTorrent and
+                    return not RGMercUtils.GetSetting('DoTorrent') and
                         not RGMercUtils.BuffActiveByName(spell.Name() .. " Recourse")
                 end,
             },
@@ -1049,7 +1049,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Dicho,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap
+                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartBigTap')
                 end,
             },
             {
@@ -1057,7 +1057,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.DireTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= self.settings.StartBigTap
+                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartBigTap')
                 end,
             },
             {
@@ -1065,7 +1065,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.BuffTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap and
+                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap') and
                         RGMercUtils.DetSpellCheck(spell)
                 end,
             },
@@ -1074,7 +1074,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.BiteTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
+                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
                 end,
             },
             {
@@ -1082,7 +1082,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= self.settings.StartLifeTap
+                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
                 end,
             },
             {
@@ -1123,7 +1123,7 @@ local _ClassConfig = {
         {
             gem = 3,
             spells = {
-                { name = "Torrent", cond = function(self) return self.settings.DoTorrent end, },
+                { name = "Torrent", cond = function(self) return RGMercUtils.GetSetting('DoTorrent') end, },
                 { name = "BondTap", },
             },
         },
@@ -1161,7 +1161,7 @@ local _ClassConfig = {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "AeTaunt",  cond = function(self) return self.settings.DoAE and mq.TLO.Me.AltAbility("Explosion of Hatred")() == nil end, },
+                { name = "AeTaunt",  cond = function(self) return RGMercUtils.GetSetting('DoAE') and mq.TLO.Me.AltAbility("Explosion of Hatred")() == nil end, },
                 { name = "ForPower", },
             },
         },

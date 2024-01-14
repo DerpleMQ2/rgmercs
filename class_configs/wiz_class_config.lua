@@ -566,8 +566,14 @@ return {
     },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return { mq.TLO.Me.ID(), } end, cond = function(self, combat_state) return combat_state == "Downtime" and
-            RGMercUtils.DoBuffCheck() end, },
+        {
+            name = 'Downtime',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
         {
             name = 'Burn',
             state = 1,
@@ -631,7 +637,7 @@ return {
                 name = "Mana Burn",
                 type = "AA",
                 cond = function(self)
-                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and self.settings.DoManaBurn
+                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and RGMercUtils.GetSetting('DoManaBurn')
                 end,
             },
         },
@@ -664,14 +670,14 @@ return {
                 name = "Concussion",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > self.settings.JoltAggro
+                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
                 end,
             },
             {
                 name = "JoltSpell",
                 type = "Spell",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > self.settings.JoltAggro
+                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
                 end,
             },
             {
@@ -805,21 +811,23 @@ return {
                 name = "Force of Flame",
                 type = "AA",
                 cond = function(self)
-                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and not RGMercUtils.AAReady("Force of Will")
+                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and
+                    not RGMercUtils.AAReady("Force of Will")
                 end,
             },
             {
                 name = "Force of Ice",
                 type = "AA",
                 cond = function(self)
-                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and RGMercUtils.AAReady("Force of Flame")
+                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and RGMercUtils.AAReady("Force of Flame")
                 end,
             },
             {
                 name = "Force of Will",
                 type = "AA",
                 cond = function(self)
-                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and not RGMercUtils.AAReady("Force of Flame")
+                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and
+                    not RGMercUtils.AAReady("Force of Flame")
                 end,
             },
         },
@@ -891,7 +899,7 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return self.settings.DoChestClick and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
