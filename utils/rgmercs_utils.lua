@@ -911,7 +911,7 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
 
     if entry.type:lower() == "customfunc" then
         if entry.custom_func then
-            ret = entry.custom_func(caller)
+            ret = entry.custom_func(caller, targetId)
         else
             ret = false
         end
@@ -2598,7 +2598,7 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
             if entry.cond then
                 local condArg  = Utils.GetEntryConditionArg(resolvedActionMap, entry)
                 local condTarg = mq.TLO.Target
-                local pass     = entry.cond(condArg, condTarg, true)
+                local pass     = entry.cond(caller, condArg, condTarg, true)
                 local active   = entry.active_cond and entry.active_cond(caller, condArg) or false
 
                 if active == true then
