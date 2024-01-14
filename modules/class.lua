@@ -196,7 +196,11 @@ function Module:Render()
                 RGMercUtils.RenderRotationTableKey()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
-                    if ImGui.CollapsingHeader(r.name) then
+                    local rotationName = r.name
+                    if r.timer then
+                        rotationName = string.format("%s [%s]", r.name, RGMercUtils.FormatTime(math.max(0, r.timer - (os.clock() - (self.TempSettings.RotationTimers[r.name] or 0)))))
+                    end
+                    if ImGui.CollapsingHeader(rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.Rotations[r.name],
                             self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
@@ -535,7 +539,7 @@ function Module:GiveTime(combat_state)
         RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
         local timeCheck = true
         if r.timer then
-            self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or os.clock()
+            self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
             if os.clock() - self.TempSettings.RotationTimers[r.name] < r.timer then
                 timeCheck = false
             end
@@ -548,7 +552,6 @@ function Module:GiveTime(combat_state)
                         self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
 
                     if r.state then r.state = newState end
-
                     self.TempSettings.RotationTimers[r.name] = os.clock()
                 end
             end

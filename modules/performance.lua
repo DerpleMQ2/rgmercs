@@ -95,7 +95,6 @@ function Module:LoadSettings()
     if err or not config then
         RGMercsLogger.log_error("\ay[Performance Monitor]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
-        self.settings.MyCheckbox = false
         self:SaveSettings(false)
     else
         self.settings = config()

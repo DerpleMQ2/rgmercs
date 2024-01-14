@@ -31,7 +31,7 @@ local curState       = "Downtime"
 -- Icon Rendering
 local animItems      = mq.FindTextureAnimation("A_DragItem")
 local animBox        = mq.FindTextureAnimation("A_RecessedBox")
---local derpImg        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/derp.png")
+local derpImg        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog.jpg")
 
 -- Constants
 local ICON_WIDTH     = 40
@@ -148,17 +148,15 @@ local function RGMercsGUI()
 
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
         ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
-        --ImGui.Image(derpImg:GetTextureID(), ImVec2(ImGui.GetWindowWidth(), ImGui.GetWindowHeight()))
-
-        --ImGui.SetCursorPos(0, 0)
 
         if shouldDrawGUI then
             local pressed
-
-            ImGui.Text(string.format("RGMercs [%s/%s] by: %s running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
+            ImGui.Image(derpImg:GetTextureID(), ImVec2(40, 40))
+            ImGui.SameLine()
+            ImGui.Text(string.format("RGMercs [%s/%s] by: %s running for %s (%s)\nBuild: %s", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
                 RGMercConfig.Globals.CurLoadedChar,
-                RGMercConfig.Globals.CurLoadedClass))
-            ImGui.Text(string.format("Build: %s", GitCommit.commitId or "None"))
+                RGMercConfig.Globals.CurLoadedClass, GitCommit.commitId or "None"))
+
 
             if RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
