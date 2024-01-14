@@ -1034,7 +1034,7 @@ function Utils.SelfBuffCheck(spell)
         return Utils.BuffActiveByName(spell)
     end
     if not spell or not spell() then
-        RGMercsLogger.log_verbose("\arSelfBuffCheck() Spell Invalid")
+        --RGMercsLogger.log_verbose("\arSelfBuffCheck() Spell Invalid")
         return false
     end
     ---@diagnostic disable-next-line: undefined-field

@@ -2,16 +2,18 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    ['Modes'] = {
+    _version              = "0.1a",
+    _author               = "Derple",
+    ['Modes']             = {
         'DPS',
     },
-    ['ItemSets'] = {
+    ['ItemSets']          = {
         ['Epic'] = {
             "Savage Lord's Totem",             -- Epic    -- Epic 1.5
             "Spiritcaller Totem of the Feral", -- Epic    -- Epic 2.0
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']       = {
         ['SwarmPet'] = {
             -- Swarm Pet
             "Bestial Empathy",       -- Level 68
@@ -604,141 +606,675 @@ return {
             "Ikatiar's Vindication",
         },
     },
-    ['Rotations'] = {
-        ['Tank'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+    ['HealRotationOrder'] = {
+        {
+            name = 'PetHealpoint',
+            state = 1,
+            steps = 1,
+            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() end,
+        },
+        {
+            name  = 'LightHealPoint',
+            state = 1,
+            steps = 1,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().LightHealPoint end,
+        },
+    },
+    ['HealRotations']     = {
+        ["PetHealpoint"] = {
+            {
+                name = "PetHealSpell",
+                type = "Spell",
+                cond = function(self, spell) return true end,
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+        },
+        ["LightHealPoint"] = {
+            {
+                name = "HealSpell",
+                type = "Spell",
+                cond = function(self, spell) return mq.TLO.Me.Level() < 112 end,
+            },
+        },
+    },
+    ['RotationOrder']     = {
+        -- Downtime doesn't have state because we run the whole rotation at once.
+        {
+            name = 'GroupBuff',
+            timer = 60, -- only run every 60 seconds top.
+            targetId = function(self)
+                local groupIds = { mq.TLO.Me.ID(), }
+                local count = mq.TLO.Group.Members()
+                for i = 1, count do
+                    table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                end
+                return
+                    groupIds
+            end,
+            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end,
+        },
+        {
+            name = 'Downtime',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
+        {
+            name = 'Downtime Pet',
+            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck() and mq.TLO.Me.Pet.ID() > 0
+            end,
+        },
+        {
+            name = 'Debuff',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'Burn',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'DPS',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
+
+    },
+    ['HelperFunctions']   = {
+        BeastialAligmentCheck = function(self)
+            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and
+                not RGMercUtils.SongActive('Bestial Alignment') and
+                not RGMercUtils.BuffActiveByName('Ferociousness')
+        end,
+        HHEFuryDiscCheckPrimary = function(self)
+            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and
+                not RGMercUtils.SongActive('Bestial Alignment') and
+                not RGMercUtils.BuffActiveByName('Ferociousness') and
+                not RGMercUtils.PCAAReady("Bestial Alignment")
+        end,
+        HHEFuryDiscCheckSecondary = function(self)
+            return RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and
+                not RGMercUtils.SongActive('Bestial Alignment') and
+                not RGMercUtils.BuffActiveByName('Ferociousness')
+        end,
+        FerociousnessCheck = function(self)
+            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and
+                not RGMercUtils.SongActive('Bestial Alignment')
+        end,
+    },
+    ['Rotations']         = {
+        ['Burn'] = {
+            -- Set 1
+            -- Besial Alignment (65+) when HHEFuryDisc (88+) and Ferociousness (105+) not active
+            {
+                name = "Bestial Alignment",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.ClassConfig.HelperFunctions.BeastialAligmentCheck(self)
+                end,
+            },
+            -- Vindisc (102+) when HHEFuryDisc (88+) and Ferociousness (105+) not active, but Besial Alignment active
+            {
+                name = "Vindisc",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return self.ClassConfig.HelperFunctions.BeastialAligmentCheck(self)
+                end,
+            },
+            -- Frenzy of Spirit (59+) when HHEFuryDisc (88+) and Ferociousness (105+) not active, but Besial Alignment active
+            {
+                name = "renzy of Spirit",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.ClassConfig.HelperFunctions.BeastialAligmentCheck(self)
+                end,
+            },
+            -- Bloodlust (95+) when HHEFuryDisc (88+) and Ferociousness (105+) not active, but Besial Alignment active
+            {
+                name = "Bloodlust",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.ClassConfig.HelperFunctions.BeastialAligmentCheck(self)
+                end,
+            },
+            -- Frenzied Swipes (100+) when HHEFuryDisc (88+) and Ferociousness (105+) not active, but Besial Alignment active
+            {
+                name = "Frenzied Swipes",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.ClassConfig.HelperFunctions.BeastialAligmentCheck(self)
+                end,
+            },
+            -- Set 2
+            -- HHEFuryDisc (88+) when Besial Alignment (65+) down and not active, and Ferociousness (105+) not active
+            {
+                name = "HHEFuryDisc",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return self.ClassConfig.HelperFunctions.HHEFuryDiscCheckPrimary(self)
+                end,
+            },
+            -- Spire of the Savage Lord (85+) when Besial Alignment (65+) and Ferociousness (105+) not active, but HHEFuryDisc active
+            {
+                name = "Spire of the Savage Lord",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.ClassConfig.HelperFunctions.HHEFuryDiscCheckSecondary(self)
+                end,
+            },
+            -- DmgModDisc (60+) when Besial Alignment (65+) and Ferociousness (105+) not active, but HHEFuryDisc active
+            {
+                name = "DmgModDisc",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return self.ClassConfig.HelperFunctions.HHEFuryDiscCheckSecondary(self)
+                end,
+            },
+            -- Chest Click when Besial Alignment (65+) and Ferociousness (105+) not active, but HHEFuryDisc active (When we dont have HHEFuryDisc, fire off when available)
+            {
+                name = mq.TLO.Me.Inventory("Chest").Name(),
+                type = "Item",
+                cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and self.settings.DoChestClick and item() and item.Spell.Stacks() and
+                        item.TimerReady() == 0
+                end,
+            },
+            -- Set 3
+            -- Ferociousness (105+) when Besial Alignment (65+) and HHEFuryDisc (88+) down and not active
+            {
+                name = "Ferociousness",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.ClassConfig.HelperFunctions.FerociousnessCheck(self) and RGMercUtils.BuffActiveByName(aaName) and RGMercUtils.PCAAReady(aaName) and
+                        not RGMercUtils.PCDiscReady(self.ResolvedActionMap['HHEFuryDisc'])
+                end,
+            },
+            -- Companion's Fury (86+) when Ferociousness (105+) active and HHEFuryDisc (88+) and Besial Alignment (65+) not active (When we dont have Ferociousness, fire off when other conditions met)
+            {
+                name = "Companion's Fury",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.ClassConfig.HelperFunctions.FerociousnessCheck(self) and (not RGMercUtils.BuffActiveByName("Ferociousness") or
+                        not RGMercUtils.CanUseAA("Ferociousness"))
+                end,
+            },
+            -- Group Bestial Alignment (83+) when Ferociousness (105+) active and HHEFuryDisc (88+) and Besial Alignment (65+) not active (When we dont have Ferociousness, fire off when other conditions met)
+            {
+                name = "Group Bestial Alignment",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.ClassConfig.HelperFunctions.FerociousnessCheck(self) and (not RGMercUtils.BuffActiveByName("Ferociousness") or
+                        not RGMercUtils.CanUseAA("Ferociousness"))
+                end,
+            },
+        },
+        ['Debuff'] = {
+            {
+                name = "SlowSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return self.settings.DoSlow and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget() and
+                        spell.SlowPct() > (target.Slowed.SlowPct() or 0)
+                end,
+            },
+            {
+                name = "Sha's Reprisal",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.settings.DoSlow and not RGMercUtils.TargetHasBuffByName(aaName) and
+                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (target.Slowed.SlowPct() or 0)
+                end,
             },
         },
         ['DPS'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+            {
+                name = "PetSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.Me.Pet.ID() == 0
+                end,
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "Round Kick",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return RGMercUtils.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                end,
+            },
+            {
+                name = "Kick",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return not RGMercUtils.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                end,
+            },
+            {
+                name = "Blooddot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    local vindDisc = self.ResolvedActionMap['Vindisc']
+                    if not vindDisc then return false end
+                    return mq.TLO.Me.ActiveDisc.ID() == (vindDisc.ID() or 0)
+                end,
+            },
+            {
+                name = "Enduring Frenzy",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.GetTargetPctHPs() > 90
+                end,
+            },
+            {
+                name = "EndRegenProcDisc",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return mq.TLO.Me.PctEndurance() < 10
+                end,
+            },
+            {
+                name = "Chameleon Strike",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "SingleClaws",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return not self.settings.DoAoe
+                end,
+            },
+            {
+                name = "AEClaws",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return self.settings.DoAoe
+                end,
+            },
+            {
+                name = "Maul",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return true
+                end,
+            },
+            {
+                name = "BeastialBuffDisc",
+                type = "Disc",
+                cond = function(self, discSpell, target)
+                    return RGMercUtils.BuffActiveByID(discSpell.ID())
+                end,
+            },
+            {
+                name = "DichoSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return true
+                end,
+            },
+            {
+                name = "Maelstrom",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()
+                end,
+            },
+            {
+                name = "PoiBite",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()
+                end,
+            },
+            {
+                name = "FrozenPoi",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()
+                end,
+            },
+            {
+                name = "Icelance1",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()
+                end,
+            },
+            {
+                name = "Icelance2",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()
+                end,
+            },
+            {
+                name = "Colddot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
+                end,
+            },
+            {
+                name = "Blooddot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell)
+                end,
             },
         },
-        ['Healer'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+        ['GroupBuff'] = {
+            {
+                name = "RunSpeedBuff",
+                type = "Spell",
+                cond = function(self, spell)
+                    return self.settings.DoRunSpeed and not RGMercUtils.TargetHasBuffByName(spell.RankName())
+                end,
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "ManaRegenBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName())
+                end,
+            },
+            {
+                name = "AvatarSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName())
+                end,
+            },
+            {
+                name = "GroupAtkBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                end,
+            },
+            {
+                name = "SingleAtkHPBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    local targetClass = target.Class.ShortName()
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                end,
+            },
+            {
+                name = "GroupAtkHPBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                end,
+            },
+            {
+                name = "SingleAtkHPBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    local targetClass = target.Class.ShortName()
+
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                end,
+            },
+            {
+                name = "GroupFocusSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                end,
+            },
+            {
+                name = "SingleFocusSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    local targetClass = target.Class.ShortName()
+
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                end,
             },
         },
-        ['Hybrid'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+        ['Downtime'] = {
+            {
+                name = "PetSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.Me.Pet.ID() == 0
+                end,
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "KillShotBuff",
+                type = "Spell",
+                cond = function(self, spell)
+                    if not spell or not spell then return false end
+                    return RGMercUtils.SelfBuffCheck(spell) and mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() == nil
+                end,
             },
+            {
+                name = "Pact of The Wurine",
+                type = "AA",
+                cond = function(self, aaName) return RGMercUtils.SelfBuffAACheck(aaName) and (mq.TLO.Me.PctEndurance() < 21) end,
+            },
+            {
+                name = "Consumption of Spirit",
+                type = "AA",
+                cond = function(self, aaName) return RGMercUtils.SelfBuffAACheck(aaName) and (mq.TLO.Me.PctHPs() > 70 and mq.TLO.Me.PctMana() < 80) end,
+            },
+            -- TODO: Does anyone even want this?
+            --{
+            --    name = "VerifyFerocity",
+            --    type = "CustomFunc",
+            --    custom_func = function(self, targetId)
+            --        if not self.settings.DoCombatFero or not RGMercUtils.NPCSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
+            --        -- TODO: Ferocity List?
+            --        return false
+            --    end,
+            --},
         },
-        ['DefaultConfig'] = {
-            ['Mode'] = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['Downtime Pet'] = {
+            {
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    return self.settings.DoEpic and
+                        mq.TLO.FindItem(itemName)() and (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil or mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
+                end,
+            },
+            {
+                name = "Hobble of Spirits",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    local slowProc = self.ResolvedActionMap['PetSlowProc']
+                    return self.settings.DoSnare and (slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
+                        mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName())() == nil
+                end,
+            },
+            {
+                name = "AvatarSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "RunSpeedBuff",
+                type = "Spell",
+                cond = function(self, spell)
+                    return self.settings.DoRunSpeed and RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetOffenseBuff",
+                type = "Spell",
+                cond = function(self, spell)
+                    return (not self.settings.DoTankPet) and RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetDefenseBuff",
+                type = "Spell",
+                cond = function(self, spell)
+                    return self.settings.DoTankPet and RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetSlowProc",
+                type = "Spell",
+                cond = function(self, spell)
+                    return self.settings.DoPetSlow and RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetHaste",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetDamageProc",
+                type = "Spell",
+                cond = function(self, spell)
+                    return (not self.settings.DoTankPet) and RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetHealProc",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetSpellGuard",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetGrowl",
+                type = "Spell",
+                cond = function(self, spell)
+                    return (not self.settings.DoSwarmPet) and not RGMercUtils.SongActive(spell.RankName())
+                end,
+            },
         },
     },
+    ['Spells']            = {
+        {
+            gem = 1,
+            spells = {
+                { name = "HealSpell", },
+            },
+        },
+        {
+            gem = 2,
+            spells = {
+                { name = "PetHealSpell", },
+            },
+        },
+        {
+            gem = 3,
+            spells = {
+                { name = "Icelance1", },
+            },
+        },
+        {
+            gem = 4,
+            spells = {
+                { name = "Icelance2", },
+            },
+        },
+        {
+            gem = 5,
+            spells = {
+                { name = "Blooddot", },
+            },
+        },
+        {
+            gem = 6,
+            spells = {
+                { name = "GroupAtkBuff", },
+                { name = "SingleAtkBuff", },
+            },
+        },
+        {
+            gem = 7,
+            spells = {
+                { name = "SlowSpell",  cond = function(self) return self.settings.DoSlow end, },
+                { name = "EndemicDot", cond = function(self) return self.settings.DoDot end, },
+            },
+        },
+        {
+            gem = 8,
+            spells = {
+                { name = "PoiBite", },
+                { name = "SwarmPet", cond = function(self) return self.settings.DoSwarmPet end, },
+                { name = "PetGrowl", },
+            },
+        },
+        {
+            gem = 9,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "PoiBite", },
+                { name = "SwarmPet", cond = function(self) return self.settings.DoSwarmPet end, },
+                { name = "PetGrowl", },
+            },
+        },
+        {
+            gem = 10,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "FrozenPoi", },
+            },
+        },
+        {
+            gem = 11,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "Maelstrom", },
+            },
+        },
+        {
+            gem = 12,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "Colddot", },
+            },
+        },
+    },
+    ['DefaultConfig']     = {
+        ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['DoCombatFero'] = { DisplayName = "Do Combat Fero", Category = "Combat", Tooltip = "Do Combat Fero", Default = true, },
+        ['DoEpic']       = { DisplayName = "Do Epic", Category = "Abilities", Tooltip = "Enable using your epic clicky", Default = true, },
+        ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
+        ['DoRunSpeed']   = { DisplayName = "Do Run Speed", Category = "Buffs", Tooltip = "Do Run Speed Spells/AAs", Default = true, },
+        ['DoTankPet']    = { DisplayName = "Do Tank Pet", Category = "Buffs", Tooltip = "DoTankPet", Default = true, },
+        ['DoPetSlow']    = { DisplayName = "Do Pet Slow", Category = "Buffs", Tooltip = "DoPetSlow", Default = true, },
+        ['DoSlow']       = { DisplayName = "Do Slow", Category = "Buffs", Tooltip = "DoSlow", Default = true, },
+        ['DoSwarmPet']   = { DisplayName = "Do Swarm Pet", Category = "Buffs", Tooltip = "DoSwarmPet", Default = true, },
+        ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoAoe']        = { DisplayName = "Do AoE", Category = "Abilities", Tooltip = "Enable using AoE Abilities", Default = true, },
+        ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
+    },
+
 }
