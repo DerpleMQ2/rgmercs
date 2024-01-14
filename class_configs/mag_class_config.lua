@@ -1437,7 +1437,7 @@ _ClassConfig      = {
                 name = "VolleyNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("DPS")
+                    return RGMercUtils.IsModeActive("Fire")
                 end,
             },
             {
@@ -1462,7 +1462,7 @@ _ClassConfig      = {
                 name = "SpearNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("DPS")
+                    return RGMercUtils.IsModeActive("Fire")
                 end,
             },
             {
@@ -1476,7 +1476,7 @@ _ClassConfig      = {
                 name = "SpearNuke2",
                 type = "Spell",
                 cond = function(self)
-                    return RGMercUtils.IsModeActive("DPS") and RGMercUtils.BurnCheck()
+                    return RGMercUtils.IsModeActive("Fire") and RGMercUtils.BurnCheck()
                 end,
             },
             {
@@ -1496,12 +1496,12 @@ _ClassConfig      = {
             {
                 name = "MagicNuke1",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 and RGMercUtils.IsModeActive("DPS") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 and RGMercUtils.IsModeActive("Fire") end,
             },
             {
                 name = "MagicNuke2",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 and RGMercUtils.IsModeActive("DPS") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 and RGMercUtils.IsModeActive("Fire") end,
             },
             {
                 name = "FireOrbItem",

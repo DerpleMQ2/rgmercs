@@ -271,6 +271,10 @@ end
 ---@param mode string
 ---@return boolean
 function Module:IsModeActive(mode)
+    if self.ClassConfig.Modes[mode] == nil then
+        RGMercsLogger.log_error("\arIsModeActive(%s) ==> Invalid Mode Type!", mode)
+        return false
+    end
     return Module:GetClassModeName():lower() == mode:lower()
 end
 
