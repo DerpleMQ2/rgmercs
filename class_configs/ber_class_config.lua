@@ -436,7 +436,7 @@ return {
                 name = "BerAura",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.Aura(1).ID() and mq.TLO.Me.CombatAbilityReady(discSpell.RankName()) and mq.TLO.Me.PctEndurance() > 10
+                    return not mq.TLO.Me.Aura(1).ID() and mq.TLO.Me.CombatAbilityReady(discSpell.RankName())() and mq.TLO.Me.PctEndurance() > 10
                 end,
             },
         },

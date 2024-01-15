@@ -2,6 +2,8 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
+    _version              = "0.3a",
+    _author               = "Pureleaf, Derple",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,

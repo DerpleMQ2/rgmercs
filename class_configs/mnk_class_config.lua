@@ -262,42 +262,42 @@ local _ClassConfig = {
                 name = "Infusion of Thunder",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Spire of the Sensei",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "CraneStance",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Five Point Palm",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Heel",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             -- Set 2
@@ -305,7 +305,7 @@ local _ClassConfig = {
                 name = "Focused Destructive Force",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -313,7 +313,7 @@ local _ClassConfig = {
                 name = "Poise",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -321,7 +321,7 @@ local _ClassConfig = {
                 name = "DichoSpell",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -329,7 +329,7 @@ local _ClassConfig = {
                 name = "CraneStance",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -337,7 +337,7 @@ local _ClassConfig = {
                 name = "Five Point Palm",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -345,7 +345,7 @@ local _ClassConfig = {
                 name = "Palm",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -354,56 +354,56 @@ local _ClassConfig = {
                 name = "Infusion of Thunder",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
-                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
+                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Spire of the Sensei",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
-                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
+                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Ton Po's Stance",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
-                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
+                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
-                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
+                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "CraneStance",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
-                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
+                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Five Point Palm",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
-                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
+                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Speed",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel']) and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm']) and
-                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed']) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Heel'])() and not mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Palm'])() and
+                        mq.TLO.Me.CombatAbilityReady(self.ResolvedActionMap['Speed'])() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             -- Set 4
