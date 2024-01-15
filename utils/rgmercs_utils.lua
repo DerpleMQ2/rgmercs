@@ -1074,7 +1074,7 @@ function Utils.GetSetting(setting)
     end
 
     if ret.value ~= nil then
-        RGMercsLogger.log_verbose("\ag[Setting] \at'%s' \agfound in module \am%s", setting, ret.module)
+        RGMercsLogger.log_super_verbose("\ag[Setting] \at'%s' \agfound in module \am%s", setting, ret.module)
     else
         RGMercsLogger.log_error("\ag[Setting] \at'%s' \aywas requested but not found in any module!", setting)
     end
