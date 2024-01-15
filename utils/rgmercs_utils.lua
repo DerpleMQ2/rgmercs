@@ -267,18 +267,21 @@ function Utils.NPCSpellReady(spell, targetId, healingSpell)
     return false
 end
 
+---@param aaName string
+---@param targetId number?
+---@param healingSpell boolean?
 ---@return boolean
 function Utils.NPCAAReady(aaName, targetId, healingSpell)
     local me = mq.TLO.Me
     local ability = mq.TLO.Me.AltAbility(aaName)
 
-    if targetId == 0 then targetId = mq.TLO.Target.ID() end
+    if targetId == 0 or not targetId then targetId = mq.TLO.Target.ID() end
 
     if not ability or not ability() then return false end
 
     if me.Stunned() then return false end
 
-    local target = mq.TLO.Spawn(targetId)
+    local target = mq.TLO.Spawn(string.format("id %d", targetId))
 
     if not target or not target() or target.Dead() then return false end
 
@@ -286,7 +289,7 @@ function Utils.NPCAAReady(aaName, targetId, healingSpell)
         if Utils.MyClassIs("brd") or (not me.Moving() and not me.Casting.ID()) then
             if target.LineOfSight() then
                 return true
-            elseif healingSpell then
+            elseif healingSpell == true then
                 return true
             end
         end
@@ -1167,6 +1170,12 @@ end
 ---@return number
 function Utils.GetTargetDistance(target)
     return (target and target.Distance() or (mq.TLO.Target.Distance() or 9999))
+end
+
+---@param target MQTarget|nil
+---@return number
+function Utils.GetTargetMaxRangeTo(target)
+    return (target and target.MaxRangeTo() or (mq.TLO.Target.MaxRangeTo() or 0))
 end
 
 ---@param target MQTarget|nil
