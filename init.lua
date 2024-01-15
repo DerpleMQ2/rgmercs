@@ -308,7 +308,7 @@ local function RGInit(...)
     end
 
     for k, v in ipairs(RGMercConfig.ExpansionIDToName) do
-        RGMercsLogger.log_debug("\ayExpanions \at%s\ao[\am%d\ao]: %s", v, k, RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
+        RGMercsLogger.log_debug("\ayExpansion \at%s\ao[\am%d\ao]: %s", v, k, RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
     end
 
     -- TODO: Can turn this into an options parser later.
