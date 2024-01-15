@@ -735,7 +735,7 @@ function Module:CheckForAbort(pullID)
             return true
         end
 
-        if RGMercConfig:GetSettings().SafeTargeting and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
+        if RGMercUtils.GetSetting('SafeTargeting') and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
             RGMercsLogger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targetting is enabled! \ax")
             return true
         end
@@ -993,7 +993,7 @@ function Module:GiveTime(combat_stateModule)
 
     RGMercUtils.SetTarget(pullID)
 
-    if RGMercConfig:GetSettings().SafeTargeting then
+    if RGMercUtils.GetSetting('SafeTargeting') then
         -- Hard coding 500 units as our radius as it's probably twice our effective spell range.
         if RGMercUtils.IsSpawnFightingStranger(mq.TLO.Spawn(pullID), 500) then
             abortPull = true

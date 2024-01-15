@@ -1204,14 +1204,14 @@ local _ClassConfig = {
                 name = "NukeSpell1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() >= RGMercConfig:GetSettings().ManaToNuke
+                    return mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
                 end,
             },
             {
                 name = "NukeSpell2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() >= RGMercConfig:GetSettings().ManaToNuke
+                    return mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
                 end,
             },
             {
@@ -1296,7 +1296,7 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
                     return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and RGMercUtils.GetXTHaterCount() > 2 and
-                    mq.TLO.Target.Slowed() == nil
+                        mq.TLO.Target.Slowed() == nil
                 end,
             },
             {
@@ -1424,7 +1424,7 @@ local _ClassConfig = {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "AllianceSpell",  cond = function(self) return RGMercConfig:GetSettings().DoAlliance end, },
+                { name = "AllianceSpell",  cond = function(self) return RGMercUtils.GetSetting('DoAlliance') end, },
                 { name = "ManaDrainSpell", cond = function(self) return true end, },
             },
         },

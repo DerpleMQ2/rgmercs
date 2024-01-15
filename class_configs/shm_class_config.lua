@@ -671,7 +671,7 @@ local _ClassConfig = {
 
             local targetClass = target.Class.ShortName()
 
-            if mq.TLO.Me.CombatState():lower() == "combat" and (targetClass == "dru" or targetClass == "clr" or RGMercConfig:GetSettings().DoBattleRez) then
+            if mq.TLO.Me.CombatState():lower() == "combat" and (targetClass == "dru" or targetClass == "clr" or RGMercUtils.GetSetting('DoBattleRez')) then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
                     return RGMercUtils.UseItem("Staff of Forbidden Rites", corpseId)
                 end
@@ -706,19 +706,19 @@ local _ClassConfig = {
             name  = 'BigHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().BigHealPoint end,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint') end,
         },
         {
             name = 'GroupHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt end,
+            cond = function(self, target) return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
         },
         {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().MainHealPoint end,
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('MainHealPoint') end,
         },
     },
     ['HealRotations']     = {
@@ -732,7 +732,7 @@ local _ClassConfig = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint') and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
                         not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
@@ -740,7 +740,7 @@ local _ClassConfig = {
                 name = "Call of the Ancients",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint')
                 end,
             },
         },
@@ -902,7 +902,7 @@ local _ClassConfig = {
                 name = "Rabid Bear",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSettings().DoMelee and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             {
@@ -944,7 +944,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.GetSetting('DoAESlow') and
-                        not RGMercUtils.TargetHasBuffByName(mq.TLO.Spell("Turgur's Swarm").Trigger(1).RankName())
+                        not RGMercUtils.TargetHasBuffByName(mq.TLO.Spell("Turgur's Swarm").Trigger(1).RankName.Name())
                 end,
             },
             {
@@ -1012,7 +1012,7 @@ local _ClassConfig = {
                 name = "Rabid Bear",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSettings().DoMelee and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             {
@@ -1031,7 +1031,7 @@ local _ClassConfig = {
                 -- first check is for live second is for TLP
                 cond = function(self, spell)
                     return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)) or
-                        (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercConfig:GetSettings().BurnAuto or RGMercUtils.SmallBurn()))
+                        (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils.SmallBurn()))
                 end,
             },
             {
@@ -1055,7 +1055,7 @@ local _ClassConfig = {
                 -- first check is for live second is for TLP
                 cond = function(self, spell)
                     return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)) or
-                        (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercConfig:GetSettings().BurnAuto or RGMercUtils.SmallBurn()))
+                        (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils.SmallBurn()))
                 end,
             },
             {
@@ -1089,7 +1089,7 @@ local _ClassConfig = {
                     if mq.TLO.Me.Level() > 65 then
                         return true
                     end
-                    return RGMercConfig:GetSettings().BurnAuto or RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoNuke')
+                    return RGMercUtils.GetSetting('BurnAuto') or RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoNuke')
                 end,
             },
         },
@@ -1098,7 +1098,7 @@ local _ClassConfig = {
                 name = "PetSpell",
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
-                cond = function(self, _) return RGMercConfig:GetSettings().DoPet and mq.TLO.Me.Pet.ID() == 0 end,
+                cond = function(self, _) return RGMercUtils.GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
                 post_activate = function(self, spell)
                     local pet = mq.TLO.Me.Pet
                     if pet.ID() > 0 then

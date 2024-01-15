@@ -115,7 +115,7 @@ end
 
 ---@return number
 local function GetMainOpacity()
-    return tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0
+    return tonumber(RGMercUtils.GetSetting('BgOpacity')) or 1.0
 end
 
 local function RGMercsGUI()
@@ -174,7 +174,7 @@ local function RGMercsGUI()
             ImGui.NewLine()
             ImGui.Separator()
 
-            local newOpacity, changed = ImGui.SliderFloat("Opacity", tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0, 0.1, 1.0)
+            local newOpacity, changed = ImGui.SliderFloat("Opacity", tonumber(RGMercUtils.GetSetting('BgOpacity')) or 1.0, 0.1, 1.0)
 
             if changed then
                 RGMercConfig:GetSettings().BgOpacity = tostring(newOpacity)
@@ -243,7 +243,7 @@ local function RGMercsGUI()
 
             if RGMercsConsole then
                 local changed
-                RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level", RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
+                RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level", RGMercUtils.GetSetting('LogLevel'), RGMercConfig.Constants.LogLevels,
                     #RGMercConfig.Constants.LogLevels)
 
                 if changed then
@@ -296,7 +296,7 @@ local function RGInit(...)
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
     RGMercConfig.SubModuleSettings = RGMercModules:ExecAll("Init")
 
-    if not RGMercConfig:GetSettings().DoTwist then
+    if not RGMercUtils.GetSetting('DoTwist') then
         local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist", })
         if #unloaded == 1 then table.insert(unloadedPlugins, unloaded[1]) end
     end
@@ -351,7 +351,7 @@ local function RGInit(...)
         RGMercConfig.Globals.MainAssist = mainAssist
         RGMercUtils.PopUp("Targetting %s for Main Assist", RGMercConfig.Globals.MainAssist)
         RGMercUtils.SetTarget(RGMercUtils.GetMainAssistId())
-        RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist, RGMercConfig:GetSettings().AutoAssistAt)
+        RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist, RGMercUtils.GetSetting('AutoAssistAt'))
     end
 
     if RGMercUtils.GetGroupMainAssistName() ~= mainAssist then
@@ -378,7 +378,7 @@ local function Main()
     if RGMercConfig.Globals.PauseMain then
         mq.delay(1000)
         mq.doevents()
-        if RGMercConfig:GetSettings().RunMovePaused then
+        if RGMercUtils.GetSetting('RunMovePaused') then
             RGMercModules:ExecModule("Movement", "GiveTime", curState)
         end
         return
@@ -423,7 +423,7 @@ local function Main()
     end
 
     -- Handles state for when we're in combat
-    if RGMercUtils.DoCombatActions() and not RGMercConfig:GetSettings().PriorityHealing then
+    if RGMercUtils.DoCombatActions() and not RGMercUtils.GetSetting('PriorityHealing') then
         -- IsHealing or IsMezzing should re-determine their target as this point because they may
         -- have switched off to mez or heal after the initial find target check and the target
         -- may have changed by this point.
@@ -436,12 +436,12 @@ local function Main()
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
             RGMercConfig.Globals.LastPetCmd = os.clock()
-            if RGMercConfig:GetSettings().DoPet and (RGMercUtils.GetTargetPctHPs() <= RGMercConfig:GetSettings().PetEngagePct) then
+            if RGMercUtils.GetSetting('DoPet') and (RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('PetEngagePct')) then
                 RGMercUtils.PetAttack(RGMercConfig.Globals.AutoTargetID)
             end
         end
 
-        if RGMercConfig:GetSettings().DoMercenary then
+        if RGMercUtils.GetSetting('DoMercenary') then
             local merc = mq.TLO.Me.Mercenary
 
             if merc() and merc.ID() then
@@ -465,20 +465,20 @@ local function Main()
     end
 
     if RGMercUtils.DoCamp() then
-        if RGMercConfig:GetSettings().DoMercenary and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
+        if RGMercUtils.GetSetting('DoMercenary') and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
             RGMercUtils.DoCmd("/squelch /stance passive")
         end
     end
 
-    if RGMercUtils.DoBuffCheck() and not RGMercConfig:GetSettings().PriorityHealing then
+    if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
         -- TODO: Group Buffs
     end
 
-    if RGMercConfig:GetSettings().DoModRod then
+    if RGMercUtils.GetSetting('DoModRod') then
         RGMercUtils.ClickModRod()
     end
 
-    if RGMercConfig:GetSettings().DoMed >= 2 then
+    if RGMercUtils.GetSetting('DoMed') >= 2 then
         RGMercUtils.AutoMed()
     end
 
@@ -499,7 +499,7 @@ local function Main()
     -- TODO: Fix Curing
 
     -- Revive our mercenary if they're dead and we're using a mercenary
-    if RGMercConfig:GetSettings().DoMercenary then
+    if RGMercUtils.GetSetting('DoMercenary') then
         if mq.TLO.Me.Mercenary.State():lower() == "dead" then
             if mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_SuspendButton").Text():lower() == "revive" then
                 mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_SuspendButton").LeftMouseUp()

@@ -691,7 +691,7 @@ return {
                 name = "GambitSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct')
                 end,
             },
             {
@@ -812,7 +812,7 @@ return {
                 type = "AA",
                 cond = function(self)
                     return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and
-                    not RGMercUtils.AAReady("Force of Will")
+                        not RGMercUtils.AAReady("Force of Will")
                 end,
             },
             {
@@ -827,7 +827,7 @@ return {
                 type = "AA",
                 cond = function(self)
                     return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and
-                    not RGMercUtils.AAReady("Force of Flame")
+                        not RGMercUtils.AAReady("Force of Flame")
                 end,
             },
         },
@@ -880,14 +880,14 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
             {
@@ -895,7 +895,7 @@ return {
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and mq.TLO.Me.Song(item.Spell.RankName())() ~= nil
+                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
@@ -903,10 +903,10 @@ return {
                 end,
             },
             {
-                name = RGMercConfig:GetSettings().ClarityPotion,
+                name = RGMercUtils.GetSetting('ClarityPotion'),
                 type = "Item",
                 cond = function(self)
-                    local item = mq.TLO.FindItem(RGMercConfig:GetSettings().ClarityPotion)
+                    local item = mq.TLO.FindItem(RGMercUtils.GetSetting('ClarityPotion'))
                     return item() and item.Spell.Stacks() and item.TimerReady()
                 end,
             },

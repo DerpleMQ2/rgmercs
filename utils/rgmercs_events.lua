@@ -24,10 +24,10 @@ mq.event("CantSee", "You cannot see your target.", function()
         --}
     else
         RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target!")
-        if RGMercConfig:GetSettings().DoAutoEngage then
+        if RGMercUtils.GetSetting('DoAutoEngage') then
             if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
                 RGMercUtils.DoCmd("/squelch /face fast")
-                if RGMercConfig:GetSettings().DoMelee then
+                if RGMercUtils.GetSetting('DoMelee') then
                     RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
                         (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
                     RGMercUtils.NavInCombat(RGMercConfig:GetSettings(), mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
@@ -55,10 +55,10 @@ local function tooFarHandler()
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
-        if RGMercConfig:GetSettings().DoAutoEngage then
+        if RGMercUtils.GetSetting('DoAutoEngage') then
             if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
                 RGMercUtils.DoCmd("/squelch /face fast")
-                if RGMercConfig:GetSettings().DoMelee then
+                if RGMercUtils.GetSetting('DoMelee') then
                     RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
                         (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
                     RGMercUtils.NavInCombat(RGMercConfig:GetSettings(), mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)

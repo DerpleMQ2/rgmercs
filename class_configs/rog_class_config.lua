@@ -273,7 +273,7 @@ return {
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and mq.TLO.Me.Song(item.Spell.RankName())() ~= nil
+                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
@@ -296,35 +296,35 @@ return {
                 name = "Frenzied",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell)
                 end,
             },
             {
                 name = "Twisted",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell)
                 end,
             },
             {
                 name = "AimDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Executioner",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Executioner2",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
