@@ -712,7 +712,7 @@ local _ClassConfig = {
             name = 'GroupHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
+            cond = function(self, target) return (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt') end,
         },
         {
             name = 'MainHealPoint',

@@ -691,7 +691,7 @@ local _ClassConfig = {
             name = 'GroupHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
+            cond = function(self, target) return (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt') end,
         },
         {
             name = 'MainHealPoint',
@@ -718,7 +718,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, spell)
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
-                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
+                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -726,7 +726,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName) -- note: Is aaName the correct arg here? or should be 'spell'?
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and aaName.StacksTarget() and
-                        not RGMercUtils.TargetHasBuff(aaName) and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
+                        not RGMercUtils.TargetHasBuff(aaName) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -734,7 +734,7 @@ local _ClassConfig = {
                 type = "spell",
                 cond = function(self, spell)
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
-                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
+                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -762,7 +762,7 @@ local _ClassConfig = {
                 type = "spell",
                 cond = function(self, spell)
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
-                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
+                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
                 end,
             },
         },

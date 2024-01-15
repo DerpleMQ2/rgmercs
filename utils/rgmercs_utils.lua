@@ -1148,6 +1148,16 @@ function Utils.TargetHasBuffByName(buffName)
 end
 
 ---@param target MQTarget|nil
+---@param type string
+---@return boolean
+function Utils.TargetBodyIs(target, type)
+    if not target then target = mq.TLO.Target end
+    if not target or target() then return false end
+
+    return target.Body.Name():lower() == type:lower()
+end
+
+---@param target MQTarget|nil
 ---@return number
 function Utils.GetTargetLevel(target)
     return (target and target.Level() or (mq.TLO.Target.Level() or 0))
@@ -2645,7 +2655,7 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for idx, entry in ipairs(rotationTable) do
+        for idx, entry in ipairs(rotationTable or {}) do
             ImGui.TableNextColumn()
             ImGui.Text(tostring(idx))
             if rotationState > 0 then
