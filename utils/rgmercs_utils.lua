@@ -1427,7 +1427,7 @@ function Utils.AutoMed()
             forcesit = true
         end
     elseif RGMercConfig.Constants.RGMelee:contains(me.Class.ShortName()) then
-        if me.PctHPs() >= Utils.GetSetting('HPMedPctStop').PctEndurance() >= Utils.GetSetting('EndMedPctStop') then
+        if me.PctHPs() >= Utils.GetSetting('HPMedPctStop') and me.PctEndurance() >= Utils.GetSetting('EndMedPctStop') then
             RGMercConfig.Globals.InMedState = false
             forcestand = true
         end
