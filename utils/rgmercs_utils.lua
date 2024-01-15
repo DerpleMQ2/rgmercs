@@ -2257,7 +2257,15 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
         RGMercsLogger.log_debug("Finding best item for Set: %s", unresolvedName)
         resolvedActionMap[unresolvedName] = Utils.GetBestItem(itemTable)
     end
-    for unresolvedName, spellTable in pairs(abilitySets) do
+
+    local sortedAbilitySets = {}
+    for unresolvedName, _ in pairs(abilitySets) do
+        table.insert(sortedAbilitySets, unresolvedName)
+    end
+    table.sort(sortedAbilitySets)
+
+    for _, unresolvedName in pairs(sortedAbilitySets) do
+        local spellTable = abilitySets[unresolvedName]
         RGMercsLogger.log_debug("\ayFinding best spell for Set: \am%s", unresolvedName)
         resolvedActionMap[unresolvedName] = Utils.GetBestSpell(spellTable, resolvedActionMap)
     end
