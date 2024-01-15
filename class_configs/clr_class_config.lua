@@ -10,6 +10,27 @@ local _ClassConfig = {
         'Heal',
         'Hybrid',
     },
+    ['Cures']             = {
+        CureNow = function(self, type, targetId)
+            if RGMercUtils.CanUseAA("Radiant Cure") then
+                return RGMercUtils.UseAA("Radiant Cure", targetId)
+            end
+
+            local cureSpell = RGMercUtils.GetResolvedActionMapItem('CureDisease')
+
+
+            if type:lower() == "poison" then
+                cureSpell = RGMercUtils.GetResolvedActionMapItem('CurePoison')
+            elseif type:lower() == "curse" then
+                cureSpell = RGMercUtils.GetResolvedActionMapItem('CureCurse')
+            elseif type:lower() == "corruption" then
+                cureSpell = RGMercUtils.GetResolvedActionMapItem('CureCorrupt')
+            end
+
+            if not cureSpell or not cureSpell() then return false end
+            return RGMercUtils.UseSpell(cureSpell.RankName.Name(), targetId, true)
+        end,
+    },
     ['ItemSets']          = {
         ['Epic'] = {
             "Harmony of the Soul",

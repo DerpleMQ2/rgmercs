@@ -12,6 +12,13 @@ local _ClassConfig = {
         'Heal',
         'Hybrid',
     },
+    ['Cures']             = {
+        CureNow = function(self, type, targetId)
+            local cureSpell = RGMercUtils.GetResolvedActionMapItem('CureSpell')
+            if not cureSpell or not cureSpell() then return false end
+            return RGMercUtils.UseSpell(cureSpell.RankName.Name(), targetId, true)
+        end,
+    },
     ['ItemSets']          = {
         ['Epic'] = {
             "Crafted Talisman of Fates",

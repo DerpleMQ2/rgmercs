@@ -24,6 +24,7 @@ Module.TempSettings.RotationStates        = {}
 Module.TempSettings.HealingRotationStates = {}
 Module.TempSettings.RotationTimers        = {}
 Module.TempSettings.RezTimers             = {}
+Module.TempSettings.CureCheckTimer        = 0
 Module.TempSettings.ShowFailedSpells      = false
 Module.TempSettings.ReloadingLoadouts     = true
 Module.TempSettings.NewCombatMode         = false
@@ -506,6 +507,46 @@ function Module:RunHealRotation()
     end
 end
 
+function Module:RunCureRotation()
+    if (os.clock() - self.TempSettings.CureCheckTimer) < 15 then return end
+
+    self.TempSettings.CureCheckTimer = os.clock()
+
+    local dannetPeers = mq.TLO.DanNet.PeerCount()
+    local checks = { { type = "Poison", check = "Me.Poisoned.ID", },
+        { type = "Disease",    check = "Me.Diseased.ID", },
+        { type = "Curse",      check = "Me.Cursed.ID", },
+        { type = "Corruption", check = "Me.Corrupted.ID", }, }
+
+    for i = 1, dannetPeers do
+        ---@diagnostic disable-next-line: redundant-parameter
+        local peer = mq.TLO.DanNet.Peers(i)()
+        if mq.TLO.SpawnCount(string.format("pc =%s radius 150", peer))() == 1 then
+            RGMercsLogger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
+            local effectCount = DanNet.query(peer, "Me.TotalCounters", 1000) or "null"
+            RGMercsLogger.log_verbose("\ay[Cures] %s :: Effect Count: %s", peer, effectCount)
+            if effectCount:lower() ~= "null" and effectCount ~= "0" then
+                for _, data in ipairs(checks) do
+                    local effectId = DanNet.query(peer, data.check, 1000) or "null"
+                    RGMercsLogger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
+
+                    if effectId:lower() ~= "null" then
+                        local cureTarget = mq.TLO.Spawn(string.format("pc =%s"))
+                        if cureTarget and cureTarget() then
+                            -- Cure it!
+                            if self.ClassConfig.Cures and self.ClassConfig.Cures.CurNow then
+                                self.ClassConfig.Cures.CurNow(self, data.type, cureTarget.ID())
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            RGMercsLogger.log_verbose("\ao[Cures] %s is in \arNOT\ao range", peer)
+        end
+    end
+end
+
 function Module:GiveTime(combat_state)
     if not self.ClassConfig then return end
 
@@ -539,6 +580,11 @@ function Module:GiveTime(combat_state)
         end
 
         self:RunHealRotation()
+    end
+
+    if self:IsCuring() or true then
+        RGMercsLogger.log_verbose("\ao[Cures] Checking for curables...")
+        self:RunCureRotation()
     end
 
     -- Downtime rotaiton will just run a full rotation to completion
@@ -611,7 +657,7 @@ function Module:DoGetState()
     local spellLoadout = "Spell Loadout\n-=-=-=-=-=-=-\n"
 
     for g, s in pairs(self.SpellLoadOut) do
-        spellLoadout = spellLoadout .. string.format("[%-2d] :: %s\n", g, (s.RankName() or "None"))
+        spellLoadout = spellLoadout .. string.format("[%-2d] :: %s\n", g, (s.spell.RankName.Name() or "None"))
     end
 
     local rotationStates = "Current Rotation States\n-=-=-=-=-=-=-=-\n"

@@ -105,6 +105,7 @@ Config.Constants.LogLevels = {
     "Info",
     "Debug",
     "Verbose",
+    "Super-Verbose",
 }
 
 Config.ExpansionIDToName   = {}

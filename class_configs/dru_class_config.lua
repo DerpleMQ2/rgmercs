@@ -11,6 +11,13 @@ return {
         'Heal',
         'Mana',
     },
+    ['Cures']             = {
+        CureNow = function(self, type, targetId)
+            local cureSpell = RGMercUtils.GetResolvedActionMapItem('SingleTgtCure')
+            if not cureSpell or not cureSpell() then return false end
+            return RGMercUtils.UseSpell(cureSpell.RankName.Name(), targetId, true)
+        end,
+    },
     ['ItemSets']          = {
         ['Epic'] = {
             "Staff of Living Brambles",

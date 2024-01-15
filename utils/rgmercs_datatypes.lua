@@ -23,8 +23,16 @@ local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
     end,
 })
 
----@return MQType, RGMercsModuleType
+---@return MQType, RGMercsModuleType|string
 local function RGMercsTLOHandler(param)
+    if param:lower() == "curable" then
+        return 'string', string.format("Disease: %d, Poison: %d, Curse: %d, Corruption: %d",
+            mq.TLO.Me.Diseased.ID() or 0,
+            mq.TLO.Me.Poisoned.ID() or 0,
+            mq.TLO.Me.Cursed.ID() or 0,
+            mq.TLO.Me.Corrupted.ID() or 0)
+    end
+
     return rgMercsModuleType, RGMercModules:GetModule(param)
 end
 -- Register our TLO functions
