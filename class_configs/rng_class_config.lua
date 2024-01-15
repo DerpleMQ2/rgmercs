@@ -2,6 +2,12 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
+    ['CommandHandlers'] = {
+        makeammo = function(self, ...)
+            RGMercsLogger.log_info("I would make ammo, if I only knew how.")
+            return true
+        end,
+    },
     ['Modes'] = {
         'Tank',
         'DPS',

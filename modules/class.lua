@@ -629,9 +629,11 @@ end
 ---@param ... string
 ---@return boolean
 function Module:HandleBind(cmd, ...)
-    local params = ...
     local handled = false
     -- /rglua cmd handler
+    if self.ClassConfig.CommandHandlers[cmd] then
+        return self.ClassConfig.CommandHandlers[cmd](self, ...)
+    end
     return handled
 end
 
