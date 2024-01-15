@@ -358,12 +358,12 @@ function Module:GiveTime(combat_state)
 
     if combat_state == "Downtime" then
         if RGMercUtils.ShouldShrink() then
-            RGMercUtils.UseItem(RGMercConfig:GetSettings().ShrinkItem, mq.TLO.Me.ID())
+            RGMercUtils.UseItem(RGMercUtils.GetSetting('ShrinkItem'), mq.TLO.Me.ID())
         end
 
         if RGMercUtils.ShouldMount() then
             RGMercsLogger.log_debug("\ayMounting...")
-            RGMercUtils.UseItem(RGMercConfig:GetSettings().MountItem, mq.TLO.Me.ID())
+            RGMercUtils.UseItem(RGMercUtils.GetSetting('MountItem'), mq.TLO.Me.ID())
         end
 
         if RGMercUtils.ShouldDismount() then
@@ -439,7 +439,7 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    if RGMercUtils.DoBuffCheck() and not RGMercConfig:GetSettings().PriorityHealing then
+    if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
         if mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and self.settings.MaintainCampfire then
             self:Campfire()
         end

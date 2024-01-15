@@ -629,7 +629,7 @@ return {
                 name = "Phantom",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and RGMercConfig:GetSettings().DoPet
+                    return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.GetSetting('DoPet')
                 end,
             },
             {
@@ -664,7 +664,7 @@ return {
                 name = "Alliance",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercConfig:GetSettings().DoAlliance and RGMercUtils.CanAlliance() and not RGMercUtils.TargetHasBuff(spell)
+                    return RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
             {

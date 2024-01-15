@@ -326,7 +326,7 @@ function Module:SelfCheckAndRez()
 
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
@@ -343,7 +343,7 @@ function Module:IGCheckAndRez()
 
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
@@ -360,7 +360,7 @@ function Module:OOGCheckAndRez()
 
         if rezSpawn() and (RGMercUtils.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSettings().RetryRezDelay then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
                     self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
@@ -387,7 +387,7 @@ function Module:FindWorstHurtGroupMember(minHPs)
                     worstId = healTarget.ID()
                 end
 
-                if RGMercConfig:GetSettings().DoPetHeals then
+                if RGMercUtils.GetSetting('DoPetHeals') then
                     if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
                         RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(), healTarget.Pet.DisplayName())
                         worstPct = healTarget.Pet.PctHPs()
@@ -427,7 +427,7 @@ function Module:FindWorstHurtXT(minHPs)
                     worstId = healTarget.ID()
                 end
 
-                if RGMercConfig:GetSettings().DoPetHeals then
+                if RGMercUtils.GetSetting('DoPetHeals') then
                     if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
                         RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(), healTarget.Pet.DisplayName())
                         worstPct = healTarget.Pet.PctHPs()
@@ -495,13 +495,13 @@ function Module:HealById(id)
 end
 
 function Module:RunHealRotation()
-    self:HealById(self:FindWorstHurtGroupMember(RGMercConfig:GetSettings().MaxHealPoint))
+    self:HealById(self:FindWorstHurtGroupMember(RGMercUtils.GetSetting('MaxHealPoint')))
 
-    if RGMercConfig:GetSettings().AssistOutside then
-        self:HealById(self:FindWorstHurtXT(RGMercConfig:GetSettings().MaxHealPoint))
+    if RGMercUtils.GetSetting('AssistOutside') then
+        self:HealById(self:FindWorstHurtXT(RGMercUtils.GetSetting('MaxHealPoint')))
     end
 
-    if mq.TLO.Me.PctHPs() < RGMercConfig:GetSettings().MaxHealPoint then
+    if mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('MaxHealPoint') then
         self:HealById(mq.TLO.Me.ID())
     end
 end
@@ -528,12 +528,12 @@ function Module:GiveTime(combat_state)
     -- Healing Happens reguardless of combat_state and happens first.
     if self:IsHealing() then
         -- TODO Check Rezes
-        if self.CombatState ~= "Downtime" or (not mq.TLO.Me.Invis() or RGMercConfig:GetSettings().BreakInvis) then
+        if self.CombatState ~= "Downtime" or (not mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BreakInvis')) then
             self:IGCheckAndRez()
 
             self:SelfCheckAndRez()
 
-            if RGMercConfig:GetSettings().AssistOutside then
+            if RGMercUtils.GetSetting('AssistOutside') then
                 self:OOGCheckAndRez()
             end
         end
@@ -570,7 +570,7 @@ function Module:GiveTime(combat_state)
     end
 
     if self.CombatState == "Downtime" then
-        if not RGMercConfig:GetSettings().BurnAuto then RGMercConfig:GetSettings().BurnSize = 0 end
+        if not RGMercUtils.GetSetting('BurnAuto') then RGMercConfig:GetSettings().BurnSize = 0 end
     end
 end
 

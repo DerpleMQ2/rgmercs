@@ -646,7 +646,7 @@ local _ClassConfig = {
     ['HelperFunctions']   = {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         DoRez = function(self, corpseId)
-            if RGMercConfig:GetSettings().DoBattleRez or RGMercUtils.DoBuffCheck() then
+            if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
                 RGMercUtils.SetTarget(corpseId)
 
                 local target = mq.TLO.Target
@@ -685,19 +685,19 @@ local _ClassConfig = {
             name  = 'BigHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().BigHealPoint end,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint') end,
         },
         {
             name = 'GroupHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt end,
+            cond = function(self, target) return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
         },
         {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().MainHealPoint end,
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('MainHealPoint') end,
         },
     }, -- end HealRotationOrder
     ['HealRotations']     = {
@@ -717,24 +717,24 @@ local _ClassConfig = {
                 name = "Celestial Regeneration",
                 type = "AA",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
-                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
+                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
                 end,
             },
             {
                 name = "Exquisite Benediction",
                 type = "AA",
                 cond = function(self, aaName) -- note: Is aaName the correct arg here? or should be 'spell'?
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and RGMercUtils.GetSetting('DoHOT') and aaName.StacksTarget() and
-                        not RGMercUtils.TargetHasBuff(aaName) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and aaName.StacksTarget() and
+                        not RGMercUtils.TargetHasBuff(aaName) and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
                 end,
             },
             {
                 name = "groupheal",
                 type = "spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
-                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
+                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -761,8 +761,8 @@ local _ClassConfig = {
                 name = "wardspell",
                 type = "spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().GroupHealPoint and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
-                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
+                        not RGMercUtils.TargetHasBuff(spell) and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
                 end,
             },
         },
@@ -845,7 +845,7 @@ local _ClassConfig = {
                 name = "Focused Celestial Regeneration",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.AAReady(aaName) and (RGMercUtils.GetTargetDistance() < RGMercConfig:GetSettings().AssistRange)
+                    return RGMercUtils.AAReady(aaName) and (RGMercUtils.GetTargetDistance() < RGMercUtils.GetSetting('AssistRange'))
                 end,
             },
             {
@@ -971,21 +971,21 @@ local _ClassConfig = {
                 name = "Spire of the Vicar",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSettings().DoMelee and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             {
                 name = "Divine Avatar",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSettings().DoMelee and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             {
                 name = "Divine Retribution",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSettings().DoMelee and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
         },

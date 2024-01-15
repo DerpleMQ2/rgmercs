@@ -630,7 +630,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.DLUA,
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or 0) end,
                 cond = function(self, aaName)
-                    return self.ClassConfig.HelperFunctions.castDLU(self) and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName())
+                    return self.ClassConfig.HelperFunctions.castDLU(self) and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName.Name())
                 end,
             },
             {
@@ -741,7 +741,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
                 cond = function(
                     self, spell)
-                    return mq.TLO.Me.Pet.ID() == 0 and RGMercConfig:GetSettings().DoPet and RGMercUtils.ReagentCheck(spell)
+                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
@@ -784,7 +784,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.HarmTouch,
                 cond = function(self, _)
-                    return (RGMercConfig:GetSettings().BurnAuto and RGMercUtils.IsNamed(mq.TLO.Target)) or
+                    return (RGMercUtils.GetSetting('BurnAuto') and RGMercUtils.IsNamed(mq.TLO.Target)) or
                         RGMercUtils.BigBurn()
                 end,
             },

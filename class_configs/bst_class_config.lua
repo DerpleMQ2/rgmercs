@@ -617,7 +617,7 @@ return {
             name  = 'LightHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSettings().LightHealPoint end,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('LightHealPoint') end,
         },
     },
     ['HealRotations']     = {
@@ -1104,7 +1104,7 @@ return {
                 cond = function(self, aaName, target)
                     local slowProc = self.ResolvedActionMap['PetSlowProc']
                     return RGMercUtils.GetSetting('DoSnare') and (slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
-                        mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName())() == nil
+                        mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name())() == nil
                 end,
             },
             {

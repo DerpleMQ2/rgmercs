@@ -1240,7 +1240,7 @@ _ClassConfig      = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return mq.TLO.Me.Pet.ID() == 0 and RGMercConfig:GetSettings().DoPet and (self.TempSettings.PocketPet or RGMercUtils.GetXTHaterCount() == 0)
+                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and (self.TempSettings.PocketPet or RGMercUtils.GetXTHaterCount() == 0)
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
             },
@@ -1275,7 +1275,7 @@ _ClassConfig      = {
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and mq.TLO.Me.Song(item.Spell.RankName())() ~= nil
+                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
@@ -1287,7 +1287,7 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuffByName(self.ResolvedActionMap['AllianceBuff']) and
-                        RGMercConfig:GetSettings().DoAlliance and RGMercUtils.CanAlliance()
+                        RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance()
                 end,
             },
             {
@@ -1550,7 +1550,7 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
-                        RGMercConfig:GetSettings().DoAlliance and RGMercUtils.CanAlliance()
+                        RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance()
                 end,
             },
 
@@ -2057,14 +2057,14 @@ _ClassConfig      = {
                 {
                     name = "AllianceBuff",
                     cond = function(self)
-                        return RGMercConfig:GetSettings().DoAlliance and mq.TLO.Me.Level() >= 75 and
+                        return RGMercUtils.GetSetting('DoAlliance') and mq.TLO.Me.Level() >= 75 and
                             ((mq.TLO.Me.AltAbility("Malaise").ID() or 0) > 0 or not RGMercUtils.GetSetting('DoMalo'))
                     end,
                 },
                 {
                     name = "FireOrbSummon",
                     cond = function(self)
-                        return not RGMercConfig:GetSettings().DoAlliance and mq.TLO.Me.Level() >= 75 and
+                        return not RGMercUtils.GetSetting('DoAlliance') and mq.TLO.Me.Level() >= 75 and
                             ((mq.TLO.Me.AltAbility("Malaise").ID() or 0) > 0 or not RGMercUtils.GetSetting('DoMalo'))
                     end,
                 },
