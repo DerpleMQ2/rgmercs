@@ -228,8 +228,8 @@ end
 ---@return boolean
 function Utils.PCDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
-    RGMercsLogger.log_verbose("PCDiscReady(%s)", discSpell.RankName() or "None")
-    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name()) and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
+    RGMercsLogger.log_super_verbose("PCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None", Utils.BoolToString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
+    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
 
 ---@param aaName string
@@ -725,7 +725,7 @@ function Utils.UseDisc(discSpell, targetId)
 
             Utils.DoCmd("/squelch /doability \"%s\"", discSpell.RankName.Name())
 
-            mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName.Name()) and not me.Casting.ID()) end)
+            mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting.ID()) end)
 
             -- Is this even needed?
             if Utils.IsDisc(discSpell.RankName.Name()) then

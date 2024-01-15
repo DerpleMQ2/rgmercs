@@ -296,14 +296,16 @@ return {
                 name = "Frenzied",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and
+                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
                 end,
             },
             {
                 name = "Twisted",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and
+                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
                 end,
             },
             {
