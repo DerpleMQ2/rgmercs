@@ -1070,7 +1070,13 @@ function Utils.GetSetting(setting)
             end
         end
     end
-    RGMercsLogger.log_verbose("\ag[Setting] \at%s \agfound in module \am%s", setting, ret.module)
+
+    if ret.value ~= nil then
+        RGMercsLogger.log_verbose("\ag[Setting] \at'%s' \agfound in module \am%s", setting, ret.module)
+    else
+        RGMercsLogger.log_error("\ag[Setting] \at'%s' \aywas requested but not found in any module!", setting)
+    end
+
     return ret.value
 end
 
@@ -2170,6 +2176,7 @@ end
 ---@param songName string
 ---@return boolean
 function Utils.SongActive(songName)
+    if not songName then return false end
     if type(songName) ~= "string" then
         RGMercsLogger.log_error("\arUtils.SongActive was passed a non-string songname! %s", type(songName))
         return false
@@ -2180,6 +2187,7 @@ end
 ---@param buffName string
 ---@return boolean
 function Utils.BuffActiveByName(buffName)
+    if not buffName then return false end
     if type(buffName) ~= "string" then
         RGMercsLogger.log_error("\arUtils.BuffActiveByName was passed a non-string buffname! %s", type(buffName))
         return false
@@ -2190,12 +2198,14 @@ end
 ---@param buffId integer
 ---@return boolean
 function Utils.BuffActiveByID(buffId)
+    if not buffId then return false end
     return ((mq.TLO.Me.FindBuff("id " .. tostring(buffId)).ID() or 0) > 0)
 end
 
 ---@param auraName string
 ---@return boolean
 function Utils.AuraActiveByName(auraName)
+    if not auraName then return false end
     local auraOne = string.find(mq.TLO.Me.Aura(1)() or "", auraName) ~= nil
     local auraTwo = string.find(mq.TLO.Me.Aura(2)() or "", auraName) ~= nil
 
@@ -2205,6 +2215,7 @@ end
 ---@param spell MQSpell
 ---@return boolean
 function Utils.DetGOMCheck(spell)
+    if not spell or spell() then return false end
     local me = mq.TLO.Me
     return me.Song("Gift of Mana").ID() and me.Song("Gift of Mana").Base(3)() >= (spell.Level() or 0)
 end
