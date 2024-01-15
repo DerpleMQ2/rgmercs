@@ -197,9 +197,9 @@ function Module:Render()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
                     local rotationName = r.name
-                    if r.timer then
-                        rotationName = string.format("%s [%s]", r.name, RGMercUtils.FormatTime(math.max(0, r.timer - (os.clock() - (self.TempSettings.RotationTimers[r.name] or 0)))))
-                    end
+                    --if r.timer then
+                    --    rotationName = string.format("%s [%s]", r.name, RGMercUtils.FormatTime(math.max(0, r.timer - (os.clock() - (self.TempSettings.RotationTimers[r.name] or 0)))))
+                    --end
                     if ImGui.CollapsingHeader(rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.Rotations[r.name],
@@ -451,6 +451,8 @@ end
 
 function Module:HealById(id)
     if id == 0 then return end
+    if not self.ClassConfig.HealRotationOrder then return end
+
     RGMercsLogger.log_verbose("\awHealById(%d)", id)
 
     local healTarget = mq.TLO.Spawn(id)
@@ -469,7 +471,7 @@ function Module:HealById(id)
 
     local selectedRotation = nil
 
-    for _, rotation in pairs(self.ClassConfig.HealRotationOrder) do
+    for _, rotation in pairs(self.ClassConfig.HealRotationOrder or {}) do
         RGMercsLogger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id, rotation.name)
         if not rotation.cond or rotation.cond(self, healTarget) then
             RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw appropriate to use.", id, rotation.name)
@@ -631,7 +633,7 @@ end
 function Module:HandleBind(cmd, ...)
     local handled = false
     -- /rglua cmd handler
-    if self.ClassConfig.CommandHandlers[cmd] then
+    if self.ClassConfig.CommandHandlers and self.ClassConfig.CommandHandlers[cmd] then
         return self.ClassConfig.CommandHandlers[cmd](self, ...)
     end
     return handled
