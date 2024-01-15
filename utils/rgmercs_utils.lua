@@ -675,8 +675,10 @@ function Utils.CheckPCNeedsBuff(spell, targetId, targetName, uiCheck)
         return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() == nil
     elseif mq.TLO.DanNet(targetName)() == nil then
         -- Target.
-        Utils.SetTarget(targetId)
-        mq.delay("2s", function() return mq.TLO.Target.BuffsPopulated() end)
+        if uiCheck == false then
+            Utils.SetTarget(targetId)
+            mq.delay("2s", function() return mq.TLO.Target.BuffsPopulated() end)
+        end
         return mq.TLO.Target.FindBuff("id " .. tostring(spell.ID()))() == nil
     else
         -- DanNet
