@@ -34,7 +34,14 @@ end
 ---@param event string
 ---@param data table|nil
 function Utils.BroadcastUpdate(module, event, data)
-    Utils.Actors.send({ from = RGMercConfig.Globals.CurLoadedChar, script = Utils.ScriptName, module = module, event = event, data = data, })
+    Utils.Actors.send({
+        from = RGMercConfig.Globals.CurLoadedChar,
+        script = Utils.ScriptName,
+        module = module,
+        event =
+            event,
+        data = data,
+    })
 end
 
 ---@param time integer # in seconds
@@ -135,7 +142,8 @@ function Utils.HandleDeath()
         if mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() == 0 then
             mq.delay("30s", function() return (mq.TLO.Me.CombatState():lower() == "active") end)
             Utils.DoCmd("/useitem \"Fellowship Registration Insignia\"")
-            mq.delay("2s", function() return (mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() ~= 0) end)
+            mq.delay("2s",
+                function() return (mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() ~= 0) end)
         else
             RGMercsLogger.log_error("\aw Bummer, Insignia on cooldown, you must really suck at this game...")
         end
@@ -179,7 +187,8 @@ end
 ---@param aaName string
 ---@return boolean
 function Utils.CanUseAA(aaName)
-    return mq.TLO.Me.AltAbility(aaName)() and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level() and mq.TLO.Me.AltAbility(aaName).Rank() > 0
+    return mq.TLO.Me.AltAbility(aaName)() and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level() and
+        mq.TLO.Me.AltAbility(aaName).Rank() > 0
 end
 
 ---@return boolean
@@ -210,7 +219,8 @@ end
 function Utils.IsDisc(name)
     local spell = mq.TLO.Spell(name)
 
-    return (spell() and spell.IsSkill() and spell.Duration() and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and true or false
+    return (spell() and spell.IsSkill() and spell.Duration() and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and
+        true or false
 end
 
 ---@param spell MQSpell
@@ -221,15 +231,18 @@ function Utils.PCSpellReady(spell)
 
     if me.Stunned() then return false end
 
-    return me.CurrentMana() > spell.Mana() and (me.Casting.ID() or 0) == 0 and me.Book(spell.RankName.Name())() ~= nil and not me.Moving()
+    return me.CurrentMana() > spell.Mana() and (me.Casting.ID() or 0) == 0 and me.Book(spell.RankName.Name())() ~= nil and
+        not me.Moving()
 end
 
 ---@param discSpell MQSpell
 ---@return boolean
 function Utils.PCDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
-    RGMercsLogger.log_super_verbose("PCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None", Utils.BoolToString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
-    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
+    RGMercsLogger.log_super_verbose("PCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
+        Utils.BoolToString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
+    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
+        mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
 
 ---@param discSpell MQSpell
@@ -238,8 +251,10 @@ function Utils.NPCDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
     local target = mq.TLO.Target
     if not target or not target() then return false end
-    RGMercsLogger.log_super_verbose("NPCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None", Utils.BoolToString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
-    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and target.Type():lower() ~= "corpse" and
+    RGMercsLogger.log_super_verbose("NPCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
+        Utils.BoolToString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
+    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
+        mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and target.Type():lower() ~= "corpse" and
         target.LineOfSight() and not target.Hovering()
 end
 
@@ -247,7 +262,8 @@ end
 ---@return boolean
 function Utils.PCAAReady(aaName)
     local spell = mq.TLO.Me.AltAbility(aaName).Spell
-    return Utils.AAReady(aaName) and mq.TLO.Me.CurrentMana() >= (spell.Mana() or 0) or mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0)
+    return Utils.AAReady(aaName) and mq.TLO.Me.CurrentMana() >= (spell.Mana() or 0) or
+        mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0)
 end
 
 ---@return boolean
@@ -408,7 +424,8 @@ function Utils.GetBestSpell(spellList, alreadyResolvedMap)
                     end
                 else
                     Utils.PrintGroupMessage(string.format(
-                        "%s \aw [%s] \ax \ar ! MISSING SPELL ! \ax -- \ag %s \ax -- \aw LVL: %d \ax", mq.TLO.Me.CleanName(), spellName,
+                        "%s \aw [%s] \ax \ar ! MISSING SPELL ! \ax -- \ag %s \ax -- \aw LVL: %d \ax",
+                        mq.TLO.Me.CleanName(), spellName,
                         spell.RankName.Name(), spell.Level()))
                 end
             end
@@ -427,7 +444,8 @@ end
 
 ---@param target MQSpawn
 function Utils.WaitCastFinish(target)
-    local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime.TotalSeconds() or 0) + ((mq.TLO.EverQuest.Ping() * 2 / 100) + 1)) * 1000
+    local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime.TotalSeconds() or 0) + ((mq.TLO.EverQuest.Ping() * 2 / 100) + 1)) *
+        1000
     local maxWait = maxWaitOrig
 
     ---@diagnostic disable-next-line: undefined-field
@@ -442,7 +460,8 @@ function Utils.WaitCastFinish(target)
         maxWait = maxWait - 100
 
         if maxWait <= 0 then
-            local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d", (mq.TLO.Me.Casting.ID() or -1), maxWaitOrig,
+            local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d",
+                (mq.TLO.Me.Casting.ID() or -1), maxWaitOrig,
                 Utils.BoolToString(mq.TLO.Window("CastingWindow").Open()), RGMercConfig.Globals.AutoTargetID)
 
             RGMercsLogger.log_debug(msg)
@@ -731,7 +750,8 @@ function Utils.UseDisc(discSpell, targetId)
 
             if Utils.IsDisc(discSpell.RankName.Name()) then
                 if me.ActiveDisc.ID() then
-                    RGMercsLogger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(), me.ActiveDisc.Name())
+                    RGMercsLogger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(),
+                        me.ActiveDisc.Name())
                     Utils.DoCmd("/stopdisc")
                     mq.delay(20, function() return not me.ActiveDisc.ID() end)
                 end
@@ -739,7 +759,8 @@ function Utils.UseDisc(discSpell, targetId)
 
             Utils.DoCmd("/squelch /doability \"%s\"", discSpell.RankName.Name())
 
-            mq.delay(discSpell.MyCastTime() / 100 or 100, function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting.ID()) end)
+            mq.delay(discSpell.MyCastTime() / 100 or 100,
+                function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting.ID()) end)
 
             -- Is this even needed?
             if Utils.IsDisc(discSpell.RankName.Name()) then
@@ -753,16 +774,114 @@ function Utils.UseDisc(discSpell, targetId)
     end
 end
 
+--- Modified Version of UseSpell to accomodate Songs
+---@param songName string
+---@param targetId integer
+---@param bAllowMem boolean
+---@return boolean
+function Utils.UseSong(songName, targetId, bAllowMem)
+    if not songName then return false end
+    local me = mq.TLO.Me
+    RGMercsLogger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, Utils.BoolToString(bAllowMem))
+
+    if songName then
+        local spell = mq.TLO.Spell(songName)
+
+        if not spell() then
+            RGMercsLogger.log_error("\arSinging Failed: Somehow I tried to cast a spell That doesn't exist: %s",
+                songName)
+            return false
+        end
+
+        -- Check we actually have the song -- Me.Book always needs to use RankName
+        if not me.Book(songName)() then
+            RGMercsLogger.log_error("\arSinging Failed: Somehow I tried to cast a spell I didn't know: %s", songName)
+            return false
+        end
+
+        if me.CurrentMana() < spell.Mana() then
+            RGMercsLogger.log_verbose("\arSinging Failed: I tried to cast a spell %s I don't have mana for it.",
+                songName)
+            return false
+        end
+
+        local targetSpawn = mq.TLO.Spawn(targetId)
+
+        if (Utils.GetXTHaterCount() > 0 or not bAllowMem) and (not Utils.CastReady(songName) or not mq.TLO.Me.Gem(songName)()) then
+            RGMercsLogger.log_debug("\ayI tried to singing %s but it was not ready and we are in combat - moving on.",
+                songName)
+            return false
+        end
+
+        local spellRequiredMem = false
+        if not me.Gem(songName)() then
+            RGMercsLogger.log_debug("\ay%s is not memorized - meming!", songName)
+            Utils.MemorizeSpell(Utils.UseGem, songName, 5000)
+            spellRequiredMem = true
+        end
+
+        if not me.Gem(songName)() then
+            RGMercsLogger.log_debug("\arFailed to memorized %s - moving on...", songName)
+            return false
+        end
+
+        local oldDuration = 0
+        if targetId == me.ID() then
+            oldDuration = me.Song(songName).Duration.TotalSeconds()
+        else
+            oldDuration = targetSpawn.CachedBuff(songName).Duration.TotalSeconds()
+        end
+
+        Utils.WaitCastReady(songName, spellRequiredMem and (5 * 60 * 100) or 5000)
+        mq.delay(500)
+
+        Utils.ActionPrep()
+
+        RGMercsLogger.log_verbose("\ag %s \ar =>> \ay %s \ar <<=", songName, targetSpawn.CleanName() or "None")
+        -- TODO Swap Instruments
+
+        Utils.DoCmd("/cast \"%s\"", songName)
+
+        mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
+
+        while mq.TLO.Window("CastingWindow").Open() do
+            if not RGMercConfig.Globals.PauseMain or Utils.GetSetting('RunMovePaused') then
+                RGMercModules:ExecModule("Movement", "GiveTime", "Combat")
+            end
+            mq.doevents()
+            mq.delay(1)
+        end
+
+        if targetId == me.ID() then
+            mq.delay("5s", function() return me.Song(songName).Duration.Seconds() > oldDuration end)
+        end
+
+        if Utils.GetLastCastResultName() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
+            Utils.DoCmd("/stopsong")
+            return true
+        end
+
+        Utils.DoCmd("/stopsong")
+    end
+    return false
+end
+
 ---@param spellName string
 ---@param targetId integer
 ---@param bAllowMem boolean
 ---@return boolean
 function Utils.UseSpell(spellName, targetId, bAllowMem)
     local me = mq.TLO.Me
+    -- Immediately send bards to the song handler.
+    if me.Class.ShortName():lower() == "brd" then
+        return Utils.UseSong(spellName, targetId, bAllowMem)
+    end
+
     RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, Utils.BoolToString(bAllowMem))
 
     if me.Moving() then
-        RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s) -- Failed because I am moving", spellName, targetId, Utils.BoolToString(bAllowMem))
+        RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s) -- Failed because I am moving", spellName, targetId,
+            Utils.BoolToString(bAllowMem))
         return false
     end
 
@@ -770,7 +889,8 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         local spell = mq.TLO.Spell(spellName)
 
         if not spell() then
-            RGMercsLogger.log_error("\arCasting Failed: Somehow I tried to cast a spell That doesn't exist: %s", spellName)
+            RGMercsLogger.log_error("\arCasting Failed: Somehow I tried to cast a spell That doesn't exist: %s",
+                spellName)
             return false
         end
         -- Check we actually have the spell -- Me.Book always needs to use RankName
@@ -791,35 +911,38 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             if targetLevel <= 65 and spellLevel > 95 then levelCheckPass = false end
 
             if not levelCheckPass then
-                RGMercsLogger.log_error("\arCasting %s failed level check with target=%d and spell=%d", spellName, targetLevel, spellLevel)
+                RGMercsLogger.log_error("\arCasting %s failed level check with target=%d and spell=%d", spellName,
+                    targetLevel, spellLevel)
                 return false
             end
         end
 
         -- Check for Reagents
         if not Utils.ReagentCheck(spell) then
-            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have Reagents for.", spellName)
+            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have Reagents for.",
+                spellName)
             return false
         end
 
         -- Check for enough mana -- just in case something has changed by this point...
         if me.CurrentMana() < spell.Mana() then
-            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have mana for it.", spellName)
+            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have mana for it.",
+                spellName)
             return false
         end
 
-        local target = mq.TLO.Spawn(targetId)
-
         -- If we're combat casting we need to both have the same swimming status
-        if targetId == 0 or (target() and target.FeetWet() ~= me.FeetWet()) then
-            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.", spellName, targetId)
+        if targetId == 0 or (targetSpawn() and targetSpawn.FeetWet() ~= me.FeetWet()) then
+            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.",
+                spellName, targetId)
             return false
         end
 
         Utils.WaitGlobalCoolDown()
 
         if (Utils.GetXTHaterCount() > 0 or not bAllowMem) and (not Utils.CastReady(spellName) or not mq.TLO.Me.Gem(spellName)()) then
-            RGMercsLogger.log_debug("\ayI tried to cast %s but it was not ready and we are in combat - moving on.", spellName)
+            RGMercsLogger.log_debug("\ayI tried to cast %s but it was not ready and we are in combat - moving on.",
+                spellName)
             return false
         end
 
@@ -846,7 +969,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         Utils.DoCmd(cmd)
         RGMercsLogger.log_debug("Running: \at'%s'", cmd)
 
-        Utils.WaitCastFinish(target)
+        Utils.WaitCastFinish(targetSpawn)
 
         return true
     end
@@ -903,7 +1026,8 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
         else
             ret = Utils.UseSpell(spell.RankName(), targetId, bAllowMem)
 
-            RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", entry.name, spell.RankName(), ret and "\agSuccess" or "\arFailed!")
+            RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", entry.name, spell.RankName(),
+                ret and "\agSuccess" or "\arFailed!")
         end
     end
 
@@ -940,7 +1064,8 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
             RGMercsLogger.log_debug("Dont have a Disc for \ao =>> \ag %s \ao <<=", entry.name)
             ret = false
         else
-            RGMercsLogger.log_debug("Using Disc \ao =>> \ag %s [%s] \ao <<=", entry.name, (discSpell() and discSpell.RankName() or "None"))
+            RGMercsLogger.log_debug("Using Disc \ao =>> \ag %s [%s] \ao <<=", entry.name,
+                (discSpell() and discSpell.RankName() or "None"))
             ret = Utils.UseDisc(discSpell, targetId)
         end
     end
@@ -983,7 +1108,8 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
                 local condArg = Utils.GetEntryConditionArg(resolvedActionMap, entry)
                 local condTarg = mq.TLO.Spawn(targetId)
                 local pass = entry.cond(caller, condArg, condTarg, false)
-                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s", entry.name, entry.type, condArg,
+                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
+                    entry.name, entry.type, condArg,
                     condTarg.CleanName() or "None", Utils.BoolToString(pass))
                 if pass == true then
                     local res = Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
@@ -1030,7 +1156,8 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
         lastStepIdx = 1
     end
 
-    RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, (start_step or -1), lastStepIdx)
+    RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, (start_step or -1),
+        lastStepIdx)
 
     return lastStepIdx
 end
@@ -1057,7 +1184,8 @@ function Utils.SelfBuffCheck(spell)
     local res = not Utils.BuffActiveByID(spell.RankName.ID()) and spell.Stacks()
 
     ---@diagnostic disable-next-line: undefined-field
-    RGMercsLogger.log_verbose("\arSelfBuffCheck(%s/%d) Spell Obj => %s", spell.RankName(), spell.RankName.ID(), Utils.BoolToString(res))
+    RGMercsLogger.log_verbose("\arSelfBuffCheck(%s/%d) Spell Obj => %s", spell.RankName(), spell.RankName.ID(),
+        Utils.BoolToString(res))
 
     return res
 end
@@ -1081,7 +1209,9 @@ function Utils.GetSetting(setting)
             if not ret.value then
                 ret = { module = name, value = data.settings[setting], }
             else
-                RGMercsLogger.log_error("\ay[Setting] \arError: Key %s exists in multipe settings tables: \aw%s arand \aw%s! Returning first but this should be fixed!", setting,
+                RGMercsLogger.log_error(
+                    "\ay[Setting] \arError: Key %s exists in multipe settings tables: \aw%s arand \aw%s! Returning first but this should be fixed!",
+                    setting,
                     ret.name, name)
             end
         end
@@ -1272,7 +1402,8 @@ end
 ---@return boolean
 function Utils.BurnCheck()
     local settings = RGMercConfig:GetSettings()
-    local autoBurn = settings.BurnAuto and ((Utils.GetXTHaterCount() >= settings.BurnMobCount) or (Utils.IsNamed(mq.TLO.Target) and settings.BurnNamed))
+    local autoBurn = settings.BurnAuto and
+        ((Utils.GetXTHaterCount() >= settings.BurnMobCount) or (Utils.IsNamed(mq.TLO.Target) and settings.BurnNamed))
     local alwaysBurn = (settings.BurnAlways and settings.BurnAuto)
 
     return autoBurn or alwaysBurn
@@ -1297,7 +1428,8 @@ end
 ---@param targetId integer
 function Utils.DoStick(config, targetId)
     if os.clock() - Utils.LastDoStick < 4 then
-        RGMercsLogger.log_debug("\ayIgnoring DoStick because we just stuck less than 4 seconds ago - let's give it some time.")
+        RGMercsLogger.log_debug(
+            "\ayIgnoring DoStick because we just stuck less than 4 seconds ago - let's give it some time.")
         return
     end
 
@@ -1367,14 +1499,16 @@ end
 
 ---@return boolean
 function Utils.ShouldShrink()
-    return (Utils.GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2 and (Utils.GetSetting('ShrinkItem'):len() > 0)
+    return (Utils.GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2 and
+        (Utils.GetSetting('ShrinkItem'):len() > 0)
 end
 
 ---@return boolean
 function Utils.ShouldMount()
     if Utils.GetSetting('DoMount') == 1 then return false end
 
-    local passBasicChecks = not Utils.GetSetting('DoMelee') and Utils.GetSetting('MountItem'):len() > 0 and mq.TLO.Zone.Outdoor()
+    local passBasicChecks = not Utils.GetSetting('DoMelee') and Utils.GetSetting('MountItem'):len() > 0 and
+        mq.TLO.Zone.Outdoor()
 
     local passCheckMountOne = ((Utils.GetSetting('DoMount') == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0))
     local passCheckMountTwo = ((Utils.GetSetting('DoMount') == 3 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
@@ -1399,7 +1533,8 @@ end
 function Utils.ShouldKillTargetReset()
     local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", RGMercConfig.Globals.AutoTargetID))
     local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", RGMercConfig.Globals.AutoTargetID))
-    return (((not killSpawn() or killSpawn.Dead()) or killCorpse()) and RGMercConfig.Globals.AutoTargetID > 0) and true or false
+    return (((not killSpawn() or killSpawn.Dead()) or killCorpse()) and RGMercConfig.Globals.AutoTargetID > 0) and true or
+        false
 end
 
 function Utils.AutoMed()
@@ -1457,7 +1592,8 @@ function Utils.AutoMed()
             forcesit = true
         end
     else
-        RGMercsLogger.log_error("\arYour character class is not in the type list(s): rghybrid, rgcasters, rgmelee. That's a problem for a dev.")
+        RGMercsLogger.log_error(
+            "\arYour character class is not in the type list(s): rghybrid, rgcasters, rgmelee. That's a problem for a dev.")
         RGMercConfig.Globals.InMedState = false
         return
     end
@@ -1629,7 +1765,8 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
 
             if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IAmMA()) and Utils.GetTargetPctHPs() > 0 then
                 if target.Distance() > target.MaxRangeTo() then
-                    RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(), target.MaxRangeTo())
+                    RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
+                        target.MaxRangeTo())
                     if preEngageRoutine then
                         preEngageRoutine()
                     end
@@ -1748,16 +1885,20 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
 
             if cur_spawn() then
                 if cur_spawn.AssistName():len() > 0 then
-                    RGMercsLogger.log_verbose("My Interest: %s =? Their Interest: %s", spawn.Name(), cur_spawn.AssistName())
+                    RGMercsLogger.log_verbose("My Interest: %s =? Their Interest: %s", spawn.Name(),
+                        cur_spawn.AssistName())
                     if cur_spawn.AssistName() == spawn.Name() then
-                        RGMercsLogger.log_verbose("[%s] Fighting same mob as: %s Theirs: %s Ours: %s", t, cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
+                        RGMercsLogger.log_verbose("[%s] Fighting same mob as: %s Theirs: %s Ours: %s", t,
+                            cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
                         local checkName = cur_spawn.CleanName()
 
                         if cur_spawn.Type():lower() == "mercenary" then checkName = cur_spawn.Owner.CleanName() end
                         if cur_spawn.Type():lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
 
                         if not Utils.IsSafeName(t, checkName) then
-                            RGMercsLogger.log_verbose("\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax", cur_spawn.CleanName(), cur_spawn.AssistName())
+                            RGMercsLogger.log_verbose(
+                                "\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax",
+                                cur_spawn.CleanName(), cur_spawn.AssistName())
                             return true
                         end
                     end
@@ -1806,7 +1947,8 @@ function Utils.MATargetScan(radius, zradius)
                     if xtSpawn.PctAggro() < 100 and Utils.IsTanking() then
                         -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
                         if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
-                            RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]", xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
+                            RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]",
+                                xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
                             return xtSpawn.ID() or 0
                         end
                     end
@@ -1889,7 +2031,8 @@ end
 function Utils.FindTarget()
     RGMercsLogger.log_verbose("FindTarget()")
     if mq.TLO.Spawn(string.format("id %d pcpet xtarhater", mq.TLO.Me.XTarget(1).ID())).ID() > 0 then
-        RGMercsLogger.log_verbose("FindTarget() Determined that xtarget(1)=%s is a pcpet xtarhater", mq.TLO.Me.XTarget(1).CleanName())
+        RGMercsLogger.log_verbose("FindTarget() Determined that xtarget(1)=%s is a pcpet xtarhater",
+            mq.TLO.Me.XTarget(1).CleanName())
         Utils.KillPCPet()
     end
 
@@ -1933,16 +2076,21 @@ function Utils.FindTarget()
 
             if RGMercConfig.Globals.AutoTargetID == 0 then
                 -- If we currently don't have a target, we should see if there's anything nearby we should go after.
-                RGMercConfig.Globals.AutoTargetID = Utils.MATargetScan(Utils.GetSetting('AssistRange'), Utils.GetSetting('MAScanZRange'))
-                RGMercsLogger.log_verbose("MATargetScan returned %d -- Current Target: %s [%d]", RGMercConfig.Globals.AutoTargetID, target.CleanName(), target.ID())
+                RGMercConfig.Globals.AutoTargetID = Utils.MATargetScan(Utils.GetSetting('AssistRange'),
+                    Utils.GetSetting('MAScanZRange'))
+                RGMercsLogger.log_verbose("MATargetScan returned %d -- Current Target: %s [%d]",
+                    RGMercConfig.Globals.AutoTargetID, target.CleanName(), target.ID())
             else
                 -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
                 -- Only be turned off by tank modes.
                 if not Utils.GetSetting('StayOnTarget') then
-                    RGMercConfig.Globals.AutoTargetID = Utils.MATargetScan(Utils.GetSetting('AssistRange'), Utils.GetSetting('MAScanZRange'))
+                    RGMercConfig.Globals.AutoTargetID = Utils.MATargetScan(Utils.GetSetting('AssistRange'),
+                        Utils.GetSetting('MAScanZRange'))
                     local autoTarget = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
-                    RGMercsLogger.log_verbose("Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
-                        autoTarget.CleanName() or "None", RGMercConfig.AutoTargetID or 0, target() and target.CleanName() or "None", target() and target.ID() or 0)
+                    RGMercsLogger.log_verbose(
+                        "Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
+                        autoTarget.CleanName() or "None", RGMercConfig.AutoTargetID or 0,
+                        target() and target.CleanName() or "None", target() and target.ID() or 0)
                 end
             end
         end
@@ -1957,13 +2105,16 @@ function Utils.FindTarget()
 
             local assistTarget = mq.TLO.Spawn(queryResult)
             if queryResult then
-                RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s", assistTarget.CleanName() or "None")
+                RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
+                    assistTarget.CleanName() or "None")
             end
 
-            RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist, Utils.BoolToString(assistTarget.Aggressive()))
+            RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist,
+                Utils.BoolToString(assistTarget.Aggressive()))
 
             if assistTarget() and assistTarget.Aggressive() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
-                RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(), assistTarget.ID())
+                RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
+                    assistTarget.ID())
                 RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
             end
         else
@@ -2096,7 +2247,8 @@ end
 function Utils.FindTargetCheck()
     local config = RGMercConfig:GetSettings()
 
-    RGMercsLogger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Utils.GetXTHaterCount(), Utils.BoolToString(Utils.IAmMA()), Utils.BoolToString(config.FollowMarkTarget),
+    RGMercsLogger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Utils.GetXTHaterCount(),
+        Utils.BoolToString(Utils.IAmMA()), Utils.BoolToString(config.FollowMarkTarget),
         Utils.BoolToString(RGMercConfig.Globals.BackOffFlag))
 
     local OATarget = false
@@ -2109,7 +2261,8 @@ function Utils.FindTargetCheck()
 
         local assistTarget = mq.TLO.Spawn(queryResult)
         if queryResult then
-            RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s", assistTarget.CleanName() or "None")
+            RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
+                assistTarget.CleanName() or "None")
         end
 
         if assistTarget and assistTarget() then
@@ -2117,7 +2270,8 @@ function Utils.FindTargetCheck()
         end
     end
 
-    return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget or OATarget) and not RGMercConfig.Globals.BackOffFlag
+    return (Utils.GetXTHaterCount() > 0 or Utils.IAmMA() or config.FollowMarkTarget or OATarget) and
+        not RGMercConfig.Globals.BackOffFlag
 end
 
 ---@param autoTargetId integer
@@ -2136,7 +2290,8 @@ function Utils.OkToEngage(autoTargetId)
     local mercCheck = target.Type() == "mercenary"
     if pcCheck or mercCheck then
         if not mq.TLO.Me.Combat() then
-            RGMercsLogger.log_verbose("\ay[2] Target type check failed \aw[\atpcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay",
+            RGMercsLogger.log_verbose(
+                "\ay[2] Target type check failed \aw[\atpcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay",
                 Utils.BoolToString(pcCheck), Utils.BoolToString(mercCheck))
         end
         return false
@@ -2158,12 +2313,14 @@ function Utils.OkToEngage(autoTargetId)
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_verbose("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
-                    target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId, mq.TLO.Me.ID())
+                    target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
+                    mq.TLO.Me.ID())
             end
             return true
         else
             RGMercsLogger.log_verbose("\ayAssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
-                target.CleanName(), target.ID(), Utils.BoolToString(distanceCheck), Utils.GetTargetDistance(), Utils.BoolToString(assistCheck))
+                target.CleanName(), target.ID(), Utils.BoolToString(distanceCheck), Utils.GetTargetDistance(),
+                Utils.BoolToString(assistCheck))
             return false
         end
     end
@@ -2325,16 +2482,22 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                         local loadedSpell = spellsToLoad[bestSpell.RankName()] or false
 
                         if pass and bestSpell and bookSpell and not loadedSpell then
-                            RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will load \at%s\ax ==> \ag%s", g.gem, s.name, bestSpell.RankName())
+                            RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will load \at%s\ax ==> \ag%s", g.gem, s
+                                .name, bestSpell.RankName())
                             spellLoadOut[g.gem] = { selectedSpellData = s, spell = bestSpell, }
                             spellsToLoad[bestSpell.RankName()] = true
                             break
                         else
-                            RGMercsLogger.log_debug("    ==> \ayGem \am%d will \arNOT\ay load \at%s (pass=%s, bestSpell=%s, bookSpell=%d, loadedSpell=%s)", g.gem, s.name,
-                                Utils.BoolToString(pass), bestSpell and bestSpell.RankName() or "", bookSpell or -1, Utils.BoolToString(loadedSpell))
+                            RGMercsLogger.log_debug(
+                                "    ==> \ayGem \am%d will \arNOT\ay load \at%s (pass=%s, bestSpell=%s, bookSpell=%d, loadedSpell=%s)",
+                                g.gem, s.name,
+                                Utils.BoolToString(pass), bestSpell and bestSpell.RankName() or "", bookSpell or -1,
+                                Utils.BoolToString(loadedSpell))
                         end
                     else
-                        RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will \arNOT\ay load \at%s\ax ==> \arNo Resolved Spell!", g.gem, s.name)
+                        RGMercsLogger.log_debug(
+                            "    ==> \ayGem \am%d\ay will \arNOT\ay load \at%s\ax ==> \arNo Resolved Spell!", g.gem,
+                            s.name)
                     end
                 end
             else
@@ -2346,7 +2509,8 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
     end
 
     if #spellLoadOut >= mq.TLO.Me.NumGems() then
-        RGMercsLogger.log_error("\arYour spell loadout count is the same as your number of gems. This might cause your character to sit and remem often! Consider fixing this!")
+        RGMercsLogger.log_error(
+            "\arYour spell loadout count is the same as your number of gems. This might cause your character to sit and remem often! Consider fixing this!")
     end
 
     return resolvedActionMap, spellLoadOut
@@ -2355,14 +2519,16 @@ end
 function Utils.GetDynamicTooltipForSpell(action)
     local resolvedItem = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", action)
 
-    return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None", resolvedItem.Description() or "None")
+    return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None",
+        resolvedItem.Description() or "None")
 end
 
 function Utils.GetDynamicTooltipForAA(action)
     local resolvedItem = mq.TLO.Spell(action)
 
     ---@diagnostic disable-next-line: undefined-field
-    return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None", resolvedItem.Description() or "None")
+    return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None",
+        resolvedItem.Description() or "None")
 end
 
 ---@param loc string
@@ -2406,7 +2572,8 @@ end
 
 function Utils.DeleteOA(idx)
     if idx <= #Utils.GetSetting('OutsideAssistList') then
-        RGMercsLogger.log_info("\axOutside Assist \at%s\ax \ag%s\ax - \arDeleted!\ax", idx, Utils.GetSetting('OutsideAssistList[idx]'))
+        RGMercsLogger.log_info("\axOutside Assist \at%s\ax \ag%s\ax - \arDeleted!\ax", idx,
+            Utils.GetSetting('OutsideAssistList[idx]'))
         table.remove(Utils.GetSetting('OutsideAssistList'), idx)
         --Utils.GetSetting('OutsideAssistList[idx]') = nil
         RGMercConfig:SaveSettings(false)
@@ -2861,7 +3028,8 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                         ImGui.PushID("##combo_setting_" .. k)
                         settings[k], pressed = ImGui.Combo("", settings[k], defaults[k].ComboOptions)
                         ImGui.PopID()
-                        new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
+                        new_loadout = new_loadout or
+                            ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
                         any_pressed = any_pressed or (pressed or false)
                     elseif defaults[k].Type == "ClickyItem" then
                         -- make a drag and drop target
@@ -2883,7 +3051,8 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                             end
                         end
                         Utils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
-                        new_loadout = new_loadout or ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
+                        new_loadout = new_loadout or
+                            ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
                         any_pressed = any_pressed or (pressed or false)
                         ImGui.PopID()
                     elseif defaults[k].Type ~= "Custom" then
@@ -2942,7 +3111,8 @@ function Utils.RenderSettings(settings, defaults, categories)
     local catNames = categories and categories:toList() or { "", }
     table.sort(catNames)
 
-    Utils.ShowAdvancedConfig, _ = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options", Utils.ShowAdvancedConfig)
+    Utils.ShowAdvancedConfig, _ = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options",
+        Utils.ShowAdvancedConfig)
 
     if ImGui.BeginTabBar("Settings_Categories") then
         for _, c in ipairs(catNames) do
