@@ -1278,10 +1278,19 @@ function Utils.DetSpellCheck(spell)
 end
 
 ---@param spell MQSpell
+---@param buffTarget target|nil
 ---@return boolean
-function Utils.TargetHasBuff(spell)
+function Utils.TargetHasBuff(spell, buffTarget)
+    local target = mq.TLO.Target
+
+    if buffTarget ~= nil and buffTarget.ID() > 0 then
+        target = buffTarget
+    end
+
     if not spell or not spell() then return false end
-    return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0) and true or false
+    if not buffTarget or not buffTarget() then return false end
+
+    return (buffTarget.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
 end
 
 ---@param buffName string
@@ -1296,10 +1305,22 @@ end
 ---@return boolean
 function Utils.TargetBodyIs(target, type)
     if not target then target = mq.TLO.Target end
-    if not target or target() then return false end
+    if not target or not target() then return false end
 
     local targetBody = (target() and target.Body() and target.Body.Name()) or "none"
     return targetBody:lower() == type:lower()
+end
+
+---@param classTable string|table
+---@param target MQTarget|nil
+---@return boolean
+function Utils.TargetClassIs(classTable, target)
+    local classSet = type(classTable) == 'table' and Set.new(classTable) or Set.new({ classTable })
+
+    if not target then target = mq.TLO.Target end
+    if not target or not target() or not target.Class() then return false end
+
+    return classSet:contains(target.Class.ShortName() or "None")
 end
 
 ---@param target MQTarget|nil

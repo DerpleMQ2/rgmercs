@@ -12,6 +12,7 @@ Module.SpellLoadOut                       = {}
 Module.ResolvedActionMap                  = {}
 Module.TempSettings                       = {}
 Module.CombatState                        = "None"
+Module.CurrentRotation                    = { name = "None", state = 0 }
 Module.ClassConfig                        = nil
 Module.DefaultCategories                  = nil
 
@@ -47,7 +48,8 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    local custom_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, RGMercConfig.Globals.CurLoadedClass:lower())
+    local custom_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir,
+        RGMercConfig.Globals.CurLoadedClass:lower())
 
     if RGMercUtils.file_exists(custom_config_file) then
         RGMercsLogger.log_info("Loading Custom Core Class Config: %s", custom_config_file)
@@ -60,7 +62,8 @@ function Module:LoadSettings()
     end
 
     if not self.ClassConfig then
-        self.ClassConfig = require(string.format("class_configs.%s_class_config", RGMercConfig.Globals.CurLoadedClass:lower()))
+        self.ClassConfig = require(string.format("class_configs.%s_class_config",
+            RGMercConfig.Globals.CurLoadedClass:lower()))
     end
 
     Module.DefaultCategories = Set.new({})
@@ -77,13 +80,16 @@ function Module:LoadSettings()
     Module.TempSettings.HealingRotationStates = {}
     for i, m in pairs(self.ClassConfig.HealRotationOrder or {}) do Module.TempSettings.HealingRotationStates[i] = m end
 
-    RGMercsLogger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass, RGMercConfig.Globals.CurLoadedChar)
-    RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author, self.ClassConfig._version)
+    RGMercsLogger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass,
+        RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author,
+        self.ClassConfig._version)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!", RGMercConfig.Globals.CurLoadedClass, settings_pickle_path)
+        RGMercsLogger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
+            RGMercConfig.Globals.CurLoadedClass, settings_pickle_path)
         self.settings = {}
         self:SaveSettings(false)
     else
@@ -91,7 +97,8 @@ function Module:LoadSettings()
     end
 
     if not self.settings or not self.DefaultCategories or not self.ClassConfig.DefaultConfig then
-        RGMercsLogger.log_error("\arFailed to Load Core Class Config for Classs: %s", RGMercConfig.Globals.CurLoadedClass)
+        RGMercsLogger.log_error("\arFailed to Load Core Class Config for Classs: %s", RGMercConfig.Globals
+            .CurLoadedClass)
         return
     end
 
@@ -115,7 +122,13 @@ function Module:Init()
     -- set dynamic names.
     self:SetDynamicNames()
 
-    return { self = self, settings = self.settings, defaults = self.ClassConfig.DefaultConfig, categories = self.DefaultCategories, }
+    return {
+        self = self,
+        settings = self.settings,
+        defaults = self.ClassConfig.DefaultConfig,
+        categories = self
+            .DefaultCategories,
+    }
 end
 
 function Module:SetDynamicNames()
@@ -165,14 +178,16 @@ function Module:Render()
         ImGui.Text("Mode: ")
         ImGui.SameLine()
         RGMercUtils.Tooltip(self.ClassConfig.DefaultConfig.Mode.Tooltip)
-        self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes, #self.ClassConfig.Modes)
+        self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes,
+            #self.ClassConfig.Modes)
         if pressed then
             self:SaveSettings(false)
             self.TempSettings.NewCombatMode = true
         end
 
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings, self.ClassConfig.DefaultConfig, self.DefaultCategories)
+            self.settings, pressed, loadoutChange = RGMercUtils.RenderSettings(self.settings,
+                self.ClassConfig.DefaultConfig, self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
                 self.TempSettings.NewCombatMode = self.TempSettings.NewCombatMode or loadoutChange
@@ -203,7 +218,8 @@ function Module:Render()
                     --end
                     if ImGui.CollapsingHeader(rotationName) then
                         ImGui.Indent()
-                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.Rotations[r.name],
+                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name,
+                            self.ClassConfig.Rotations[r.name],
                             self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
                         ImGui.Unindent()
                     end
@@ -220,7 +236,8 @@ function Module:Render()
                 for _, r in pairs(self.TempSettings.HealingRotationStates) do
                     if ImGui.CollapsingHeader(r.name) then
                         ImGui.Indent()
-                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name, self.ClassConfig.HealRotations[r.name],
+                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name,
+                            self.ClassConfig.HealRotations[r.name],
                             self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
                         ImGui.Unindent()
                     end
@@ -230,6 +247,7 @@ function Module:Render()
         end
 
         ImGui.Text(string.format("Combat State: %s", self.CombatState))
+        ImGui.Text(string.format("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state))
     end
 end
 
@@ -390,7 +408,8 @@ function Module:FindWorstHurtGroupMember(minHPs)
 
                 if RGMercUtils.GetSetting('DoPetHeals') then
                     if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
-                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(), healTarget.Pet.DisplayName())
+                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
+                            healTarget.Pet.DisplayName())
                         worstPct = healTarget.Pet.PctHPs()
                         worstId = healTarget.Pet.ID()
                     end
@@ -430,7 +449,8 @@ function Module:FindWorstHurtXT(minHPs)
 
                 if RGMercUtils.GetSetting('DoPetHeals') then
                     if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
-                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(), healTarget.Pet.DisplayName())
+                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
+                            healTarget.Pet.DisplayName())
                         worstPct = healTarget.Pet.PctHPs()
                         worstId = healTarget.Pet.ID()
                     end
@@ -473,14 +493,17 @@ function Module:HealById(id)
     local selectedRotation = nil
 
     for _, rotation in pairs(self.ClassConfig.HealRotationOrder or {}) do
-        RGMercsLogger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id, rotation.name)
+        RGMercsLogger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id,
+            rotation.name)
         if not rotation.cond or rotation.cond(self, healTarget) then
-            RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw appropriate to use.", id, rotation.name)
+            RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw appropriate to use.", id,
+                rotation.name)
             -- since these are ordered by prioirty we can assume we are the best option.
             selectedRotation = rotation
             break
         else
-            RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \aris NOT\aw appropriate to use.", id, rotation.name)
+            RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \aris NOT\aw appropriate to use.", id,
+                rotation.name)
         end
     end
 
@@ -488,6 +511,8 @@ function Module:HealById(id)
         RGMercsLogger.log_verbose("\ayHealById(%d):: No appropriate heal rotation found. Bailling.", id)
         return
     end
+
+    self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0 }
 
     local newState = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
         self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0, false)
@@ -601,6 +626,7 @@ function Module:GiveTime(combat_state)
             for _, targetId in ipairs(r.targetId()) do
                 if r.cond and r.cond(self, combat_state) then
                     RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
+                    self.CurrentRotation = { name = r.name, state = r.state or 0 }
                     local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
                         self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
 
@@ -609,7 +635,8 @@ function Module:GiveTime(combat_state)
                 end
             end
         else
-            RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
+            RGMercsLogger.log_verbose(
+                "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
                 RGMercUtils.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
                 RGMercUtils.FormatTime(r.timer - (os.clock() - self.TempSettings.RotationTimers[r.name])))
         end
@@ -665,12 +692,14 @@ function Module:DoGetState()
         local actionEntry = self.ClassConfig.Rotations[r.name][r.state or 1]
         rotationStates = rotationStates ..
             string.format("[%d] %s :: %d :: Type: %s Action: %s\n", idx, r.name, r.state or 0, actionEntry.type,
-                self.ResolvedActionMap[actionEntry.name] and self.ResolvedActionMap[actionEntry.name] or actionEntry.name)
+                self.ResolvedActionMap[actionEntry.name] and self.ResolvedActionMap[actionEntry.name] or actionEntry
+                .name)
     end
 
     local state = string.format("Combat State: %s", self.CombatState)
 
-    return string.format("Class(%s)\n%s\n%s\n%s\n%s", RGMercConfig.Globals.CurLoadedClass, actionMap, spellLoadout, rotationStates, state)
+    return string.format("Class(%s)\n%s\n%s\n%s\n%s", RGMercConfig.Globals.CurLoadedClass, actionMap, spellLoadout,
+        rotationStates, state)
 end
 
 ---@param cmd string
