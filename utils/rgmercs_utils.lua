@@ -232,6 +232,17 @@ function Utils.PCDiscReady(discSpell)
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
 
+---@param discSpell MQSpell
+---@return boolean
+function Utils.NPCDiscReady(discSpell)
+    if not discSpell or not discSpell() then return false end
+    local target = mq.TLO.Target
+    if not target or not target() then return false end
+    RGMercsLogger.log_super_verbose("NPCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None", Utils.BoolToString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
+    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and target.Type():lower() ~= "corpse" and
+        target.LineOfSight() and not target.Hovering()
+end
+
 ---@param aaName string
 ---@return boolean
 function Utils.PCAAReady(aaName)

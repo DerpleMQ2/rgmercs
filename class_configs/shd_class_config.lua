@@ -1152,14 +1152,12 @@ local _ClassConfig = {
         },
         {
             gem = 7,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "BiteTap", },
             },
         },
         {
             gem = 8,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "AeTaunt",  cond = function(self) return RGMercUtils.GetSetting('DoAE') and mq.TLO.Me.AltAbility("Explosion of Hatred")() == nil end, },
                 { name = "ForPower", },
