@@ -235,7 +235,6 @@ function Module:Render()
                                 RGMercUtils.DoCmd(string.format("/dex %s /casting \"%s\" -maxtries|10 -targetid|%d gem%d", selectedPorter, sv.Name, RGMercUtils.GetTargetID(),
                                     mq.TLO.Me.NumGems()))
                             else
-                                RGMercUtils.DoCmd("/dex " .. selectedPorter .. " /casting \"" .. sv.Name .. "\" -maxtries|10")
                                 RGMercUtils.DoCmd(string.format("/dex %s /casting \"%s\" -maxtries|10 gem%d", selectedPorter, sv.Name, mq.TLO.Me.NumGems()))
                             end
                         end
