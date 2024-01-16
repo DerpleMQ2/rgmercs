@@ -1168,7 +1168,8 @@ function Utils.TargetBodyIs(target, type)
     if not target then target = mq.TLO.Target end
     if not target or target() then return false end
 
-    return target.Body.Name():lower() == type:lower()
+    local targetBody = (target() and target.Body() and target.Body.Name()) or "none"
+    return targetBody:lower() == type:lower()
 end
 
 ---@param target MQTarget|nil
