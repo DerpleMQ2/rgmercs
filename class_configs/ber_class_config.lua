@@ -429,14 +429,16 @@ return {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() <= 21 and not mq.TLO.Me.Invis()
+                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() <= 21 and
+                        not mq.TLO.Me.Invis()
                 end,
             },
             {
                 name = "BerAura",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.Aura(1).ID() and mq.TLO.Me.CombatAbilityReady(discSpell.RankName())() and mq.TLO.Me.PctEndurance() > 10
+                    return not mq.TLO.Me.Aura(1).ID() and mq.TLO.Me.CombatAbilityReady(discSpell.RankName())() and
+                        mq.TLO.Me.PctEndurance() > 10
                 end,
             },
         },
@@ -445,7 +447,8 @@ return {
                 name = "PrimaryBurnDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc.ID() or mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['DiscondDisc'] or "None"))
+                    return RGMercUtils.PCDiscReady(discSpell) and
+                        (not mq.TLO.Me.ActiveDisc.ID() or mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['DiscondDisc'] or "None"))
                 end,
             },
             {
@@ -522,7 +525,8 @@ return {
                 name = "CleavingDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None") and RGMercUtils.PCDiscReady(discSpell)
+                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None") and
+                        RGMercUtils.PCDiscReady(discSpell)
                 end,
             },
             {
@@ -565,14 +569,16 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     local epicItem = mq.TLO.FindItem(itemName)
-                    return RGMercUtils.GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and epicItem.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and
+                        epicItem.TimerReady() == 0
                 end,
             },
             {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActive("Battle Leap Warcry") and not RGMercUtils.SongActive("Group Bestial Alignment")
+                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActive("Battle Leap Warcry") and
+                        not RGMercUtils.SongActive("Group Bestial Alignment")
                 end,
             },
             {
@@ -594,7 +600,8 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return mq.TLO.Spell(discSpell).NoExpendReagentID(1)() == -1 or
-                        (mq.TLO.FindItem(mq.TLO.Spell(discSpell).NoExpendReagentID(1)())() or 0) > 0 and RGMercUtils.PCDiscReady(discSpell)
+                        (mq.TLO.FindItem(mq.TLO.Spell(discSpell).NoExpendReagentID(1)())() or 0) > 0 and
+                        RGMercUtils.PCDiscReady(discSpell)
                 end,
             },
             {
@@ -664,7 +671,8 @@ return {
                 name = "Alliance",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and not RGMercUtils.TargetHasBuff(spell)
+                    return RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and
+                        not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
             {
