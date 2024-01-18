@@ -173,6 +173,9 @@ Config.DefaultConfig = {
     ['GroupInjureCnt']    = { DisplayName = "Group Heal Point", Category = "Heals", Tooltip = "Number of group members to be injured before using a group heal spell.", Default = 3, Min = 1, Max = 5, ConfigType = "Advanced", },
     ['DoPetHeals']        = { DisplayName = "Do Pet Heals", Category = "Heals", Tooltip = "Heal Pets?", Default = false, ConfigType = "Advanced", },
     ['MaxHealPoint']      = { DisplayName = "Max Heal Point", Category = "Heals", Tooltip = "The point at which you stop healing.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
+    ['LightHealPoint']    = { DisplayName = "Ligh tHeal Point", Category = "Heals", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
+    ['CompHealPoint']     = { DisplayName = "Comp Heal Point", Category = "Heals", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
+    ['RemedyHealPoint']   = { DisplayName = "Remedy Heal Point", Category = "Heals", Tooltip = "Use Spells", Default = 80, Min = 1, Max = 99, },
 
     -- [ REZ ] --
     ['RetryRezDelay']     = { DisplayName = "Retry Rez Delay", Category = "Rez", Tooltip = "Time in seconds of how often to try to rez a corpse.", Default = 6, Min = 1, Max = 60, ConfigType = "Advanced", },
