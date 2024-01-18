@@ -3,10 +3,15 @@ local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
     ['CommandHandlers'] = {
-        makeammo = function(self, ...)
-            RGMercsLogger.log_info("I would make ammo, if I only knew how.")
-            return true
-        end,
+        makeammo = {
+            usage = "/rgl makeammo",
+            about = "Will Make Ammo - I think?",
+            handler =
+                function(self, ...)
+                    RGMercsLogger.log_info("I would make ammo, if I only knew how.")
+                    return true
+                end,
+        },
     },
     ['Modes'] = {
         'Tank',

@@ -12,7 +12,7 @@ Module.SpellLoadOut                       = {}
 Module.ResolvedActionMap                  = {}
 Module.TempSettings                       = {}
 Module.CombatState                        = "None"
-Module.CurrentRotation                    = { name = "None", state = 0 }
+Module.CurrentRotation                    = { name = "None", state = 0, }
 Module.ClassConfig                        = nil
 Module.DefaultCategories                  = nil
 
@@ -336,6 +336,10 @@ function Module:GetTheme()
     end
 end
 
+function Module:GetClassConfig()
+    return self.ClassConfig
+end
+
 function Module:SelfCheckAndRez()
     local rezSearch = string.format("pccorpse %d radius 100 zradius 50", mq.TLO.Me.ID())
     local rezCount = mq.TLO.SpawnCount(rezSearch)()
@@ -512,7 +516,7 @@ function Module:HealById(id)
         return
     end
 
-    self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0 }
+    self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0, }
 
     local newState = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
         self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0, false)
@@ -626,7 +630,7 @@ function Module:GiveTime(combat_state)
             for _, targetId in ipairs(r.targetId()) do
                 if r.cond and r.cond(self, combat_state) then
                     RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
-                    self.CurrentRotation = { name = r.name, state = r.state or 0 }
+                    self.CurrentRotation = { name = r.name, state = r.state or 0, }
                     local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
                         self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
 
@@ -709,7 +713,7 @@ function Module:HandleBind(cmd, ...)
     local handled = false
     -- /rglua cmd handler
     if self.ClassConfig.CommandHandlers and self.ClassConfig.CommandHandlers[cmd] then
-        return self.ClassConfig.CommandHandlers[cmd](self, ...)
+        return self.ClassConfig.CommandHandlers[cmd].handler(self, ...)
     end
     return handled
 end

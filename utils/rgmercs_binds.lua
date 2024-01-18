@@ -86,6 +86,11 @@ Bind.Handlers     = {
                     printf("%-20s - Usage: %-20s | %s", c, d.usage, d.about)
                 end
             end
+
+            printf("\nClass Specific Commands Help\n------------\n")
+            for c, d in pairs(RGMercModules:ExecModule("Class", "GetClassConfig").CommandHandlers or {}) do
+                printf("%-20s - Usage: %-20s | %s", c, d.usage, d.about)
+            end
         end,
     },
 

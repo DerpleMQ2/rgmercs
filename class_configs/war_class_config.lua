@@ -5,30 +5,39 @@ local _ClassConfig = {
     _version            = "0.1a",
     _author             = "Derple",
     ['CommandHandlers'] = {
-        defdisc = function(self, ...)
-            local discSpell = self:GetResolvedActionMapItem('meleemit')
+        defdisc = {
+            usage = "/rgl defdisc",
+            about = "Uses best warrior melee mitigation disc",
+            handler = function(self, ...)
+                local discSpell = self:GetResolvedActionMapItem('meleemit')
 
-            if discSpell and discSpell() and RGMercUtils.PCDiscReady(discSpell) then
-                if RGMercUtils.BuffActiveByName('Night\'s Endless Terror') then
-                    RGMercUtils.DoCmd('/docommand /removebuff "Night\'s Endless Terror"')
-                    mq.delay(5)
+                if discSpell and discSpell() and RGMercUtils.PCDiscReady(discSpell) then
+                    if RGMercUtils.BuffActiveByName('Night\'s Endless Terror') then
+                        RGMercUtils.DoCmd('/docommand /removebuff "Night\'s Endless Terror"')
+                        mq.delay(5)
+                    end
+                    RGMercUtils.UseDisc(discSpell, RGMercUtils.GetTargetID())
+                else
+                    RGMercsLogger.log_error("\ar COOL DOWN \ag >> \aw meleemit \ag << ")
                 end
-                RGMercUtils.UseDisc(discSpell, RGMercUtils.GetTargetID())
-            else
-                RGMercsLogger.log_error("\ar COOL DOWN \ag >> \aw meleemit \ag << ")
-            end
-            return true
-        end,
-        evadedisc = function(self, ...)
-            local discSpell = self:GetResolvedActionMapItem('missall')
+                return true
+            end,
+        },
 
-            if discSpell and discSpell() and RGMercUtils.PCDiscReady(discSpell) then
-                RGMercUtils.UseDisc(discSpell, RGMercUtils.GetTargetID())
-            else
-                RGMercsLogger.log_error("\ar COOL DOWN \ag >> \aw ${missall} \ag << ")
-            end
-            return true
-        end,
+        evadedisc = {
+            usage = "/rgl evadedisc",
+            about = "Uses best warrior evasion disc",
+            handler = function(self, ...)
+                local discSpell = self:GetResolvedActionMapItem('missall')
+
+                if discSpell and discSpell() and RGMercUtils.PCDiscReady(discSpell) then
+                    RGMercUtils.UseDisc(discSpell, RGMercUtils.GetTargetID())
+                else
+                    RGMercsLogger.log_error("\ar COOL DOWN \ag >> \aw ${missall} \ag << ")
+                end
+                return true
+            end,
+        },
     },
     ['ModeChecks']      = {
         IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
