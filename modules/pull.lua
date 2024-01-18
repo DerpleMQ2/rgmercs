@@ -423,9 +423,8 @@ function Module:MoveWayPointUp(id)
     if newId < 1 then return end
     if id > #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] then return end
 
-    local oldEntry = self:GetWPById(newId)
-    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId] = self:GetWPById(id)
-    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] = oldEntry
+    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId], self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] =
+        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id], self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId]
     self:SaveSettings(false)
 end
 
@@ -436,9 +435,9 @@ function Module:MoveWayPointDown(id)
     if id < 1 then return end
     if newId > #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] then return end
 
-    local oldEntry = self:GetWPById(newId)
-    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId] = self:GetWPById(id)
-    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] = oldEntry
+    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId], self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] =
+        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id], self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId]
+
     self:SaveSettings(false)
 end
 

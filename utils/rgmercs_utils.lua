@@ -1315,7 +1315,7 @@ end
 ---@param target MQTarget|nil
 ---@return boolean
 function Utils.TargetClassIs(classTable, target)
-    local classSet = type(classTable) == 'table' and Set.new(classTable) or Set.new({ classTable })
+    local classSet = type(classTable) == 'table' and Set.new(classTable) or Set.new({ classTable, })
 
     if not target then target = mq.TLO.Target end
     if not target or not target() or not target.Class() then return false end
@@ -2610,9 +2610,9 @@ function Utils.MoveOAUp(id)
     if newId < 1 then return end
     if id > #Utils.GetSetting('OutsideAssistList') then return end
 
-    local oldEntry                               = Utils.GetSetting('OutsideAssistList')[newId]
-    Utils.GetSetting('OutsideAssistList')[newId] = Utils.GetSetting('OutsideAssistList')[id]
-    Utils.GetSetting('OutsideAssistList')[id]    = oldEntry
+    Utils.GetSetting('OutsideAssistList')[newId], Utils.GetSetting('OutsideAssistList')[id] =
+        Utils.GetSetting('OutsideAssistList')[id], Utils.GetSetting('OutsideAssistList')[newId]
+
     RGMercConfig:SaveSettings(false)
 end
 
@@ -2623,9 +2623,9 @@ function Utils.MoveOADown(id)
     if id < 1 then return end
     if newId > #Utils.GetSetting('OutsideAssistList') then return end
 
-    local oldEntry                               = Utils.GetSetting('OutsideAssistList')[newId]
-    Utils.GetSetting('OutsideAssistList')[newId] = Utils.GetSetting('OutsideAssistList')[id]
-    Utils.GetSetting('OutsideAssistList')[id]    = oldEntry
+    Utils.GetSetting('OutsideAssistList')[newId], Utils.GetSetting('OutsideAssistList')[id] =
+        Utils.GetSetting('OutsideAssistList')[id], Utils.GetSetting('OutsideAssistList')[newId]
+
     RGMercConfig:SaveSettings(false)
 end
 
