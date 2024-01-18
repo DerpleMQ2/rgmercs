@@ -301,7 +301,7 @@ local function RGInit(...)
         if #unloaded == 1 then table.insert(unloadedPlugins, unloaded[1]) end
     end
 
-    local mainAssist = RGMercUtils.GetTargetName()
+    local mainAssist = mq.TLO.Target.CleanName()
 
     if mainAssist:len() == 0 and mq.TLO.Group() then
         mainAssist = mq.TLO.Group.MainAssist() or ""
