@@ -118,7 +118,7 @@ local _ClassConfig = {
 
                     -- How many bundles to make. Dividing as each combine makes 5 arrows
                     if amount == nil then
-                        local amount = 5
+                        amount = 5
                     end
                     local toMake = tonumber(amount) / 5
 
