@@ -927,7 +927,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.UnityBuff,
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or 0) end,
                 cond = function(self, aaName)
-                    return castWSU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName())
+                    return castWSU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName() or "")
                 end,
             },
             {
@@ -1227,7 +1227,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SummerNuke,
                 active_cond = function(self, spell) return RGMercUtils.IsTanking() end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetSpellCheck(spell) and (mq.TLO.Me.PctAggro() < 100 or mq.TLO.Target.SecondaryPctAggro() > 50)
+                    return RGMercUtils.DetSpellCheck(spell) and (mq.TLO.Me.PctAggro() < 100 or mq.TLO.Me.SecondaryPctAggro() > 50)
                 end,
             },
         },
