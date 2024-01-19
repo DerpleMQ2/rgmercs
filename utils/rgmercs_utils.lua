@@ -1031,6 +1031,19 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
         end
     end
 
+    if entry.type:lower() == "song" then
+        local spell = resolvedActionMap[entry.name]
+
+        if not spell or not spell() then
+            ret = false
+        else
+            ret = Utils.UseSong(spell.RankName(), targetId, bAllowMem)
+
+            RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", entry.name, spell.RankName(),
+                ret and "\agSuccess" or "\arFailed!")
+        end
+    end
+
     if entry.type:lower() == "aa" then
         if Utils.AAReady(entry.name) then
             Utils.UseAA(entry.name, targetId)
@@ -1080,7 +1093,7 @@ end
 
 function Utils.GetEntryConditionArg(map, entry)
     local condArg = map[entry.name] or mq.TLO.Spell(entry.name)
-    if entry.type:lower() ~= "spell" and (condArg == nil or entry.type:lower() == "aa") then
+    if (entry.type:lower() ~= "spell" and entry.type:lower() ~= "song") and (condArg == nil or entry.type:lower() == "aa") then
         condArg = entry.name
     end
 
@@ -1661,6 +1674,39 @@ function Utils.ClickModRod()
             return
         end
     end
+end
+
+---@param songSpell MQSpell
+---@return boolean
+function Utils.SongMemed(songSpell)
+    if not songSpell or not songSpell() then return false end
+    local me = mq.TLO.Me
+
+    return me.Gem(songSpell.Name())() ~= nil
+end
+
+---@param songSpell MQSpell
+---@return boolean
+function Utils.BuffSong(songSpell)
+    if not songSpell or not songSpell() then return false end
+    local me = mq.TLO.Me
+
+    local res = Utils.SongMemed(songSpell) and (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= (songSpell.MyCastTime.Seconds() + 6)
+    RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), duration(%0.2f) < casttime(%0.2f) --> result(%s)", songSpell.Name(),
+        Utils.BoolToString(me.Gem(songSpell.Name())() ~= nil),
+        me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, songSpell.MyCastTime.Seconds() + 6, Utils.BoolToString(res))
+    return res
+end
+
+---@param songSpell MQSpell
+---@return boolean
+function Utils.DebuffSong(songSpell)
+    if not songSpell or not songSpell() then return false end
+    local me = mq.TLO.Me
+    local res = me.Gem(songSpell.Name()) and not Utils.TargetHasBuff(songSpell)
+    RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), targetHas(%s) --> result(%s)", songSpell.Name(), Utils.BoolToString(me.Gem(songSpell.Name())() ~= nil),
+        Utils.BoolToString(Utils.TargetHasBuff(songSpell)), Utils.BoolToString(res))
+    return res
 end
 
 ---@return boolean
@@ -2926,6 +2972,10 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
                     ImGui.Text("<<Custom Func>>")
                     ImGui.PopStyleColor()
                 elseif entry.type:lower() == "spell" then
+                    ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.05, .05, 0.9)
+                    ImGui.Text("<Missing Spell>")
+                    ImGui.PopStyleColor()
+                elseif entry.type:lower() == "song" then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.05, .05, 0.9)
                     ImGui.Text("<Missing Spell>")
                     ImGui.PopStyleColor()

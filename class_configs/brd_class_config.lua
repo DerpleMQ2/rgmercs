@@ -48,11 +48,9 @@ local Tooltips     = {
 
 local _ClassConfig = {
     _version          = "0.1a",
-    _author           = "Tiddliestix",
-
+    _author           = "Derple, Tiddliestix",
     ['Modes']         = {
-        'DPS',
-        'Hybrid',
+        'Melee',
     },
     ['ItemSets']      = {
         ['Epic'] = {
@@ -346,7 +344,202 @@ local _ClassConfig = {
             "Ancient: Call of Power",
             "Eriki's Psalm of Power",
         },
-        ['DotSong'] = {
+        ['Dot1Song'] = {
+            -- DotSongs - Level Range 30 - 115
+
+            -- Fire Dot
+            "Shak Dathor's Chant of Flame",
+            "Sontalak's Chant of Flame",
+            "Qunard's Chant of Flame",
+            "Nilsara's Chant of Flame",
+            "Gosik's Chant of Flame",
+            "Daevan's Chant of Flame",
+            "Sotor's Chant of Flame",
+            "Talendor's Chant of Flame",
+            "Tjudawos' Chant of Flame",
+            "Vulka's Chant of Flame",
+            "Tuyen's Chant of Fire",
+            "Tuyen's Chant of Flame",
+
+            -- Posion Dot
+            "Cruor's Chant of Poison",
+            "Malvus's Chant of Poison",
+            "Nexona's Chant of Poison",
+            "Serisaria's Chant of Poison",
+            "Slaunk's Chant of Poison",
+            "Hiqork's Chant of Poison",
+            "Spinechiller's Chant of Poison",
+            "Severilous' Chant of Poison",
+            "Kildrukaun's Chant of Poison",
+            "Vulka's Chant of Poison",
+            "Tuyen's Chant of Venom",
+            "Tuyen's Chant of Poison",
+
+            -- Ice Dot
+            "Sylra Fris' Chant of Frost",
+            "Yelinak's Chant of Frost",
+            "Ekron's Chant of Frost",
+            "Kirchen's Chant of Frost",
+            "Edoth's Chant of Frost",
+            "Kalbrok's Chant of Frost",
+            "Fergar's Chant of Frost",
+            "Gorenaire's Chant of Frost",
+            "Zeixshi-Kar's Chant of Frost",
+            "Vulka's Chant of Frost",
+            "Tuyen's Chant of Ice",
+            "Tuyen's Chant of Frost",
+
+            -- Disease Dot
+            "Coagulus' Chant of Disease",
+            "Zlexak's Chant of Disease",
+            "Hoshkar's Chant of Disease",
+            "Horthin's Chant of Disease",
+            "Siavonn's Chant of Disease",
+            "Wasinai's Chant of Disease",
+            "Shiverback's Chant of Disease",
+            "Trakanon's Chant of Disease",
+            "Vyskudra's Chant of Disease",
+            "Vulka's Chant of Disease",
+            "Tuyen's Chant of the Plague",
+            "Tuyen's Chant of Disease",
+
+            -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
+            "Ancient: Chaos Chant",
+            "Angstlich's Assonance",
+            "Fufil's Diminishing Dirge",
+            "Fufil's Curtailing Chant",
+        },
+        ['Dot2Song'] = {
+            -- DotSongs - Level Range 30 - 115
+
+            -- Fire Dot
+            "Shak Dathor's Chant of Flame",
+            "Sontalak's Chant of Flame",
+            "Qunard's Chant of Flame",
+            "Nilsara's Chant of Flame",
+            "Gosik's Chant of Flame",
+            "Daevan's Chant of Flame",
+            "Sotor's Chant of Flame",
+            "Talendor's Chant of Flame",
+            "Tjudawos' Chant of Flame",
+            "Vulka's Chant of Flame",
+            "Tuyen's Chant of Fire",
+            "Tuyen's Chant of Flame",
+
+            -- Posion Dot
+            "Cruor's Chant of Poison",
+            "Malvus's Chant of Poison",
+            "Nexona's Chant of Poison",
+            "Serisaria's Chant of Poison",
+            "Slaunk's Chant of Poison",
+            "Hiqork's Chant of Poison",
+            "Spinechiller's Chant of Poison",
+            "Severilous' Chant of Poison",
+            "Kildrukaun's Chant of Poison",
+            "Vulka's Chant of Poison",
+            "Tuyen's Chant of Venom",
+            "Tuyen's Chant of Poison",
+
+            -- Ice Dot
+            "Sylra Fris' Chant of Frost",
+            "Yelinak's Chant of Frost",
+            "Ekron's Chant of Frost",
+            "Kirchen's Chant of Frost",
+            "Edoth's Chant of Frost",
+            "Kalbrok's Chant of Frost",
+            "Fergar's Chant of Frost",
+            "Gorenaire's Chant of Frost",
+            "Zeixshi-Kar's Chant of Frost",
+            "Vulka's Chant of Frost",
+            "Tuyen's Chant of Ice",
+            "Tuyen's Chant of Frost",
+
+            -- Disease Dot
+            "Coagulus' Chant of Disease",
+            "Zlexak's Chant of Disease",
+            "Hoshkar's Chant of Disease",
+            "Horthin's Chant of Disease",
+            "Siavonn's Chant of Disease",
+            "Wasinai's Chant of Disease",
+            "Shiverback's Chant of Disease",
+            "Trakanon's Chant of Disease",
+            "Vyskudra's Chant of Disease",
+            "Vulka's Chant of Disease",
+            "Tuyen's Chant of the Plague",
+            "Tuyen's Chant of Disease",
+
+            -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
+            "Ancient: Chaos Chant",
+            "Angstlich's Assonance",
+            "Fufil's Diminishing Dirge",
+            "Fufil's Curtailing Chant",
+        },
+        ['Dot3Song'] = {
+            -- DotSongs - Level Range 30 - 115
+
+            -- Fire Dot
+            "Shak Dathor's Chant of Flame",
+            "Sontalak's Chant of Flame",
+            "Qunard's Chant of Flame",
+            "Nilsara's Chant of Flame",
+            "Gosik's Chant of Flame",
+            "Daevan's Chant of Flame",
+            "Sotor's Chant of Flame",
+            "Talendor's Chant of Flame",
+            "Tjudawos' Chant of Flame",
+            "Vulka's Chant of Flame",
+            "Tuyen's Chant of Fire",
+            "Tuyen's Chant of Flame",
+
+            -- Posion Dot
+            "Cruor's Chant of Poison",
+            "Malvus's Chant of Poison",
+            "Nexona's Chant of Poison",
+            "Serisaria's Chant of Poison",
+            "Slaunk's Chant of Poison",
+            "Hiqork's Chant of Poison",
+            "Spinechiller's Chant of Poison",
+            "Severilous' Chant of Poison",
+            "Kildrukaun's Chant of Poison",
+            "Vulka's Chant of Poison",
+            "Tuyen's Chant of Venom",
+            "Tuyen's Chant of Poison",
+
+            -- Ice Dot
+            "Sylra Fris' Chant of Frost",
+            "Yelinak's Chant of Frost",
+            "Ekron's Chant of Frost",
+            "Kirchen's Chant of Frost",
+            "Edoth's Chant of Frost",
+            "Kalbrok's Chant of Frost",
+            "Fergar's Chant of Frost",
+            "Gorenaire's Chant of Frost",
+            "Zeixshi-Kar's Chant of Frost",
+            "Vulka's Chant of Frost",
+            "Tuyen's Chant of Ice",
+            "Tuyen's Chant of Frost",
+
+            -- Disease Dot
+            "Coagulus' Chant of Disease",
+            "Zlexak's Chant of Disease",
+            "Hoshkar's Chant of Disease",
+            "Horthin's Chant of Disease",
+            "Siavonn's Chant of Disease",
+            "Wasinai's Chant of Disease",
+            "Shiverback's Chant of Disease",
+            "Trakanon's Chant of Disease",
+            "Vyskudra's Chant of Disease",
+            "Vulka's Chant of Disease",
+            "Tuyen's Chant of the Plague",
+            "Tuyen's Chant of Disease",
+
+            -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
+            "Ancient: Chaos Chant",
+            "Angstlich's Assonance",
+            "Fufil's Diminishing Dirge",
+            "Fufil's Curtailing Chant",
+        },
+        ['Dot4Song'] = {
             -- DotSongs - Level Range 30 - 115
 
             -- Fire Dot
@@ -511,6 +704,47 @@ local _ClassConfig = {
             "Wave of Slumber",
         },
     },
+    ['RotationOrder'] = {
+        -- Downtime doesn't have state because we run the whole rotation at once.
+        {
+            name = 'Downtime',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
+        {
+            name = 'Debuff',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'Burn',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    RGMercUtils.BurnCheck() and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'DPS',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
+            end,
+        },
+
+    },
     ['Rotations']     = {
         ['Burn'] = {
         },
@@ -521,72 +755,158 @@ local _ClassConfig = {
         ['DPS'] = {
         },
         ['Downtime'] = {
+            {
+                name = "BardDPSAura",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and not RGMercUtils.AuraActiveByName(songSpell.RankName()) and RGMercUtils.GetSetting('UseRegenAura')
+                end,
+            },
+            {
+                name = "ChorusRegenSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting('DoMed') == 1
+                end,
+            },
+            {
+                name = "AccelerandoSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                end,
+            },
+            {
+                name = "BardRegenAura",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and not RGMercUtils.AuraActiveByName(songSpell.RankName()) and RGMercUtils.GetSetting('UseRegenAura')
+                end,
+            },
+            {
+                name = "BardRunBuff",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and not RGMercUtils.GetSetting('UseAASelo') and RGMercUtils.GetSetting('DoRunSpeed')
+                end,
+            },
+            {
+                name = "CrescendoSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    local gemTimer = mq.TLO.Me.GemTimer(songSpell.Name())() or 0
+                    return RGMercUtils.BuffSong(songSpell) and gemTimer == 0 and mq.TLO.Me.PctMana() < 75
+                end,
+            },
+            {
+                name = "PulseRegenSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                end,
+            },
+            {
+                name = "ResistSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                end,
+            },
+            {
+                name = "WarMarchSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                end,
+            },
+            {
+                name = "MainAriaSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                end,
+            },
         },
     },
     ['Spells']        = {
         {
             gem = 1,
             spells = {
-                -- { name = "NAME FROM ABILITY SET LIST", cond = function(self) return mq.TLO.Me.Level() < 86 end, },
+                { name = "AESlowSong",  cond = function(self) return RGMercUtils.GetSetting('DoSlow') end, },
+                { name = "SlowSong",    cond = function(self) return RGMercUtils.GetSetting('DoSlow') end, },
+                { name = "InsultSong1", cond = function(self) return true end, },
             },
         },
         {
             gem = 2,
             spells = {
+                { name = "ChorusRegenSong", cond = function(self) return true end, },
             },
         },
         {
             gem = 3,
             spells = {
+                { name = "WarMarchSong", cond = function(self) return true end, },
             },
         },
         {
             gem = 4,
             spells = {
+                { name = "Dot1Song", cond = function(self) return true end, },
             },
         },
         {
             gem = 5,
             spells = {
+                { name = "MezSong", cond = function(self) return true end, },
             },
         },
         {
             gem = 6,
             spells = {
+                { name = "LowAriaSong",  cond = function(self) return mq.TLO.Me.Level() <= 63 end, },
+                { name = "MainAriaSong", cond = function(self) return true end, },
             },
         },
         {
             gem = 7,
             spells = {
+                { name = "BardRunBuff", cond = function(self) return RGMercUtils.GetSetting('UseAASelo') and RGMercUtils.CanUseAA("Selo's Sonata") end, },
+                { name = "DichoSong",   cond = function(self) return true end, },
             },
         },
         {
             gem = 8,
             spells = {
+                { name = "Dot2Song", cond = function(self) return true end, },
             },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "Dot4Song", cond = function(self) return true end, },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "MezAESong", cond = function(self) return true end, },
             },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "CrescendoSong", cond = function(self) return true end, },
             },
         },
         {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "Dot3Song", cond = function(self) return true end, },
             },
         },
         {
@@ -597,7 +917,11 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode'] = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
+        ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['DoSlow']       = { DisplayName = "Cast Slow", Category = "Combat", Tooltip = "Do Slow Spells/AAs", Default = true, },
+        ['UseAASelo']    = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true, },
+        ['UseRegenAura'] = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = true, },
+        ['DoRunSpeed']   = { DisplayName = "Cast Run Speed Buffs", Category = "Buffs", Tooltip = "Use Ranger Run Speed Buffs.", Default = true, },
     },
 
 }

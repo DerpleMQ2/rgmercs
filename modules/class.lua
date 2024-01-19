@@ -674,6 +674,8 @@ function Module:DoGetState()
                 mappedAction = "cmd function"
             elseif entry.type:lower() == "spell" then
                 mappedAction = "<Missing Spell>"
+            elseif entry.type:lower() == "song" then
+                mappedAction = "<Missing Song>"
             elseif entry.type:lower() == "ability" then
                 mappedAction = entry.name
             elseif entry.type:lower() == "aa" then
