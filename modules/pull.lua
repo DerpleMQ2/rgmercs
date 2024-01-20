@@ -157,7 +157,7 @@ function Module:Init()
     RGMercsLogger.log_info("Pull Module Loaded.")
     self:LoadSettings()
     self.ModuleLoaded = true
-    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:RenderMobList(displayName, settingName)
@@ -195,6 +195,10 @@ function Module:RenderMobList(displayName, settingName)
             ImGui.EndTable()
         end
     end
+end
+
+function Module:ShouldRender()
+    return true
 end
 
 function Module:Render()
@@ -419,9 +423,8 @@ function Module:MoveWayPointUp(id)
     if newId < 1 then return end
     if id > #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] then return end
 
-    local oldEntry = self:GetWPById(newId)
-    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId] = self:GetWPById(id)
-    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] = oldEntry
+    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId], self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] =
+        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id], self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId]
     self:SaveSettings(false)
 end
 
@@ -432,9 +435,9 @@ function Module:MoveWayPointDown(id)
     if id < 1 then return end
     if newId > #self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] then return end
 
-    local oldEntry = self:GetWPById(newId)
-    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId] = self:GetWPById(id)
-    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] = oldEntry
+    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId], self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id] =
+        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][id], self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][newId]
+
     self:SaveSettings(false)
 end
 
@@ -731,7 +734,7 @@ function Module:CheckForAbort(pullID)
             return true
         end
 
-        if RGMercConfig:GetSettings().SafeTargeting and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
+        if RGMercUtils.GetSetting('SafeTargeting') and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
             RGMercsLogger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targetting is enabled! \ax")
             return true
         end
@@ -989,7 +992,7 @@ function Module:GiveTime(combat_stateModule)
 
     RGMercUtils.SetTarget(pullID)
 
-    if RGMercConfig:GetSettings().SafeTargeting then
+    if RGMercUtils.GetSetting('SafeTargeting') then
         -- Hard coding 500 units as our radius as it's probably twice our effective spell range.
         if RGMercUtils.IsSpawnFightingStranger(mq.TLO.Spawn(pullID), 500) then
             abortPull = true

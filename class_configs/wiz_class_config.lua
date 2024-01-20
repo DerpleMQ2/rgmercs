@@ -566,12 +566,19 @@ return {
     },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
+        {
+            name = 'Downtime',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.BurnCheck()
@@ -581,7 +588,7 @@ return {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state ==
                     "Combat"
@@ -630,7 +637,7 @@ return {
                 name = "Mana Burn",
                 type = "AA",
                 cond = function(self)
-                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and self.settings.DoManaBurn
+                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and RGMercUtils.GetSetting('DoManaBurn')
                 end,
             },
         },
@@ -663,14 +670,14 @@ return {
                 name = "Concussion",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > self.settings.JoltAggro
+                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
                 end,
             },
             {
                 name = "JoltSpell",
                 type = "Spell",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > self.settings.JoltAggro
+                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
                 end,
             },
             {
@@ -684,7 +691,7 @@ return {
                 name = "GambitSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct')
                 end,
             },
             {
@@ -804,21 +811,23 @@ return {
                 name = "Force of Flame",
                 type = "AA",
                 cond = function(self)
-                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and not RGMercUtils.AAReady("Force of Will")
+                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and
+                        not RGMercUtils.AAReady("Force of Will")
                 end,
             },
             {
                 name = "Force of Ice",
                 type = "AA",
                 cond = function(self)
-                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and RGMercUtils.AAReady("Force of Flame")
+                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and RGMercUtils.AAReady("Force of Flame")
                 end,
             },
             {
                 name = "Force of Will",
                 type = "AA",
                 cond = function(self)
-                    return self.settings.WeaveAANukes and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and not RGMercUtils.AAReady("Force of Flame")
+                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and
+                        not RGMercUtils.AAReady("Force of Flame")
                 end,
             },
         },
@@ -871,14 +880,14 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSettings().ModRodManaPct and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
             {
@@ -886,18 +895,18 @@ return {
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and mq.TLO.Me.Song(item.Spell.RankName())() ~= nil
+                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return self.settings.DoChestClick and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
-                name = RGMercConfig:GetSettings().ClarityPotion,
+                name = RGMercUtils.GetSetting('ClarityPotion'),
                 type = "Item",
                 cond = function(self)
-                    local item = mq.TLO.FindItem(RGMercConfig:GetSettings().ClarityPotion)
+                    local item = mq.TLO.FindItem(RGMercUtils.GetSetting('ClarityPotion'))
                     return item() and item.Spell.Stacks() and item.TimerReady()
                 end,
             },

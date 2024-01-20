@@ -213,12 +213,19 @@ return {
     },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
-        { name = 'Downtime', targetId = function(self) return mq.TLO.Me.ID() end, cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end, },
+        {
+            name = 'Downtime',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck()
+            end,
+        },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.BurnCheck()
@@ -228,7 +235,7 @@ return {
             name = 'Evasion',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.IAmMA() and RGMercUtils.GetMainAssistPctHPs() > 0 and mq.TLO.Me.PctAggro() > 90
             end,
@@ -237,7 +244,7 @@ return {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return RGMercConfig.Globals.AutoTargetID end,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -266,11 +273,11 @@ return {
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and mq.TLO.Me.Song(item.Spell.RankName())() ~= nil
+                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return self.settings.DoChestClick and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
@@ -278,7 +285,7 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     local item = mq.TLO.FindItem(itemName)
-                    return item and item() and self.settings.DoEpic and item.Spell.Stacks() and item.TimerReady()
+                    return item and item() and RGMercUtils.GetSetting('DoEpic') and item.Spell.Stacks() and item.TimerReady()
                 end,
             },
             {
@@ -288,49 +295,51 @@ return {
             {
                 name = "Frenzied",
                 type = "Disc",
-                cond = function(self, discName)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discName)
+                cond = function(self, discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and
+                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
                 end,
             },
             {
                 name = "Twisted",
                 type = "Disc",
-                cond = function(self, discName)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discName)
+                cond = function(self, discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and
+                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
                 end,
             },
             {
                 name = "AimDisc",
                 type = "Disc",
-                cond = function(self, discName)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self, discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Executioner",
                 type = "Disc",
-                cond = function(self, discName)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self, discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Executioner2",
                 type = "Disc",
-                cond = function(self, discName)
-                    return (RGMercConfig:GetSettings().BurnAuto or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self, discSpell)
+                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "EdgeDisc",
                 type = "Disc",
-                cond = function(self, discName)
+                cond = function(self, discSpell)
                     return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "AspDisc",
                 type = "Disc",
-                cond = function(self, discName)
+                cond = function(self, discSpell)
                     return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -361,8 +370,8 @@ return {
             {
                 name = "Ambush",
                 type = "Disc",
-                cond = function(self, discName)
-                    local discSpell = mq.TLO.Spell(discName)
+                cond = function(self, discSpell)
+                    local discSpell = mq.TLO.Spell(discSpell)
                     return mq.TLO.Me.PctEndurance() >= 5 and
                         RGMercUtils.GetTargetPctHPs() >= 90 and
                         RGMercUtils.GetTargetDistance() < 50 and
@@ -380,8 +389,8 @@ return {
             {
                 name = "Vision",
                 type = "Disc",
-                cond = function(self, discName)
-                    return RGMercUtils.SongActive(discName)
+                cond = function(self, discSpell)
+                    return RGMercUtils.SongActive(discSpell)
                 end,
             },
             {
@@ -391,8 +400,8 @@ return {
             {
                 name = "Jugular",
                 type = "Disc",
-                cond = function(self, discName)
-                    local discSpell = mq.TLO.Spell(discName)
+                cond = function(self, discSpell)
+                    local discSpell = mq.TLO.Spell(discSpell)
                     return (discSpell() and discSpell.Level() <= 82) and mq.TLO.Me.CombatState():lower() ~= "combat"
                 end,
             },
@@ -419,7 +428,7 @@ return {
                 name = "PoisonName",
                 type = "ClickyItem",
                 cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
                         not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
                 end,
@@ -455,23 +464,23 @@ return {
                 name = "PoisonClicky",
                 type = "ClickyItem",
                 active_cond = function(self, _)
-                    return (mq.TLO.FindItemCount(self.settings.PoisonName)() or 0) >= self.settings.PoisonItemCount
+                    return (mq.TLO.FindItemCount(RGMercUtils.GetSetting('PoisonName'))() or 0) >= RGMercUtils.GetSetting('PoisonItemCount')
                 end,
                 cond = function(self, _)
-                    return (mq.TLO.FindItemCount(self.settings.PoisonName)() or 0) < self.settings.PoisonItemCount and
-                        mq.TLO.FindItem(self.settings.PoisonClicky)() and
-                        mq.TLO.FindItem(self.settings.PoisonClicky).Timer() == 0
+                    return (mq.TLO.FindItemCount(RGMercUtils.GetSetting('PoisonName'))() or 0) < RGMercUtils.GetSetting('PoisonItemCount') and
+                        mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonClicky'))() and
+                        mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonClicky')).Timer() == 0
                 end,
             },
             {
                 name = "PoisonName",
                 type = "ClickyItem",
                 active_cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and RGMercUtils.BuffActiveByID(poisonItem.Spell.ID() or 0)
                 end,
                 cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(self.settings.PoisonName)
+                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
                         not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
                 end,
@@ -483,7 +492,7 @@ return {
                     return mq.TLO.Me.Invis() and mq.TLO.Me.Sneaking()
                 end,
                 cond = function(self)
-                    return self.settings.DoHideSneak
+                    return RGMercUtils.GetSetting('DoHideSneak')
                 end,
                 custom_func = function(_)
                     if mq.TLO.Me.AbilityReady("hide") then RGMercUtils.DoCmd("/doability hide") end

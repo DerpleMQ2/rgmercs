@@ -109,7 +109,7 @@ function Module:Init()
     local className = mq.TLO.Me.Class.ShortName():lower()
     self:LoadSettings()
 
-    if className == "wiz" or className == "dru" then
+    if RGMercUtils.MyClassIs("wiz") or RGMercUtils.MyClassIs("dru") then
         self.TransportSpells                                                    = {}
         self.TransportSpells[RGMercConfig.Globals.CurLoadedChar]                = {}
         self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Class          = className
@@ -146,7 +146,7 @@ function Module:Init()
     self:CreatePorterList()
     self:GenerateFilteredPortsList()
 
-    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:GetColorForType(type)
@@ -181,6 +181,10 @@ function Module:GenerateFilteredPortsList()
         table.insert(self.TempSettings.FilteredList.SortedTabNames, k)
     end
     table.sort(self.TempSettings.FilteredList.SortedTabNames)
+end
+
+function Module:ShouldRender()
+    return #self.TempSettings.PorterList > 0
 end
 
 function Module:Render()
@@ -231,7 +235,6 @@ function Module:Render()
                                 RGMercUtils.DoCmd(string.format("/dex %s /casting \"%s\" -maxtries|10 -targetid|%d gem%d", selectedPorter, sv.Name, RGMercUtils.GetTargetID(),
                                     mq.TLO.Me.NumGems()))
                             else
-                                RGMercUtils.DoCmd("/dex " .. selectedPorter .. " /casting \"" .. sv.Name .. "\" -maxtries|10")
                                 RGMercUtils.DoCmd(string.format("/dex %s /casting \"%s\" -maxtries|10 gem%d", selectedPorter, sv.Name, mq.TLO.Me.NumGems()))
                             end
                         end

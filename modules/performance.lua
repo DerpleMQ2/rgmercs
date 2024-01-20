@@ -1,19 +1,19 @@
 -- Sample Performance Monitor Class Module
-local mq              = require('mq')
-local RGMercUtils     = require("utils.rgmercs_utils")
-local ImPlot          = require('ImPlot')
-local Set             = require('mq.Set')
+local mq                  = require('mq')
+local RGMercUtils         = require("utils.rgmercs_utils")
+local ImPlot              = require('ImPlot')
+local Set                 = require('mq.Set')
 
----@class ScrollingBuffer
+---@class ScrollingPlotBuffer
 ---@field MaxSize number
 ---@field Offset number
 ---@field DataX number[]
 ---@field DataY number[]
-local ScrollingBuffer = {}
+local ScrollingPlotBuffer = {}
 
 ---@param max_size? number
----@return ScrollingBuffer
-function ScrollingBuffer:new(max_size)
+---@return ScrollingPlotBuffer
+function ScrollingPlotBuffer:new(max_size)
     max_size = max_size or 2000
     local newObject = setmetatable({}, self)
     self.__index = self
@@ -26,7 +26,7 @@ end
 
 ---@param x number
 ---@param y number
-function ScrollingBuffer:AddPoint(x, y)
+function ScrollingPlotBuffer:AddPoint(x, y)
     if #self.DataX < self.MaxSize then
         table.insert(self.DataX, x)
         table.insert(self.DataY, y)
@@ -40,7 +40,7 @@ function ScrollingBuffer:AddPoint(x, y)
     end
 end
 
-function ScrollingBuffer:Erase()
+function ScrollingPlotBuffer:Erase()
     self.DataX = {}
     self.DataY = {}
 end
@@ -95,7 +95,6 @@ function Module:LoadSettings()
     if err or not config then
         RGMercsLogger.log_error("\ay[Performance Monitor]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
-        self.settings.MyCheckbox = false
         self:SaveSettings(false)
     else
         self.settings = config()
@@ -116,7 +115,11 @@ function Module:Init()
     RGMercsLogger.log_info("Performance Monitor Module Loaded.")
     self:LoadSettings()
 
-    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+end
+
+function Module:ShouldRender()
+    return true
 end
 
 function Module:Render()
@@ -130,7 +133,8 @@ function Module:Render()
         for _, data in pairs(self.FrameTimingData) do
             for idx, time in ipairs(data.frameTimes.DataY) do
                 -- is this entry visible?
-                local visible = data.frameTimes.DataX[idx] > os.clock() - self.settings.SecondsToStore and data.frameTimes.DataX[idx] < os.clock()
+                local visible = data.frameTimes.DataX[idx] > os.clock() - self.settings.SecondsToStore and
+                    data.frameTimes.DataX[idx] < os.clock()
                 if visible and time > self.GoalMaxFrameTime then
                     self.GoalMaxFrameTime = math.ceil(time / self.MaxFrameStep) * self.MaxFrameStep
                 end
@@ -152,7 +156,8 @@ function Module:Render()
                 local framData = self.FrameTimingData[module]
 
                 if framData then
-                    ImPlot.PlotLine(module, framData.frameTimes.DataX, framData.frameTimes.DataY, #framData.frameTimes.DataX,
+                    ImPlot.PlotLine(module, framData.frameTimes.DataX, framData.frameTimes.DataY,
+                        #framData.frameTimes.DataX,
                         self.settings.PlotFillLines and ImPlotLineFlags.Shaded or ImPlotLineFlags.None,
                         framData.frameTimes.Offset - 1)
                 end
@@ -163,7 +168,8 @@ function Module:Render()
     end
 
     if ImGui.CollapsingHeader("Config Options") then
-        self.settings.SecondsToStore, pressed = ImGui.SliderInt(self.DefaultConfig.SecondsToStore.DisplayName, self.settings.SecondsToStore, self.DefaultConfig.SecondsToStore.Min,
+        self.settings.SecondsToStore, pressed = ImGui.SliderInt(self.DefaultConfig.SecondsToStore.DisplayName,
+            self.settings.SecondsToStore, self.DefaultConfig.SecondsToStore.Min,
             self.DefaultConfig.SecondsToStore
             .Max,
             "%d s")
@@ -184,7 +190,14 @@ end
 function Module:OnFrameExec(module, frameTime)
     if not self.settings.EnablePerfMonitoring then return end
 
-    if not self.FrameTimingData[module] then self.FrameTimingData[module] = { mutexLock = false, lastFrame = os.clock(), frameTimes = ScrollingBuffer:new(), } end
+    if not self.FrameTimingData[module] then
+        self.FrameTimingData[module] = {
+            mutexLock = false,
+            lastFrame = os.clock(),
+            frameTimes =
+                ScrollingPlotBuffer:new(),
+        }
+    end
 
     self.FrameTimingData[module].lastFrame = os.clock()
     self.FrameTimingData[module].frameTimes:AddPoint(os.clock(), frameTime)

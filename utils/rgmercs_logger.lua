@@ -14,11 +14,12 @@ function actions.get_log_level() return currentLogLevel end
 function actions.set_log_level(level) currentLogLevel = level end
 
 local logLevels = {
-	['verbose'] = { level = 5, header = "\apVERBOSE\ax", },
-	['debug']   = { level = 4, header = "\amDEBUG  \ax", },
-	['info']    = { level = 3, header = "\aoINFO   \ax", },
-	['warn']    = { level = 2, header = "\ayWARN   \ax", },
-	['error']   = { level = 1, header = "\arERROR  \ax", },
+	['super_verbose'] = { level = 6, header = "\atSUPER\aw-\apVERBOSE\ax", },
+	['verbose']       = { level = 5, header = "\apVERBOSE\ax", },
+	['debug']         = { level = 4, header = "\amDEBUG  \ax", },
+	['info']          = { level = 3, header = "\aoINFO   \ax", },
+	['warn']          = { level = 2, header = "\ayWARN   \ax", },
+	['error']         = { level = 1, header = "\arERROR  \ax", },
 }
 
 local function getCallStack()
@@ -69,6 +70,10 @@ end
 
 function actions.log_verbose(output, ...)
 	log('verbose', output, ...)
+end
+
+function actions.log_super_verbose(output, ...)
+	log('super_verbose', output, ...)
 end
 
 return actions

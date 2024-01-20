@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      # Additional steps like build or test
+
+      - name: Create Release
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged)
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: dev-v${{ github.run_number }}
+          release_name: Development Release dev-v${{ github.run_number }}
+          draft: false
+          prerelease: true

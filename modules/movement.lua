@@ -16,7 +16,7 @@ Module.Constants               = {}
 Module.Constants.GGHZones      = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
 
 Module.DefaultConfig           = {
-    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = 60, Min = 10, Max = 150, },
+    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = 60, Min = 10, Max = 300, },
     ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false, },
     ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100, },
     ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
@@ -73,7 +73,7 @@ function Module:Init()
     RGMercsLogger.log_info("Chase Module Loaded.")
     self:LoadSettings()
     self.ModuleLoaded = true
-    return { settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
+    return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:ChaseOn(target)
@@ -118,6 +118,7 @@ function Module:CampOn()
     self.TempSettings.AutoCampY  = mq.TLO.Me.Y()
     self.TempSettings.AutoCampZ  = mq.TLO.Me.Z()
     self.TempSettings.CampZoneId = mq.TLO.Zone.ID()
+    RGMercUtils.DoCmd("/mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
     RGMercsLogger.log_info("\ayCamping On: (X: \at%d\ay ; Y: \at%d\ay)", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY)
 end
 
@@ -129,6 +130,7 @@ end
 function Module:CampOff()
     self.settings.ReturnToCamp = false
     self:SaveSettings(false)
+    RGMercUtils.DoCmd("/mapfilter campradius off")
 end
 
 function Module:DestoryCampfire()
@@ -216,6 +218,10 @@ function Module:Campfire(camptype)
     end
 end
 
+function Module:ShouldRender()
+    return true
+end
+
 function Module:Render()
     ImGui.Text("Chase Module")
 
@@ -260,7 +266,7 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if self.settings.ReturnToCamp then
+        if RGMercUtils.GetSetting('ReturnToCamp') then
             local me = mq.TLO.Me
             local distanceToCamp = RGMercUtils.GetDistance(me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0)
             ImGui.Text("Camp Location")
@@ -270,9 +276,11 @@ function Module:Render()
                 ImGui.Text(string.format("Distance to Camp: %d", distanceToCamp))
             end
             ImGui.Unindent()
-            if ImGui.SmallButton("Set New Camp Here") then
-                self:CampOn()
-            end
+        end
+
+        if ImGui.SmallButton("Set New Camp Here") then
+            self.settings.ReturnToCamp = true
+            self:CampOn()
         end
 
         local state, pressed = RGMercUtils.RenderOptionToggle("##chase_om", "Chase On", self.settings.ChaseOn)
@@ -298,7 +306,7 @@ function Module:ShouldFollow()
     local assistSpawn = RGMercUtils.GetMainAssistSpawn()
 
     return not mq.TLO.MoveTo.Moving() and
-        (not me.Casting.ID() or me.Class.ShortName():lower() == "brd") and
+        (not me.Casting.ID() or RGMercUtils.MyClassIs("brd")) and
         (RGMercUtils.GetXTHaterCount() == 0 or (assistSpawn() and assistSpawn.Distance() > self.settings.ChaseDistance))
 end
 
@@ -354,12 +362,12 @@ function Module:GiveTime(combat_state)
 
     if combat_state == "Downtime" then
         if RGMercUtils.ShouldShrink() then
-            RGMercUtils.UseItem(RGMercConfig:GetSettings().ShrinkItem, mq.TLO.Me.ID())
+            RGMercUtils.UseItem(RGMercUtils.GetSetting('ShrinkItem'), mq.TLO.Me.ID())
         end
 
         if RGMercUtils.ShouldMount() then
             RGMercsLogger.log_debug("\ayMounting...")
-            RGMercUtils.UseItem(RGMercConfig:GetSettings().MountItem, mq.TLO.Me.ID())
+            RGMercUtils.UseItem(RGMercUtils.GetSetting('MountItem'), mq.TLO.Me.ID())
         end
 
         if RGMercUtils.ShouldDismount() then
@@ -435,7 +443,7 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    if RGMercUtils.DoBuffCheck() and not RGMercConfig:GetSettings().PriorityHealing then
+    if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
         if mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and self.settings.MaintainCampfire then
             self:Campfire()
         end

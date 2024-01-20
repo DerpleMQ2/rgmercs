@@ -1,20 +1,23 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq           = require('mq')
+local RGMercUtils  = require("utils.rgmercs_utils")
 
-return {
-    ['Modes'] = {
-        ['Mori'] = 0,
-        ['Charm'] = 1,
-        ['TLP'] = 2,
-        ['Mez'] = 3,
+local _ClassConfig = {
+    _version          = "0.1a",
+    _author           = "Derple",
+    ['ModeChecks']    = {
+        IsMezzing = function() return true end,
+        IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
     },
-    ['ItemSets'] = {
+    ['Modes']         = {
+        'Mez',
+    },
+    ['ItemSets']      = {
         ['Epic'] = {
             "Staff of Eternal Eloquence",
             "Oculus of Persuasion",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']   = {
         ['AuraBuff1'] = {
             "Twincast Aura",
         },
@@ -543,6 +546,66 @@ return {
             "Ancient: Chaos Madness",
             "Ancient: Chaotic Visions",
         },
+        ['NukeSpell1'] = {
+            --- Nuke 1 -- >= LVL7
+            "Mindrend",
+            "Mindreap",
+            "Mindrift",
+            "Mindslash",
+            "Mindsunder",
+            "Mindcleave",
+            "Mindscythe",
+            "Mindblade",
+            "Spectral Assault",
+            "Polychaotic Assault",
+            "Multichromatic Assault",
+            "Polychromatic Assault",
+            "Colored Chaos",
+            "Psychosis",
+            "Madness of Ikkibi",
+            "Insanity",
+            "Dementing Visions",
+            "Dementia",
+            "Discordant Mind",
+            "Anarchy",
+            "Chaos Flux",
+            "Sanity Warp",
+            "Chaotic Feedback",
+            "Chromarcana",
+            "Ancient: Neurosis",
+            "Ancient: Chaos Madness",
+            "Ancient: Chaotic Visions",
+        },
+        ['NukeSpell2'] = {
+            --- Nuke 1 -- >= LVL7
+            "Mindrend",
+            "Mindreap",
+            "Mindrift",
+            "Mindslash",
+            "Mindsunder",
+            "Mindcleave",
+            "Mindscythe",
+            "Mindblade",
+            "Spectral Assault",
+            "Polychaotic Assault",
+            "Multichromatic Assault",
+            "Polychromatic Assault",
+            "Colored Chaos",
+            "Psychosis",
+            "Madness of Ikkibi",
+            "Insanity",
+            "Dementing Visions",
+            "Dementia",
+            "Discordant Mind",
+            "Anarchy",
+            "Chaos Flux",
+            "Sanity Warp",
+            "Chaotic Feedback",
+            "Chromarcana",
+            "Ancient: Neurosis",
+            "Ancient: Chaos Madness",
+            "Ancient: Chaotic Visions",
+        },
         ['RuneNuke'] = {
             --- RUNE - Nuke Fast >=LVL86
             "Chromatic Spike",
@@ -751,141 +814,635 @@ return {
             "Root",
         },
     },
-    ['Rotations'] = {
-        ['Tank'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+    ['RotationOrder'] = {
+        {
+            name = 'SelfBuff',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end,
+
+        },
+        {
+            name = 'GroupBuff',
+            timer = 60, -- only run every 60 seconds top.
+            targetId = function(self)
+                local groupIds = { mq.TLO.Me.ID(), }
+                local count = mq.TLO.Group.Members()
+                for i = 1, count do
+                    table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                end
+                return
+                    groupIds
+            end,
+            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end,
+        },
+        {
+            name = 'Debuff',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'Burn',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'DPS',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
+
+    },
+    ['Rotations']     = {
+        ['SelfBuff'] = {
+            {
+                name = "SelfHPBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "MezBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "SelfRune1",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "SelfRune2",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+            },
+            {
+                name = "Veil of Mindshadow",
+                type = "AA",
+                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByName(aaName) end,
+                cond = function(self, aaName) return RGMercUtils.SelfBuffAACheck(aaName) end,
+            },
+            {
+                name = "PetBuffSpell",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.ID()).ID() end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
+            },
+            {
+                name = "Azure Mind Crystal",
+                type = "AA",
+                active_cond = function(self, aaName) return mq.TLO.FindItem(aaName)() ~= nil end,
+                cond = function(self, aaName) return mq.TLO.Me.PctMana() > 90 and not mq.TLO.FindItem(aaName)() end,
+            },
+            {
+                name = "Gather Mana",
+                type = "AA",
+                active_cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName) return mq.TLO.Me.PctMana() < 60 end,
+            },
+            {
+                name = "AuraBuff1",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
+                cond = function(self, spell) return not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+            },
+            {
+                name = "AuraBuff2",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
+                cond = function(self, spell) return not RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+            },
+            {
+                name = "AuraBuff3",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
+                cond = function(self, spell) return RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+            },
+
+        },
+        ['GroupBuff'] = {
+            -- TODO : Macro group buff rotation never was hooked up ask Mori about this later.
+            {
+                name = "ManaRegen",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "HasteBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "GroupSpellShield",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "GroupDoTShield",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "GroupAuspiceBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "NdtBuff",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not RGMercUtils.GetSetting('DoNDTBuff') then return false end
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "SingleRune",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "GroupRune",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not self.DoGroupAbsorb then return false end
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
+            },
+            {
+                name = "AggroRune",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target, uiCheck)
+                    if not RGMercUtils.GetSetting('DoAggroRune') then return false end
+                    if not target or not target() then return false end
+
+                    if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
+
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                end,
             },
         },
         ['DPS'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+            {
+                name = "Glyph Spray",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
+                        RGMercUtils.GetMainAssistPctHPs() < 45 and RGMercUtils.GetMainAssistPctHPs() > 5
+                end,
+
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "Reactive Rune",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
+                        RGMercUtils.GetMainAssistPctHPs() < 45 and RGMercUtils.GetMainAssistPctHPs() > 5
+                end,
+
+            },
+            {
+                name = "Self Stasis",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30
+                end,
+
+            },
+            {
+                name = "Dimensional Instability",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30
+                end,
+
+            },
+            {
+                name = "Beguiler's Directed Banishment",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 40
+                end,
+
+            },
+            {
+                name = "Beguiler's Banishment",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 50 and
+                        mq.TLO.SpawnCount("npc radius 20")() > 2
+                end,
+
+            },
+            {
+                name = "Doppelganger",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 60
+                end,
+
+            },
+            {
+                name = "Phantasmal Opponent",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 60
+                end,
+
+            },
+            {
+                name = "Dimensional Shield",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 80
+                end,
+
+            },
+            {
+                name = "Arcane Whisper",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.PctAggro() >= 90
+                end,
+
+            },
+            {
+                name = "Silent Casting",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return mq.TLO.Me.PctAggro() >= 90
+                end,
+
+            },
+            {
+                name = "Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return true
+                end,
+
+            },
+            {
+                name = "TashSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
+                end,
+            },
+            {
+                name = "Bite of Tashani",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
+                end,
+
+            },
+            {
+                name = "TwinCast",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoTwincastDPS') and not RGMercUtils.BuffActiveByID(spell.ID()) and not RGMercUtils.BuffActiveByName("Improved Twincast") and
+                        not RGMercModules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID())
+                end,
+            },
+            {
+                name = "DoTSpell1",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoDot') and RGMercUtils.DetSpellCheck(spell)
+                end,
+            },
+            {
+                name = "DichoSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoDicho') and RGMercUtils.DetSpellCheck(spell)
+                end,
+            },
+            {
+                name = "NukeSpell1",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
+                end,
+            },
+            {
+                name = "NukeSpell2",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
+                end,
+            },
+            {
+                name = "ManaDrainSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return (mq.TLO.Target.CurrentMana() or 0) > 10
+                end,
             },
         },
-        ['Healer'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+        ['Burn'] = {
+            {
+                name = "Illusions of Grandeur",
+                type = "AA",
+                cond = function(self, aaName) return true end,
+
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "Spire of Enchantment",
+                type = "AA",
+                cond = function(self, aaName) return true end,
+
             },
-        },
-        ['Hybrid'] = {
-            ['Rotation'] = {
-                ['Burn'] = {
-                    {},
-                },
-                ['Debuff'] = {
-                    {},
-                },
-                ['Heal'] = {
-                    {},
-                },
-                ['DPS'] = {
-                    {},
-                },
-                ['Downtime'] = {
-                    {},
-                },
+            {
+                name = "Improved Twincast",
+                type = "AA",
+                cond = function(self, aaName) return true end,
+
             },
-            ['Spells'] = {
-                { name = "", gem = 1, },
-                { name = "", gem = 2, },
-                { name = "", gem = 3, },
-                { name = "", gem = 4, },
-                { name = "", gem = 5, },
-                { name = "", gem = 6, },
-                { name = "", gem = 7, },
-                { name = "", gem = 8, },
-                { name = "", gem = 9, },
-                { name = "", gem = 10, },
-                { name = "", gem = 11, },
-                { name = "", gem = 12, },
+            {
+                name = "Forceful Rejuvenation",
+                type = "AA",
+                cond = function(self, aaName) return true end,
+
+            },
+            {
+                name = "alculated Insanity",
+                type = "AA",
+                cond = function(self, aaName) return true end,
+
+            },
+            {
+                name = "Mental Contortion",
+                type = "AA",
+                cond = function(self, aaName) return RGMercUtils.IsNamed(mq.TLO.Target) end,
+
+            },
+            {
+                name = "Chromatic Haze",
+                type = "AA",
+                cond = function(self, aaName) return true end,
+
             },
         },
-        ['DefaultConfig'] = {
-            ['Mode'] = '1',
+        ['Debuff'] = {
+            {
+                name = "TashSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
+                end,
+            },
+            {
+                name = "Bite of Tashani",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
+                end,
+
+            },
+            {
+                name = "StripBuffSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoStripBuff') and mq.TLO.Target.Beneficial()
+                end,
+            },
+            {
+                name = "Enveloping Helix",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and RGMercUtils.GetXTHaterCount() > 2 and
+                        mq.TLO.Target.Slowed() == nil
+                end,
+            },
+            {
+                name = "Slowing Helix",
+                type = "AA",
+                cond = function(self, aaName)
+                    if mq.TLO.Target.ID() <= 0 then return false end
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
+                        (not RGMercUtils.NPCAAReady("Enveloping Helix", mq.TLO.Target.ID(), false) or
+                            RGMercUtils.GetXTHaterCount() > 2) and mq.TLO.Target.Slowed() == nil
+                end,
+            },
+            {
+                name = "CripSlowSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return (RGMercUtils.GetSetting('DoSlow') or RGMercUtils.GetSetting('DoCripple')) and RGMercUtils.DetSpellCheck(spell)
+                end,
+            },
+            {
+                name = "SlowSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell)
+                end,
+            },
+            {
+                name = "CrippleSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell)
+                end,
+            },
+            {
+                name = "ManaDrainSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.DetSpellCheck(spell) and mq.TLO.Target.CurrentMana() > 10
+                end,
+            },
         },
     },
+    ['Spells']        = {
+        {
+            gem = 1,
+            spells = {
+                { name = "MezSpell", },
+            },
+        },
+        {
+            gem = 2,
+            spells = {
+                { name = "MezAESpell", },
+            },
+        },
+        {
+            gem = 3,
+            spells = {
+                { name = "TashSpell", },
+            },
+        },
+        {
+            gem = 4,
+            spells = {
+                { name = "SlowSpell",      cond = function(self) return not RGMercUtils.CanUseAA("Slowing Helix") and mq.TLO.Me.Level() < 88 end, },
+                { name = "CripSlowSpell",  cond = function(self) return not RGMercUtils.CanUseAA("Slowing Helix") and mq.TLO.Me.Level() >= 88 end, },
+                { name = "ManaDrainSpell", cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 5,
+            spells = {
+                { name = "NdtBuff", },
+            },
+        },
+        {
+            gem = 6,
+            spells = {
+                { name = "NukeSpell1", },
+            },
+        },
+        {
+            gem = 7,
+            spells = {
+                { name = "DoTSpell1", },
+            },
+        },
+        {
+            gem = 8,
+            spells = {
+                { name = "CrippleSpell",   cond = function(self) return RGMercUtils.GetSetting('DoCripple') and mq.TLO.Me.Level() < 88 end, },
+                { name = "StripBuffSpell", cond = function(self) return RGMercUtils.GetSetting('DoStripBuff') end, },
+                { name = "NukeSpell2",     cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 9,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "ManaDot", cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 10,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "RuneNuke", cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 11,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "DebuffDot", cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 12,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "DichoSpell", cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 13,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "AllianceSpell",  cond = function(self) return RGMercUtils.GetSetting('DoAlliance') end, },
+                { name = "ManaDrainSpell", cond = function(self) return true end, },
+            },
+        },
+    },
+    ['DefaultConfig'] = {
+        ['Mode']          = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['DoLearners']    = { DisplayName = "Do Learners", Category = "Spells & Abilities", Tooltip = "Set to use the Learner's Aura instead of the Mana Regen Aura.", Default = false, },
+        ['DoTash']        = { DisplayName = "Do Tash", Category = "Spells & Abilities", Tooltip = "Cast Tash Spells", Default = true, },
+        ['DoTwincastDPS'] = { DisplayName = "Do Twincast DPS", Category = "Spells & Abilities", Tooltip = "Cast Twincast during DPS rotation", Default = true, },
+        ['DoDot']         = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
+        ['DoSlow']        = { DisplayName = "Cast Slow", Category = "Spells and Abilities", Tooltip = "Enable casting Slow spells.", Default = true, },
+        ['DoCripple']     = { DisplayName = "Cast Cripple", Category = "Spells and Abilities", Tooltip = "Enable casting Cripple spells.", Default = true, },
+        ['DoDicho']       = { DisplayName = "Cast Dicho", Category = "Spells and Abilities", Tooltip = "Enable casting Dicho spells.", Default = true, },
+        ['DoNDTBuff']     = { DisplayName = "Cast NDT", Category = "Spells and Abilities", Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).", Default = true, },
+        ['DoGroupAbsorb'] = { DisplayName = "Do Group Absorb", Category = "Spells and Abilities", Tooltip = "Enable casting the Group Absorb line with -Hate Proc.", Default = true, },
+        ['DoAggroRune']   = { DisplayName = "Do Aggro Rune", Category = "Spells and Abilities", Tooltip = "Enable casting the Tank Aggro Rune", Default = true, },
+        ['DoStripBuff']   = { DisplayName = "Do Strip Buffs", Category = "Spells and Abilities", Tooltip = "Enable casting buff canceler spells.", Default = true, },
+    },
 }
+
+return _ClassConfig
