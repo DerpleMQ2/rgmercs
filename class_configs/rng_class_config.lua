@@ -738,8 +738,6 @@ local _ClassConfig = {
         ["MoveSpells"] = {
             "Spirit of Falcons",
             "Spirit of Eagle",
-            "Pack Shrew",
-            "Spirit of the Shrew",
             "Spirit of Wolf",
         },
         ["Alliance"] = {
@@ -1211,7 +1209,7 @@ local _ClassConfig = {
                 type = "Ability",
                 tooltip = Tooltips.Taunt,
                 cond = function(self, abilityName)
-                    return RGMercUtils.IsTanking() and mq.TLO.Me.AbilityReady(abilityName)() and
+                    return mq.TLO.Me.AbilityReady(abilityName)() and
                         mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
                         RGMercUtils.GetTargetDistance() < 30
                 end,
@@ -1329,9 +1327,9 @@ local _ClassConfig = {
                 name = "Heartshot",
                 type = "Spell",
                 tooltip = Tooltips.Heartshot,
-                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) and self.settings.DoReagentArrow end,
+                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()
+                    return RGMercUtils.ManaCheck()and self.settings.DoReagentArrow
                 end,
             },
             {
@@ -1422,7 +1420,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.AEBlades,
                 cond = function(self)
-                    return self.settings.DoAoE and RGMercUtils.GetTargetDistance() > 50
+                    return self.settings.DoAoE and RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
                 end,
             },
             {
@@ -1430,7 +1428,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.FocusedBlades,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() > 50
+                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
                 end,
             },
             {
@@ -1438,7 +1436,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.ReflexSlashHeal,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() > 50
+                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
                 end,
             },
         },
@@ -1481,7 +1479,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.JoltingKicks,
                 active_cond = function(self) return not RGMercUtils.IsTanking() and mq.TLO.Me.PctAggro() > 30 end,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.GetTargetDistance() <= 50
+                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.GetTargetDistance() <= 50 and RGMercConfig.DoMelee
                 end,
             },
             {
@@ -1506,7 +1504,7 @@ local _ClassConfig = {
                 name = "Chamelon's Gift",
                 type = "AA",
                 tooltip = Tooltips.CG,
-                active_cond = function(self, spell) return not RGMercUtils.IsTanking() and RGMercUtils.DetAACheck(2037) end,
+                active_cond = function(self, spell) return not RGMercUtils.IsTanking() end,
                 cond = function(self, spell)
                     return mq.TLO.Me.PctAggro() > 70 and mq.TLO.Me.PctHPs() < 50 and RGMercUtils.DetAACheck(2037)
                 end,
