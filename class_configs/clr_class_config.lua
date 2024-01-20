@@ -1214,8 +1214,8 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     local aaSpell = mq.TLO.Spell(mq.TLO.Me.AltAbility("Saint's Unity")() and mq.TLO.Me.AltAbility("Saint's Unity").Spell.Trigger(1).BaseName() or "")
                     local aaLevel = aaSpell and aaSpell.Level() or 0
-                    return aaLevel < spell.Level() and RGMercUtils.GetSetting('DoDruid') and spell.Stacks() and RGMercUtils.CanUseAA('Spirit Mastery') and
-                        not RGMercUtils.BuffActiveByID(spell.ID())
+                    return aaLevel < (spell.Level() or 0) and RGMercUtils.GetSetting('DoDruid') and (spell.Stacks() or false) and RGMercUtils.CanUseAA('Spirit Mastery') and
+                        not RGMercUtils.BuffActiveByID(spell.ID() or 0)
                 end,
             },
             {
