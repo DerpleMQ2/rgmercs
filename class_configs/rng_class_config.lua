@@ -84,7 +84,6 @@ local Tooltips    = {
     SCF                 = "AA: Group Buff that drains Mana or Endurance and Twin Casts Spells or Abilities Depending on Class",
     SotP                = "AA: Increase Max HP and Dex Cap + Decreased Hatred Generation + Increased Melee Proc Chance + Increased Melee Minimum Damage",
     EoN                 = "AA: High Chance to Dispel Your Target",
-    RangedMode          = "Skill: Use /autofire instead of using Melee"
 }
 
 -- helper function for advanced logic to see if we want to use Windstalker's Unity
@@ -738,6 +737,8 @@ local _ClassConfig = {
         ["MoveSpells"] = {
             "Spirit of Falcons",
             "Spirit of Eagle",
+            "Pack Shrew",
+            "Spirit of the Shrew",
             "Spirit of Wolf",
         },
         ["Alliance"] = {
@@ -1095,18 +1096,18 @@ local _ClassConfig = {
                 name = "AgroReducerBuff",
                 type = "Spell",
                 tooltip = Tooltips.AgroReducerBuff,
-                active_cond = function(self, spell) return not RGMercUtils.IsTanking() end,
+                active_cond = function(self, spell) return self.settings.DoAgroReducerBuff end,
                 cond = function(self, spell)
-                    return self.settings.DoAgroReducerBuff and RGMercUtils.SelfBuffCheck(spell)
+                    return not RGMercUtils.IsTanking() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "AgroBuff",
                 type = "Spell",
                 tooltip = Tooltips.AgroBuff,
-                active_cond = function(self, spell) return RGMercUtils.IsTanking() end,
+                active_cond = function(self, spell) return not self.settings.DoAgroReducerBuff end,
                 cond = function(self, spell)
-                    return not self.settings.DoAgroReducerBuff and RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.IsTanking() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1119,21 +1120,19 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Poison Arrows",
+                name = "PoisonArrow",
                 type = "AA",
                 tooltip = Tooltips.PoisonArrow,
-                active_cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
                 cond = function(self, spell)
                     return RGMercUtils.DetAACheck(927) and self.settings.DoPoisonArrow
                 end,
             },
             {
-                name = "Flaming Arrows",
+                name = "FlamingArrow",
                 type = "AA",
                 tooltip = Tooltips.FlamingArrow,
-                active_cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetAACheck(289) and (mq.TLO.Me.Level() < 86 or not self.settings.DoPoisonArrow)
+                    return RGMercUtils.DetAACheck(289) and not self.settings.DoPoisonArrow
                 end,
             },
         },
@@ -1191,7 +1190,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.BowDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercConfig.DoMelee
+                    return not mq.TLO.Me.ActiveDisc.ID() and not self.settings.DoMelee
                 end,
             },
             {
@@ -1199,7 +1198,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.MeleeDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercConfig.DoMelee
+                    return not mq.TLO.Me.ActiveDisc.ID() and self.settings.DoMelee
                 end,
             },
         },
@@ -1209,7 +1208,7 @@ local _ClassConfig = {
                 type = "Ability",
                 tooltip = Tooltips.Taunt,
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and
+                    return RGMercUtils.IsTanking() and mq.TLO.Me.AbilityReady(abilityName)() and
                         mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
                         RGMercUtils.GetTargetDistance() < 30
                 end,
@@ -1287,16 +1286,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Ranged Mode",
-                type = "Ability",
-                tooltip = Tooltips.RangedMode,
-                active_cond = function(self, combat_state) return combat_state == 'Combat' and not RGMercConfig.DoMelee end,
-                cond = function(self)
-                    mq.cmd('/squelch face')
-                    mq.cmd('/timed 4 /autofire on')
-                end,
-            },
-            {
                 name = "CalledShotsArrow",
                 type = "Spell",
                 tooltip = Tooltips.CalledShotsArrow,
@@ -1327,9 +1316,9 @@ local _ClassConfig = {
                 name = "Heartshot",
                 type = "Spell",
                 tooltip = Tooltips.Heartshot,
-                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
+                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) and self.settings.DoReagentArrow end,
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()and self.settings.DoReagentArrow
+                    return RGMercUtils.ManaCheck()
                 end,
             },
             {
@@ -1420,7 +1409,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.AEBlades,
                 cond = function(self)
-                    return self.settings.DoAoE and RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
+                    return self.settings.DoAoE and RGMercUtils.GetTargetDistance() > 50
                 end,
             },
             {
@@ -1428,7 +1417,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.FocusedBlades,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
+                    return RGMercUtils.GetTargetDistance() > 50
                 end,
             },
             {
@@ -1436,7 +1425,15 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.ReflexSlashHeal,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
+                    return RGMercUtils.GetTargetDistance() > 50
+                end,
+            },
+            {
+                name = "EndRegenDisc",
+                type = "Disc",
+                tooltip = Tooltips.EndRegenDisc,
+                cond = function(self)
+                    return not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.PctEndurance < 30
                 end,
             },
         },
@@ -1479,7 +1476,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.JoltingKicks,
                 active_cond = function(self) return not RGMercUtils.IsTanking() and mq.TLO.Me.PctAggro() > 30 end,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.GetTargetDistance() <= 50 and RGMercConfig.DoMelee
+                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.GetTargetDistance() <= 50
                 end,
             },
             {
@@ -1504,7 +1501,7 @@ local _ClassConfig = {
                 name = "Chamelon's Gift",
                 type = "AA",
                 tooltip = Tooltips.CG,
-                active_cond = function(self, spell) return not RGMercUtils.IsTanking() end,
+                active_cond = function(self, spell) return not RGMercUtils.IsTanking() and RGMercUtils.DetAACheck(2037) end,
                 cond = function(self, spell)
                     return mq.TLO.Me.PctAggro() > 70 and mq.TLO.Me.PctHPs() < 50 and RGMercUtils.DetAACheck(2037)
                 end,
