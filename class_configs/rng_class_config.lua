@@ -84,6 +84,7 @@ local Tooltips    = {
     SCF                 = "AA: Group Buff that drains Mana or Endurance and Twin Casts Spells or Abilities Depending on Class",
     SotP                = "AA: Increase Max HP and Dex Cap + Decreased Hatred Generation + Increased Melee Proc Chance + Increased Melee Minimum Damage",
     EoN                 = "AA: High Chance to Dispel Your Target",
+    RangedMode          = "Skill: Use /autofire instead of using Melee"
 }
 
 -- helper function for advanced logic to see if we want to use Windstalker's Unity
@@ -1096,18 +1097,18 @@ local _ClassConfig = {
                 name = "AgroReducerBuff",
                 type = "Spell",
                 tooltip = Tooltips.AgroReducerBuff,
-                active_cond = function(self, spell) return self.settings.DoAgroReducerBuff end,
+                active_cond = function(self, spell) return not RGMercUtils.IsTanking() end,
                 cond = function(self, spell)
-                    return not RGMercUtils.IsTanking() and RGMercUtils.SelfBuffCheck(spell)
+                    return self.settings.DoAgroReducerBuff and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "AgroBuff",
                 type = "Spell",
                 tooltip = Tooltips.AgroBuff,
-                active_cond = function(self, spell) return not self.settings.DoAgroReducerBuff end,
+                active_cond = function(self, spell) return RGMercUtils.IsTanking() end,
                 cond = function(self, spell)
-                    return RGMercUtils.IsTanking() and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.settings.DoAgroReducerBuff and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1120,19 +1121,21 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "PoisonArrow",
+                name = "Poison Arrows",
                 type = "AA",
                 tooltip = Tooltips.PoisonArrow,
+                active_cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
                 cond = function(self, spell)
                     return RGMercUtils.DetAACheck(927) and self.settings.DoPoisonArrow
                 end,
             },
             {
-                name = "FlamingArrow",
+                name = "Flaming Arrows",
                 type = "AA",
                 tooltip = Tooltips.FlamingArrow,
+                active_cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetAACheck(289) and not self.settings.DoPoisonArrow
+                    return RGMercUtils.DetAACheck(289) and (mq.TLO.Me.Level() < 86 or not self.settings.DoPoisonArrow)
                 end,
             },
         },
@@ -1190,7 +1193,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.BowDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and not self.settings.DoMelee
+                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercConfig.DoMelee
                 end,
             },
             {
@@ -1198,7 +1201,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.MeleeDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and self.settings.DoMelee
+                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercConfig.DoMelee
                 end,
             },
         },
@@ -1283,6 +1286,16 @@ local _ClassConfig = {
                 active_cond = function(self, combat_state) return combat_state ~= 'Combat' and self.settings.DoOpener end,
                 cond = function(self, spell)
                     return RGMercUtils.DetSpellCheck(spell) and self.settings.DoReagentArrow
+                end,
+            },
+            {
+                name = "Ranged Mode",
+                type = "Ability",
+                tooltip = Tooltips.RangedMode,
+                active_cond = function(self, combat_state) return combat_state == 'Combat' and not RGMercConfig.DoMelee end,
+                cond = function(self)
+                    mq.cmd('/squelch face')
+                    mq.cmd('/timed 4 /autofire on')
                 end,
             },
             {
@@ -1409,7 +1422,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.AEBlades,
                 cond = function(self)
-                    return self.settings.DoAoE and RGMercUtils.GetTargetDistance() > 50
+                    return self.settings.DoAoE and RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
                 end,
             },
             {
@@ -1417,7 +1430,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.FocusedBlades,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() > 50
+                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
                 end,
             },
             {
@@ -1425,9 +1438,17 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.ReflexSlashHeal,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() > 50
+                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
                 end,
-            }, --]]
+            },
+            {
+                name = "EndRegenDisc",
+                type = "Disc",
+                tooltip = Tooltips.EndRegenDisc,
+                cond = function(self)
+                    return not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.PctEndurance < 30
+                end,
+            },
         },
         ['Defense'] = {
             {
@@ -1620,7 +1641,6 @@ local _ClassConfig = {
         ['DoReagentArrow']    = { DisplayName = "Use Reagent Arrow", Category = "Spells and Abilities", Tooltip = "Toggle usage of Spells and Openers that require Reagent arrows.", Default = false, },
         ['DoAgroReducerBuff'] = { DisplayName = "Cast Agro Reducer Buff", Category = "Spells and Abilities", Tooltip = "Use Agro Reduction Buffs.", Default = true, },
         ['HPStopDOT']         = { DisplayName = "Mob HP to stop DoTs", Category = "Spells and Abilities", Tooltip = "Enemy %HP to stop casting dots.", Default = 30, Min = 1, Max = 100, },
-
     },
 }
 
