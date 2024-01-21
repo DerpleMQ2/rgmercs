@@ -87,9 +87,19 @@ Bind.Handlers     = {
                 end
             end
 
-            printf("\nClass Specific Commands Help\n------------\n")
-            for c, d in pairs(RGMercModules:ExecModule("Class", "GetClassConfig").CommandHandlers or {}) do
-                printf("%-20s - Usage: %-20s | %s", c, d.usage, d.about)
+            local moduleCommands = RGMercModules:ExecAll("GetCommandHandlers")
+
+            for _, info in pairs(moduleCommands) do
+                local printHeader = true
+                if info.CommandHandlers then
+                    for c, d in pairs(info.CommandHandlers or {}) do
+                        if printHeader then
+                            printf("\n%s Specific Commands Help\n------------\n", info.module)
+                            printHeader = false
+                        end
+                        printf("%-20s - Usage: %-20s | %s", c, d.usage, d.about)
+                    end
+                end
             end
         end,
     },

@@ -217,6 +217,10 @@ function Module:DoGetState()
     return "Enabled"
 end
 
+function Module:GetCommandHandlers()
+    return { module = self._name, CommandHandlers = {}, }
+end
+
 ---@param cmd string
 ---@param ... string
 ---@return boolean

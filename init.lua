@@ -151,11 +151,12 @@ local function RGMercsGUI()
 
         if shouldDrawGUI then
             local pressed
-            ImGui.Image(derpImg:GetTextureID(), ImVec2(40, 40))
+            ImGui.Image(derpImg:GetTextureID(), ImVec2(60, 60))
             ImGui.SameLine()
-            ImGui.Text(string.format("RGMercs [%s/%s] by: %s running for %s (%s)\nBuild: %s", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
+            ImGui.Text(string.format("RGMercs [%s/%s] by: %s\nLoaded Char: %s\nClass Config: %s\nBuild: %s", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
                 RGMercConfig.Globals.CurLoadedChar,
-                RGMercConfig.Globals.CurLoadedClass, GitCommit.commitId or "None"))
+                RGMercModules:ExecModule("Class", "GetVersionString"),
+                GitCommit.commitId or "None"))
 
 
             if RGMercConfig.Globals.PauseMain then

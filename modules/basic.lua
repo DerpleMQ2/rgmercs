@@ -83,6 +83,10 @@ function Module:DoGetState()
     return "Running..."
 end
 
+function Module:GetCommandHandlers()
+    return { module = self._name, CommandHandlers = {}, }
+end
+
 ---@param cmd string
 ---@param ... string
 ---@return boolean

@@ -25,6 +25,44 @@ Module.DefaultConfig           = {
     ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
 }
 
+Module.CommandHandlers         = {
+    chaseon = {
+        usage = "/rgl chaseon <name?>",
+        about = "Chase your current target or <name>",
+        handler = function(self, params)
+            self:ChaseOn(params)
+        end,
+    },
+    chaseoff = {
+        usage = "/rgl chaseoff",
+        about = "Turn Chasing Off",
+        handler = function(self, _)
+            self:ChaseOff()
+        end,
+    },
+    campon = {
+        usage = "/rgl campon",
+        about = "Set a camp here",
+        handler = function(self, _)
+            self:CampOn()
+        end,
+    },
+    campoff = {
+        usage = "/rgl campoff",
+        about = "Clear your camp",
+        handler = function(self, _)
+            self:CampOff()
+        end,
+    },
+    go2ggh = {
+        usage = "/rgl go2ggh",
+        about = "Go to Guild Hall",
+        handler = function(self, _)
+            self:Go2GGH()
+        end,
+    },
+}
+
 Module.DefaultCategories       = Set.new({})
 for _, v in pairs(Module.DefaultConfig) do
     if v.Type ~= "Custom" then
@@ -455,6 +493,10 @@ function Module:DoGetState()
     return "Running..."
 end
 
+function Module:GetCommandHandlers()
+    return { module = self._name, CommandHandlers = self.CommandHandlers, }
+end
+
 ---@param cmd string
 ---@param ... string
 ---@return boolean
@@ -462,20 +504,8 @@ function Module:HandleBind(cmd, ...)
     local params = ...
     local handled = false
 
-    if cmd:lower() == "chaseon" then
-        self:ChaseOn(params)
-        handled = true
-    elseif cmd:lower() == "chaseoff" then
-        self:ChaseOff()
-        handled = true
-    elseif cmd:lower() == "campon" then
-        self:CampOn()
-        handled = true
-    elseif cmd:lower() == "campoff" then
-        self:CampOff()
-        handled = true
-    elseif cmd:lower() == "go2ggh" then
-        self:Go2GGH()
+    if self.CommandHandlers[cmd:lower()] ~= nil then
+        self.CommandHandlers[cmd:lower()].hander(self, params)
         handled = true
     end
 

@@ -1,7 +1,8 @@
 -- Sample Basic Class Module
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
-local Set         = require("mq.Set")
+local mq                 = require('mq')
+local RGMercUtils        = require("utils.rgmercs_utils")
+local Set                = require("mq.Set")
+local RGMercsClassLoader = require('utils.rgmercs_classloader')
 require('utils.rgmercs_datatypes')
 
 local Module                              = { _version = '0.1a', _name = "Class", _author = 'Derple', }
@@ -48,23 +49,8 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    local custom_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir,
-        RGMercConfig.Globals.CurLoadedClass:lower())
-
-    if RGMercUtils.file_exists(custom_config_file) then
-        RGMercsLogger.log_info("Loading Custom Core Class Config: %s", custom_config_file)
-        local config, err = loadfile(custom_config_file)
-        if not config or err then
-            RGMercsLogger.log_error("Failed to Load Custom Core Class Config: %s", custom_config_file)
-        else
-            self.ClassConfig = config()
-        end
-    end
-
-    if not self.ClassConfig then
-        self.ClassConfig = require(string.format("class_configs.%s_class_config",
-            RGMercConfig.Globals.CurLoadedClass:lower()))
-    end
+    -- load base configurations
+    self.ClassConfig = RGMercsClassLoader.load(RGMercConfig.Globals.CurLoadedClass)
 
     Module.DefaultCategories = Set.new({})
     for _, v in pairs(self.ClassConfig.DefaultConfig or {}) do
@@ -706,6 +692,15 @@ function Module:DoGetState()
 
     return string.format("Class(%s)\n%s\n%s\n%s\n%s", RGMercConfig.Globals.CurLoadedClass, actionMap, spellLoadout,
         rotationStates, state)
+end
+
+function Module:GetVersionString()
+    if not self.ClassConfig then return "Unknown" end
+    return string.format("%s %s by %s%s", RGMercConfig.Globals.CurLoadedClass, self.ClassConfig._version, self.ClassConfig._author, self.ClassConfig.IsCustom and " [Custom]" or "")
+end
+
+function Module:GetCommandHandlers()
+    return { module = self._name, CommandHandlers = self.ClassConfig.CommandHandlers, }
 end
 
 ---@param cmd string

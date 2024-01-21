@@ -555,6 +555,10 @@ function Module:DoGetState()
     return "TODO"
 end
 
+function Module:GetCommandHandlers()
+    return { module = self._name, CommandHandlers = {}, }
+end
+
 ---@param cmd string
 ---@param ... string
 ---@return boolean
