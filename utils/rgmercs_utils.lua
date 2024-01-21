@@ -1100,6 +1100,26 @@ function Utils.GetEntryConditionArg(map, entry)
     return condArg
 end
 
+---@param caller self
+---@param resolvedActionMap table
+---@param entry table
+---@param targetId integer
+---@return boolean
+function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
+    local condArg = Utils.GetEntryConditionArg(resolvedActionMap, entry)
+    local condTarg = mq.TLO.Spawn(targetId)
+    local pass = false
+    if condArg ~= nil then
+        pass = entry.cond(caller, condArg, condTarg, false)
+    end
+
+    RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
+        entry.name, entry.type, condArg or "None",
+        condTarg.CleanName() or "None", Utils.BoolToSColortring(pass))
+
+    return pass
+end
+
 ---@param caller self #caller's self object to pass back into class config conditions
 ---@param rotationTable table #rotation table to run through
 ---@param targetId integer # target to cast on
@@ -1118,12 +1138,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
             RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             lastStepIdx = idx
             if entry.cond then
-                local condArg = Utils.GetEntryConditionArg(resolvedActionMap, entry)
-                local condTarg = mq.TLO.Spawn(targetId)
-                local pass = entry.cond(caller, condArg, condTarg, false)
-                RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
-                    entry.name, entry.type, condArg,
-                    condTarg.CleanName() or "None", Utils.BoolToString(pass))
+                local pass = Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
                 if pass == true then
                     local res = Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
                     if res == true then
@@ -1207,6 +1222,12 @@ end
 ---@return string
 function Utils.BoolToString(b)
     return b and "TRUE" or "FALSE"
+end
+
+---@param b boolean
+---@return string
+function Utils.BoolToSColortring(b)
+    return b and "\agTRUE" or "\arFALSE"
 end
 
 ---Returns a setting from either the global or a module setting table.
