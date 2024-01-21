@@ -211,6 +211,9 @@ function Module:OnZone()
     -- Zone Handler
 end
 
+function Module:OnCombatModeChanged()
+end
+
 function Module:DoGetState()
     if not self.settings.EnablePerfMonitoring then return "Disabled" end
 

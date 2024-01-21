@@ -57,15 +57,16 @@ end
 
 function Module:ExecAll(fn, ...)
     local ret = {}
-    for n, m in pairs(self.modules) do
+    for _, name in pairs(self.module_order) do
         local startTime = os.clock() * 1000
-        local r = m[fn](m, ...)
-        ret[n] = r
+        local module = self.modules[name]
+        local r = module[fn](module, ...)
+        ret[name] = r
 
         if fn == "GiveTime" then
             local frameTime = (os.clock() * 1000) - startTime
             if self.modules.Performance then
-                self.modules.Performance:OnFrameExec(n, frameTime)
+                self.modules.Performance:OnFrameExec(name, frameTime)
             end
         end
     end

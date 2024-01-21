@@ -41,17 +41,26 @@ local PullStateDisplayStrings = {
 local PullStatesIDToName      = {}
 for k, v in pairs(PullStates) do PullStatesIDToName[v] = k end
 
-Module.TempSettings.PullState  = PullStates.PULL_IDLE
+Module.TempSettings.PullState          = PullStates.PULL_IDLE
 
-Module.Constants               = {}
-Module.Constants.PullModes     = {
+Module.Constants                       = {}
+Module.Constants.PullModes             = {
     "Normal",
     "Chain",
     "Hunt",
     "Farm",
 }
 
-Module.Constants.PullAbilities = {
+Module.Constants.PullAbilities         = {
+    {
+        id = "Face",
+        Type = "Special",
+        AbilityRange = 5,
+        DisplayName = "Face Pull",
+        cond = function(self)
+            return true
+        end,
+    },
     {
         id = "PetPull",
         Type = "Special",
@@ -63,19 +72,22 @@ Module.Constants.PullAbilities = {
     },
     {
         id = "Taunt",
-        Type = "Ability",
+        Type = "Spell",
         DisplayName = "Taunt",
         AbilityRange = 10,
         cond = function(self)
-            return mq.TLO.Me
-                .Ability("Taunt")() ~= nil
+            return mq.TLO.Me.Skill("Taunt")() > 0
         end,
     },
-    { id = "Ranged", Type = "Special", DisplayName = "Ranged", cond = function(self) return mq.TLO.Me.Inventory("ranged")() ~= nil end, },
+    {
+        id = "Ranged",
+        Type = "Special",
+        DisplayName = "Ranged",
+        cond = function(self) return (mq.TLO.Me.Inventory("ranged").Type() or ""):lower() == "bow" end,
+    },
 }
 
-local PullAbilityIDToName      = {}
-for k, v in ipairs(Module.Constants.PullAbilities) do PullAbilityIDToName[v.id] = k end
+local PullAbilityIDToName              = {}
 
 Module.TempSettings.ValidPullAbilities = {}
 
@@ -140,11 +152,28 @@ function Module:LoadSettings()
 
     -- Setup Defaults
     self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+end
 
-    for _, v in ipairs(Module.Constants.PullAbilities) do
+function Module:OnCombatModeChanged()
+    self.TempSettings.ValidPullAbilities = {}
+
+    for k, v in ipairs(Module.Constants.PullAbilities) do
         if not v.cond or v.cond(self) then
-            table.insert(self.TempSettings.ValidPullAbilities, v.DisplayName)
+            local displayName = v.DisplayName
+            if type(displayName) == 'function' then displayName = displayName() end
+            table.insert(self.TempSettings.ValidPullAbilities, displayName)
         end
+        PullAbilityIDToName[v.id] = k
+    end
+
+    -- pull in class specific configs.
+    for k, v in ipairs(RGMercModules:ExecModule("Class", "GetPullAbilities")) do
+        if not v.cond or v.cond(self) then
+            local displayName = v.DisplayName
+            if type(displayName) == 'function' then displayName = displayName() end
+            table.insert(self.TempSettings.ValidPullAbilities, displayName)
+        end
+        PullAbilityIDToName[v.id] = k
     end
 end
 
@@ -1034,6 +1063,29 @@ function Module:GiveTime(combat_stateModule)
                 RGMercUtils.DoCmd("/squelch /pet back off")
                 mq.delay("1s", function() return (mq.TLO.Pet.PlayerState() or 0) == 0 end)
                 RGMercUtils.DoCmd("/squelch /pet follow")
+            elseif self.settings.PullAbility == PullAbilityIDToName.Face then -- Face pull
+                -- Make sure we're looking straight ahead at our mob and delay
+                -- until we're facing them.
+                RGMercUtils.DoCmd("/look 0")
+
+                mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
+
+                -- We will continue to fire arrows until we aggro our target
+                while not successFn(self) do
+                    startingXTargs = RGMercUtils.GetXTHaterIDs()
+                    mq.doevents()
+
+                    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", pullID, pullAbility.AbilityRange, "off")
+
+                    if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
+                        break
+                    end
+
+                    if self:CheckForAbort(pullID) then
+                        break
+                    end
+                    mq.delay(10)
+                end
             elseif self.settings.PullAbility == PullAbilityIDToName.Ranged then -- Ranged pull
                 -- Make sure we're looking straight ahead at our mob and delay
                 -- until we're facing them.
@@ -1064,10 +1116,14 @@ function Module:GiveTime(combat_stateModule)
 
                     if pullAbility.Type:lower() == "ability" then
                         if mq.TLO.Me.AbilityReady(pullAbility.id) then
-                            RGMercUtils.UseAbility(pullAbility.id)
+                            local abilityName = pullAbility.AbilityName
+                            if type(abilityName) == 'function' then abilityName = abilityName() end
+                            RGMercUtils.UseAbility(abilityName)
                         end
                     elseif pullAbility.Type():lower() == "spell" then
-                        RGMercUtils.UseSpell(pullAbility.id, pullID, true)
+                        local abilityName = pullAbility.AbilityName
+                        if type(abilityName) == 'function' then abilityName = abilityName() end
+                        RGMercUtils.UseSpell(abilityName, pullID, false)
                     end
 
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then

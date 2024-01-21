@@ -488,6 +488,9 @@ function Module:GiveTime(combat_state)
     end
 end
 
+function Module:OnCombatModeChanged()
+end
+
 function Module:DoGetState()
     -- Reture a reasonable state if queried
     return "Running..."

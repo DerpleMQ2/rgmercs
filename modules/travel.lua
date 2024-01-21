@@ -268,6 +268,9 @@ function Module:OnZone()
     -- Zone Handler
 end
 
+function Module:OnCombatModeChanged()
+end
+
 function Module:DoGetState()
     -- Reture a reasonable state if queried
     return "Running..."

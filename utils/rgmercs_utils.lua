@@ -2604,6 +2604,10 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
     return resolvedActionMap, spellLoadOut
 end
 
+function Utils.GetResolvedActionMapItem(action)
+    return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", action)
+end
+
 function Utils.GetDynamicTooltipForSpell(action)
     local resolvedItem = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", action)
 

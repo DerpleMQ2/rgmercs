@@ -147,6 +147,11 @@ function Module:SetCombatMode(mode)
     if self.ClassConfig.OnModeChange then
         self.ClassConfig.OnModeChange(self, mode)
     end
+
+    RGMercModules:ExecAll("OnCombatModeChanged")
+end
+
+function Module:OnCombatModeChanged()
 end
 
 function Module:ShouldRender()
@@ -271,6 +276,12 @@ end
 function Module:GetClassModeName()
     if not self.settings or not self.ClassConfig then return "None" end
     return self.ClassConfig.Modes[self.settings.Mode] or "None"
+end
+
+---@return table
+function Module:GetPullAbilities()
+    if not self.ClassConfig then return {} end
+    return self.ClassConfig.PullAbilities or {}
 end
 
 ---@param mode string
