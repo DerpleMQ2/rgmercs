@@ -916,7 +916,7 @@ return {
         {
             gem = 1,
             spells = {
-                { name_func = function(self) return string.format("%sClaw", self:GetClassModeName()) end, },
+                { name_func = function(self) return string.format("%sClaw", self:GetClassModeName()) end, }, -- Returning ComboClaw
                 { name = "IceClaw", },
                 { name = "FireClaw", },
                 { name = "MagicClaw", },
@@ -926,8 +926,8 @@ return {
         {
             gem = 2,
             spells = {
-                { name_func = function(self) return string.format("%sEtherealNuke", self:GetClassModeName()) end, },
-                { name_func = function(self) return string.format("%sNuke", self:GetClassModeName()) end, },
+                { name_func = function(self) return string.format("%sEtherealNuke", self:GetClassModeName()) end, }, -- Returning ComboEtherealNuke
+                { name_func = function(self) return string.format("%sNuke", self:GetClassModeName()) end, }, -- Returning ComboNuke
                 { name = "FireEtherealNuke", },
                 { name = "FireNuke", },
             },
@@ -1020,5 +1020,6 @@ return {
         ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['JoltAggro']    = { DisplayName = "Jolt Aggro %", Category = "Combat", Tooltip = "Aggro at which to use Jolt", Default = 65, Min = 1, Max = 100, },
         ['WeaveAANukes'] = { DisplayName = "Weave AA Nukes", Category = "Combat", Tooltip = "Weave in AA Nukes", Default = true, },
+        ['DoManaBurn'] = { DisplayName = "Do Mana Burn", Category = "Combat", Tooltip = "Use Mana Burn AA", Default = true, },
     },
 }

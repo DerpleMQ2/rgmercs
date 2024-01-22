@@ -389,7 +389,8 @@ return {
             {
                 name = "Vision",
                 type = "Disc",
-                cond = function(self, discSpell)
+                cond = function(self, discSpell)  -- discSpell is being passed as userdata
+                    local discSpell = mq.TLO.Spell(discSpell)() -- Have to create a variable and add ()
                     return RGMercUtils.SongActive(discSpell)
                 end,
             },
