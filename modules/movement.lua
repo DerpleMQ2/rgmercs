@@ -508,7 +508,7 @@ function Module:HandleBind(cmd, ...)
     local handled = false
 
     if self.CommandHandlers[cmd:lower()] ~= nil then
-        self.CommandHandlers[cmd:lower()].hander(self, params)
+        self.CommandHandlers[cmd:lower()].handler(self, params)
         handled = true
     end
 
