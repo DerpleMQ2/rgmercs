@@ -33,7 +33,7 @@ local _ClassConfig = {
                 if discSpell and discSpell() and RGMercUtils.PCDiscReady(discSpell) then
                     RGMercUtils.UseDisc(discSpell, RGMercUtils.GetTargetID())
                 else
-                    RGMercsLogger.log_error("\ar COOL DOWN \ag >> \aw ${missall} \ag << ")
+                    RGMercsLogger.log_error("\ar COOL DOWN \ag >> \aw missall \ag << ")
                 end
                 return true
             end,
