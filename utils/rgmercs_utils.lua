@@ -1100,24 +1100,47 @@ function Utils.GetEntryConditionArg(map, entry)
     return condArg
 end
 
+---@param logInfo string #appended to logs for tracing
+---@param fn any
+---@param ... any
+---@return any
+function Utils.SafeCallFunc(logInfo, fn, ...)
+    if not fn then return true end -- no condition func == pass
+    local success, ret = pcall(fn, ...)
+    if not success then
+        RGMercsLogger.log_debug("\ay%s\n\ar\t%s", logInfo, ret)
+        ret = false
+    end
+    return ret
+end
+
 ---@param caller self
 ---@param resolvedActionMap table
 ---@param entry table
 ---@param targetId integer
----@return boolean
+---@return boolean, boolean # check pass and active pass
 function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
     local condArg = Utils.GetEntryConditionArg(resolvedActionMap, entry)
     local condTarg = mq.TLO.Spawn(targetId)
     local pass = false
+    local active = false
     if condArg ~= nil then
-        pass = entry.cond(caller, condArg, condTarg, false)
+        local logInfo = string.format("check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay)", entry.name or "NoName",
+            (type(condArg) == 'userdata' and condArg() or condArg) or "None",
+            condTarg.CleanName() or "None")
+        pass = Utils.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg, false)
+
+
+        if entry.active_cond then
+            active = Utils.SafeCallFunc("Active " .. logInfo, entry.active_cond, caller, condArg)
+        end
     end
 
     RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
         entry.name, entry.type, condArg or "None",
         condTarg.CleanName() or "None", Utils.BoolToSColortring(pass))
 
-    return pass
+    return pass, active
 end
 
 ---@param caller self #caller's self object to pass back into class config conditions
@@ -2549,7 +2572,7 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
     end
 
     for _, g in ipairs(spellGemList or {}) do
-        if not g.cond or g.cond(caller, g.gem) then
+        if Utils.SafeCallFunc(string.format("Gem Conditin Check %d", g.gem), g.cond, caller, g.gem) then
             RGMercsLogger.log_debug("\ayGem \am%d\ay will be loaded.", g.gem)
 
             if g ~= nil and g.spells ~= nil then
@@ -2566,7 +2589,7 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                     local bestSpell = resolvedActionMap[spellName]
                     if bestSpell then
                         local bookSpell = mq.TLO.Me.Book(bestSpell.RankName())()
-                        local pass = not s.cond or s.cond(caller, bestSpell)
+                        local pass = Utils.SafeCallFunc(string.format("Spell Condition Check: %s", bestSpell() or "None"), s.cond, caller, bestSpell)
                         local loadedSpell = spellsToLoad[bestSpell.RankName()] or false
 
                         if pass and bestSpell and bookSpell and not loadedSpell then
@@ -2950,10 +2973,7 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
             end
             ImGui.TableNextColumn()
             if entry.cond then
-                local condArg  = Utils.GetEntryConditionArg(resolvedActionMap, entry)
-                local condTarg = mq.TLO.Target
-                local pass     = entry.cond(caller, condArg, condTarg, true)
-                local active   = entry.active_cond and entry.active_cond(caller, condArg) or false
+                local pass, active = Utils.TestConditionForEntry(caller, resolvedActionMap, entry, mq.TLO.Target.ID())
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)

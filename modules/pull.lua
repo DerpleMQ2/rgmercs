@@ -158,7 +158,7 @@ function Module:OnCombatModeChanged()
     self.TempSettings.ValidPullAbilities = {}
 
     for k, v in ipairs(Module.Constants.PullAbilities) do
-        if not v.cond or v.cond(self) then
+        if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
             local displayName = v.DisplayName
             if type(displayName) == 'function' then displayName = displayName() end
             table.insert(self.TempSettings.ValidPullAbilities, displayName)
@@ -168,7 +168,7 @@ function Module:OnCombatModeChanged()
 
     -- pull in class specific configs.
     for k, v in ipairs(RGMercModules:ExecModule("Class", "GetPullAbilities")) do
-        if not v.cond or v.cond(self) then
+        if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
             local displayName = v.DisplayName
             if type(displayName) == 'function' then displayName = displayName() end
             table.insert(self.TempSettings.ValidPullAbilities, displayName)
