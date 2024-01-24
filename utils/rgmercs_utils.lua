@@ -1108,7 +1108,7 @@ function Utils.SafeCallFunc(logInfo, fn, ...)
     if not fn then return true end -- no condition func == pass
     local success, ret = pcall(fn, ...)
     if not success then
-        RGMercsLogger.log_debug("\ay%s\n\ar\t%s", logInfo, ret)
+        RGMercsLogger.log_error("\ay%s\n\ar\t%s", logInfo, ret)
         ret = false
     end
     return ret
