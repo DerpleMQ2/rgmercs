@@ -453,7 +453,7 @@ function Module:ProcessMezList()
                 local spell = mq.TLO.Spell(data.mez_spell)
                 if data.duration > (spell.MyCastTime() / 100) or spawn.Distance() > self.settings.MezRadius or not spawn.LineOfSight() then
                     RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Timer(%s > %s) Distance(%d) LOS(%s)", id, RGMercUtils.FormatTime(data.duration / 1000),
-                        RGMercUtils.FormatTime(spell.MyCastTime() / 100), spawn.Distance(), RGMercUtils.BoolToString(spawn.LineOfSight()))
+                        RGMercUtils.FormatTime(spell.MyCastTime() / 100), spawn.Distance(), RGMercUtils.BoolToColorString(spawn.LineOfSight()))
                 else
                     if id == RGMercConfig.Globals.AutoTargetID then
                         RGMercsLogger.log_debug("\ayProcessMezList(%d) ::Mob is MA's target skipping", id)

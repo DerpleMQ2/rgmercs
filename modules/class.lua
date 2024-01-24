@@ -121,7 +121,7 @@ function Module:SetDynamicNames()
     for _, data in pairs(self.ClassConfig.Rotations) do
         for _, r in ipairs(data) do
             if r.name_func then
-                r.name = r.name_func(self)
+                r.name = RGMercUtils.SafeCallFunc(r.name_func, self) or "Error in name_func!"
             end
         end
     end
@@ -619,20 +619,21 @@ function Module:GiveTime(combat_state)
         local timeCheck = true
         if r.timer then
             self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
-            if os.clock() - self.TempSettings.RotationTimers[r.name] < r.timer then
-                timeCheck = false
-            end
+            timeCheck = ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
         end
         if timeCheck then
-            for _, targetId in ipairs(r.targetId()) do
-                if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
-                    RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
-                    self.CurrentRotation = { name = r.name, state = r.state or 0, }
-                    local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
-                        self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
+            local targetTable = RGMercUtils.SafeCallFunc("Rotation Target Table", r.targetId)
+            if targetTable ~= false then
+                for _, targetId in ipairs(targetTable) do
+                    if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
+                        RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
+                        self.CurrentRotation = { name = r.name, state = r.state or 0, }
+                        local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
+                            self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
 
-                    if r.state then r.state = newState end
-                    self.TempSettings.RotationTimers[r.name] = os.clock()
+                        if r.state then r.state = newState end
+                        self.TempSettings.RotationTimers[r.name] = os.clock()
+                    end
                 end
             end
         else
