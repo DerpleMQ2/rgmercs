@@ -496,7 +496,7 @@ function Module:HealById(id)
     for _, rotation in pairs(self.ClassConfig.HealRotationOrder or {}) do
         RGMercsLogger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id,
             rotation.name)
-        if not rotation.cond or rotation.cond(self, healTarget) then
+        if RGMercUtils.SafeCallFunc(string.format("Heal Rotation Condition Check for %s", rotation.name), rotation.cond, self, healTarget) then
             RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw appropriate to use.", id,
                 rotation.name)
             -- since these are ordered by prioirty we can assume we are the best option.
@@ -625,7 +625,7 @@ function Module:GiveTime(combat_state)
         end
         if timeCheck then
             for _, targetId in ipairs(r.targetId()) do
-                if r.cond and r.cond(self, combat_state) then
+                if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
                     RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
                     self.CurrentRotation = { name = r.name, state = r.state or 0, }
                     local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
