@@ -240,7 +240,7 @@ end
 function Utils.PCDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
     RGMercsLogger.log_super_verbose("PCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
-        Utils.BoolToString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
+        Utils.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
         mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
@@ -252,7 +252,7 @@ function Utils.NPCDiscReady(discSpell)
     local target = mq.TLO.Target
     if not target or not target() then return false end
     RGMercsLogger.log_super_verbose("NPCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
-        Utils.BoolToString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
+        Utils.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
         mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and target.Type():lower() ~= "corpse" and
         target.LineOfSight() and not target.Hovering()
@@ -462,7 +462,7 @@ function Utils.WaitCastFinish(target)
         if maxWait <= 0 then
             local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d",
                 (mq.TLO.Me.Casting.ID() or -1), maxWaitOrig,
-                Utils.BoolToString(mq.TLO.Window("CastingWindow").Open()), RGMercConfig.Globals.AutoTargetID)
+                Utils.BoolToColorString(mq.TLO.Window("CastingWindow").Open()), RGMercConfig.Globals.AutoTargetID)
 
             RGMercsLogger.log_debug(msg)
             Utils.PrintGroupMessage(msg)
@@ -782,7 +782,7 @@ end
 function Utils.UseSong(songName, targetId, bAllowMem)
     if not songName then return false end
     local me = mq.TLO.Me
-    RGMercsLogger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, Utils.BoolToString(bAllowMem))
+    RGMercsLogger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, Utils.BoolToColorString(bAllowMem))
 
     if songName then
         local spell = mq.TLO.Spell(songName)
@@ -877,11 +877,11 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         return Utils.UseSong(spellName, targetId, bAllowMem)
     end
 
-    RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, Utils.BoolToString(bAllowMem))
+    RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, Utils.BoolToColorString(bAllowMem))
 
     if me.Moving() then
         RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s) -- Failed because I am moving", spellName, targetId,
-            Utils.BoolToString(bAllowMem))
+            Utils.BoolToColorString(bAllowMem))
         return false
     end
 
@@ -1064,11 +1064,11 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
 
     if entry.type:lower() == "customfunc" then
         if entry.custom_func then
-            ret = entry.custom_func(caller, targetId)
+            ret = Utils.SafeCallFunc(entry.custom_func, caller, targetId)
         else
             ret = false
         end
-        --RGMercsLogger.log_verbose("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, Utils.BoolToString(ret))
+        --RGMercsLogger.log_verbose("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, Utils.BoolToColorString(ret))
     end
 
     if entry.type:lower() == "disc" then
@@ -1106,6 +1106,7 @@ end
 ---@return any
 function Utils.SafeCallFunc(logInfo, fn, ...)
     if not fn then return true end -- no condition func == pass
+
     local success, ret = pcall(fn, ...)
     if not success then
         RGMercsLogger.log_error("\ay%s\n\ar\t%s", logInfo, ret)
@@ -1130,7 +1131,6 @@ function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
             condTarg.CleanName() or "None")
         pass = Utils.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg, false)
 
-
         if entry.active_cond then
             active = Utils.SafeCallFunc("Active " .. logInfo, entry.active_cond, caller, condArg)
         end
@@ -1138,7 +1138,7 @@ function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
 
     RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
         entry.name, entry.type, condArg or "None",
-        condTarg.CleanName() or "None", Utils.BoolToSColortring(pass))
+        condTarg.CleanName() or "None", Utils.BoolToColorString(pass))
 
     return pass, active
 end
@@ -1235,8 +1235,8 @@ function Utils.SelfBuffCheck(spell)
     local res = not Utils.BuffActiveByID(spell.RankName.ID()) and spell.Stacks()
 
     ---@diagnostic disable-next-line: undefined-field
-    RGMercsLogger.log_verbose("\arSelfBuffCheck(%s/%d) Spell Obj => %s", spell.RankName(), spell.RankName.ID(),
-        Utils.BoolToString(res))
+    RGMercsLogger.log_verbose("\aySelfBuffCheck(\at%s\ay/\am%d\ay) Spell Obj => %s", spell.RankName(), spell.RankName.ID(),
+        Utils.BoolToColorString(res))
 
     return res
 end
@@ -1249,7 +1249,7 @@ end
 
 ---@param b boolean
 ---@return string
-function Utils.BoolToSColortring(b)
+function Utils.BoolToColorString(b)
     return b and "\agTRUE" or "\arFALSE"
 end
 
@@ -1294,11 +1294,12 @@ function Utils.SelfBuffAACheck(aaName)
     local triggerStacks = (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
 
     --RGMercsLogger.log_verbose("SelfBuffAACheck(%s) abilityReady(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s) triggerStacks(%s)", aaName,
-    --    Utils.BoolToString(abilityReady),
-    --    Utils.BoolToString(buffNotActive),
-    --    Utils.BoolToString(triggerNotActive),
-    --    Utils.BoolToString(auraNotActive),
-    --    Utils.BoolToString(stacks), Utils.BoolToString(triggerStacks))
+    --    Utils.BoolToColorString(abilityReady),
+    --    Utils.BoolToColorString(buffNotActive),
+    --    Utils.BoolToColorString(triggerNotActive),
+    --    Utils.BoolToColorString(auraNotActive),
+    --    Utils.BoolToColorString(stacks),
+    --    Utils.BoolToColorString(triggerStacks))
 
     return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks and triggerStacks
 end
@@ -1680,7 +1681,7 @@ function Utils.AutoMed()
         "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d :: forceSit %s :: forceStand %s",
         me.PctHPs(), Utils.GetSetting('HPMedPct'), me.PctMana(),
         Utils.GetSetting('ManaMedPct'), me.PctEndurance(),
-        Utils.GetSetting('EndMedPct'), Utils.BoolToString(forcesit), Utils.BoolToString(forcestand))
+        Utils.GetSetting('EndMedPct'), Utils.BoolToColorString(forcesit), Utils.BoolToColorString(forcestand))
 
     if Utils.GetXTHaterCount() > 0 then
         if Utils.GetSetting('DoMelee') then
@@ -1737,8 +1738,8 @@ function Utils.BuffSong(songSpell)
 
     local res = Utils.SongMemed(songSpell) and (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= (songSpell.MyCastTime.Seconds() + 6)
     RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), duration(%0.2f) < casttime(%0.2f) --> result(%s)", songSpell.Name(),
-        Utils.BoolToString(me.Gem(songSpell.Name())() ~= nil),
-        me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, songSpell.MyCastTime.Seconds() + 6, Utils.BoolToString(res))
+        Utils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
+        me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, songSpell.MyCastTime.Seconds() + 6, Utils.BoolToColorString(res))
     return res
 end
 
@@ -1748,8 +1749,8 @@ function Utils.DebuffSong(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
     local res = me.Gem(songSpell.Name()) and not Utils.TargetHasBuff(songSpell)
-    RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), targetHas(%s) --> result(%s)", songSpell.Name(), Utils.BoolToString(me.Gem(songSpell.Name())() ~= nil),
-        Utils.BoolToString(Utils.TargetHasBuff(songSpell)), Utils.BoolToString(res))
+    RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), targetHas(%s) --> result(%s)", songSpell.Name(), Utils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
+        Utils.BoolToColorString(Utils.TargetHasBuff(songSpell)), Utils.BoolToColorString(res))
     return res
 end
 
@@ -2221,7 +2222,7 @@ function Utils.FindTarget()
             end
 
             RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist,
-                Utils.BoolToString(assistTarget.Aggressive()))
+                Utils.BoolToColorString(assistTarget.Aggressive()))
 
             if assistTarget() and assistTarget.Aggressive() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
                 RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
@@ -2359,8 +2360,8 @@ function Utils.FindTargetCheck()
     local config = RGMercConfig:GetSettings()
 
     RGMercsLogger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Utils.GetXTHaterCount(),
-        Utils.BoolToString(Utils.IAmMA()), Utils.BoolToString(config.FollowMarkTarget),
-        Utils.BoolToString(RGMercConfig.Globals.BackOffFlag))
+        Utils.BoolToColorString(Utils.IAmMA()), Utils.BoolToColorString(config.FollowMarkTarget),
+        Utils.BoolToColorString(RGMercConfig.Globals.BackOffFlag))
 
     local OATarget = false
 
@@ -2403,7 +2404,7 @@ function Utils.OkToEngage(autoTargetId)
         if not mq.TLO.Me.Combat() then
             RGMercsLogger.log_verbose(
                 "\ay[2] Target type check failed \aw[\atpcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay",
-                Utils.BoolToString(pcCheck), Utils.BoolToString(mercCheck))
+                Utils.BoolToColorString(pcCheck), Utils.BoolToColorString(mercCheck))
         end
         return false
     end
@@ -2430,14 +2431,14 @@ function Utils.OkToEngage(autoTargetId)
             return true
         else
             RGMercsLogger.log_verbose("\ayAssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
-                target.CleanName(), target.ID(), Utils.BoolToString(distanceCheck), Utils.GetTargetDistance(),
-                Utils.BoolToString(assistCheck))
+                target.CleanName(), target.ID(), Utils.BoolToColorString(distanceCheck), Utils.GetTargetDistance(),
+                Utils.BoolToColorString(assistCheck))
             return false
         end
     end
 
     RGMercsLogger.log_verbose("\ayOkay to Engage Failed with Fall Through!",
-        Utils.BoolToString(pcCheck), Utils.BoolToString(mercCheck))
+        Utils.BoolToColorString(pcCheck), Utils.BoolToColorString(mercCheck))
     return false
 end
 
@@ -2577,7 +2578,7 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
 
             if g ~= nil and g.spells ~= nil then
                 for _, s in ipairs(g.spells) do
-                    if s.name_func then s.name = s.name_func(caller) end
+                    if s.name_func then s.name = Utils.SafeCallFunc(s.name_func, caller) or "Error in name_func!" end
                     local spellName = s.name
                     RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, g.gem)
                     if abilitySets[spellName] == nil then
@@ -2602,8 +2603,8 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                             RGMercsLogger.log_debug(
                                 "    ==> \ayGem \am%d will \arNOT\ay load \at%s (pass=%s, bestSpell=%s, bookSpell=%d, loadedSpell=%s)",
                                 g.gem, s.name,
-                                Utils.BoolToString(pass), bestSpell and bestSpell.RankName() or "", bookSpell or -1,
-                                Utils.BoolToString(loadedSpell))
+                                Utils.BoolToColorString(pass), bestSpell and bestSpell.RankName() or "", bookSpell or -1,
+                                Utils.BoolToColorString(loadedSpell))
                         end
                     else
                         RGMercsLogger.log_debug(

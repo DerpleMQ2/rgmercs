@@ -493,7 +493,7 @@ local function Main()
     local mercCheck = mq.TLO.Target.Type() == "mercenary"
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
         RGMercsLogger.log_debug("\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
-            RGMercUtils.BoolToString(mq.TLO.Me.Combat()), RGMercUtils.BoolToString(pcCheck), RGMercUtils.BoolToString(mercCheck))
+            RGMercUtils.BoolToColorString(mq.TLO.Me.Combat()), RGMercUtils.BoolToColorString(pcCheck), RGMercUtils.BoolToColorString(mercCheck))
         RGMercUtils.DoCmd("/attack off")
     end
 
