@@ -121,7 +121,7 @@ function Module:SetDynamicNames()
     for _, data in pairs(self.ClassConfig.Rotations) do
         for _, r in ipairs(data) do
             if r.name_func then
-                r.name = RGMercUtils.SafeCallFunc(r.name_func, self) or "Error in name_func!"
+                r.name = RGMercUtils.SafeCallFunc("SetDynamicName", r.name_func, self) or "Error in name_func!"
             end
         end
     end

@@ -1064,7 +1064,7 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
 
     if entry.type:lower() == "customfunc" then
         if entry.custom_func then
-            ret = Utils.SafeCallFunc(entry.custom_func, caller, targetId)
+            ret = Utils.SafeCallFunc(string.format("Custom Func Entry: %s", entry.name), entry.custom_func, caller, targetId)
         else
             ret = false
         end
@@ -1267,9 +1267,9 @@ function Utils.GetSetting(setting)
                 ret = { module = name, value = data.settings[setting], }
             else
                 RGMercsLogger.log_error(
-                    "\ay[Setting] \arError: Key %s exists in multipe settings tables: \aw%s arand \aw%s! Returning first but this should be fixed!",
+                    "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Returning first but this should be fixed!",
                     setting,
-                    ret.name, name)
+                    ret.module, name)
             end
         end
     end
@@ -2578,7 +2578,7 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
 
             if g ~= nil and g.spells ~= nil then
                 for _, s in ipairs(g.spells) do
-                    if s.name_func then s.name = Utils.SafeCallFunc(s.name_func, caller) or "Error in name_func!" end
+                    if s.name_func then s.name = Utils.SafeCallFunc("Spell Name Func", s.name_func, caller) or "Error in name_func!" end
                     local spellName = s.name
                     RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, g.gem)
                     if abilitySets[spellName] == nil then

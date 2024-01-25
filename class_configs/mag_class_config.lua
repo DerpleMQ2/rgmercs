@@ -2132,7 +2132,6 @@ _ClassConfig      = {
         ['SelfModRod']     = { DisplayName = "Self Mod Rod Item", Category = "Mana", Tooltip = "Click the modrod clicky you want to use here", Type = "ClickyItem", Default = "", },
         ['SummonModRods']  = { DisplayName = "Summon Mod Rods", Category = "Mana", Tooltip = "Summon Mod Rods", Default = true, },
         ['GatherManaPct']  = { DisplayName = "Gather Mana %", Category = "Mana", Tooltip = "When to use Gather Mana", Default = 70, Min = 1, Max = 99, },
-        ['ModRodManaPct']  = { DisplayName = "Mod Rod Mana %", Category = "Pet", Tooltip = "Use Mod Rod at [X]% Mana", Default = 70, Min = 1, Max = 99, },
         ['DoForce']        = { DisplayName = "Do Force", Category = "Spells & Abilities", Tooltip = "Use Force of Elements AA", Default = true, },
         ['DoMagicNuke']    = { DisplayName = "Do Magic Nuke", Category = "Spells & Abilities", Tooltip = "Use Magic nukes instead of Fire", Default = false, },
         ['DoChestClick']   = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
