@@ -547,21 +547,23 @@ function Module:RunCureRotation()
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet.Peers(i)()
-        if mq.TLO.SpawnCount(string.format("pc =%s radius 150", peer))() == 1 then
-            RGMercsLogger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
-            local effectCount = DanNet.query(peer, "Me.TotalCounters", 1000) or "null"
-            RGMercsLogger.log_verbose("\ay[Cures] %s :: Effect Count: %s", peer, effectCount)
-            if effectCount:lower() ~= "null" and effectCount ~= "0" then
-                for _, data in ipairs(checks) do
-                    local effectId = DanNet.query(peer, data.check, 1000) or "null"
-                    RGMercsLogger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
+        if peer:len() > 0 then
+            if mq.TLO.SpawnCount(string.format("pc =%s radius 150", peer))() == 1 then
+                RGMercsLogger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
+                local effectCount = DanNet.query(peer, "Me.TotalCounters", 1000) or "null"
+                RGMercsLogger.log_verbose("\ay[Cures] %s :: Effect Count: %s", peer, effectCount)
+                if effectCount:lower() ~= "null" and effectCount ~= "0" then
+                    for _, data in ipairs(checks) do
+                        local effectId = DanNet.query(peer, data.check, 1000) or "null"
+                        RGMercsLogger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
 
-                    if effectId:lower() ~= "null" then
-                        local cureTarget = mq.TLO.Spawn(string.format("pc =%s"))
-                        if cureTarget and cureTarget() then
-                            -- Cure it!
-                            if self.ClassConfig.Cures and self.ClassConfig.Cures.CurNow then
-                                self.ClassConfig.Cures.CurNow(self, data.type, cureTarget.ID())
+                        if effectId:lower() ~= "null" then
+                            local cureTarget = mq.TLO.Spawn(string.format("pc =%s"))
+                            if cureTarget and cureTarget() then
+                                -- Cure it!
+                                if self.ClassConfig.Cures and self.ClassConfig.Cures.CurNow then
+                                    self.ClassConfig.Cures.CurNow(self, data.type, cureTarget.ID())
+                                end
                             end
                         end
                     end

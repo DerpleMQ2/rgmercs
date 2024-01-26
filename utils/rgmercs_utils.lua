@@ -2212,7 +2212,7 @@ function Utils.FindTarget()
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
         if Utils.GetSetting('AssistOutside') then
             local queryCmd = string.format("/dquery %s -q Target.ID", RGMercConfig.Globals.MainAssist)
-            mq.cmdf(queryCmd)
+            Utils.DoCmd(queryCmd)
             local queryResult = tostring(mq.TLO.DanNet.Q())
 
             local assistTarget = mq.TLO.Spawn(queryResult)
@@ -2368,7 +2368,7 @@ function Utils.FindTargetCheck()
     -- our MA out of group has a valid target for us.
     if Utils.GetSetting('AssistOutside') then
         local queryCmd = string.format("/dquery %s -q Target.ID", RGMercConfig.Globals.MainAssist)
-        mq.cmdf(queryCmd)
+        Utils.DoCmd(queryCmd)
         local queryResult = tostring(mq.TLO.DanNet.Q())
 
         local assistTarget = mq.TLO.Spawn(queryResult)

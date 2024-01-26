@@ -84,7 +84,7 @@ local Tooltips    = {
     SCF                 = "AA: Group Buff that drains Mana or Endurance and Twin Casts Spells or Abilities Depending on Class",
     SotP                = "AA: Increase Max HP and Dex Cap + Decreased Hatred Generation + Increased Melee Proc Chance + Increased Melee Minimum Damage",
     EoN                 = "AA: High Chance to Dispel Your Target",
-    RangedMode          = "Skill: Use /autofire instead of using Melee"
+    RangedMode          = "Skill: Use /autofire instead of using Melee",
 }
 
 -- helper function for advanced logic to see if we want to use Windstalker's Unity
@@ -148,9 +148,9 @@ local _ClassConfig = {
                     -- Ensure a kit was found then open it and enter Experimentation mode
                     -- To Do: Find a way to see if container is open
                     if fletchKit ~= '' then
-                        mq.cmdf('/timed %d /itemnotify "%s" rightmouseup', delay, fletchKit)
+                        RGMercUtils.DoCmd('/timed %d /itemnotify "%s" rightmouseup', delay, fletchKit)
                         delay = delay + 5
-                        mq.cmdf('/timed %d /notify TradeskillWnd COMBW_ExperimentButton leftmouseup', delay)
+                        RGMercUtils.DoCmd('/timed %d /notify TradeskillWnd COMBW_ExperimentButton leftmouseup', delay)
                         delay = delay + 5
                     end
 
@@ -161,16 +161,16 @@ local _ClassConfig = {
                         for i = 1, toMake do
                             local matName = matTable[i]
 
-                            mq.cmdf('/timed %d /nomodkey /ctrl /itemnotify "%s" leftmouseup', delay, matName)
+                            RGMercUtils.DoCmd('/timed %d /nomodkey /ctrl /itemnotify "%s" leftmouseup', delay, matName)
                             delay = delay + 5
-                            mq.cmdf('/timed %d /itemnotify in %s %d leftmouseup', delay, kitSlot, i)
+                            RGMercUtils.DoCmd('/timed %d /itemnotify in %s %d leftmouseup', delay, kitSlot, i)
                             delay = delay + 5
                             if i == #matTable then
-                                mq.cmdf('/timed %d /combine %s', delay, kitSlot)
+                                RGMercUtils.DoCmd('/timed %d /combine %s', delay, kitSlot)
                                 delay = delay + 7
-                                mq.cmdf('/timed %d /autoinventory', delay)
+                                RGMercUtils.DoCmd('/timed %d /autoinventory', delay)
                                 delay = delay + 5
-                                mq.cmdf('/timed %d /echo Combine #%d', delay, j)
+                                RGMercUtils.DoCmd('/timed %d /echo Combine #%d', delay, j)
                                 delay = delay + 13
                             end
                         end
@@ -1294,8 +1294,8 @@ local _ClassConfig = {
                 tooltip = Tooltips.RangedMode,
                 active_cond = function(self, combat_state) return combat_state == 'Combat' and not RGMercConfig.DoMelee end,
                 cond = function(self)
-                    mq.cmd('/squelch face')
-                    mq.cmd('/timed 4 /autofire on')
+                    RGMercUtils.DoCmd('/squelch face')
+                    RGMercUtils.DoCmd('/timed 4 /autofire on')
                 end,
             },
             {
