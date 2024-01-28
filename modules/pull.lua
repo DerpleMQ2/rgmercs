@@ -72,8 +72,9 @@ Module.Constants.PullAbilities         = {
     },
     {
         id = "Taunt",
-        Type = "Spell",
+        Type = "Ability",
         DisplayName = "Taunt",
+        AbilityName = "Taunt",
         AbilityRange = 10,
         cond = function(self)
             return mq.TLO.Me.Skill("Taunt")() > 0
@@ -1075,7 +1076,7 @@ function Module:GiveTime(combat_stateModule)
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
                     mq.doevents()
 
-                    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", pullID, pullAbility.AbilityRange, "off")
+                    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", pullID, pullAbility.AbilityRange, "on")
 
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
@@ -1120,7 +1121,7 @@ function Module:GiveTime(combat_stateModule)
                             if type(abilityName) == 'function' then abilityName = abilityName() end
                             RGMercUtils.UseAbility(abilityName)
                         end
-                    elseif pullAbility.Type():lower() == "spell" then
+                    elseif pullAbility.Type:lower() == "spell" then
                         local abilityName = pullAbility.AbilityName
                         if type(abilityName) == 'function' then abilityName = abilityName() end
                         RGMercUtils.UseSpell(abilityName, pullID, false)

@@ -2211,10 +2211,7 @@ function Utils.FindTarget()
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
         if Utils.GetSetting('AssistOutside') then
-            local queryCmd = string.format("/dquery %s -q Target.ID", RGMercConfig.Globals.MainAssist)
-            Utils.DoCmd(queryCmd)
-            local queryResult = tostring(mq.TLO.DanNet.Q())
-
+            local queryResult = DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
             local assistTarget = mq.TLO.Spawn(queryResult)
             if queryResult then
                 RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
@@ -2235,7 +2232,7 @@ function Utils.FindTarget()
         end
     end
 
-    if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
+    if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID and Utils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
         Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
     end
 end
@@ -2367,9 +2364,7 @@ function Utils.FindTargetCheck()
 
     -- our MA out of group has a valid target for us.
     if Utils.GetSetting('AssistOutside') then
-        local queryCmd = string.format("/dquery %s -q Target.ID", RGMercConfig.Globals.MainAssist)
-        Utils.DoCmd(queryCmd)
-        local queryResult = tostring(mq.TLO.DanNet.Q())
+        local queryResult = DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
 
         local assistTarget = mq.TLO.Spawn(queryResult)
         if queryResult then

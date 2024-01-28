@@ -547,18 +547,18 @@ function Module:RunCureRotation()
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet.Peers(i)()
-        if peer:len() > 0 then
+        if peer and peer:len() > 0 then
             if mq.TLO.SpawnCount(string.format("pc =%s radius 150", peer))() == 1 then
                 RGMercsLogger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
-                local effectCount = DanNet.query(peer, "Me.TotalCounters", 1000) or "null"
+                local effectCount = DanNet.observe(peer, "Me.TotalCounters", 1000) or "null"
                 RGMercsLogger.log_verbose("\ay[Cures] %s :: Effect Count: %s", peer, effectCount)
                 if effectCount:lower() ~= "null" and effectCount ~= "0" then
                     for _, data in ipairs(checks) do
-                        local effectId = DanNet.query(peer, data.check, 1000) or "null"
+                        local effectId = DanNet.observe(peer, data.check, 1000) or "null"
                         RGMercsLogger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
 
                         if effectId:lower() ~= "null" then
-                            local cureTarget = mq.TLO.Spawn(string.format("pc =%s"))
+                            local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
                             if cureTarget and cureTarget() then
                                 -- Cure it!
                                 if self.ClassConfig.Cures and self.ClassConfig.Cures.CurNow then
@@ -610,7 +610,7 @@ function Module:GiveTime(combat_state)
         self:RunHealRotation()
     end
 
-    if self:IsCuring() or true then
+    if self:IsCuring() then
         RGMercsLogger.log_verbose("\ao[Cures] Checking for curables...")
         self:RunCureRotation()
     end
@@ -627,14 +627,17 @@ function Module:GiveTime(combat_state)
             local targetTable = RGMercUtils.SafeCallFunc("Rotation Target Table", r.targetId)
             if targetTable ~= false then
                 for _, targetId in ipairs(targetTable) do
-                    if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
-                        RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
-                        self.CurrentRotation = { name = r.name, state = r.state or 0, }
-                        local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
-                            self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
+                    -- only do combat with a target.
+                    if targetId and targetId > 0 then
+                        if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
+                            RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
+                            self.CurrentRotation = { name = r.name, state = r.state or 0, }
+                            local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
+                                self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
 
-                        if r.state then r.state = newState end
-                        self.TempSettings.RotationTimers[r.name] = os.clock()
+                            if r.state then r.state = newState end
+                            self.TempSettings.RotationTimers[r.name] = os.clock()
+                        end
                     end
                 end
             end

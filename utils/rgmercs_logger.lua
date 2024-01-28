@@ -23,10 +23,10 @@ local logLevels = {
 }
 
 local function getCallStack()
-	local info = debug.getinfo(5, "Snl")
+	local info = debug.getinfo(4, "Snl")
 
 	local callerTracer = string.format("\ao%s\aw::\ao%s()\aw:\ao%-04d\ax",
-		info.short_src and info.short_src:match("[^\\^/]*.lua$") or "unknown_file", info.name or "unknown_func", info.currentline)
+		info and info.short_src and info.short_src:match("[^\\^/]*.lua$") or "unknown_file", info and info.name or "unknown_func", info and info.currentline or 0)
 
 	return callerTracer
 end

@@ -430,9 +430,6 @@ local function Main()
         -- may have changed by this point.
         if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing()) then
             RGMercUtils.FindTarget()
-            if RGMercUtils.GetTargetID() ~= RGMercConfig.Globals.AutoTargetID then
-                RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
-            end
         end
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
