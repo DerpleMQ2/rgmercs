@@ -116,7 +116,7 @@ end
 
 ---@return number
 local function GetMainOpacity()
-    return tonumber(RGMercUtils.GetSetting('BgOpacity')) or 1.0
+    return tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0
 end
 
 local function RGMercsGUI()
@@ -176,7 +176,7 @@ local function RGMercsGUI()
             ImGui.NewLine()
             ImGui.Separator()
 
-            local newOpacity, changed = ImGui.SliderFloat("Opacity", tonumber(RGMercUtils.GetSetting('BgOpacity')) or 1.0, 0.1, 1.0)
+            local newOpacity, changed = ImGui.SliderFloat("Opacity", tonumber(RGMercConfig:GetSettings().BgOpacity) or 1.0, 0.1, 1.0)
 
             if changed then
                 RGMercConfig:GetSettings().BgOpacity = tostring(newOpacity)
@@ -245,7 +245,7 @@ local function RGMercsGUI()
 
             if RGMercsConsole then
                 local changed
-                RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level", RGMercUtils.GetSetting('LogLevel'), RGMercConfig.Constants.LogLevels,
+                RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level", RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
                     #RGMercConfig.Constants.LogLevels)
 
                 if changed then
