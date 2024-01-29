@@ -43,7 +43,10 @@ local function log(logLevel, output, ...)
 
 	-- only log out warnings and errors
 	if logLevels[logLevel].level <= 2 or logToFileAlways then
-		mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), logLevels[logLevel].header, callerTracer, output))
+		local fileOutput = output:gsub("\a.", "")
+		local fileHeader = logLevels[logLevel].header:gsub("\a.", "")
+		local fileTracer = callerTracer:gsub("\a.", "")
+		mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), fileHeader, fileTracer, fileOutput))
 	end
 
 	if RGMercsConsole ~= nil then
