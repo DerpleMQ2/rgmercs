@@ -1074,7 +1074,6 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
     if entry.type:lower() == "disc" then
         local discSpell = resolvedActionMap[entry.name]
         if not discSpell then
-            RGMercsLogger.log_debug("Dont have a Disc for \ao =>> \ag %s \ao <<=", entry.name)
             ret = false
         else
             RGMercsLogger.log_debug("Using Disc \ao =>> \ag %s [%s] \ao <<=", entry.name,

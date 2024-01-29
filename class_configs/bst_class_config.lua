@@ -833,7 +833,7 @@ return {
                 cond = function(self, spell, target)
                     return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
                         spell.StacksTarget() and
-                        spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct(target))
+                        spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct())
                 end,
             },
             {
@@ -841,7 +841,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.TargetHasBuffByName(aaName) and
-                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (RGMercUtils.GetTargetSlowedPct(target))
+                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (RGMercUtils.GetTargetSlowedPct())
                 end,
             },
         },
@@ -1103,7 +1103,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     local slowProc = self.ResolvedActionMap['PetSlowProc']
-                    return RGMercUtils.GetSetting('DoSnare') and (slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
+                    return RGMercUtils.GetSetting('DoSnare') and (slowProc and slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
                         mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name())() == nil
                 end,
             },
