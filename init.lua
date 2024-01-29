@@ -41,7 +41,7 @@ local COUNT_Y_OFFSET = 23
 local EQ_ICON_OFFSET = 500
 
 -- UI --
-local function display_item_on_cursor()
+local function displayItemOnCursor()
     if mq.TLO.Cursor() then
         local cursor_item = mq.TLO.Cursor -- this will be an MQ item, so don't forget to use () on the members!
 
@@ -266,7 +266,7 @@ local function RGMercsGUI()
                 end
             end
 
-            display_item_on_cursor()
+            displayItemOnCursor()
         end
 
         ImGui.PopID()
@@ -375,6 +375,11 @@ local function Main()
     end
 
     notifyZoning = true
+
+    if mq.TLO.Me.NumGems() ~= RGMercUtils.UseGem then
+        -- sometimes this can get out of sync.
+        RGMercUtils.UseGem = mq.TLO.Me.NumGems()
+    end
 
     if RGMercConfig.Globals.PauseMain then
         mq.delay(1000)

@@ -1125,6 +1125,7 @@ function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
     local condTarg = mq.TLO.Spawn(targetId)
     local pass = false
     local active = false
+
     if condArg ~= nil then
         local logInfo = string.format("check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay)", entry.name or "NoName",
             (type(condArg) == 'userdata' and condArg() or condArg) or "None",
@@ -1417,10 +1418,9 @@ function Utils.GetTargetID(target)
     return (target and target.ID() or (mq.TLO.Target.ID() or 0))
 end
 
----@param target MQTarget|nil
 ---@return number
-function Utils.GetTargetAggroPct(target)
-    return (target and target.PctAggro() or (mq.TLO.Target.PctAggro() or 0))
+function Utils.GetTargetAggroPct()
+    return (mq.TLO.Target.PctAggro() or 0)
 end
 
 ---@param target MQTarget|nil
@@ -1429,17 +1429,12 @@ function Utils.GetTargetAggressive(target)
     return (target and target.Aggressive() or (mq.TLO.Target.Aggressive() or false))
 end
 
----@param target MQTarget|nil
 ---@return number
-function Utils.GetTargetSlowedPct(target)
+function Utils.GetTargetSlowedPct()
     -- no valid target
-    if (not target or not target()) and not mq.TLO.Target then return 0 end
-    -- passed in target valid but not slowed
-    if target and target() and not target.Slowed() then return 0 end
-    -- implied target valid but not slowed
     if mq.TLO.Target and not mq.TLO.Target.Slowed() then return 0 end
 
-    return ((target and target() and target.Slowed.SlowPct()) or (mq.TLO.Target.Slowed.SlowPct() or 0))
+    return (mq.TLO.Target.Slowed.SlowPct() or 0)
 end
 
 ---@return integer
