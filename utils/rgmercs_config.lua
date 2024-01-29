@@ -189,6 +189,7 @@ Config.DefaultConfig = {
 
     -- [ DEBUG ] --
     ['LogLevel']          = { DisplayName = "Log Level", Category = "Debug", Tooltip = "1 = Errors, 2 = Warnings, 3 = Info, 4 = Debug, 5 = Verbose", Type = "Custom", Default = 3, Min = 1, Max = 5, ConfigType = "Advanced", },
+    ['LogToFile']         = { DisplayName = "Log To File", Category = "Debug", Tooltip = "Write all logs to the mqlog file.", Type = "Custom", Default = false, ConfigType = "Advanced", },
 
     -- [ ASSIST ] --
     ['OutsideAssistList'] = { DisplayName = "List of Outsiders to Assist", Category = "Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {}, ConfigType = "Advanced", },
@@ -220,6 +221,7 @@ function Config:SaveSettings(doBroadcast)
     mq.pickle(self:GetConfigFileName(), self.settings)
 
     RGMercsLogger.set_log_level(RGMercUtils.GetSetting('LogLevel'))
+    RGMercsLogger.set_log_to_file(RGMercUtils.GetSetting('LogToFile'))
 
     if doBroadcast == true then
         RGMercUtils.BroadcastUpdate("main", "LoadSettings")

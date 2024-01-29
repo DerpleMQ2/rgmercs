@@ -12,6 +12,7 @@ RGMercConfig:LoadSettings()
 RGMercsConsole = nil
 
 RGMercsLogger.set_log_level(RGMercConfig:GetSettings().LogLevel)
+RGMercsLogger.set_log_to_file(RGMercConfig:GetSettings().LogToFile)
 
 local RGMercUtils = require("utils.rgmercs_utils")
 
@@ -246,6 +247,13 @@ local function RGMercsGUI()
                 local changed
                 RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level", RGMercUtils.GetSetting('LogLevel'), RGMercConfig.Constants.LogLevels,
                     #RGMercConfig.Constants.LogLevels)
+
+                if changed then
+                    RGMercConfig:SaveSettings(false)
+                end
+
+                ImGui.SameLine()
+                RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file", "Log to File", RGMercConfig:GetSettings().LogToFile)
 
                 if changed then
                     RGMercConfig:SaveSettings(false)

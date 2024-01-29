@@ -8,10 +8,13 @@ local logLeaderEnd    = '\ar]\ax\aw >>>'
 
 --- @type number
 local currentLogLevel = 3
+local logToFileAlways = false
 
 function actions.get_log_level() return currentLogLevel end
 
 function actions.set_log_level(level) currentLogLevel = level end
+
+function actions.set_log_to_file(logToFile) logToFileAlways = logToFile end
 
 local logLevels = {
 	['super_verbose'] = { level = 6, header = "\atSUPER\aw-\apVERBOSE\ax", },
@@ -39,7 +42,7 @@ local function log(logLevel, output, ...)
 	if (... ~= nil) then output = string.format(output, ...) end
 
 	-- only log out warnings and errors
-	if logLevels[logLevel].level <= 2 then
+	if logLevels[logLevel].level <= 2 or logToFileAlways then
 		mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), logLevels[logLevel].header, callerTracer, output))
 	end
 
