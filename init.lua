@@ -196,7 +196,7 @@ local function RGMercsGUI()
                     ImGui.Text("MA: " .. (RGMercUtils.GetMainAssistSpawn().CleanName() or "None"))
                     if mq.TLO.Target.ID() > 0 and mq.TLO.Target.Type():lower() == "pc" and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
                         if ImGui.SmallButton("Set MA to Current Target") then
-                            RGMercConfig.Globals.AutoTargetID = mq.TLO.Target.ID()
+                            RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
                         end
                     end
                     ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))

@@ -86,6 +86,16 @@ Module.Constants.PullAbilities         = {
         DisplayName = "Ranged",
         cond = function(self) return (mq.TLO.Me.Inventory("ranged").Type() or ""):lower() == "bow" end,
     },
+    {
+        id = "Kick",
+        Type = "Ability",
+        DisplayName = "Kick",
+        AbilityName = "Kick",
+        AbilityRange = 10,
+        cond = function(self)
+            return mq.TLO.Me.Skill("Kick")() > 0
+        end,
+    },
 }
 
 local PullAbilityIDToName              = {}
@@ -103,7 +113,7 @@ Module.DefaultConfig                   = {
     ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pulling", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
     ['PullMinLevel']       = { DisplayName = "Pull Min Level", Category = "Pulling", Tooltip = "Min Level Mobs to consider pulling", Default = mq.TLO.Me.Level() - 3, Min = 1, Max = 150, },
     ['PullMaxLevel']       = { DisplayName = "Pull Max Level", Category = "Pulling", Tooltip = "Max Level Mobs to consider pulling", Default = mq.TLO.Me.Level() + 3, Min = 1, Max = 150, },
-    ['GroupWatch']         = { DisplayName = "Enable Group Watch", Category = "Pulling", Tooltip = "0 = Off, 1 = Healers, 2 = Everyone", Default = 1, Min = 0, Max = 2, },
+    ['GroupWatch']         = { DisplayName = "Enable Group Watch", Category = "Pulling", Tooltip = "1 = Off, 2 = Healers, 3 = Everyone", Type = "Combo", ComboOptions = { 'Off', 'Healers', 'Everyone', }, Default = 1, Min = 1, Max = 3, },
     ['GroupWatchStartPct'] = { DisplayName = "Group Watch %", Category = "Pulling", Tooltip = "If your group member is above [X]% resource, start pulls again.", Default = 80, Min = 1, Max = 100, },
     ['GroupWatchStopPct']  = { DisplayName = "Group Watch %", Category = "Pulling", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 20, Min = 1, Max = 100, },
     ['PullHPPct']          = { DisplayName = "Pull HP %", Category = "Pulling", Tooltip = "Make sure you have at least this much HP %", Default = 20, Min = 1, Max = 100, },
@@ -155,14 +165,22 @@ function Module:LoadSettings()
     self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
 end
 
+---@param id number
+---@return string
+function Module:getPullAbilityDisplayName(id)
+    local displayName = self.TempSettings.ValidPullAbilities[id].DisplayName
+
+    if type(displayName) == 'function' then displayName = displayName() end
+
+    return displayName or "Error"
+end
+
 function Module:OnCombatModeChanged()
     self.TempSettings.ValidPullAbilities = {}
 
     for k, v in ipairs(Module.Constants.PullAbilities) do
         if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
-            local displayName = v.DisplayName
-            if type(displayName) == 'function' then displayName = displayName() end
-            table.insert(self.TempSettings.ValidPullAbilities, displayName)
+            table.insert(self.TempSettings.ValidPullAbilities, v)
         end
         PullAbilityIDToName[v.id] = k
     end
@@ -170,9 +188,7 @@ function Module:OnCombatModeChanged()
     -- pull in class specific configs.
     for k, v in ipairs(RGMercModules:ExecModule("Class", "GetPullAbilities")) do
         if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
-            local displayName = v.DisplayName
-            if type(displayName) == 'function' then displayName = displayName() end
-            table.insert(self.TempSettings.ValidPullAbilities, displayName)
+            table.insert(self.TempSettings.ValidPullAbilities, v)
         end
         PullAbilityIDToName[v.id] = k
     end
@@ -264,7 +280,8 @@ function Module:Render()
             self:SaveSettings(false)
         end
         if #self.TempSettings.ValidPullAbilities > 0 then
-            self.settings.PullAbility, pressed = ImGui.Combo("Pull Ability", self.settings.PullAbility, self.TempSettings.ValidPullAbilities, #self.TempSettings.ValidPullAbilities)
+            self.settings.PullAbility, pressed = ImGui.Combo("Pull Ability", self.settings.PullAbility, function(id) return self:getPullAbilityDisplayName(id) end,
+                #self.TempSettings.ValidPullAbilities) --, self.TempSettings.ValidPullAbilities, #self.TempSettings.ValidPullAbilities)
             if pressed then
                 self:SaveSettings(false)
             end
@@ -852,12 +869,12 @@ function Module:GiveTime(combat_stateModule)
 
     self.TempSettings.LastPull = os.clock()
 
-    if self.settings.GroupWatch == 1 then
+    if self.settings.GroupWatch == 2 then
         if not self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData.campSettings, campData.returnToCamp) then
             self.TempSettings.PullState = PullStates.PULL_GROUPWATCH_WAIT
             return
         end
-    elseif self.settings.GroupWatch == 2 then
+    elseif self.settings.GroupWatch == 3 then
         if not self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData.campSettings, campData.returnToCamp) then
             self.TempSettings.PullState = PullStates.PULL_GROUPWATCH_WAIT
             return
@@ -977,7 +994,7 @@ function Module:GiveTime(combat_stateModule)
     self.TempSettings.PullState = PullStates.PULL_NAV_TO_TARGET
     RGMercsLogger.log_debug("\ayFound Target: %d - Attempting to Nav", pullID)
 
-    local pullAbility = self.Constants.PullAbilities[self.settings.PullAbility]
+    local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
     local startingXTargs = RGMercUtils.GetXTHaterIDs()
 
     RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", pullID, pullAbility.AbilityRange, "off")
