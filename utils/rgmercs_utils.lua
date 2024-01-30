@@ -1972,7 +1972,9 @@ function Utils.IsSafeName(t, name)
     if mq.TLO.Group.Member(name)() then return true end
     if mq.TLO.Raid.Member(name)() then return true end
 
-    if mq.TLO.Spawn(string.format("%s =%s", t, name)).Guild() == mq.TLO.Me.Guild() then return true end
+    if mq.TLO.Me.Guild() ~= nil then
+        if mq.TLO.Spawn(string.format("%s =%s", t, name)).Guild() == mq.TLO.Me.Guild() then return true end
+    end
 
     return false
 end
