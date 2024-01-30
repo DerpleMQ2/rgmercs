@@ -12,7 +12,7 @@ Module.TempSettings               = {}
 Module.TempSettings.LastPull      = os.clock()
 Module.TempSettings.TargetSpawnID = 0
 Module.TempSettings.CurrentWP     = 1
-Module.TempSettings.PullTargets   = 0
+Module.TempSettings.PullTargets   = {}
 Module.TempSettings.AbortPull     = false
 
 
@@ -114,9 +114,10 @@ Module.DefaultConfig                   = {
     ['PullMinLevel']       = { DisplayName = "Pull Min Level", Category = "Pulling", Tooltip = "Min Level Mobs to consider pulling", Default = mq.TLO.Me.Level() - 3, Min = 1, Max = 150, },
     ['PullMaxLevel']       = { DisplayName = "Pull Max Level", Category = "Pulling", Tooltip = "Max Level Mobs to consider pulling", Default = mq.TLO.Me.Level() + 3, Min = 1, Max = 150, },
     ['GroupWatch']         = { DisplayName = "Enable Group Watch", Category = "Pulling", Tooltip = "1 = Off, 2 = Healers, 3 = Everyone", Type = "Combo", ComboOptions = { 'Off', 'Healers', 'Everyone', }, Default = 1, Min = 1, Max = 3, },
-    ['GroupWatchStartPct'] = { DisplayName = "Group Watch %", Category = "Pulling", Tooltip = "If your group member is above [X]% resource, start pulls again.", Default = 80, Min = 1, Max = 100, },
-    ['GroupWatchStopPct']  = { DisplayName = "Group Watch %", Category = "Pulling", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 20, Min = 1, Max = 100, },
+    ['GroupWatchStartPct'] = { DisplayName = "Group Watch Start %", Category = "Pulling", Tooltip = "If your group member is above [X]% resource, start pulls again.", Default = 80, Min = 1, Max = 100, },
+    ['GroupWatchStopPct']  = { DisplayName = "Group Watch Stop %", Category = "Pulling", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 20, Min = 1, Max = 100, },
     ['PullHPPct']          = { DisplayName = "Pull HP %", Category = "Pulling", Tooltip = "Make sure you have at least this much HP %", Default = 20, Min = 1, Max = 100, },
+    ['PullManaPct']        = { DisplayName = "Pull Mana %", Category = "Pulling", Tooltip = "Make sure you have at least this much Mana %", Default = 20, Min = 1, Max = 100, },
     ['FarmWayPoints']      = { DisplayName = "Farming Waypoints", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullAllowList']      = { DisplayName = "Allow List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullDenyList']       = { DisplayName = "Deny List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
@@ -243,6 +244,35 @@ function Module:RenderMobList(displayName, settingName)
     end
 end
 
+function Module:RenderPullTargets()
+    if ImGui.BeginTable("Pull Targets", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
+        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
+        ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 60.0)
+        ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
+        ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthFixed), 160.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        for idx, target in ipairs(self.TempSettings.PullTargets) do
+            local spawn = target.spawn
+            ImGui.TableNextColumn()
+            ImGui.Text(tostring(idx))
+            ImGui.TableNextColumn()
+            ImGui.Text(spawn.CleanName() or "Unknown")
+            ImGui.TableNextColumn()
+            ImGui.Text(tostring(spawn.Level() or 0))
+            ImGui.TableNextColumn()
+            ImGui.Text(tostring(math.ceil(spawn.Distance() or 0)))
+            ImGui.TableNextColumn()
+            RGMercUtils.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
+        end
+
+        ImGui.EndTable()
+    end
+end
+
 function Module:ShouldRender()
     return true
 end
@@ -321,9 +351,9 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text(RGMercUtils.FormatTime(nextPull))
             ImGui.TableNextColumn()
-            ImGui.Text("Pull Targets")
+            ImGui.Text("Pull Target Count")
             ImGui.TableNextColumn()
-            ImGui.Text(tostring(self.TempSettings.PullTargets))
+            ImGui.Text(tostring(#self.TempSettings.PullTargets))
             ImGui.TableNextColumn()
             ImGui.Text("Current Farm WP ID")
             ImGui.TableNextColumn()
@@ -340,6 +370,10 @@ function Module:Render()
         self:RenderMobList("Deny List", "PullDenyList")
         ImGui.NewLine()
         ImGui.Separator()
+
+        if ImGui.CollapsingHeader("Pull Targets") then
+            self:RenderPullTargets()
+        end
 
         if ImGui.CollapsingHeader("Farm Waypoints") then
             ImGui.PushID("##_small_btn_create_wp")
@@ -511,59 +545,64 @@ function Module:ShouldPull()
     local me = mq.TLO.Me
 
     if me.PctHPs() < self.settings.PullHPPct then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax PctHPs < %d", self.settings.PullHPPct)
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctHPs < %d", self.settings.PullHPPct)
+        return false
+    end
+
+    if me.MaxMana() > 0 and me.PctMana() < self.settings.PullManaPct then
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctMana < %d", self.settings.PullManaPct)
         return false
     end
 
     if RGMercUtils.SongActive("Restless Ice") then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
         return false
     end
 
     if RGMercUtils.SongActive("Restless Ice Infection") then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
         return false
     end
 
     if RGMercUtils.BuffActiveByName("Resurrection Sickness") then return false end
 
     if (me.Snared.ID() or 0 > 0) then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax I am snared!")
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am snared!")
         return false
     end
 
     if (me.Rooted.ID() or 0 > 0) then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax I am rooted!")
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am rooted!")
         return false
     end
 
     if (me.Poisoned.ID() or 0 > 0) and not (me.Tashed.ID()) or 0 > 0 then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax I am poisoned!")
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am poisoned!")
         return false
     end
 
     if (me.Diseased.ID() or 0 > 0) then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax I am diseased!")
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am diseased!")
         return false
     end
 
     if (me.Cursed.ID() or 0 > 0) then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax I am cursed!")
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am cursed!")
         return false
     end
 
     if (me.Corrupted.ID() or 0 > 0) then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax I am corrupted!")
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am corrupted!")
         return false
     end
 
     if self:IsPullMode("Chain") and RGMercUtils.GetXTHaterCount() > self.settings.ChainCount then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
         return false
     end
 
     if not self:IsPullMode("Chain") and RGMercUtils.GetXTHaterCount() > 0 then
-        RGMercsLogger.log_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > 1", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > 1", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
         return false
     end
 
@@ -682,8 +721,6 @@ function Module:FindTarget()
     local pullCount = mq.TLO.SpawnCount(pullSearchString)()
     RGMercsLogger.log_debug("\awSearch (\at%s\aw) Found :: \am%d\ax", pullSearchString, pullCount)
 
-    Module.TempSettings.PullTargets = pullCount
-
     local pullTargets = {}
 
     for i = 1, pullCount do
@@ -735,6 +772,8 @@ function Module:FindTarget()
     end
 
     table.sort(pullTargets, function(a, b) return a.distance < b.distance end)
+
+    self.TempSettings.PullTargets = pullTargets
 
     if #pullTargets > 0 then
         RGMercsLogger.log_debug("Pulling %s [%d] --> Distance %d", pullTargets[1].spawn.CleanName(), pullTargets[1].spawn.ID(), pullTargets[1].distance)
@@ -1133,7 +1172,7 @@ function Module:GiveTime(combat_stateModule)
                     mq.doevents()
 
                     if pullAbility.Type:lower() == "ability" then
-                        if mq.TLO.Me.AbilityReady(pullAbility.id) then
+                        if mq.TLO.Me.AbilityReady(pullAbility.id)() then
                             local abilityName = pullAbility.AbilityName
                             if type(abilityName) == 'function' then abilityName = abilityName() end
                             RGMercUtils.UseAbility(abilityName)

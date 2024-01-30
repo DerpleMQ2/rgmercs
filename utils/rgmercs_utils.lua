@@ -2226,7 +2226,8 @@ function Utils.FindTarget()
         end
     end
 
-    if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID and Utils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
+    RGMercsLogger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", RGMercConfig.Globals.AutoTargetID or 0, mq.TLO.Target.ID())
+    if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
         Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
     end
 end

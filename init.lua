@@ -427,7 +427,6 @@ local function Main()
     end
 
     if RGMercUtils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
-        RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
         RGMercUtils.EngageTarget(RGMercConfig.Globals.AutoTargetID)
     else
         if RGMercUtils.GetXTHaterCount() > 0 and RGMercUtils.GetTargetID() > 0 then
