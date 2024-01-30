@@ -187,16 +187,18 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if #self.SpellLoadOut > 0 then
-            if ImGui.CollapsingHeader("Spell Loadout") then
-                ImGui.Indent()
-                RGMercUtils.RenderLoadoutTable(self.SpellLoadOut)
-                ImGui.Unindent()
+        if ImGui.CollapsingHeader("Spell Loadout") then
+            ImGui.Indent()
+            if ImGui.SmallButton("Reload Spell Loadout") then
+                self.TempSettings.NewCombatMode = true
             end
 
+            if #self.SpellLoadOut > 0 then
+                RGMercUtils.RenderLoadoutTable(self.SpellLoadOut)
+            end
+            ImGui.Unindent()
             ImGui.Separator()
         end
-
         if not self.TempSettings.ReloadingLoadouts then
             if ImGui.CollapsingHeader("Rotations") then
                 ImGui.Indent()
