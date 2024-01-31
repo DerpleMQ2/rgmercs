@@ -6,6 +6,7 @@ local Set         = require("mq.Set")
 
 mq.event("CantSee", "You cannot see your target.", function()
     if RGMercConfig.Globals.BackOffFlag then return end
+    if RGMercConfig.Globals.PauseMain then return end
 
     if mq.TLO.Stick.Active() then
         RGMercUtils.DoCmd("/stick off")
@@ -45,6 +46,7 @@ end)
 local function tooFarHandler()
     RGMercsLogger.log_debug("tooFarHandler()")
     if RGMercConfig.Globals.BackOffFlag then return end
+    if RGMercConfig.Globals.PauseMain then return end
     if mq.TLO.Stick.Active() then
         RGMercUtils.DoCmd("/stick off")
     end
