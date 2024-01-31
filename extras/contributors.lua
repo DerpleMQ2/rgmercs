@@ -3,4 +3,6 @@ return {
     'Morisato',
     'Greyn Artestre',
     'Postleaf',
+    'Werkfakter',
+    'SonicZentropy',
 }
