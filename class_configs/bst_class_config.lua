@@ -974,14 +974,14 @@ return {
                 name = "Colddot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
+                    return RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoDot') and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
                 end,
             },
             {
                 name = "Blooddot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
+                    return RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoDot') and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
                 end,
             },
             {

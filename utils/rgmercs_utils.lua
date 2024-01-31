@@ -1217,12 +1217,12 @@ end
 ---@return boolean
 function Utils.SelfBuffPetCheck(spell)
     if not spell or not spell() then return false end
-    
+
     -- Skip if the spell is set as a blocked pet buff, otherwise the bot loops forever
-    if mq.TLO.Me.BlockedPetBuff(spell) then
+    if mq.TLO.Me.BlockedPetBuff(spell.ID()) then
         return false
     end
-    
+
     return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
@@ -2057,35 +2057,39 @@ function Utils.MATargetScan(radius, zradius)
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
         if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
-            RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
-            if (xtSpawn.Distance() or 999) <= radius then
-                -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
-                -- get aggro data from the spawn data type.
-                if Utils.HaveExpansion("EXPANSION_LEVEL_ROF") then
-                    if xtSpawn.PctAggro() < 100 and Utils.IsTanking() then
-                        -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
-                        if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
-                            RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]",
-                                xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
-                            return xtSpawn.ID() or 0
+            if not Utils.GetSetting('SafeTargeting') or not Utils.IsSpawnFightingStranger(xtSpawn, radius) then
+                RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
+                if (xtSpawn.Distance() or 999) <= radius then
+                    -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
+                    -- get aggro data from the spawn data type.
+                    if Utils.HaveExpansion("EXPANSION_LEVEL_ROF") then
+                        if xtSpawn.PctAggro() < 100 and Utils.IsTanking() then
+                            -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
+                            if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
+                                RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]",
+                                    xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
+                                return xtSpawn.ID() or 0
+                            end
                         end
                     end
-                end
 
-                -- If a name has take priority.
-                if Utils.IsNamed(xtSpawn) then
-                    RGMercsLogger.log_verbose("Found Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
-                    return xtSpawn.ID() or 0
-                end
+                    -- If a name has take priority.
+                    if Utils.IsNamed(xtSpawn) then
+                        RGMercsLogger.log_verbose("Found Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
+                        return xtSpawn.ID() or 0
+                    end
 
-                if (xtSpawn.Body.Name() or "none"):lower() == "Giant" then
-                    return xtSpawn.ID() or 0
-                end
+                    if (xtSpawn.Body.Name() or "none"):lower() == "Giant" then
+                        return xtSpawn.ID() or 0
+                    end
 
-                if (xtSpawn.PctHPs() or 100) < lowestHP then
-                    lowestHP = xtSpawn.PctHPs() or 0
-                    killId = xtSpawn.ID() or 0
+                    if (xtSpawn.PctHPs() or 100) < lowestHP then
+                        lowestHP = xtSpawn.PctHPs() or 0
+                        killId = xtSpawn.ID() or 0
+                    end
                 end
+            else
+                RGMercsLogger.log_verbose("XTarget %s [%d] Distance: %d - is fighting someone else - ignoring it.", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
             end
         end
     end

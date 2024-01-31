@@ -524,6 +524,7 @@ function Module:HealById(id)
 end
 
 function Module:RunHealRotation()
+    RGMercsLogger.log_verbose("\ao[Heals] Checking for injured friends...")
     self:HealById(self:FindWorstHurtGroupMember(RGMercUtils.GetSetting('MaxHealPoint')))
 
     if RGMercUtils.GetSetting('AssistOutside') then
