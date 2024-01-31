@@ -860,7 +860,9 @@ function Module:NavToWaypoint(loc, ignoreAggro)
         RGMercsLogger.log_verbose("NavToWaypoint Aggro Count: %d", RGMercUtils.GetXTHaterCount())
 
         if RGMercUtils.GetXTHaterCount() > 0 and not ignoreAggro then
-            RGMercUtils.DoCmd("/nav stop log=off")
+            if mq.TLO.Navigation.Active() then
+                RGMercUtils.DoCmd("/nav stop log=off")
+            end
             return false
         end
 

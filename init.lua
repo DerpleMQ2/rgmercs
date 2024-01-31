@@ -400,8 +400,9 @@ local function Main()
 
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
-        if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
-            RGMercConfig.Globals.LastFaceTime = os.clock()
+        --if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
+        if not RGMercUtils.FacingTarget() then
+            --RGMercConfig.Globals.LastFaceTime = os.clock()
             RGMercUtils.DoCmd("/squelch /face")
         end
     else

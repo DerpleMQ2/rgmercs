@@ -1879,7 +1879,9 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
 
                     Utils.NavInCombat(config, autoTargetId, target.MaxRangeTo(), false)
                 else
-                    Utils.DoCmd("/nav stop log=off")
+                    if mq.TLO.Navigation.Active() then
+                        Utils.DoCmd("/nav stop log=off")
+                    end
                     if mq.TLO.Stick.Status():lower() == "off" then
                         Utils.DoStick(config, autoTargetId)
                     end
@@ -2521,6 +2523,13 @@ function Utils.DetGambitCheck()
     local gambitSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "GambitSpell")
 
     return (gambitSpell and gambitSpell() and ((me.Song(gambitSpell.RankName.Name()).ID() or 0) > 0)) and true or false
+end
+
+---@return boolean
+function Utils.FacingTarget()
+    if mq.TLO.Target.ID() == 0 then return true end
+
+    return math.abs(mq.TLO.Target.HeadingTo.DegreesCCW() - mq.TLO.Me.Heading.DegreesCCW()) <= 20
 end
 
 ---@param aaId integer
