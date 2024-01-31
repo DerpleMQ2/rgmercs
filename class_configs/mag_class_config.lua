@@ -1597,7 +1597,7 @@ _ClassConfig      = {
                 name = "PetAura",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.AuraActiveByName(spell.BaseName())
+                    return mq.TLO.Me.Pet.ID() > 0 and not RGMercUtils.AuraActiveByName(spell.BaseName())
                 end,
             },
             {

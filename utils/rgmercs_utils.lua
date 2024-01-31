@@ -1217,6 +1217,12 @@ end
 ---@return boolean
 function Utils.SelfBuffPetCheck(spell)
     if not spell or not spell() then return false end
+    
+    -- Skip if the spell is set as a blocked pet buff, otherwise the bot loops forever
+    if mq.TLO.Me.BlockedPetBuff(spell) then
+        return false
+    end
+    
     return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
