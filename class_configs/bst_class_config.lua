@@ -981,6 +981,13 @@ return {
                     return RGMercUtils.ManaCheck() and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
                 end,
             },
+            {
+                name = "EndemicDot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoDot') and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
+                end,
+            },
         },
         ['GroupBuff'] = {
             {
