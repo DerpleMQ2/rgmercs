@@ -1008,7 +1008,7 @@ return {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName())
+                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and RGMercConfig.GetSetting('DoAvatar')
                 end,
             },
             {
@@ -1118,7 +1118,7 @@ return {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell) and RGMercUtils.GetSetting('DoAvatar')
                 end,
             },
             {
@@ -1283,7 +1283,8 @@ return {
         ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoAoe']        = { DisplayName = "Do AoE", Category = "Abilities", Tooltip = "Enable using AoE Abilities", Default = true, },
         ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
-        ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
+        ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100 },
+        ['DoAvatar']     = { DisplayName = "Do Avatar", Category = "Buffs", Tooltip = "Buff Group/Pet with Avatar", Default = true },
     },
 
 }
