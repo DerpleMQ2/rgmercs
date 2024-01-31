@@ -1250,7 +1250,7 @@ end
 ---@param b boolean
 ---@return string
 function Utils.BoolToColorString(b)
-    return b and "\agTRUE" or "\arFALSE"
+    return b and "\agTRUE\ax" or "\arFALSE\ax"
 end
 
 ---Returns a setting from either the global or a module setting table.
@@ -1346,9 +1346,9 @@ function Utils.TargetHasBuff(spell, buffTarget)
     end
 
     if not spell or not spell() then return false end
-    if not buffTarget or not buffTarget() then return false end
+    if not target or not target() then return false end
 
-    return (buffTarget.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
+    return (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
 end
 
 ---@param buffName string
@@ -1625,7 +1625,9 @@ function Utils.AutoMed()
 
     --If we're moving/following/navigating/sticking, don't med.
     if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
-        RGMercsLogger.log_verbose("Sit check returning early due to movement.")
+        RGMercsLogger.log_verbose("Sit check returning early due to movement. Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s)",
+            me.Casting() or "None", Utils.BoolToColorString(me.Moving()), Utils.BoolToColorString(mq.TLO.Stick.Active()),
+            Utils.BoolToColorString(mq.TLO.Navigation.Active()), Utils.BoolToColorString(mq.TLO.MoveTo.Moving()), Utils.BoolToColorString(mq.TLO.AdvPath.Following()))
         return
     end
 

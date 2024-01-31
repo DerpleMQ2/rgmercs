@@ -9,12 +9,17 @@ local logLeaderEnd    = '\ar]\ax\aw >>>'
 --- @type number
 local currentLogLevel = 3
 local logToFileAlways = false
+local logFilter       = nil
 
 function actions.get_log_level() return currentLogLevel end
 
 function actions.set_log_level(level) currentLogLevel = level end
 
 function actions.set_log_to_file(logToFile) logToFileAlways = logToFile end
+
+function actions.set_log_filter(filter) logFilter = filter end
+
+function actions.clear_log_filter() logFilter = nil end
 
 local logLevels = {
 	['super_verbose'] = { level = 6, header = "\atSUPER\aw-\apVERBOSE\ax", },
@@ -47,6 +52,10 @@ local function log(logLevel, output, ...)
 		local fileHeader = logLevels[logLevel].header:gsub("\a.", "")
 		local fileTracer = callerTracer:gsub("\a.", "")
 		mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), fileHeader, fileTracer, fileOutput))
+	end
+
+	if logFilter ~= nil then
+		if callerTracer:find(logFilter) == nil and output:find(logFilter) == nil then return end
 	end
 
 	if RGMercsConsole ~= nil then

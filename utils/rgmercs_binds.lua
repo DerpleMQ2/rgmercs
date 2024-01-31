@@ -23,11 +23,24 @@ Bind.Handlers     = {
     ['qsay'] = {
         usage = "/rgl qsay <text>",
         about = "All RGMercs will target your target and say your <text>",
-        handler = function(...)
-            local text = ...
+        handler = function(text)
             RGMercUtils.DoCmd("/squelch /dggaexecute /target id %d", RGMercUtils.GetTargetID())
             mq.delay(5)
             RGMercUtils.DoCmd("/squelch /dggaexecute /say %s", text)
+        end,
+    },
+    ['setlogfilter'] = {
+        usage = "/rgl setlogfilter <filter>",
+        about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging)",
+        handler = function(text)
+            RGMercsLogger.set_log_filter(text)
+        end,
+    },
+    ['clearlogfilter'] = {
+        usage = "/rgl clearlogfilter",
+        about = "Clear log regex filter.",
+        handler = function(...)
+            RGMercsLogger.clear_log_filter()
         end,
     },
     ['pause'] = {
