@@ -7,6 +7,9 @@ return {
     ['Modes']             = {
         'DPS',
     },
+    ['ModeChecks']        = {
+        IsHealing = function() return true end,
+    },
     ['ItemSets']          = {
         ['Epic'] = {
             "Savage Lord's Totem",             -- Epic    -- Epic 1.5
@@ -1009,7 +1012,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
-                    RGMercConfig.GetSetting('DoAvatar')
+                        RGMercConfig.GetSetting('DoAvatar')
                 end,
             },
             {
