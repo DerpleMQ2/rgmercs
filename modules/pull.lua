@@ -1017,10 +1017,10 @@ function Module:GiveTime(combat_stateModule)
     local start_z = mq.TLO.Me.Z()
 
     if campData.returnToCamp then
-        RGMercsLogger.log_debug("\ayStoring Camp info to return to")
-        start_x = campData.campSettings.CampX
-        start_y = campData.campSettings.CampY
-        start_z = campData.campSettings.CampZ
+        RGMercsLogger.log_debug("\ayRTB: Storing Camp info to return to")
+        start_x = campData.campSettings.AutoCampX
+        start_y = campData.campSettings.AutoCampY
+        start_z = campData.campSettings.AutoCampZ
     end
 
     RGMercsLogger.log_debug("\ayRTB Location: %d %d %d", start_y, start_x, start_z)
