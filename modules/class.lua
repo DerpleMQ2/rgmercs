@@ -662,6 +662,8 @@ function Module:GiveTime(combat_state)
 end
 
 function Module:OnDeath()
+    mq.cmd("/nav stop")
+    mq.cmd("/stick off")
 end
 
 function Module:OnZone()
