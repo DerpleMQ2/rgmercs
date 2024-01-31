@@ -46,6 +46,7 @@ local _ClassConfig = {
     },
     ['AbilitySets']   = {
         ['SelfHPBuff'] = {
+			"Shield of Memories",
             "Shield of Shadow",
             "Shield of Restless Ice",
             "Shield of Scales",
@@ -67,6 +68,7 @@ local _ClassConfig = {
             "Lesser Shielding",
         },
         ['SelfRune1'] = {
+			"Golemskin",
             "Carrion Skin",
             "Frozen Skin",
             "Ashen Skin",
@@ -79,6 +81,7 @@ local _ClassConfig = {
             "Wraithskin",
         },
         ['SelfSpellShield1'] = {
+			"Shield of Inescapability",
             "Shield of Inevitability",
             "Shield of Destiny",
             "Shield of Order",
@@ -93,10 +96,10 @@ local _ClassConfig = {
         ---DPS
         ['AllianceSpell'] = {
             -- Alliance Spells
-            "Malevolent Alliance",
-            "Malevolent Covenant",
-            "Malevolent Coalition",
             "Malevolent Conjunction",
+            "Malevolent Coalition",
+			"Malevolent Covenant",
+            "Malevolent Alliance",
         },
         ['DichoSpell'] = {
             ---DichoSpell >= LVL101
@@ -107,6 +110,7 @@ local _ClassConfig = {
         },
         ['SwarmPet'] = {
             ---SwarmPet >= LVL85
+			"Call Skeleton Thrall",
             "Call Skeleton Mass",
             "Call Skeleton Horde",
             "Call Skeleton Army",
@@ -118,7 +122,10 @@ local _ClassConfig = {
         },
         ['HealthTaps'] = {
             ---HealthTaps >= LVL1
+            "Soullash",
+			"Extort Essence",
             "Soulflay",
+			"Maraud Essence",
             "Soulgouge",
             "Draw Essence",
             "Soulsiphon",
@@ -146,6 +153,7 @@ local _ClassConfig = {
         },
         ['DurationTap'] = {
             ---DurationTap >= LVL29
+			"Helmsbane's Grasp",
             "The Protector's Grasp",
             "Tserrina's Grasp",
             "Bomoda's Grasp",
@@ -165,6 +173,7 @@ local _ClassConfig = {
         },
         ['GroupLeech'] = {
             ---GroupLeech >= LVL9
+			"Ghastly Leech",
             "Twilight Leech",
             "Frozen Leech",
             "Ashen Leech",
@@ -173,6 +182,7 @@ local _ClassConfig = {
         },
         ['PoisonNuke'] = {
             ---PoisonNuke >=LVL21
+			"Necrotizing Venin",
             "Embalming Venin",
             "Searing Venin",
             "Effluvial Venin",
@@ -191,6 +201,7 @@ local _ClassConfig = {
         },
         ['PoisonNuke2'] = {
             ---PoisonNuke2  >=LVL 75 (DD Increase chance)
+			"Decree for Blood",
             "Proclamation for Blood",
             "Assert for Blood",
             "Refute for Blood",
@@ -204,6 +215,7 @@ local _ClassConfig = {
         },
         ['FireDot1'] = {
             ---FireDot1 >= LVL80
+			"Raging Shadow",
             "Scalding Shadow",
             "Broiling Shadow",
             "Burning Shadow",
@@ -216,6 +228,7 @@ local _ClassConfig = {
         },
         ['FireDot2'] = {
             ---FireDot2 >= LVL10
+			"Pyre of Illandrin",
             "Pyre of Va Xakra",
             "Pyre of Klraggek",
             "Pyre of the Shadewarden",
@@ -236,7 +249,8 @@ local _ClassConfig = {
         },
         ['FireDot2_2'] = {
             ---FireDot2 >= LVL10
-            "Pyre of Va Xakra",
+			"Pyre of Illandrin",
+            "Pyre of Va Xakra",		
             "Pyre of Klraggek",
             "Pyre of the Shadewarden",
             "Pyre of Jorobb",
@@ -256,6 +270,7 @@ local _ClassConfig = {
         },
         ['FireDot3'] = {
             ---FireDot3 >= LVL88 (QuickDOT)
+			"Arcanaforged's Flashblaze",
             "Thall Va Kelun's Flashblaze",
             "Otatomik's Flashblaze",
             "Azeron's Flashblaze",
@@ -266,6 +281,7 @@ local _ClassConfig = {
         },
         ['FireDot4'] = {
             ---FireDot4 >= LVL73 DOT
+			"Pyre of the Abandoned",
             "Pyre of the Neglected",
             "Pyre of the Wretched",
             "Pyre of the Fereth",
@@ -279,7 +295,8 @@ local _ClassConfig = {
         },
         ['Magic1'] = {
             ---Magic1 >= LVL51 SlowDot
-            "Infected Wounds",
+            "Putrefying Wounds",
+			"Infected Wounds",
             "Septic Wounds",
             "Cytotoxic Wounds",
             "Mortiferous Wounds",
@@ -292,6 +309,7 @@ local _ClassConfig = {
         },
         ['Magic2'] = {
             ---Magic2 >=LVL67 DOT
+			"Extermination",
             "Extinction",
             "Oblivion",
             "Inevitable End",
@@ -308,6 +326,7 @@ local _ClassConfig = {
         },
         ['Magic2_2'] = {
             ---Magic2 >=LVL67 DOT
+			"Extermination",
             "Extinction",
             "Oblivion",
             "Inevitable End",
@@ -324,6 +343,7 @@ local _ClassConfig = {
         },
         ['Magic3'] = {
             ---Magic3 >=LVL87 QuickDot
+			"Blevak's Swift Deconstruction",
             "Xetheg's Swift Deconstruction",
             "Lexelan's Swift Deconstruction",
             "Adalora's Swift Deconstruction",
@@ -339,6 +359,7 @@ local _ClassConfig = {
         },
         ['Disease1'] = {
             ---Decay Line of Disease Spells >=LVL56 Slow DOT
+			"Goremand's Decay",
             "Fleshrot's Decay",
             "Danvid's Decay",
             "Mourgis' Decay",
@@ -373,6 +394,7 @@ local _ClassConfig = {
         },
         ['Disease3'] = {
             ---Sickness Life of Disease Spells >=LVL89 QuickDOT
+			"Ogna's Swift Sickness",
             "Diabo Tatrua's Swift Sickness",
             "Lairsaf's Swift Sickness",
             "Hoshkar's Swift Sickness",
@@ -383,6 +405,7 @@ local _ClassConfig = {
         },
         ['Poison1'] = {
             ---Poison1 >= LVL86 (QuickDOT)
+			"Dotal's Swift Venom",
             "Xenacious' Swift Venom",
             "Vilefang's Swift Venom",
             "Nexona's Swift Venom",
@@ -393,6 +416,7 @@ local _ClassConfig = {
         },
         ['Poison2'] = {
             ---Poison2 >=LVL1 (DOT)
+			"Luggald Venom",
             "Hemorrhagic Venom",
             "Crystal Crawler Venom",
             "Polybiad Venom",
@@ -411,6 +435,7 @@ local _ClassConfig = {
         },
         ['Poison2_2'] = {
             ---Poison2 >=LVL1 (DOT)
+			"Luggald Venom",
             "Hemorrhagic Venom",
             "Crystal Crawler Venom",
             "Polybiad Venom",
@@ -429,6 +454,7 @@ local _ClassConfig = {
         },
         ['Poison3'] = {
             ---Poison3 >= LVL79 DOT
+			"Uncia's Pallid Haze",
             "Zelnithak's Pallid Haze",
             "Dracnia's Pallid Haze",
             "Bomoda's Pallid Haze",
@@ -442,6 +468,7 @@ local _ClassConfig = {
         },
         ['Corruption1'] = {
             ---Corruption1 >= LVL77
+			"Deterioration",
             "Decomposition",
             "Miasma",
             "Effluvium",
@@ -461,6 +488,7 @@ local _ClassConfig = {
         ['ChaoticDebuff'] = {
             -- >= LVL93
             -- Chaotic Contgion
+			"Chaotic Fetor",
             "Chaotic Acridness",
             "Chaotic Miasma",
             "Chaotic Effluvium",
@@ -470,6 +498,7 @@ local _ClassConfig = {
         },
         ['SnareDOT'] = {
             -- LVL4 -> <= LVL70
+			"Afflicted Darkness",
             "Harrowing Darkness",
             "Tormenting Darkness",
             "Gnawing Darkness",
@@ -491,6 +520,7 @@ local _ClassConfig = {
         },
         ['ScentDebuff'] = {
             -- line needed till >= LVL10 <= LVL85
+			"Scent of The Realm",
             "Scent of The Grave",
             "Scent of Mortality",
             "Scent of Extinction",
@@ -508,6 +538,7 @@ local _ClassConfig = {
         },
         ['LichSpell'] = {
             -- LichForm Spell
+			"Realmside",
             "Lunaside",
             "Gloomside",
             "Contraside",
@@ -530,6 +561,7 @@ local _ClassConfig = {
         },
         ['BestowBuff'] = {
             -- Bestow Line
+			"Bestow Ruin",
             "Bestow Rot",
             "Bestow Dread",
             "Bestow Relife",
@@ -541,6 +573,7 @@ local _ClassConfig = {
         },
         ['PetSpellRog'] = {
             ---Pet Spells Rogue * Var Name:, string outer
+			"Merciless Assassin",
             "Unrelenting Assassin",
             "Restless Assassin",
             "Reliving Assassin",
@@ -558,6 +591,7 @@ local _ClassConfig = {
         },
         ['PetSpellWar'] = {
             ---Pet Spells Warrior
+			"Margator's Shade",
             "Luclin's Conqueror",
             "Tserrina's Shade",
             "Adalora's Shade",
@@ -586,6 +620,7 @@ local _ClassConfig = {
         },
         ['PetBuff'] = {
             ---Pet Buff Spell * Var Name:, string outer
+			"Instill Ally",
             "Inspire Ally",
             "Incite Ally",
             "Infuse Ally",
@@ -597,6 +632,7 @@ local _ClassConfig = {
         },
         ['PetHaste'] = {
             ---Pet Haste Spell * Var Name:, string outer
+			"Sigil of Putrefaction",
             "Sigil of Undeath",
             "Sigil of Decay",
             "Sigil of the Arcron",
