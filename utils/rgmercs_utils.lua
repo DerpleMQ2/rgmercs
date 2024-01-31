@@ -2391,7 +2391,7 @@ function Utils.OkToEngage(autoTargetId)
     local target = mq.TLO.Target
     local assistId = Utils.GetMainAssistId()
 
-    if not target() then return false end
+    if not target() or target.Dead() or target.PctHPs() == 0 then return false end
 
     local pcCheck = (target.Type() or "none"):lower() == "pc" or
         ((target.Type() or "none"):lower() == "pet" and (target.Master.Type() or "none"):lower() == "pc")
