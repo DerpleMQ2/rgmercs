@@ -124,7 +124,7 @@ Module.DefaultConfig                   = {
     ['FarmWayPoints']      = { DisplayName = "Farming Waypoints", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullAllowList']      = { DisplayName = "Allow List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullDenyList']       = { DisplayName = "Deny List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
-
+    ['SameWaterStatus']    = { DisplayName = "Water Status Match", Category = "Pulling", Tooltip = "Make sure your pull target has the same FeetWet() status as you do.", Default = true, },
 }
 
 Module.DefaultCategories               = Set.new({})
@@ -777,6 +777,11 @@ function Module:FindTarget()
                             RGMercsLogger.log_debug("\ayNo Allow/Deny List to Check!")
                         end
 
+                        if RGMercUtils.GetSetting('SameWaterStatus') and spawn.FeetWet() ~= mq.TLO.Me.FeetWet() then
+                            RGMercsLogger.log_debug("\agWater status mis-match on %s: SpawnFeetWet = %s MyFeetWet = %s", spawn.CleanName(),
+                                RGMercUtils.BoolToColorString(spawn.FeetWet()), RGMercUtils.BoolToColorString(mq.TLO.Me.FeetWet()))
+                            doInsert = false
+                        end
                         RGMercsLogger.log_debug("\ayInsert Allowed: %s", doInsert and "\agYes", "\arNo")
 
                         if doInsert then
