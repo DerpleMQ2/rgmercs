@@ -3171,11 +3171,21 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                         ImGui.Text((defaults[k].DisplayName or "None"))
                         ImGui.TableNextColumn()
                         ImGui.PushID(k .. "__btn")
-                        if ImGui.SmallButton(settings[k]:len() > 0 and settings[k] or "[Drop Here]") then
+                        ImGui.PushFont(ImGui.ConsoleFont)
+                        local displayCharCount = 11
+                        local nameLen = settings[k]:len()
+                        local maxStart = (nameLen - displayCharCount) + 1
+                        local startDisp = (os.clock() % maxStart) + 1
+
+                        if ImGui.SmallButton(nameLen > 0 and settings[k]:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
                             if mq.TLO.Cursor() then
                                 settings[k] = mq.TLO.Cursor.Name()
                                 pressed = true
                             end
+                        end
+                        ImGui.PopFont()
+                        if nameLen > 0 then
+                            Utils.Tooltip(settings[k])
                         end
                         ImGui.SameLine()
                         if ImGui.SmallButton(ICONS.MD_CLEAR) then

@@ -123,6 +123,13 @@ Config.DefaultConfig = {
     ['ClarityPotion']     = { DisplayName = "Clarity Potion", Category = "Utilities", Tooltip = "Name of your Clarity Pot", Default = "Distillate of Clarity", ConfigType = "Advanced", },
     ['RunMovePaused']     = { DisplayName = "Run Movement on Pause", Category = "Utilities", Tooltip = "Runs the Movement/Chase module even if the Main loop is paused", Default = false, ConfigType = "Advanced", },
 
+    -- [ CLICKIES ] --
+    ['UseClickies']       = { DisplayName = "Use Clickies", Category = "Clickies", Tooltip = "Use Clicky Items", Default = true, ConfigType = "Normal", },
+    ['ClickyItem1']       = { DisplayName = "Clicky Item 1", Category = "Clickies", Tooltip = "Clicky Item to use During Downtime", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
+    ['ClickyItem2']       = { DisplayName = "Clicky Item 2", Category = "Clickies", Tooltip = "Clicky Item to use During Downtime", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
+    ['ClickyItem3']       = { DisplayName = "Clicky Item 3", Category = "Clickies", Tooltip = "Clicky Item to use During Downtime", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
+    ['ClickyItem4']       = { DisplayName = "Clicky Item 4", Category = "Clickies", Tooltip = "Clicky Item to use During Downtime", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
+
     -- [ MEDITATION ] --
     ['DoMed']             = { DisplayName = "Do Meditate", Category = "Meditation", Tooltip = "0 = No Auto Med, 1 = Auto Med Out of Combat, 2 = Auto Med In Combat", Type = "Combo", ComboOptions = { 'Off', 'Out of Combat', 'In Combat', }, Default = 2, Min = 1, Max = 3, ConfigType = "Normal", },
     ['HPMedPct']          = { DisplayName = "Med HP %", Category = "Meditation", Tooltip = "What HP % to hit before medding.", Default = 60, Min = 1, Max = 99, ConfigType = "Advanced", },

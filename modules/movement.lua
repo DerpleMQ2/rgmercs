@@ -317,8 +317,12 @@ function Module:Render()
         end
 
         if ImGui.SmallButton("Set New Camp Here") then
-            self.settings.ReturnToCamp = true
             self:CampOn()
+        end
+
+        ImGui.SameLine()
+        if ImGui.SmallButton("Break Camp") then
+            self:CampOff()
         end
 
         local state, pressed = RGMercUtils.RenderOptionToggle("##chase_om", "Chase On", self.settings.ChaseOn)
@@ -328,6 +332,31 @@ function Module:Render()
 
         ImGui.Separator()
         ImGui.Text("Last Movement Command: %s", self.TempSettings.LastCmd)
+    end
+end
+
+function Module:DoClickies()
+    if not RGMercUtils.GetSetting('UseClickies') then return end
+
+    for i = 1, 4 do
+        local setting = RGMercUtils.GetSetting(string.format("ClickyItem%d", i))
+        if setting and setting:len() > 0 then
+            local item = mq.TLO.FindItem(setting)
+            RGMercsLogger.log_verbose("Looking for clicky item: %s found: %s", setting, RGMercUtils.BoolToColorString(item() ~= nil))
+
+            if item then
+                if item.RequiredLevel() <= mq.TLO.Me.Level() then
+                    if not RGMercUtils.BuffActiveByID(item.Clicky.Spell.RankName.ID() or 0) then
+                        RGMercsLogger.log_verbose("\aaCasting Item: \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
+                        RGMercUtils.UseItem(item.Name(), mq.TLO.Me.ID())
+                    else
+                        RGMercsLogger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay Already Active!", item.Name(), item.Clicky.Spell.RankName.Name())
+                    end
+                else
+                    RGMercsLogger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay I am too low level to use this clicky!", item.Name(), item.Clicky.Spell.RankName.Name())
+                end
+            end
+        end
     end
 end
 
@@ -412,6 +441,8 @@ function Module:GiveTime(combat_state)
             RGMercsLogger.log_debug("\ayDismounting...")
             self:RunCmd("/dismount")
         end
+
+        self:DoClickies()
     end
 
     if RGMercUtils.DoCamp() then
