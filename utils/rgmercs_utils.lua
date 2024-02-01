@@ -3113,7 +3113,7 @@ function Utils.RenderOptionNumber(id, text, cur, min, max, step)
     ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.5, 0.5, 0.5, 0.8)
     ImGui.PushStyleColor(ImGuiCol.Button, 1.0, 1.0, 1.0, 0.2)
     ImGui.PushStyleColor(ImGuiCol.FrameBg, 1.0, 1.0, 1.0, 0)
-    local input, changed = ImGui.InputInt(text, cur, step)
+    local input, changed = ImGui.InputInt(text, cur, step, 1, ImGuiInputTextFlags.None)
     ImGui.PopStyleColor(4)
     ImGui.PopID()
 
