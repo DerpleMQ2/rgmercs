@@ -44,17 +44,17 @@ local PullStateDisplayStrings = {
 local PullStatesIDToName      = {}
 for k, v in pairs(PullStates) do PullStatesIDToName[v] = k end
 
-Module.TempSettings.PullState          = PullStates.PULL_IDLE
+Module.TempSettings.PullState  = PullStates.PULL_IDLE
 
-Module.Constants                       = {}
-Module.Constants.PullModes             = {
+Module.Constants               = {}
+Module.Constants.PullModes     = {
     "Normal",
     "Chain",
     "Hunt",
     "Farm",
 }
 
-Module.Constants.PullAbilities         = {
+Module.Constants.PullAbilities = {
     {
         id = "Face",
         Type = "Special",
@@ -100,6 +100,11 @@ Module.Constants.PullAbilities         = {
         end,
     },
 }
+local ConColors                = {
+    "Grey", "Green", "Light Blue", "Blue", "White", "Yellow", "Red",
+}
+local ConColorsNameToId        = {}
+for i, v in ipairs(ConColors) do ConColorsNameToId[v:upper()] = i end
 
 local PullAbilityIDToName              = {}
 
@@ -111,20 +116,23 @@ Module.DefaultConfig                   = {
     ['PullMode']           = { DisplayName = "Pull Mode", Category = "Pulling", Tooltip = "1 = Normal, 2 = Chain, 3 = Hunt, 4 = Farm", Type = "Custom", Default = 1, Min = 1, Max = 4, },
     ['ChainCount']         = { DisplayName = "Chain Count", Category = "Pulling", Tooltip = "Number of mobs in chain pull mode on xtarg before we stop pulling", Default = 3, Min = 1, Max = 100, },
     ['PullDelay']          = { DisplayName = "Pull Delay", Category = "Pulling", Tooltip = "Seconds between pulls", Default = 5, Min = 1, Max = 300, },
-    ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pulling", Tooltip = "Distnace to pull", Default = 90, Min = 1, Max = 10000, },
-    ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pulling", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 150, },
-    ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pulling", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
-    ['PullMinLevel']       = { DisplayName = "Pull Min Level", Category = "Pulling", Tooltip = "Min Level Mobs to consider pulling", Default = mq.TLO.Me.Level() - 3, Min = 1, Max = 150, },
-    ['PullMaxLevel']       = { DisplayName = "Pull Max Level", Category = "Pulling", Tooltip = "Max Level Mobs to consider pulling", Default = mq.TLO.Me.Level() + 3, Min = 1, Max = 150, },
-    ['GroupWatch']         = { DisplayName = "Enable Group Watch", Category = "Pulling", Tooltip = "1 = Off, 2 = Healers, 3 = Everyone", Type = "Combo", ComboOptions = { 'Off', 'Healers', 'Everyone', }, Default = 1, Min = 1, Max = 3, },
-    ['GroupWatchStartPct'] = { DisplayName = "Group Watch Start %", Category = "Pulling", Tooltip = "If your group member is above [X]% resource, start pulls again.", Default = 80, Min = 1, Max = 100, },
-    ['GroupWatchStopPct']  = { DisplayName = "Group Watch Stop %", Category = "Pulling", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 20, Min = 1, Max = 100, },
-    ['PullHPPct']          = { DisplayName = "Pull HP %", Category = "Pulling", Tooltip = "Make sure you have at least this much HP %", Default = 20, Min = 1, Max = 100, },
-    ['PullManaPct']        = { DisplayName = "Pull Mana %", Category = "Pulling", Tooltip = "Make sure you have at least this much Mana %", Default = 20, Min = 1, Max = 100, },
+    ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pull Distance", Tooltip = "Distnace to pull", Default = 90, Min = 1, Max = 10000, },
+    ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pull Distance", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 150, },
+    ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pull Distance", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
+    ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Type = "Combo", ComboOptions = ConColors, },
+    ['PullMaxCon']         = { DisplayName = "Pull Max Con", Category = "Pull Targets", Tooltip = "Max Con Mobs to consider pulling", Default = 5, Type = "Combo", ComboOptions = ConColors, },
+    ['UsePullLevels']      = { DisplayName = "Use Pull Levels", Category = "Pull Targets", Tooltip = "Use Min and Max Levels Instead of Con.", Default = false, ConfigType = "Advanced", },
+    ['PullMinLevel']       = { DisplayName = "Pull Min Level", Category = "Pull Targets", Tooltip = "Min Level Mobs to consider pulling", Default = mq.TLO.Me.Level() - 3, Min = 1, Max = 150, ConfigType = "Advanced", },
+    ['PullMaxLevel']       = { DisplayName = "Pull Max Level", Category = "Pull Targets", Tooltip = "Max Level Mobs to consider pulling", Default = mq.TLO.Me.Level() + 3, Min = 1, Max = 150, ConfigType = "Advanced", },
+    ['GroupWatch']         = { DisplayName = "Enable Group Watch", Category = "Group Watch", Tooltip = "1 = Off, 2 = Healers, 3 = Everyone", Type = "Combo", ComboOptions = { 'Off', 'Healers', 'Everyone', }, Default = 1, Min = 1, Max = 3, },
+    ['GroupWatchStartPct'] = { DisplayName = "Group Watch Start %", Category = "Group Watch", Tooltip = "If your group member is above [X]% resource, start pulls again.", Default = 80, Min = 1, Max = 100, },
+    ['GroupWatchStopPct']  = { DisplayName = "Group Watch Stop %", Category = "Group Watch", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 20, Min = 1, Max = 100, },
+    ['PullHPPct']          = { DisplayName = "Pull HP %", Category = "Group Watch", Tooltip = "Make sure you have at least this much HP %", Default = 20, Min = 1, Max = 100, },
+    ['PullManaPct']        = { DisplayName = "Pull Mana %", Category = "Group Watch", Tooltip = "Make sure you have at least this much Mana %", Default = 20, Min = 1, Max = 100, },
     ['FarmWayPoints']      = { DisplayName = "Farming Waypoints", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullAllowList']      = { DisplayName = "Allow List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullDenyList']       = { DisplayName = "Deny List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
-    ['SameWaterStatus']    = { DisplayName = "Water Status Match", Category = "Pulling", Tooltip = "Make sure your pull target has the same FeetWet() status as you do.", Default = true, },
+    ['PullMobsInWater']    = { DisplayName = "Pull Mobs In Water", Category = "Pulling", Tooltip = "Pull Mobs that are in water bodies? If you are low level you might drown.", Default = false, },
 }
 
 Module.DefaultCategories               = Set.new({})
@@ -720,21 +728,16 @@ function Module:FindTarget()
     local pullRadius = self.Constants.PullModes[self.settings.PullMode] == "Farm" and self.settings.PullRadiusFarm or self.settings.PullRadius
     local pullSearchString = string.format("npc radius %d targetable zradius %d range %d %d playerstate 0",
         pullRadius, self.settings.PullZRadius,
-        self.settings.PullMinLevel,
-        self.settings.PullMaxLevel)
+        (self.settings.UsePullLevels and self.settings.PullMinLevel or 1),
+        (self.settings.UsePullLevels and self.settings.PullMaxLevel or 999))
 
     if self:IsPullMode("Farm") then
         local wpId = self:GetCurrentWpId()
         local wpData = self:GetWPById(wpId)
-        RGMercsLogger.log_debug(
-            "FindTarget :: Mode: Farm :: pullradius %d pullzradius %d lowlvl %d highlvl %d use_only_nav 1 arc 0 xyz %0.2f, %0.2f, %0.2f",
-            self.settings.PullRadiusFarm, self.settings.PullZRadius, self.settings.PullMinLevel, self.settings.PullMaxLevel, wpData.x, wpData.y, wpData.z)
-
         pullSearchString = pullSearchString .. string.format(" loc  %0.2f, %0.2f, %0.2f", wpData.x, wpData.y, wpData.z)
+        RGMercsLogger.log_debug("FindTarget :: Mode: Farm :: %s", pullSearchString)
     else
-        RGMercsLogger.log_debug(
-            "FindTarget :: Mode: %s :: pullradius %d pullzradius %d lowlvl %d highlvl %d use_only_nav 1 arc 0 xyz NA",
-            self.Constants.PullModes[self.settings.PullMode], self.settings.PullRadius, self.settings.PullZRadius, self.settings.PullMinLevel, self.settings.PullMaxLevel)
+        RGMercsLogger.log_debug("FindTarget :: Mode: %s :: %s", self.Constants.PullModes[self.settings.PullMode], pullSearchString)
     end
 
     local pullCount = mq.TLO.SpawnCount(pullSearchString)()
@@ -763,6 +766,17 @@ function Module:FindTarget()
                         RGMercsLogger.log_debug("\agPotential Pull %s --> Distance %d", spawn.CleanName(), distance)
                         local doInsert = true
 
+                        if not self.settings.UsePullLevels then
+                            -- check cons.
+                            local conLevel = ConColorsNameToId[spawn.ConColor()]
+                            if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
+                                doInsert = false
+                                RGMercsLogger.log_debug("\ay  - Ignoring mob '%s' due to con color. Min = %d, Max = %d, Mob = %d (%s)", spawn.CleanName(),
+                                    self.settings.PullMinCon,
+                                    self.settings.PullMaxCon, conLevel, spawn.ConColor())
+                            end
+                        end
+
                         if self:HaveList("PullAllowList") then
                             RGMercsLogger.log_debug("\ayHave Allow List to Check!")
                             if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
@@ -777,9 +791,8 @@ function Module:FindTarget()
                             RGMercsLogger.log_debug("\ayNo Allow/Deny List to Check!")
                         end
 
-                        if RGMercUtils.GetSetting('SameWaterStatus') and spawn.FeetWet() ~= mq.TLO.Me.FeetWet() then
-                            RGMercsLogger.log_debug("\agWater status mis-match on %s: SpawnFeetWet = %s MyFeetWet = %s", spawn.CleanName(),
-                                RGMercUtils.BoolToColorString(spawn.FeetWet()), RGMercUtils.BoolToColorString(mq.TLO.Me.FeetWet()))
+                        if RGMercUtils.GetSetting('PullMobsInWater') and spawn.FeetWet() then
+                            RGMercsLogger.log_debug("\agIgnoring mob in water water: %s", spawn.CleanName())
                             doInsert = false
                         end
                         RGMercsLogger.log_debug("\ayInsert Allowed: %s", doInsert and "\agYes", "\arNo")
