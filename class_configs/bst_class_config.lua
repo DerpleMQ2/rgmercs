@@ -1226,6 +1226,7 @@ return {
             spells = {
                 { name = "GroupAtkBuff", },
                 { name = "SingleAtkBuff", },
+                { name = "RunSpeedBuff", },
             },
         },
         {
