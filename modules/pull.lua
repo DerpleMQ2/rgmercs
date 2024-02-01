@@ -26,6 +26,7 @@ local PullStates              = {
     ['PULL_MOVING_TO_WP']    = 6,
     ['PULL_NAV_TO_TARGET']   = 7,
     ['PULL_RETURN_TO_CAMP']  = 8,
+    ['PULL_WAITING_ON_MOB']  = 9,
 }
 
 local PullStateDisplayStrings = {
@@ -37,6 +38,7 @@ local PullStateDisplayStrings = {
     ['PULL_MOVING_TO_WP']    = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_NAV_TO_TARGET']   = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_RETURN_TO_CAMP']  = { Display = ICONS.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_WAITING_ON_MOB']  = { Display = ICONS.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
 }
 
 local PullStatesIDToName      = {}
@@ -1246,6 +1248,16 @@ function Module:GiveTime(combat_state)
 
         RGMercUtils.DoCmd("/face id %d", self.TempSettings.PullID)
 
+        self.TempSettings.PullState = PullStates.PULL_WAITING_ON_MOB
+        -- wait for the mob to reach us.
+        while RGMercUtils.GetTargetDistance() > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius do
+            mq.delay(100)
+            if mq.TLO.Me.Pet.Combat() then
+                RGMercUtils.DoCmd("/squelch /pet back off")
+                mq.delay("1s", function() return (mq.TLO.Pet.PlayerState() or 0) == 0 end)
+                RGMercUtils.DoCmd("/squelch /pet follow")
+            end
+        end
         -- TODO PostPullCampFunc()
     end
 
