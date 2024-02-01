@@ -1250,7 +1250,7 @@ function Module:GiveTime(combat_state)
 
         self.TempSettings.PullState = PullStates.PULL_WAITING_ON_MOB
         -- wait for the mob to reach us.
-        while RGMercUtils.GetTargetDistance() > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius do
+        while mq.TLO.Target.ID() == self.TempSettings.PullID and RGMercUtils.GetTargetDistance() > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius do
             mq.delay(100)
             if mq.TLO.Me.Pet.Combat() then
                 RGMercUtils.DoCmd("/squelch /pet back off")
