@@ -14,6 +14,7 @@ Module.TempSettings.TargetSpawnID = 0
 Module.TempSettings.CurrentWP     = 1
 Module.TempSettings.PullTargets   = {}
 Module.TempSettings.AbortPull     = false
+Module.TempSettings.PullID        = 0
 
 
 local PullStates              = {
@@ -351,6 +352,10 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text(RGMercUtils.FormatTime(nextPull))
             ImGui.TableNextColumn()
+            ImGui.Text("Pull ID")
+            ImGui.TableNextColumn()
+            ImGui.Text(tostring(Module.TempSettings.PullID))
+            ImGui.TableNextColumn()
             ImGui.Text("Pull Target Count")
             ImGui.TableNextColumn()
             ImGui.Text(tostring(#self.TempSettings.PullTargets))
@@ -428,9 +433,11 @@ function Module:Render()
     end
 
     if ImGui.CollapsingHeader("Config Options") then
-        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
-        if pressed then
-            self:SaveSettings(false)
+        if self.ModuleLoaded then
+            self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
+            if pressed then
+                self:SaveSettings(false)
+            end
         end
     end
 end
@@ -879,7 +886,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
     return true
 end
 
-function Module:GiveTime(combat_stateModule)
+function Module:GiveTime(combat_state)
     if not self.settings.DoPull and self.TempSettings.TargetSpawnID == 0 then return end
 
     if not mq.TLO.Navigation.MeshLoaded() then
@@ -897,6 +904,12 @@ function Module:GiveTime(combat_stateModule)
     end
 
     if not self:ShouldPull() then
+        if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
+            -- go back to camp.
+            if campData.returnToCamp and RGMercUtils.GetDistance(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+                RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", campData.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
+            end
+        end
         return
     end
 
@@ -962,7 +975,7 @@ function Module:GiveTime(combat_stateModule)
 
     self.TempSettings.PullState = PullStates.PULL_SCAN
 
-    local pullID = 0
+    self.TempSettings.PullID = 0
 
     if self.TempSettings.TargetSpawnID > 0 then
         local targetSpawn = mq.TLO.Spawn(self.TempSettings.TargetSpawnID)
@@ -973,13 +986,13 @@ function Module:GiveTime(combat_stateModule)
     end
 
     if self.TempSettings.TargetSpawnID > 0 then
-        pullID = self.TempSettings.TargetSpawnID
+        self.TempSettings.PullID = self.TempSettings.TargetSpawnID
     else
         RGMercsLogger.log_debug("Finding Pull Target")
-        pullID = self:FindTarget()
+        self.TempSettings.PullID = self:FindTarget()
     end
 
-    if pullID == 0 and self:IsPullMode("Farm") then
+    if self.TempSettings.PullID == 0 and self:IsPullMode("Farm") then
         -- move to next WP
         self:IncrementWpId()
         -- Here we want to nav to our current waypoint. If we engage an enemy while
@@ -1007,7 +1020,7 @@ function Module:GiveTime(combat_stateModule)
 
     self.TempSettings.PullState = PullStates.PULL_IDLE
 
-    if pullID == 0 then
+    if self.TempSettings.PullID == 0 then
         RGMercsLogger.log_debug("\ayNothing to pull - better luck next time")
         return
     end
@@ -1033,18 +1046,19 @@ function Module:GiveTime(combat_stateModule)
     mq.TLO.Me.Stand()
 
     self.TempSettings.PullState = PullStates.PULL_NAV_TO_TARGET
-    RGMercsLogger.log_debug("\ayFound Target: %d - Attempting to Nav", pullID)
+    RGMercsLogger.log_debug("\ayFound Target: %d - Attempting to Nav", self.TempSettings.PullID)
 
     local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
     local startingXTargs = RGMercUtils.GetXTHaterIDs()
 
-    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", pullID, pullAbility.AbilityRange, "off")
+    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, pullAbility.AbilityRange, "off")
 
     mq.delay(1000)
 
     local abortPull = false
 
-    while mq.TLO.Navigation.Active() do
+    while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
+        RGMercsLogger.log_super_verbose("Pathing to pull id...")
         if self:IsPullMode("Chain") then
             if RGMercUtils.GetXTHaterCount() > self.settings.ChainCount then
                 RGMercsLogger.log_info("\awNOTICE:\ax Gained aggro -- aborting chain pull!")
@@ -1065,7 +1079,7 @@ function Module:GiveTime(combat_stateModule)
             end
         end
 
-        if self:CheckForAbort(pullID) then
+        if self:CheckForAbort(self.TempSettings.PullID) then
             abortPull = true
             break
         end
@@ -1078,11 +1092,11 @@ function Module:GiveTime(combat_stateModule)
 
     -- TODO: PrePullTarget()
 
-    RGMercUtils.SetTarget(pullID)
+    RGMercUtils.SetTarget(self.TempSettings.PullID)
 
     if RGMercUtils.GetSetting('SafeTargeting') then
         -- Hard coding 500 units as our radius as it's probably twice our effective spell range.
-        if RGMercUtils.IsSpawnFightingStranger(mq.TLO.Spawn(pullID), 500) then
+        if RGMercUtils.IsSpawnFightingStranger(mq.TLO.Spawn(self.TempSettings.PullID), 500) then
             abortPull = true
         end
     end
@@ -1094,23 +1108,24 @@ function Module:GiveTime(combat_stateModule)
         if target and target.ID() > 0 then
             RGMercsLogger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
 
-            local successFn = function(self) return RGMercUtils.GetXTHaterCount() > 0 end
+            local successFn = function() return RGMercUtils.GetXTHaterCount() > 0 end
 
             if self:IsPullMode("Chain") then
-                successFn = function(self) return RGMercUtils.GetXTHaterCount() > self.settings.ChainCount end
+                successFn = function() return RGMercUtils.GetXTHaterCount() > self.settings.ChainCount end
             end
 
             if self.settings.PullAbility == PullAbilityIDToName.PetPull then -- PetPull
-                RGMercUtils.PetAttack(pullID)
-                while not successFn(self) do
+                RGMercUtils.PetAttack(self.TempSettings.PullID)
+                while not successFn() do
+                    RGMercsLogger.log_super_verbose("Waiting on pet pull to finish...")
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
-                    RGMercUtils.PetAttack(pullID)
+                    RGMercUtils.PetAttack(self.TempSettings.PullID)
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
 
-                    if self:CheckForAbort(pullID) then
+                    if self:CheckForAbort(self.TempSettings.PullID) then
                         break
                     end
                     mq.delay(10)
@@ -1130,17 +1145,18 @@ function Module:GiveTime(combat_stateModule)
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
 
                 -- We will continue to fire arrows until we aggro our target
-                while not successFn(self) do
+                while not successFn() do
+                    RGMercsLogger.log_super_verbose("Waiting on face pull to finish...")
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
                     mq.doevents()
 
-                    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", pullID, pullAbility.AbilityRange, "on")
+                    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, pullAbility.AbilityRange, "on")
 
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
 
-                    if self:CheckForAbort(pullID) then
+                    if self:CheckForAbort(self.TempSettings.PullID) then
                         break
                     end
                     mq.delay(10)
@@ -1153,24 +1169,26 @@ function Module:GiveTime(combat_stateModule)
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
 
                 -- We will continue to fire arrows until we aggro our target
-                while not successFn(self) do
+                while not successFn() do
+                    RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish...")
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
-                    RGMercUtils.DoCmd("/ranged %d", pullID)
+                    RGMercUtils.DoCmd("/ranged %d", self.TempSettings.PullID)
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
 
-                    if self:CheckForAbort(pullID) then
+                    if self:CheckForAbort(self.TempSettings.PullID) then
                         break
                     end
                     mq.delay(10)
                 end
             else -- AA/Spell/Ability pull
                 mq.delay(5)
-                while not successFn(self) do
+                while not successFn() do
+                    RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...")
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
-                    RGMercUtils.DoCmd("/target ID %d", pullID)
+                    RGMercUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
                     mq.doevents()
 
                     if pullAbility.Type:lower() == "ability" then
@@ -1182,14 +1200,14 @@ function Module:GiveTime(combat_stateModule)
                     elseif pullAbility.Type:lower() == "spell" then
                         local abilityName = pullAbility.AbilityName
                         if type(abilityName) == 'function' then abilityName = abilityName() end
-                        RGMercUtils.UseSpell(abilityName, pullID, false)
+                        RGMercUtils.UseSpell(abilityName, self.TempSettings.PullID, false)
                     end
 
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
 
-                    if self:CheckForAbort(pullID) then
+                    if self:CheckForAbort(self.TempSettings.PullID) then
                         break
                     end
                     mq.delay(10)
@@ -1209,7 +1227,8 @@ function Module:GiveTime(combat_stateModule)
         RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
         mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
 
-        while mq.TLO.Navigation.Active() do
+        while mq.TLO.Navigation.Active() and (combat_state == "Downtime" or RGMercUtils.GetXTHaterCount() > 0) do
+            RGMercsLogger.log_super_verbose("Pathing to camp...")
             if mq.TLO.Me.State():lower() == "feign" or mq.TLO.Me.Sitting() then
                 RGMercsLogger.log_debug("Standing up to Engage Target")
                 mq.TLO.Me.Stand()
@@ -1217,11 +1236,14 @@ function Module:GiveTime(combat_stateModule)
                 mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
             end
 
+            if mq.TLO.Navigation.Paused() then
+                RGMercUtils.DoCmd("/nav pause")
+            end
             mq.doevents()
             mq.delay(10)
         end
 
-        RGMercUtils.DoCmd("/face id %d", pullID)
+        RGMercUtils.DoCmd("/face id %d", self.TempSettings.PullID)
 
         -- TODO PostPullCampFunc()
     end

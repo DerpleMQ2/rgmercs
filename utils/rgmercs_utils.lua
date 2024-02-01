@@ -1844,17 +1844,21 @@ function Utils.AutoCampCheck(config, tempConfig)
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
         if mq.TLO.Navigation.PathExists(navTo)() then
             Utils.DoCmd("/nav %s", navTo)
-            while mq.TLO.Navigation.Active() do
+            while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
                 mq.delay(10)
                 mq.doevents()
             end
         else
             Utils.DoCmd("/moveto loc %d %d|on", tempConfig.AutoCampY, tempConfig.AutoCampX)
-            while mq.TLO.MoveTo.Moving() do
+            while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveTo.Stopped() do
                 mq.delay(10)
                 mq.doevents()
             end
         end
+    end
+
+    if mq.TLO.Navigation.Active() then
+        Utils.DoCmd("/nav stop")
     end
 end
 
