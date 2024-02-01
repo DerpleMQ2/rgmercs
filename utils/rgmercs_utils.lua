@@ -17,6 +17,7 @@ Utils.ShowDownNamed      = false
 Utils.ShowAdvancedConfig = false
 Utils.Memorizing         = false
 Utils.UseGem             = mq.TLO.Me.NumGems()
+Utils.ConfigFilter       = ""
 
 ---@param path string
 ---@return boolean
@@ -3150,7 +3151,7 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for _, k in ipairs(settingNames) do
+        for _, k in ipairs(settingNames, redSettings) do
             if Utils.ShowAdvancedConfig or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
                 if defaults[k].Category == category then
                     if defaults[k].Type == "Combo" then
@@ -3233,7 +3234,7 @@ end
 ---@return table: settings
 ---@return boolean: any_pressed
 ---@return boolean: requires_new_loadout
-function Utils.RenderSettings(settings, defaults, categories)
+function Utils.RenderSettings(settings, defaults, categories, hideControls)
     local any_pressed = false
     local new_loadout = false
 
@@ -3242,21 +3243,36 @@ function Utils.RenderSettings(settings, defaults, categories)
         table.insert(settingNames, k)
     end
 
+    if not hideControls then
+        Utils.ShowAdvancedConfig, _ = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options",
+            Utils.ShowAdvancedConfig)
+
+        Utils.ConfigFilter = ImGui.InputText("Search Configs", Utils.ConfigFilter)
+    end
+
+    local filteredSettings = {}
+
+    if Utils.ConfigFilter:len() > 0 then
+        for _, k in ipairs(settingNames) do
+            local lowerFilter = Utils.ConfigFilter:lower()
+            if k:lower():find(lowerFilter) ~= nil or defaults[k].DisplayName:lower():find(lowerFilter) ~= nil or defaults[k].Category:lower():find(lowerFilter) ~= nil then
+                table.insert(filteredSettings, k)
+            end
+        end
+        settingNames = filteredSettings
+    end
+
     table.sort(settingNames,
         function(k1, k2)
             if defaults[k1].Category == defaults[k2].Category then
                 return defaults[k1].DisplayName < defaults[k2].DisplayName
             else
-                return defaults[k1].Category <
-                    defaults[k2].Category
+                return defaults[k1].Category < defaults[k2].Category
             end
         end)
 
     local catNames = categories and categories:toList() or { "", }
     table.sort(catNames)
-
-    Utils.ShowAdvancedConfig, _ = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options",
-        Utils.ShowAdvancedConfig)
 
     if ImGui.BeginTabBar("Settings_Categories") then
         for _, c in ipairs(catNames) do

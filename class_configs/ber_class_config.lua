@@ -2,10 +2,12 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    ['Modes'] = {
+    _version          = "0.1a",
+    _author           = "Derple",
+    ['Modes']         = {
         'DPS',
     },
-    ['ItemSets'] = {
+    ['ItemSets']      = {
         ['Epic'] = {
             "Vengeful Taelosian Blood Axe",
             "Raging Taelosian Alloy Axe",
@@ -14,7 +16,7 @@ return {
             "Cohort's Warmonger Coat",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']   = {
         ['EndRegen'] = {
             "Second Wind",
             "Third Wind",
@@ -365,7 +367,7 @@ return {
             end,
         },
     },
-    ['Rotations'] = {
+    ['Rotations']     = {
         ['Downtime'] = {
             {
                 name = "SummonAxes",

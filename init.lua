@@ -201,26 +201,30 @@ local function RGMercsGUI()
                     end
                     ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
-                        local settingsRef = RGMercConfig:GetSettings()
-                        settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
-                        if pressed then
-                            RGMercConfig:SaveSettings(false)
+                        ImGui.Indent()
+                        if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
+                            local settingsRef = RGMercConfig:GetSettings()
+                            settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
+                            if pressed then
+                                RGMercConfig:SaveSettings(false)
+                            end
                         end
-                    end
 
-                    for n, s in pairs(RGMercConfig.SubModuleSettings) do
-                        if RGMercModules:ExecModule(n, "ShouldRender") then
-                            ImGui.PushID(n .. "_config_hdr")
-                            if s and s.settings and s.defaults and s.categories then
-                                if ImGui.CollapsingHeader(string.format("%s: Config Options", n)) then
-                                    s.settings, pressed, _ = RGMercUtils.RenderSettings(s.settings, s.defaults, s.categories)
-                                    if pressed then
-                                        RGMercModules:ExecModule(n, "SaveSettings", true)
+                        for n, s in pairs(RGMercConfig.SubModuleSettings) do
+                            if RGMercModules:ExecModule(n, "ShouldRender") then
+                                ImGui.PushID(n .. "_config_hdr")
+                                if s and s.settings and s.defaults and s.categories then
+                                    if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
+                                        s.settings, pressed, _ = RGMercUtils.RenderSettings(s.settings, s.defaults, s.categories, true)
+                                        if pressed then
+                                            RGMercModules:ExecModule(n, "SaveSettings", true)
+                                        end
                                     end
                                 end
+                                ImGui.PopID()
                             end
-                            ImGui.PopID()
                         end
+                        ImGui.Unindent()
                     end
 
                     if ImGui.CollapsingHeader("Outside Assist List") then
