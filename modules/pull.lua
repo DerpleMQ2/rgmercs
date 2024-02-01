@@ -179,20 +179,21 @@ end
 
 function Module:OnCombatModeChanged()
     self.TempSettings.ValidPullAbilities = {}
+    PullAbilityIDToName = {}
 
     for k, v in ipairs(Module.Constants.PullAbilities) do
         if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
             table.insert(self.TempSettings.ValidPullAbilities, v)
+            PullAbilityIDToName[v.id] = k
         end
-        PullAbilityIDToName[v.id] = k
     end
 
     -- pull in class specific configs.
     for k, v in ipairs(RGMercModules:ExecModule("Class", "GetPullAbilities")) do
         if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
             table.insert(self.TempSettings.ValidPullAbilities, v)
+            PullAbilityIDToName[v.id] = k
         end
-        PullAbilityIDToName[v.id] = k
     end
 end
 
