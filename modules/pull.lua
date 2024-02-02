@@ -315,13 +315,16 @@ function Module:Render()
             end
         end
 
-        if ImGui.SmallButton("Set New Camp Here") then
-            RGMercUtils.DoCmd("/rgl campon")
-        end
+        local campData = RGMercModules:ExecModule("Movement", "GetCampData")
 
-        ImGui.SameLine()
-        if ImGui.SmallButton("Break Camp") then
-            RGMercUtils.DoCmd("/rgl campoff")
+        if campData.returnToCamp then
+            if ImGui.SmallButton("Break Camp") then
+                RGMercUtils.DoCmd("/rgl campoff")
+            end
+        else
+            if ImGui.SmallButton("Set New Camp Here") then
+                RGMercUtils.DoCmd("/rgl campon")
+            end
         end
 
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
