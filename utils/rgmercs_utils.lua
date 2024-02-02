@@ -2271,6 +2271,10 @@ end
 function Utils.HandleMezAnnounce(msg)
     if Utils.GetSetting('MezAnnounce') then
         Utils.PrintGroupMessage(msg)
+        if Utils.GetSetting('MezAnnounceGroup') then
+            local cleanMsg = msg:gsub("\a.", "")
+            Utils.DoCmd("/gsay %s", cleanMsg)
+        end
     else
         RGMercsLogger.log_debug(msg)
     end
