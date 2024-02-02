@@ -18,27 +18,29 @@ Module.TempSettings.PullID        = 0
 
 
 local PullStates              = {
-    ['PULL_IDLE']            = 1,
-    ['PULL_GROUPWATCH_WAIT'] = 2,
-    ['PULL_NAV_INTERRUPT']   = 3,
-    ['PULL_SCAN']            = 4,
-    ['PULL_PULLING']         = 5,
-    ['PULL_MOVING_TO_WP']    = 6,
-    ['PULL_NAV_TO_TARGET']   = 7,
-    ['PULL_RETURN_TO_CAMP']  = 8,
-    ['PULL_WAITING_ON_MOB']  = 9,
+    ['PULL_IDLE']               = 1,
+    ['PULL_GROUPWATCH_WAIT']    = 2,
+    ['PULL_NAV_INTERRUPT']      = 3,
+    ['PULL_SCAN']               = 4,
+    ['PULL_PULLING']            = 5,
+    ['PULL_MOVING_TO_WP']       = 6,
+    ['PULL_NAV_TO_TARGET']      = 7,
+    ['PULL_RETURN_TO_CAMP']     = 8,
+    ['PULL_WAITING_ON_MOB']     = 9,
+    ['PULL_WAITING_SHOULDPULL'] = 10,
 }
 
 local PullStateDisplayStrings = {
-    ['PULL_IDLE']            = { Display = ICONS.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
-    ['PULL_GROUPWATCH_WAIT'] = { Display = ICONS.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_NAV_INTERRUPT']   = { Display = ICONS.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
-    ['PULL_SCAN']            = { Display = ICONS.FA_EYE, Text = "Scanning for Targest", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_PULLING']         = { Display = ICONS.FA_BULLSEYE, Text = "Pulling", Color = { r = 0.8, g = 0.03, b = 0.02, a = 1.0, }, },
-    ['PULL_MOVING_TO_WP']    = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_NAV_TO_TARGET']   = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_RETURN_TO_CAMP']  = { Display = ICONS.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_WAITING_ON_MOB']  = { Display = ICONS.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_IDLE']               = { Display = ICONS.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
+    ['PULL_GROUPWATCH_WAIT']    = { Display = ICONS.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_NAV_INTERRUPT']      = { Display = ICONS.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
+    ['PULL_SCAN']               = { Display = ICONS.FA_EYE, Text = "Scanning for Targest", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_PULLING']            = { Display = ICONS.FA_BULLSEYE, Text = "Pulling", Color = { r = 0.8, g = 0.03, b = 0.02, a = 1.0, }, },
+    ['PULL_MOVING_TO_WP']       = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_NAV_TO_TARGET']      = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_RETURN_TO_CAMP']     = { Display = ICONS.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_WAITING_ON_MOB']     = { Display = ICONS.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_WAITING_SHOULDPULL'] = { Display = ICONS.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
 }
 
 local PullStatesIDToName      = {}
@@ -931,6 +933,7 @@ function Module:GiveTime(combat_state)
     if not self:ShouldPull() then
         if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
             -- go back to camp.
+            self.TempSettings.PullState = PullStates.PULL_WAITING_SHOULDPULL
             if campData.returnToCamp and RGMercUtils.GetDistance(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                 RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
             end
