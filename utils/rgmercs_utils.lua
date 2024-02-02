@@ -3151,7 +3151,7 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for _, k in ipairs(settingNames, redSettings) do
+        for _, k in ipairs(settingNames) do
             if Utils.ShowAdvancedConfig or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
                 if defaults[k].Category == category then
                     if defaults[k].Type == "Combo" then
