@@ -320,7 +320,7 @@ local function RGInit(...)
         mainAssist = mq.TLO.Group.MainAssist() or ""
     end
 
-    for k, v in ipairs(RGMercConfig.ExpansionIDToName) do
+    for k, v in ipairs(RGMercConfig.Constants.ExpansionIDToName) do
         RGMercsLogger.log_debug("\ayExpansion \at%s\ao[\am%d\ao]: %s", v, k, RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
     end
 

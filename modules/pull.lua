@@ -44,17 +44,17 @@ local PullStateDisplayStrings = {
 local PullStatesIDToName      = {}
 for k, v in pairs(PullStates) do PullStatesIDToName[v] = k end
 
-Module.TempSettings.PullState  = PullStates.PULL_IDLE
+Module.TempSettings.PullState          = PullStates.PULL_IDLE
 
-Module.Constants               = {}
-Module.Constants.PullModes     = {
+Module.Constants                       = {}
+Module.Constants.PullModes             = {
     "Normal",
     "Chain",
     "Hunt",
     "Farm",
 }
 
-Module.Constants.PullAbilities = {
+Module.Constants.PullAbilities         = {
     {
         id = "Face",
         Type = "Special",
@@ -100,11 +100,6 @@ Module.Constants.PullAbilities = {
         end,
     },
 }
-local ConColors                = {
-    "Grey", "Green", "Light Blue", "Blue", "White", "Yellow", "Red",
-}
-local ConColorsNameToId        = {}
-for i, v in ipairs(ConColors) do ConColorsNameToId[v:upper()] = i end
 
 local PullAbilityIDToName              = {}
 
@@ -119,8 +114,8 @@ Module.DefaultConfig                   = {
     ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pull Distance", Tooltip = "Distnace to pull", Default = 90, Min = 1, Max = 10000, },
     ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pull Distance", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 150, },
     ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pull Distance", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
-    ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Type = "Combo", ComboOptions = ConColors, },
-    ['PullMaxCon']         = { DisplayName = "Pull Max Con", Category = "Pull Targets", Tooltip = "Max Con Mobs to consider pulling", Default = 5, Type = "Combo", ComboOptions = ConColors, },
+    ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
+    ['PullMaxCon']         = { DisplayName = "Pull Max Con", Category = "Pull Targets", Tooltip = "Max Con Mobs to consider pulling", Default = 5, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
     ['UsePullLevels']      = { DisplayName = "Use Pull Levels", Category = "Pull Targets", Tooltip = "Use Min and Max Levels Instead of Con.", Default = false, ConfigType = "Advanced", },
     ['PullMinLevel']       = { DisplayName = "Pull Min Level", Category = "Pull Targets", Tooltip = "Min Level Mobs to consider pulling", Default = mq.TLO.Me.Level() - 3, Min = 1, Max = 150, ConfigType = "Advanced", },
     ['PullMaxLevel']       = { DisplayName = "Pull Max Level", Category = "Pull Targets", Tooltip = "Max Level Mobs to consider pulling", Default = mq.TLO.Me.Level() + 3, Min = 1, Max = 150, ConfigType = "Advanced", },
@@ -768,7 +763,7 @@ function Module:FindTarget()
 
                         if not self.settings.UsePullLevels then
                             -- check cons.
-                            local conLevel = ConColorsNameToId[spawn.ConColor()]
+                            local conLevel = RGMercConfig.Constants.ConColorsNameToId[spawn.ConColor()]
                             if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
                                 doInsert = false
                                 RGMercsLogger.log_debug("\ay  - Ignoring mob '%s' due to con color. Min = %d, Max = %d, Mob = %d (%s)", spawn.CleanName(),
@@ -1231,6 +1226,8 @@ function Module:GiveTime(combat_state)
                         local abilityName = pullAbility.AbilityName
                         if type(abilityName) == 'function' then abilityName = abilityName() end
                         RGMercUtils.UseSpell(abilityName, self.TempSettings.PullID, false)
+                    else
+                        RGMercsLogger.log_error("\arInvalid PullAbilityType: %s :: %s", pullAbility.Type, pullAbility.id)
                     end
 
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
@@ -1276,13 +1273,21 @@ function Module:GiveTime(combat_state)
         RGMercUtils.DoCmd("/face id %d", self.TempSettings.PullID)
 
         self.TempSettings.PullState = PullStates.PULL_WAITING_ON_MOB
+
+        -- give the mob 2 mins to get to us.
+        local maxPullWait = 1000 * 120 -- 2 mins
         -- wait for the mob to reach us.
-        while mq.TLO.Target.ID() == self.TempSettings.PullID and RGMercUtils.GetTargetDistance() > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius do
+        while mq.TLO.Target.ID() == self.TempSettings.PullID and RGMercUtils.GetTargetDistance() > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius and maxPullWait > 0 do
             mq.delay(100)
             if mq.TLO.Me.Pet.Combat() then
                 RGMercUtils.DoCmd("/squelch /pet back off")
                 mq.delay("1s", function() return (mq.TLO.Pet.PlayerState() or 0) == 0 end)
                 RGMercUtils.DoCmd("/squelch /pet follow")
+            end
+            maxPullWait = maxPullWait - 100
+
+            if self:CheckForAbort(self.TempSettings.PullID) then
+                break
             end
         end
         -- TODO PostPullCampFunc()

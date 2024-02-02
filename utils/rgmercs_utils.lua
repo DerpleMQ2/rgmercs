@@ -1955,7 +1955,7 @@ end
 ---@param name string
 ---@return boolean
 function Utils.HaveExpansion(name)
-    return mq.TLO.Me.HaveExpansion(RGMercConfig.ExpansionNameToID[name])
+    return mq.TLO.Me.HaveExpansion(RGMercConfig.Constants.ExpansionNameToID[name])
 end
 
 ---@param class string

@@ -63,9 +63,7 @@ Config.Constants.CastResults         = {
 Config.Constants.CastResultsIdToName = {}
 for k, v in pairs(Config.Constants.CastResults) do Config.Constants.CastResultsIdToName[v] = k end
 
-Config.SubModuleSettings   = {}
-
-Config.ExpansionNameToID   = {
+Config.Constants.ExpansionNameToID = {
     ['EXPANSION_LEVEL_CLASSIC'] = 0,  -- No Expansion
     ['EXPANSION_LEVEL_ROK']     = 1,  -- The Ruins of Kunark
     ['EXPANSION_LEVEL_SOV']     = 2,  -- The Scars of Velious
@@ -99,7 +97,10 @@ Config.ExpansionNameToID   = {
     ['EXPANSION_LEVEL_LS']      = 30, -- Laurion's Song
 }
 
-Config.Constants.LogLevels = {
+Config.Constants.ExpansionIDToName = {}
+for k, v in pairs(Config.Constants.ExpansionNameToID) do Config.Constants.ExpansionIDToName[v] = k end
+
+Config.Constants.LogLevels         = {
     "Errors",
     "Warnings",
     "Info",
@@ -108,8 +109,13 @@ Config.Constants.LogLevels = {
     "Super-Verbose",
 }
 
-Config.ExpansionIDToName   = {}
-for k, v in pairs(Config.ExpansionNameToID) do Config.ExpansionIDToName[v] = k end
+Config.Constants.ConColors         = {
+    "Grey", "Green", "Light Blue", "Blue", "White", "Yellow", "Red",
+}
+Config.Constants.ConColorsNameToId = {}
+for i, v in ipairs(Config.Constants.ConColors) do Config.Constants.ConColorsNameToId[v:upper()] = i end
+
+Config.SubModuleSettings = {}
 
 -- Defaults
 Config.DefaultConfig = {

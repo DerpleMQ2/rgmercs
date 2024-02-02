@@ -1349,6 +1349,32 @@ return {
             },
         },
     },
+    ['PullAbilities']     = {
+        {
+            id = 'StunTimer4',
+            Type = "Spell",
+            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer4')() or "" end,
+            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer4')() or "" end,
+            AbilityRange = 150,
+            cond = function(self)
+                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('StunTimer4')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
+            id = 'StunTimer5',
+            Type = "Spell",
+            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer5')() or "" end,
+            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer5')() or "" end,
+            AbilityRange = 150,
+            cond = function(self)
+                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('StunTimer5')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+    },
     ['DefaultConfig']     = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
         ['DoNuke']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
