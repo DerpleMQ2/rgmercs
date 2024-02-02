@@ -45,6 +45,14 @@ function Utils.BroadcastUpdate(module, event, data)
     })
 end
 
+---@param t table
+---@return number
+function Utils.GetTableSize(t)
+    local i = 0
+    for _, _ in pairs(t) do i = i + 1 end
+    return i
+end
+
 ---@param time integer # in seconds
 ---@return string
 function Utils.FormatTime(time)
@@ -705,6 +713,7 @@ end
 ---@param targetName string
 ---@param uiCheck boolean # UI Cannot do DanNet checks.
 function Utils.CheckPCNeedsBuff(spell, targetId, targetName, uiCheck)
+    if not spell or not spell() then return false end
     if targetId == mq.TLO.Me.ID() then
         return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() == nil
     elseif mq.TLO.DanNet(targetName)() == nil then
@@ -3244,8 +3253,10 @@ function Utils.RenderSettings(settings, defaults, categories, hideControls)
     end
 
     if not hideControls then
-        Utils.ShowAdvancedConfig, _ = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options",
-            Utils.ShowAdvancedConfig)
+        RGMercConfig:GetSettings().ShowAdvancedOpts, changed = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options", RGMercConfig:GetSettings().ShowAdvancedOpts)
+        if changed then
+            RGMercConfig:SaveSettings(true)
+        end
 
         Utils.ConfigFilter = ImGui.InputText("Search Configs", Utils.ConfigFilter)
     end

@@ -210,6 +210,7 @@ Config.DefaultConfig = {
 
     -- [ UI ] --
     ['BgOpacity']         = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = "1.0", ConfigType = "Advanced", },
+    ['ShowAdvancedOpts']  = { DisplayName = "Show Advanced Options", Category = "UI", Tooltip = "Show Advanced Options", Type = "Custom", Default = false, ConfigType = "Advanced", },
 }
 
 Config.DefaultCategories = Set.new({})

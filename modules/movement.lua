@@ -345,7 +345,7 @@ function Module:DoClickies()
             RGMercsLogger.log_verbose("Looking for clicky item: %s found: %s", setting, RGMercUtils.BoolToColorString(item() ~= nil))
 
             if item then
-                if item.RequiredLevel() <= mq.TLO.Me.Level() then
+                if (item.RequiredLevel() or 0) <= mq.TLO.Me.Level() then
                     if not RGMercUtils.BuffActiveByID(item.Clicky.Spell.RankName.ID() or 0) then
                         RGMercsLogger.log_verbose("\aaCasting Item: \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
                         RGMercUtils.UseItem(item.Name(), mq.TLO.Me.ID())

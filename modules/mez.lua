@@ -110,7 +110,7 @@ function Module:Render()
         ImGui.Separator()
         -- CCEd targets
         if ImGui.CollapsingHeader("CC Target List") then
-            if ImGui.BeginTable("MezzedList", 4, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
+            if ImGui.BeginTable("MezzedList", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
                 ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
                 ImGui.TableSetupColumn('Duration', (ImGuiTableColumnFlags.WidthFixed), 150.0)
@@ -129,7 +129,7 @@ function Module:Render()
                     else
                         ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.02, 0.02, 1)
                     end
-                    ImGui.Text(string.format("%s", RGMercUtils.FormatTime(data.duration / 1000)))
+                    ImGui.Text(string.format("%s", RGMercUtils.FormatTime(math.max(0, data.duration / 1000))))
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
                     ImGui.Text(string.format("%s", data.name))
@@ -420,22 +420,24 @@ end
 function Module:ProcessMezList()
     -- Assume by default we never need to block for mez. We'll set this if-and-only-if
     -- we need to mez but our ability is on cooldown.
-
+    RGMercsLogger.log_debug("\ayProcessMezList() :: Loop")
     local mezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSpell")
-    local aeMezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezAESpell")
 
-    if #self.TempSettings.MezTracker <= 1 then
+    if RGMercUtils.GetTableSize(self.TempSettings.MezTracker) <= 1 then
         -- If we have only one spawn we're tracking, we don't need to be mezzing
+        RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Only 1 Spawn - let it break")
         return
     end
 
     if not self.settings.UseSingleTgtMez then
+        RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Single Target Mezzing is off...")
         return
     end
 
     local removeList = {}
     for id, data in pairs(self.TempSettings.MezTracker) do
         local spawn = mq.TLO.Spawn(id)
+        RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Checking...", id)
 
         if not spawn or not spawn() or spawn.Dead() or spawn.Type():lower() == "corpse" then
             table.insert(removeList, id)
@@ -450,15 +452,16 @@ function Module:ProcessMezList()
                 -- Only worry about mezzing if their mez timer less than the time it will take to cast
                 -- the mez spell. MyCastTime is in ms, timer is in deciseconds.
                 -- We already fudge the mez timer when we set it.
-                local spell = mq.TLO.Spell(data.mez_spell)
+                local spell = mezSpell
                 if data.duration > (spell.MyCastTime() / 100) or spawn.Distance() > self.settings.MezRadius or not spawn.LineOfSight() then
                     RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Timer(%s > %s) Distance(%d) LOS(%s)", id, RGMercUtils.FormatTime(data.duration / 1000),
                         RGMercUtils.FormatTime(spell.MyCastTime() / 100), spawn.Distance(), RGMercUtils.BoolToColorString(spawn.LineOfSight()))
                 else
                     if id == RGMercConfig.Globals.AutoTargetID then
-                        RGMercsLogger.log_debug("\ayProcessMezList(%d) ::Mob is MA's target skipping", id)
+                        RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Mob is MA's target skipping", id)
                         table.insert(removeList, id)
                     else
+                        RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Mob needs mezed.", id)
                         if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() then
                             RGMercsLogger.log_debug(" \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start mez.")
                             RGMercUtils.DoCmd("/attack off")
@@ -508,11 +511,11 @@ function Module:DoMez()
 
     self:UpdateTimings()
 
-    if RGMercUtils.GetXTHaterCount() > self.settings.MezStartCount then
+    if RGMercUtils.GetXTHaterCount() >= self.settings.MezStartCount then
         self:UpdateMezList()
     end
 
-    if (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell)()) and #self.TempSettings.MezTracker >= 1 then
+    if (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell)()) and RGMercUtils.GetTableSize(self.TempSettings.MezTracker) >= 1 then
         self:ProcessMezList()
     end
 end
