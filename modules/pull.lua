@@ -47,6 +47,7 @@ local PullStatesIDToName      = {}
 for k, v in pairs(PullStates) do PullStatesIDToName[v] = k end
 
 Module.TempSettings.PullState          = PullStates.PULL_IDLE
+Module.TempSettings.PullStateReason    = ""
 
 Module.Constants                       = {}
 Module.Constants.PullModes             = {
@@ -342,16 +343,20 @@ function Module:Render()
             ImGui.Text("Pull State")
             ImGui.TableNextColumn()
             local stateData = PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
+            local stateColor = ImGui.GetColorU32(stateData.Color.r or 1.0, stateData.Color.g or 1.0, stateData.Color.b or 1.0, stateData.Color.a or 1.0)
+            ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
             if not stateData then
-                ImGui.PushStyleColor(ImGuiCol.Text, 1, 1, 1, 1)
                 ImGui.Text("Invalid State Data... This should auto resolve.")
-                ImGui.PopStyleColor()
             else
-                ImGui.PushStyleColor(ImGuiCol.Text, stateData.Color.r, stateData.Color.g, stateData.Color.b, stateData.Color.a)
                 ImGui.Text(stateData.Display .. " " .. stateData.Text)
-                ImGui.PopStyleColor()
             end
-
+            ImGui.PopStyleColor()
+            ImGui.TableNextColumn()
+            ImGui.Text("Pull State Reason")
+            ImGui.TableNextColumn()
+            ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
+            ImGui.Text(self.TempSettings.PullStateReason:len() > 0 and self.TempSettings.PullStateReason or "N/A")
+            ImGui.PopStyleColor()
             ImGui.TableNextColumn()
             ImGui.Text("Should Pull")
             ImGui.TableNextColumn()
@@ -564,73 +569,73 @@ function Module:DeleteWayPoint(idx)
     end
 end
 
---- @return boolean
+--- @return boolean, string
 function Module:ShouldPull()
     local me = mq.TLO.Me
 
     if me.PctHPs() < self.settings.PullHPPct then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctHPs < %d", self.settings.PullHPPct)
-        return false
+        return false, string.format("PctHPs < %d", self.settings.PullHPPct)
     end
 
     if me.MaxMana() > 0 and me.PctMana() < self.settings.PullManaPct then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctMana < %d", self.settings.PullManaPct)
-        return false
+        return false, string.format("PctMana < %d", self.settings.PullManaPct)
     end
 
     if RGMercUtils.SongActive("Restless Ice") then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
-        return false
+        return false, string.format("Restless Ice")
     end
 
     if RGMercUtils.SongActive("Restless Ice Infection") then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
-        return false
+        return false, string.format("Ice Infection")
     end
 
-    if RGMercUtils.BuffActiveByName("Resurrection Sickness") then return false end
+    if RGMercUtils.BuffActiveByName("Resurrection Sickness") then return false, string.format("Resurrection Sickness") end
 
     if (me.Snared.ID() or 0 > 0) then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am snared!")
-        return false
+        return false, string.format("Snared")
     end
 
     if (me.Rooted.ID() or 0 > 0) then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am rooted!")
-        return false
+        return false, string.format("Rooted")
     end
 
     if (me.Poisoned.ID() or 0 > 0) and not (me.Tashed.ID()) or 0 > 0 then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am poisoned!")
-        return false
+        return false, string.format("Poisoned")
     end
 
     if (me.Diseased.ID() or 0 > 0) then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am diseased!")
-        return false
+        return false, string.format("Diseased")
     end
 
     if (me.Cursed.ID() or 0 > 0) then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am cursed!")
-        return false
+        return false, string.format("Cursed")
     end
 
     if (me.Corrupted.ID() or 0 > 0) then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am corrupted!")
-        return false
+        return false, string.format("Corrupted")
     end
 
     if self:IsPullMode("Chain") and RGMercUtils.GetXTHaterCount() > self.settings.ChainCount then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
-        return false
+        return false, string.format("XTargetCount(%d) > ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
     end
 
     if not self:IsPullMode("Chain") and RGMercUtils.GetXTHaterCount() > 0 then
-        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > 1", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
-        return false
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > 0", RGMercUtils.GetXTHaterCount())
+        return false, string.format("XTargetCount(%d) > 0", RGMercUtils.GetXTHaterCount())
     end
 
-    return true
+    return true, ""
 end
 
 function Module:FarmFullInvActions()
@@ -657,11 +662,11 @@ end
 ---@param classes table|nil # mq.Set type
 ---@param resourceStartPct number
 ---@param resourceStopPct number
----@return boolean
+---@return boolean, string
 function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, campData, returnToCamp)
     local groupCount = mq.TLO.Group.Members()
 
-    if not groupCount or groupCount == 0 then return true end
+    if not groupCount or groupCount == 0 then return true, "" end
 
     for i = 1, groupCount do
         local member = mq.TLO.Group.Member(i)
@@ -671,32 +676,32 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                 local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceStopPct or resourceStartPct
                 if member.PctHPs() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
-                    return false
+                    return false, string.format("%s Low HP", member.CleanName())
                 end
                 if member.Class.CanCast() and member.PctMana() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
-                    return false
+                    return false, string.format("%s Low Mana", member.CleanName())
                 end
                 if member.PctEndurance() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
-                    return false
+                    return false, string.format("%s Low End", member.CleanName())
                 end
 
                 if member.Hovering() then
                     RGMercUtils.PrintGroupMessage("%s is dead - Holding pulls!", member.CleanName())
-                    return false
+                    return false, string.format("%s Dead", member.CleanName())
                 end
 
                 if member.OtherZone() then
                     RGMercUtils.PrintGroupMessage("%s is in another zone - Holding pulls!", member.CleanName())
-                    return false
+                    return false, string.format("%s Out of Zone", member.CleanName())
                 end
 
                 if (member.Distance() or 0) >
 
                     RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                     RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
-                    return false
+                    return false, string.format("%s Too Far", member.CleanName())
                 end
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
@@ -704,13 +709,13 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                         if returnToCamp and RGMercUtils.GetDistance(member.Y(), member.X(), campData.AutoCampX, campData.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(), campData.AutoCampY,
                                 campData.AutoCampX, campData.AutoCampZ, RGMercConfig.SubModuleSettings.settings.Movement.settings.AutoCampRadius)
-                            return false
+                            return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     else
                         if RGMercUtils.GetDistance(member.Y(), member.X(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
                                 RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius)
-                            return false
+                            return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     end
                 end
@@ -718,7 +723,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
         end
     end
 
-    return true
+    return true, ""
 end
 
 function Module:FindTarget()
@@ -879,6 +884,13 @@ function Module:IsPullState(state)
     return self.TempSettings.PullState == PullStates[state]
 end
 
+---@param state number
+---@param reason string
+function Module:SetPullState(state, reason)
+    self.TempSettings.PullState = state
+    self.TempSettings.PullStateReason = reason
+end
+
 function Module:NavToWaypoint(loc, ignoreAggro)
     -- if DoMed is set it will take care of standing us up
     if mq.TLO.Me.Sitting() then
@@ -913,6 +925,10 @@ function Module:NavToWaypoint(loc, ignoreAggro)
     return true
 end
 
+function Module:GetPullStateTargetInfo()
+    return string.format("%s(%d) Dist(%d)", RGMercUtils.GetTargetCleanName(), RGMercUtils.GetTargetID(), RGMercUtils.GetTargetDistance())
+end
+
 function Module:GiveTime(combat_state)
     if not self.settings.DoPull and self.TempSettings.TargetSpawnID == 0 then return end
 
@@ -930,10 +946,11 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    if not self:ShouldPull() then
+    local shouldPull, reason = self:ShouldPull()
+    if not shouldPull then
         if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
             -- go back to camp.
-            self.TempSettings.PullState = PullStates.PULL_WAITING_SHOULDPULL
+            self:SetPullState(PullStates.PULL_WAITING_SHOULDPULL, reason)
             if campData.returnToCamp and RGMercUtils.GetDistance(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                 RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
             end
@@ -946,24 +963,27 @@ function Module:GiveTime(combat_state)
     -- GROUPWATCH and NAVINTERRUPT are the two states we can't reset. In the future it may be best to
     -- limit this to only the states we know should be transitionable to the IDLE state.
     if self.TempSettings.PullState ~= PullStates.PULL_GROUPWATCH_WAIT and self.TempSettings.PullState ~= PullStates.PULL_NAV_INTERRUPT then
-        self.TempSettings.PullState = PullStates.PULL_IDLE
+        self:SetPullState(PullStates.PULL_IDLE, "")
     end
 
     self.TempSettings.LastPull = os.clock()
 
     if self.settings.GroupWatch == 2 then
-        if not self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData.campSettings, campData.returnToCamp) then
-            self.TempSettings.PullState = PullStates.PULL_GROUPWATCH_WAIT
+        local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct,
+            campData.campSettings, campData.returnToCamp)
+        if not groupReady then
+            self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
             return
         end
     elseif self.settings.GroupWatch == 3 then
-        if not self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData.campSettings, campData.returnToCamp) then
-            self.TempSettings.PullState = PullStates.PULL_GROUPWATCH_WAIT
+        local groupReady, groupReason = self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData.campSettings, campData.returnToCamp)
+        if not groupReady then
+            self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
             return
         end
     end
 
-    self.TempSettings.PullState = PullStates.PULL_IDLE
+    self:SetPullState(PullStates.PULL_IDLE, "")
 
     -- We're ready to pull, but first, check if we're in farm mode and if we were interrupted
     if self:IsPullMode("Farm") then
@@ -971,7 +991,7 @@ function Module:GiveTime(combat_state)
         if currentWpId == 0 then
             RGMercsLogger.log_error("\arYou do not have a valid WP ID(%d) for this zone(%s::%s) - Aborting!", self.TempSettings.CurrentWP, mq.TLO.Zone.Name(),
                 mq.TLO.Zone.ShortName())
-            self.TempSettings.PullState = PullStates.PULL_IDLE
+            self:SetPullState(PullStates.PULL_IDLE, "")
             self.settings.DoPull = 0
             return
         end
@@ -985,15 +1005,15 @@ function Module:GiveTime(combat_state)
             -- We're not ready to pull yet as we haven't made it to our waypoint. Keep navigating if we don't have a full inventory
             if mq.TLO.Me.FreeInventory() == 0 then self:FarmFullInvActions() end
 
-            self.TempSettings.PullState = PullStates.PULL_MOVING_TO_WP
+            self:SetPullState(PullStates.PULL_MOVING_TO_WP, string.format("WP Id: %d", currentWpId))
             -- TODO: PreNav Actions
             if not self:NavToWaypoint(self:GetWPById(currentWpId)) then
-                self.TempSettings.PullState = PullStates.PULL_NAV_INTERRUPT
+                self:SetPullState(PullStates.PULL_NAVINTERRUPT, "")
                 return
             else
-                self.TempSettings.PullState = PullStates.PULL_IDLE
+                self:SetPullState(PullStates.PULL_IDLE, "")
             end
-            self.TempSettings.PullState = PullStates.PULL_IDLE
+            self:SetPullState(PullStates.PULL_IDLE, "")
         end
 
         -- We're not in an interrupted state if we make it this far -- so
@@ -1001,7 +1021,7 @@ function Module:GiveTime(combat_state)
         if mq.TLO.Me.FreeInventory() == 0 then self:FarmFullInvActions() end
     end
 
-    self.TempSettings.PullState = PullStates.PULL_SCAN
+    self:SetPullState(PullStates.PULL_SCAN, "")
 
     self.TempSettings.PullID = 0
 
@@ -1031,22 +1051,21 @@ function Module:GiveTime(combat_state)
         -- TODO: PreNav()
         --/if (${SubDefined[${Zone.ShortName}_PreNav_${Pull_FarmWPNum}]}) /call ${Zone.ShortName}_PreNav_${Pull_FarmWPNum}
 
-        self.TempSettings.PullState = PullStates.PULL_MOVING_TO_WP
-
         local wpData = self:GetWPById(self:GetCurrentWpId())
+        self:SetPullState(PullStates.PULL_MOVING_TO_WP, string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z))
         if not self:NavToWaypoint(string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z)) then
-            self.TempSettings.PullState = PullStates.PULL_NAVINTERRUPT
+            self:SetPullState(PullStates.PULL_NAVINTERRUPT, "")
             return
         else
             -- TODO: AtWP()
             --/if (${SubDefined[${Zone.ShortName}_AtWaypoint_${Pull_FarmWPNum}]}) /call ${Zone.ShortName}_AtWaypoint_${Pull_FarmWPNum}
         end
 
-        self.TempSettings.PullState = PullStates.PULL_IDLE
+        self:SetPullState(PullStates.PULL_IDLE, "")
         return
     end
 
-    self.TempSettings.PullState = PullStates.PULL_IDLE
+    self:SetPullState(PullStates.PULL_IDLE, "")
 
     if self.TempSettings.PullID == 0 then
         RGMercsLogger.log_debug("\ayNothing to pull - better luck next time")
@@ -1073,13 +1092,13 @@ function Module:GiveTime(combat_state)
 
     mq.TLO.Me.Stand()
 
-    self.TempSettings.PullState = PullStates.PULL_NAV_TO_TARGET
+    self:SetPullState(PullStates.PULL_NAV_TO_TARGET, string.format("Id: %d", self.TempSettings.PullID))
     RGMercsLogger.log_debug("\ayFound Target: %d - Attempting to Nav", self.TempSettings.PullID)
 
     local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
     local startingXTargs = RGMercUtils.GetXTHaterIDs()
 
-    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, pullAbility.AbilityRange, "off")
+    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, pullAbility.AbilityRange, "on")
 
     mq.delay(1000)
 
@@ -1131,7 +1150,8 @@ function Module:GiveTime(combat_state)
 
     if abortPull == false then
         local target = mq.TLO.Target
-        self.TempSettings.PullState = PullStates.PULL_PULLING
+        self:SetPullState(PullStates.PULL_PULLING, self:GetPullStateTargetInfo())
+
 
         if target and target.ID() > 0 then
             RGMercsLogger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
@@ -1252,7 +1272,7 @@ function Module:GiveTime(combat_state)
 
     if self:IsPullMode("Normal") or self:IsPullMode("Chain") then
         -- Nav back to camp.
-        self.TempSettings.PullState = PullStates.PULL_RETURN_TO_CAMP
+        self:SetPullState(PullStates.PULL_RETURN_TO_CAMP, string.format("Camp Loc: %0.2f %0.2f %0.2f", start_y, start_x, start_z))
 
         RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
         mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
@@ -1275,12 +1295,13 @@ function Module:GiveTime(combat_state)
 
         RGMercUtils.DoCmd("/face id %d", self.TempSettings.PullID)
 
-        self.TempSettings.PullState = PullStates.PULL_WAITING_ON_MOB
+        self:SetPullState(PullStates.PULL_WAITING_ON_MOB, self:GetPullStateTargetInfo())
 
         -- give the mob 2 mins to get to us.
         local maxPullWait = 1000 * 120 -- 2 mins
         -- wait for the mob to reach us.
         while mq.TLO.Target.ID() == self.TempSettings.PullID and RGMercUtils.GetTargetDistance() > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius and maxPullWait > 0 do
+            self:SetPullState(PullStates.PULL_WAITING_ON_MOB, self:GetPullStateTargetInfo())
             mq.delay(100)
             if mq.TLO.Me.Pet.Combat() then
                 RGMercUtils.DoCmd("/squelch /pet back off")
@@ -1297,7 +1318,7 @@ function Module:GiveTime(combat_state)
     end
 
     self.TempSettings.TargetSpawnID = 0
-    self.TempSettings.PullState = PullStates.PULL_IDLE
+    self:SetPullState(PullStates.PULL_IDLE, "")
 end
 
 function Module:OnDeath()

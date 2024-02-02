@@ -1428,6 +1428,12 @@ function Utils.GetTargetName(target)
 end
 
 ---@param target MQTarget|nil
+---@return string
+function Utils.GetTargetCleanName(target)
+    return (target and target.Name() or (mq.TLO.Target.CleanName() or ""))
+end
+
+---@param target MQTarget|nil
 ---@return number
 function Utils.GetTargetID(target)
     return (target and target.ID() or (mq.TLO.Target.ID() or 0))
