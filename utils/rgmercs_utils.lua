@@ -3161,7 +3161,7 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
         ImGui.TableHeadersRow()
 
         for _, k in ipairs(settingNames) do
-            if Utils.ShowAdvancedConfig or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
+            if Utils.GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
                 if defaults[k].Category == category then
                     if defaults[k].Type == "Combo" then
                         -- build a combo box.
@@ -3253,6 +3253,7 @@ function Utils.RenderSettings(settings, defaults, categories, hideControls)
     end
 
     if not hideControls then
+        local changed = false
         RGMercConfig:GetSettings().ShowAdvancedOpts, changed = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options", RGMercConfig:GetSettings().ShowAdvancedOpts)
         if changed then
             RGMercConfig:SaveSettings(true)
@@ -3290,7 +3291,7 @@ function Utils.RenderSettings(settings, defaults, categories, hideControls)
             local shouldShow = false
             for _, k in ipairs(settingNames) do
                 if defaults[k].Category == c then
-                    if Utils.ShowAdvancedConfig or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
+                    if Utils.GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
                         shouldShow = true
                         break
                     end

@@ -1200,7 +1200,7 @@ function Module:GiveTime(combat_state)
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
-                    RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish...")
+                    RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.DoCmd("/ranged %d", self.TempSettings.PullID)
                     mq.doevents()
@@ -1216,7 +1216,7 @@ function Module:GiveTime(combat_state)
             else -- AA/Spell/Ability pull
                 mq.delay(5)
                 while not successFn() do
-                    RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...")
+                    RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...%s", RGMercUtils.BoolToColorString(successFn()))
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
                     mq.doevents()
