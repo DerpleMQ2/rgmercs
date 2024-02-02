@@ -564,6 +564,46 @@ return {
             },
         },
     },
+    --[[['CommandHandlers']   = {
+        wizevac = {
+            usage = "/rgl wizevac",
+            about = "Cause wizard to cast an evac AA or spell",
+            handler =
+                function(self)
+                    local evacSpells = {'Exodus', 'Evacuate', 'Lesser Evacuate'}
+                    local portName = ''
+                    local me = mq.TLO.Me
+
+
+                    for _, port in ipairs(evacSpells) do
+                        if me.Class.Name() == 'Wizard' and me.Level >= 57 and port == 'Evacuate' then
+                            portName = port
+                            break
+                        elseif me.Class.Name() == 'Wizard' and me.Level >= 18 and port == 'Lesser Evacuate' then
+                            portName = port
+                            break
+                        end
+                    end
+
+                    -- Cast the spell. Will report if need to memorize or don't have the spell
+                    mq.cmd('/if (${Cast.Ready[exodus]}) /casting "exodus" alt')
+                    mq.cmdf('/timed 1 /if (${Me.Book["%s"]}>0) /casting "%s"', portName, portName)
+                    mq.cmdf('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
+
+                    -- Have to memorize
+                    mq.cmdf('/timed 5 /if (${Cast.Status.Equal[CM]}) /timed 5 /dgt all Memorizing "%s"! Ready in 1.5 seconds', portName)
+                    mq.cmdf('/timed 50 /if (${Cast.Timing}>6000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
+                    mq.cmdf('/timed 90 /if (${Cast.Timing}>4000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
+
+                    -- Already memorized
+                    mq.cmdf('/timed 5 /if (${Cast.Timing}>8000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
+                    mq.cmdf('/timed 40 /if (${Cast.Timing}>5000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
+
+                    -- Out of mana
+                    mq.cmdf('/timed 5 /if (${Cast.Status.Equal[CAST_OUTOFMANA]}) /dgt all Out of mana! Can\'t Evac!')
+                end
+        }
+    },]]
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
@@ -684,7 +724,7 @@ return {
                 name = "SelfRune1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and mq.TLO.FindItemCount('Peridot')() > 0
                 end,
             },
             {
@@ -798,6 +838,27 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck()
+                end,
+            },
+            {
+                name = "FireRainNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck() and RGMercUtils.GetXTHaterCount() > 2 and RGMercUtils.GetTargetDistance() > 30
+                end,
+            },
+            {
+                name = "IceRainNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck() and RGMercUtils.GetXTHaterCount() > 2 and RGMercUtils.GetTargetDistance() > 30
+                end,
+            },
+            {
+                name = "SnareSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.ManaCheck() and RGMercUtils.GetTargetDistance() > 30 and self.settings.DoSnare
                 end,
             },
             {
@@ -950,6 +1011,20 @@ return {
             spells = {
                 { name = "FuseNuke", },
                 {
+                    name = "FireRainNuke",
+                    active_cond = function(self) return self.settings.DoRain end,
+                    cond = function(self)
+                        return RGMercModules:ExecModule("Class", "GetClassModeName") == "Fire" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Combo"
+                    end,
+                },
+                {
+                    name = "IceRainNuke",
+                    active_cond = function(self) return self.settings.DoRain end,
+                    cond = function(self)
+                        return RGMercModules:ExecModule("Class", "GetClassModeName") == "Ice" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Magic"
+                    end,
+                },
+                {
                     name = "IceNuke",
                     cond = function(self)
                         return RGMercModules:ExecModule("Class", "GetClassModeName") == "Fire" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Combo"
@@ -963,7 +1038,11 @@ return {
                 },
             },
         },
-        { gem = 5, spells = { { name = "TwincastSpell", }, { name = "StunSpell", }, { name = "SnareSpell", }, { name = "RootSpell", }, }, },
+        { gem = 5, spells = { 
+            { name = "TwincastSpell", }, 
+            { name = "SnareSpell", cond = function(self) return self.settings.DoSnare end, }, 
+            { name = "StunSpell", }, 
+            { name = "RootSpell", }, }, },
         { gem = 6, spells = { { name = "GambitSpell", }, { name = "HarvestSpell", }, }, },
         {
             gem = 7,
@@ -1020,5 +1099,8 @@ return {
         ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['JoltAggro']    = { DisplayName = "Jolt Aggro %", Category = "Combat", Tooltip = "Aggro at which to use Jolt", Default = 65, Min = 1, Max = 100, },
         ['WeaveAANukes'] = { DisplayName = "Weave AA Nukes", Category = "Combat", Tooltip = "Weave in AA Nukes", Default = true, },
+        ['DoManaBurn'] = { DisplayName = "Use Mana Burn AA", Category = "Combat", Tooltip = "Enable usage of Mana Burn", Default = true, },
+        ['DoSnare'] = { DisplayName = "Use Snare Spells", Category = "Combat", Tooltip = "Enable usage of Snares", Default = true, },
+        ['DoRain'] = { DisplayName = "Use Rain Spells", Category = "Combat", Tooltip = "Enable usage of Rain Spells", Default = true, },
     },
 }
