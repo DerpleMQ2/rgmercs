@@ -1199,8 +1199,7 @@ function Module:GiveTime(combat_state)
             if self:IsPullMode("Chain") then
                 successFn = function() return RGMercUtils.GetXTHaterCount() > self.settings.ChainCount end
             end
-            printf(self.settings.PullAbility)
-            printf(PullAbilityIDToName.Ranged)
+
             if self.settings.PullAbility == PullAbilityIDToName.PetPull then -- PetPull
                 RGMercUtils.PetAttack(self.TempSettings.PullID)
                 while not successFn() do
