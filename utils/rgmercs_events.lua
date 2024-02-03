@@ -41,6 +41,36 @@ end)
 
 -- [ END CANT SEE HANDLERS ] --
 
+-- [ TOO CLOSE HANDLERS] --
+
+mq.event("TooClose", "Your target is too close to use a ranged weapon!", function()
+    -- Check if we're in the middle of a pull and use a backup.
+    if RGMercUtils.GetSetting('DoPull') and RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
+        local discSpell = mq.TLO.Spell("Throw Stone")
+        if RGMercUtils.NPCDiscReady(discSpell) then
+            RGMercUtils.UseDisc(discSpell, mq.TLO.Target.ID())
+        else
+            if RGMercUtils.AbilityReady("Taunt") then
+                RGMercUtils.DoCmd("/nav id %d distance=%d lineofsite=on log=off", RGMercUtils.GetTargetID(), RGMercUtils.GetTargetMaxRangeTo())
+                mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
+                RGMercUtils.UseAbility("Taunt")
+            end
+        end
+    end
+
+    -- Only do non-pull code if autoengage is on
+    if RGMercUtils.GetSetting('DoAutoEngage') then
+        if RGMercUtils.MyClassIs("rng") and not RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
+            -- Basic stick code until we implement nav circumference
+            RGMercUtils.NavAroundCircle(mq.TLO.Target, 45, true)
+        end
+    end
+
+    mq.flushevents("TooClose")
+end)
+
+-- [ END TOO CLOSE HANDLERS] --
+
 -- [ TOO FAR HANDLERS ] --
 
 local function tooFarHandler()

@@ -211,10 +211,10 @@ function Utils.AAReady(aaName)
     return Utils.CanUseAA(aaName) and mq.TLO.Me.AltAbilityReady(aaName)()
 end
 
----@param aaName string
+---@param abilityName string
 ---@return boolean
-function Utils.AbilityReady(aaName)
-    return mq.TLO.Me.AbilityReady(aaName)()
+function Utils.AbilityReady(abilityName)
+    return mq.TLO.Me.AbilityReady(abilityName)()
 end
 
 ---@param aaName string
@@ -1548,6 +1548,61 @@ function Utils.DoCmd(cmd, ...)
     mq.cmdf(formatted)
 end
 
+---@param target MQTarget
+---@param radius number
+---@param bDontStick boolean
+---@return boolean
+function Utils.NavAroundCircle(target, radius, bDontStick)
+    if not Utils.GetSetting('DoAutoEngage') then return false end
+    if not target or not target() and not target.Dead() then return false end
+    if not mq.TLO.Navigation.MeshLoaded() then return false end
+
+    local spawn_x = target.X()
+    local spawn_y = target.Y()
+    local spawn_z = target.Z()
+
+    local tgt_x = 0
+    local tgt_y = 0
+    -- We need to get the spawn's heading to _us_ based on our heading to the spawn
+    -- to nav a circle around it. This is done by inverting the coordinates. E.g.,
+    -- If our heading to the mob is 90 degrees CCW, their heading to us is 270 degrees CCW.
+
+    local tmp_degrees = target.HeadingTo.DegreesCCW() - 180
+    if tmp_degrees < 0 then tmp_degrees = 360 + tmp_degrees end
+
+    -- Loop until we find an x,y loc ${radius} away from the mob,
+    -- that we can navigate to, and is in LoS
+
+    for steps = 1, 36 do
+        -- EQ's x coordinates have an opposite number line. Positive x values are to the left of 0,
+        -- negative values are to the right of 0, so we need to - our radius.
+        -- EQ's unit circle starts 0 degrees at the top of the unit circle instead of the right, so
+        -- the below still finds coordinates rotated counter-clockwise 90 degrees.
+
+        tgt_x = spawn_x + (-1 * radius * math.cos(tmp_degrees))
+        tgt_y = spawn_y + (radius * math.sin(tmp_degrees))
+
+        RGMercsLogger.log_debug("\aw%d\ax tmp_degrees \aw%d\ax tgt_x \aw%0.2f\ax tgt_y \aw%02.f\ax", steps, tmp_degrees, tgt_x, tgt_y)
+        -- First check that we can navigate to our new target
+        if mq.TLO.Navigation.PathExists(string.format("locyxz %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z))() then
+            -- Then check if our new spots has line of sight to our target.
+            if mq.TLO.LineOfSight(string.format("%0.2f,%0.2f,%0.2f:%0.2f,%0.2f,%0.2f", tgt_y, tgt_x, spawn_z, spawn_y, spawn_x, spawn_z))() then
+                -- Make sure it's a valid loc...
+                if mq.TLO.EverQuest.ValidLoc(string.format("%0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z))() then
+                    RGMercsLogger.log_debug("Found Valid Circling Loc: %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z)
+                    Utils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z)
+                    mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
+                    mq.delay("10s", function() return not mq.TLO.Navigation.Active() end)
+                    Utils.DoCmd("/squelch /face fast")
+                    return true
+                end
+            end
+        end
+    end
+
+    return false
+end
+
 ---@param config table
 ---@param targetId integer
 ---@param distance integer
@@ -2477,7 +2532,7 @@ function Utils.PetAttack(targetId)
     local target = mq.TLO.Spawn(targetId)
 
     if not target() then return end
-    if not pet() then return end
+    if pet.ID() == 0 then return end
 
     if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" then
         Utils.DoCmd("/squelch /pet attack")
