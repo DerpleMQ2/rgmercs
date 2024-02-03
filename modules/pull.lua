@@ -987,7 +987,7 @@ function Module:GiveTime(combat_state)
         if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
             -- go back to camp.
             self:SetPullState(PullStates.PULL_WAITING_SHOULDPULL, reason)
-            local distanceToCamp = RGMercUtils.GetDistance(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY)
+            local distanceToCamp = RGMercUtils.GetDistance(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampY, campData.campSettings.AutoCampX)
             if campData.returnToCamp and distanceToCamp > RGMercUtils.GetSetting('AutoCampRadius') then
                 RGMercsLogger.log_debug("Distance to camp is %d and radius is %d - going closer.", distanceToCamp, RGMercUtils.GetSetting('AutoCampRadius'))
                 RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
