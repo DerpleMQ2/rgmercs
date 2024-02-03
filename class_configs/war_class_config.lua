@@ -595,7 +595,7 @@ local _ClassConfig = {
                 type = "Ability",
                 cond = function(self, abilityName)
                     return mq.TLO.Me.AbilityReady(abilityName)() and
-                        RGMercUtils.GetTargetDistance() < RGMercUtils.GetTargetMaxRangeTo()
+                        RGMercUtils.GetTargetDistance() < 15
                 end,
             },
             {

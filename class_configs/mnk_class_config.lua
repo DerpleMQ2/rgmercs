@@ -597,7 +597,8 @@ local _ClassConfig = {
                 name = "Disarm",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercUtils.AbilityReady(abilityName)
+                    return RGMercUtils.AbilityReady(abilityName) and
+                        RGMercUtils.GetTargetDistance() < 15
                 end,
             },
         },
