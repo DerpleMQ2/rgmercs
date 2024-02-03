@@ -1351,6 +1351,11 @@ function Module:GiveTime(combat_state)
             if self:CheckForAbort(self.TempSettings.PullID) then
                 break
             end
+
+            -- they ain't coming!
+            if not RGMercUtils.IsSpawnXHater(self.TempSettings.PullID) then
+                break
+            end
         end
         -- TODO PostPullCampFunc()
     end
