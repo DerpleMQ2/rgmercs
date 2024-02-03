@@ -241,6 +241,13 @@ local _ClassConfig = {
                     return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
                 end,
             },
+            {
+                name = "Mend",
+                type = "Ability",
+                cond = function(self, abilityName)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.PctHPs() < 85
+                end,
+            },
         },
         ['Burn'] = {
             -- Set 1
@@ -594,6 +601,20 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Round Kick",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                end,
+            },
+            {
+                name = "Kick",
+                type = "Ability",
+                cond = function(self, abilityName)
+                    return RGMercUtils.AbilityReady(abilityName)
+                end,
+            },
+            {
                 name = "Disarm",
                 type = "Ability",
                 cond = function(self, abilityName)
@@ -605,7 +626,7 @@ local _ClassConfig = {
     },
     ['DefaultConfig'] = {
         ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
-        ['DoIntimidation'] = { DisplayName = "Do Intimidation", Category = "Combat", Tooltip = "Select Use Intimidation", Default = true, },
+        ['DoIntimidation'] = { DisplayName = "Do Intimidation", Category = "Combat", Tooltip = "Select Use Intimidation", Default = false, },
     },
 }
 

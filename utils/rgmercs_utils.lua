@@ -995,7 +995,6 @@ end
 ---@param bAllowMem boolean         # allow memorization of spells if needed.
 ---@return boolean
 function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
-    local me = mq.TLO.Me
     local ret = false
 
     if entry.type == nil then return false end -- bad data.
@@ -1146,7 +1145,7 @@ function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
         end
     end
 
-    RGMercsLogger.log_verbose("\ay   :: Testing Codition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
+    RGMercsLogger.log_verbose("\ay   :: Testing Condition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
         entry.name, entry.type, condArg or "None",
         condTarg.CleanName() or "None", Utils.BoolToColorString(pass))
 

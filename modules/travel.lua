@@ -160,9 +160,9 @@ function Module:GenerateFilteredPortsList()
     self.TempSettings.FilteredList = {}
     self.TempSettings.FilteredList.Tabs = {}
     self.TempSettings.FilteredList.SortedTabNames = {}
-    for porter, data in pairs(self.TransportSpells) do
+    for porter, data in pairs(self.TransportSpells or {}) do
         if porter == self.TempSettings.PorterList[self.TempSettings.SelectedPorter] then
-            for subCat, spellList in pairs(data.Tabs) do
+            for subCat, spellList in pairs(data.Tabs or {}) do
                 for _, spellData in ipairs(spellList) do
                     local s, _ = string.find(spellData.SearchFields, self.TempSettings.FilterText:lower())
                     if self.TempSettings.FilterText:len() >= 1 and (s ~= nil) then

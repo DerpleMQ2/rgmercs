@@ -1253,7 +1253,7 @@ local _ClassConfig = {
                 name = "GroupHPBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return not RGMercUtils.TargetHasBuff(spell) end,
+                cond = function(self, spell, target) return not RGMercUtils.TargetHasBuff(spell, target) end,
             },
         },
         ['Downtime'] = {
