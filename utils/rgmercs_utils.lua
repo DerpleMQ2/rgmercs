@@ -2283,15 +2283,15 @@ end
 ---@return integer
 function Utils.GetXTHaterCount()
     local xtCount = mq.TLO.Me.XTarget() or 0
-    local haterCount = (Utils.GetTargetAggroPct() > 0 or Utils.GetTargetAggressive()) and 1 or 0
+    local haterCount = 0
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.Aggressive() and xtarg.ID() ~= Utils.GetTargetID() then
+        -- no aggro info under 20.
+        if xtarg and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") then
             haterCount = haterCount + 1
         end
     end
-
     return haterCount
 end
 
