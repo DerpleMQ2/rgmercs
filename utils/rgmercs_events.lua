@@ -55,6 +55,11 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 RGMercUtils.UseAbility("Taunt")
             end
+            if RGMercUtils.AbilityReady("Kick") then
+                RGMercUtils.DoCmd("/nav id %d distance=%d lineofsite=on log=off", RGMercUtils.GetTargetID(), RGMercUtils.GetTargetMaxRangeTo())
+                mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
+                RGMercUtils.UseAbility("Kick")
+            end
         end
     end
 

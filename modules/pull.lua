@@ -94,7 +94,8 @@ Module.Constants.PullAbilities         = {
         AbilityRange = function() return mq.TLO.Me.Inventory("ranged").Range() end,
         cond = function(self)
             local rangedType = (mq.TLO.Me.Inventory("ranged").Type() or ""):lower()
-            return rangedType == "archery" or rangedType == "bow" and mq.TLO.FindItemCount("Arrow")() > 1
+            local rangedTypes = Set.new({ "archery", "bow", "throwingv1", "throwing", "throwingv2", })
+            return rangedTypes:contains(rangedType)
         end,
     },
     {
