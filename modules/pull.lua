@@ -115,6 +115,7 @@ Module.TempSettings.ValidPullAbilities = {}
 
 Module.DefaultConfig                   = {
     ['DoPull']             = { DisplayName = "Enable Pulling", Category = "Pulling", Tooltip = "Enable pulling", Default = false, },
+    ['AutoSetRoles']       = { DisplayName = "Auto Set Roles", Category = "Pulling", Tooltip = "Make yourself MA and Puller when you start pulls.", Default = true, },
     ['PullAbility']        = { DisplayName = "Pull Ability", Category = "Pulling", Tooltip = "What should we pull with?", Default = 1, Type = "Custom", },
     ['PullMode']           = { DisplayName = "Pull Mode", Category = "Pulling", Tooltip = "1 = Normal, 2 = Chain, 3 = Hunt, 4 = Farm", Type = "Custom", Default = 1, Min = 1, Max = 4, },
     ['ChainCount']         = { DisplayName = "Chain Count", Category = "Pulling", Tooltip = "Number of mobs in chain pull mode on xtarg before we stop pulling", Default = 3, Min = 1, Max = 100, },
@@ -321,6 +322,14 @@ function Module:Render()
 
         if ImGui.Button(self.settings.DoPull and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
             self.settings.DoPull = not self.settings.DoPull
+            if RGMercUtils.GetSetting('AutoSetRoles') and mq.TLO.Group.Leader() == mq.TLO.Me.DisplayName() then
+                -- in hunt mode we follow around.
+
+                if self.Constants.PullModes[self.settings.PullMode] ~= "Hunt" then
+                    RGMercUtils.DoCmd("/grouproles %s %s 3", self.settings.DoPull and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
+                end
+                RGMercUtils.DoCmd("/grouproles set %s 2", RGMercConfig.Globals.MainAssist)                                       -- set MA
+            end
             self:SaveSettings(false)
         end
         ImGui.PopStyleColor()
