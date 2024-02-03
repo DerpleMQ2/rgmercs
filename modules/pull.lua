@@ -1,20 +1,21 @@
 -- Sample Pull Class Module
-local mq                          = require('mq')
-local RGMercUtils                 = require("utils.rgmercs_utils")
-local Set                         = require("mq.Set")
-local ICONS                       = require('mq.Icons')
+local mq                                 = require('mq')
+local RGMercUtils                        = require("utils.rgmercs_utils")
+local Set                                = require("mq.Set")
+local ICONS                              = require('mq.Icons')
 
-local Module                      = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
-Module.__index                    = Module
-Module.settings                   = {}
-Module.ModuleLoaded               = false
-Module.TempSettings               = {}
-Module.TempSettings.LastPull      = os.clock()
-Module.TempSettings.TargetSpawnID = 0
-Module.TempSettings.CurrentWP     = 1
-Module.TempSettings.PullTargets   = {}
-Module.TempSettings.AbortPull     = false
-Module.TempSettings.PullID        = 0
+local Module                             = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
+Module.__index                           = Module
+Module.settings                          = {}
+Module.ModuleLoaded                      = false
+Module.TempSettings                      = {}
+Module.TempSettings.LastPull             = os.clock()
+Module.TempSettings.TargetSpawnID        = 0
+Module.TempSettings.CurrentWP            = 1
+Module.TempSettings.PullTargets          = {}
+Module.TempSettings.AbortPull            = false
+Module.TempSettings.PullID               = 0
+Module.TempSettings.LastPullAbilityCheck = 0
 
 
 local PullStates              = {
@@ -90,7 +91,11 @@ Module.Constants.PullAbilities         = {
         id = "Ranged",
         Type = "Special",
         DisplayName = "Ranged",
-        cond = function(self) return (mq.TLO.Me.Inventory("ranged").Type() or ""):lower() == "bow" end,
+        AbilityRange = function() return mq.TLO.Me.Inventory("ranged").Range() end,
+        cond = function(self)
+            local rangedType = (mq.TLO.Me.Inventory("ranged").Type() or ""):lower()
+            return rangedType == "archery" or rangedType == "bow" and mq.TLO.FindItemCount("Arrow")() > 1
+        end,
     },
     {
         id = "Kick",
@@ -185,24 +190,34 @@ function Module:getPullAbilityDisplayName(id)
     return displayName or "Error"
 end
 
-function Module:OnCombatModeChanged()
-    self.TempSettings.ValidPullAbilities = {}
-    PullAbilityIDToName = {}
+function Module:SetValidPullAbilities()
+    if os.clock() - self.TempSettings.LastPullAbilityCheck < 10 then return end
+
+    self.TempSettings.LastPullAbilityCheck = os.clock()
+    local tmpValidPullAbilities = {}
+    local tmpPullAbilityIDToName = {}
 
     for k, v in ipairs(Module.Constants.PullAbilities) do
         if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
-            table.insert(self.TempSettings.ValidPullAbilities, v)
-            PullAbilityIDToName[v.id] = k
+            table.insert(tmpValidPullAbilities, v)
+            tmpPullAbilityIDToName[v.id] = k
         end
     end
 
     -- pull in class specific configs.
     for k, v in ipairs(RGMercModules:ExecModule("Class", "GetPullAbilities")) do
         if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
-            table.insert(self.TempSettings.ValidPullAbilities, v)
-            PullAbilityIDToName[v.id] = k
+            table.insert(tmpValidPullAbilities, v)
+            tmpPullAbilityIDToName[v.id] = k
         end
     end
+
+    self.TempSettings.ValidPullAbilities = tmpValidPullAbilities
+    PullAbilityIDToName = tmpPullAbilityIDToName
+end
+
+function Module:OnCombatModeChanged()
+    self:SetValidPullAbilities()
 end
 
 function Module.New()
@@ -377,9 +392,13 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text(RGMercUtils.FormatTime(nextPull))
             ImGui.TableNextColumn()
+            ImGui.Text("Pull Range")
+            ImGui.TableNextColumn()
+            ImGui.Text(tostring(self:GetPullAbilityRange()))
+            ImGui.TableNextColumn()
             ImGui.Text("Pull ID")
             ImGui.TableNextColumn()
-            ImGui.Text(tostring(Module.TempSettings.PullID))
+            ImGui.Text(tostring(self.TempSettings.PullID))
             ImGui.TableNextColumn()
             ImGui.Text("Pull Target Count")
             ImGui.TableNextColumn()
@@ -928,11 +947,23 @@ function Module:NavToWaypoint(loc, ignoreAggro)
     return true
 end
 
+function Module:GetPullAbilityRange()
+    if not self.ModuleLoaded then return 0 end
+    local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
+    if not pullAbility then return 0 end
+
+    local ret = pullAbility.AbilityRange
+    if type(ret) == 'function' then ret = ret() end
+    return ret
+end
+
 function Module:GetPullStateTargetInfo()
     return string.format("%s(%d) Dist(%d)", RGMercUtils.GetTargetCleanName(), RGMercUtils.GetTargetID(), RGMercUtils.GetTargetDistance())
 end
 
 function Module:GiveTime(combat_state)
+    self:SetValidPullAbilities()
+
     if not self.settings.DoPull and self.TempSettings.TargetSpawnID == 0 then return end
 
     if not mq.TLO.Navigation.MeshLoaded() then
@@ -1101,7 +1132,7 @@ function Module:GiveTime(combat_state)
     local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
     local startingXTargs = RGMercUtils.GetXTHaterIDs()
 
-    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, pullAbility.AbilityRange, "on")
+    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
 
     mq.delay(1000)
 
@@ -1201,7 +1232,7 @@ function Module:GiveTime(combat_state)
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
                     mq.doevents()
 
-                    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, pullAbility.AbilityRange, "on")
+                    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
 
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
