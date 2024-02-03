@@ -197,19 +197,21 @@ function Module:SetValidPullAbilities()
     local tmpValidPullAbilities = {}
     local tmpPullAbilityIDToName = {}
 
-    for k, v in ipairs(Module.Constants.PullAbilities) do
+    for _, v in ipairs(Module.Constants.PullAbilities) do
         if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
             table.insert(tmpValidPullAbilities, v)
-            tmpPullAbilityIDToName[v.id] = k
         end
     end
 
     -- pull in class specific configs.
-    for k, v in ipairs(RGMercModules:ExecModule("Class", "GetPullAbilities")) do
+    for _, v in ipairs(RGMercModules:ExecModule("Class", "GetPullAbilities")) do
         if RGMercUtils.SafeCallFunc("Checking Pull Ability Condition", v.cond, self) then
             table.insert(tmpValidPullAbilities, v)
-            tmpPullAbilityIDToName[v.id] = k
         end
+    end
+
+    for k, v in ipairs(tmpValidPullAbilities) do
+        tmpPullAbilityIDToName[v.id] = k
     end
 
     self.TempSettings.ValidPullAbilities = tmpValidPullAbilities
@@ -1195,7 +1197,8 @@ function Module:GiveTime(combat_state)
             if self:IsPullMode("Chain") then
                 successFn = function() return RGMercUtils.GetXTHaterCount() > self.settings.ChainCount end
             end
-
+            printf(self.settings.PullAbility)
+            printf(PullAbilityIDToName.Ranged)
             if self.settings.PullAbility == PullAbilityIDToName.PetPull then -- PetPull
                 RGMercUtils.PetAttack(self.TempSettings.PullID)
                 while not successFn() do
