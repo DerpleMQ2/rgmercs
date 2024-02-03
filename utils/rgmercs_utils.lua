@@ -1937,10 +1937,9 @@ end
 
 ---@return boolean
 function Utils.MercEngage()
-    local target = mq.TLO.Target
-    local merc   = mq.TLO.Me.Mercenary
+    local merc = mq.TLO.Me.Mercenary
 
-    if merc() and target() and target.ID() == RGMercConfig.Globals.AutoTargetID and target.Distance() < Utils.GetSetting('AssistRange') then
+    if merc() and Utils.GetTargetID() == RGMercConfig.Globals.AutoTargetID and Utils.GetTargetDistance() < Utils.GetSetting('AssistRange') then
         if Utils.GetTargetPctHPs() <= Utils.GetSetting('AutoAssistAt') or                              -- Hit Assist HP
             merc.Class.ShortName():lower() == "clr" or                                                 -- Cleric can engage right away
             (merc.Class.ShortName():lower() == "war" and mq.TLO.Group.MainTank.ID() == merc.ID()) then -- Merc is our Main Tank
