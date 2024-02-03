@@ -2,7 +2,7 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    _version              = "0.3a",
+    _version              = "1.0 Beta",
     _author               = "Pureleaf, Derple",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
@@ -59,7 +59,7 @@ local _ClassConfig = {
             "Ward of Righteousness",
             "Ward of Persistence",
             "Ward of Commitment",
-        },     
+        },
         ['remedyheal1'] = {
             --Remedy Slot 1 & 2 Primary Remedy Slot - Picks best Spell
             "Minor Healing",
