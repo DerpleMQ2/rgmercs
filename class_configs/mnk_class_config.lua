@@ -2,16 +2,18 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    ['Modes'] = {
+    _version          = "1.0 Beta",
+    _author           = "Derple",
+    ['Modes']         = {
         'DPS',
     },
-    ['ItemSets'] = {
+    ['ItemSets']      = {
         ['Epic'] = {
             "Transcended Fistwraps of Immortality",
             "Fistwraps of Celestial Discipline",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']   = {
         ['EndRegen'] = {
             -- Fast Endurance regen - No Update
             "Second Wind",
@@ -218,7 +220,7 @@ local _ClassConfig = {
             end,
         },
     },
-    ['Rotations'] = {
+    ['Rotations']     = {
         ['Downtime'] = {
             {
                 name = "MonkAura",

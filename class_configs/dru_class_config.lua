@@ -3,6 +3,8 @@ local RGMercUtils  = require("utils.rgmercs_utils")
 local Set          = require('mq.Set')
 
 local _ClassConfig = {
+    _version              = "1.0 Beta",
+    _author               = "Derple",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return RGMercUtils.IsModeActive("Heal") end,
