@@ -605,6 +605,7 @@ local _ClassConfig = {
             "Protection of Steel",
             "Protection of Rock",
             "Protection of Wood",
+            'Skin like Wood',
         },
         ['TempHPBuff'] = {
             -- Temp Health -- Focus on Tank
@@ -737,9 +738,6 @@ local _ClassConfig = {
             "Daggerspur Bulwark",
             "Daggerspike Bulwark",
             "Icebriar Bulwark",
-        },
-        ['GroupHPBuff'] = {
-            'Skin like Wood',
         },
     },
     ['HealRotationOrder'] = {
@@ -1223,7 +1221,7 @@ local _ClassConfig = {
                 name = "HPTypeOneGroup",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+                cond = function(self, spell, target) return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget() end,
             },
             {
                 name = "ReptileCombatInnate",
@@ -1238,7 +1236,7 @@ local _ClassConfig = {
                 name = "GroupRegenBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+                cond = function(self, spell, target) return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget() end,
             },
             {
                 name = "Wrath of the Wild",
@@ -1248,12 +1246,6 @@ local _ClassConfig = {
                     return not RGMercUtils.TargetHasBuffByName(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name()) and
                         target.ID() == RGMercUtils.GetMainAssistId()
                 end,
-            },
-            {
-                name = "GroupHPBuff",
-                type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell, target) return not RGMercUtils.TargetHasBuff(spell, target) end,
             },
         },
         ['Downtime'] = {
