@@ -169,13 +169,13 @@ local function RGMercsGUI()
                 GitCommit.commitId or "None"))
 
 
-            if RGMercConfig.Globals.PauseMain then
+            if not RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
             else
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
             end
 
-            if ImGui.Button(RGMercConfig.Globals.PauseMain and "Unpause" or "Pause", (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
+            if ImGui.Button(RGMercConfig.Globals.PauseMain and "PAUSED" or "Running", (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
                 RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
             end
             ImGui.PopStyleColor()
