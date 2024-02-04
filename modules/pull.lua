@@ -344,15 +344,17 @@ function Module:Render()
 
         local campData = RGMercModules:ExecModule("Movement", "GetCampData")
 
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
         if campData.returnToCamp then
-            if ImGui.SmallButton("Break Camp") then
+            if ImGui.Button("Break Camp", ImGui.GetWindowWidth() * .3, 18) then
                 RGMercUtils.DoCmd("/rgl campoff")
             end
         else
-            if ImGui.SmallButton("Set New Camp Here") then
+            if ImGui.Button("Set New Camp Here", ImGui.GetWindowWidth() * .3, 18) then
                 RGMercUtils.DoCmd("/rgl campon")
             end
         end
+        ImGui.PopStyleVar(1)
 
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
         if pressed then

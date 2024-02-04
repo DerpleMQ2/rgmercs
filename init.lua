@@ -121,6 +121,7 @@ end
 
 local function RGMercsGUI()
     local theme = GetTheme()
+    local themeColorPop = 0
     local themeStylePop = 0
 
     if RGMercsConsole == nil then
@@ -140,13 +141,21 @@ local function RGMercsGUI()
     if openGUI and Alive() then
         if theme ~= nil then
             for _, t in pairs(theme) do
-                ImGui.PushStyleColor(t.element, t.color.r, t.color.g, t.color.b, t.color.a)
-                themeStylePop = themeStylePop + 1
+                if t.color then
+                    ImGui.PushStyleColor(t.element, t.color.r, t.color.g, t.color.b, t.color.a)
+                    themeColorPop = themeColorPop + 1
+                elseif t.value then
+                    ImGui.PushStyleVar(t.element, t.value)
+                    themeStylePop = themeStylePop + 1
+                end
             end
         end
 
-        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
+        local imGuiStyle = ImGui.GetStyle()
 
+        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
+        ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, 10)
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 6)
         openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
         ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
 
@@ -166,7 +175,7 @@ local function RGMercsGUI()
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
             end
 
-            if ImGui.Button(RGMercConfig.Globals.PauseMain and "Unpause" or "Pause", ImGui.GetWindowWidth(), 40) then
+            if ImGui.Button(RGMercConfig.Globals.PauseMain and "Unpause" or "Pause", (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
                 RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
             end
             ImGui.PopStyleColor()
@@ -284,9 +293,12 @@ local function RGMercsGUI()
         ImGui.PopID()
         ImGui.End()
         if themeStylePop > 0 then
-            ImGui.PopStyleColor(themeStylePop)
+            ImGui.PopStyleColor(themeColorPop)
         end
-        ImGui.PopStyleVar(1)
+        if themeStylePop > 0 then
+            ImGui.PopStyleVar(themeStylePop)
+        end
+        ImGui.PopStyleVar(3)
     end
 end
 
