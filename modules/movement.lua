@@ -122,6 +122,7 @@ function Module:ChaseOn(target)
     end
 
     if chaseTarget() and chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
+        self:CampOff()
         self.settings.ChaseOn = true
         self.settings.ChaseTarget = chaseTarget.CleanName()
         self:SaveSettings(false)
@@ -151,6 +152,7 @@ function Module:ChaseOff()
 end
 
 function Module:CampOn()
+    self:ChaseOff()
     self.settings.ReturnToCamp   = true
     self.TempSettings.AutoCampX  = mq.TLO.Me.X()
     self.TempSettings.AutoCampY  = mq.TLO.Me.Y()
@@ -314,15 +316,18 @@ function Module:Render()
                 ImGui.Text(string.format("Distance to Camp: %d", distanceToCamp))
             end
             ImGui.Unindent()
-        end
 
-        if ImGui.SmallButton("Set New Camp Here") then
-            self:CampOn()
-        end
-
-        ImGui.SameLine()
-        if ImGui.SmallButton("Break Camp") then
-            self:CampOff()
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
+            if ImGui.Button("Break Camp", ImGui.GetWindowWidth() * .3, 18) then
+                self:CampOff()
+            end
+            ImGui.PopStyleVar(1)
+        else
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
+            if ImGui.Button("Set New Camp Here", ImGui.GetWindowWidth() * .3, 18) then
+                self:CampOn()
+            end
+            ImGui.PopStyleVar(1)
         end
 
         local state, pressed = RGMercUtils.RenderOptionToggle("##chase_om", "Chase On", self.settings.ChaseOn)

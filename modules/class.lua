@@ -91,7 +91,7 @@ function Module:LoadSettings()
     -- Setup Defaults
     self.settings = RGMercUtils.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
 
-    self.TempSettings.NewCombatMode = true
+    self:RescanLoadout()
 end
 
 function Module.New()
@@ -130,6 +130,10 @@ end
 function Module:GetResolvedActionMapItem(item)
     if self.TempSettings.ReloadingLoadouts then return nil end
     return self.ResolvedActionMap[item]
+end
+
+function Module:RescanLoadout()
+    self.TempSettings.NewCombatMode = true
 end
 
 function Module:SetCombatMode(mode)
@@ -173,7 +177,7 @@ function Module:Render()
             #self.ClassConfig.Modes)
         if pressed then
             self:SaveSettings(false)
-            self.TempSettings.NewCombatMode = true
+            self:RescanLoadout()
         end
 
         if ImGui.CollapsingHeader("Config Options") then
@@ -190,7 +194,7 @@ function Module:Render()
         if ImGui.CollapsingHeader("Spell Loadout") then
             ImGui.Indent()
             if ImGui.SmallButton("Reload Spell Loadout") then
-                self.TempSettings.NewCombatMode = true
+                self:RescanLoadout()
             end
 
             if #self.SpellLoadOut > 0 then

@@ -1914,6 +1914,7 @@ function Utils.AutoCampCheck(config, tempConfig)
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
         if mq.TLO.Navigation.PathExists(navTo)() then
             Utils.DoCmd("/nav %s", navTo)
+            mq.delay("2s", function() return mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 end)
             while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
                 mq.delay(10)
                 mq.doevents()
@@ -2492,13 +2493,18 @@ function Utils.OkToEngage(autoTargetId)
         return false
     end
 
+    if Utils.GetSetting('SafeTargeting') and Utils.IsSpawnFightingStranger(target, 100) then
+        RGMercsLogger.log_verbose("\ay  OkayToEngage() %s is fighting Stranger --> Not Engaging", Utils.GetTargetCleanName())
+        return false
+    end
+
     if Utils.GetTargetID() ~= autoTargetId then
-        RGMercsLogger.log_verbose("%d != %d --> Not Engaging", target.ID() or 0, autoTargetId)
+        RGMercsLogger.log_verbose("  OkayToEngage() %d != %d --> Not Engaging", target.ID() or 0, autoTargetId)
         return false
     end
 
     if target.Mezzed.ID() and not config.AllowMezBreak then
-        RGMercsLogger.log_debug("Target is mezzed and not AllowMezBreak --> Not Engaging")
+        RGMercsLogger.log_debug("  OkayToEngage() Target is mezzed and not AllowMezBreak --> Not Engaging")
         return false
     end
 
@@ -2507,20 +2513,20 @@ function Utils.OkToEngage(autoTargetId)
         local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
-                RGMercsLogger.log_verbose("\ay%d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
+                RGMercsLogger.log_verbose("\ag  OkayToEngage() %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
                     target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
                     mq.TLO.Me.ID())
             end
             return true
         else
-            RGMercsLogger.log_verbose("\ayAssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
+            RGMercsLogger.log_verbose("\ay  OkayToEngage() AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
                 target.CleanName(), target.ID(), Utils.BoolToColorString(distanceCheck), Utils.GetTargetDistance(),
                 Utils.BoolToColorString(assistCheck))
             return false
         end
     end
 
-    RGMercsLogger.log_verbose("\ayOkay to Engage Failed with Fall Through!",
+    RGMercsLogger.log_verbose("\ay  OkayToEngage() Okay to Engage Failed with Fall Through!",
         Utils.BoolToColorString(pcCheck), Utils.BoolToColorString(mercCheck))
     return false
 end

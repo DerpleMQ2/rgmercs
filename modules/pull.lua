@@ -60,15 +60,6 @@ Module.Constants.PullModes             = {
 
 Module.Constants.PullAbilities         = {
     {
-        id = "Face",
-        Type = "Special",
-        AbilityRange = 5,
-        DisplayName = "Face Pull",
-        cond = function(self)
-            return true
-        end,
-    },
-    {
         id = "PetPull",
         Type = "Special",
         AbilityRange = 100,
@@ -106,6 +97,15 @@ Module.Constants.PullAbilities         = {
         AbilityRange = 10,
         cond = function(self)
             return mq.TLO.Me.Skill("Kick")() > 0
+        end,
+    },
+    {
+        id = "Face",
+        Type = "Special",
+        AbilityRange = 5,
+        DisplayName = "Face Pull",
+        cond = function(self)
+            return true
         end,
     },
 }
@@ -346,12 +346,12 @@ function Module:Render()
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
         if campData.returnToCamp then
-            if ImGui.Button("Break Camp", ImGui.GetWindowWidth() * .3, 18) then
-                RGMercUtils.DoCmd("/rgl campoff")
+            if ImGui.Button("Break Group Camp", ImGui.GetWindowWidth() * .3, 18) then
+                RGMercUtils.DoCmd("/dgza /rgl campoff")
             end
         else
-            if ImGui.Button("Set New Camp Here", ImGui.GetWindowWidth() * .3, 18) then
-                RGMercUtils.DoCmd("/rgl campon")
+            if ImGui.Button("Set Group Camp Here", ImGui.GetWindowWidth() * .3, 18) then
+                RGMercUtils.DoCmd("/dgza /rgl campon")
             end
         end
         ImGui.PopStyleVar(1)

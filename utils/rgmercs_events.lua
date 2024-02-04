@@ -125,7 +125,7 @@ mq.event('Being Memo', "Beginning to memorize #1#...", function(spell)
     RGMercUtils.Memorizing = true
 end)
 
-mq.event('End Memo', "You have finished memorizing #1#", function(spell)
+mq.event('End Memo', "You have finished memorizing #1#.", function(spell)
     RGMercUtils.Memorizing = false
 end)
 
@@ -134,6 +134,15 @@ mq.event('Abort Memo', "Aborting memorization of spell.", function()
 end)
 
 -- [ END MEM SPELL HANDLERS ] --
+
+-- [ SCRIBE SPELL HANDLERS ] --
+
+mq.event('End Scribe', "You have finished scribing #1#.", function(spell)
+    -- Rescan spell list
+    RGMercModules:ExecModule("Class", "RescanLoadout")
+end)
+
+-- [ END SCRIBE SPELL HANDLERS ] --
 
 -- [ CAST RESULT HANDLERS ] --
 mq.event('Success1', "You begin casting#*#", function()

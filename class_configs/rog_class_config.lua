@@ -390,7 +390,7 @@ return {
                 name = "Vision",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell)
+                    return RGMercUtils.SongActive(discSpell.Name())
                 end,
             },
             {
