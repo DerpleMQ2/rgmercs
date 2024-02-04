@@ -315,21 +315,21 @@ function Module:Render()
     if mq.TLO.Me.Hovering() then return end
 
     if self.ModuleLoaded then
-        if self.settings.DoPull then
+        if RGMercUtils.GetSetting('DoPull') then
             ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
         else
             ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
         end
 
-        if ImGui.Button(self.settings.DoPull and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
+        if ImGui.Button(RGMercUtils.GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
             self.settings.DoPull = not self.settings.DoPull
             if RGMercUtils.GetSetting('AutoSetRoles') and mq.TLO.Group.Leader() == mq.TLO.Me.DisplayName() then
                 -- in hunt mode we follow around.
 
                 if self.Constants.PullModes[self.settings.PullMode] ~= "Hunt" then
-                    RGMercUtils.DoCmd("/grouproles %s %s 3", self.settings.DoPull and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
+                    RGMercUtils.DoCmd("/grouproles %s %s 3", RGMercUtils.GetSetting('DoPull') and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
                 end
-                RGMercUtils.DoCmd("/grouproles set %s 2", RGMercConfig.Globals.MainAssist)                                       -- set MA
+                RGMercUtils.DoCmd("/grouproles set %s 2", RGMercConfig.Globals.MainAssist)                                                   -- set MA
             end
             self:SaveSettings(false)
         end
@@ -690,7 +690,7 @@ function Module:FarmFullInvActions()
     -- }
 
     RGMercsLogger.log_error("\arStopping Pulls - Bags are full!")
-    self.settings.DoPull = 0
+    self.settings.DoPull = false
     RGMercUtils.DoCmd("/beep")
 end
 
@@ -758,6 +758,20 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
     end
 
     return true, ""
+end
+
+function Module:FixPullerMerc()
+    if mq.TLO.Group.Puller() ~= mq.TLO.Me.DisplayName() and RGMercUtils.GetSetting('DoPull') then return end
+
+    local merc = mq.TLO.Me.Mercenary
+
+    if not merc or not merc() then return end
+
+    if (merc.Distance() or 0) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+        RGMercUtils.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
+        mq.delay("10s", function() return (merc.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius end)
+        RGMercUtils.DoCmd("/grouproles set %s 3", mq.TLO.Me.DisplayName())
+    end
 end
 
 function Module:FindTarget()
@@ -865,7 +879,7 @@ function Module:CheckForAbort(pullID)
         return true
     end
 
-    if (not self.settings.DoPull and self.TempSettings.TargetSpawnID == 0) or RGMercConfig.Globals.PauseMain then
+    if (not RGMercUtils.GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0) or RGMercConfig.Globals.PauseMain then
         RGMercsLogger.log_debug("\ar ALERT: Pulling Disabled at user request. \ax")
         return true
     end
@@ -976,7 +990,7 @@ end
 function Module:GiveTime(combat_state)
     self:SetValidPullAbilities()
 
-    if not self.settings.DoPull and self.TempSettings.TargetSpawnID == 0 then return end
+    if not RGMercUtils.GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
     if not mq.TLO.Navigation.MeshLoaded() then
         RGMercsLogger.log_debug("\ar ERROR: There's no mesh for this zone. Can't pull. \ax")
@@ -1016,6 +1030,8 @@ function Module:GiveTime(combat_state)
 
     self.TempSettings.LastPull = os.clock()
 
+    self:FixPullerMerc()
+
     if self.settings.GroupWatch == 2 then
         local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct,
             campData.campSettings, campData.returnToCamp)
@@ -1040,7 +1056,7 @@ function Module:GiveTime(combat_state)
             RGMercsLogger.log_error("\arYou do not have a valid WP ID(%d) for this zone(%s::%s) - Aborting!", self.TempSettings.CurrentWP, mq.TLO.Zone.Name(),
                 mq.TLO.Zone.ShortName())
             self:SetPullState(PullStates.PULL_IDLE, "")
-            self.settings.DoPull = 0
+            self.settings.DoPull = false
             return
         end
 
