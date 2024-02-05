@@ -516,7 +516,7 @@ local function Main()
     -- If target is not attackable then turn off attack
     local pcCheck = (mq.TLO.Target.Type() or "none"):lower() == "pc" or
         ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
-    local mercCheck = mq.TLO.Target.Type() == "mercenary"
+    local mercCheck = (mq.TLO.Target.Type() or "none"):lower() == "mercenary"
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
         RGMercsLogger.log_debug("\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
             RGMercUtils.BoolToColorString(mq.TLO.Me.Combat()), RGMercUtils.BoolToColorString(pcCheck), RGMercUtils.BoolToColorString(mercCheck))

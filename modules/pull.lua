@@ -16,6 +16,7 @@ Module.TempSettings.PullTargets          = {}
 Module.TempSettings.AbortPull            = false
 Module.TempSettings.PullID               = 0
 Module.TempSettings.LastPullAbilityCheck = 0
+Module.TempSettings.LastPullerMercChec   = 0
 
 
 local PullStates              = {
@@ -761,16 +762,23 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
 end
 
 function Module:FixPullerMerc()
-    if mq.TLO.Group.Puller() ~= mq.TLO.Me.DisplayName() and RGMercUtils.GetSetting('DoPull') then return end
+    if os.clock() - self.TempSettings.LastPullerMercChec < 15 then return end
+    self.TempSettings.LastPullerMercChec = os.clock()
 
-    local merc = mq.TLO.Me.Mercenary
+    if mq.TLO.Group.Leader() ~= mq.TLO.Me.DisplayName() then return end
 
-    if not merc or not merc() then return end
+    local groupCount = mq.TLO.Group.Members()
 
-    if (merc.Distance() or 0) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
-        RGMercUtils.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
-        mq.delay("10s", function() return (merc.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius end)
-        RGMercUtils.DoCmd("/grouproles set %s 3", mq.TLO.Me.DisplayName())
+    for i = 1, groupCount do
+        local merc = mq.TLO.Group.Member(i)
+
+        if merc and merc() and merc.Type() == "Mercenary" and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
+            if (merc.Distance() or 0) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius(merc.Owner.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+                RGMercUtils.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
+                mq.delay("10s", function() return (merc.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius end)
+                RGMercUtils.DoCmd("/grouproles set %s 3", mq.TLO.Me.DisplayName())
+            end
+        end
     end
 end
 
@@ -989,6 +997,7 @@ end
 
 function Module:GiveTime(combat_state)
     self:SetValidPullAbilities()
+    self:FixPullerMerc()
 
     if not RGMercUtils.GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
@@ -1031,8 +1040,6 @@ function Module:GiveTime(combat_state)
     end
 
     self.TempSettings.LastPull = os.clock()
-
-    self:FixPullerMerc()
 
     if self.settings.GroupWatch == 2 then
         local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct,
