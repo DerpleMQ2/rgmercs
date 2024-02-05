@@ -1873,7 +1873,7 @@ end
 ---@param y2 number
 ---@return number
 function Utils.GetDistance(x1, y1, x2, y2)
-    return mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", y1, x1, y2, x2))()
+    return mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", y1 or 0, x1 or 0, y2 or 0, x2 or 0))()
 end
 
 ---@return boolean
