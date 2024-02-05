@@ -92,7 +92,7 @@ local _ClassConfig = {
             -- Fd Spell
             "Death Peace",
         },
-        
+
         ---DPS
         ['AllianceSpell'] = {
             -- Alliance Spells
@@ -180,7 +180,7 @@ local _ClassConfig = {
             "Dark Leech",
             "Leech",
         },
-        ['PoisonNuke'] = {
+        ['PoisonNuke1'] = {
             ---PoisonNuke >=LVL21
             "Necrotizing Venin",
             "Embalming Venin",
@@ -250,7 +250,7 @@ local _ClassConfig = {
         ['FireDot2_2'] = {
             ---FireDot2 >= LVL10
             "Pyre of Illandrin",
-            "Pyre of Va Xakra",		
+            "Pyre of Va Xakra",
             "Pyre of Klraggek",
             "Pyre of the Shadewarden",
             "Pyre of Jorobb",
@@ -860,7 +860,7 @@ local _ClassConfig = {
                 cond = function(self, _) return RGMercUtils.GetTargetPctHPs() > 50 and RGMercUtils.ManaCheck() end,
             },
             {
-                name = "PoisonNuke",
+                name = "PoisonNuke1",
                 type = "Spell",
                 cond = function(self, _) return RGMercUtils.ManaCheck() end,
             },
@@ -1130,7 +1130,7 @@ local _ClassConfig = {
         {
             gem = 4,
             spells = {
-                { name = "PoisonNuke",  cond = function(self) return mq.TLO.Me.Level() < 75 end, },
+                { name = "PoisonNuke1", cond = function(self) return mq.TLO.Me.Level() < 75 end, },
                 { name = "PoisonNuke2", },
                 { name = "Poison2_2", },
             },

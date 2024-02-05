@@ -7,21 +7,21 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version          = "0.1a",
-    _author           = "Derple",
-    ['Modes']         = {
+    _version        = "0.1a",
+    _author         = "Derple",
+    ['Modes']       = {
         'Combo',
         'Fire',
         'Ice',
         'Magic',
     },
-    ['ItemSets']      = {
+    ['ItemSets']    = {
         ['Epic'] = {
             "Staff of Phenomenal Power",
             "Staff of Prismatic Power",
         },
     },
-    ['AbilitySets']   = {
+    ['AbilitySets'] = {
         ['AllianceSpell'] = {
             "Malarian Mantle",
             "Frostbound Conjunction",
@@ -534,7 +534,7 @@ return {
             "Mana Weave",
         },
     },
-    ['ChatBegList']   = {
+    ['ChatBegList'] = {
         ['WizBegs'] = {
             ['bindme'] = {
                 ['spell'] = "Bind Affinity",
@@ -1038,11 +1038,14 @@ return {
                 },
             },
         },
-        { gem = 5, spells = { 
-            { name = "TwincastSpell", }, 
-            { name = "SnareSpell", cond = function(self) return self.settings.DoSnare end, }, 
-            { name = "StunSpell", }, 
-            { name = "RootSpell", }, }, },
+        {
+            gem = 5,
+            spells = {
+                { name = "TwincastSpell", },
+                { name = "SnareSpell",    cond = function(self) return self.settings.DoSnare end, },
+                { name = "StunSpell", },
+                { name = "RootSpell", }, },
+        },
         { gem = 6, spells = { { name = "GambitSpell", }, { name = "HarvestSpell", }, }, },
         {
             gem = 7,
@@ -1095,12 +1098,12 @@ return {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
+        ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 3, Min = 1, Max = 4, },
         ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['JoltAggro']    = { DisplayName = "Jolt Aggro %", Category = "Combat", Tooltip = "Aggro at which to use Jolt", Default = 65, Min = 1, Max = 100, },
         ['WeaveAANukes'] = { DisplayName = "Weave AA Nukes", Category = "Combat", Tooltip = "Weave in AA Nukes", Default = true, },
-        ['DoManaBurn'] = { DisplayName = "Use Mana Burn AA", Category = "Combat", Tooltip = "Enable usage of Mana Burn", Default = true, },
-        ['DoSnare'] = { DisplayName = "Use Snare Spells", Category = "Combat", Tooltip = "Enable usage of Snares", Default = true, },
-        ['DoRain'] = { DisplayName = "Use Rain Spells", Category = "Combat", Tooltip = "Enable usage of Rain Spells", Default = true, },
+        ['DoManaBurn']   = { DisplayName = "Use Mana Burn AA", Category = "Combat", Tooltip = "Enable usage of Mana Burn", Default = true, },
+        ['DoSnare']      = { DisplayName = "Use Snare Spells", Category = "Combat", Tooltip = "Enable usage of Snares", Default = true, },
+        ['DoRain']       = { DisplayName = "Use Rain Spells", Category = "Combat", Tooltip = "Enable usage of Rain Spells", Default = true, },
     },
 }

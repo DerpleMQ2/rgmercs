@@ -959,7 +959,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         local spellRequiredMem = false
         if not me.Gem(spellName)() then
             RGMercsLogger.log_debug("\ay%s is not memorized - meming!", spellName)
-            Utils.MemorizeSpell(Utils.UseGem, spellName, 5000)
+            Utils.MemorizeSpell(Utils.UseGem, spellName, 15000)
             spellRequiredMem = true
         end
 
@@ -1092,7 +1092,6 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
     end
 
     if entry.post_activate then
-        RGMercsLogger.log_debug("Running Post-Activate for %s", entry.name)
         entry.post_activate(caller, Utils.GetEntryConditionArg(resolvedActionMap, entry), ret)
     end
 
@@ -1206,7 +1205,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
 
     if Utils.GetXTHaterCount() == 0 and oldSpellInSlot() and mq.TLO.Me.Gem(Utils.UseGem)() ~= oldSpellInSlot.Name() then
         RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, Utils.UseGem)
-        Utils.MemorizeSpell(Utils.UseGem, oldSpellInSlot.Name(), 10000)
+        Utils.MemorizeSpell(Utils.UseGem, oldSpellInSlot.Name(), 15000)
     end
 
     -- Move to the next step
@@ -3395,7 +3394,7 @@ function Utils.LoadSpellLoadOut(spellLoadOut)
         end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
-            Utils.MemorizeSpell(gem, selectedRank, 7000)
+            Utils.MemorizeSpell(gem, selectedRank, 15000)
         end
     end
 end

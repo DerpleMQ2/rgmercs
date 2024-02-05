@@ -121,7 +121,7 @@ Module.DefaultConfig                   = {
     ['PullMode']           = { DisplayName = "Pull Mode", Category = "Pulling", Tooltip = "1 = Normal, 2 = Chain, 3 = Hunt, 4 = Farm", Type = "Custom", Default = 1, Min = 1, Max = 4, },
     ['ChainCount']         = { DisplayName = "Chain Count", Category = "Pulling", Tooltip = "Number of mobs in chain pull mode on xtarg before we stop pulling", Default = 3, Min = 1, Max = 100, },
     ['PullDelay']          = { DisplayName = "Pull Delay", Category = "Pulling", Tooltip = "Seconds between pulls", Default = 5, Min = 1, Max = 300, },
-    ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pull Distance", Tooltip = "Distnace to pull", Default = 90, Min = 1, Max = 10000, },
+    ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pull Distance", Tooltip = "Distnace to pull", Default = 350, Min = 1, Max = 10000, },
     ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pull Distance", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 150, },
     ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pull Distance", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
     ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },

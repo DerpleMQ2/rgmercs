@@ -210,9 +210,6 @@ function Module:Render()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
                     local rotationName = r.name
-                    --if r.timer then
-                    --    rotationName = string.format("%s [%s]", r.name, RGMercUtils.FormatTime(math.max(0, r.timer - (os.clock() - (self.TempSettings.RotationTimers[r.name] or 0)))))
-                    --end
                     if ImGui.CollapsingHeader(rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name,
@@ -629,12 +626,12 @@ function Module:GiveTime(combat_state)
     -- Downtime rotaiton will just run a full rotation to completion
     for _, r in ipairs(self.TempSettings.RotationStates) do
         RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
-        local timeCheck = true
+        local timeCheckPassed = true
         if r.timer then
             self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
-            timeCheck = ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
+            timeCheckPassed = ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
         end
-        if timeCheck then
+        if timeCheckPassed then
             local targetTable = RGMercUtils.SafeCallFunc("Rotation Target Table", r.targetId)
             if targetTable ~= false then
                 for _, targetId in ipairs(targetTable) do

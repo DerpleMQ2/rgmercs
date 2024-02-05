@@ -51,18 +51,6 @@ _ClassConfig      = {
             "Raging Servant",
             "Rage of Zomm",
         },
-        ['SpearNuke'] = {
-            -- Spear Nuke* >= LVL 70
-            "Spear of Molten Dacite",
-            "Spear of Molten Luclinite",
-            "Spear of Molten Komatiite",
-            "Spear of Molten Arcronite",
-            "Spear of Molten Shieldstone",
-            "Spear of Blistersteel",
-            "Spear of Molten Steel",
-            "Spear of Magma",
-            "Spear of Ro",
-        },
         ['SpearNuke1'] = {
             -- Spear Nuke* >= LVL 70
             "Spear of Molten Dacite",
@@ -101,33 +89,6 @@ _ClassConfig      = {
             "Fickle Pyroclasm",
             "Fickle Inferno",
             "Fickle Fire",
-        },
-        ['FireNuke'] = {
-            -- Fire Nuke 1 <= LVL <= 70
-            "Cremating Sands",
-            "Ravaging Sands",
-            "Incinerating Sands",
-            "Crash of Sand",
-            "Blistering Sands",
-            "Searing Sands",
-            "Broiling Sands",
-            "Blast of Sand",
-            "Burning Sands",
-            "Burst of Sand",
-            "Strike of Sand",
-            "Torrid Sands",
-            "Scorching Sands",
-            "Scalding Sands",
-            "Sun Vortex",
-            "Star Strike",
-            "Ancient: Nova Strike",
-            "Burning Sand",
-            "Shock of Fiery Blades",
-            "Char",
-            "Blaze",
-            "Shock of Flame",
-            "Burn",
-            "Burst of Flame",
         },
         ['FireNuke1'] = {
             -- Fire Nuke 1 <= LVL <= 70
@@ -182,27 +143,6 @@ _ClassConfig      = {
             "Shock of Flame",
             "Burn",
             "Burst of Flame",
-        },
-        ['MagicNuke'] = {
-            -- Nuke 1 <= LVL <= 69
-            "Shock of Memorial Steel",
-            "Shock of Carbide Steel",
-            "Shock of Burning Steel",
-            "Shock of Arcronite Steel",
-            "Shock of Darksteel",
-            "Shock of Blistersteel",
-            "Shock of Argathian Steel",
-            "Shock of Ethereal Steel",
-            "Shock of Discordant Steel",
-            "Shock of Cineral Steel",
-            "Shock of Silvered Steel",
-            "Blade Strike",
-            "Rock of Taelosia",
-            "Black Steel",
-            "Shock of Steel",
-            "Shock of Swords",
-            "Shock of Spikes",
-            "Shock of Blades",
         },
         ['MagicNuke1'] = {
             -- Nuke 1 <= LVL <= 69
@@ -267,14 +207,6 @@ _ClassConfig      = {
             "Cinder Bolt",
             "Bolt of Flame",
             "Flame Bolt",
-        },
-        ['MagicBoltNuke'] = {
-            -- Magic Bolt Nukes
-            "Luclinite Bolt",
-            "Komatiite Bolt",
-            "Korascian Bolt",
-            "Meteoric Bolt",
-            "Iron Bolt",
         },
         ['MagicBoltNuke1'] = {
             -- Magic Bolt Nukes
@@ -1459,14 +1391,14 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "SpearNuke",
+                name = "SpearNuke1",
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("Fire")
                 end,
             },
             {
-                name = "SpearNuke",
+                name = "SpearNuke1",
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("PetTank") and RGMercUtils.SongActive("Conjurer's Synergy")
@@ -2001,9 +1933,9 @@ _ClassConfig      = {
             gem = 1,
             spells = {
                 { name = "FireNuke1",  cond = function(self) return RGMercUtils.IsModeActive("PetTank") and mq.TLO.Me.Level() <= 69 end, },
-                { name = "SpearNuke",  cond = function(self) return RGMercUtils.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
+                { name = "SpearNuke1", cond = function(self) return RGMercUtils.IsModeActive("PetTank") and mq.TLO.Me.Level() > 69 end, },
                 { name = "MagicNuke1", cond = function(self) return RGMercUtils.GetSetting('DoMagicNuke') end, },
-                { name = "SpearNuke",  cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
+                { name = "SpearNuke1", cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
                 { name = "FireNuke1",  cond = function(self) return true end, },
             },
         },

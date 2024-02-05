@@ -63,12 +63,6 @@ local _ClassConfig = {
             "Barrage of Fists",
             "Flurry of Fists",
         },
-        ['Precision'] = {
-            "Doomwalker's Precision Strike",
-            "Firewalker's Precision Strike",
-            "Icewalker's Precision Strike",
-            "Bloodwalker's Precision Strike",
-        },
         ['Precision1'] = {
             "Doomwalker's Precision Strike",
             "Firewalker's Precision Strike",

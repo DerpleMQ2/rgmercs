@@ -139,8 +139,8 @@ Config.DefaultConfig = {
     -- [ MEDITATION ] --
     ['DoMed']             = { DisplayName = "Do Meditate", Category = "Meditation", Tooltip = "0 = No Auto Med, 1 = Auto Med Out of Combat, 2 = Auto Med In Combat", Type = "Combo", ComboOptions = { 'Off', 'Out of Combat', 'In Combat', }, Default = 2, Min = 1, Max = 3, ConfigType = "Normal", },
     ['HPMedPct']          = { DisplayName = "Med HP %", Category = "Meditation", Tooltip = "What HP % to hit before medding.", Default = 60, Min = 1, Max = 99, ConfigType = "Advanced", },
-    ['ManaMedPct']        = { DisplayName = "Med Mana %", Category = "Meditation", Tooltip = "What Mana % to hit before medding.", Default = 30, Min = 1, Max = 99, ConfigType = "Advanced", },
-    ['EndMedPct']         = { DisplayName = "Med Endurance %", Category = "Meditation", Tooltip = "What Endurance % to hit before medding.", Default = 30, Min = 1, Max = 99, ConfigType = "Advanced", },
+    ['ManaMedPct']        = { DisplayName = "Med Mana %", Category = "Meditation", Tooltip = "What Mana % to hit before medding.", Default = 60, Min = 1, Max = 99, ConfigType = "Advanced", },
+    ['EndMedPct']         = { DisplayName = "Med Endurance %", Category = "Meditation", Tooltip = "What Endurance % to hit before medding.", Default = 60, Min = 1, Max = 99, ConfigType = "Advanced", },
     ['ManaMedPctStop']    = { DisplayName = "Med Mana % Stop", Category = "Meditation", Tooltip = "What Mana % to hit before stopping medding.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
     ['EndMedPctStop']     = { DisplayName = "Med Endurance % Stop", Category = "Meditation", Tooltip = "What Endurance % to hit before stopping medding.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
     ['HPMedPctStop']      = { DisplayName = "Med HP % Stop", Category = "Meditation", Tooltip = "What HP % to hit before stopping medding.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
