@@ -72,7 +72,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version            = "0.1a",
+    _version            = "1.0 Beta",
     _author             = "Derple",
     ['ModeChecks']      = {
         IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,

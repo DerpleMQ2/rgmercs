@@ -328,6 +328,18 @@ end)
 
 -- [ END CAST RESULT HANDLERS ] --
 
+-- [ MEZ HANDLERS ] --
+
 mq.event('MezBroken', "#1# has been awakened by #2#.", function(_, mobName, breakerName)
     RGMercModules:ExecModule("Mez", "HandleMezBroke", mobName, breakerName)
 end)
+
+-- [ END MEZ HANDLERS ] --
+
+-- [ GAME EVENT HANDLERS ] --
+
+mq.event('Camping', "It will take you about #1# seconds to prepare your camp.", function(seconds)
+    RGMercConfig.Globals.PauseMain = true
+end)
+
+-- [ END GAME EVENT HANDLERS ] --

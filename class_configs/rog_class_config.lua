@@ -2,7 +2,7 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version          = "0.1a",
+    _version          = "1.0 Beta",
     _author           = "Derple",
     ['Modes']         = {
         'DPS',
@@ -217,8 +217,7 @@ return {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck()
+                return combat_state == "Downtime"
             end,
         },
         {
@@ -495,8 +494,14 @@ return {
                     return RGMercUtils.GetSetting('DoHideSneak')
                 end,
                 custom_func = function(_)
-                    if mq.TLO.Me.AbilityReady("hide") then RGMercUtils.DoCmd("/doability hide") end
-                    if mq.TLO.Me.AbilityReady("sneak") then RGMercUtils.DoCmd("/doability sneak") end
+                    if RGMercUtils.GetSetting('ChaseOn') then
+                        if mq.TLO.Me.Sneaking() then
+                            RGMercUtils.DoCmd("/doability sneak")
+                        end
+                    else
+                        if mq.TLO.Me.AbilityReady("hide")() then RGMercUtils.DoCmd("/doability hide") end
+                        if mq.TLO.Me.AbilityReady("sneak")() then RGMercUtils.DoCmd("/doability sneak") end
+                    end
                     return true
                 end,
             },
