@@ -2646,6 +2646,12 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
     local spellLoadOut = {}
     local resolvedActionMap = {}
     local spellsToLoad = {}
+    
+    -- Allow a callback fn for generating spell loadouts rather than a static list
+    -- Can be used by bards to prioritize loadouts based on user choices
+    if spellGemList.getSpellCallback ~= nil and type(spellGemList.getSpellCallback) == "function" then
+        spellGemList = spellGemList.getSpellCallback()
+    end
 
     Utils.UseGem = mq.TLO.Me.NumGems()
 
