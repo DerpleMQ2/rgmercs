@@ -1797,8 +1797,8 @@ end
 function Utils.SongMemed(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
-
-    return me.Gem(songSpell.Name())() ~= nil
+    -- Rk. II and III songs fail this check without RankName()
+    return me.Gem(songSpell.RankName() or songSpell.Name())() ~= nil
 end
 
 ---@param songSpell MQSpell
