@@ -1127,7 +1127,7 @@ end
 ---@param entry table
 ---@param targetId integer
 ---@return boolean, boolean # check pass and active pass
-function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
+function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId, uiCheck)
     local condArg = Utils.GetEntryConditionArg(resolvedActionMap, entry)
     local condTarg = mq.TLO.Spawn(targetId)
     local pass = false
@@ -1137,7 +1137,7 @@ function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
         local logInfo = string.format("check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay)", entry.name or "NoName",
             (type(condArg) == 'userdata' and condArg() or condArg) or "None",
             condTarg.CleanName() or "None")
-        pass = Utils.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg, false)
+        pass = Utils.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg, uiCheck)
 
         if entry.active_cond then
             active = Utils.SafeCallFunc("Active " .. logInfo, entry.active_cond, caller, condArg)
@@ -1169,7 +1169,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
             RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             lastStepIdx = idx
             if entry.cond then
-                local pass = Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
+                local pass = Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId, false)
                 if pass == true then
                     local res = Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
                     if res == true then
@@ -3075,7 +3075,7 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
             end
             ImGui.TableNextColumn()
             if entry.cond then
-                local pass, active = Utils.TestConditionForEntry(caller, resolvedActionMap, entry, mq.TLO.Target.ID())
+                local pass, active = Utils.TestConditionForEntry(caller, resolvedActionMap, entry, mq.TLO.Target.ID(), true)
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
