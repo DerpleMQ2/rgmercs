@@ -1156,7 +1156,7 @@ local _ClassConfig = {
                 { name = "ScentDebuff", cond = function(self) return mq.TLO.Me.Level() < 89 end, },
                 { name = "Disease3", },
                 { name = "Disease1", },
-                { name = "Disease", },
+                { name = "Disease2", },
             },
         },
         {

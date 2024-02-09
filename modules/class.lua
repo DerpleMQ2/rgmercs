@@ -197,7 +197,7 @@ function Module:Render()
                 self:RescanLoadout()
             end
 
-            if #self.SpellLoadOut > 0 then
+            if RGMercUtils.GetTableSize(self.SpellLoadOut) > 0 then
                 RGMercUtils.RenderLoadoutTable(self.SpellLoadOut)
             end
             ImGui.Unindent()

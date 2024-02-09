@@ -115,7 +115,11 @@ function Module:Init()
 end
 
 function Module:ChaseOn(target)
-    local chaseTarget = RGMercUtils.GetMainAssistSpawn() or mq.TLO.Target
+    local chaseTarget = RGMercUtils.GetMainAssistSpawn()
+
+    if not chaseTarget or not chaseTarget() then
+        chaseTarget = mq.TLO.Target
+    end
 
     if target then
         chaseTarget = mq.TLO.Spawn("pc =" .. target)

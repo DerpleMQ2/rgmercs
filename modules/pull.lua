@@ -773,7 +773,7 @@ function Module:FixPullerMerc()
         local merc = mq.TLO.Group.Member(i)
 
         if merc and merc() and merc.Type() == "Mercenary" and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
-            if (merc.Distance() or 0) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius(merc.Owner.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+            if (merc.Distance() or 0) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius and (merc.Owner.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                 RGMercUtils.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
                 mq.delay("10s", function() return (merc.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius end)
                 RGMercUtils.DoCmd("/grouproles set %s 3", mq.TLO.Me.DisplayName())

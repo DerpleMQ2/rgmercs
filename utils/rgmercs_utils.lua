@@ -1001,7 +1001,7 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
 
     -- Run pre-activates
     if entry.pre_activate then
-        RGMercsLogger.log_debug("Running Pre-Activate for %s", entry.name)
+        RGMercsLogger.log_super_verbose("Running Pre-Activate for %s", entry.name)
         entry.pre_activate(caller, Utils.GetEntryConditionArg(resolvedActionMap, entry))
     end
 
