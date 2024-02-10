@@ -215,7 +215,9 @@ Config.DefaultConfig = {
     ['BurnNamed']         = { DisplayName = "Auto Burn Named", Category = "Burns", Tooltip = "Automatically burn named mobs.", Default = false, ConfigType = "Advanced", },
 
     -- [ UI ] --
-    ['BgOpacity']         = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Type = "Custom", Default = "1.0", ConfigType = "Advanced", },
+    ['BgOpacity']         = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Default = 100, Min = 5, Max = 100, },
+    ['FrameEdgeRounding'] = { DisplayName = "Frame Edge Rounding", Category = "UI", Tooltip = "Frame Edge Rounding for the RGMercs UI", Default = 6, Min = 0, Max = 50, },
+    ['ScrollBarRounding'] = { DisplayName = "Scroll Bar Rounding", Category = "UI", Tooltip = "Frame Edge Rounding for the RGMercs UI", Default = 10, Min = 0, Max = 50, },
     ['ShowAdvancedOpts']  = { DisplayName = "Show Advanced Options", Category = "UI", Tooltip = "Show Advanced Options", Type = "Custom", Default = false, ConfigType = "Advanced", },
 }
 
