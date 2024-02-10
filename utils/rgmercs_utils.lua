@@ -1163,7 +1163,11 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
     local oldSpellInSlot = mq.TLO.Me.Gem(Utils.UseGem)
     local stepsThisTime  = 0
     local lastStepIdx    = 0
-
+    
+    -- This is useful when class config wants to re-check every rotation condition every run
+    -- For example, if gem1 meets all condition criteria, it WILL cast repeatedly on every cast
+    -- Used for bards to dynamically weave properly
+    if rotationTable.doFullRotation then start_step = 1 end
     for idx, entry in ipairs(rotationTable) do
         if idx >= start_step then
             RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
@@ -1214,7 +1218,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
     if lastStepIdx > #rotationTable then
         lastStepIdx = 1
     end
-
+    
     RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, (start_step or -1),
         lastStepIdx)
 
@@ -1806,8 +1810,8 @@ end
 function Utils.SongMemed(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
-    -- Rk. II and III songs fail this check without RankName()
-    return me.Gem(songSpell.RankName() or songSpell.Name())() ~= nil
+
+    return me.Gem(songSpell.RankName())() ~= nil
 end
 
 ---@param songSpell MQSpell
