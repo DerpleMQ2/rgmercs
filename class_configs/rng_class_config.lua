@@ -826,20 +826,20 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             cond  = function(self, target)
-                return mq.TLO.Me.Level() >= 89 and RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint
+                return mq.TLO.Me.Level() >= 89 and RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint')
             end,
         },
         {
             name = 'MainHealPoint', -- Heal
             state = 1,
             steps = 1,
-            cond = function(self, target) return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSettings().MainHealPoint end,
+            cond = function(self, target) return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint') end,
         },
         {
             name = 'GroupHealPoint', -- TotHeal
             state = 1,
             steps = 1,
-            cond = function(self, target) return mq.TLO.Group() and mq.TLO.Group.Injured(RGMercConfig:GetSettings().GroupHealPoint)() > RGMercConfig:GetSettings().GroupInjureCnt end,
+            cond = function(self, target) return mq.TLO.Group() and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
         },
     },
     ['HealRotations']     = {
@@ -848,7 +848,7 @@ local _ClassConfig = {
                 name = "Fastheal",
                 type = "Spell",
                 cond = function(self, _, target)
-                    return self.settings.DoHeals
+                    return RGMercUtils.GetSetting('DoHeals')
                 end,
             },
 
@@ -858,7 +858,7 @@ local _ClassConfig = {
                 name = "Heal",
                 type = "Spell",
                 cond = function(self, _, target)
-                    return self.settings.DoHeals
+                    return RGMercUtils.GetSetting('DoHeals')
                 end,
             },
         },
@@ -867,7 +867,7 @@ local _ClassConfig = {
                 name = "Heal",
                 type = "Spell",
                 cond = function(self, _, target)
-                    return self.settings.DoHeals
+                    return RGMercUtils.GetSetting('DoHeals')
                 end,
             },
         },
@@ -1061,7 +1061,7 @@ local _ClassConfig = {
                 name = "MoveSpells",
                 type = "Spell",
                 tooltip = Tooltips.MoveSpells,
-                active_cond = function(self, spell) return self.settings.DoRunSpeed and RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return RGMercUtils.GetSetting('DoRunSpeed') and RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -1099,7 +1099,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.AgroReducerBuff,
                 active_cond = function(self, spell) return not RGMercUtils.IsTanking() end,
                 cond = function(self, spell)
-                    return self.settings.DoAgroReducerBuff and RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.GetSetting('DoAgroReducerBuff') and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1108,14 +1108,14 @@ local _ClassConfig = {
                 tooltip = Tooltips.AgroBuff,
                 active_cond = function(self, spell) return RGMercUtils.IsTanking() end,
                 cond = function(self, spell)
-                    return not self.settings.DoAgroReducerBuff and RGMercUtils.SelfBuffCheck(spell)
+                    return not RGMercUtils.GetSetting('DoAgroReducerBuff') and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "RegenSpells",
                 type = "Spell",
                 tooltip = Tooltips.RegenSpells,
-                active_cond = function(self, spell) return self.settings.DoRegen end,
+                active_cond = function(self, spell) return RGMercUtils.GetSetting('DoRegen') end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -1126,7 +1126,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.PoisonArrow,
                 active_cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetAACheck(927) and self.settings.DoPoisonArrow
+                    return RGMercUtils.DetAACheck(927) and RGMercUtils.GetSetting('DoPoisonArrow')
                 end,
             },
             {
@@ -1135,7 +1135,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.FlamingArrow,
                 active_cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetAACheck(289) and (mq.TLO.Me.Level() < 86 or not self.settings.DoPoisonArrow)
+                    return RGMercUtils.DetAACheck(289) and (mq.TLO.Me.Level() < 86 or not RGMercUtils.GetSetting('DoPoisonArrow'))
                 end,
             },
         },
@@ -1193,7 +1193,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.BowDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercConfig.DoMelee
+                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.GetSetting('DoMelee')
                 end,
             },
             {
@@ -1201,7 +1201,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.MeleeDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercConfig.DoMelee
+                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.GetSetting('DoMelee')
                 end,
             },
         },
@@ -1239,7 +1239,6 @@ local _ClassConfig = {
                 name = "Guardian of the Forest",
                 type = "AA",
                 tooltip = Tooltips.GotF,
-                active_cond = function(self, spell) return RGMercUtils.DetAACheck(184) end,
                 cond = function(self, spell)
                     return not RGMercUtils.SongActive("Group Guardian of the Forest") and not RGMercUtils.SongActive("Outrider's Accuracy")
                 end,
@@ -1248,7 +1247,6 @@ local _ClassConfig = {
                 name = "Outrider's Accuracy",
                 type = "AA",
                 tooltip = Tooltips.OA,
-                active_cond = function(self, spell) return RGMercUtils.DetAACheck(3804) end,
                 cond = function(self, spell)
                     return not RGMercUtils.SongActive("Group Guardian of the Forest") and not RGMercUtils.SongActive("Guardian of the Forest")
                 end,
@@ -1257,7 +1255,6 @@ local _ClassConfig = {
                 name = "Group Guardian of the Forest",
                 type = "AA",
                 tooltip = Tooltips.GGotF,
-                active_cond = function(self, spell) return RGMercUtils.DetAACheck(873) end,
                 cond = function(self, spell)
                     return not RGMercUtils.SongActive("Guardian of the Forest") and not RGMercUtils.SongActive("Outrider's Accuracy")
                 end,
@@ -1274,35 +1271,33 @@ local _ClassConfig = {
                 name = "ArrowOpener",
                 type = "Spell",
                 tooltip = Tooltips.ArrowOpener,
-                active_cond = function(self, combat_state) return combat_state ~= 'Combat' and self.settings.DoOpener end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetSpellCheck(spell) and self.settings.DoReagentArrow
+                    return RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoReagentArrow')
                 end,
             },
             {
                 name = "PullOpener",
                 type = "Spell",
                 tooltip = Tooltips.PullOpener,
-                active_cond = function(self, combat_state) return combat_state ~= 'Combat' and self.settings.DoOpener end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetSpellCheck(spell) and self.settings.DoReagentArrow
+                    return RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoReagentArrow')
                 end,
             },
             {
                 name = "Ranged Mode",
-                type = "Ability",
+                type = "CustomFunc",
                 tooltip = Tooltips.RangedMode,
-                active_cond = function(self, combat_state) return combat_state == 'Combat' and not RGMercConfig.DoMelee end,
-                cond = function(self)
+                cond = function(self, combat_state) return not RGMercUtils.GetSetting('DoMelee') end,
+                custom_func = function(self)
                     RGMercUtils.DoCmd('/squelch face')
                     RGMercUtils.DoCmd('/timed 4 /autofire on')
+                    mq.delay(400)
                 end,
             },
             {
                 name = "CalledShotsArrow",
                 type = "Spell",
                 tooltip = Tooltips.CalledShotsArrow,
-                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
                 cond = function(self, spell)
                     return RGMercUtils.ManaCheck()
                 end,
@@ -1311,7 +1306,6 @@ local _ClassConfig = {
                 name = "FocusedArrows",
                 type = "Spell",
                 tooltip = Tooltips.FocusedArrows,
-                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
                 cond = function(self, spell)
                     return RGMercUtils.ManaCheck()
                 end,
@@ -1320,7 +1314,6 @@ local _ClassConfig = {
                 name = "DichoSpell",
                 type = "Spell",
                 tooltip = Tooltips.DichoSpell,
-                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
                 cond = function(self, spell)
                     return RGMercUtils.ManaCheck()
                 end,
@@ -1329,7 +1322,6 @@ local _ClassConfig = {
                 name = "Heartshot",
                 type = "Spell",
                 tooltip = Tooltips.Heartshot,
-                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) and self.settings.DoReagentArrow end,
                 cond = function(self, spell)
                     return RGMercUtils.ManaCheck()
                 end,
@@ -1338,7 +1330,6 @@ local _ClassConfig = {
                 name = "Fireboon",
                 type = "Spell",
                 tooltip = Tooltips.Fireboon,
-                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
                 cond = function(self, spell)
                     return RGMercUtils.DetSpellCheck(spell) and not RGMercUtils.BuffActiveByName("FireboonBuff")
                 end,
@@ -1347,7 +1338,6 @@ local _ClassConfig = {
                 name = "Iceboon",
                 type = "Spell",
                 tooltip = Tooltips.Iceboon,
-                active_cond = function(self, spell) return RGMercUtils.DetSpellCheck(spell) end,
                 cond = function(self, spell)
                     return RGMercUtils.DetSpellCheck(spell) and not RGMercUtils.BuffActiveByName("IceboonBuff")
                 end,
@@ -1357,16 +1347,16 @@ local _ClassConfig = {
                 tooltip = Tooltips.Entrap,
                 type = "AA",
                 cond = function(self)
-                    return self.settings.DoSnare and RGMercUtils.DetAACheck(219)
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetAACheck(219)
                 end,
             },
             {
                 name = "SnareSpells",
                 type = "Spell",
                 tooltip = Tooltips.SnareSpells,
-                active_cond = function(self) return not mq.TLO.Me.AltAbility(219)() end,
+
                 cond = function(self, spell)
-                    return self.settings.DoSnare and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1374,7 +1364,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.AEArrows,
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck() and self.settings.DoAoE
+                    return RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoAoE')
                 end,
             },
             {
@@ -1382,7 +1372,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.SwarmDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) and self.settings.DoDot
+                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and RGMercUtils.GetSetting('DoDot')
                 end,
             },
             {
@@ -1390,7 +1380,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.ShortSwarmDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(self.settings.HPStopDOT, spell) and self.settings.DoDot
+                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and RGMercUtils.GetSetting('DoDot')
                 end,
             },
             {
@@ -1422,7 +1412,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.AEBlades,
                 cond = function(self)
-                    return self.settings.DoAoE and RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
+                    return RGMercUtils.GetSetting('DoAoE') and RGMercUtils.GetTargetDistance() < 50 and RGMercUtils.GetSetting('DoMelee')
                 end,
             },
             {
@@ -1430,7 +1420,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.FocusedBlades,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
+                    return RGMercUtils.GetTargetDistance() < 50 and RGMercUtils.GetSetting('DoMelee')
                 end,
             },
             {
@@ -1438,7 +1428,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.ReflexSlashHeal,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig.DoMelee
+                    return RGMercUtils.GetTargetDistance() < 50 and RGMercUtils.GetSetting('DoMelee')
                 end,
             },
             {
@@ -1556,8 +1546,8 @@ local _ClassConfig = {
             gem = 4,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "ArrowOpener", cond = function(self) return self.settings.DoOpener end, },
-                { name = "SnareSpells", cond = function(self) return not RGMercUtils.DetAACheck(219) and self.settings.DoSnare end, },
+                { name = "ArrowOpener", cond = function(self) return RGMercUtils.GetSetting('DoOpener') end, },
+                { name = "SnareSpells", cond = function(self) return not RGMercUtils.DetAACheck(219) and RGMercUtils.GetSetting('DoSnare') end, },
             },
         },
         {
@@ -1594,7 +1584,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "SummerNuke", },
-                { name = "AEArrows",   cond = function(self) return self.settings.DoAoE end, },
+                { name = "AEArrows",   cond = function(self) return RGMercUtils.GetSetting('DoAoE') end, },
                 { name = "Veil", },
             },
         },
