@@ -1125,6 +1125,7 @@ local _ClassConfig = {
                 { name = "FireDot2",   cond = function(self) return mq.TLO.Me.Level() < 51 end, },
                 { name = "Magic1", },
                 { name = "FireDot2_2", },
+                { name = "GroupLeech", },
             },
         },
         {
@@ -1147,6 +1148,7 @@ local _ClassConfig = {
             spells = {
                 { name = "DurationTap", },
                 { name = "Magic2", },
+                { name = "LichSpell", },
             },
         },
         {

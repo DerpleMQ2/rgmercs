@@ -1410,7 +1410,7 @@ end
 ---@param target MQTarget|nil
 ---@return number
 function Utils.GetTargetMaxRangeTo(target)
-    return (target and target.MaxRangeTo() or (mq.TLO.Target.MaxRangeTo() or 0))
+    return (target and target.MaxRangeTo() or (mq.TLO.Target.MaxRangeTo() or 15))
 end
 
 ---@param target MQTarget|nil
@@ -1613,7 +1613,7 @@ function Utils.NavInCombat(config, targetId, distance, bDontStick)
     end
 
     if mq.TLO.Navigation.PathExists("id " .. tostring(targetId) .. " distance " .. tostring(distance))() then
-        Utils.DoCmd("/nav id %d distance=%d log=off lineofsight=on", targetId, distance)
+        Utils.DoCmd("/nav id %d distance=%d log=off lineofsight=on", targetId, distance or 15)
         while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
             mq.delay(100)
         end
@@ -1952,14 +1952,14 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
             end
 
             if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IAmMA()) and Utils.GetTargetPctHPs() > 0 then
-                if target.Distance() > target.MaxRangeTo() then
+                if target.Distance() > Utils.GetTargetMaxRangeTo(target) then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
                     if preEngageRoutine then
                         preEngageRoutine()
                     end
 
-                    Utils.NavInCombat(config, autoTargetId, target.MaxRangeTo(), false)
+                    Utils.NavInCombat(config, autoTargetId, Utils.GetTargetMaxRangeTo(target), false)
                 else
                     if mq.TLO.Navigation.Active() then
                         Utils.DoCmd("/nav stop log=off")

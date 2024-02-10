@@ -32,7 +32,7 @@ local curState       = "Downtime"
 -- Icon Rendering
 local animItems      = mq.FindTextureAnimation("A_DragItem")
 local animBox        = mq.FindTextureAnimation("A_RecessedBox")
-local derpImg        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog.jpg")
+local derpImg        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
 
 -- Constants
 local ICON_WIDTH     = 40

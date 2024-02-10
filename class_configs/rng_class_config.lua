@@ -1446,7 +1446,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.EndRegenDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.PctEndurance < 30
+                    return not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.PctEndurance() < 30
                 end,
             },
         },
@@ -1626,6 +1626,20 @@ local _ClassConfig = {
             spells = {
                 { name = "Alliance", },
             },
+        },
+    },
+    ['PullAbilities']     = {
+        {
+            id = 'Snare',
+            Type = "Spell",
+            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('SnareSpells')() or "" end,
+            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('SnareSpells')() or "" end,
+            AbilityRange = 150,
+            cond = function(self)
+                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('SnareSpells')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
         },
     },
     ['DefaultConfig']     = {
