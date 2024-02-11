@@ -1539,11 +1539,20 @@ function Utils.DoStick(config, targetId)
     end
 end
 
+function Utils.DoGroupCmd(cmd, ...)
+    local dgcmd = "/dga /if ($\\{Zone.ID} == ${Zone.ID} && $\\{Group.Leader.Name.Equal[${Group.Leader.Name}]}) "
+    local formatted = cmd
+    if ... ~= nil then formatted = string.format(cmd, ...) end
+    formatted = dgcmd .. formatted
+    RGMercsLogger.log_debug("\atRGMercs \awsent MQ \amGroup Command\aw: >> \ag%s\aw <<", formatted)
+    mq.cmd(formatted)
+end
+
 function Utils.DoCmd(cmd, ...)
     local formatted = cmd
     if ... ~= nil then formatted = string.format(cmd, ...) end
     RGMercsLogger.log_debug("\atRGMercs \awsent MQ \amCommand\aw: >> \ag%s\aw <<", formatted)
-    mq.cmdf(formatted)
+    mq.cmd(formatted)
 end
 
 ---@param target MQTarget

@@ -348,11 +348,11 @@ function Module:Render()
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
         if campData.returnToCamp then
             if ImGui.Button("Break Group Camp", ImGui.GetWindowWidth() * .3, 18) then
-                RGMercUtils.DoCmd("/dgza /rgl campoff")
+                RGMercUtils.DoGroupCmd("/rgl campoff")
             end
         else
             if ImGui.Button("Set Group Camp Here", ImGui.GetWindowWidth() * .3, 18) then
-                RGMercUtils.DoCmd("/dgza /rgl campon")
+                RGMercUtils.DoGroupCmd("/rgl campon")
             end
         end
         ImGui.PopStyleVar(1)
