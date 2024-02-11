@@ -281,14 +281,14 @@ local function RGMercsGUI()
         end
 
         ImGui.PopID()
-        ImGui.End()
-        if themeStylePop > 0 then
+        ImGui.PopStyleVar(3)
+        if themeColorPop > 0 then
             ImGui.PopStyleColor(themeColorPop)
         end
         if themeStylePop > 0 then
             ImGui.PopStyleVar(themeStylePop)
         end
-        ImGui.PopStyleVar(3)
+        ImGui.End()
     end
 end
 
