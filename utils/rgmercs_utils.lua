@@ -861,12 +861,16 @@ function Utils.UseSong(songName, targetId, bAllowMem)
             mq.doevents()
             mq.delay(1)
         end
-
+        
         if targetId == me.ID() then
-            mq.delay("5s", function() return me.Song(songName).Duration.Seconds() > oldDuration end)
+            mq.delay("3s", function() return me.Song(songName).Duration.Seconds() > oldDuration end)
+        else
+            -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
+            -- might need to be bumped a bit for people with high latency?
+            mq.delay(150)
         end
-
-        if Utils.GetLastCastResultName() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
+        
+        if Utils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
             Utils.DoCmd("/stopsong")
             return true
         end
