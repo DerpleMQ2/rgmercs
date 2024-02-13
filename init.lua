@@ -323,7 +323,7 @@ local function RGInit(...)
     end
 
     for k, v in ipairs(RGMercConfig.Constants.ExpansionIDToName) do
-        RGMercsLogger.log_debug("\ayExpansion \at%s\ao[\am%d\ao]: %s", v, k, RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
+        RGMercsLogger.log_debug("\ayExpansion \at%-22s\ao[\am%02d\ao]: %s", v, k, RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
     end
 
     -- TODO: Can turn this into an options parser later.
@@ -485,10 +485,6 @@ local function Main()
         if RGMercUtils.GetSetting('DoMercenary') and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
             RGMercUtils.DoCmd("/squelch /stance passive")
         end
-    end
-
-    if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
-        -- TODO: Group Buffs
     end
 
     if RGMercUtils.GetSetting('DoModRod') then

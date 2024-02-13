@@ -23,22 +23,22 @@ travelColors["Single"]             = {}
 
 -- evac
 travelColors["Group v2"]["r"]      = 220
-travelColors["Group v2"]["g"]      = 0
-travelColors["Group v2"]["b"]      = 0
+travelColors["Group v2"]["g"]      = 80
+travelColors["Group v2"]["b"]      = 80
 
 -- group port
 travelColors["Group v1"]["r"]      = 141
-travelColors["Group v1"]["g"]      = 0
+travelColors["Group v1"]["g"]      = 80
 travelColors["Group v1"]["b"]      = 250
 
 -- self gate
 travelColors["Self"]["r"]          = 200
 travelColors["Self"]["g"]          = 240
-travelColors["Self"]["b"]          = 0
+travelColors["Self"]["b"]          = 80
 
 -- translocation
 travelColors["Single"]["r"]        = 180
-travelColors["Single"]["g"]        = 0
+travelColors["Single"]["g"]        = 80
 travelColors["Single"]["b"]        = 180
 
 local function getConfigFileName()
@@ -120,7 +120,7 @@ function Module:Init()
         for i = 1, RGMercConfig.Constants.SpellBookSlots do
             local spell = mq.TLO.Me.Book(i)
             if spell.Category() == "Transport" then
-                RGMercsLogger.log_debug("\ayFound Transport Spell: <\ay%s\ay> => \at'%s'\ay \ao(%d) \ay[\am%s\ay]", spell.Subcategory(), spell.RankName(), spell.ID(),
+                RGMercsLogger.log_debug("\ayFound Transport Spell: <\ay%-15s\ay> => \at'%s'\ay \ao(%d) \ay[\am%s\ay]", spell.Subcategory(), spell.RankName(), spell.ID(),
                     spell.TargetType())
                 local subCat = spell.Subcategory()
                 self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] or {}
@@ -239,6 +239,7 @@ function Module:Render()
                             end
                         end
                         ImGui.PopStyleColor(2)
+                        RGMercUtils.Tooltip(sv.Name)
                     end
                     ImGui.EndTable()
                     ImGui.EndTabItem()
