@@ -1183,8 +1183,9 @@ _ClassConfig      = {
                 type = "CustomFunc",
                 custom_func = function(self)
                     local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].Base(1)
-                    if mq.TLO.FindItemCount(baseItem) == 1 then
-                        return RGMercUtils.UseItem(baseItem, mq.TLO.Me.ID())
+                    if mq.TLO.FindItemCount(baseItem)() == 1 then
+                        local invItem = mq.TLO.FindItem(baseItem)
+                        return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
                     end
 
                     return false
@@ -1195,8 +1196,9 @@ _ClassConfig      = {
                 type = "CustomFunc",
                 custom_func = function(self)
                     local baseItem = self.ResolvedActionMap['FirePetItemSummon'].Base(1)
-                    if mq.TLO.FindItemCount(baseItem) == 1 then
-                        return RGMercUtils.UseItem(baseItem, mq.TLO.Me.ID())
+                    if mq.TLO.FindItemCount(baseItem)() == 1 then
+                        local invItem = mq.TLO.FindItem(baseItem)
+                        return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
                     end
 
                     return false
@@ -1270,7 +1272,7 @@ _ClassConfig      = {
                 custom_func = function(self)
                     local oowItems = { 'Glyphwielder\'s Tunic of the Summoner', 'Runemaster\'s Robe', }
                     for _, item in ipairs(oowItems) do
-                        if mq.TLO.FindItemCount(item) == 1 then
+                        if mq.TLO.FindItemCount(item)() == 1 then
                             self.TempSettings.OowRobeBase = item
                             return RGMercUtils.UseItem(item, mq.TLO.Me.ID())
                         end
@@ -1440,8 +1442,9 @@ _ClassConfig      = {
                 type = "CustomFunc",
                 custom_func = function(self)
                     local baseItem = self.ResolvedActionMap['FireOrbSummon'].Base(1)
-                    if mq.TLO.FindItemCount(baseItem) == 1 then
-                        return RGMercUtils.UseItem(baseItem, mq.TLO.Me.ID())
+                    if mq.TLO.FindItemCount(baseItem)() == 1 then
+                        local invItem = mq.TLO.FindItem(baseItem)
+                        return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
                     end
 
                     return false
@@ -1453,8 +1456,9 @@ _ClassConfig      = {
                 cond = function(self) return RGMercUtils.IsModeActive("PetTank") end,
                 custom_func = function(self)
                     local baseItem = self.ResolvedActionMap['IceOrbSummon'].Base(1)
-                    if mq.TLO.FindItemCount(baseItem) == 1 then
-                        return RGMercUtils.UseItem(baseItem, mq.TLO.Me.ID())
+                    if mq.TLO.FindItemCount(baseItem)() == 1 then
+                        local invItem = mq.TLO.FindItem(baseItem)
+                        return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
                     end
 
                     return false

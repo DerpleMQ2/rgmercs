@@ -533,18 +533,19 @@ end
 -- Global Messaging callback
 ---@diagnostic disable-next-line: unused-local
 local script_actor = RGMercUtils.Actors.register(function(message)
-    if message()["from"] == RGMercConfig.Globals.CurLoadedChar then return end
-    if message()["script"] ~= RGMercUtils.ScriptName then return end
+    local msg = message()
+    if msg.from == RGMercConfig.Globals.CurLoadedChar then return end
+    if msg.script ~= RGMercUtils.ScriptName then return end
 
-    RGMercsLogger.log_info("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", message()["from"],
-        message()["module"],
-        message()["event"])
+    RGMercsLogger.log_info("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", msg.from,
+        msg.module,
+        msg.event)
 
-    if message()["module"] then
-        if message()["module"] == "main" then
+    if msg.module then
+        if msg.module == "main" then
             RGMercConfig:LoadSettings()
         else
-            RGMercModules:ExecModule(message()["module"], message()["event"], message()["data"])
+            RGMercModules:ExecModule(msg.module, msg.event, msg.data)
         end
     end
 end)
