@@ -1,12 +1,16 @@
 --- @type Mq
 local mq             = require('mq')
-local BL             = require("biggerlib")
 local RGMercUtils    = require("utils.rgmercs_utils")
-local RGMercsLogger  = require("utils.rgmercs_logger")
+local RGMercsLogger = require("utils.rgmercs_logger")
+
+-- Used to let the bard juggle multiple downtime buffs and keep them as maximally refreshed as possible
+-- Not intended to be directly edited by users
+local bardRecastDurationThreshold = 21000
 
 local Tooltips       = {
     Epic             = 'Item: Casts Epic Weapon Ability',
     BardRunBuff      = "Song Line: Movement Speed Modifier",
+    UseMelody        = "Enabling Use Melody will cause the bard to stick to a strict rotation similar to MQ2Twist rather than choosing each song dynamically based on current conditions",
 
     MainAriaSong     = "Song Line: Spell Damage Focus Haste v3 Modifier",
     WarMarchSong     = "Song Line: Melee Haste + DS + STR/ATK Increase",
@@ -747,12 +751,21 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'DPS',
+            name = 'DPSDynamic',
             state = 1,
             steps = 1,
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.GetSetting('UseDynamicMelody')
+            end,
+        },
+        {
+            name = 'DPSProcedural',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning() and not RGMercUtils.GetSetting('UseDynamicMelody')
             end,
         },
 
@@ -884,41 +897,11 @@ local _ClassConfig = {
                     return RGMercUtils.GetSetting('DoDispel') and mq.TLO.Target.Beneficial()
                 end,
             },
-            {
-                name = "Dreadstone",
-                type = "Item",
-                cond = function(self, itemName)
-                    -- This item is instant cast for free with almost no CD, just mash it forever when it's available
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
-            },
+          
         },
         ['Heal'] = {
         },
-
-        ['Testing'] = {
-            {
-                name = "FireDotSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseFireDots') and
-                        -- If dot is about to wear off, recast
-                        getDetSongDuration(songSpell) <= 4
-                end,
-            },
-            {
-                name = "IceDotSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseIceDots') and
-                        -- If dot is about to wear off, recast
-                        getDetSongDuration(songSpell) <= 4
-                end,
-            },
-        
-        },
         ['DPSProcedural'] = {
-            doFullRotation = true,
             {
                 name = "MainAriaSong",
                 type = "Song",
@@ -1019,10 +1002,30 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['DPS'] = {
+        ['DPSDynamic'] = {
             -- This makes the full rotation execute each round, 
             --so it'll never pick up and resume wherever it left off the previous cast
             doFullRotation = true,
+            -- Kludge that addresses bards not attempting to start attacking until after a song completes
+            -- Uncomment if you'd like to occasionally start attacking earlier than normal
+            --[[{
+                name = "Force Attack",
+                type = "AA",
+                cond = function(self, itemName)
+                    local mytar = mq.TLO.Target
+                    if not mq.TLO.Me.Combat() and mytar() and mytar.Distance() < 50 then
+                        RGMercUtils.DoCmd("/keypress AUTOPRIM")
+                    end                  
+                end,
+            },]]
+            {
+                name = "Dreadstone",
+                type = "Item",
+                cond = function(self, itemName)                   
+                    -- This item is instant cast for free with almost no CD, just mash it forever when it's available
+                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
                  
             {
                 name = "Epic",
@@ -1237,7 +1240,7 @@ local _ClassConfig = {
         },
 
         ['Downtime'] = {
-            -- TODO these should probably go in a buff rotation or perhaps downtime, but it'll require remem'ing the aura song
+            -- #TODO: these should probably go in a buff rotation or perhaps downtime, but it'll require remem'ing the aura song
             --{
             --    name = "BardDPSAura",
             --    type = "Song",
@@ -1258,9 +1261,8 @@ local _ClassConfig = {
                 name = "SymphonyOfBattle",
                 type = "Item",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
-                cond = function(self, songSpell)
+                cond = function(self, _)
                     return RGMercUtils.SelfBuffCheck("Symphony of Battle")
-                        --and RGMercUtils.GetSetting('DoMed')
                         and not mq.TLO.Me.Invis()
                 end,
             },
@@ -1330,7 +1332,7 @@ local _ClassConfig = {
                 cond = function(self, songSpell)
                     return RGMercUtils.SongMemed(songSpell)
                         -- Try to mostly keep it active along with aria
-                        and mq.TLO.Me.Song(songSpell.Name()).Duration() or 0 < 21000
+                        and mq.TLO.Me.Song(songSpell.Name()).Duration() or 0 < bardRecastDurationThreshold
                         and not mq.TLO.Me.Invis()
                 end,
             },
@@ -1338,9 +1340,8 @@ local _ClassConfig = {
                 name = "MainAriaSong",
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
-                cond = function(self, songSpell)
-                    return --RGMercUtils.BuffSong(songSpell) and
-                        not mq.TLO.Me.Invis()
+                cond = function(self, _)
+                    return not mq.TLO.Me.Invis()
                 end,
             },
           
@@ -1352,7 +1353,8 @@ local _ClassConfig = {
         ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4 },
         ['UseAASelo']      = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true },
         ['DoRunSpeed']     = { DisplayName = "Cast Run Speed Buffs", Category = "Buffs", Tooltip = "Use Selos.", Default = true },
-        ['UseRegenAura']   = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = false },
+        ['UseRegenAura'] = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = false },
+        ['UseDynamicMelody']       = { DisplayName = "Use Dynamic Melody", Category = "Combat", Tooltip = Tooltips.UseMelody, Default = true, Advanced = true },
         
         ['UseEpic']        = { DisplayName = "Use Epic Click", Category = "Burns", Tooltip = "Use Epic 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always' }, Default = 1, Min = 1, Max = 3 },
         ['UseFierceEye']   = { DisplayName = "Use Fierce Eye", Category = "Burns", Tooltip = "Use FierceEye 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always' }, Default = 1, Min = 1, Max = 3, },

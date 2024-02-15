@@ -862,13 +862,9 @@ function Utils.UseSong(songName, targetId, bAllowMem)
             mq.delay(1)
         end
         
-        if targetId == me.ID() then
-            mq.delay("3s", function() return me.Song(songName).Duration.Seconds() > oldDuration end)
-        else
-            -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
-            -- might need to be bumped a bit for people with high latency?
-            mq.delay(150)
-        end
+        -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
+        mq.delay(500, function() return not me.Casting.ID() > 0 end)
+      
         
         if Utils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
             Utils.DoCmd("/stopsong")
@@ -1712,7 +1708,7 @@ function Utils.AutoMed()
         RGMercsLogger.log_verbose("Sit check returning early due to mount.")
         return
     end
-
+    
     RGMercConfig:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
