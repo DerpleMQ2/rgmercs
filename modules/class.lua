@@ -103,10 +103,10 @@ function Module:Init()
     RGMercsLogger.log_info("\agInitializing Core Class Module...")
     self:LoadSettings()
 
-    self.ModuleLoaded = true
-
     -- set dynamic names.
     self:SetDynamicNames()
+
+    self.ModuleLoaded = true
 
     return {
         self = self,
@@ -443,7 +443,7 @@ function Module:FindWorstHurtXT(minHPs)
     for i = 1, xtSize do
         local healTarget = mq.TLO.Me.XTarget(i)
 
-        if healTarget and healTarget() and healTarget.Type():lower() == "pc" then
+        if healTarget and healTarget() and (healTarget.Type() or "none"):lower() == "pc" then
             if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
                 if healTarget.PctHPs() < worstPct then
                     RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())

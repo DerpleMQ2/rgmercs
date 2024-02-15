@@ -1134,9 +1134,9 @@ function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId,
     local active = false
 
     if condArg ~= nil then
-        local logInfo = string.format("check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay)", entry.name or "NoName",
+        local logInfo = string.format("check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay), uiCheck(%s)", entry.name or "NoName",
             (type(condArg) == 'userdata' and condArg() or condArg) or "None",
-            condTarg.CleanName() or "None")
+            condTarg.CleanName() or "None", Utils.BoolToColorString(uiCheck))
         pass = Utils.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg, uiCheck)
 
         if entry.active_cond then
@@ -2586,7 +2586,7 @@ end
 ---@param buffName string
 ---@return boolean
 function Utils.BuffActiveByName(buffName)
-    if not buffName then return false end
+    if not buffName or buffName:len() == 0 then return false end
     if type(buffName) ~= "string" then
         RGMercsLogger.log_error("\arUtils.BuffActiveByName was passed a non-string buffname! %s", type(buffName))
         return false

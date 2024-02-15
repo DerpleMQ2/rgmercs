@@ -1084,7 +1084,7 @@ _ClassConfig      = {
             local resolvedPetSpell = self.ResolvedActionMap[petSpellVar]
 
             if not resolvedPetSpell then
-                RGMercsLogger.log_error("No valid pet spell found for type: %s", petSpellVar)
+                RGMercsLogger.log_debug("No valid pet spell found for type: %s", petSpellVar)
                 return false
             end
 
@@ -1591,7 +1591,7 @@ _ClassConfig      = {
                 name = "PetManaConv",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
+                    return spell and spell() and not RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
