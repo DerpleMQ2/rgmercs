@@ -1563,21 +1563,21 @@ _ClassConfig      = {
                 name = "FireOrbSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "")() == 0
                 end,
             },
             {
                 name = "EarthPetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "")() == 0
                 end,
             },
             {
                 name = "FirePetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1) or "") == 0
+                    return mq.TLO.FindItemCount(spell.Base(1) or "")() == 0
                 end,
             },
             {
