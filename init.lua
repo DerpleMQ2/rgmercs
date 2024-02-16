@@ -156,7 +156,7 @@ local function RGMercsGUI()
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
         ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, RGMercConfig:GetSettings().ScrollBarRounding)
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, RGMercConfig:GetSettings().FrameEdgeRounding)
-        openGUI, shouldDrawGUI = ImGui.Begin('RGMercs', openGUI)
+        openGUI, shouldDrawGUI = ImGui.Begin(string.format('RGMercs##%s', RGMercConfig.Globals.CurLoadedChar), openGUI)
         ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
 
         if shouldDrawGUI then
