@@ -2,8 +2,8 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 _ClassConfig      = {
-    _version              = "0.1a",
-    _author               = "Derple",
+    _version              = "0.2B",
+    _author               = "Derple, Morisato",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsTanking = function() return RGMercUtils.IsModeActive("PetTank") end,
@@ -913,7 +913,7 @@ _ClassConfig      = {
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    mq.TLO.Me.SpellInCooldown() == nil
+                    mq.TLO.Me.SpellInCooldown()
             end,
         },
         {
