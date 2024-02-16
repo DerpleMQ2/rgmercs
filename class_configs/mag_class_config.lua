@@ -1458,7 +1458,7 @@ _ClassConfig      = {
                 name = "Malaise",
                 type = "Wind of Malaise",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoMalo') and RGMercUtils.GetSetting('doAEMalo') and RGMercUtils.DetAACheck(aaName)
+                    return RGMercUtils.GetSetting('DoMalo') and RGMercUtils.GetSetting('DoAEMalo') and RGMercUtils.DetAACheck(aaName)
                 end,
             },
         },
