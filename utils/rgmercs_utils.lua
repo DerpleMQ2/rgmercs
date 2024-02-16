@@ -2232,7 +2232,8 @@ function Utils.MATargetScan(radius, zradius)
 end
 
 --- This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID
-function Utils.FindTarget()
+---@param validateFn function? # Function which is run before changing targets to avoid target strobing
+function Utils.FindTarget(validateFn)
     RGMercsLogger.log_verbose("FindTarget()")
     if mq.TLO.Spawn(string.format("id %d pcpet xtarhater", mq.TLO.Me.XTarget(1).ID())).ID() > 0 then
         RGMercsLogger.log_verbose("FindTarget() Determined that xtarget(1)=%s is a pcpet xtarhater",
@@ -2313,10 +2314,17 @@ function Utils.FindTarget()
             RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist,
                 Utils.BoolToColorString(assistTarget.Aggressive()))
 
-            if assistTarget() and assistTarget.Aggressive() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
+            if assistTarget() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
                 RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
                     assistTarget.ID())
                 RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
+                if not Utils.IsSpawnXHater(RGMercConfig.Globals.AutoTargetID) then
+                    Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+                    mq.delay("2s", function() return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID end)
+                    mq.cmd("/xtarget set 1 autohater")
+                    mq.delay(100)
+                    mq.cmd("/xtarget add")
+                end
             end
         else
             ---@diagnostic disable-next-line: undefined-field
@@ -2326,7 +2334,9 @@ function Utils.FindTarget()
 
     RGMercsLogger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", RGMercConfig.Globals.AutoTargetID or 0, mq.TLO.Target.ID())
     if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
-        Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+        if not validateFn or validateFn(RGMercConfig.Globals.AutoTargetID) then
+            Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+        end
     end
 end
 
@@ -2478,6 +2488,57 @@ function Utils.FindTargetCheck()
         not RGMercConfig.Globals.BackOffFlag
 end
 
+---@param targetId integer
+---@return boolean
+function Utils.OkToEngagePreValidateId(targetId)
+    local config = RGMercConfig:GetSettings()
+
+    if not config.DoAutoEngage then return false end
+    local target = mq.TLO.Spawn(targetId)
+    local assistId = Utils.GetMainAssistId()
+
+    if not target() or target.Dead() or target.PctHPs() == 0 then return false end
+
+    local pcCheck = (target.Type() or "none"):lower() == "pc" or
+        ((target.Type() or "none"):lower() == "pet" and (target.Master.Type() or "none"):lower() == "pc")
+    local mercCheck = target.Type() == "mercenary"
+    if pcCheck or mercCheck then
+        if not mq.TLO.Me.Combat() then
+            RGMercsLogger.log_verbose(
+                "\ay[2] Target type check failed \aw[\atpcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay",
+                Utils.BoolToColorString(pcCheck), Utils.BoolToColorString(mercCheck))
+        end
+        return false
+    end
+
+    if Utils.GetSetting('SafeTargeting') and Utils.IsSpawnFightingStranger(target, 100) then
+        RGMercsLogger.log_verbose("\ay  OkToEngageId() %s is fighting Stranger --> Not Engaging", Utils.GetTargetCleanName())
+        return false
+    end
+
+    if not RGMercConfig.Globals.BackOffFlag then --Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
+        local distanceCheck = Utils.GetTargetDistance() < config.AssistRange
+        local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
+        if distanceCheck and assistCheck then
+            if not mq.TLO.Me.Combat() then
+                RGMercsLogger.log_verbose("\ag  OkToEngageId() %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
+                    target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
+                    mq.TLO.Me.ID())
+            end
+            return true
+        else
+            RGMercsLogger.log_verbose("\ay  OkToEngageId() AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
+                target.CleanName(), target.ID(), Utils.BoolToColorString(distanceCheck), Utils.GetTargetDistance(),
+                Utils.BoolToColorString(assistCheck))
+            return false
+        end
+    end
+
+    RGMercsLogger.log_verbose("\ay  OkToEngageId() Okay to Engage Failed with Fall Through!",
+        Utils.BoolToColorString(pcCheck), Utils.BoolToColorString(mercCheck))
+    return false
+end
+
 ---@param autoTargetId integer
 ---@return boolean
 function Utils.OkToEngage(autoTargetId)
@@ -2511,7 +2572,8 @@ function Utils.OkToEngage(autoTargetId)
         return false
     end
 
-    if target.Mezzed.ID() and not config.AllowMezBreak then
+    -- if this target is from a target ID then it wont have .Mezzed
+    if target.Mezzed and target.Mezzed.ID() and not config.AllowMezBreak then
         RGMercsLogger.log_debug("  OkayToEngage() Target is mezzed and not AllowMezBreak --> Not Engaging")
         return false
     end

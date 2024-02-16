@@ -430,7 +430,10 @@ local function Main()
 
     if RGMercUtils.FindTargetCheck() then
         -- This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID
-        RGMercUtils.FindTarget()
+        RGMercUtils.FindTarget(function(targetId)
+            if RGMercUtils.OkToEngagePreValidateId(targetId) then return true end
+            return false
+        end)
     end
 
     if RGMercUtils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
