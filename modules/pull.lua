@@ -80,6 +80,15 @@ Module.Constants.PullAbilities         = {
         end,
     },
     {
+        id = "AutoAttack",
+        Type = "Special",
+        DisplayName = "Auto Attack",
+        AbilityRange = 5,
+        cond = function(self)
+            return true
+        end,
+    },
+    {
         id = "Ranged",
         Type = "Special",
         DisplayName = "Ranged",
@@ -1294,6 +1303,28 @@ function Module:GiveTime(combat_state)
                     RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.DoCmd("/ranged %d", self.TempSettings.PullID)
+                    mq.doevents()
+                    if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
+                        break
+                    end
+
+                    if self:CheckForAbort(self.TempSettings.PullID) then
+                        break
+                    end
+                    mq.delay(10)
+                end
+            elseif self.settings.PullAbility == PullAbilityIDToName.AutoAttack then -- Auto Attack pull
+                -- Make sure we're looking straight ahead at our mob and delay
+                -- until we're facing them.
+                RGMercUtils.DoCmd("/look 0")
+
+                mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
+
+                -- We will continue to fire arrows until we aggro our target
+                while not successFn() do
+                    RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
+                    startingXTargs = RGMercUtils.GetXTHaterIDs()
+                    RGMercUtils.DoCmd("/attack")
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
