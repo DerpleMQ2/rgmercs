@@ -1276,7 +1276,7 @@ local _ClassConfig = {
                 name = "FocusSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return not RGMercUtils.TargetHasBuff(spell, target)
+                    return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget()
                 end,
             },
             {
