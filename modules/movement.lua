@@ -126,6 +126,7 @@ function Module:ChaseOn(target)
     end
 
     if chaseTarget() and chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
+        mq.cmd("/nav stop")
         self:CampOff()
         self.settings.ChaseOn = true
         self.settings.ChaseTarget = chaseTarget.CleanName()
