@@ -37,7 +37,6 @@ local Tooltips                    = {
     FateSong         = "Song Line: Cold DD Damage Increae + Effiency",
     -- Splitting DoT lines into individual dots because it is often useful to drop 1-2 dots for some other song on raids
     FireDotSong      = "Song Line: Fire Dots",
-    ColdDotSong      = "Song Line: Cold Dots",
     DiseaseDotSong   = "Song Line: Disease Dots",
     PoisonDotSong    = "Song Line: Poison Dots",
     IceDotSong       = "Song Line: Ice Dots",
