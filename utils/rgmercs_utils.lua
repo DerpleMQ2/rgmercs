@@ -3301,9 +3301,9 @@ function Utils.RenderOptionNumber(id, text, cur, min, max, step)
     ImGui.PopStyleColor(4)
     ImGui.PopID()
 
+    input = tonumber(input) or 0
     if input > max then input = max end
     if input < min then input = min end
-
 
     changed = cur ~= input
     return input, changed
