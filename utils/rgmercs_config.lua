@@ -386,31 +386,27 @@ function Config:GetUsageText(config, showUsageText, defaults)
     local defaultText = ""
     local currentText = ""
 
-    if configData.Type == nil or configData.Type == "Combo" then
-        if type(configData.Default) == 'number' then
-            rangeText = string.format("\aw<\a-y%d\aw-\a-y%d\ax>", configData.Min or 0, configData.Max or 999)
-            defaultText = string.format("[\a-tDefault: %d\ax]", configData.Default)
-            currentText = string.format("[\a-gCurrent: %d\ax]", RGMercUtils.GetSetting(config))
-            handledType = true
-        elseif type(configData.Default) == 'boolean' then
-            rangeText = string.format("\aw<\a-yon\aw|\a-yoff\ax>")
-            ---@diagnostic disable-next-line: param-type-mismatch
-            defaultText = string.format("[\a-tDefault: %s\ax]", RGMercUtils.BoolToString(configData.Default))
-            currentText = string.format("[\a-gCurrent: %s\ax]", RGMercUtils.BoolToString(RGMercUtils.GetSetting(config)))
-            handledType = true
-        elseif type(configData.Default) == 'string' then
-            rangeText = string.format("\aw<\"str\">")
-            defaultText = string.format("[\a-tDefault: \"%s\"\ax]", configData.Default)
-            currentText = string.format("[\a-gCurrent: \"%s\"\ax]", RGMercUtils.GetSetting(config))
-            handledType = true
-        else
-            printf("%s type of %s is not known", config, type(configData.Default))
-        end
+    if type(configData.Default) == 'number' then
+        rangeText = string.format("\aw<\a-y%d\aw-\a-y%d\ax>", configData.Min or 0, configData.Max or 999)
+        defaultText = string.format("[\a-tDefault: %d\ax]", configData.Default)
+        currentText = string.format("[\a-gCurrent: %d\ax]", RGMercUtils.GetSetting(config))
+        handledType = true
+    elseif type(configData.Default) == 'boolean' then
+        rangeText = string.format("\aw<\a-yon\aw|\a-yoff\ax>")
+        ---@diagnostic disable-next-line: param-type-mismatch
+        defaultText = string.format("[\a-tDefault: %s\ax]", RGMercUtils.BoolToString(configData.Default))
+        currentText = string.format("[\a-gCurrent: %s\ax]", RGMercUtils.BoolToString(RGMercUtils.GetSetting(config)))
+        handledType = true
+    elseif type(configData.Default) == 'string' then
+        rangeText = string.format("\aw<\"str\">")
+        defaultText = string.format("[\a-tDefault: \"%s\"\ax]", configData.Default)
+        currentText = string.format("[\a-gCurrent: \"%s\"\ax]", RGMercUtils.GetSetting(config))
+        handledType = true
     end
 
     usageString = usageString ..
-        string.format("%s %s %s %s", RGMercUtils.PadString(rangeText, 20, false), RGMercUtils.PadString(currentText, 20, false), RGMercUtils.PadString(defaultText, 20, false),
-            type(configData.Default) or "None")
+        string.format("%s %s %s", RGMercUtils.PadString(rangeText, 20, false), RGMercUtils.PadString(currentText, 20, false), RGMercUtils.PadString(defaultText, 20, false)
+        )
 
     return handledType, usageString
 end
