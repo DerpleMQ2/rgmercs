@@ -758,7 +758,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     else
-                        if RGMercUtils.GetDistance(member.Y(), member.X(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+                        if RGMercUtils.GetDistance(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
                                 RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius)
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
