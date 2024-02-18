@@ -1,31 +1,46 @@
-local mq           = require('mq')
-local RGMercUtils  = require("utils.rgmercs_utils")
+--- @type Mq
+local mq                          = require('mq')
+local RGMercUtils                 = require("utils.rgmercs_utils")
+local RGMercsLogger               = require("utils.rgmercs_logger")
 
-local Tooltips     = {
+-- Used to let the bard juggle multiple downtime buffs and keep them as maximally refreshed as possible
+-- Not intended to be directly edited by users
+local bardRecastDurationThreshold = 21000
+
+local Tooltips                    = {
     Epic             = 'Item: Casts Epic Weapon Ability',
     BardRunBuff      = "Song Line: Movement Speed Modifier",
-    MainAriaSong     = "Song Line: Spell Focus Modifier",
+    UseMelody        =
+    "Enabling Use Melody will cause the bard to stick to a strict rotation similar to MQ2Twist rather than choosing each song dynamically based on current conditions",
+
+    MainAriaSong     = "Song Line: Spell Damage Focus Haste v3 Modifier",
+    WarMarchSong     = "Song Line: Melee Haste + DS + STR/ATK Increase",
     SufferingSong    = "Song Line Line: Melee Proc With Agro Reduction",
+    SpitefulSong     = "Song Line: Increase AC Agro Increase Proc",
     SprySonataSong   = "Song Line: Magic Asorb AC Increase Mitigate Damage Shield Resist Spells",
-    PsalmSong        = "Song Line: Spell Damage Focus Haste v3",
+    PotencySong      = "Song Line: Fire and Magic DoT Modifier",
     CrescendoSong    = "Song Line: Group v2 Increase Hit Points and Mana",
     ArcaneSong       = "Song Line: Caster Spell Proc",
     InsultSong       = "Song Line: Single Target DD",
-    DichoSong        = "Song Line: Triggers Psalm of Empowerment and Psalm of Potential H/M/E Increase Melee and Caster Dam Increase",
+    DichoSong        =
+    "Song Line: Triggers Psalm of Empowerment and Psalm of Potential H/M/E Increase Melee and Caster Dam Increase",
     BardDPSAura      = "Aura Line: OverHaste, Melee/Caster DPS",
     BardRegenAura    = "Aura Line: HP/Mana Regen",
     PulseRegenSong   = "Song Line: HP/Mana/Endurence Regen Increases Healing Yield",
     ChorusRegenSong  = "Song Line: AE HP/Mana Regen",
     CantataRegenSong = "Song Line: Group HP/Mana Regen",
-    WarMarchSong     = "Song Line: Melee Haste + DS + STR/ATK Increase",
     CasterAriaSong   = "Song Line: Fire DD Damage Increase + Effiency",
     SlowSong         = "Song Line: Melee Attack Slow",
     AESlowSong       = "Song Line: PBAE Melee Attack Slow",
     AccelerandoSong  = "Song Line: Reduce Cast Time (Beneficial Only) Agro Reduction Modifier",
-    SpitefulSong     = "Song Line: Increase AC Agro Increase Proc",
     RecklessSong     = "Song Line: Increase Crit Heal and Crit HoT",
     FateSong         = "Song Line: Cold DD Damage Increae + Effiency",
-    DotSong          = "Song Line:  DoT Damage Songs",
+    -- Splitting DoT lines into individual dots because it is often useful to drop 1-2 dots for some other song on raids
+    FireDotSong      = "Song Line: Fire Dots",
+    ColdDotSong      = "Song Line: Cold Dots",
+    DiseaseDotSong   = "Song Line: Disease Dots",
+    PoisonDotSong    = "Song Line: Poison Dots",
+
     CureSong         = "Song Line: Single Target Cure Poison Disease and Corruption",
     AllianceSong     = "Song Line: Mob Debuff Increase Insult Damage for other Bards",
     CharmSong        = "Song Line: Charm Mob",
@@ -40,23 +55,168 @@ local Tooltips     = {
     Bellow           = "AA: Stuns Initial DD Damage and Increases Resist Modifier on Mob Concludes with DD",
     Spire            = "AA: Lowers Incoming Melee Damage and Increases Melee and Spell Damage",
     FuneralDirge     = "AA: DD and Increases Melee Damage to Target",
-    FierceEye        = "AA: Increases Base Melee Damage and Increase Melee Crit Damage and Increase Proc Rate and Increase Crit Chance on Spells",
+    FierceEye        =
+    "AA: Increases Base Melee Damage and Increase Melee Crit Damage and Increase Proc Rate and Increase Crit Chance on Spells",
     QuickTime        = "AA: Hundred Hands Effect and Increase Melee Hit and Increase Atk",
     BladedSong       = "AA: Reverse Damage Shield",
     Jonthans         = "Song Line: Self-only Haste Melee Damage Modifier Melee Min Damage Modifier Proc Modifier",
 }
 
+local function generateSongList()
+    local songCache = {}
+    local songCount = 0
+
+    --------------------------------------------------------------------------------------
+    local function addSong(songToAdd)
+        songCount = songCount + 1
+        table.insert(songCache, {
+            gem = songCount,
+            spells = {
+                { name = songToAdd, cond = function(self) return true end, },
+            },
+        })
+    end
+
+    local function ConditionallyAddSong(settingToCheck, songToAdd)
+        if RGMercUtils.GetSetting(settingToCheck) then
+            addSong(songToAdd)
+        end
+    end
+
+    local function AddCriticalSongs()
+        ConditionallyAddSong("DoAEMez", "MezAESong")
+        ConditionallyAddSong("DoSlow", "SlowSong")
+        ConditionallyAddSong("DoAESlow", "AESlowSong")
+        -- TODO maybe someday
+        --ConditionallyAddSong("DoCharm", "CharmSong")
+        ConditionallyAddSong("DoDispel", "DispelSong")
+    end
+
+    local function AddMainGroupDPSSongs()
+        addSong('WarMarchSong')
+        addSong('MainAriaSong')
+        ConditionallyAddSong('UseProgressive', 'DichoSong')
+    end
+
+    local function AddSelfDPSSongs()
+        ConditionallyAddSong("UseAlliance", "AllianceSong")
+        ConditionallyAddSong("UseInsult", 'InsultSong')
+        ConditionallyAddSong("UseFireDots", "FireDotSong")
+        ConditionallyAddSong("UseIceDots", "IceDotSong")
+        ConditionallyAddSong("UseDiseaseDots", "DiseaseDotSong")
+        ConditionallyAddSong("UsePoisonDots", "PoisonDotSong")
+    end
+
+    local function AddMeleeDPSSongs()
+        ConditionallyAddSong("UseSuffering", "SufferingSong")
+    end
+
+    local function AddTankSongs()
+        ConditionallyAddSong("UseSpiteful", "SpitefulSong")
+        ConditionallyAddSong("UseSpry", "SprySonataSong")
+        ConditionallyAddSong("UseResist", "ResistSong")
+    end
+
+    local function AddHealerSongs()
+        ConditionallyAddSong("UseReckless", "RecklessSong")
+        ConditionallyAddSong("UsePulse", "PulseRegenSong")
+    end
+
+    local function AddCasterDPSSongs()
+        ConditionallyAddSong("UseArcane", "ArcaneSong")
+        ConditionallyAddSong("UseFireDDMod", "CasterAriaSong")
+        ConditionallyAddSong("UseFate", "FateSong")
+        ConditionallyAddSong("UsePotency", "PotencySong")
+    end
+
+    local function AddRegenSongs()
+        ConditionallyAddSong("UseAmp", "AmpSong")
+        ConditionallyAddSong("UseCrescendo", "CrescendoSong")
+        ConditionallyAddSong("UseChorus", "ChorusRegenSong")
+        ConditionallyAddSong("UseCantata", "CantataRegenSong")
+    end
+    -----------------------------------------------------------------------------------------
+
+    AddCriticalSongs()
+    if RGMercUtils.IsModeActive("General") then
+        AddMainGroupDPSSongs()
+        AddSelfDPSSongs()
+        AddRegenSongs()
+        AddMeleeDPSSongs()
+        AddCasterDPSSongs()
+        AddHealerSongs()
+        AddTankSongs()
+    elseif RGMercUtils.IsModeActive("Tank") then -- Tank
+        AddTankSongs()
+        AddMainGroupDPSSongs()
+        AddHealerSongs()
+        AddMeleeDPSSongs()
+        AddRegenSongs()
+        AddSelfDPSSongs()
+        AddCasterDPSSongs()
+    elseif RGMercUtils.IsModeActive("Caster") then
+        AddMainGroupDPSSongs()
+        AddCasterDPSSongs()
+        AddRegenSongs()
+        AddSelfDPSSongs()
+        AddMeleeDPSSongs()
+        AddHealerSongs()
+        AddTankSongs()
+    elseif RGMercUtils.IsModeActive("Healer") then -- Healer
+        AddHealerSongs()
+        AddMainGroupDPSSongs()
+        AddRegenSongs()
+        AddSelfDPSSongs()
+        AddCasterDPSSongs()
+        AddTankSongs()
+        AddMeleeDPSSongs()
+    else
+        RGMercsLogger.log_warning("Bard Mode not found!  Adding DPS songs, but you should select a mode.")
+        AddMainGroupDPSSongs()
+        AddSelfDPSSongs()
+        AddRegenSongs()
+        AddMeleeDPSSongs()
+        AddCasterDPSSongs()
+    end
+
+    if songCount > mq.TLO.Me.NumGems() then
+        RGMercsLogger.log_warning("WARNING your bard is trying to memorize too many songs!  Please unselect some.")
+        while #songCache > mq.TLO.Me.NumGems() do
+            table.remove(songCache)
+        end
+    end
+
+    return songCache
+end
+
+--- Checks target for duration remaining on dot songs
+local function getDetSongDuration(songSpell)
+    local duration = mq.TLO.Target.FindBuff("name " .. songSpell.Name()).Duration.TotalSeconds() or 0
+    --BL.info("Det song duration is: ", duration)
+    return duration
+end
+
 local _ClassConfig = {
-    _version          = "0.1a",
-    _author           = "Derple, Tiddliestix",
+    _version          = "0.2a",
+    _author           = "Derple, Tiddliestix, SonicZentropy",
     ['Modes']         = {
-        'Melee',
+        'General',
+        'Tank',
+        'Caster',
+        'Healer'
     },
     ['ItemSets']      = {
         ['Epic'] = {
             "Blade of Vesagran",
-            "Priismatic Dragon Blade",
+            "Prismatic Dragon Blade",
         },
+        ['Dreadstone'] = {
+            "Possessed Dreadstone Minstrel's Rapier"
+        },
+        ['SymphonyOfBattle'] = {
+            "Rapier of Somber Notes",
+            "Songblade of the Eternal"
+        }
     },
     ['AbilitySets']   = {
         ['BardRunBuff'] = {
@@ -69,7 +229,7 @@ local _ClassConfig = {
         },
         ['MainAriaSong'] = {
             -- MainAriaSong - Level Ranges 45 - 111
-            -- What differs between PsalmSong and MainAriaSong ???
+            "Aria of Tenisbre", -- 125
             "Aria of Pli Xin Liako",
             "Aria of Margidor",
             "Aria of Begalru",
@@ -78,6 +238,7 @@ local _ClassConfig = {
             "Aria of the Orator",
             "Aria of the Composer",
             "Aria of the Poet",
+            "Performer's Psalm of Pyrotechnics",
             "Ancient: Call of Power",
             "Aria of the Artist",
             "Yelhun's Mystic Call",
@@ -85,9 +246,11 @@ local _ClassConfig = {
             "Rizlona's Call of Flame",
             "Rizlona's Fire",
             "Rizlona's Embers",
+            "Eriki's Psalm of Power",
         },
         ['SufferingSong'] = {
             -- SufferingSong - Level Range 89 - 114
+            "Kanghammer's Song of Suffering", -- 125
             "Shojralen's Song of Suffering",
             "Omorden's Song of Suffering",
             "Travenro's Song of Suffering",
@@ -111,6 +274,7 @@ local _ClassConfig = {
             -- [] = "Jonthan's Whistling Warsong",
             -- [] = "Chant of Battle",
             -- SprySonataSong - Level Range 77 - 118
+            "Dhakka's Spry Sonata", -- 125, really bad song, nobody should ever use this
             "Xetheg's Spry Sonata",
             "Kellek's Spry Sonata",
             "Kluzen's Spry Sonata",
@@ -121,6 +285,7 @@ local _ClassConfig = {
         },
         ['CrescendoSong'] = {
             -- CrescendoSong - Level Range 75 - 114
+            "Regar's Lively Crescendo", -- 125
             "Zelinstein's Lively Crescendo",
             "Zburator's Lively Crescendo",
             "Jembel's Lively Crescendo",
@@ -134,6 +299,7 @@ local _ClassConfig = {
         },
         ['ArcaneSong'] = {
             -- ArcaneSong - Level Range 70 - 115
+            "Arcane Rhythm", -- 125
             "Arcane Harmony",
             "Arcane Symphony",
             "Arcane Ballad",
@@ -146,6 +312,7 @@ local _ClassConfig = {
             "Arcane Aria",
         },
         ['InsultSong'] = {
+            "Eoreg's Insult", -- 125
             "Nord's Disdain",
             "Sogran's Insult",
             "Yelinak's Insult",
@@ -172,6 +339,7 @@ local _ClassConfig = {
         },
         ['BardDPSAura'] = {
             -- BardDPSAura - Level Ranges 55 - 115
+            "Aura of Tenisbre", -- 125
             "Aura of Pli Xin Liako",
             "Aura of Margidor",
             "Aura of Begalru",
@@ -185,6 +353,7 @@ local _ClassConfig = {
             "Aura of Insight",
         },
         ['BardRegenAura'] = {
+            "Aura of Shalowain",
             "Aura of Shei Vinitras",
             "Aura of Vhal`Sera",
             "Aura of Xigam",
@@ -196,6 +365,7 @@ local _ClassConfig = {
         },
         ['PulseRegenSong'] = {
             -- PulseRegenSong - Level Range 77 - 111 ** -- Low level regens are for TLP users thus preferring mana over health.
+            "Pulse of August", -- 125
             "Pulse of Nikolas",
             "Pulse of Vhal`Sera",
             "Pulse of Xigam",
@@ -210,6 +380,7 @@ local _ClassConfig = {
         },
         ['ChorusRegenSong'] = {
             -- ChorusRegenSong - Level Range 6 - 113
+            "Chorus of Shalowain", -- 125
             "Chorus of Shei Vinitras",
             "Chorus of Vhal`Sera",
             "Chorus of Xigam",
@@ -230,6 +401,7 @@ local _ClassConfig = {
             "Cantata of Replenishment",
             "Cantata of Soothing",
             "Hymn of Restoration",
+
         },
         ['CantataRegenSong'] = {
             -- CantataRegenSong - Level Range 6 - 113
@@ -244,6 +416,7 @@ local _ClassConfig = {
         },
         ['WarMarchSong'] = {
             -- WarMarchSong Level Range 10 - 114
+            "War March of Nokk", -- 125
             "War March of Centien Xi Va Xakra",
             "War March of Radiwol",
             "War March of Dekloaz",
@@ -262,9 +435,12 @@ local _ClassConfig = {
             "McVaxius' Berserker Crescendo",
             "Vilia's Verses of Celerity",
             "Anthem de Arms",
+
+
         },
         ['CasterAriaSong'] = {
             -- CasterAriaSong - Level Range 72 - 113
+            "Flariton's Aria", -- 125
             "Constance's Aria",
             "Sontalak's Aria",
             "Qunard's Aria",
@@ -282,6 +458,7 @@ local _ClassConfig = {
         },
         ['AESlowSong'] = {
             -- AESlowSong - Level Range 20 - 114 (Single target works better)
+            "Zinnia's Melodic Binding", -- 125
             "Radiwol's Melodic Binding",
             "Dekloaz's Melodic Binding",
             "Protan's Melodic Binding",
@@ -289,6 +466,7 @@ local _ClassConfig = {
         },
         ['AccelerandoSong'] = {
             -- AccelerandoSong - Level Range 88 - 113 **
+            "Appeasing Accelerando", -- 125
             "Satisfying Accelerando",
             "Placating Accelerando",
             "Atoning Accelerando",
@@ -299,6 +477,7 @@ local _ClassConfig = {
         },
         ['SpitefulSong'] = {
             -- SpitefulSong - Level Range 90 -
+            "Tatalros' Spiteful Lyric", -- 125
             "Von Deek's Spiteful Lyric",
             "Omorden's Spiteful Lyric",
             "Travenro's Spiteful Lyric",
@@ -309,6 +488,7 @@ local _ClassConfig = {
         },
         ['RecklessSong'] = {
             -- RecklessSong - Level Range 93 - 113 **
+            "Grayleaf's Reckless Renewal", -- 125
             "Kai's Reckless Renewal",
             "Reivaj's Reckless Renewal",
             "Rigelon's Reckless Renewal",
@@ -318,6 +498,7 @@ local _ClassConfig = {
         },
         ['FateSong'] = {
             -- Fatesong - Level Range 77 - 112 **
+            "Fatesong of Zoraxmen", -- 125
             "Fatesong of Lucca",
             "Fatesong of Radiwol",
             "Fatesong of Dekloaz",
@@ -328,9 +509,10 @@ local _ClassConfig = {
             "Fatesong of the Gelidran",
             "Garadell's Fatesong",
         },
-        ['PsalmSong'] = {
-            -- PsalmSong - Level Range 69 - 112 **
-            -- What differs between PsalmSong and MainAriaSong ???
+
+        ['PotencySong'] = {
+            -- Fire & Magic Dots song
+            "Tatalros' Psalm of Potency", -- 125
             "Fyrthek Fior's Psalm of Potency",
             "Velketor's Psalm of Potency",
             "Akett's Psalm of Potency",
@@ -340,14 +522,9 @@ local _ClassConfig = {
             "Lyrin's Psalm of Potency",
             "Druzzil's Psalm of Potency",
             "Erradien's Psalm of Potency",
-            "Performer's Psalm of Pyrotechnics",
-            "Ancient: Call of Power",
-            "Eriki's Psalm of Power",
         },
-        ['Dot1Song'] = {
-            -- DotSongs - Level Range 30 - 115
-
-            -- Fire Dot
+        ['FireDotSong'] = {
+            "Kindleheart's Chant of Flame", -- 125
             "Shak Dathor's Chant of Flame",
             "Sontalak's Chant of Flame",
             "Qunard's Chant of Flame",
@@ -360,48 +537,6 @@ local _ClassConfig = {
             "Vulka's Chant of Flame",
             "Tuyen's Chant of Fire",
             "Tuyen's Chant of Flame",
-
-            -- Posion Dot
-            "Cruor's Chant of Poison",
-            "Malvus's Chant of Poison",
-            "Nexona's Chant of Poison",
-            "Serisaria's Chant of Poison",
-            "Slaunk's Chant of Poison",
-            "Hiqork's Chant of Poison",
-            "Spinechiller's Chant of Poison",
-            "Severilous' Chant of Poison",
-            "Kildrukaun's Chant of Poison",
-            "Vulka's Chant of Poison",
-            "Tuyen's Chant of Venom",
-            "Tuyen's Chant of Poison",
-
-            -- Ice Dot
-            "Sylra Fris' Chant of Frost",
-            "Yelinak's Chant of Frost",
-            "Ekron's Chant of Frost",
-            "Kirchen's Chant of Frost",
-            "Edoth's Chant of Frost",
-            "Kalbrok's Chant of Frost",
-            "Fergar's Chant of Frost",
-            "Gorenaire's Chant of Frost",
-            "Zeixshi-Kar's Chant of Frost",
-            "Vulka's Chant of Frost",
-            "Tuyen's Chant of Ice",
-            "Tuyen's Chant of Frost",
-
-            -- Disease Dot
-            "Coagulus' Chant of Disease",
-            "Zlexak's Chant of Disease",
-            "Hoshkar's Chant of Disease",
-            "Horthin's Chant of Disease",
-            "Siavonn's Chant of Disease",
-            "Wasinai's Chant of Disease",
-            "Shiverback's Chant of Disease",
-            "Trakanon's Chant of Disease",
-            "Vyskudra's Chant of Disease",
-            "Vulka's Chant of Disease",
-            "Tuyen's Chant of the Plague",
-            "Tuyen's Chant of Disease",
 
             -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
             "Ancient: Chaos Chant",
@@ -409,38 +544,10 @@ local _ClassConfig = {
             "Fufil's Diminishing Dirge",
             "Fufil's Curtailing Chant",
         },
-        ['Dot2Song'] = {
-            -- DotSongs - Level Range 30 - 115
-
-            -- Fire Dot
-            "Shak Dathor's Chant of Flame",
-            "Sontalak's Chant of Flame",
-            "Qunard's Chant of Flame",
-            "Nilsara's Chant of Flame",
-            "Gosik's Chant of Flame",
-            "Daevan's Chant of Flame",
-            "Sotor's Chant of Flame",
-            "Talendor's Chant of Flame",
-            "Tjudawos' Chant of Flame",
-            "Vulka's Chant of Flame",
-            "Tuyen's Chant of Fire",
-            "Tuyen's Chant of Flame",
-
-            -- Posion Dot
-            "Cruor's Chant of Poison",
-            "Malvus's Chant of Poison",
-            "Nexona's Chant of Poison",
-            "Serisaria's Chant of Poison",
-            "Slaunk's Chant of Poison",
-            "Hiqork's Chant of Poison",
-            "Spinechiller's Chant of Poison",
-            "Severilous' Chant of Poison",
-            "Kildrukaun's Chant of Poison",
-            "Vulka's Chant of Poison",
-            "Tuyen's Chant of Venom",
-            "Tuyen's Chant of Poison",
+        ['IceDotSong'] = {
 
             -- Ice Dot
+            "Swarn's Chant of Frost",
             "Sylra Fris' Chant of Frost",
             "Yelinak's Chant of Frost",
             "Ekron's Chant of Frost",
@@ -454,19 +561,7 @@ local _ClassConfig = {
             "Tuyen's Chant of Ice",
             "Tuyen's Chant of Frost",
 
-            -- Disease Dot
-            "Coagulus' Chant of Disease",
-            "Zlexak's Chant of Disease",
-            "Hoshkar's Chant of Disease",
-            "Horthin's Chant of Disease",
-            "Siavonn's Chant of Disease",
-            "Wasinai's Chant of Disease",
-            "Shiverback's Chant of Disease",
-            "Trakanon's Chant of Disease",
-            "Vyskudra's Chant of Disease",
-            "Vulka's Chant of Disease",
-            "Tuyen's Chant of the Plague",
-            "Tuyen's Chant of Disease",
+
 
             -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
             "Ancient: Chaos Chant",
@@ -474,24 +569,11 @@ local _ClassConfig = {
             "Fufil's Diminishing Dirge",
             "Fufil's Curtailing Chant",
         },
-        ['Dot3Song'] = {
+        ['PoisonDotSong'] = {
             -- DotSongs - Level Range 30 - 115
 
-            -- Fire Dot
-            "Shak Dathor's Chant of Flame",
-            "Sontalak's Chant of Flame",
-            "Qunard's Chant of Flame",
-            "Nilsara's Chant of Flame",
-            "Gosik's Chant of Flame",
-            "Daevan's Chant of Flame",
-            "Sotor's Chant of Flame",
-            "Talendor's Chant of Flame",
-            "Tjudawos' Chant of Flame",
-            "Vulka's Chant of Flame",
-            "Tuyen's Chant of Fire",
-            "Tuyen's Chant of Flame",
 
-            -- Posion Dot
+            "Marsin's Chant of Poison",
             "Cruor's Chant of Poison",
             "Malvus's Chant of Poison",
             "Nexona's Chant of Poison",
@@ -505,33 +587,7 @@ local _ClassConfig = {
             "Tuyen's Chant of Venom",
             "Tuyen's Chant of Poison",
 
-            -- Ice Dot
-            "Sylra Fris' Chant of Frost",
-            "Yelinak's Chant of Frost",
-            "Ekron's Chant of Frost",
-            "Kirchen's Chant of Frost",
-            "Edoth's Chant of Frost",
-            "Kalbrok's Chant of Frost",
-            "Fergar's Chant of Frost",
-            "Gorenaire's Chant of Frost",
-            "Zeixshi-Kar's Chant of Frost",
-            "Vulka's Chant of Frost",
-            "Tuyen's Chant of Ice",
-            "Tuyen's Chant of Frost",
 
-            -- Disease Dot
-            "Coagulus' Chant of Disease",
-            "Zlexak's Chant of Disease",
-            "Hoshkar's Chant of Disease",
-            "Horthin's Chant of Disease",
-            "Siavonn's Chant of Disease",
-            "Wasinai's Chant of Disease",
-            "Shiverback's Chant of Disease",
-            "Trakanon's Chant of Disease",
-            "Vyskudra's Chant of Disease",
-            "Vulka's Chant of Disease",
-            "Tuyen's Chant of the Plague",
-            "Tuyen's Chant of Disease",
 
             -- Misc Dot -- Or Minsc Dot (HEY HEY BOO BOO!)
             "Ancient: Chaos Chant",
@@ -539,52 +595,10 @@ local _ClassConfig = {
             "Fufil's Diminishing Dirge",
             "Fufil's Curtailing Chant",
         },
-        ['Dot4Song'] = {
+        ['DiseaseDotSong'] = {
             -- DotSongs - Level Range 30 - 115
 
-            -- Fire Dot
-            "Shak Dathor's Chant of Flame",
-            "Sontalak's Chant of Flame",
-            "Qunard's Chant of Flame",
-            "Nilsara's Chant of Flame",
-            "Gosik's Chant of Flame",
-            "Daevan's Chant of Flame",
-            "Sotor's Chant of Flame",
-            "Talendor's Chant of Flame",
-            "Tjudawos' Chant of Flame",
-            "Vulka's Chant of Flame",
-            "Tuyen's Chant of Fire",
-            "Tuyen's Chant of Flame",
-
-            -- Posion Dot
-            "Cruor's Chant of Poison",
-            "Malvus's Chant of Poison",
-            "Nexona's Chant of Poison",
-            "Serisaria's Chant of Poison",
-            "Slaunk's Chant of Poison",
-            "Hiqork's Chant of Poison",
-            "Spinechiller's Chant of Poison",
-            "Severilous' Chant of Poison",
-            "Kildrukaun's Chant of Poison",
-            "Vulka's Chant of Poison",
-            "Tuyen's Chant of Venom",
-            "Tuyen's Chant of Poison",
-
-            -- Ice Dot
-            "Sylra Fris' Chant of Frost",
-            "Yelinak's Chant of Frost",
-            "Ekron's Chant of Frost",
-            "Kirchen's Chant of Frost",
-            "Edoth's Chant of Frost",
-            "Kalbrok's Chant of Frost",
-            "Fergar's Chant of Frost",
-            "Gorenaire's Chant of Frost",
-            "Zeixshi-Kar's Chant of Frost",
-            "Vulka's Chant of Frost",
-            "Tuyen's Chant of Ice",
-            "Tuyen's Chant of Frost",
-
-            -- Disease Dot
+            "Goremand's Chant of Disease", -- 125
             "Coagulus' Chant of Disease",
             "Zlexak's Chant of Disease",
             "Hoshkar's Chant of Disease",
@@ -615,6 +629,7 @@ local _ClassConfig = {
             "Coalition of Sticks and Stones",
         },
         ['CharmSong'] = {
+            "Voice of Suja", -- 125
             "Omiyad's Demand",
             "Voice of the Diabo",
             "Silisia's Demand",
@@ -660,6 +675,7 @@ local _ClassConfig = {
         },
         ['MezSong'] = {
             -- MezSong - Level Range 15 - 114
+            "Slumber of Suja", -- 125
             "Slumber of the Diabo",
             -- [] = "Lullaby of Nightfall",
             -- [] = "Lullaby of Zburator",
@@ -694,6 +710,7 @@ local _ClassConfig = {
         },
         ['MezAESong'] = {
             -- MezAESong - Level Range 85 - 115 **
+            "Wave of Stupor", -- 125
             "Wave of Nocturn",
             "Wave of Sleep",
             "Wave of Somnolence",
@@ -705,13 +722,14 @@ local _ClassConfig = {
         },
     },
     ['RotationOrder'] = {
-        -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck()
+                -- For bards, we want "Downtime" to be ANY time we're not actively attacking.
+                -- Checking combat_state == "Downtime" is not enough, because
+                --bards end up on aggro list due to song aggro and will thusly stop casting downtime songs during pulls
+                return not mq.TLO.Me.Combat()
             end,
         },
         {
@@ -720,8 +738,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -731,82 +748,164 @@ local _ClassConfig = {
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
+                    RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
             end,
         },
         {
-            name = 'DPS',
+            name = 'DPSDynamic',
             state = 1,
             steps = 1,
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not RGMercUtils.Feigning() and
+                RGMercUtils.GetSetting('UseDynamicMelody')
+            end,
+        },
+        {
+            name = 'DPSProcedural',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning() and
+                not RGMercUtils.GetSetting('UseDynamicMelody')
             end,
         },
 
     },
     ['Rotations']     = {
         ['Burn'] = {
+            {
+                name = "Epic",
+                type = "Item",
+                cond = function(self)
+                    return RGMercUtils.GetSetting('UseEpic') == 2
+                end,
+            },
+            {
+                name = "Fierce Eye",
+                type = "AA",
+                cond = function(self, aaName)
+                    return
+                        RGMercUtils.GetSetting('UseFierceEye') == 2
+                        and RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Quick Time",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Funeral Dirge",
+                type = "AA",
+                cond = function(self, aaName)
+                    return
+                        RGMercUtils.GetSetting('UseFuneralDirge')
+                        and RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Spire of the Minstrels",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Bladed Song",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Thousand Blades",
+                type = "Ability",
+                cond = function(self, abilityName)
+                    return RGMercUtils.AbilityReady(abilityName)
+                end,
+            },
+            {
+                name = "Flurry of Notes",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Dance of Blades",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Cacophony",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Frenzied Kicks",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
         },
         ['Debuff'] = {
+            {
+                name = "MezAESong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    local setting = RGMercUtils.GetSetting('DoAEMez')
+                    local memmed = RGMercUtils.SongMemed(songSpell)
+                    local spellReady = mq.TLO.Me.SpellReady(songSpell)()
+                    local aeMezCt = RGMercUtils.GetSetting("AEMezCount")
+
+                    local res = setting and memmed and spellReady
+                        and RGMercUtils.GetXTHaterCount() >= aeMezCt
+
+                    return res
+                end,
+            },
+            {
+                name = "AESlowSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.GetSetting("DoAESlow")
+                        and RGMercUtils.DetSpellCheck(songSpell)
+                        and RGMercUtils.GetXTHaterCount() > 2
+                        and not mq.TLO.Target.Slowed()
+                end,
+            },
+            {
+                name = "SlowSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.GetSetting("DoSlow")
+                        and RGMercUtils.DetSpellCheck(songSpell)
+                        and not mq.TLO.Target.Slowed()
+                end,
+            },
+            {
+                name = "DispelSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.GetSetting('DoDispel') and mq.TLO.Target.Beneficial()
+                end,
+            },
+
         },
         ['Heal'] = {
         },
-        ['DPS'] = {
-        },
-        ['Downtime'] = {
+        ['DPSProcedural'] = {
             {
-                name = "BardDPSAura",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.SongMemed(songSpell) and not RGMercUtils.AuraActiveByName(songSpell.RankName()) and RGMercUtils.GetSetting('UseRegenAura')
-                end,
-            },
-            {
-                name = "ChorusRegenSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting('DoMed') == 1
-                end,
-            },
-            {
-                name = "AccelerandoSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.BuffSong(songSpell)
-                end,
-            },
-            {
-                name = "BardRegenAura",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.SongMemed(songSpell) and not RGMercUtils.AuraActiveByName(songSpell.RankName()) and RGMercUtils.GetSetting('UseRegenAura')
-                end,
-            },
-            {
-                name = "BardRunBuff",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.BuffSong(songSpell) and not RGMercUtils.GetSetting('UseAASelo') and RGMercUtils.GetSetting('DoRunSpeed')
-                end,
-            },
-            {
-                name = "CrescendoSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    local gemTimer = mq.TLO.Me.GemTimer(songSpell.Name())() or 0
-                    return RGMercUtils.BuffSong(songSpell) and gemTimer == 0 and mq.TLO.Me.PctMana() < 75
-                end,
-            },
-            {
-                name = "PulseRegenSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.BuffSong(songSpell)
-                end,
-            },
-            {
-                name = "ResistSong",
+                name = "MainAriaSong",
                 type = "Song",
                 cond = function(self, songSpell)
                     return RGMercUtils.BuffSong(songSpell)
@@ -820,109 +919,492 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Progressive",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                        and RGMercUtils.GetSetting("UseProgressive")
+                end,
+            },
+            {
+                name = "RecklessSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseReckless")
+                end,
+            },
+            {
+                name = "PulseRegenSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UsePulse")
+                end,
+            },
+            {
+                name = "ChorusRegenSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseChorus")
+                end,
+            },
+            {
+                name = "CrescendoSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseCrescendo') and
+                        -- If dot is about to wear off, recast
+                        RGMercUtils.BuffSong(songSpell) and
+                        (mq.TLO.Group.LowMana(95)() or -1) > 0 and
+                        -- Don't use up *ALL* mana or we lose fade
+                        mq.TLO.Me.PctMana() > 20
+                end,
+            },
+            {
+                name = "DichoSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseProgressive') and
+                        RGMercUtils.BuffSong(songSpell)
+                end,
+            },
+            {
+                name = "FireDotSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseFireDots') and
+                        -- If dot is about to wear off, recast
+                        getDetSongDuration(songSpell) <= 3500
+                end,
+            },
+            {
+                name = "IceDotSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseIceDots') and
+                        -- If dot is about to wear off, recast
+                        getDetSongDuration(songSpell) <= 3500
+                end,
+            },
+            {
+                name = "PoisonDotSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UsePoisonDots') and
+                        -- If dot is about to wear off, recast
+                        getDetSongDuration(songSpell) <= 3500
+                end,
+            },
+            {
+                name = "DiseaseDotSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseDiseaseDots') and
+                        -- If dot is about to wear off, recast
+                        getDetSongDuration(songSpell) <= 3500
+                end,
+            },
+        },
+        ['DPSDynamic'] = {
+            -- This makes the full rotation execute each round,
+            --so it'll never pick up and resume wherever it left off the previous cast
+            doFullRotation = true,
+            -- Kludge that addresses bards not attempting to start attacking until after a song completes
+            -- Uncomment if you'd like to occasionally start attacking earlier than normal
+            --[[{
+                name = "Force Attack",
+                type = "AA",
+                cond = function(self, itemName)
+                    local mytar = mq.TLO.Target
+                    if not mq.TLO.Me.Combat() and mytar() and mytar.Distance() < 50 then
+                        RGMercUtils.DoCmd("/keypress AUTOPRIM")
+                    end
+                end,
+            },]]
+            {
+                name = "Dreadstone",
+                type = "Item",
+                cond = function(self, itemName)
+                    -- This item is instant cast for free with almost no CD, just mash it forever when it's available
+                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
+
+            {
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    return RGMercUtils.GetSetting('UseEpic') == 3 and mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
+            {
+                name = "Fierce Eye",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.GetSetting('UseFierceEye') == 3
+                        and RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Boastful Bellow",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.GetSetting('UseBellow')
+                        and RGMercUtils.AAReady(aaName)
+                        and mq.TLO.Me.PctEndurance() > 20 -- Bellow DEVOURS endurance
+                end,
+            },
+            {
                 name = "MainAriaSong",
                 type = "Song",
                 cond = function(self, songSpell)
                     return RGMercUtils.BuffSong(songSpell)
                 end,
             },
-        },
-    },
-    ['Spells']        = {
-        {
-            gem = 1,
-            spells = {
-                { name = "AESlowSong",  cond = function(self) return RGMercUtils.GetSetting('DoSlow') end, },
-                { name = "SlowSong",    cond = function(self) return RGMercUtils.GetSetting('DoSlow') end, },
-                { name = "InsultSong1", cond = function(self) return true end, },
+            {
+                name = "WarMarchSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                end,
+            },
+            {
+                name = "AllianceSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                        and RGMercUtils.GetSetting("UseAlliance")
+                        and RGMercUtils.DetSpellCheck(songSpell)
+                end,
+            },
+            {
+                name = "CrescendoSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseCrescendo') and
+                        -- If dot is about to wear off, recast
+                        RGMercUtils.BuffSong(songSpell) and
+                        (mq.TLO.Group.LowMana(95)() or -1) > 0 and
+                        -- Don't use up *ALL* mana or we lose fade
+                        mq.TLO.Me.PctMana() > 20
+                end,
+            },
+            {
+                name = "DichoSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseProgressive') and
+                        RGMercUtils.BuffSong(songSpell) and RGMercUtils.PCSpellReady(songSpell)
+                        and mq.TLO.Me.PctEndurance() > 20
+                end,
+            },
+            -- Self Deeps
+            {
+                name = "FireDotSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseFireDots') and
+                        -- If dot is about to wear off, recast
+                        getDetSongDuration(songSpell) <= 4
+                end,
+            },
+            {
+                name = "IceDotSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseIceDots') and
+                        -- If dot is about to wear off, recast
+                        getDetSongDuration(songSpell) <= 4
+                end,
+            },
+            {
+                name = "PoisonDotSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UsePoisonDots') and
+                        -- If dot is about to wear off, recast
+                        getDetSongDuration(songSpell) <= 4
+                end,
+            },
+            {
+                name = "DiseaseDotSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseDiseaseDots') and
+                        -- If dot is about to wear off, recast
+                        getDetSongDuration(songSpell) <= 4
+                end,
+            },
+            {
+                name = "InsultSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseInsult')
+                        and mq.TLO.Me.SpellReady(self.ResolvedActionMap['InsultSong'] or "")()
+                        -- If dot is about to wear off, recast
+                        and getDetSongDuration(songSpell) <= 4
+                end,
+            },
+            -- Regens
+            {
+                name = "AmpSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseAmp")
+                end,
+            },
+            {
+                name = "PulseRegenSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UsePulse")
+                end,
+            },
+            {
+                name = "ChorusRegenSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseChorus")
+                end,
+            },
+            {
+                name = "CantataSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseCantata")
+                end,
+            },
+            -- Melee DPS
+            {
+                name = "SufferingSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseSuffering")
+                end,
+            },
+            {
+                name = "ArcaneSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseArcane")
+                end,
+            },
+            {
+                name = "CasterAriaSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseFireDDMod")
+                end,
+            },
+            {
+                name = "FateSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseFate")
+                end,
+            },
+            {
+                name = "PotencySong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UsePotency")
+                end,
+            },
+            --heals
+            {
+                name = "RecklessSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseReckless")
+                end,
+            },
+            -- tank
+            {
+                name = "SpitefulSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseSpiteful")
+                end,
+            },
+            {
+                name = "SprySonataSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseSpry")
+                end,
+            },
+            {
+                name = "ResistSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseResist")
+                end,
             },
         },
-        {
-            gem = 2,
-            spells = {
-                { name = "ChorusRegenSong", cond = function(self) return true end, },
+
+        ['Downtime'] = {
+            -- #TODO: these should probably go in a buff rotation or perhaps downtime, but it'll require remem'ing the aura song
+            --{
+            --    name = "BardDPSAura",
+            --    type = "Song",
+            --    cond = function(self, songSpell)
+            --        return RGMercUtils.SongMemed(songSpell) and not RGMercUtils.AuraActiveByName(songSpell.RankName()) and
+            --            not RGMercUtils.GetSetting('UseRegenAura')
+            --    end,
+            --},
+            --{
+            --    name = "BardRegenAura",
+            --    type = "Song",
+            --    cond = function(self, songSpell)
+            --        return RGMercUtils.SongMemed(songSpell) and not RGMercUtils.AuraActiveByName(songSpell.RankName()) and
+            --            RGMercUtils.GetSetting('UseRegenAura')
+            --    end,
+            --},
+            {
+                name = "SymphonyOfBattle",
+                type = "Item",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, _)
+                    return RGMercUtils.SelfBuffCheck("Symphony of Battle")
+                        and not mq.TLO.Me.Invis()
+                end,
             },
-        },
-        {
-            gem = 3,
-            spells = {
-                { name = "WarMarchSong", cond = function(self) return true end, },
+            {
+                name = "ChorusRegenSong",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell)
+                        --and RGMercUtils.GetSetting('DoMed')
+                        and not mq.TLO.Me.Invis()
+                end,
             },
-        },
-        {
-            gem = 4,
-            spells = {
-                { name = "Dot1Song", cond = function(self) return true end, },
+            {
+                name = "AccelerandoSong",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.BuffSong(songSpell)
+                        and not mq.TLO.Me.Invis()
+                end,
             },
-        },
-        {
-            gem = 5,
-            spells = {
-                { name = "MezSong", cond = function(self) return true end, },
+            {
+                name = "BardRunBuff",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.BuffSong(songSpell) and
+                        not RGMercUtils.GetSetting('UseAASelo') and
+                        RGMercUtils.GetSetting('DoRunSpeed')
+                        and not mq.TLO.Me.Invis()
+                end,
             },
-        },
-        {
-            gem = 6,
-            spells = {
-                { name = "LowAriaSong",  cond = function(self) return mq.TLO.Me.Level() <= 63 end, },
-                { name = "MainAriaSong", cond = function(self) return true end, },
+            {
+                name = "CrescendoSong",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, songSpell)
+                    local gemTimer = mq.TLO.Me.GemTimer(songSpell.Name())() or 0
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.BuffSong(songSpell) and gemTimer == 0 and
+                        mq.TLO.Me.PctMana() < 75
+                        and not mq.TLO.Me.Invis()
+                end,
             },
-        },
-        {
-            gem = 7,
-            spells = {
-                { name = "BardRunBuff", cond = function(self) return RGMercUtils.GetSetting('UseAASelo') and RGMercUtils.CanUseAA("Selo's Sonata") end, },
-                { name = "DichoSong",   cond = function(self) return true end, },
+            {
+                name = "PulseRegenSong",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.BuffSong(songSpell)
+                        and not mq.TLO.Me.Invis()
+                end,
             },
-        },
-        {
-            gem = 8,
-            spells = {
-                { name = "Dot2Song", cond = function(self) return true end, },
+            {
+                name = "ResistSong",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.BuffSong(songSpell)
+                        and not mq.TLO.Me.Invis()
+                end,
             },
-        },
-        {
-            gem = 9,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "Dot4Song", cond = function(self) return true end, },
+            {
+                name = "WarMarchSong",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell)
+                        -- Try to mostly keep it active along with aria
+                        and mq.TLO.Me.Song(songSpell.Name()).Duration() or 0 < bardRecastDurationThreshold
+                        and not mq.TLO.Me.Invis()
+                end,
             },
-        },
-        {
-            gem = 10,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "MezAESong", cond = function(self) return true end, },
+            {
+                name = "MainAriaSong",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, _)
+                    return not mq.TLO.Me.Invis()
+                end,
             },
+
+
         },
-        {
-            gem = 11,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "CrescendoSong", cond = function(self) return true end, },
-            },
-        },
-        {
-            gem = 12,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "Dot3Song", cond = function(self) return true end, },
-            },
-        },
-        {
-            gem = 13,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-            },
-        },
-    },
-    ['DefaultConfig'] = {
-        ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
-        ['DoSlow']       = { DisplayName = "Cast Slow", Category = "Combat", Tooltip = "Do Slow Spells/AAs", Default = true, },
-        ['UseAASelo']    = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true, },
-        ['UseRegenAura'] = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = true, },
-        ['DoRunSpeed']   = { DisplayName = "Cast Run Speed Buffs", Category = "Buffs", Tooltip = "Use Ranger Run Speed Buffs.", Default = true, },
     },
 
+    ['DefaultConfig'] = {
+        ['Mode']             = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4 },
+        ['UseAASelo']        = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true },
+        ['DoRunSpeed']       = { DisplayName = "Cast Run Speed Buffs", Category = "Buffs", Tooltip = "Use Selos.", Default = true },
+        ['UseRegenAura']     = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = false },
+        ['UseDynamicMelody'] = { DisplayName = "Use Dynamic Melody", Category = "Combat", Tooltip = Tooltips.UseMelody, Default = true, Advanced = true },
+
+        ['UseEpic']          = { DisplayName = "Use Epic Click", Category = "Burns", Tooltip = "Use Epic 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always' }, Default = 1, Min = 1, Max = 3 },
+        ['UseFierceEye']     = { DisplayName = "Use Fierce Eye", Category = "Burns", Tooltip = "Use FierceEye 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always' }, Default = 1, Min = 1, Max = 3, },
+        ['UseFuneralDirge']  = { DisplayName = "Use Funeral Dirge", Category = "Burns", Tooltip = "Use Funeral Dirge", Default = true },
+
+        ['UseAlliance']      = { DisplayName = "Use Alliance", Category = "Combat", Tooltip = Tooltips.AllianceSong, Default = false },
+        ['UseBellow']        = { DisplayName = "Use Bellow", Category = "Combat", Tooltip = "Use Boastful Bellow", Default = true },
+        -- Debuffs
+        ['DoSlow']           = { DisplayName = "Cast Slow", Category = "Combat", Tooltip = Tooltips.SlowSong, Default = false, },
+        ['DoAESlow']         = { DisplayName = "Cast AE Slow", Category = "Combat", Tooltip = Tooltips.AESlowSong, Default = false },
+        ['DoDispel']         = { DisplayName = "Use Dispel", Category = "Combat", Tooltip = Tooltips.DispelSong, Default = false },
+
+        -- TODO
+        --['DoCharm']       = { DisplayName = "Use Charm", Category = "Songs", Tooltip = Tooltips.CharmSong, Default = false },
+        ['DoAEMez']          = { DisplayName = "Do AoE Mez", Category = "Combat", Tooltip = "AEMez", Default = false },
+        ['AEMezCount']       = { DisplayName = "AoE Mez Count", Category = "Combat", Tooltip = "Mob count before AE mez casts", Default = 3, Min = 1, Max = 12 },
+        --healer
+        ['UseResist']        = { DisplayName = "Use Resists", Category = "Songs/Heals", Tooltip = Tooltips.ResistSong, Default = false },
+        ['UseReckless']      = { DisplayName = "Use Reckless", Category = "Songs/Heals", Tooltip = Tooltips.RecklessSong, Default = false },
+        ['UseCure']          = { DisplayName = "Use Cure", Category = "Songs/Heals", Tooltip = Tooltips.CureSong, Default = false },
+        ['UsePulse']         = { DisplayName = "Use Pulse", Category = "Songs/Heals", Tooltip = Tooltips.PulseRegenSong, Default = true },
+        --Regen
+        ['UseAmp']           = { DisplayName = "Use Amp", Category = "Songs/Regen", Tooltip = Tooltips.AmpSong, Default = false },
+        ['UseChorus']        = { DisplayName = "Use Chorus", Category = "Songs/Regen", Tooltip = Tooltips.ChorusRegenSong, Default = true },
+        ['UseCantata']       = { DisplayName = "Use Cantata", Category = "Songs/Regen", Tooltip = Tooltips.CantataRegenSong, Default = false },
+        ['UseCrescendo']     = { DisplayName = "Use Crescendo", Category = "Songs/Regen", Tooltip = Tooltips.CrescendoSong, Default = true },
+        ['UseAccelerando']   = { DisplayName = "Use Accelerando", Category = "Songs/Regen", Tooltip = Tooltips.AccelerandoSong, Default = false },
+        --DPS
+        ['UseInsult']        = { DisplayName = "Use Insult Nuke", Category = "Songs/DPS", Tooltip = Tooltips.InsultSong, Default = true },
+        ['UseFireDots']      = { DisplayName = "Use Fire Dots", Category = "Songs/DPS", Tooltip = Tooltips.FireDotSong, Default = true },
+        ['UseIceDots']       = { DisplayName = "Use Ice Dots", Category = "Songs/DPS", Tooltip = Tooltips.IceDotSong, Default = true },
+        ['UsePoisonDots']    = { DisplayName = "Use Poison Dots", Category = "Songs/DPS", Tooltip = Tooltips.PoisonDotSong, Default = true },
+        ['UseDiseaseDots']   = { DisplayName = "Use Disease Dots", Category = "Songs/DPS", Tooltip = Tooltips.DiseaseDotSong, Default = true },
+
+        --Tank
+        ['UseSpiteful']      = { DisplayName = "Use Spiteful", Category = "Songs/Tank", Tooltip = Tooltips.SpitefulSong, Default = false },
+        ['UseSpry']          = { DisplayName = "Use Spry", Category = "Songs/Tank", Tooltip = Tooltips.SprySonataSong, Default = false },
+        --Caster
+        ['UseArcane']        = { DisplayName = "Use Arcane", Category = "Songs/Caster", Tooltip = Tooltips.ArcaneSong, Default = false },
+        ['UseFireDDMod']     = { DisplayName = "Use Fire Aria", Category = "Songs/Caster", Tooltip = Tooltips.CasterAriaSong, Default = false },
+        ['UsePotency']       = { DisplayName = "Use Potency", Category = "Songs/Caster", Tooltip = Tooltips.PotencySong, Default = false },
+        ['UseFate']          = { DisplayName = "Use Fate", Category = "Songs/Caster", Tooltip = Tooltips.FateSong, Default = false },
+        -- Melee DPS Only
+        ['UseSuffering']     = { DisplayName = "Use Suffering", Category = "Songs/Melee", Tooltip = Tooltips.SufferingSong, Default = false },
+        ['UseProgressive']   = { DisplayName = "Use Progressive", Category = "Songs/Melee", Tooltip = Tooltips.DichoSong, Default = true },
+        ['UseJonthan']       = { DisplayName = "Use Jonthan", Category = "Songs/Melee", Tooltip = Tooltips.Jonthans, Default = false },
+
+    },
+    ['Spells']        = { getSpellCallback = generateSongList }
 }
 return _ClassConfig

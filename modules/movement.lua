@@ -460,7 +460,7 @@ function Module:GiveTime(combat_state)
     end
 
     if not self:ShouldFollow() then
-        RGMercsLogger.log_verbose("ShouldFollow() check failed.")
+        RGMercsLogger.log_super_verbose("ShouldFollow() check failed.")
         return
     end
 
