@@ -292,79 +292,81 @@ function Config:UpdateCommandHandlers()
 
     for moduleName, moduleData in pairs(allConfigs) do
         for config, configData in pairs(moduleData.defaults or {}) do
-            local _, usageString = self:GetUsageText(config, true, moduleData.defaults)
+            local handled, usageString = self:GetUsageText(config, true, moduleData.defaults)
 
-            if type(configData.Default) == 'number' then
-                self.CommandHandlers[config:lower()] = {
-                    name = config,
-                    usage = usageString,
-                    subModule = moduleName,
-                    about = configData.Tooltip,
-                    handler = function(self, value)
-                        value = tonumber(value)
-                        if value > (moduleData.defaults[config].Max or 999) or value < (moduleData.defaults[config].Min or 0) then
-                            RGMercsLogger.log_info("\ayError: %s is not a valid setting for %s.", value, config)
-                            local _, update = self:GetUsageText(config, true, moduleData.defaults)
-                            RGMercsLogger.log_info(update)
-                            return
-                        end
-                        local _, update = self:GetUsageText(config, false, moduleData.defaults)
-                        RGMercsLogger.log_info("\a-y%s :: Before :: %s", config, update)
-                        moduleData.settings[config] = value
-                        _, update = self:GetUsageText(config, false, moduleData.defaults)
-                        RGMercsLogger.log_info("\ag%s :: After  :: %s", config, update)
-                        if moduleName == "Core" then
-                            self:SaveSettings(true)
-                        else
-                            RGMercModules:ExecModule(moduleName, "SaveSettings", true)
-                        end
-                    end,
-                }
-            end
-            if type(configData.Default) == 'boolean' then
-                self.CommandHandlers[config:lower()] = {
-                    name = config,
-                    usage = usageString,
-                    subModule = moduleName,
-                    about = configData.Tooltip,
-                    handler = function(self, value)
-                        local boolValue = false
-                        if value == "true" or value == "on" or (tonumber(value) or 0) >= 1 then
-                            boolValue = true
-                        end
+            if handled then
+                if type(configData.Default) == 'number' then
+                    self.CommandHandlers[config:lower()] = {
+                        name = config,
+                        usage = usageString,
+                        subModule = moduleName,
+                        about = configData.Tooltip,
+                        handler = function(self, value)
+                            value = tonumber(value)
+                            if value > (moduleData.defaults[config].Max or 999) or value < (moduleData.defaults[config].Min or 0) then
+                                RGMercsLogger.log_info("\ayError: %s is not a valid setting for %s.", value, config)
+                                local _, update = self:GetUsageText(config, true, moduleData.defaults)
+                                RGMercsLogger.log_info(update)
+                                return
+                            end
+                            local _, update = self:GetUsageText(config, false, moduleData.defaults)
+                            RGMercsLogger.log_info("\a-y%s :: Before :: %s", config, update)
+                            moduleData.settings[config] = value
+                            _, update = self:GetUsageText(config, false, moduleData.defaults)
+                            RGMercsLogger.log_info("\ag%s :: After  :: %s", config, update)
+                            if moduleName == "Core" then
+                                self:SaveSettings(true)
+                            else
+                                RGMercModules:ExecModule(moduleName, "SaveSettings", true)
+                            end
+                        end,
+                    }
+                end
+                if type(configData.Default) == 'boolean' then
+                    self.CommandHandlers[config:lower()] = {
+                        name = config,
+                        usage = usageString,
+                        subModule = moduleName,
+                        about = configData.Tooltip,
+                        handler = function(self, value)
+                            local boolValue = false
+                            if value == "true" or value == "on" or (tonumber(value) or 0) >= 1 then
+                                boolValue = true
+                            end
 
-                        local _, update = self:GetUsageText(config, false, moduleData.defaults)
-                        RGMercsLogger.log_info("\a-y%s :: Before :: %-5s", config, update)
-                        moduleData.settings[config] = boolValue
-                        _, update = self:GetUsageText(config, false, moduleData.defaults)
-                        RGMercsLogger.log_info("\ag%s :: After  :: %-5ss", config, update)
-                        if moduleName == "Core" then
-                            self:SaveSettings(true)
-                        else
-                            RGMercModules:ExecModule(moduleName, "SaveSettings", true)
-                        end
-                    end,
-                }
-            end
-            if type(configData.Default) == 'string' then
-                self.CommandHandlers[config:lower()] = {
-                    name = config,
-                    usage = usageString,
-                    subModule = moduleName,
-                    about = configData.Tooltip,
-                    handler = function(self, value)
-                        local _, update = self:GetUsageText(config, false, moduleData.defaults)
-                        RGMercsLogger.log_info("\a-y%s :: Before :: \"%s\"", config, update)
-                        moduleData.settings[config] = value
-                        _, update = self:GetUsageText(config, false, moduleData.defaults)
-                        RGMercsLogger.log_info("\ag%s :: After  :: \"%s\"", config, update)
-                        if moduleName == "Core" then
-                            self:SaveSettings(true)
-                        else
-                            RGMercModules:ExecModule(moduleName, "SaveSettings", true)
-                        end
-                    end,
-                }
+                            local _, update = self:GetUsageText(config, false, moduleData.defaults)
+                            RGMercsLogger.log_info("\a-y%s :: Before :: %-5s", config, update)
+                            moduleData.settings[config] = boolValue
+                            _, update = self:GetUsageText(config, false, moduleData.defaults)
+                            RGMercsLogger.log_info("\ag%s :: After  :: %-5ss", config, update)
+                            if moduleName == "Core" then
+                                self:SaveSettings(true)
+                            else
+                                RGMercModules:ExecModule(moduleName, "SaveSettings", true)
+                            end
+                        end,
+                    }
+                end
+                if type(configData.Default) == 'string' then
+                    self.CommandHandlers[config:lower()] = {
+                        name = config,
+                        usage = usageString,
+                        subModule = moduleName,
+                        about = configData.Tooltip,
+                        handler = function(self, value)
+                            local _, update = self:GetUsageText(config, false, moduleData.defaults)
+                            RGMercsLogger.log_info("\a-y%s :: Before :: \"%s\"", config, update)
+                            moduleData.settings[config] = value
+                            _, update = self:GetUsageText(config, false, moduleData.defaults)
+                            RGMercsLogger.log_info("\ag%s :: After  :: \"%s\"", config, update)
+                            if moduleName == "Core" then
+                                self:SaveSettings(true)
+                            else
+                                RGMercModules:ExecModule(moduleName, "SaveSettings", true)
+                            end
+                        end,
+                    }
+                end
             end
         end
     end
@@ -401,11 +403,14 @@ function Config:GetUsageText(config, showUsageText, defaults)
             defaultText = string.format("[\a-tDefault: \"%s\"\ax]", configData.Default)
             currentText = string.format("[\a-gCurrent: \"%s\"\ax]", RGMercUtils.GetSetting(config))
             handledType = true
+        else
+            printf("%s type of %s is not known", config, type(configData.Default))
         end
     end
 
     usageString = usageString ..
-        string.format("%s %s %s", RGMercUtils.PadString(rangeText, 20, false), RGMercUtils.PadString(currentText, 20, false), RGMercUtils.PadString(defaultText, 20, false))
+        string.format("%s %s %s %s", RGMercUtils.PadString(rangeText, 20, false), RGMercUtils.PadString(currentText, 20, false), RGMercUtils.PadString(defaultText, 20, false),
+            type(configData.Default) or "None")
 
     return handledType, usageString
 end
