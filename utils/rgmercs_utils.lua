@@ -2854,6 +2854,44 @@ function Utils.GetDynamicTooltipForAA(action)
         resolvedItem.Description() or "None")
 end
 
+function Utils.GetConColor(color)
+    if color:lower() == "dead" then
+        return 0.4, 0.4, 0.4, 0.8
+    end
+
+    if color:lower() == "grey" then
+        return 0.6, 0.6, 0.6, 0.8
+    end
+
+    if color:lower() == "green" then
+        return 0.02, 0.8, 0.2, 0.8
+    end
+
+    if color:lower() == "light blue" then
+        return 0.02, 0.8, 1.0, 0.8
+    end
+
+    if color:lower() == "blue" then
+        return 0.02, 0.4, 1.0, 1.0
+    end
+
+    if color:lower() == "yellow" then
+        return 0.8, 0.8, 0.02, 0.8
+    end
+
+    if color:lower() == "red" then
+        return 0.8, 0.2, 0.2, 0.8
+    end
+
+    return 1.0, 1.0, 1.0, 1.0
+end
+
+function Utils.GetConColorBySpawn(spawn)
+    if not spawn or not spawn or spawn.Dead() then return Utils.GetConColor("Dead") end
+
+    return Utils.GetConColor(spawn.ConColor())
+end
+
 ---@param loc string
 function Utils.NavEnabledLoc(loc)
     ImGui.PushStyleColor(ImGuiCol.Text, 0.690, 0.553, 0.259, 1)

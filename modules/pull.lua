@@ -299,7 +299,9 @@ function Module:RenderPullTargets()
             ImGui.TableNextColumn()
             ImGui.Text(tostring(idx))
             ImGui.TableNextColumn()
+            ImGui.PushStyleColor(ImGuiCol.Text, RGMercUtils.GetConColorBySpawn(spawn))
             ImGui.Text(spawn.CleanName() or "Unknown")
+            ImGui.PopStyleColor()
             ImGui.TableNextColumn()
             ImGui.Text(tostring(spawn.Level() or 0))
             ImGui.TableNextColumn()
@@ -349,6 +351,7 @@ function Module:Render()
             ImGui.SameLine()
             if ImGui.Button("Pull Target " .. ICONS.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
                 self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
+                table.insert(self.TempSettings.PullTargets, { spawn = mq.TLO.Target, distance = mq.TLO.Target.Distance(), })
             end
         end
 
