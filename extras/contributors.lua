@@ -5,4 +5,5 @@ return {
     'Postleaf',
     'Werkfakter',
     'SonicZentropy',
+    'Tiddliestix',
 }
