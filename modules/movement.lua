@@ -205,8 +205,8 @@ function Module:Campfire(camptype)
 
     if mq.TLO.Zone.ID() == 33506 then return end
 
-    if not mq.TLO.Me.Fellowship() or mq.TLO.Me.Fellowship.Campfire() then
-        RGMercsLogger.log_info("\arNot in a fellowship or already have a campfire -- not putting one down.")
+    if mq.TLO.Me.Fellowship.ID() == 0 or mq.TLO.Me.Fellowship.Campfire() then
+        RGMercsLogger.log_super_verbose("\arNot in a fellowship or already have a campfire -- not putting one down.")
         return
     end
 
