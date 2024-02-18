@@ -8,9 +8,8 @@ Bind.MainHandler  = function(cmd, ...)
         return RGMercsBinds.Handlers[cmd].handler(...)
     end
 
-    local results = RGMercModules:ExecAll("HandleBind", cmd, ...)
-
     local processed = false
+    local results = RGMercModules:ExecAll("HandleBind", cmd, ...)
 
     for _, r in pairs(results) do processed = processed or r end
 
@@ -20,6 +19,13 @@ Bind.MainHandler  = function(cmd, ...)
 end
 
 Bind.Handlers     = {
+    ['set'] = {
+        usage = "/rgl set [show | <setting> <value>]",
+        about = "Show All Settings or Set a specific RGMercs setting",
+        handler = function(config, value)
+            RGMercConfig:HandleBind(config, value)
+        end,
+    },
     ['qsay'] = {
         usage = "/rgl qsay <text>",
         about = "All RGMercs will target your target and say your <text>",
@@ -93,10 +99,10 @@ Bind.Handlers     = {
             printf("RGMercs [%s/%s] by: %s running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
                 RGMercConfig.Globals.CurLoadedChar,
                 RGMercConfig.Globals.CurLoadedClass)
-            printf("\nCommand Help\n------------\n")
+            printf("\n\agCore \awCommand Help\aw\n------------\n")
             for c, d in pairs(RGMercsBinds.Handlers) do
                 if c ~= "help" then
-                    printf("%-20s - Usage: %-20s | %s", c, d.usage, d.about)
+                    printf("\am%-20s\aw - \atUsage: \ay%-30s\aw | %s", c, d.usage, d.about)
                 end
             end
 
@@ -107,10 +113,10 @@ Bind.Handlers     = {
                 if info.CommandHandlers then
                     for c, d in pairs(info.CommandHandlers or {}) do
                         if printHeader then
-                            printf("\n%s Specific Commands Help\n------------\n", info.module)
+                            printf("\n\ag%s\aw Specific Commands Help\n------------\n", info.module)
                             printHeader = false
                         end
-                        printf("%-20s - Usage: %-20s | %s", c, d.usage, d.about)
+                        printf("\am%-20s\aw - \atUsage: \ay%-60s\aw | %s", c, d.usage, d.about)
                     end
                 end
             end

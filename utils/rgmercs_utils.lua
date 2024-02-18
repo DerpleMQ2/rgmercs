@@ -1261,16 +1261,37 @@ function Utils.SelfBuffCheck(spell)
     return res
 end
 
+---@param string string
+---@param len number
+---@param padFront boolean
+---@param padChar string?
+function Utils.PadString(string, len, padFront, padChar)
+    if not padChar then padChar = " " end
+    local cleanText = string:gsub("\a[-]?.", "")
+
+    local paddingNeeded = len - cleanText:len()
+
+    for _ = 1, paddingNeeded do
+        if padFront then
+            string = padChar .. string
+        else
+            string = string .. padChar
+        end
+    end
+
+    return string
+end
+
 ---@param b boolean
 ---@return string
 function Utils.BoolToString(b)
-    return b and "TRUE" or "FALSE"
+    return b and "true" or "false"
 end
 
 ---@param b boolean
 ---@return string
 function Utils.BoolToColorString(b)
-    return b and "\agTRUE\ax" or "\arFALSE\ax"
+    return b and "\agtrue\ax" or "\arfalse\ax"
 end
 
 ---Returns a setting from either the global or a module setting table.
@@ -3396,7 +3417,8 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                             new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
                             any_pressed = any_pressed or pressed
                         elseif type(settings[k]) == 'string' then -- display only
-                            ImGui.Text(settings[k])
+                            settings[k], pressed = ImGui.InputText("##" .. k, settings[k])
+                            any_pressed = any_pressed or pressed
                             Utils.Tooltip(settings[k])
                         end
                     end

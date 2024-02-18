@@ -159,7 +159,7 @@ Config.DefaultConfig = {
     ['AssistRange']         = { DisplayName = "Assist Range", Category = "Combat", Tooltip = "Distance to the target before you engage.", Default = Config.Constants.RGCasters:contains(Config.Globals.CurLoadedClass) and 90 or 45, Min = 15, Max = 200, ConfigType = "Advanced", },
     ['MAScanZRange']        = { DisplayName = "Main Assist Scan ZRange", Category = "Combat", Tooltip = "Distance in Z direction to look for targets.", Default = 45, Min = 15, Max = 200, ConfigType = "Advanced", },
     ['AutoAssistAt']        = { DisplayName = "Auto Assist At", Category = "Combat", Tooltip = "Melee attack when target hits [x] HP %.", Default = 98, Min = 1, Max = 100, ConfigType = "Advanced", },
-    ['StickHow']            = { DisplayName = "Stick How", Category = "Combat", Tooltip = "Custom /stick command", Type = "Custom", Default = "", ConfigType = "Advanced", },
+    ['StickHow']            = { DisplayName = "Stick How", Category = "Combat", Tooltip = "Custom /stick command", Default = "", ConfigType = "Advanced", },
     ['AllowMezBreak']       = { DisplayName = "Allow Mez Break", Category = "Combat", Tooltip = "Allow Mez Breaking.", Default = false, ConfigType = "Advanced", },
     ['InstantRelease']      = { DisplayName = "Instant Release", Category = "Combat", Tooltip = "Instantly release when you die.", Default = false, ConfigType = "Advanced", },
     ['DoAutoTarget']        = { DisplayName = "Auto Target", Category = "Combat", Tooltip = "Automatically change targets.", Default = true, ConfigType = "Normal", },
@@ -177,7 +177,7 @@ Config.DefaultConfig = {
     -- [ BUFF ] --
     ['DoTwist']             = { DisplayName = "Enable Bard Twisting", Category = "Buffs", Tooltip = "Use MQ2Twist", Default = true, ConfigType = "Advanced", },
     ['DoBuffs']             = { DisplayName = "Do Buffs", Category = "Buffs", Tooltip = "Do Non-Class Specific Buffs.", Default = true, ConfigType = "Advanced", },
-    ['BuffWaitMoveTimer']   = { DisplayName = "Buff Wait Timer", Category = "Buffs", Tooltip = "Seconds to wait after stoping movement before doing buffs.", Default = 5, ConfigType = "Advanced", },
+    ['BuffWaitMoveTimer']   = { DisplayName = "Buff Wait Timer", Category = "Buffs", Tooltip = "Seconds to wait after stoping movement before doing buffs.", Default = 5, Min = 0, Max = 60, ConfigType = "Advanced", },
 
     -- [ HEALING ] --
     ['BreakInvis']          = { DisplayName = "Break Invis", Category = "Heals", Tooltip = "Set to break invis to heal injured group or out of group members when out of combat only. Healers will always break invis in combat.", Default = false, ConfigType = "Advanced", },
@@ -230,6 +230,8 @@ for _, v in pairs(Config.DefaultConfig) do
     end
 end
 
+Config.CommandHandlers = {}
+
 function Config:GetConfigFileName()
     return mq.configDir ..
         '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServer .. "_" .. self.Globals.CurLoadedChar .. '.lua'
@@ -271,7 +273,108 @@ function Config:LoadSettings()
         self:SaveSettings(false)
     end
 
+    self:UpdateCommandHandlers()
+
     return true
+end
+
+function Config:UpdateCommandHandlers()
+    self.CommandHandlers = {}
+
+    for config, configData in pairs(Config.DefaultConfig) do
+        local _, usageString = self:GetUsageText(config, true)
+
+        if type(configData.Default) == 'number' then
+            self.CommandHandlers[config:lower()] = {
+                name = config,
+                usage = usageString,
+                about = configData.Tooltip,
+                handler = function(self, value)
+                    value = tonumber(value)
+                    if value > Config.DefaultConfig[config].Max or value < Config.DefaultConfig[config].Min then
+                        RGMercsLogger.log_info("\ayError: %s is not a valid setting for %s.", value, config)
+                        local _, update = self:GetUsageText(config, true)
+                        RGMercsLogger.log_info(update)
+                        return
+                    end
+                    local _, update = self:GetUsageText(config, false)
+                    RGMercsLogger.log_info("\a-y%s :: Before :: %s", config, update)
+                    self.settings[config] = value
+                    _, update = self:GetUsageText(config, false)
+                    RGMercsLogger.log_info("\ag%s :: After  :: %s", config, update)
+                    self:SaveSettings(true)
+                end,
+            }
+        end
+        if type(configData.Default) == 'boolean' then
+            self.CommandHandlers[config:lower()] = {
+                name = config,
+                usage = usageString,
+                about = configData.Tooltip,
+                handler = function(self, value)
+                    local boolValue = false
+                    if value == "true" or value == "on" or (tonumber(value) or 0) >= 1 then
+                        boolValue = true
+                    end
+
+                    local _, update = self:GetUsageText(config, false)
+                    RGMercsLogger.log_info("\a-y%s :: Before :: %-5s", config, update)
+                    self.settings[config] = boolValue
+                    _, update = self:GetUsageText(config, false)
+                    RGMercsLogger.log_info("\ag%s :: After  :: %-5ss", config, update)
+                    self:SaveSettings(true)
+                end,
+            }
+        end
+        if type(configData.Default) == 'string' then
+            self.CommandHandlers[config:lower()] = {
+                name = config,
+                usage = usageString,
+                about = configData.Tooltip,
+                handler = function(self, value)
+                    local _, update = self:GetUsageText(config, false)
+                    RGMercsLogger.log_info("\a-y%s :: Before :: \"%s\"", config, update)
+                    self.settings[config] = value
+                    _, update = self:GetUsageText(config, false)
+                    RGMercsLogger.log_info("\ag%s :: After  :: \"%s\"", config, update)
+                    self:SaveSettings(true)
+                end,
+            }
+        end
+    end
+end
+
+function Config:GetUsageText(config, showUsageText)
+    local handledType = false
+    local usageString = showUsageText and string.format("/rgl set %s ", RGMercUtils.PadString(config, 25, false)) or ""
+    local configData = Config.DefaultConfig[config]
+
+    local rangeText = ""
+    local defaultText = ""
+    local currentText = ""
+
+    if type(configData.Default) == 'number' then
+        rangeText = string.format("\aw<\a-y%d\aw-\a-y%d\ax>", configData.Min, configData.Max)
+        defaultText = string.format("[\a-tDefault: %d\ax]", configData.Default)
+        currentText = string.format("[\a-gCurrent: %d\ax]", RGMercUtils.GetSetting(config))
+        handledType = true
+    elseif type(configData.Default) == 'boolean' then
+        rangeText = string.format("\aw<\a-yon\aw|\a-yoff\ax>")
+        ---@diagnostic disable-next-line: param-type-mismatch
+        defaultText = string.format("[\a-tDefault: %s\ax]", RGMercUtils.BoolToString(configData.Default))
+        currentText = string.format("[\a-gCurrent: %s\ax]", RGMercUtils.BoolToString(RGMercUtils.GetSetting(config)))
+        handledType = true
+    elseif type(configData.Default) == 'string' then
+        rangeText = string.format("\aw<\"str\">")
+        defaultText = string.format("[\a-tDefault: \"%s\"\ax]", configData.Default)
+        currentText = string.format("[\a-gCurrent: \"%s\"\ax]", RGMercUtils.GetSetting(config))
+        handledType = true
+    end
+
+    usageString = usageString ..
+        string.format("%s %s %s", RGMercUtils.PadString(rangeText, 20, false), RGMercUtils.PadString(currentText, 20, false), RGMercUtils.PadString(defaultText, 20, false))
+
+    return handledType, usageString
 end
 
 function Config:GetSettings()
@@ -284,6 +387,41 @@ end
 
 function Config:GetTimeSinceLastMove()
     return os.clock() - self.Globals.LastMove.TimeAtMove
+end
+
+function Config:GetCommandHandlers()
+    return { module = "Config", CommandHandlers = self.CommandHandlers, }
+end
+
+---@param config string
+---@param value any
+---@return boolean
+function Config:HandleBind(config, value)
+    local handled = false
+
+    if not config or config:lower() == "show" or config:len() == 0 then
+        self:UpdateCommandHandlers()
+        local sortedKeys = {}
+        for c, _ in pairs(self.CommandHandlers or {}) do
+            table.insert(sortedKeys, c)
+        end
+        table.sort(sortedKeys)
+        printf("\n\ag%s\aw Specific Commands Help\n------------\n", "Config")
+        for _, c in pairs(sortedKeys) do
+            local d = self.CommandHandlers[c]
+            printf("\am%-20s\aw - \atUsage: \ay%s\aw | %s", d.name, RGMercUtils.PadString(d.usage, 100, false), d.about)
+        end
+        return true
+    end
+
+    if self.CommandHandlers[config:lower()] ~= nil then
+        self.CommandHandlers[config:lower()].handler(self, value)
+        handled = true
+    else
+        RGMercsLogger.log_error("\at%s\aw - \arNot a valid config setting!\ax", config)
+    end
+
+    return handled
 end
 
 function Config:StoreLastMove()
