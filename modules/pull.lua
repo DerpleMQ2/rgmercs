@@ -744,14 +744,15 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                 end
 
                 --if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 80) then
-                if RGMercUtils.GetDistance(member.Y(), member.X(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
+                if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
                     RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
-                    return false, string.format("%s Too Far (%d)", member.CleanName(), member.Distance() or 0)
+                    return false,
+                        string.format("%s Too Far (%d)", member.CleanName(), RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY))
                 end
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
                     if member.ID() == RGMercUtils.GetMainAssistId() then
-                        if returnToCamp and RGMercUtils.GetDistance(member.Y(), member.X(), campData.AutoCampX, campData.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+                        if returnToCamp and RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(), campData.AutoCampY,
                                 campData.AutoCampX, campData.AutoCampZ, RGMercConfig.SubModuleSettings.settings.Movement.settings.AutoCampRadius)
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
