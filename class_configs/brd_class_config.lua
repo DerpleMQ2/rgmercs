@@ -40,6 +40,7 @@ local Tooltips                    = {
     ColdDotSong      = "Song Line: Cold Dots",
     DiseaseDotSong   = "Song Line: Disease Dots",
     PoisonDotSong    = "Song Line: Poison Dots",
+    IceDotSong       = "Song Line: Ice Dots",
 
     CureSong         = "Song Line: Single Target Cure Poison Disease and Corruption",
     AllianceSong     = "Song Line: Mob Debuff Increase Insult Damage for other Bards",

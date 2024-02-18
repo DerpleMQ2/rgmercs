@@ -4,6 +4,8 @@ local RGMercUtils = require("utils.rgmercs_utils")
 local Bind        = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
 
 Bind.MainHandler  = function(cmd, ...)
+    if not cmd or cmd:len() == 0 then cmd = "help" end
+
     if RGMercsBinds.Handlers[cmd] then
         return RGMercsBinds.Handlers[cmd].handler(...)
     end

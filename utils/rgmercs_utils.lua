@@ -2271,7 +2271,7 @@ function Utils.FindTarget(validateFn)
     -- Handle cases where our autotarget is no longer valid because it isn't a valid spawn or is dead.
     if RGMercConfig.Globals.AutoTargetID ~= 0 then
         local autoSpawn = mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID))
-        if not autoSpawn() or autoSpawn.Type():lower() == "corpse" then
+        if not autoSpawn or not autoSpawn() or (autoSpawn.Type() or "none"):lower() == "corpse" then
             RGMercsLogger.log_debug("\ayFindTarget() : Clearing Target because it is a corpse or no longer valid.")
             Utils.ClearTarget()
         end
