@@ -2874,10 +2874,8 @@ end
 
 function Utils.DeleteOA(idx)
     if idx <= #Utils.GetSetting('OutsideAssistList') then
-        RGMercsLogger.log_info("\axOutside Assist \at%s\ax \ag%s\ax - \arDeleted!\ax", idx,
-            Utils.GetSetting('OutsideAssistList[idx]'))
+        RGMercsLogger.log_info("\axOutside Assist \at%d\ax \ag%s\ax - \arDeleted!\ax", idx, Utils.GetSetting('OutsideAssistList')[idx])
         table.remove(Utils.GetSetting('OutsideAssistList'), idx)
-        --Utils.GetSetting('OutsideAssistList[idx]') = nil
         RGMercConfig:SaveSettings(false)
     else
         RGMercsLogger.log_error("\ar%d is not a valid OA ID!", idx)
