@@ -710,16 +710,16 @@ local _ClassConfig = {
             {
                 name = "RecklessHeal1",
                 type = "Spell",
-                cond = function(self, _)
-                    return RGMercUtils.GetMainAssistPctHPs() <=
+                cond = function(self, _, target)
+                    return (target and target.PctHPs() or 100) <=
                         RGMercUtils.GetSetting('RecklessHealPct')
                 end,
             },
             {
                 name = "GroupRenewalHoT",
                 type = "Spell",
-                cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint') and
+                cond = function(self, spell, target)
+                    return (target and target.PctHPs() or 100) <= RGMercUtils.GetSetting('MainHealPoint') and
                         RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
                         not RGMercUtils.TargetHasBuff(spell)
                 end,
@@ -727,8 +727,8 @@ local _ClassConfig = {
             {
                 name = "Call of the Ancients",
                 type = "AA",
-                cond = function(self, aaName)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint')
+                cond = function(self, aaName, target)
+                    return (target and target.PctHPs() or 100) <= RGMercUtils.GetSetting('MainHealPoint')
                 end,
             },
         },
@@ -810,7 +810,7 @@ local _ClassConfig = {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck()
+                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
             end,
         },
         {
@@ -825,7 +825,8 @@ local _ClassConfig = {
                 return
                     groupIds
             end,
-            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end,
+            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
+                RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer') end,
         },
         {
             name = 'Splash',

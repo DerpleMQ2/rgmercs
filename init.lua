@@ -94,13 +94,13 @@ local function RenderTarget()
     ImGui.SameLine()
     if RGMercConfig.Globals.AutoTargetID == 0 then
         ImGui.Text("None")
-        ImGui.ProgressBar(0, -1, 25)
+        RGMercUtils.RenderProgressBar(0, -1, 25)
     else
         local assistSpawn = RGMercUtils.GetAutoTarget()
         local pctHPs = assistSpawn.PctHPs() or 0
         if not pctHPs then pctHPs = 0 end
         local ratioHPs = pctHPs / 100
-        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 1 - ratioHPs, ratioHPs, 0, 1)
+        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 1 - ratioHPs, ratioHPs, 0.2, 0.7)
         if math.floor(assistSpawn.Distance() or 0) >= 350 then
             ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 0.0, 1)
         else
@@ -108,8 +108,7 @@ local function RenderTarget()
         end
         ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "", assistSpawn.ID() or 0, assistSpawn.Level() or 0,
             assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
-        ImGui.ProgressBar(ratioHPs, -1, 25)
-
+        RGMercUtils.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
     end
 end

@@ -877,7 +877,7 @@ _ClassConfig      = {
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.ID(), mq.TLO.Me.Pet.ID(), } or { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck()
+                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
             end,
         },
         {

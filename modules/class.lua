@@ -403,7 +403,7 @@ function Module:FindWorstHurtGroupMember(minHPs)
         local healTarget = mq.TLO.Group.Member(i)
 
         if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
-            if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
+            if (healTarget.Class.ShortName() or "none"):lower() ~= "ber" then -- berzerkers have special handing
                 if healTarget.PctHPs() < worstPct then
                     RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
                     worstPct = healTarget.PctHPs()

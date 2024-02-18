@@ -63,7 +63,7 @@ local Tooltips                    = {
 }
 
 local function generateSongList()
-    local songCache = {}
+    local songCache = { CollapseGems = true, }
     local songCount = 0
 
     --------------------------------------------------------------------------------------
@@ -87,6 +87,7 @@ local function generateSongList()
         ConditionallyAddSong("DoAEMez", "MezAESong")
         ConditionallyAddSong("DoSlow", "SlowSong")
         ConditionallyAddSong("DoAESlow", "AESlowSong")
+        ConditionallyAddSong("DoRunSpeed", "BardRunBuff")
         -- TODO maybe someday
         --ConditionallyAddSong("DoCharm", "CharmSong")
         ConditionallyAddSong("DoDispel", "DispelSong")
@@ -133,6 +134,7 @@ local function generateSongList()
         ConditionallyAddSong("UseAmp", "AmpSong")
         ConditionallyAddSong("UseCrescendo", "CrescendoSong")
         ConditionallyAddSong("UseChorus", "ChorusRegenSong")
+        ConditionallyAddSong("UsePulse", "PulseRegenSong")
         ConditionallyAddSong("UseCantata", "CantataRegenSong")
     end
     -----------------------------------------------------------------------------------------
@@ -179,13 +181,6 @@ local function generateSongList()
         AddCasterDPSSongs()
     end
 
-    if songCount > mq.TLO.Me.NumGems() then
-        RGMercsLogger.log_warning("WARNING your bard is trying to memorize too many songs!  Please unselect some.")
-        while #songCache > mq.TLO.Me.NumGems() do
-            table.remove(songCache)
-        end
-    end
-
     return songCache
 end
 
@@ -203,7 +198,7 @@ local _ClassConfig = {
         'General',
         'Tank',
         'Caster',
-        'Healer'
+        'Healer',
     },
     ['ItemSets']      = {
         ['Epic'] = {
@@ -211,12 +206,12 @@ local _ClassConfig = {
             "Prismatic Dragon Blade",
         },
         ['Dreadstone'] = {
-            "Possessed Dreadstone Minstrel's Rapier"
+            "Possessed Dreadstone Minstrel's Rapier",
         },
         ['SymphonyOfBattle'] = {
             "Rapier of Somber Notes",
-            "Songblade of the Eternal"
-        }
+            "Songblade of the Eternal",
+        },
     },
     ['AbilitySets']   = {
         ['BardRunBuff'] = {
@@ -758,7 +753,7 @@ local _ClassConfig = {
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning() and
-                RGMercUtils.GetSetting('UseDynamicMelody')
+                    RGMercUtils.GetSetting('UseDynamicMelody')
             end,
         },
         {
@@ -768,7 +763,7 @@ local _ClassConfig = {
             targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning() and
-                not RGMercUtils.GetSetting('UseDynamicMelody')
+                    not RGMercUtils.GetSetting('UseDynamicMelody')
             end,
         },
 
@@ -1352,59 +1347,59 @@ local _ClassConfig = {
     },
 
     ['DefaultConfig'] = {
-        ['Mode']             = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4 },
-        ['UseAASelo']        = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true },
-        ['DoRunSpeed']       = { DisplayName = "Cast Run Speed Buffs", Category = "Buffs", Tooltip = "Use Selos.", Default = true },
-        ['UseRegenAura']     = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = false },
-        ['UseDynamicMelody'] = { DisplayName = "Use Dynamic Melody", Category = "Combat", Tooltip = Tooltips.UseMelody, Default = true, Advanced = true },
+        ['Mode']             = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
+        ['UseAASelo']        = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true, },
+        ['DoRunSpeed']       = { DisplayName = "Cast Run Speed Buffs", Category = "Buffs", Tooltip = "Use Selos.", Default = true, },
+        ['UseRegenAura']     = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = false, },
+        ['UseDynamicMelody'] = { DisplayName = "Use Dynamic Melody", Category = "Combat", Tooltip = Tooltips.UseMelody, Default = true, Advanced = true, },
 
-        ['UseEpic']          = { DisplayName = "Use Epic Click", Category = "Burns", Tooltip = "Use Epic 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always' }, Default = 1, Min = 1, Max = 3 },
-        ['UseFierceEye']     = { DisplayName = "Use Fierce Eye", Category = "Burns", Tooltip = "Use FierceEye 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always' }, Default = 1, Min = 1, Max = 3, },
-        ['UseFuneralDirge']  = { DisplayName = "Use Funeral Dirge", Category = "Burns", Tooltip = "Use Funeral Dirge", Default = true },
+        ['UseEpic']          = { DisplayName = "Use Epic Click", Category = "Burns", Tooltip = "Use Epic 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always', }, Default = 1, Min = 1, Max = 3, },
+        ['UseFierceEye']     = { DisplayName = "Use Fierce Eye", Category = "Burns", Tooltip = "Use FierceEye 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always', }, Default = 1, Min = 1, Max = 3, },
+        ['UseFuneralDirge']  = { DisplayName = "Use Funeral Dirge", Category = "Burns", Tooltip = "Use Funeral Dirge", Default = true, },
 
-        ['UseAlliance']      = { DisplayName = "Use Alliance", Category = "Combat", Tooltip = Tooltips.AllianceSong, Default = false },
-        ['UseBellow']        = { DisplayName = "Use Bellow", Category = "Combat", Tooltip = "Use Boastful Bellow", Default = true },
+        ['UseAlliance']      = { DisplayName = "Use Alliance", Category = "Combat", Tooltip = Tooltips.AllianceSong, Default = false, },
+        ['UseBellow']        = { DisplayName = "Use Bellow", Category = "Combat", Tooltip = "Use Boastful Bellow", Default = true, },
         -- Debuffs
         ['DoSlow']           = { DisplayName = "Cast Slow", Category = "Combat", Tooltip = Tooltips.SlowSong, Default = false, },
-        ['DoAESlow']         = { DisplayName = "Cast AE Slow", Category = "Combat", Tooltip = Tooltips.AESlowSong, Default = false },
-        ['DoDispel']         = { DisplayName = "Use Dispel", Category = "Combat", Tooltip = Tooltips.DispelSong, Default = false },
+        ['DoAESlow']         = { DisplayName = "Cast AE Slow", Category = "Combat", Tooltip = Tooltips.AESlowSong, Default = false, },
+        ['DoDispel']         = { DisplayName = "Use Dispel", Category = "Combat", Tooltip = Tooltips.DispelSong, Default = false, },
 
         -- TODO
         --['DoCharm']       = { DisplayName = "Use Charm", Category = "Songs", Tooltip = Tooltips.CharmSong, Default = false },
-        ['DoAEMez']          = { DisplayName = "Do AoE Mez", Category = "Combat", Tooltip = "AEMez", Default = false },
-        ['AEMezCount']       = { DisplayName = "AoE Mez Count", Category = "Combat", Tooltip = "Mob count before AE mez casts", Default = 3, Min = 1, Max = 12 },
+        ['DoAEMez']          = { DisplayName = "Do AoE Mez", Category = "Combat", Tooltip = "AEMez", Default = false, },
+        ['AEMezCount']       = { DisplayName = "AoE Mez Count", Category = "Combat", Tooltip = "Mob count before AE mez casts", Default = 3, Min = 1, Max = 12, },
         --healer
-        ['UseResist']        = { DisplayName = "Use Resists", Category = "Songs/Heals", Tooltip = Tooltips.ResistSong, Default = false },
-        ['UseReckless']      = { DisplayName = "Use Reckless", Category = "Songs/Heals", Tooltip = Tooltips.RecklessSong, Default = false },
-        ['UseCure']          = { DisplayName = "Use Cure", Category = "Songs/Heals", Tooltip = Tooltips.CureSong, Default = false },
-        ['UsePulse']         = { DisplayName = "Use Pulse", Category = "Songs/Heals", Tooltip = Tooltips.PulseRegenSong, Default = true },
+        ['UseResist']        = { DisplayName = "Use Resists", Category = "Songs/Heals", Tooltip = Tooltips.ResistSong, Default = false, },
+        ['UseReckless']      = { DisplayName = "Use Reckless", Category = "Songs/Heals", Tooltip = Tooltips.RecklessSong, Default = false, },
+        ['UseCure']          = { DisplayName = "Use Cure", Category = "Songs/Heals", Tooltip = Tooltips.CureSong, Default = false, },
+        ['UsePulse']         = { DisplayName = "Use Pulse", Category = "Songs/Heals", Tooltip = Tooltips.PulseRegenSong, Default = true, },
         --Regen
-        ['UseAmp']           = { DisplayName = "Use Amp", Category = "Songs/Regen", Tooltip = Tooltips.AmpSong, Default = false },
-        ['UseChorus']        = { DisplayName = "Use Chorus", Category = "Songs/Regen", Tooltip = Tooltips.ChorusRegenSong, Default = true },
-        ['UseCantata']       = { DisplayName = "Use Cantata", Category = "Songs/Regen", Tooltip = Tooltips.CantataRegenSong, Default = false },
-        ['UseCrescendo']     = { DisplayName = "Use Crescendo", Category = "Songs/Regen", Tooltip = Tooltips.CrescendoSong, Default = true },
-        ['UseAccelerando']   = { DisplayName = "Use Accelerando", Category = "Songs/Regen", Tooltip = Tooltips.AccelerandoSong, Default = false },
+        ['UseAmp']           = { DisplayName = "Use Amp", Category = "Songs/Regen", Tooltip = Tooltips.AmpSong, Default = false, },
+        ['UseChorus']        = { DisplayName = "Use Chorus", Category = "Songs/Regen", Tooltip = Tooltips.ChorusRegenSong, Default = true, },
+        ['UseCantata']       = { DisplayName = "Use Cantata", Category = "Songs/Regen", Tooltip = Tooltips.CantataRegenSong, Default = false, },
+        ['UseCrescendo']     = { DisplayName = "Use Crescendo", Category = "Songs/Regen", Tooltip = Tooltips.CrescendoSong, Default = true, },
+        ['UseAccelerando']   = { DisplayName = "Use Accelerando", Category = "Songs/Regen", Tooltip = Tooltips.AccelerandoSong, Default = false, },
         --DPS
-        ['UseInsult']        = { DisplayName = "Use Insult Nuke", Category = "Songs/DPS", Tooltip = Tooltips.InsultSong, Default = true },
-        ['UseFireDots']      = { DisplayName = "Use Fire Dots", Category = "Songs/DPS", Tooltip = Tooltips.FireDotSong, Default = true },
-        ['UseIceDots']       = { DisplayName = "Use Ice Dots", Category = "Songs/DPS", Tooltip = Tooltips.IceDotSong, Default = true },
-        ['UsePoisonDots']    = { DisplayName = "Use Poison Dots", Category = "Songs/DPS", Tooltip = Tooltips.PoisonDotSong, Default = true },
-        ['UseDiseaseDots']   = { DisplayName = "Use Disease Dots", Category = "Songs/DPS", Tooltip = Tooltips.DiseaseDotSong, Default = true },
+        ['UseInsult']        = { DisplayName = "Use Insult Nuke", Category = "Songs/DPS", Tooltip = Tooltips.InsultSong, Default = true, },
+        ['UseFireDots']      = { DisplayName = "Use Fire Dots", Category = "Songs/DPS", Tooltip = Tooltips.FireDotSong, Default = true, },
+        ['UseIceDots']       = { DisplayName = "Use Ice Dots", Category = "Songs/DPS", Tooltip = Tooltips.IceDotSong, Default = true, },
+        ['UsePoisonDots']    = { DisplayName = "Use Poison Dots", Category = "Songs/DPS", Tooltip = Tooltips.PoisonDotSong, Default = true, },
+        ['UseDiseaseDots']   = { DisplayName = "Use Disease Dots", Category = "Songs/DPS", Tooltip = Tooltips.DiseaseDotSong, Default = true, },
 
         --Tank
-        ['UseSpiteful']      = { DisplayName = "Use Spiteful", Category = "Songs/Tank", Tooltip = Tooltips.SpitefulSong, Default = false },
-        ['UseSpry']          = { DisplayName = "Use Spry", Category = "Songs/Tank", Tooltip = Tooltips.SprySonataSong, Default = false },
+        ['UseSpiteful']      = { DisplayName = "Use Spiteful", Category = "Songs/Tank", Tooltip = Tooltips.SpitefulSong, Default = false, },
+        ['UseSpry']          = { DisplayName = "Use Spry", Category = "Songs/Tank", Tooltip = Tooltips.SprySonataSong, Default = false, },
         --Caster
-        ['UseArcane']        = { DisplayName = "Use Arcane", Category = "Songs/Caster", Tooltip = Tooltips.ArcaneSong, Default = false },
-        ['UseFireDDMod']     = { DisplayName = "Use Fire Aria", Category = "Songs/Caster", Tooltip = Tooltips.CasterAriaSong, Default = false },
-        ['UsePotency']       = { DisplayName = "Use Potency", Category = "Songs/Caster", Tooltip = Tooltips.PotencySong, Default = false },
-        ['UseFate']          = { DisplayName = "Use Fate", Category = "Songs/Caster", Tooltip = Tooltips.FateSong, Default = false },
+        ['UseArcane']        = { DisplayName = "Use Arcane", Category = "Songs/Caster", Tooltip = Tooltips.ArcaneSong, Default = false, },
+        ['UseFireDDMod']     = { DisplayName = "Use Fire Aria", Category = "Songs/Caster", Tooltip = Tooltips.CasterAriaSong, Default = false, },
+        ['UsePotency']       = { DisplayName = "Use Potency", Category = "Songs/Caster", Tooltip = Tooltips.PotencySong, Default = false, },
+        ['UseFate']          = { DisplayName = "Use Fate", Category = "Songs/Caster", Tooltip = Tooltips.FateSong, Default = false, },
         -- Melee DPS Only
-        ['UseSuffering']     = { DisplayName = "Use Suffering", Category = "Songs/Melee", Tooltip = Tooltips.SufferingSong, Default = false },
-        ['UseProgressive']   = { DisplayName = "Use Progressive", Category = "Songs/Melee", Tooltip = Tooltips.DichoSong, Default = true },
-        ['UseJonthan']       = { DisplayName = "Use Jonthan", Category = "Songs/Melee", Tooltip = Tooltips.Jonthans, Default = false },
+        ['UseSuffering']     = { DisplayName = "Use Suffering", Category = "Songs/Melee", Tooltip = Tooltips.SufferingSong, Default = false, },
+        ['UseProgressive']   = { DisplayName = "Use Progressive", Category = "Songs/Melee", Tooltip = Tooltips.DichoSong, Default = true, },
+        ['UseJonthan']       = { DisplayName = "Use Jonthan", Category = "Songs/Melee", Tooltip = Tooltips.Jonthans, Default = false, },
 
     },
-    ['Spells']        = { getSpellCallback = generateSongList }
+    ['Spells']        = { getSpellCallback = generateSongList, },
 }
 return _ClassConfig

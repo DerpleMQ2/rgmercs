@@ -126,7 +126,6 @@ function Module:ChaseOn(target)
     end
 
     if chaseTarget() and chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
-        mq.cmd("/nav stop")
         self:CampOff()
         self.settings.ChaseOn = true
         self.settings.ChaseTarget = chaseTarget.CleanName()
@@ -479,7 +478,7 @@ function Module:GiveTime(combat_state)
         end
 
         if mq.TLO.Me.Dead() then return end
-        if not chaseSpawn() or chaseSpawn.Distance() < self.settings.ChaseDistance then return end
+        if not chaseSpawn or not chaseSpawn() or (chaseSpawn.Distance() or 0) < self.settings.ChaseDistance then return end
 
         local Nav = mq.TLO.Navigation
 

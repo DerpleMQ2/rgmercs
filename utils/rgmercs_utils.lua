@@ -861,11 +861,11 @@ function Utils.UseSong(songName, targetId, bAllowMem)
             mq.doevents()
             mq.delay(1)
         end
-        
+
         -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
-        mq.delay(500, function() return not me.Casting.ID() > 0 end)
-      
-        
+        mq.delay(500, function() return me.Casting.ID() == 0 end)
+
+
         if Utils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
             Utils.DoCmd("/stopsong")
             return true
@@ -1144,9 +1144,11 @@ function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId,
         end
     end
 
-    RGMercsLogger.log_verbose("\ay   :: Testing Condition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
-        entry.name, entry.type, condArg or "None",
-        condTarg.CleanName() or "None", Utils.BoolToColorString(pass))
+    if not uiCheck then
+        RGMercsLogger.log_verbose("\ay   :: Testing Condition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
+            entry.name, entry.type, condArg or "None",
+            condTarg.CleanName() or "None", Utils.BoolToColorString(pass))
+    end
 
     return pass, active
 end
@@ -1163,7 +1165,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
     local oldSpellInSlot = mq.TLO.Me.Gem(Utils.UseGem)
     local stepsThisTime  = 0
     local lastStepIdx    = 0
-    
+
     -- This is useful when class config wants to re-check every rotation condition every run
     -- For example, if gem1 meets all condition criteria, it WILL cast repeatedly on every cast
     -- Used for bards to dynamically weave properly
@@ -1218,7 +1220,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
     if lastStepIdx > #rotationTable then
         lastStepIdx = 1
     end
-    
+
     RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, (start_step or -1),
         lastStepIdx)
 
@@ -1238,7 +1240,7 @@ function Utils.SelfBuffPetCheck(spell)
     return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
----@param spell MQSpell
+---@param spell MQSpell|string
 ---@return boolean
 function Utils.SelfBuffCheck(spell)
     if type(spell) == "string" then
@@ -1708,7 +1710,7 @@ function Utils.AutoMed()
         RGMercsLogger.log_verbose("Sit check returning early due to mount.")
         return
     end
-    
+
     RGMercConfig:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
@@ -1811,7 +1813,7 @@ function Utils.SongMemed(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
 
-    return me.Gem(songSpell.RankName())() ~= nil
+    return me.Gem(songSpell.RankName.Name())() ~= nil
 end
 
 ---@param songSpell MQSpell
@@ -2094,7 +2096,7 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
                     if cur_spawn.AssistName() == spawn.Name() then
                         RGMercsLogger.log_verbose("[%s] Fighting same mob as: %s Theirs: %s Ours: %s", t,
                             cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
-                        local checkName = cur_spawn.CleanName()
+                        local checkName = cur_spawn and cur_spawn() or cur_spawn.CleanName() or "None"
 
                         if cur_spawn.Type():lower() == "mercenary" then checkName = cur_spawn.Owner.CleanName() end
                         if cur_spawn.Type():lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
@@ -2748,15 +2750,22 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
         spellGemList = spellGemList.getSpellCallback()
     end
 
+    local curGem = 1
+
     for _, g in ipairs(spellGemList or {}) do
-        if Utils.SafeCallFunc(string.format("Gem Conditin Check %d", g.gem), g.cond, caller, g.gem) then
-            RGMercsLogger.log_debug("\ayGem \am%d\ay will be loaded.", g.gem)
+        local gem = g.gem
+        if spellGemList.CollapseGems then
+            gem = curGem
+        end
+
+        if Utils.SafeCallFunc(string.format("Gem Condition Check %d", gem), g.cond, caller, gem) then
+            RGMercsLogger.log_debug("\ayGem \am%d\ay will be loaded.", gem)
 
             if g ~= nil and g.spells ~= nil then
                 for _, s in ipairs(g.spells) do
                     if s.name_func then s.name = Utils.SafeCallFunc("Spell Name Func", s.name_func, caller) or "Error in name_func!" end
                     local spellName = s.name
-                    RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, g.gem)
+                    RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, gem)
                     if abilitySets[spellName] == nil then
                         -- this means we put a varname into our spell table that we didn't define in the ability list.
                         RGMercsLogger.log_error(
@@ -2770,21 +2779,22 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                         local loadedSpell = spellsToLoad[bestSpell.RankName()] or false
 
                         if pass and bestSpell and bookSpell and not loadedSpell then
-                            RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will load \at%s\ax ==> \ag%s", g.gem, s
+                            RGMercsLogger.log_debug("    ==> \ayGem \am%d\ay will load \at%s\ax ==> \ag%s", gem, s
                                 .name, bestSpell.RankName())
-                            spellLoadOut[g.gem] = { selectedSpellData = s, spell = bestSpell, }
+                            spellLoadOut[gem] = { selectedSpellData = s, spell = bestSpell, }
                             spellsToLoad[bestSpell.RankName()] = true
+                            curGem = curGem + 1
                             break
                         else
                             RGMercsLogger.log_debug(
                                 "    ==> \ayGem \am%d will \arNOT\ay load \at%s (pass=%s, bestSpell=%s, bookSpell=%d, loadedSpell=%s)",
-                                g.gem, s.name,
+                                gem, s.name,
                                 Utils.BoolToColorString(pass), bestSpell and bestSpell.RankName() or "", bookSpell or -1,
                                 Utils.BoolToColorString(loadedSpell))
                         end
                     else
                         RGMercsLogger.log_debug(
-                            "    ==> \ayGem \am%d\ay will \arNOT\ay load \at%s\ax ==> \arNo Resolved Spell!", g.gem,
+                            "    ==> \ayGem \am%d\ay will \arNOT\ay load \at%s\ax ==> \arNo Resolved Spell!", gem,
                             s.name)
                     end
                 end
@@ -2792,7 +2802,7 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                 RGMercsLogger.log_debug("    ==> No Resolved Spell! class file not configured properly")
             end
         else
-            RGMercsLogger.log_debug("\agGem %d will not be loaded.", g.gem)
+            RGMercsLogger.log_debug("\agGem %d will not be loaded.", gem)
         end
     end
 
@@ -3256,6 +3266,21 @@ function Utils.RenderOptionToggle(id, text, on)
     ImGui.Text(text)
 
     return state, toggled
+end
+
+---@param pct number # % of bar
+---@param width number
+---@param height number
+function Utils.RenderProgressBar(pct, width, height)
+    local style = ImGui.GetStyle()
+    local start_x, start_y = ImGui.GetCursorPos()
+    local text = string.format("%d%%", pct * 100)
+    local label_x, _ = ImGui.CalcTextSize(text)
+    ImGui.ProgressBar(pct, width, height, "")
+    local end_x, end_y = ImGui.GetCursorPos()
+    ImGui.SetCursorPos(start_x + ((ImGui.GetWindowWidth() / 2) - (style.ItemSpacing.x + math.floor(label_x / 2))), start_y + style.ItemSpacing.y)
+    ImGui.Text(text)
+    ImGui.SetCursorPos(end_x, end_y)
 end
 
 ---@param id string

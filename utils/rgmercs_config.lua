@@ -177,6 +177,7 @@ Config.DefaultConfig = {
     -- [ BUFF ] --
     ['DoTwist']             = { DisplayName = "Enable Bard Twisting", Category = "Buffs", Tooltip = "Use MQ2Twist", Default = true, ConfigType = "Advanced", },
     ['DoBuffs']             = { DisplayName = "Do Buffs", Category = "Buffs", Tooltip = "Do Non-Class Specific Buffs.", Default = true, ConfigType = "Advanced", },
+    ['BuffWaitMoveTimer']   = { DisplayName = "Buff Wait Timer", Category = "Buffs", Tooltip = "Seconds to wait after stoping movement before doing buffs.", Default = 5, ConfigType = "Advanced", },
 
     -- [ HEALING ] --
     ['BreakInvis']          = { DisplayName = "Break Invis", Category = "Heals", Tooltip = "Set to break invis to heal injured group or out of group members when out of combat only. Healers will always break invis in combat.", Default = false, ConfigType = "Advanced", },
