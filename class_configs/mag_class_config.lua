@@ -1190,6 +1190,7 @@ _ClassConfig      = {
                 name = "EarthPetItemSummon",
                 type = "CustomFunc",
                 custom_func = function(self)
+                    if not self.ResolvedActionMap['EarthPetItemSummon'] then return false end
                     local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].Base(1)
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
@@ -1203,6 +1204,7 @@ _ClassConfig      = {
                 name = "FirePetItemSummon",
                 type = "CustomFunc",
                 custom_func = function(self)
+                    if not self.ResolvedActionMap['FirePetItemSummon'] then return false end
                     local baseItem = self.ResolvedActionMap['FirePetItemSummon'].Base(1)
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
@@ -1335,7 +1337,8 @@ _ClassConfig      = {
                 name = "FireOrbItem",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    local baseItem = self.ResolvedActionMap['FireOrbSummon'].Base(1)
+                    if not self.ResolvedActionMap['FireOrbSummon'] then return false end
+                    local baseItem = self.ResolvedActionMap['FireOrbSummon'].Base(1) or "None"
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
                         return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Target.ID())
