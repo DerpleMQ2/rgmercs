@@ -743,7 +743,8 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                     return false, string.format("%s Out of Zone", member.CleanName())
                 end
 
-                if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
+                --if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 80) then
+                if RGMercUtils.GetDistance(member.Y(), member.X(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
                     RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                     return false, string.format("%s Too Far (%d)", member.CleanName(), member.Distance() or 0)
                 end
