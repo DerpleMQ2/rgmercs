@@ -134,8 +134,8 @@ Module.DefaultConfig                   = {
     ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pull Distance", Tooltip = "Distnace to pull", Default = 350, Min = 1, Max = 10000, },
     ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pull Distance", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 150, },
     ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pull Distance", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
-    ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
-    ['PullMaxCon']         = { DisplayName = "Pull Max Con", Category = "Pull Targets", Tooltip = "Max Con Mobs to consider pulling", Default = 5, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
+    ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
+    ['PullMaxCon']         = { DisplayName = "Pull Max Con", Category = "Pull Targets", Tooltip = "Max Con Mobs to consider pulling", Default = 5, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
     ['UsePullLevels']      = { DisplayName = "Use Pull Levels", Category = "Pull Targets", Tooltip = "Use Min and Max Levels Instead of Con.", Default = false, ConfigType = "Advanced", },
     ['PullMinLevel']       = { DisplayName = "Pull Min Level", Category = "Pull Targets", Tooltip = "Min Level Mobs to consider pulling", Default = mq.TLO.Me.Level() - 3, Min = 1, Max = 150, ConfigType = "Advanced", },
     ['PullMaxLevel']       = { DisplayName = "Pull Max Level", Category = "Pull Targets", Tooltip = "Max Level Mobs to consider pulling", Default = mq.TLO.Me.Level() + 3, Min = 1, Max = 150, ConfigType = "Advanced", },
@@ -324,7 +324,7 @@ function Module:Render()
     -- dead... whoops
     if mq.TLO.Me.Hovering() then return end
 
-    if self.ModuleLoaded then
+    if self.ModuleLoaded and RGMercConfig.Globals.SubmodulesLoaded then
         if RGMercUtils.GetSetting('DoPull') then
             ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
         else

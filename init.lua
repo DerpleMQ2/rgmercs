@@ -308,7 +308,7 @@ local function RGInit(...)
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
 
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
-    RGMercConfig.SubModuleSettings = RGMercModules:ExecAll("Init")
+    RGMercConfig:SetSubModules(RGMercModules:ExecAll("Init"))
 
     if not RGMercUtils.GetSetting('DoTwist') then
         local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist", })
