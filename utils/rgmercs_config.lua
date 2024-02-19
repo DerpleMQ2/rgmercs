@@ -129,6 +129,7 @@ Config.DefaultConfig = {
     ['ModRodManaPct']       = { DisplayName = "Mod Rod Mana %", Category = "Utilities", Tooltip = "What Mana % to hit before using a rod.", Default = 30, Min = 1, Max = 99, ConfigType = "Advanced", },
     ['ClarityPotion']       = { DisplayName = "Clarity Potion", Category = "Utilities", Tooltip = "Name of your Clarity Pot", Default = "Distillate of Clarity", ConfigType = "Advanced", },
     ['RunMovePaused']       = { DisplayName = "Run Movement on Pause", Category = "Utilities", Tooltip = "Runs the Movement/Chase module even if the Main loop is paused", Default = false, ConfigType = "Advanced", },
+    ['StandFailedFD']       = { DisplayName = "Stand on Failed FD", Category = "Utilities", Tooltip = "Auto stands you up if you fall to the ground.", Default = true, ConfigType = "Normal", },
 
     -- [ CLICKIES ] --
     ['UseClickies']         = { DisplayName = "Use Clickies", Category = "Clickies", Tooltip = "Use Clicky Items", Default = true, ConfigType = "Normal", },
@@ -171,6 +172,7 @@ Config.DefaultConfig = {
     ['DoMelee']             = { DisplayName = "Enable Melee Combat", Category = "Combat", Tooltip = "Melee targets.", Default = Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass), ConfigType = "Normal", },
     ['ManaToNuke']          = { DisplayName = "Mana to Nuke", Category = "Combat", Tooltip = "Minimum % Mana in order to continue to cast nukes.", Default = 30, Min = 1, Max = 100, ConfigType = "Advanced", },
     ['MovebackWhenTank']    = { DisplayName = "Moveback as Tank", Category = "Combat", Tooltip = "Adds 'moveback' to stick command when tanking. Helpful to keep mobs from getting behind you.", Default = false, ConfigType = "Advanced", },
+    ['AutoStandFD']         = { DisplayName = "Stand from FD in Combat", Category = "Combat", Tooltip = "Auto stands you up from FD if combat starts.", Default = true, ConfigType = "Normal", },
 
     -- [ Wards ] --
     ['WardsPlease']         = { DisplayName = "Enable Wards", Category = "Wards", Tooltip = "Enable Ward Type Spells", Default = true, ConfigType = "Normal", },

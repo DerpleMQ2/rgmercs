@@ -338,8 +338,18 @@ end)
 
 -- [ GAME EVENT HANDLERS ] --
 
-mq.event('Camping', "It will take you about #1# seconds to prepare your camp.", function(seconds)
+mq.event('Camping', "It will take you about #1# seconds to prepare your camp.", function(_, seconds)
     RGMercConfig.Globals.PauseMain = true
 end)
 
 -- [ END GAME EVENT HANDLERS ] --
+
+-- [ FD EVENT HANDLERS ] --
+
+mq.event('FallToGround', "#1# has fallen to the ground#*#", function(_, who)
+    if who == mq.TLO.Me.DisplayName() and RGMercUtils.GetSetting('StandFailedFD') then
+        mq.cmd("/stand")
+    end
+end)
+
+-- [ END FD EVENT HANDLERS ] --
