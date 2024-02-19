@@ -2883,9 +2883,9 @@ function Utils.GetConColor(color)
         if color:lower() == "red" then
             return 0.8, 0.2, 0.2, 0.8
         end
-
-        return 1.0, 1.0, 1.0, 1.0
     end
+
+    return 1.0, 1.0, 1.0, 1.0
 end
 
 function Utils.GetConColorBySpawn(spawn)
