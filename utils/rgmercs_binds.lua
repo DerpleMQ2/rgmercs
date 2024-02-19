@@ -63,7 +63,7 @@ Bind.Handlers     = {
         about = "Will pause all of your Group RGMercs' Main Loop",
         handler = function()
             RGMercConfig.Globals.PauseMain = true
-            RGMercUtils.DoCmd("squelch /dggeexecute /rgl pause")
+            RGMercUtils.DoCmd("/squelch /dggeexecute /rgl pause")
         end,
     },
     ['unpause'] = {
