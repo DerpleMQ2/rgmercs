@@ -302,6 +302,7 @@ function Config:UpdateCommandHandlers()
                         name = config,
                         usage = usageString,
                         subModule = moduleName,
+                        category = configData.Category,
                         about = configData.Tooltip,
                         handler = function(self, value)
                             value = tonumber(value)
@@ -329,6 +330,7 @@ function Config:UpdateCommandHandlers()
                         name = config,
                         usage = usageString,
                         subModule = moduleName,
+                        category = configData.Category,
                         about = configData.Tooltip,
                         handler = function(self, value)
                             local boolValue = false
@@ -354,6 +356,7 @@ function Config:UpdateCommandHandlers()
                         name = config,
                         usage = usageString,
                         subModule = moduleName,
+                        category = configData.Category,
                         about = configData.Tooltip,
                         handler = function(self, value)
                             local _, update = self:GetUsageText(config, false, moduleData.defaults)
@@ -457,12 +460,34 @@ function Config:HandleBind(config, value)
         end
         table.sort(sortedKeys)
 
+        local sortedCategories = {}
+        for c, d in pairs(self.CommandHandlers or {}) do
+            sortedCategories[d.subModule] = sortedCategories[d.subModule] or {}
+            if not RGMercUtils.TableContains(sortedCategories[d.subModule], d.category) then
+                table.insert(sortedCategories[d.subModule], d.category)
+            end
+        end
+        for _, subModuleTable in pairs(sortedCategories) do
+            table.sort(subModuleTable)
+        end
+
         for _, subModuleName in ipairs(allModules) do
-            printf("\n\ag%s\aw Settings\n------------\n", subModuleName)
-            for _, c in pairs(sortedKeys) do
-                local d = self.CommandHandlers[c]
-                if d.subModule == subModuleName then
-                    printf("\am%-20s\aw - \atUsage: \ay%s\aw | %s", d.name, RGMercUtils.PadString(d.usage, 100, false), d.about)
+            local printHeader = true
+            for _, c in ipairs(sortedCategories[subModuleName] or {}) do
+                local printCategory = true
+                for _, k in ipairs(sortedKeys) do
+                    local d = self.CommandHandlers[k]
+                    if d.subModule == subModuleName and d.category == c then
+                        if printHeader then
+                            printf("\n\ag%s\aw Settings\n------------", subModuleName)
+                            printHeader = false
+                        end
+                        if printCategory then
+                            printf("\n\aoCategory: %s\aw", c)
+                            printCategory = false
+                        end
+                        printf("\am%-20s\aw - \atUsage: \ay%s\aw | %s", d.name, RGMercUtils.PadString(d.usage, 100, false), d.about)
+                    end
                 end
             end
         end

@@ -53,6 +53,18 @@ function Utils.GetTableSize(t)
     return i
 end
 
+---@param t table
+---@param value string
+---@return boolean
+function Utils.TableContains(t, value)
+    for _, v in pairs(t) do
+        if v == value then
+            return true
+        end
+    end
+    return false
+end
+
 ---@param time integer # in seconds
 ---@return string
 function Utils.FormatTime(time)
