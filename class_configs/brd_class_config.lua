@@ -1375,11 +1375,11 @@ local _ClassConfig = {
         ['UseCure']          = { DisplayName = "Use Cure", Category = "Heal Songs", Tooltip = Tooltips.CureSong, Default = false, },
         ['UsePulse']         = { DisplayName = "Use Pulse", Category = "Heal Songs", Tooltip = Tooltips.PulseRegenSong, Default = true, },
         --Regen
-        ['UseAmp']           = { DisplayName = "Use Amp", Category = "Songs/Regen", Tooltip = Tooltips.AmpSong, Default = false, },
-        ['UseChorus']        = { DisplayName = "Use Chorus", Category = "Songs/Regen", Tooltip = Tooltips.ChorusRegenSong, Default = true, },
-        ['UseCantata']       = { DisplayName = "Use Cantata", Category = "Songs/Regen", Tooltip = Tooltips.CantataRegenSong, Default = false, },
-        ['UseCrescendo']     = { DisplayName = "Use Crescendo", Category = "Songs/Regen", Tooltip = Tooltips.CrescendoSong, Default = true, },
-        ['UseAccelerando']   = { DisplayName = "Use Accelerando", Category = "Songs/Regen", Tooltip = Tooltips.AccelerandoSong, Default = false, },
+        ['UseAmp']           = { DisplayName = "Use Amp", Category = "Regen Songs", Tooltip = Tooltips.AmpSong, Default = false, },
+        ['UseChorus']        = { DisplayName = "Use Chorus", Category = "Regen Songs", Tooltip = Tooltips.ChorusRegenSong, Default = true, },
+        ['UseCantata']       = { DisplayName = "Use Cantata", Category = "Regen Songs", Tooltip = Tooltips.CantataRegenSong, Default = false, },
+        ['UseCrescendo']     = { DisplayName = "Use Crescendo", Category = "Regen Songs", Tooltip = Tooltips.CrescendoSong, Default = true, },
+        ['UseAccelerando']   = { DisplayName = "Use Accelerando", Category = "Regen Songs", Tooltip = Tooltips.AccelerandoSong, Default = false, },
         --DPS
         ['UseInsult']        = { DisplayName = "Use Insult Nuke", Category = "DPS Songs", Tooltip = Tooltips.InsultSong, Default = true, },
         ['UseFireDots']      = { DisplayName = "Use Fire Dots", Category = "DPS Songs", Tooltip = Tooltips.FireDotSong, Default = true, },
