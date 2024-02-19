@@ -722,8 +722,10 @@ return {
                 return
                     groupIds
             end,
-            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
-                RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer') end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
+                    RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
         },
         {
             name = 'Burn',
@@ -1153,35 +1155,35 @@ return {
                 name = "Divine Protector's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and self.ClassConfig.HelperFunctions.castDPU()
+                    return RGMercUtils.AAReady(aaName) and self.ClassConfig.HelperFunctions.castDPU(self)
                 end,
             },
             {
                 name = "ArmorSelfBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU() and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "FuryProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU() and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Remorse",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU() and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Piety",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU() and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
