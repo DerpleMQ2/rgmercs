@@ -569,8 +569,8 @@ function Module:RunCureRotation()
                             local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
                             if cureTarget and cureTarget() then
                                 -- Cure it!
-                                if self.ClassConfig.Cures and self.ClassConfig.Cures.CurNow then
-                                    self.ClassConfig.Cures.CurNow(self, data.type, cureTarget.ID())
+                                if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
+                                    RGMercUtils.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, cureTarget.ID())
                                 end
                             end
                         end

@@ -15,6 +15,16 @@ local _ClassConfig = {
     ['Cures']             = {
         CureNow = function(self, type, targetId)
             local cureSpell = RGMercUtils.GetResolvedActionMapItem('CureSpell')
+            if cureSpell and cureSpell() then
+                return RGMercUtils.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            end
+
+            if type:lower() == "poison" then
+                cureSpell = RGMercUtils.GetResolvedActionMapItem('TLPCurePoison')
+            elseif type:lower() == "disease" then
+                cureSpell = RGMercUtils.GetResolvedActionMapItem('TLPCureDisease')
+            end
+
             if not cureSpell or not cureSpell() then return false end
             return RGMercUtils.UseSpell(cureSpell.RankName.Name(), targetId, true)
         end,
@@ -825,8 +835,10 @@ local _ClassConfig = {
                 return
                     groupIds
             end,
-            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
-                RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer') end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
+                    RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
         },
         {
             name = 'Splash',
