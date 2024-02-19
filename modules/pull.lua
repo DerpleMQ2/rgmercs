@@ -753,10 +753,18 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                 end
 
                 --if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 80) then
-                if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
-                    RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
-                    return false,
-                        string.format("%s Too Far (%d)", member.CleanName(), RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY))
+                if returnToCamp then
+                    if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
+                        RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
+                        return false,
+                            string.format("%s Too Far (%d)", member.CleanName(), RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY))
+                    end
+                else
+                    if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 80) then
+                        RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
+                        return false,
+                            string.format("%s Too Far (%d)", member.CleanName(), RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY))
+                    end
                 end
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then

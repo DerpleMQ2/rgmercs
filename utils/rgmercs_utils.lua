@@ -1447,6 +1447,12 @@ function Utils.GetTargetPctHPs(target)
 end
 
 ---@param target MQTarget|nil
+---@return boolean
+function Utils.GetTargetDead(target)
+    return (target and target.Dead() or (mq.TLO.Target.Dead() or true))
+end
+
+---@param target MQTarget|nil
 ---@return string
 function Utils.GetTargetName(target)
     return (target and target.Name() or (mq.TLO.Target.Name() or ""))
@@ -1987,7 +1993,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
                 mq.TLO.Me.Stand()
             end
 
-            if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IAmMA()) and Utils.GetTargetPctHPs() > 0 then
+            if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IAmMA()) and not Utils.GetTargetDead() then
                 if target.Distance() > Utils.GetTargetMaxRangeTo(target) then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
