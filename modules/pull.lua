@@ -836,7 +836,7 @@ function Module:FindTarget()
         local spawn = mq.TLO.NearestSpawn(i, pullSearchString)
         local skipSpawn = false
 
-        if spawn and (spawn.ID() or 0) > 0 then
+        if spawn and (spawn.ID() or 0) > 0 and spawn.Targetable() then
             if self:IsPullMode("Chain") then
                 if RGMercUtils.IsSpawnXHater(spawn.ID()) then
                     RGMercsLogger.log_debug("\awSpawn \am%s\aw (\at%d\aw) Already on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
