@@ -28,4 +28,4 @@ jobs:
           tag_name: v${{ github.run_number }}
           release_name: Release v${{ github.run_number }}
           draft: false
-          prerelease: true
+          prerelease: false
