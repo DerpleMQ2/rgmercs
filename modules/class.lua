@@ -566,7 +566,7 @@ function Module:RunCureRotation()
                         local effectId = DanNet.observe(peer, data.check, 1000) or "null"
                         RGMercsLogger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
 
-                        if effectId:lower() ~= "null" then
+                        if effectId:lower() ~= "null" and effectId ~= "0" then
                             local cureTarget = mq.TLO.Spawn(string.format("pc =%s", peer))
                             if cureTarget and cureTarget() then
                                 -- Cure it!
