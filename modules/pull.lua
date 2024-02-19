@@ -65,6 +65,7 @@ Module.Constants.PullAbilities         = {
         Type = "Special",
         AbilityRange = 100,
         DisplayName = "Pet Pull",
+        LOS = false,
         cond = function(self)
             return RGMercConfig.Constants.RGPetClass:contains(RGMercConfig.Globals.CurLoadedClass)
         end,
@@ -753,10 +754,18 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                 end
 
                 --if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 80) then
-                if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
-                    RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
-                    return false,
-                        string.format("%s Too Far (%d)", member.CleanName(), RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY))
+                if returnToCamp then
+                    if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
+                        RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
+                        return false,
+                            string.format("%s Too Far (%d)", member.CleanName(), RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY))
+                    end
+                else
+                    if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 80) then
+                        RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
+                        return false,
+                            string.format("%s Too Far (%d)", member.CleanName(), RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY))
+                    end
                 end
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
@@ -827,7 +836,7 @@ function Module:FindTarget()
         local spawn = mq.TLO.NearestSpawn(i, pullSearchString)
         local skipSpawn = false
 
-        if spawn and (spawn.ID() or 0) > 0 then
+        if spawn and (spawn.ID() or 0) > 0 and spawn.Targetable() then
             if self:IsPullMode("Chain") then
                 if RGMercUtils.IsSpawnXHater(spawn.ID()) then
                     RGMercsLogger.log_debug("\awSpawn \am%s\aw (\at%d\aw) Already on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
@@ -1120,7 +1129,7 @@ function Module:GiveTime(combat_state)
 
     if self.TempSettings.TargetSpawnID > 0 then
         local targetSpawn = mq.TLO.Spawn(self.TempSettings.TargetSpawnID)
-        if not targetSpawn() or targetSpawn.Dead() or targetSpawn.PctHPs() == 0 then
+        if not targetSpawn() or targetSpawn.Dead() then
             RGMercsLogger.log_debug("\arDropping Manual target id %d - it is dead.", self.TempSettings.TargetSpawnID)
             self.TempSettings.TargetSpawnID = 0
         end
@@ -1190,8 +1199,9 @@ function Module:GiveTime(combat_state)
 
     local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
     local startingXTargs = RGMercUtils.GetXTHaterIDs()
+    local requireLOS = pullAbility.LOS == nil and true or pullAbility.LOS
 
-    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
+    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
 
     mq.delay(1000)
 

@@ -163,6 +163,7 @@ function Module:CampOn()
     self.TempSettings.AutoCampZ  = mq.TLO.Me.Z()
     self.TempSettings.CampZoneId = mq.TLO.Zone.ID()
     RGMercUtils.DoCmd("/mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
+    RGMercUtils.DoCmd("/mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))
     RGMercsLogger.log_info("\ayCamping On: (X: \at%d\ay ; Y: \at%d\ay)", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY)
 end
 
@@ -175,6 +176,7 @@ function Module:CampOff()
     self.settings.ReturnToCamp = false
     self:SaveSettings(false)
     RGMercUtils.DoCmd("/mapfilter campradius off")
+    RGMercUtils.DoCmd("/mapfilter pullradius off")
 end
 
 function Module:DestoryCampfire()

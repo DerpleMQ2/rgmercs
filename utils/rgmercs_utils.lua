@@ -53,6 +53,18 @@ function Utils.GetTableSize(t)
     return i
 end
 
+---@param t table
+---@param value string
+---@return boolean
+function Utils.TableContains(t, value)
+    for _, v in pairs(t) do
+        if v == value then
+            return true
+        end
+    end
+    return false
+end
+
 ---@param time integer # in seconds
 ---@return string
 function Utils.FormatTime(time)
@@ -1443,7 +1455,21 @@ end
 ---@param target MQTarget|nil
 ---@return number
 function Utils.GetTargetPctHPs(target)
-    return (target and target.PctHPs() or (mq.TLO.Target.PctHPs() or 0))
+    local useTarget = target
+    if not useTarget then useTarget = mq.TLO.Target end
+    if not useTarget or not useTarget() then return 0 end
+
+    return useTarget.PctHPs()
+end
+
+---@param target MQTarget|nil
+---@return boolean
+function Utils.GetTargetDead(target)
+    local useTarget = target
+    if not useTarget then useTarget = mq.TLO.Target end
+    if not useTarget or not useTarget() then return true end
+
+    return useTarget.Dead()
 end
 
 ---@param target MQTarget|nil
@@ -1977,9 +2003,11 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
 
     local target = mq.TLO.Target
 
-    if mq.TLO.Me.State():lower() == "feign" and not Utils.MyClassIs("mnk") then
+    if mq.TLO.Me.State():lower() == "feign" and not Utils.MyClassIs("mnk") and Utils.GetSetting('AutoStandFD') then
         mq.TLO.Me.Stand()
     end
+
+    RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Checking for valid Target.", Utils.GetTargetCleanName())
 
     if target() and (target.ID() or 0) == autoTargetId and (mq.TLO.Target.Distance() or 0) <= config.AssistRange then
         if config.DoMelee then
@@ -1987,7 +2015,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
                 mq.TLO.Me.Stand()
             end
 
-            if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IAmMA()) and Utils.GetTargetPctHPs() > 0 then
+            if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IAmMA()) and not Utils.GetTargetDead(target) then
                 if target.Distance() > Utils.GetTargetMaxRangeTo(target) then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
@@ -2005,11 +2033,15 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
                     end
 
                     if not mq.TLO.Me.Combat() then
-                        RGMercsLogger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", target.CleanName())
-                        Utils.DoCmd("/keypress AUTOPRIM")
+                        RGMercsLogger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", Utils.GetTargetCleanName())
+                        Utils.DoCmd("/attack on")
                     end
                 end
+            else
+                RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.", Utils.GetTargetCleanName())
             end
+        else
+            RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Utils.GetTargetCleanName())
         end
     else
         if not config.DoMelee and RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
@@ -2017,7 +2049,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
         end
 
         -- TODO: why are we doing this after turning stick on just now?
-        if mq.TLO.Stick.Status():lower() == "on" then Utils.DoCmd("/stick off") end
+        --if mq.TLO.Stick.Status():lower() == "on" then Utils.DoCmd("/stick off") end
     end
 end
 
@@ -2524,7 +2556,7 @@ function Utils.OkToEngagePreValidateId(targetId)
     local target = mq.TLO.Spawn(targetId)
     local assistId = Utils.GetMainAssistId()
 
-    if not target() or target.Dead() or target.PctHPs() == 0 then return false end
+    if not target() or target.Dead() then return false end
 
     local pcCheck = (target.Type() or "none"):lower() == "pc" or
         ((target.Type() or "none"):lower() == "pet" and (target.Master.Type() or "none"):lower() == "pc")
@@ -2575,7 +2607,7 @@ function Utils.OkToEngage(autoTargetId)
     local target = mq.TLO.Target
     local assistId = Utils.GetMainAssistId()
 
-    if not target() or target.Dead() or target.PctHPs() == 0 then return false end
+    if not target() or target.Dead() then return false end
 
     local pcCheck = (target.Type() or "none"):lower() == "pc" or
         ((target.Type() or "none"):lower() == "pet" and (target.Master.Type() or "none"):lower() == "pc")
