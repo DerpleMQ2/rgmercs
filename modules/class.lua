@@ -547,7 +547,8 @@ function Module:RunCureRotation()
     self.TempSettings.CureCheckTimer = os.clock()
 
     local dannetPeers = mq.TLO.DanNet.PeerCount()
-    local checks = { { type = "Poison", check = "Me.Poisoned.ID", },
+    local checks = {
+        { type = "Poison",     check = "Me.Poisoned.ID", },
         { type = "Disease",    check = "Me.Diseased.ID", },
         { type = "Curse",      check = "Me.Cursed.ID", },
         { type = "Corruption", check = "Me.Corrupted.ID", }, }
