@@ -63,7 +63,7 @@ Bind.Handlers     = {
         about = "Will pause all of your Group RGMercs' Main Loop",
         handler = function()
             RGMercConfig.Globals.PauseMain = true
-            RGMercUtils.DoCmd("/squelch /dggeexecute /rgl pause")
+            RGMercUtils.DoCmd("/squelch /dgge /rgl pause")
         end,
     },
     ['unpause'] = {
@@ -78,21 +78,21 @@ Bind.Handlers     = {
         about = "Will unpause all of your Group RGMercs' Main Loop",
         handler = function()
             RGMercConfig.Globals.PauseMain = false
-            RGMercUtils.DoCmd("squelch /dggeexecute /rgl unpause")
+            RGMercUtils.DoCmd("/squelch /dgge /rgl unpause")
         end,
     },
     ['yes'] = {
         usage = "/rgl yes",
         about = "Will cause all of your Group RGMercs to click on every possible 'Yes' Dialogue they have up.",
         handler = function()
-            RGMercUtils.DoCmd("/dggaexecute /notify LargeDialogWindow LDW_YesButton leftmouseup")
-            RGMercUtils.DoCmd("/dggaexecute /notify LargeDialogWindow LDW_OkButton leftmouseup")
-            RGMercUtils.DoCmd("/dggaexecute /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
-            RGMercUtils.DoCmd("/dggaexecute /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
-            RGMercUtils.DoCmd("/dggaexecute /notify TradeWND TRDW_Trade_Button leftmouseup")
-            RGMercUtils.DoCmd("/dggaexecute /notify GiveWnd GVW_Give_Button leftmouseup ")
-            RGMercUtils.DoCmd("/dggaexecute /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
-            RGMercUtils.DoCmd("/dggaexecute /notify RaidWindow RAID_AcceptButton leftmouseup")
+            RGMercUtils.DoCmd("/dgga /notify LargeDialogWindow LDW_YesButton leftmouseup")
+            RGMercUtils.DoCmd("/dgga /notify LargeDialogWindow LDW_OkButton leftmouseup")
+            RGMercUtils.DoCmd("/dgga /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
+            RGMercUtils.DoCmd("/dgga /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
+            RGMercUtils.DoCmd("/dgga /notify TradeWND TRDW_Trade_Button leftmouseup")
+            RGMercUtils.DoCmd("/dgga /notify GiveWnd GVW_Give_Button leftmouseup ")
+            RGMercUtils.DoCmd("/dgga /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
+            RGMercUtils.DoCmd("/dgga /notify RaidWindow RAID_AcceptButton leftmouseup")
         end,
     },
     ['help'] =
