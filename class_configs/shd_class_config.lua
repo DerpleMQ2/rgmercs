@@ -491,6 +491,25 @@ local _ClassConfig = {
             "Terror of Ander",
             "Terror of Tarantis",
         },
+        ['Terror2'] = {
+            "Terror of Darkness",
+            "Terror of Shadows",
+            "Terror of Death",
+            "Terror of Terris",
+            "Terror of Thule",
+            "Terror of Discord",
+            "Terror of Vergalid",
+            "Terror of the Soulbleeder",
+            "Terror of Jelvalak",
+            "Terror of Rerekalen",
+            "Terror of Desalin",
+            "Terror of Poira",
+            "Terror of Narus",
+            "Terror of Kra`Du",
+            "Terror of Mirenilla",
+            "Terror of Ander",
+            "Terror of Tarantis",
+        },
         ['TempHP'] = {
             "Stormwall Stance",
             "Defiant Stance",
@@ -884,6 +903,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Terror2",
+                type = "Spell",
+                tooltip = Tooltips.Terror,
+                cond = function(self)
+                    return RGMercUtils.IsTanking() and mq.TLO.Me.SecondaryPctAggro() > 60
+                end,
+            },
+            {
                 name = "MeleeMit",
                 type = "Disc",
                 tooltip = Tooltips.MeleeMit,
@@ -1125,6 +1152,7 @@ local _ClassConfig = {
             spells = {
                 { name = "Torrent", cond = function(self) return RGMercUtils.GetSetting('DoTorrent') end, },
                 { name = "BondTap", },
+                { name = "Terror2", },
             },
         },
         {
