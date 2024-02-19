@@ -65,6 +65,7 @@ Module.Constants.PullAbilities         = {
         Type = "Special",
         AbilityRange = 100,
         DisplayName = "Pet Pull",
+        LOS = false,
         cond = function(self)
             return RGMercConfig.Constants.RGPetClass:contains(RGMercConfig.Globals.CurLoadedClass)
         end,
@@ -1198,8 +1199,9 @@ function Module:GiveTime(combat_state)
 
     local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
     local startingXTargs = RGMercUtils.GetXTHaterIDs()
+    local requireLOS = pullAbility.LOS == nil and true or pullAbility.LOS
 
-    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
+    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
 
     mq.delay(1000)
 
