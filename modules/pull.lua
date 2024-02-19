@@ -1128,7 +1128,7 @@ function Module:GiveTime(combat_state)
 
     if self.TempSettings.TargetSpawnID > 0 then
         local targetSpawn = mq.TLO.Spawn(self.TempSettings.TargetSpawnID)
-        if not targetSpawn() or targetSpawn.Dead() or targetSpawn.PctHPs() == 0 then
+        if not targetSpawn() or targetSpawn.Dead() then
             RGMercsLogger.log_debug("\arDropping Manual target id %d - it is dead.", self.TempSettings.TargetSpawnID)
             self.TempSettings.TargetSpawnID = 0
         end
