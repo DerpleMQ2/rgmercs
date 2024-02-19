@@ -403,6 +403,11 @@ local function Main()
         return
     end
 
+    -- sometimes nav gets interupted this will try to reset it.
+    if RGMercConfig:GetTimeSinceLastMove() > 5 and mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() == 0 then
+        RGMercUtils.DoCmd("/nav stop")
+    end
+
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
         --if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
