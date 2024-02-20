@@ -2203,12 +2203,14 @@ function Utils.MATargetScan(radius, zradius)
                 if (xtSpawn.Distance() or 999) <= radius then
                     -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                     -- get aggro data from the spawn data type.
-                    if xtSpawn.PctAggro() < 100 and Utils.IsTanking() then
-                        -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
-                        if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
-                            RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]",
-                                xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
-                            return xtSpawn.ID() or 0
+                    if mq.TLO.Me.Level() >= 20 then
+                        if xtSpawn.PctAggro() < 100 and Utils.IsTanking() then
+                            -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
+                            if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
+                                RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]",
+                                    xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
+                                return xtSpawn.ID() or 0
+                            end
                         end
                     end
 
