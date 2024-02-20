@@ -606,7 +606,7 @@ function Module:GiveTime(combat_state)
     -- Healing Happens reguardless of combat_state and happens first.
     if self:IsHealing() then
         -- TODO Check Rezes
-        if self.CombatState ~= "Downtime" or (not mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BreakInvis')) then
+        if self.CombatState == "Downtime" or (not mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BreakInvis')) then
             self:IGCheckAndRez()
 
             self:SelfCheckAndRez()
