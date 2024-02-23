@@ -1459,7 +1459,7 @@ function Utils.GetTargetPctHPs(target)
     if not useTarget then useTarget = mq.TLO.Target end
     if not useTarget or not useTarget() then return 0 end
 
-    return useTarget.PctHPs()
+    return useTarget.PctHPs() or 0
 end
 
 ---@param target MQTarget|nil
