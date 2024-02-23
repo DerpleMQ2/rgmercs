@@ -315,6 +315,16 @@ function Module:IsHealing()
 end
 
 ---@return boolean
+function Module:IsRezing()
+    -- If we are healing then we are also rezing.
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsRezing then
+        return self:IsHealing()
+    end
+
+    return self.ClassConfig.ModeChecks.IsRezing() or self:IsHealing()
+end
+
+---@return boolean
 function Module:IsCuring()
     if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsCuring then
         return false
@@ -605,6 +615,10 @@ function Module:GiveTime(combat_state)
 
     -- Healing Happens reguardless of combat_state and happens first.
     if self:IsHealing() then
+        self:RunHealRotation()
+    end
+
+    if self:IsRezing() then
         -- Check Rezes
         if (not mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BreakInvis')) then
             self:IGCheckAndRez()
@@ -615,8 +629,6 @@ function Module:GiveTime(combat_state)
                 self:OOGCheckAndRez()
             end
         end
-
-        self:RunHealRotation()
     end
 
     if self:IsCuring() then

@@ -12,12 +12,16 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    _version          = "0.1a",
-    _author           = "Derple",
-    ['Modes']         = {
+    _version            = "0.1a",
+    _author             = "Derple",
+    ['Modes']           = {
         'DPS',
     },
-    ['Themes']        = {
+    ['ModeChecks']      = {
+        -- necro can AA Rez
+        IsRezing = function() return true end,
+    },
+    ['Themes']          = {
         ['DPS'] = {
             { element = ImGuiCol.TitleBgActive,    color = { r = 0.5, g = 0.05, b = 1.0, a = .8, }, },
             { element = ImGuiCol.TableHeaderBg,    color = { r = 0.4, g = 0.05, b = 0.8, a = .8, }, },
@@ -38,13 +42,13 @@ local _ClassConfig = {
             { element = ImGuiCol.FrameBgActive,    color = { r = 0.2, g = 0.05, b = 0.6, a = 1.0, }, },
         },
     },
-    ['ItemSets']      = {
+    ['ItemSets']        = {
         ['Epic'] = {
             "Deathwhisper",
             "Soulwhisper",
         },
     },
-    ['AbilitySets']   = {
+    ['AbilitySets']     = {
         ['SelfHPBuff'] = {
             "Shield of Memories",
             "Shield of Shadow",
@@ -650,7 +654,7 @@ local _ClassConfig = {
             "Focus Death",
         },
     },
-    ['RotationOrder'] = {
+    ['RotationOrder']   = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
@@ -690,7 +694,7 @@ local _ClassConfig = {
             end,
         },
     },
-    ['Rotations']     = {
+    ['Rotations']       = {
         ['Safety'] = {
             {
                 name = "Death Peace",
@@ -1103,7 +1107,27 @@ local _ClassConfig = {
             },
         },
     },
-    ['Spells']        = {
+    ['HelperFunctions'] = {
+        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
+        DoRez = function(self, corpseId)
+            if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
+                RGMercUtils.SetTarget(corpseId)
+
+                local target = mq.TLO.Target
+
+                if not target or not target() then return false end
+
+                if mq.TLO.Target.Distance() > 25 then
+                    RGMercUtils.DoCmd("/corpse")
+                end
+
+                if RGMercUtils.AAReady("Convergence") and mq.TLO.FindItemCount(mq.TLO.AltAbility("Convergence").Spell.ReagentID(1)())() > 0 then
+                    return RGMercUtils.UseAA("Convergence", corpseId)
+                end
+            end
+        end,
+    },
+    ['Spells']          = {
         {
             gem = 1,
             spells = {
@@ -1211,7 +1235,7 @@ local _ClassConfig = {
             },
         },
     },
-    ['DefaultConfig'] = {
+    ['DefaultConfig']   = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['PetType']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "1 = War, 2 = Rog", Type = "Combo", ComboOptions = { 'War', 'Rog', }, Default = 1, Min = 1, Max = 2, },
         ['DoLich']            = { DisplayName = "Cast Lich", Category = "Spells and Abilities", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
