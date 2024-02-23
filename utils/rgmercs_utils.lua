@@ -3445,35 +3445,36 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                         ImGui.TableNextColumn()
                         ImGui.Text((defaults[k].DisplayName or "None"))
                         ImGui.TableNextColumn()
-                        ImGui.PushID(k .. "__btn")
                         ImGui.PushFont(ImGui.ConsoleFont)
                         local displayCharCount = 11
                         local nameLen = settings[k]:len()
                         local maxStart = (nameLen - displayCharCount) + 1
                         local startDisp = (os.clock() % maxStart) + 1
 
+                        ImGui.PushID(k .. "__btn")
                         if ImGui.SmallButton(nameLen > 0 and settings[k]:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
                             if mq.TLO.Cursor() then
                                 settings[k] = mq.TLO.Cursor.Name()
                                 pressed = true
                             end
                         end
+                        ImGui.PopID()
+
                         ImGui.PopFont()
                         if nameLen > 0 then
                             Utils.Tooltip(settings[k])
                         end
                         ImGui.SameLine()
+                        ImGui.PushID(k .. "__clear_btn")
                         if ImGui.SmallButton(ICONS.MD_CLEAR) then
-                            if mq.TLO.Cursor() then
-                                settings[k] = ""
-                                pressed = true
-                            end
+                            settings[k] = ""
+                            pressed = true
                         end
+                        ImGui.PopID()
                         Utils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
                         new_loadout = new_loadout or
                             ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
                         any_pressed = any_pressed or (pressed or false)
-                        ImGui.PopID()
                     elseif defaults[k].Type ~= "Custom" then
                         ImGui.TableNextColumn()
                         ImGui.Text((defaults[k].DisplayName or "None"))
