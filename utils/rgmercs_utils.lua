@@ -1440,7 +1440,7 @@ function Utils.GetTargetLevel(target)
     return (target and target.Level() or (mq.TLO.Target.Level() or 0))
 end
 
----@param target MQTarget|nil
+---@param target MQTarget|spawn|nil
 ---@return number
 function Utils.GetTargetDistance(target)
     return (target and target.Distance() or (mq.TLO.Target.Distance() or 9999))
@@ -2576,18 +2576,18 @@ function Utils.OkToEngagePreValidateId(targetId)
     end
 
     if not RGMercConfig.Globals.BackOffFlag then --Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
-        local distanceCheck = Utils.GetTargetDistance() < config.AssistRange
+        local distanceCheck = Utils.GetTargetDistance(target) < config.AssistRange
         local assistCheck = (Utils.GetTargetPctHPs(target) <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_verbose("\ag  OkToEngageId() %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
-                    target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
+                    target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(target), config.AutoAssistAt, assistId,
                     mq.TLO.Me.ID())
             end
             return true
         else
             RGMercsLogger.log_verbose("\ay  OkToEngageId() AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
-                target.CleanName(), target.ID(), Utils.BoolToColorString(distanceCheck), Utils.GetTargetDistance(),
+                target.CleanName(), target.ID(), Utils.BoolToColorString(distanceCheck), Utils.GetTargetDistance(target),
                 Utils.BoolToColorString(assistCheck))
             return false
         end
@@ -2669,8 +2669,8 @@ function Utils.PetAttack(targetId)
     if pet.ID() == 0 then return end
 
     if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" then
-        Utils.DoCmd("/squelch /pet attack")
-        Utils.DoCmd("/squelch /pet swarm")
+        Utils.DoCmd("/squelch /pet attack %d", targetId)
+        Utils.DoCmd("/squelch /pet swarm %d", targetId)
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
     end
 end

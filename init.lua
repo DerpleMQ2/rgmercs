@@ -419,12 +419,14 @@ local function Main()
     end
 
     -- Handles state for when we're in combat
-    if RGMercUtils.DoCombatActions() and not RGMercUtils.GetSetting('PriorityHealing') then
+    if RGMercUtils.DoCombatActions() then
         -- IsHealing or IsMezzing should re-determine their target as this point because they may
         -- have switched off to mez or heal after the initial find target check and the target
         -- may have changed by this point.
-        if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing()) then
-            RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
+        if not RGMercUtils.GetSetting('PriorityHealing') then
+            if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing()) then
+                RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
+            end
         end
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then

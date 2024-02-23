@@ -264,7 +264,7 @@ function Module:RenderMobList(displayName, settingName)
             ImGui.TableSetupColumn('Controls', (ImGuiTableColumnFlags.WidthFixed), 80.0)
             ImGui.TableHeadersRow()
 
-            for idx, mobName in ipairs(self.settings[settingName][mq.TLO.Zone.ShortName()] or {}) do
+            for idx, mobName in pairs(self.settings[settingName][mq.TLO.Zone.ShortName()] or {}) do
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(idx))
                 ImGui.TableNextColumn()
@@ -549,7 +549,7 @@ function Module:IsMobInList(listName, mobName, defaultNoList)
     -- no list so everything is allowed.
     if not self:HaveList(listName) then return defaultNoList end
 
-    for _, v in ipairs(self.settings[listName][mq.TLO.Zone.ShortName()]) do
+    for _, v in pairs(self.settings[listName][mq.TLO.Zone.ShortName()]) do
         if v == mobName then return true end
     end
 

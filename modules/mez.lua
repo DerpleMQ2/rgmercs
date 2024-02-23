@@ -295,11 +295,11 @@ function Module:AEMezCheck()
 
     -- Get the nearest spawn meeting our npc search criteria
     local nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCFilter)
-    if not nearestSpawn or nearestSpawn() then
+    if not nearestSpawn or not nearestSpawn() then
         nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCPetFilter)
     end
 
-    if not nearestSpawn or nearestSpawn() then
+    if not nearestSpawn or not nearestSpawn() then
         return
     end
 

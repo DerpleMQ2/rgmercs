@@ -51,6 +51,13 @@ Bind.Handlers     = {
             RGMercsLogger.clear_log_filter()
         end,
     },
+    ['togglepause'] = {
+        usage = "/rgl togglepause",
+        about = "Will toggle the pause state of your RGMerc Main Loop",
+        handler = function()
+            RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
+        end,
+    },
     ['pause'] = {
         usage = "/rgl pause",
         about = "Will pause your RGMerc Main Loop",
