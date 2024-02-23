@@ -1140,7 +1140,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "PetBuff",
+                name = "PetBuffSpell",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
                 cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
@@ -1419,6 +1419,7 @@ local _ClassConfig = {
                 { name = "SlowProcBuff", },
                 -- [ TLP FALL BACK ] --
                 { name = "CanniSpell", },
+                { name = "PetBuffSpell", },
             },
         },
         {
