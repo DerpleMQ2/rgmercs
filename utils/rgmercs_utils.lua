@@ -1452,7 +1452,7 @@ function Utils.GetTargetMaxRangeTo(target)
     return (target and target.MaxRangeTo() or (mq.TLO.Target.MaxRangeTo() or 15))
 end
 
----@param target MQTarget|nil
+---@param target MQTarget|spawn|nil
 ---@return number
 function Utils.GetTargetPctHPs(target)
     local useTarget = target
@@ -2203,7 +2203,7 @@ function Utils.MATargetScan(radius, zradius)
                 if (xtSpawn.Distance() or 999) <= radius then
                     -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                     -- get aggro data from the spawn data type.
-                    if Utils.HaveExpansion("EXPANSION_LEVEL_ROF") then
+                    if mq.TLO.Me.Level() >= 20 then
                         if xtSpawn.PctAggro() < 100 and Utils.IsTanking() then
                             -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
                             if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
@@ -2577,7 +2577,7 @@ function Utils.OkToEngagePreValidateId(targetId)
 
     if not RGMercConfig.Globals.BackOffFlag then --Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
         local distanceCheck = Utils.GetTargetDistance() < config.AssistRange
-        local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
+        local assistCheck = (Utils.GetTargetPctHPs(target) <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_verbose("\ag  OkToEngageId() %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
@@ -3445,35 +3445,36 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                         ImGui.TableNextColumn()
                         ImGui.Text((defaults[k].DisplayName or "None"))
                         ImGui.TableNextColumn()
-                        ImGui.PushID(k .. "__btn")
                         ImGui.PushFont(ImGui.ConsoleFont)
                         local displayCharCount = 11
                         local nameLen = settings[k]:len()
                         local maxStart = (nameLen - displayCharCount) + 1
                         local startDisp = (os.clock() % maxStart) + 1
 
+                        ImGui.PushID(k .. "__btn")
                         if ImGui.SmallButton(nameLen > 0 and settings[k]:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
                             if mq.TLO.Cursor() then
                                 settings[k] = mq.TLO.Cursor.Name()
                                 pressed = true
                             end
                         end
+                        ImGui.PopID()
+
                         ImGui.PopFont()
                         if nameLen > 0 then
                             Utils.Tooltip(settings[k])
                         end
                         ImGui.SameLine()
+                        ImGui.PushID(k .. "__clear_btn")
                         if ImGui.SmallButton(ICONS.MD_CLEAR) then
-                            if mq.TLO.Cursor() then
-                                settings[k] = ""
-                                pressed = true
-                            end
+                            settings[k] = ""
+                            pressed = true
                         end
+                        ImGui.PopID()
                         Utils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
                         new_loadout = new_loadout or
                             ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
                         any_pressed = any_pressed or (pressed or false)
-                        ImGui.PopID()
                     elseif defaults[k].Type ~= "Custom" then
                         ImGui.TableNextColumn()
                         ImGui.Text((defaults[k].DisplayName or "None"))

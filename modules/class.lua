@@ -350,7 +350,7 @@ function Module:SelfCheckAndRez()
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
-                    self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
+                    RGMercUtils.SafeCallFunc(self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
@@ -367,7 +367,7 @@ function Module:IGCheckAndRez()
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
-                    self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
+                    RGMercUtils.SafeCallFunc(self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
@@ -384,7 +384,7 @@ function Module:OOGCheckAndRez()
         if rezSpawn() and (RGMercUtils.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
-                    self.ClassConfig.HelperFunctions.DoRez(self, rezSpawn.ID())
+                    RGMercUtils.SafeCallFunc(self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
             end
@@ -605,8 +605,8 @@ function Module:GiveTime(combat_state)
 
     -- Healing Happens reguardless of combat_state and happens first.
     if self:IsHealing() then
-        -- TODO Check Rezes
-        if self.CombatState ~= "Downtime" or (not mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BreakInvis')) then
+        -- Check Rezes
+        if (not mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BreakInvis')) then
             self:IGCheckAndRez()
 
             self:SelfCheckAndRez()
@@ -638,7 +638,7 @@ function Module:GiveTime(combat_state)
                 for _, targetId in ipairs(targetTable) do
                     -- only do combat with a target.
                     if targetId and targetId > 0 then
-                        if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
+                        if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state, mq.TLO.Spawn(targetId)) then
                             RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
                             self.CurrentRotation = { name = r.name, state = r.state or 0, }
                             local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
