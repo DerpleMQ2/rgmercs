@@ -3464,7 +3464,7 @@ function Utils.RenderSettingsTable(settings, settingNames, defaults, category)
                         if nameLen > 0 then
                             Utils.Tooltip(settings[k])
                         end
-                        ImGui.PopID()
+
                         ImGui.SameLine()
                         ImGui.PushID(k .. "__clear_btn")
                         if ImGui.SmallButton(ICONS.MD_CLEAR) then
