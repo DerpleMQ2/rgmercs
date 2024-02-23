@@ -42,32 +42,6 @@ local COUNT_Y_OFFSET = 23
 local EQ_ICON_OFFSET = 500
 
 -- UI --
-local function displayItemOnCursor()
-    if mq.TLO.Cursor() then
-        local cursor_item = mq.TLO.Cursor -- this will be an MQ item, so don't forget to use () on the members!
-
-        local draw_list = ImGui.GetForegroundDrawList()
-        local window_x, window_y = ImGui.GetWindowPos()
-        local window_w, window_h = ImGui.GetWindowSize()
-        local mouse_x, mouse_y = ImGui.GetMousePos()
-
-        if mouse_x < window_x or mouse_x > window_x + window_w then return end
-        if mouse_y < window_y or mouse_y > window_y + window_h then return end
-
-        local icon_x = mouse_x + 10
-        local icon_y = mouse_y + 10
-        local stack_x = icon_x + COUNT_X_OFFSET + 10
-        local stack_y = (icon_y + COUNT_Y_OFFSET)
-        animItems:SetTextureCell(cursor_item.Icon() - EQ_ICON_OFFSET)
-        draw_list:AddTextureAnimation(animItems, ImVec2(icon_x, icon_y), ImVec2(ICON_WIDTH, ICON_HEIGHT))
-        if cursor_item.Stackable() then
-            local text_size = ImGui.CalcTextSize(tostring(cursor_item.Stack()))
-            draw_list:AddTextureAnimation(animBox, ImVec2(stack_x, stack_y), ImVec2(text_size, ImGui.GetTextLineHeight()))
-            draw_list:AddText(ImVec2(stack_x, stack_y), IM_COL32(255, 255, 255, 255), tostring(cursor_item.Stack()))
-        end
-    end
-end
-
 local function renderModulesTabs()
     if not RGMercConfig:SettingsLoaded() then return end
 
@@ -275,8 +249,6 @@ local function RGMercsGUI()
                     ImGui.Separator()
                 end
             end
-
-            displayItemOnCursor()
         end
 
         ImGui.PopID()
@@ -434,10 +406,7 @@ local function Main()
 
     if RGMercUtils.FindTargetCheck() then
         -- This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID
-        RGMercUtils.FindTarget(function(targetId)
-            if RGMercUtils.OkToEngagePreValidateId(targetId) then return true end
-            return false
-        end)
+        RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
     end
 
     if RGMercUtils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
@@ -455,7 +424,7 @@ local function Main()
         -- have switched off to mez or heal after the initial find target check and the target
         -- may have changed by this point.
         if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing()) then
-            RGMercUtils.FindTarget()
+            RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
         end
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then

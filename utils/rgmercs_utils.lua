@@ -1452,7 +1452,7 @@ function Utils.GetTargetMaxRangeTo(target)
     return (target and target.MaxRangeTo() or (mq.TLO.Target.MaxRangeTo() or 15))
 end
 
----@param target MQTarget|nil
+---@param target MQTarget|spawn|nil
 ---@return number
 function Utils.GetTargetPctHPs(target)
     local useTarget = target
@@ -2577,7 +2577,7 @@ function Utils.OkToEngagePreValidateId(targetId)
 
     if not RGMercConfig.Globals.BackOffFlag then --Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
         local distanceCheck = Utils.GetTargetDistance() < config.AssistRange
-        local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
+        local assistCheck = (Utils.GetTargetPctHPs(target) <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_verbose("\ag  OkToEngageId() %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",

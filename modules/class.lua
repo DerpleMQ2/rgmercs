@@ -638,7 +638,7 @@ function Module:GiveTime(combat_state)
                 for _, targetId in ipairs(targetTable) do
                     -- only do combat with a target.
                     if targetId and targetId > 0 then
-                        if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
+                        if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state, mq.TLO.Spawn(targetId)) then
                             RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
                             self.CurrentRotation = { name = r.name, state = r.state or 0, }
                             local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,

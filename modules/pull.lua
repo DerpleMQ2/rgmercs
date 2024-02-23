@@ -1199,7 +1199,7 @@ function Module:GiveTime(combat_state)
 
     local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
     local startingXTargs = RGMercUtils.GetXTHaterIDs()
-    local requireLOS = pullAbility.LOS == nil and true or pullAbility.LOS
+    local requireLOS = pullAbility and (pullAbility.LOS == nil and true or pullAbility.LOS) or true
 
     RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
 
