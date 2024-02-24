@@ -16,7 +16,7 @@ Bind.MainHandler  = function(cmd, ...)
     for _, r in pairs(results) do processed = processed or r end
 
     if not processed then
-        RGMercsLogger.log_warning("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
+        RGMercsLogger.log_warn("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
     end
 end
 

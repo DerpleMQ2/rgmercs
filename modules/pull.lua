@@ -998,7 +998,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
         end
 
         if mq.TLO.Navigation.Velocity() == 0 then
-            RGMercsLogger.log_warning("NavToWaypoint Velocity is 0 - Are we stuck?")
+            RGMercsLogger.log_warn("NavToWaypoint Velocity is 0 - Are we stuck?")
             if mq.TLO.Navigation.Paused() then
                 RGMercUtils.DoCmd("/nav pause log=off")
             end

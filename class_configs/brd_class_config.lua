@@ -174,7 +174,7 @@ local function generateSongList()
         AddTankSongs()
         AddMeleeDPSSongs()
     else
-        RGMercsLogger.log_warning("Bard Mode not found!  Adding DPS songs, but you should select a mode.")
+        RGMercsLogger.log_warn("Bard Mode not found!  Adding DPS songs, but you should select a mode.")
         AddMainGroupDPSSongs()
         AddSelfDPSSongs()
         AddRegenSongs()
