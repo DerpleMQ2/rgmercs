@@ -1,31 +1,36 @@
 -- Sample Basic Class Module
-local mq                       = require('mq')
-local RGMercUtils              = require("utils.rgmercs_utils")
-local ICONS                    = require('mq.Icons')
-local Set                      = require("mq.Set")
+local mq                           = require('mq')
+local RGMercUtils                  = require("utils.rgmercs_utils")
+local ICONS                        = require('mq.Icons')
+local Set                          = require("mq.Set")
 
-local Module                   = { _version = '0.1a', _name = "Movement", _author = 'Derple', }
-Module.__index                 = Module
-Module.ModuleLoaded            = false
-Module.TempSettings            = {}
-Module.TempSettings.CampZoneId = 0
-Module.TempSettings.Go2GGH     = 0
-Module.TempSettings.LastCmd    = ""
+local Module                       = { _version = '0.1a', _name = "Movement", _author = 'Derple', }
+Module.__index                     = Module
+Module.ModuleLoaded                = false
+Module.TempSettings                = {}
+Module.TempSettings.CampZoneId     = 0
+Module.TempSettings.Go2GGH         = 0
+Module.TempSettings.LastCmd        = ""
 
-Module.Constants               = {}
-Module.Constants.GGHZones      = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
+Module.Constants                   = {}
+Module.Constants.GGHZones          = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
+Module.Constants.CampfireNameToKit = {
+    ['Regular Fellowship'] = 1,
+    ['Empowered Fellowship'] = 2,
+    ['EScaled Wolf'] = 36,
+}
 
-Module.DefaultConfig           = {
+Module.DefaultConfig               = {
     ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = (RGMercConfig.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 15 or 60), Min = 10, Max = 300, },
     ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false, },
     ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100, },
     ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
     ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
-    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "0: Off; 1: Regular Fellowship; 2: Empowered Fellowship; 36: Scaled Wolf", Default = 1, Min = 0, Max = 36, },
+    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; 3: Empowered Fellowship; 4: Scaled Wolf", Type = "Combo", ComboOptions = { 'Off', 'Regular Fellowship', 'Empowered Fellowship', "Scaled Wolf", }, Default = 2, Min = 1, Max = 4, },
     ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
 }
 
-Module.CommandHandlers         = {
+Module.CommandHandlers             = {
     chaseon = {
         usage = "/rgl chaseon <name?>",
         about = "Chase your current target or <name>",
@@ -63,7 +68,7 @@ Module.CommandHandlers         = {
     },
 }
 
-Module.DefaultCategories       = Set.new({})
+Module.DefaultCategories           = Set.new({})
 for _, v in pairs(Module.DefaultConfig) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
@@ -214,7 +219,7 @@ function Module:Campfire(camptype)
 
     if self.settings.MaintainCampfire then
         if mq.TLO.FindItemCount("Fellowship Campfire Materials") == 0 then
-            self.settings.MaintainCampfire = 1
+            self.settings.MaintainCampfire = 2 -- Regular Fellowship
             self:SaveSettings(false)
             RGMercsLogger.log_info("Fellowship Campfire Materials Not Found. Setting to Regular Fellowship.")
         end
@@ -251,16 +256,17 @@ function Module:Campfire(camptype)
 
         mq.TLO.Window("FellowshipWnd").Child("FP_RefreshList").LeftMouseUp()
         mq.delay("1s")
-        mq.TLO.Window("FellowshipWnd").Child("FP_CampsiteKitList").Select(self.settings.MaintainCampfire or camptype)
+        mq.TLO.Window("FellowshipWnd").Child("FP_CampsiteKitList").Select(self.Constants.CampfireNameToKit[self.settings.MaintainCampfire] or camptype)
         mq.delay("1s")
         mq.TLO.Window("FellowshipWnd").Child("FP_CreateCampsite").LeftMouseUp()
         mq.delay("5s", function() return mq.TLO.Me.Fellowship.Campfire() ~= nil end)
         mq.TLO.Window("FellowshipWnd").DoClose()
+        mq.delay("2s", function() return mq.TLO.Me.Fellowship.CampfireZone.ID() == mq.TLO.Zone.ID() end)
 
         RGMercsLogger.log_info("\agCampfire Dropped")
     else
         RGMercsLogger.log_info("\ayCan't create campfire. Only %d nearby. Setting MaintainCampfire to 0.", fellowCount)
-        self.settings.MaintainCampfire = 0
+        self.settings.MaintainCampfire = 1 -- off
     end
 end
 
@@ -460,6 +466,13 @@ function Module:GiveTime(combat_state)
         RGMercUtils.AutoCampCheck(self.settings, self.TempSettings)
     end
 
+    if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
+        if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and self.settings.MaintainCampfire > 1 then
+            RGMercsLogger.log_debug("Doing campfire maintainance")
+            self:Campfire()
+        end
+    end
+
     if not self:ShouldFollow() then
         RGMercsLogger.log_super_verbose("ShouldFollow() check failed.")
         return
@@ -520,12 +533,6 @@ function Module:GiveTime(combat_state)
             if chaseSpawn.Distance() < self.settings.ChaseDistance then
                 self:RunCmd("/squelch /afollow off")
             end
-        end
-    end
-
-    if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
-        if mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and self.settings.MaintainCampfire then
-            self:Campfire()
         end
     end
 end
