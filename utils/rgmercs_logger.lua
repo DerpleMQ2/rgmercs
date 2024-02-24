@@ -66,29 +66,15 @@ local function log(logLevel, output, ...)
 	printf('%s\aw:%s\aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, callerTracer, logLeaderEnd, output)
 end
 
-
-function actions.log_error(output, ...)
-	log('error', output, ...)
+function actions.GenerateShortcuts()
+	for level, _ in pairs(logLevels) do
+		--- @diagnostic disable-next-line
+		actions["log_" .. level:lower()] = function(output, ...)
+			log(level, output, ...)
+		end
+	end
 end
 
-function actions.log_warning(output, ...)
-	log('warn', output, ...)
-end
-
-function actions.log_info(output, ...)
-	log('info', output, ...)
-end
-
-function actions.log_debug(output, ...)
-	log('debug', output, ...)
-end
-
-function actions.log_verbose(output, ...)
-	log('verbose', output, ...)
-end
-
-function actions.log_super_verbose(output, ...)
-	log('super_verbose', output, ...)
-end
+actions.GenerateShortcuts()
 
 return actions

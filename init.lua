@@ -24,22 +24,15 @@ RGMercModules     = require("utils.rgmercs_modules").load()
 require('utils.rgmercs_datatypes')
 
 -- ImGui Variables
-local openGUI        = true
-local shouldDrawGUI  = true
-local notifyZoning   = true
-local curState       = "Downtime"
+local openGUI       = true
+local shouldDrawGUI = true
+local notifyZoning  = true
+local curState      = "Downtime"
 
 -- Icon Rendering
-local animItems      = mq.FindTextureAnimation("A_DragItem")
-local animBox        = mq.FindTextureAnimation("A_RecessedBox")
-local derpImg        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
+local derpImg       = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
 
 -- Constants
-local ICON_WIDTH     = 40
-local ICON_HEIGHT    = 40
-local COUNT_X_OFFSET = 39
-local COUNT_Y_OFFSET = 23
-local EQ_ICON_OFFSET = 500
 
 -- UI --
 local function renderModulesTabs()
