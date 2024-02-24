@@ -781,7 +781,11 @@ local _ClassConfig = {
             {
                 name = "ChaoticDebuff",
                 type = "Spell",
-                cond = function(self, spell) return not RGMercUtils.TargetHasBuff(spell) and spell.Trigger(2).StacksTarget() end,
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    return not RGMercUtils.TargetHasBuff(spell) and spell.Trigger(2).StacksTarget()
+                end,
             },
             {
                 name = "CripplingTap",

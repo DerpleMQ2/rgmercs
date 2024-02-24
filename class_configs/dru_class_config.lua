@@ -836,8 +836,10 @@ local _ClassConfig = {
                 return
                     groupIds
             end,
-            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
-                RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer') end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
+                    RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
         },
         {
             name = 'Debuff',
@@ -1224,7 +1226,11 @@ local _ClassConfig = {
                 name = "HPTypeOneGroup",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell, target) return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget() end,
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget()
+                end,
             },
             {
                 name = "ReptileCombatInnate",
@@ -1239,7 +1245,11 @@ local _ClassConfig = {
                 name = "GroupRegenBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell, target) return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget() end,
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget()
+                end,
             },
             {
                 name = "Wrath of the Wild",
