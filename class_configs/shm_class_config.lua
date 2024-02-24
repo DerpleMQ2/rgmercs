@@ -1287,7 +1287,12 @@ local _ClassConfig = {
             {
                 name = "FocusSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    RGMercUtils.SetTarget(target.ID() or 0)
+                    if not uiCheck then
+                        mq.delay("1s", function() return mq.TLO.Target.ID() == target.ID() end)
+                    end
                     return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget()
                 end,
             },
