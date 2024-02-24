@@ -179,7 +179,6 @@ end
 
 function Module:CampOff()
     self.settings.ReturnToCamp = false
-    self:DestoryCampfire()
     self:SaveSettings(false)
     RGMercUtils.DoCmd("/mapfilter campradius off")
     RGMercUtils.DoCmd("/mapfilter pullradius off")
@@ -187,22 +186,21 @@ end
 
 function Module:DestoryCampfire()
     if mq.TLO.Me.Fellowship.Campfire() == nil then return end
+    RGMercsLogger.log_debug("DestoryCampfire()")
 
     mq.TLO.Window("FellowshipWnd").DoOpen()
     mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() end)
     mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
 
     if mq.TLO.Me.Fellowship.Campfire() then
-        if mq.TLO.Zone.ID() ~= mq.TLO.Me.Fellowship.CampfireZone.ID() then
-            mq.TLO.Window("FellowshipWnd").Child("FP_DestroyCampsite").LeftMouseUp()
-            mq.delay("5s", function() return mq.TLO.Window("ConfirmationDialogBox").Open() end)
+        mq.TLO.Window("FellowshipWnd").Child("FP_DestroyCampsite").LeftMouseUp()
+        mq.delay("5s", function() return mq.TLO.Window("ConfirmationDialogBox").Open() end)
 
-            if mq.TLO.Window("ConfirmationDialogBox").Open() then
-                mq.TLO.Window("ConfirmationDialogBox").Child("Yes_Button").LeftMouseUp()
-            end
-
-            mq.delay("5s", function() return mq.TLO.Me.Fellowship.Campfire() == nil end)
+        if mq.TLO.Window("ConfirmationDialogBox").Open() then
+            mq.TLO.Window("ConfirmationDialogBox").Child("Yes_Button").LeftMouseUp()
         end
+
+        mq.delay("5s", function() return mq.TLO.Me.Fellowship.Campfire() == nil end)
     end
     mq.TLO.Window("FellowshipWnd").DoClose()
 end
