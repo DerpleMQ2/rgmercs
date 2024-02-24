@@ -653,8 +653,10 @@ return {
                 return
                     groupIds
             end,
-            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
-                RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer') end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
+                    RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
         },
         {
             name = 'Downtime',
@@ -834,7 +836,9 @@ return {
             {
                 name = "SlowSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
                         spell.StacksTarget() and
                         spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct())
@@ -1019,14 +1023,18 @@ return {
             {
                 name = "GroupAtkBuff",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
                 end,
             },
             {
                 name = "SingleAtkHPBuff",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     local targetClass = target.Class.ShortName()
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
                 end,
@@ -1034,32 +1042,38 @@ return {
             {
                 name = "GroupAtkHPBuff",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
                 end,
             },
             {
                 name = "SingleAtkHPBuff",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
                     local targetClass = target.Class.ShortName()
-
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
                 end,
             },
             {
                 name = "GroupFocusSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
                 end,
             },
             {
                 name = "SingleFocusSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
                     local targetClass = target.Class.ShortName()
-
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
                 end,
             },
