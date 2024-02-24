@@ -414,7 +414,7 @@ function Module:FindWorstHurtGroupMember(minHPs)
 
         if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
             if (healTarget.Class.ShortName() or "none"):lower() ~= "ber" then -- berzerkers have special handing
-                if healTarget.PctHPs() < worstPct then
+                if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
                     RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
                     worstPct = healTarget.PctHPs()
                     worstId = healTarget.ID()
@@ -455,7 +455,7 @@ function Module:FindWorstHurtXT(minHPs)
 
         if healTarget and healTarget() and (healTarget.Type() or "none"):lower() == "pc" then
             if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
-                if healTarget.PctHPs() < worstPct then
+                if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
                     RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
                     worstPct = healTarget.PctHPs()
                     worstId = healTarget.ID()

@@ -133,7 +133,7 @@ function Module:ChaseOn(target)
 
         RGMercsLogger.log_info("\ao Now Chasing \ag %s", chaseTarget.CleanName())
     else
-        RGMercsLogger.log_warning("\ayWarning:\ax Not a valid chase target!")
+        RGMercsLogger.log_warn("\ayWarning:\ax Not a valid chase target!")
     end
 end
 
@@ -152,7 +152,7 @@ function Module:ChaseOff()
     self.settings.ChaseOn = false
     self.settings.ChaseTarget = nil
     self:SaveSettings(false)
-    RGMercsLogger.log_warning("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
+    RGMercsLogger.log_warn("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
 end
 
 function Module:CampOn()
@@ -390,7 +390,7 @@ end
 
 function Module:Go2GGH()
     if not mq.TLO.Me.GuildID() or mq.TLO.Me.GuildID() == 0 then
-        RGMercsLogger.log_warning("\awNOTICE:\ax You're not in a guild!")
+        RGMercsLogger.log_warn("\awNOTICE:\ax You're not in a guild!")
         return
     end
     self.TempSettings.Go2GGH = 1
@@ -402,7 +402,7 @@ end
 
 function Module:GiveTime(combat_state)
     if mq.TLO.Me.Hovering() and self.settings.ChaseOn then
-        RGMercsLogger.log_warning("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
+        RGMercsLogger.log_warn("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
             self.settings.ChaseTarget)
         self.settings.ChaseOn = false
         self:SaveSettings()
@@ -413,7 +413,7 @@ function Module:GiveTime(combat_state)
         if self.TempSettings.Go2GGH == 1 then
             if not self.Constants.GGHZones:contains(mq.TLO.Zone.ShortName():lower()) then
                 if not RGMercUtils.UseOrigin() then
-                    RGMercsLogger.log_warning("\awNOTICE:\ax Go2GGH Failed.")
+                    RGMercsLogger.log_warn("\awNOTICE:\ax Go2GGH Failed.")
                     self.TempSettings.Go2GGH = 0
                 else
                     self.TempSettings.Go2GGH = 2
@@ -467,14 +467,14 @@ function Module:GiveTime(combat_state)
 
     if self.settings.ChaseOn and not self.settings.ChaseTarget then
         self.settings.ChaseOn = false
-        RGMercsLogger.log_warning("\awNOTICE:\ax \ayChase Target is invalid. Turning Chase Off!")
+        RGMercsLogger.log_warn("\awNOTICE:\ax \ayChase Target is invalid. Turning Chase Off!")
     end
 
     if self.settings.ChaseOn and self.settings.ChaseTarget then
         local chaseSpawn = mq.TLO.Spawn("pc =" .. self.settings.ChaseTarget)
 
         if not chaseSpawn or chaseSpawn.Dead() or not chaseSpawn.ID() then
-            RGMercsLogger.log_warning("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...",
+            RGMercsLogger.log_warn("\awNOTICE:\ax Chase Target \am%s\ax is dead or not found in zone - Pausing...",
                 self.settings.ChaseTarget)
             return
         end

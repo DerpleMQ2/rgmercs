@@ -141,7 +141,7 @@ function Utils.ClearTarget()
 end
 
 function Utils.HandleDeath()
-    RGMercsLogger.log_warning("You are sleeping with the fishes.")
+    RGMercsLogger.log_warn("You are sleeping with the fishes.")
 
     Utils.ClearTarget()
 
@@ -2073,7 +2073,7 @@ function Utils.MercEngage()
 end
 
 function Utils.KillPCPet()
-    RGMercsLogger.log_warning("\arKilling your pet!")
+    RGMercsLogger.log_warn("\arKilling your pet!")
     local problemPetOwner = mq.TLO.Spawn(string.format("id %d", mq.TLO.Me.XTarget(1).ID())).Master.CleanName()
 
     Utils.DoCmd("/dexecute %s /pet leave", problemPetOwner)

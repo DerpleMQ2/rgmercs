@@ -287,7 +287,7 @@ function Module:AEMezCheck()
     if not aeMezSpell or not aeMezSpell() then return end
 
     if not aeMezSpell.AERange() or aeMezSpell.AERange() == 0 then
-        RGMercsLogger.log_warning("\arWarning AE Mez Spell: %s has no AERange!", aeMezSpell.RankName.Name())
+        RGMercsLogger.log_warn("\arWarning AE Mez Spell: %s has no AERange!", aeMezSpell.RankName.Name())
     end
 
     -- Make sure the mobs of concern are within rang
