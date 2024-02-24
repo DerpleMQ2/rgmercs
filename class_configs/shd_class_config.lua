@@ -416,6 +416,32 @@ local _ClassConfig = {
             "Lifespike",
             "LifeTap",
         },
+        ['LifeTap2'] = {
+            "Touch of Flariton",
+            "Touch of Txiki",
+            "Touch of the Wailing Three",
+            "Touch of the Soulbleeder",
+            "Touch of Lanys",
+            "Touch of Dyalgem",
+            "Touch of Urash",
+            "Touch of Falsin",
+            "Touch of Lutzen",
+            "Touch of T`Vem",
+            "Touch of Drendar",
+            "Touch of Severan",
+            "Touch of the Devourer",
+            "Touch of Draygun",
+            "Touch of Innoruuk",
+            "Touch of Volatis",
+            "Drain Soul",
+            "Drain Spirit",
+            "Spirit Tap",
+            "Siphon Life",
+            "Life Leech",
+            "Lifedraw",
+            "Lifespike",
+            "LifeTap",
+        },
         ['BuffTap'] = {
             "Touch of Mortimus",
             "Touch of Namdrows",
@@ -581,7 +607,6 @@ local _ClassConfig = {
             "Dire Convulsion",
             "Dire Seizure",
             "Dire Squelch",
-            "Dark Constriction",
         },
         ['AllianceNuke'] = {
             "Bloodletting Coalition",
@@ -1113,6 +1138,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "LifeTap2",
+                type = "Spell",
+                tooltip = Tooltips.LifeTap,
+                cond = function(self, spell)
+                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
+                end,
+            },
+            {
                 name = "Bash",
                 type = "Ability",
                 tooltip = Tooltips.Bash,
@@ -1136,9 +1169,8 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
-                -- On a TLP we might not have 9 gem slots so load Terror here
-                { name = "Terror",  cond = function(self) return mq.TLO.Me.NumGems() <= 8 end, },
                 { name = "DireDot", },
+                { name = "LifeTap2", },
             },
         },
         {
@@ -1189,6 +1221,7 @@ local _ClassConfig = {
             spells = {
                 { name = "AeTaunt",  cond = function(self) return RGMercUtils.GetSetting('DoAE') and mq.TLO.Me.AltAbility("Explosion of Hatred")() == nil end, },
                 { name = "ForPower", },
+                { name = "Terror", },
             },
         },
         {
