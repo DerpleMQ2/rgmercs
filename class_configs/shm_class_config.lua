@@ -641,7 +641,6 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions']   = {
-        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         DoRez = function(self, corpseId)
             if not RGMercUtils.PCSpellReady(mq.TLO.Spell("Incarnate Anew")) and
                 not mq.TLO.FindItem("Staff of Forbidden Rites")() and
@@ -1414,10 +1413,11 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "GrowthBuff",   cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "GrowthBuff",       cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "SlowProcBuff", },
                 -- [ TLP FALL BACK ] --
+                { name = "LowLvlAttackBuff", },
                 { name = "CanniSpell", },
                 { name = "PetBuffSpell", },
             },
