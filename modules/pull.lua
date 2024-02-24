@@ -767,8 +767,8 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                         RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
-                                RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY), member.X(), member.Y(), campData.AutoCampX,
-                                campData.AutoCampY)
+                                RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY), member.X(), member.Y(), mq.TLO.Me.X(),
+                                mq.TLO.Me.Y())
                     end
                 end
 
