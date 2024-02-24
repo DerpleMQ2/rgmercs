@@ -1191,7 +1191,7 @@ _ClassConfig      = {
                 type = "CustomFunc",
                 custom_func = function(self)
                     if not self.ResolvedActionMap['EarthPetItemSummon'] then return false end
-                    local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].Base(1)()
+                    local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
                         return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
@@ -1205,7 +1205,7 @@ _ClassConfig      = {
                 type = "CustomFunc",
                 custom_func = function(self)
                     if not self.ResolvedActionMap['FirePetItemSummon'] then return false end
-                    local baseItem = self.ResolvedActionMap['FirePetItemSummon'].Base(1)()
+                    local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
                         return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
@@ -1293,7 +1293,7 @@ _ClassConfig      = {
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("PetTank") and self.TempSettings.OowRobeBase ~= nil and RGMercUtils.IsModeActive("PetTank") and
                         RGMercUtils.SelfBuffPetCheck(spell) and mq.TLO.Me.Pet.PctHPs() <= 95 and
-                        (mq.TLO.Me.PetBuff(mq.TLO.Spell(self.TempSettings.OowRobeBase).Base(1)() or "").ID()) or 0 == 0
+                        (mq.TLO.Me.PetBuff(mq.TLO.Spell(self.TempSettings.OowRobeBase).RankName.Base(1)() or "").ID()) or 0 == 0
                 end,
             },
             {
@@ -1338,7 +1338,7 @@ _ClassConfig      = {
                 type = "CustomFunc",
                 custom_func = function(self)
                     if not self.ResolvedActionMap['FireOrbSummon'] then return false end
-                    local baseItem = self.ResolvedActionMap['FireOrbSummon'].Base(1)() or "None"
+                    local baseItem = self.ResolvedActionMap['FireOrbSummon'].RankName.Base(1)() or "None"
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
                         return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Target.ID())
@@ -1508,7 +1508,7 @@ _ClassConfig      = {
                 cond = function(self, spell)
                     local modRodSpell = self.ResolvedActionMap['ManaRodSummon']
                     if not modRodSpell or not modRodSpell() then return false end
-                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)()).Name()
+                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.RankName.Base(1)()).Name()
                     return RGMercUtils.GetSetting('SummonModRods') and (mq.TLO.Me.AltAbility("Summon Modulation Shard").ID() or 0) == 0 and
                         mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
                         (mq.TLO.Cursor.ID() or 0) == 0
@@ -1520,7 +1520,7 @@ _ClassConfig      = {
                 cond = function(self, aaName)
                     local modRodSpell = mq.TLO.Spell(aaName)
                     if not modRodSpell or not modRodSpell() then return false end
-                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)()).Name()
+                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.RankName.Base(1)()).Name()
                     return RGMercUtils.GetSetting('SummonModRods') and
                         mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
                         (mq.TLO.Cursor.ID() or 0) == 0 and RGMercUtils.AAReady(aaName)
@@ -1530,7 +1530,7 @@ _ClassConfig      = {
                 name = "SelfManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
                 end,
             },
             {
@@ -1566,21 +1566,21 @@ _ClassConfig      = {
                 name = "FireOrbSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "")() == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
                 end,
             },
             {
                 name = "EarthPetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "")() == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
                 end,
             },
             {
                 name = "FirePetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "")() == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
                 end,
             },
             {
@@ -1682,7 +1682,7 @@ _ClassConfig      = {
                 cond = function(self, spell)
                     local modRodSpell = self.ResolvedActionMap['ManaRodSummon']
                     if not modRodSpell or not modRodSpell() then return false end
-                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)()).Name()
+                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.RankName.Base(1)()).Name()
                     return RGMercUtils.GetSetting('SummonModRods') and (mq.TLO.Me.AltAbility("Summon Modulation Shard").ID() or 0) == 0 and
                         mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
                         (mq.TLO.Cursor.ID() or 0) == 0
@@ -1694,7 +1694,7 @@ _ClassConfig      = {
                 cond = function(self, aaName)
                     local modRodSpell = mq.TLO.Spell(aaName)
                     if not modRodSpell or not modRodSpell() then return false end
-                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.Base(1)()).Name()
+                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.RankName.Base(1)()).Name()
                     return RGMercUtils.GetSetting('SummonModRods') and
                         mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
                         (mq.TLO.Cursor.ID() or 0) == 0 and RGMercUtils.AAReady(aaName)
@@ -1704,7 +1704,7 @@ _ClassConfig      = {
                 name = "SelfManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
                 end,
             },
             {
@@ -1740,21 +1740,21 @@ _ClassConfig      = {
                 name = "FireOrbSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "") == 0
                 end,
             },
             {
                 name = "EarthPetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "") == 0
                 end,
             },
             {
                 name = "FirePetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.Base(1)() or "") == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "") == 0
                 end,
             },
             {
