@@ -424,7 +424,7 @@ local function Main()
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
             RGMercConfig.Globals.LastPetCmd = os.clock()
-            if RGMercUtils.GetSetting('DoPet') and (RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('PetEngagePct')) then
+            if RGMercUtils.GetSetting('DoPet') and (RGMercUtils.GetTargetPctHPs(RGMercUtils.GetAutoTarget()) <= RGMercUtils.GetSetting('PetEngagePct')) then
                 RGMercUtils.PetAttack(RGMercConfig.Globals.AutoTargetID)
             end
         end
