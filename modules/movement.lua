@@ -179,12 +179,15 @@ end
 
 function Module:CampOff()
     self.settings.ReturnToCamp = false
+    self:DestoryCampfire()
     self:SaveSettings(false)
     RGMercUtils.DoCmd("/mapfilter campradius off")
     RGMercUtils.DoCmd("/mapfilter pullradius off")
 end
 
 function Module:DestoryCampfire()
+    if mq.TLO.Me.Fellowship.Campfire() == nil then return end
+
     mq.TLO.Window("FellowshipWnd").DoOpen()
     mq.delay("3s", function() return mq.TLO.Window("FellowshipWnd").Open() end)
     mq.TLO.Window("FellowshipWnd").Child("FP_Subwindows").SetCurrentTab(2)
