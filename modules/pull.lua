@@ -681,8 +681,9 @@ function Module:ShouldPull()
         return false, string.format("Corrupted")
     end
 
+    RGMercsLogger.log_debug("%d >= %d", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
     if self:IsPullMode("Chain") and RGMercUtils.GetXTHaterCount() >= self.settings.ChainCount then
-        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) >= ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
         return false, string.format("XTargetCount(%d) > ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
     end
 
@@ -776,7 +777,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                     if member.ID() == RGMercUtils.GetMainAssistId() then
                         if returnToCamp and RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(), campData.AutoCampY,
-                                campData.AutoCampX, campData.AutoCampZ, RGMercConfig.SubModuleSettings.settings.Movement.settings.AutoCampRadius)
+                                campData.AutoCampX, campData.AutoCampZ, RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius)
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     else
@@ -1218,7 +1219,7 @@ function Module:GiveTime(combat_state)
     while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
         RGMercsLogger.log_super_verbose("Pathing to pull id...")
         if self:IsPullMode("Chain") then
-            if RGMercUtils.GetXTHaterCount() > self.settings.ChainCount then
+            if RGMercUtils.GetXTHaterCount() >= self.settings.ChainCount then
                 RGMercsLogger.log_info("\awNOTICE:\ax Gained aggro -- aborting chain pull!")
                 abortPull = true
                 break
@@ -1270,7 +1271,7 @@ function Module:GiveTime(combat_state)
             local successFn = function() return RGMercUtils.GetXTHaterCount() > 0 end
 
             if self:IsPullMode("Chain") then
-                successFn = function() return RGMercUtils.GetXTHaterCount() > self.settings.ChainCount end
+                successFn = function() return RGMercUtils.GetXTHaterCount() >= self.settings.ChainCount end
             end
 
             if self.settings.PullAbility == PullAbilityIDToName.PetPull then -- PetPull
