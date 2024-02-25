@@ -193,6 +193,18 @@ function Module:LoadSettings()
     self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
 end
 
+function Module:GetSettings()
+    return self.settings
+end
+
+function Module:GetDefaultSettings()
+    return self.DefaultConfig
+end
+
+function Module:GetSettingCategories()
+    return self.DefaultCategories
+end
+
 ---@param id number
 ---@return string
 function Module:getPullAbilityDisplayName(id)
@@ -754,9 +766,8 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                     return false, string.format("%s Out of Zone", member.CleanName())
                 end
 
-                --if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 80) then
                 if returnToCamp then
-                    if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 50) then
+                    if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 50) then
                         RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
@@ -764,7 +775,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                                 campData.AutoCampY)
                     end
                 else
-                    if (member.Distance() or 0) > math.max(RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius, 80) then
+                    if (member.Distance() or 0) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 80) then
                         RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
@@ -775,15 +786,15 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
                     if member.ID() == RGMercUtils.GetMainAssistId() then
-                        if returnToCamp and RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+                        if returnToCamp and RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > RGMercUtils.GetSetting('AutoCampRadius') then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(), campData.AutoCampY,
-                                campData.AutoCampX, campData.AutoCampZ, RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius)
+                                campData.AutoCampX, campData.AutoCampZ, RGMercUtils.GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     else
-                        if RGMercUtils.GetDistance(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+                        if RGMercUtils.GetDistance(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > RGMercUtils.GetSetting('AutoCampRadius') then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
-                                RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius)
+                                RGMercUtils.GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     end
@@ -807,9 +818,9 @@ function Module:FixPullerMerc()
         local merc = mq.TLO.Group.Member(i)
 
         if merc and merc() and merc.Type() == "Mercenary" and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
-            if (merc.Distance() or 0) > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius and (merc.Owner.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius then
+            if (merc.Distance() or 0) > RGMercUtils.GetSetting('AutoCampRadius') and (merc.Owner.Distance() or 0) < RGMercUtils.GetSetting('AutoCampRadius') then
                 RGMercUtils.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
-                mq.delay("10s", function() return (merc.Distance() or 0) < RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius end)
+                mq.delay("10s", function() return (merc.Distance() or 0) < RGMercUtils.GetSetting('AutoCampRadius') end)
                 RGMercUtils.DoCmd("/grouproles set %s 3", mq.TLO.Me.DisplayName())
             end
         end
@@ -1438,7 +1449,7 @@ function Module:GiveTime(combat_state)
         -- give the mob 2 mins to get to us.
         local maxPullWait = 1000 * 120 -- 2 mins
         -- wait for the mob to reach us.
-        while mq.TLO.Target.ID() == self.TempSettings.PullID and RGMercUtils.GetTargetDistance() > RGMercConfig.SubModuleSettings.Movement.settings.AutoCampRadius and maxPullWait > 0 do
+        while mq.TLO.Target.ID() == self.TempSettings.PullID and RGMercUtils.GetTargetDistance() > RGMercUtils.GetSetting('AutoCampRadius') and maxPullWait > 0 do
             self:SetPullState(PullStates.PULL_WAITING_ON_MOB, self:GetPullStateTargetInfo())
             mq.delay(100)
             if mq.TLO.Me.Pet.Combat() then

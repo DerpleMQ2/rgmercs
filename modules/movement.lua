@@ -108,6 +108,18 @@ function Module:LoadSettings()
     self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
 end
 
+function Module:GetSettings()
+    return self.settings
+end
+
+function Module:GetDefaultSettings()
+    return self.DefaultConfig
+end
+
+function Module:GetSettingCategories()
+    return self.DefaultCategories
+end
+
 function Module.New()
     local newModule = setmetatable({ settings = {}, }, Module)
     return newModule

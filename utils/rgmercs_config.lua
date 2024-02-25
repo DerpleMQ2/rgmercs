@@ -116,8 +116,6 @@ Config.Constants.ConColors         = {
 Config.Constants.ConColorsNameToId = {}
 for i, v in ipairs(Config.Constants.ConColors) do Config.Constants.ConColorsNameToId[v:upper()] = i end
 
-Config.SubModuleSettings = {}
-
 -- Defaults
 Config.DefaultConfig = {
     -- [ UTILITIES ] --
@@ -276,33 +274,29 @@ function Config:LoadSettings()
         self:SaveSettings(false)
     end
 
-    self:UpdateCommandHandlers()
-
     return true
 end
 
 function Config:UpdateCommandHandlers()
     self.CommandHandlers = {}
 
-    local allConfigs = {
-        ["Core"] = { settings = self.settings, defaults = Config.DefaultConfig, },
-    }
+    local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+    local submoduleDefaults = RGMercModules:ExecAll("GetDefaultSettings")
 
-    for name, data in pairs(RGMercConfig.SubModuleSettings) do
-        allConfigs[name] = { settings = data.settings, defaults = data.defaults, }
-    end
+    submoduleSettings["Core"] = self.settings
+    submoduleDefaults["Core"] = Config.DefaultConfig
 
-    for moduleName, moduleData in pairs(allConfigs) do
-        for config, configData in pairs(moduleData.defaults or {}) do
-            local handled, usageString = self:GetUsageText(config, true, moduleData.defaults)
+    for moduleName, moduleSettings in pairs(submoduleSettings) do
+        for setting, _ in pairs(moduleSettings or {}) do
+            local handled, usageString = self:GetUsageText(setting, true, submoduleDefaults[moduleName])
 
             if handled then
-                self.CommandHandlers[config:lower()] = {
-                    name = config,
+                self.CommandHandlers[setting:lower()] = {
+                    name = setting,
                     usage = usageString,
                     subModule = moduleName,
-                    category = configData.Category,
-                    about = configData.Tooltip,
+                    category = submoduleDefaults[moduleName][setting].Category,
+                    about = submoduleDefaults[moduleName][setting].Tooltip,
                 }
             end
         end
@@ -348,12 +342,6 @@ function Config:GetUsageText(config, showUsageText, defaults)
     return handledType, usageString
 end
 
-function Config:SetSubModules(subModules)
-    self.SubModuleSettings = subModules
-    self:UpdateCommandHandlers()
-    self.Globals.SubmodulesLoaded = true
-end
-
 function Config:GetSettings()
     return self.settings
 end
@@ -380,7 +368,8 @@ function Config:HandleBind(config, value)
         self:UpdateCommandHandlers()
 
         local allModules = {}
-        for name, _ in pairs(RGMercConfig.SubModuleSettings) do
+        local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+        for name, _ in pairs(submoduleSettings) do
             table.insert(allModules, name)
         end
         table.sort(allModules)

@@ -94,6 +94,18 @@ function Module:LoadSettings()
     self:RescanLoadout()
 end
 
+function Module:GetSettings()
+    return self.settings
+end
+
+function Module:GetDefaultSettings()
+    return self.ClassConfig.DefaultConfig
+end
+
+function Module:GetSettingCategories()
+    return self.DefaultCategories
+end
+
 function Module.New()
     local newModule = setmetatable({ settings = {}, }, Module)
     return newModule

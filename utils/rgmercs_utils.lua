@@ -1314,10 +1314,11 @@ function Utils.GetSetting(setting)
 
     -- if we found it in the Global table we should alert if it is duplicated anywhere
     -- else as that could get confusing.
-    for name, data in pairs(RGMercConfig.SubModuleSettings) do
-        if data.settings[setting] ~= nil then
+    local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+    for name, settings in pairs(submoduleSettings) do
+        if settings[setting] ~= nil then
             if not ret.value then
-                ret = { module = name, value = data.settings[setting], }
+                ret = { module = name, value = settings[setting], }
             else
                 RGMercsLogger.log_error(
                     "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Returning first but this should be fixed!",
@@ -1344,7 +1345,7 @@ function Utils.MakeValidSetting(module, setting, value)
     local defaultConfig = RGMercConfig.DefaultConfig
 
     if module ~= "Core" then
-        defaultConfig = RGMercConfig.SubModuleSettings[module].defaults
+        defaultConfig = RGMercModules:ExecModule(module, "GetDefaultSettings")
     end
 
     if type(defaultConfig[setting].Default) == 'number' then
@@ -1378,8 +1379,9 @@ function Utils.MakeValidSettingName(setting)
         if s:lower() == setting:lower() then return "Core", s end
     end
 
-    for moduleName, data in pairs(RGMercConfig.SubModuleSettings) do
-        for s, _ in pairs(data.settings) do
+    local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+    for moduleName, settings in pairs(submoduleSettings) do
+        for s, _ in pairs(settings) do
             if s:lower() == setting:lower() then return moduleName, s end
         end
     end
@@ -1401,17 +1403,17 @@ function Utils.SetSetting(setting, value)
         _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
         if cleanValue ~= nil then
             RGMercConfig:GetSettings()[setting] = cleanValue
-            RGMercConfig:SaveSettings(true)
+            RGMercConfig:SaveSettings(false)
         end
     elseif settingModuleName ~= "None" then
-        local data = RGMercConfig.SubModuleSettings[settingModuleName]
-        if data.settings[setting] ~= nil then
-            defaultConfig = data.defaults
+        local settings = RGMercModules:ExecModule(settingModuleName, "GetSettings")
+        if settings[setting] ~= nil then
+            defaultConfig = RGMercModules:ExecModule(settingModuleName, "GetDefaultSettings")
             _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
             local cleanValue = Utils.MakeValidSetting(settingModuleName, setting, value)
             if cleanValue ~= nil then
-                data.settings[setting] = cleanValue
-                RGMercModules:ExecModule(settingModuleName, "SaveSettings", true)
+                settings[setting] = cleanValue
+                RGMercModules:ExecModule(settingModuleName, "SaveSettings", false)
             end
         end
     else
@@ -2044,7 +2046,7 @@ function Utils.AutoCampCheck(tempConfig)
     if tempConfig.CampZoneId ~= mq.TLO.Zone.ID() then return end
 
     -- let pulling module handle camp decisions while it is enabled.
-    if RGMercConfig.SubModuleSettings.Pull.settings.DoPull then return end
+    if Utils.GetSetting('DoPull') then return end
 
     local me = mq.TLO.Me
 
