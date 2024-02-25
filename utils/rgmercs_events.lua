@@ -31,7 +31,7 @@ mq.event("CantSee", "You cannot see your target.", function()
                 if RGMercUtils.GetSetting('DoMelee') then
                     RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
                         (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                    RGMercUtils.NavInCombat(RGMercConfig:GetSettings(), mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+                    RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
                 end
             end
         end
@@ -98,7 +98,7 @@ local function tooFarHandler()
                 if RGMercUtils.GetSetting('DoMelee') then
                     RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
                         (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                    RGMercUtils.NavInCombat(RGMercConfig:GetSettings(), mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+                    RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
                 end
             end
         end

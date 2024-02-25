@@ -120,12 +120,19 @@ end
 
 ---@param targetId integer
 function Utils.SetTarget(targetId)
+    local info = debug.getinfo(4, "Snl")
+
+    local callerTracer = string.format("\ao%s\aw::\ao%s()\aw:\ao%-04d\ax",
+        info and info.short_src and info.short_src:match("[^\\^/]*.lua$") or "unknown_file", info and info.name or "unknown_func", info and info.currentline or 0)
     if targetId == mq.TLO.Target.ID() then return end
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if Utils.GetSetting('DoAutoTarget') then
         if Utils.GetTargetID() ~= targetId then
             Utils.DoCmd("/target id %d", targetId)
             mq.delay(10)
+            if mq.TLO.Target.PctHPs() > 90 then
+                printf("*********Engage WARNING TARGET ABOVE 90 : %s", callerTracer)
+            end
         end
     end
 end
@@ -960,6 +967,12 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             return false
         end
 
+        if targetSpawn() and targetSpawn.Dead() then
+            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s but my target (%d) is dead.",
+                spellName, targetId)
+            return false
+        end
+
         Utils.WaitGlobalCoolDown()
 
         if (Utils.GetXTHaterCount() > 0 or not bAllowMem) and (not Utils.CastReady(spellName) or not mq.TLO.Me.Gem(spellName)()) then
@@ -1568,7 +1581,7 @@ function Utils.GetTargetName(target)
     return (target and target.Name() or (mq.TLO.Target.Name() or ""))
 end
 
----@param target MQTarget|nil
+---@param target MQTarget|spawn|nil
 ---@return string
 function Utils.GetTargetCleanName(target)
     return (target and target.Name() or (mq.TLO.Target.CleanName() or ""))
@@ -1660,9 +1673,8 @@ function Utils.BigBurn()
     return Utils.GetSetting('BurnSize') >= 3
 end
 
----@param config table
 ---@param targetId integer
-function Utils.DoStick(config, targetId)
+function Utils.DoStick(targetId)
     if os.clock() - Utils.LastDoStick < 4 then
         RGMercsLogger.log_debug(
             "\ayIgnoring DoStick because we just stuck less than 4 seconds ago - let's give it some time.")
@@ -1671,8 +1683,8 @@ function Utils.DoStick(config, targetId)
 
     Utils.LastDoStick = os.clock()
 
-    if config.StickHow:len() > 0 then
-        Utils.DoCmd("/stick %s", config.StickHow)
+    if Utils.GetSetting('StickHow'):len() > 0 then
+        Utils.DoCmd("/stick %s", Utils.GetSetting('StickHow'))
     else
         if Utils.IAmMA() then
             Utils.DoCmd("/stick 20 id %d %s uw", targetId, Utils.GetSetting('MovebackWhenTank') and "moveback" or "")
@@ -1753,12 +1765,11 @@ function Utils.NavAroundCircle(target, radius, bDontStick)
     return false
 end
 
----@param config table
 ---@param targetId integer
 ---@param distance integer
 ---@param bDontStick boolean
-function Utils.NavInCombat(config, targetId, distance, bDontStick)
-    if not config.DoAutoEngage then return end
+function Utils.NavInCombat(targetId, distance, bDontStick)
+    if not Utils.GetSetting('DoAutoEngage') then return end
 
     if mq.TLO.Stick.Active() then
         Utils.DoCmd("/stick off")
@@ -1777,7 +1788,7 @@ function Utils.NavInCombat(config, targetId, distance, bDontStick)
     end
 
     if not bDontStick then
-        Utils.DoStick(config, targetId)
+        Utils.DoStick(targetId)
     end
 end
 
@@ -2088,9 +2099,7 @@ end
 ---@param autoTargetId integer
 ---@param preEngageRoutine fun()|nil
 function Utils.EngageTarget(autoTargetId, preEngageRoutine)
-    local config = RGMercConfig:GetSettings()
-
-    if not config.DoAutoEngage then return end
+    if not Utils.GetSetting('DoAutoEngage') then return end
 
     local target = mq.TLO.Target
 
@@ -2100,13 +2109,13 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
 
     RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Checking for valid Target.", Utils.GetTargetCleanName())
 
-    if target() and (target.ID() or 0) == autoTargetId and (mq.TLO.Target.Distance() or 0) <= config.AssistRange then
-        if config.DoMelee then
+    if target() and (target.ID() or 0) == autoTargetId and Utils.GetTargetDistance() <= Utils.GetSetting('AssistRange') then
+        if Utils.GetSetting('DoMelee') then
             if mq.TLO.Me.Sitting() then
                 mq.TLO.Me.Stand()
             end
 
-            if (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IAmMA()) and not Utils.GetTargetDead(target) then
+            if (Utils.GetTargetPctHPs() <= Utils.GetSetting('AutoAssistAt') or Utils.IAmMA()) and not Utils.GetTargetDead(target) then
                 if target.Distance() > Utils.GetTargetMaxRangeTo(target) then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
@@ -2114,13 +2123,13 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
                         preEngageRoutine()
                     end
 
-                    Utils.NavInCombat(config, autoTargetId, Utils.GetTargetMaxRangeTo(target), false)
+                    Utils.NavInCombat(autoTargetId, Utils.GetTargetMaxRangeTo(target), false)
                 else
                     if mq.TLO.Navigation.Active() then
                         Utils.DoCmd("/nav stop log=off")
                     end
                     if mq.TLO.Stick.Status():lower() == "off" then
-                        Utils.DoStick(config, autoTargetId)
+                        Utils.DoStick(autoTargetId)
                     end
 
                     if not mq.TLO.Me.Combat() then
@@ -2135,7 +2144,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
             RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Utils.GetTargetCleanName())
         end
     else
-        if not config.DoMelee and RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
+        if not Utils.GetSetting('DoMelee') and RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
             Utils.DoCmd("/stick pin 40")
         end
 
@@ -2641,9 +2650,7 @@ end
 ---@param targetId integer
 ---@return boolean
 function Utils.OkToEngagePreValidateId(targetId)
-    local config = RGMercConfig:GetSettings()
-
-    if not config.DoAutoEngage then return false end
+    if not Utils.GetSetting('DoAutoEngage') then return false end
     local target = mq.TLO.Spawn(targetId)
     local assistId = Utils.GetMainAssistId()
 
@@ -2662,29 +2669,29 @@ function Utils.OkToEngagePreValidateId(targetId)
     end
 
     if Utils.GetSetting('SafeTargeting') and Utils.IsSpawnFightingStranger(target, 100) then
-        RGMercsLogger.log_verbose("\ay  OkToEngageId() %s is fighting Stranger --> Not Engaging", Utils.GetTargetCleanName())
+        RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) is fighting Stranger --> Not Engaging", Utils.GetTargetCleanName())
         return false
     end
 
     if not RGMercConfig.Globals.BackOffFlag then --Utils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
-        local distanceCheck = Utils.GetTargetDistance(target) < config.AssistRange
-        local assistCheck = (Utils.GetTargetPctHPs(target) <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
+        local distanceCheck = Utils.GetTargetDistance(target) < Utils.GetSetting('AssistRange')
+        local assistCheck = (Utils.GetTargetPctHPs(target) <= Utils.GetSetting('AutoAssistAt') or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
-                RGMercsLogger.log_verbose("\ag  OkToEngageId() %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
-                    target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(target), config.AutoAssistAt, assistId,
+                RGMercsLogger.log_verbose("\ag  OkToEngageId(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!", Utils.GetTargetCleanName(target),
+                    Utils.GetTargetDistance(target), Utils.GetSetting('AssistRange'), Utils.GetTargetPctHPs(target), Utils.GetSetting('AutoAssistAt'), assistId,
                     mq.TLO.Me.ID())
             end
             return true
         else
-            RGMercsLogger.log_verbose("\ay  OkToEngageId() AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
+            RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)", Utils.GetTargetCleanName(target),
                 target.CleanName(), target.ID(), Utils.BoolToColorString(distanceCheck), Utils.GetTargetDistance(target),
                 Utils.BoolToColorString(assistCheck))
             return false
         end
     end
 
-    RGMercsLogger.log_verbose("\ay  OkToEngageId() Okay to Engage Failed with Fall Through!",
+    RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) Okay to Engage Failed with Fall Through!", Utils.GetTargetCleanName(target),
         Utils.BoolToColorString(pcCheck), Utils.BoolToColorString(mercCheck))
     return false
 end
@@ -2733,7 +2740,7 @@ function Utils.OkToEngage(autoTargetId)
         local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
-                RGMercsLogger.log_verbose("\ag  OkayToEngage() %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
+                RGMercsLogger.log_verbose("\ag  OkayToEngage(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!", Utils.GetTargetCleanName(),
                     target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
                     mq.TLO.Me.ID())
             end

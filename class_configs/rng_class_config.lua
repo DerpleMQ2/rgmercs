@@ -886,7 +886,7 @@ local _ClassConfig = {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.BurnCheck()
@@ -896,7 +896,7 @@ local _ClassConfig = {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.IsModeActive("Healer")
             end,
@@ -905,7 +905,7 @@ local _ClassConfig = {
             name = 'Defense',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -914,7 +914,7 @@ local _ClassConfig = {
             name = 'Tank',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and RGMercUtils.IsTanking()
             end,

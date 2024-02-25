@@ -23,7 +23,9 @@ _ClassConfig      = {
             RGMercConfig:GetSettings().AllowMezBreak = true
         else
             RGMercUtils.DoCmd("/pet taunt off")
-            RGMercConfig:GetSettings().AutoAssistAt = 98
+            if RGMercUtils.GetSetting('AutoAssistAt') == 100 then
+                RGMercConfig:GetSettings().AutoAssistAt = 98
+            end
             RGMercConfig:GetSettings().StayOnTarget = true
         end
     end,
@@ -884,7 +886,7 @@ _ClassConfig      = {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
@@ -894,7 +896,7 @@ _ClassConfig      = {
             name = 'Debuff',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
@@ -903,14 +905,14 @@ _ClassConfig      = {
             name = 'DPS PET',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.IsModeActive("PetTank")
             end,
         },
         {
             name = 'Weaves',
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     mq.TLO.Me.SpellInCooldown()
@@ -920,7 +922,7 @@ _ClassConfig      = {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
@@ -980,18 +982,18 @@ _ClassConfig      = {
             local petToyResolvedSpell = self.ResolvedActionMap[string.format("Pet%sSummon", type)]
 
             if not petToyResolvedSpell or not petToyResolvedSpell() then
-                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed to resolve Pet%sSummon item type!", type)
+                RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \arFailed to resolve Pet%sSummon item type!", type)
                 return false
             end
 
             if mq.TLO.Me.Level() < petToyResolvedSpell.Level() then
-                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed your level is below the pet toy spell(%s) level: %d!", petToyResolvedSpell.RankName(),
+                RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \arFailed your level is below the pet toy spell(%s) level: %d!", petToyResolvedSpell.RankName(),
                     petToyResolvedSpell.Level())
                 return false
             end
 
             if not RGMercUtils.PCSpellReady(petToyResolvedSpell) then
-                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed PCSpellReady() Check!", type)
+                RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \arFailed PCSpellReady() Check!", type)
                 return false
             end
 
@@ -1005,11 +1007,11 @@ _ClassConfig      = {
             end
 
             if openSlot == 0 then
-                RGMercsLogger.log_debug("summon_pet_toy() ==> \arFailed to find open top level inv slot!", openSlot)
+                RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \arFailed to find open top level inv slot!", openSlot)
                 return
             end
 
-            RGMercsLogger.log_debug("summon_pet_toy() ==> \agUsing PackID=%d", openSlot)
+            RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \agUsing PackID=%d", openSlot)
 
             RGMercUtils.UseSpell(petToyResolvedSpell.RankName(), mq.TLO.Me.ID(), RGMercUtils.GetXTHaterCount() == 0)
 

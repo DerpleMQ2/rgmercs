@@ -175,21 +175,23 @@ local function RGMercsGUI()
                             end
                         end
 
-                        local submoduleSettings = RGMercModules:ExecAll("GetSettings")
-                        local submoduleDefaults = RGMercModules:ExecAll("GetDefaultSettings")
-                        local submoduleCategories = RGMercModules:ExecAll("GetSettingCategories")
-                        for n, s in pairs(submoduleSettings) do
-                            if RGMercModules:ExecModule(n, "ShouldRender") then
-                                ImGui.PushID(n .. "_config_hdr")
-                                if s and submoduleDefaults[n] and submoduleCategories[n] then
-                                    if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                        s, pressed, _ = RGMercUtils.RenderSettings(s, submoduleDefaults[n], submoduleCategories[n], true)
-                                        if pressed then
-                                            RGMercModules:ExecModule(n, "SaveSettings", true)
+                        if RGMercConfig.Globals.SubmodulesLoaded then
+                            local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+                            local submoduleDefaults = RGMercModules:ExecAll("GetDefaultSettings")
+                            local submoduleCategories = RGMercModules:ExecAll("GetSettingCategories")
+                            for n, s in pairs(submoduleSettings) do
+                                if RGMercModules:ExecModule(n, "ShouldRender") then
+                                    ImGui.PushID(n .. "_config_hdr")
+                                    if s and submoduleDefaults[n] and submoduleCategories[n] then
+                                        if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
+                                            s, pressed, _ = RGMercUtils.RenderSettings(s, submoduleDefaults[n], submoduleCategories[n], true)
+                                            if pressed then
+                                                RGMercModules:ExecModule(n, "SaveSettings", true)
+                                            end
                                         end
                                     end
+                                    ImGui.PopID()
                                 end
-                                ImGui.PopID()
                             end
                         end
                         ImGui.Unindent()

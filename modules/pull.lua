@@ -767,7 +767,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                 end
 
                 if returnToCamp then
-                    if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 50) then
+                    if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
                         RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
@@ -775,7 +775,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                                 campData.AutoCampY)
                     end
                 else
-                    if (member.Distance() or 0) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 80) then
+                    if (member.Distance() or 0) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
                         RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
@@ -786,13 +786,13 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
                     if member.ID() == RGMercUtils.GetMainAssistId() then
-                        if returnToCamp and RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > RGMercUtils.GetSetting('AutoCampRadius') then
+                        if returnToCamp and RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(), campData.AutoCampY,
                                 campData.AutoCampX, campData.AutoCampZ, RGMercUtils.GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     else
-                        if RGMercUtils.GetDistance(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > RGMercUtils.GetSetting('AutoCampRadius') then
+                        if RGMercUtils.GetDistance(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
                                 RGMercUtils.GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
