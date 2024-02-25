@@ -1187,12 +1187,17 @@ _ClassConfig      = {
         },
         ['Burn'] = {
             {
-                name = "EarthPetItemSummon",
+                name = "EarthPetItemUse",
                 type = "CustomFunc",
+                cond = function(self)
+                    if not self.ResolvedActionMap['EarthPetItemSummon'] then return false end
+                    local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
+                    return mq.TLO.FindItemCount(baseItem)() > 1
+                end,
                 custom_func = function(self)
                     if not self.ResolvedActionMap['EarthPetItemSummon'] then return false end
                     local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
-                    if mq.TLO.FindItemCount(baseItem)() == 1 then
+                    if mq.TLO.FindItemCount(baseItem)() > 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
                         return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
                     end
@@ -1201,12 +1206,17 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "FirePetItemSummon",
+                name = "FirePetItemUse",
                 type = "CustomFunc",
+                cond = function(self)
+                    if not self.ResolvedActionMap['FirePetItemSummon'] then return false end
+                    local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
+                    return mq.TLO.FindItemCount(baseItem)() > 1
+                end,
                 custom_func = function(self)
                     if not self.ResolvedActionMap['FirePetItemSummon'] then return false end
                     local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
-                    if mq.TLO.FindItemCount(baseItem)() == 1 then
+                    if mq.TLO.FindItemCount(baseItem)() > 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
                         return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
                     end
