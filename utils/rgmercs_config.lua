@@ -2,7 +2,7 @@ local mq                             = require('mq')
 local RGMercUtils                    = require("utils.rgmercs_utils")
 local Set                            = require("mq.Set")
 
-local Config                         = { _version = '0.5a', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Greyn', }
+local Config                         = { _version = '1.0 Beta', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Greyn', }
 Config.__index                       = Config
 Config.settings                      = {}
 
