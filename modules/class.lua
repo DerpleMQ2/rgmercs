@@ -351,7 +351,7 @@ function Module:GetClassConfig()
 end
 
 function Module:SelfCheckAndRez()
-    local rezSearch = string.format("pccorpse %d radius 100 zradius 50", mq.TLO.Me.ID())
+    local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Me.DisplayName())
     local rezCount = mq.TLO.SpawnCount(rezSearch)()
 
     for i = 1, rezCount do
