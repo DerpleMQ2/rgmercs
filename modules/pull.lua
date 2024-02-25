@@ -693,7 +693,6 @@ function Module:ShouldPull()
         return false, string.format("Corrupted")
     end
 
-    RGMercsLogger.log_debug("%d >= %d", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
     if self:IsPullMode("Chain") and RGMercUtils.GetXTHaterCount() >= self.settings.ChainCount then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) >= ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)
         return false, string.format("XTargetCount(%d) > ChainCount(%d)", RGMercUtils.GetXTHaterCount(), self.settings.ChainCount)

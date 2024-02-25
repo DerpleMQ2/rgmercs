@@ -489,6 +489,8 @@ function Module:GiveTime(combat_state)
             RGMercsLogger.log_debug("Doing campfire maintainance")
             self:Campfire()
         end
+    else
+        --RGMercsLogger.log_debug("Skipping Campfire Checks")
     end
 
     if not self:ShouldFollow() then
