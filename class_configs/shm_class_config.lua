@@ -1227,15 +1227,25 @@ local _ClassConfig = {
             {
                 name = "GroupFocusSpell",
                 type = "Spell",
+                active_cond = function(self, spell)
+                    local havebuff = RGMercUtils.BuffActiveByID(spell.ID())
+                    local numEffects = spell.NumEffects()
+                    for i = 1, numEffects do
+                        havebuff = havebuff or RGMercUtils.BuffActiveByID(spell.Trigger(i).ID())
+                    end
+                    return havebuff
+                end,
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    local havebuff = RGMercUtils.BuffActiveByID(spell.ID())
                     local stacks = spell.StacksTarget()
                     local numEffects = spell.NumEffects()
                     for i = 1, numEffects do
                         stacks = stacks and spell.Trigger(i).StacksTarget()
+                        havebuff = havebuff or RGMercUtils.BuffActiveByID(spell.Trigger(i).ID())
                     end
-                    return not RGMercUtils.TargetHasBuff(spell, target) and stacks
+                    return stacks and not havebuff
                 end,
             },
         },

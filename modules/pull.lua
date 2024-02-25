@@ -747,11 +747,11 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                     RGMercUtils.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
                     return false, string.format("%s Low HP", member.CleanName())
                 end
-                if member.Class.CanCast() and member.PctMana() < resourcePct then
+                if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
                     return false, string.format("%s Low Mana", member.CleanName())
                 end
-                if member.PctEndurance() < resourcePct then
+                if member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
                     return false, string.format("%s Low End", member.CleanName())
                 end
