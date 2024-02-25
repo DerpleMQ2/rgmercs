@@ -175,18 +175,23 @@ local function RGMercsGUI()
                             end
                         end
 
-                        for n, s in pairs(RGMercConfig.SubModuleSettings) do
-                            if RGMercModules:ExecModule(n, "ShouldRender") then
-                                ImGui.PushID(n .. "_config_hdr")
-                                if s and s.settings and s.defaults and s.categories then
-                                    if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                        s.settings, pressed, _ = RGMercUtils.RenderSettings(s.settings, s.defaults, s.categories, true)
-                                        if pressed then
-                                            RGMercModules:ExecModule(n, "SaveSettings", true)
+                        if RGMercConfig.Globals.SubmodulesLoaded then
+                            local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+                            local submoduleDefaults = RGMercModules:ExecAll("GetDefaultSettings")
+                            local submoduleCategories = RGMercModules:ExecAll("GetSettingCategories")
+                            for n, s in pairs(submoduleSettings) do
+                                if RGMercModules:ExecModule(n, "ShouldRender") then
+                                    ImGui.PushID(n .. "_config_hdr")
+                                    if s and submoduleDefaults[n] and submoduleCategories[n] then
+                                        if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
+                                            s, pressed, _ = RGMercUtils.RenderSettings(s, submoduleDefaults[n], submoduleCategories[n], true)
+                                            if pressed then
+                                                RGMercModules:ExecModule(n, "SaveSettings", true)
+                                            end
                                         end
                                     end
+                                    ImGui.PopID()
                                 end
-                                ImGui.PopID()
                             end
                         end
                         ImGui.Unindent()
@@ -273,7 +278,9 @@ local function RGInit(...)
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
 
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
-    RGMercConfig:SetSubModules(RGMercModules:ExecAll("Init"))
+    RGMercModules:ExecAll("Init")
+    RGMercConfig.Globals.SubmodulesLoaded = true
+    RGMercConfig:UpdateCommandHandlers()
 
     if not RGMercUtils.GetSetting('DoTwist') then
         local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist", })

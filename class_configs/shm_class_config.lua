@@ -36,12 +36,17 @@ local _ClassConfig = {
         },
     },
     ['AbilitySets']       = {
-        ["FocusSpell"] = {
+        ["SingleFocusSpell"] = {
             -- Focus Spell - Lower Levels Mix in Single Target, Higher Prefer Group Target
-            "Inner Fire",                 -- Level 1 - Single
-            "Talisman of Tnarg",          -- Level 32 - Single
-            "Talisman of Altuna",         -- Level 40 - Single
-            "Talisman of Kragg",          -- Level 55 - Single
+            "Inner Fire",           -- Level 1 - Single
+            "Talisman of Tnarg",    -- Level 32 - Single
+            "Talisman of Altuna",   -- Level 40 - Single
+            "Talisman of Kragg",    -- Level 55 - Single
+            "Unity of the Kromrif", -- Level 111 - Single
+            "Unity of the Vampyre", -- Level 116 - Single
+            "Celeritous Unity",     -- Level 121 - Single
+        },
+        ['GroupFocusSpell'] = {
             "Khura's Focusing",           -- Level 60 - Group
             "Focus of the Seventh",       -- Level 65 - Group
             "Talisman of Wunshi",         -- Level 70 - Group
@@ -53,11 +58,8 @@ local _ClassConfig = {
             "Talisman of the Courageous", -- Level 100 - Group
             "Talisman of the Doomscale",  -- Level 105 - Group
             "Talisman of the Wulthan",    -- Level 110 - Group
-            "Unity of the Kromrif",       -- Level 111 - Single
             "Talisman of the Ry'Gorr",    -- Level 115 - Group
-            "Unity of the Vampyre",       -- Level 116 - Single
             "Talisman of the Usurper",    -- Level 120 - Group
-            "Celeritous Unity",           -- Level 121 - Single
             "Talisman of the Heroic",     -- Level 125 - Group
         },
         ["RunSpeedBuff"] = {
@@ -858,17 +860,16 @@ local _ClassConfig = {
             name = 'Debuff',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
                     RGMercUtils.BurnCheck() and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
@@ -878,7 +879,7 @@ local _ClassConfig = {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercConfig.Globals.AutoTargetID, } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
             end,
@@ -963,6 +964,13 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.GetSetting('DoAESlow')
+                end,
+            },
+            {
+                name = "Languid Bite",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.BuffActiveByID(mq.TLO.Spell("Languid Bite").RankName.ID())
                 end,
             },
             {
@@ -1222,6 +1230,30 @@ local _ClassConfig = {
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
+            {
+                name = "GroupFocusSpell",
+                type = "Spell",
+                active_cond = function(self, spell)
+                    local havebuff = RGMercUtils.BuffActiveByID(spell.ID())
+                    local numEffects = spell.NumEffects()
+                    for i = 1, numEffects do
+                        havebuff = havebuff or RGMercUtils.BuffActiveByID(spell.Trigger(i).ID())
+                    end
+                    return havebuff
+                end,
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    local havebuff = RGMercUtils.BuffActiveByID(spell.ID())
+                    local stacks = spell.StacksTarget()
+                    local numEffects = spell.NumEffects()
+                    for i = 1, numEffects do
+                        stacks = stacks and spell.Trigger(i).StacksTarget()
+                        havebuff = havebuff or RGMercUtils.BuffActiveByID(spell.Trigger(i).ID())
+                    end
+                    return stacks and not havebuff
+                end,
+            },
         },
         ['GroupBuff'] = {
             {
@@ -1304,7 +1336,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "FocusSpell",
+                name = "SingleFocusSpell",
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.

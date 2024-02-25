@@ -17,7 +17,7 @@ Module.Constants.GGHZones          = Set.new({ "poknowledge", "potranquility", "
 Module.Constants.CampfireNameToKit = {
     ['Regular Fellowship'] = 1,
     ['Empowered Fellowship'] = 2,
-    ['EScaled Wolf'] = 36,
+    ['Scaled Wolf'] = 36,
 }
 
 Module.DefaultConfig               = {
@@ -106,6 +106,18 @@ function Module:LoadSettings()
 
     -- Setup Defaults
     self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+end
+
+function Module:GetSettings()
+    return self.settings
+end
+
+function Module:GetDefaultSettings()
+    return self.DefaultConfig
+end
+
+function Module:GetSettingCategories()
+    return self.DefaultCategories
 end
 
 function Module.New()
@@ -477,6 +489,8 @@ function Module:GiveTime(combat_state)
             RGMercsLogger.log_debug("Doing campfire maintainance")
             self:Campfire()
         end
+    else
+        --RGMercsLogger.log_debug("Skipping Campfire Checks")
     end
 
     if not self:ShouldFollow() then

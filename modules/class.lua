@@ -94,6 +94,18 @@ function Module:LoadSettings()
     self:RescanLoadout()
 end
 
+function Module:GetSettings()
+    return self.settings
+end
+
+function Module:GetDefaultSettings()
+    return self.ClassConfig.DefaultConfig
+end
+
+function Module:GetSettingCategories()
+    return self.DefaultCategories
+end
+
 function Module.New()
     local newModule = setmetatable({ settings = {}, }, Module)
     return newModule
@@ -600,6 +612,11 @@ function Module:GiveTime(combat_state)
 
     -- dead... whoops
     if mq.TLO.Me.Hovering() then return end
+
+    if RGMercUtils.ShouldPriorityFollow() then
+        RGMercsLogger.log_verbose("\arSkipping Class GiveTime because we are moving and follow is the priority.")
+        return
+    end
 
     -- Main Module logic goes here.
     if self.TempSettings.NewCombatMode then

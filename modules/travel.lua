@@ -71,6 +71,18 @@ function Module:LoadSettings()
     end
 end
 
+function Module:GetSettings()
+    return self.settings
+end
+
+function Module:GetDefaultSettings()
+    return self.DefaultConfig
+end
+
+function Module:GetSettingCategories()
+    return self.DefaultCategories
+end
+
 function Module:TravelerUpdate(newData)
     if newData then
         RGMercsLogger.log_debug("\agGot new Traveler update from: \am%s", newData.Name)

@@ -1,12 +1,13 @@
 -- Sample Basic Class Module
 local mq                 = require('mq')
 local RGMercUtils        = require("utils.rgmercs_utils")
+local Set                = require("mq.Set")
 
 local Module             = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
 Module.__index           = Module
 Module.settings          = {}
 Module.DefaultConfig     = {}
-Module.DefaultCategories = {}
+Module.DefaultCategories = Set.new({})
 Module.Contributors      = require("extras.contributors")
 Module.ColorWheel        = {}
 Module.ColorWheelTimer   = {}
@@ -19,6 +20,18 @@ function Module:LoadSettings()
 
     -- Setup Defaults
     self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+end
+
+function Module:GetSettings()
+    return self.settings
+end
+
+function Module:GetDefaultSettings()
+    return self.DefaultConfig
+end
+
+function Module:GetSettingCategories()
+    return self.DefaultCategories
 end
 
 function Module.New()
