@@ -1336,6 +1336,94 @@ function Utils.GetSetting(setting)
     return ret.value
 end
 
+---@param module string
+---@param setting string
+---@param value any
+---@return boolean|string|number|nil
+function Utils.MakeValidSetting(module, setting, value)
+    local defaultConfig = RGMercConfig.DefaultConfig
+
+    if module ~= "Core" then
+        defaultConfig = RGMercConfig.SubModuleSettings[module].defaults
+    end
+
+    if type(defaultConfig[setting].Default) == 'number' then
+        value = tonumber(value)
+        if value > (defaultConfig[setting].Max or 999) or value < (defaultConfig[setting].Min or 0) then
+            RGMercsLogger.log_info("\ayError: %s is not a valid setting for %s.", value, setting)
+            local _, update = RGMercConfig:GetUsageText(setting, true, defaultConfig[setting])
+            RGMercsLogger.log_info(update)
+            return nil
+        end
+
+        return value
+    elseif type(defaultConfig[setting].Default) == 'boolean' then
+        local boolValue = false
+        if value == "true" or value == "on" or (tonumber(value) or 0) >= 1 then
+            boolValue = true
+        end
+
+        return boolValue
+    elseif type(defaultConfig[setting].Default) == 'string' then
+        return value
+    end
+
+    return nil
+end
+
+---@param setting string
+---@return string, string
+function Utils.MakeValidSettingName(setting)
+    for s, _ in pairs(RGMercConfig:GetSettings()) do
+        if s:lower() == setting:lower() then return "Core", s end
+    end
+
+    for moduleName, data in pairs(RGMercConfig.SubModuleSettings) do
+        for s, _ in pairs(data.settings) do
+            if s:lower() == setting:lower() then return moduleName, s end
+        end
+    end
+    return "None", "None"
+end
+
+---Sets a setting from either in global or a module setting table.
+---@param setting string #name of setting to get
+---@param value string|boolean|number
+function Utils.SetSetting(setting, value)
+    local defaultConfig = RGMercConfig.DefaultConfig
+    local settingModuleName = "Core"
+    local beforeUpdate = ""
+
+    settingModuleName, setting = Utils.MakeValidSettingName(setting)
+
+    if settingModuleName == "Core" then
+        local cleanValue = Utils.MakeValidSetting("Core", setting, value)
+        _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
+        if cleanValue ~= nil then
+            RGMercConfig:GetSettings()[setting] = cleanValue
+            RGMercConfig:SaveSettings(true)
+        end
+    elseif settingModuleName ~= "None" then
+        local data = RGMercConfig.SubModuleSettings[settingModuleName]
+        if data.settings[setting] ~= nil then
+            defaultConfig = data.defaults
+            _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
+            local cleanValue = Utils.MakeValidSetting(settingModuleName, setting, value)
+            if cleanValue ~= nil then
+                data.settings[setting] = cleanValue
+                RGMercModules:ExecModule(settingModuleName, "SaveSettings", true)
+            end
+        end
+    else
+        RGMercsLogger.log_error("Setting %s was not found!", setting)
+        return
+    end
+
+    local _, afterUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
+    RGMercsLogger.log_info("[%s] \ag%s :: Before :: %-5s", settingModuleName, setting, beforeUpdate)
+    RGMercsLogger.log_info("[%s] \ag%s :: After  :: %-5s", settingModuleName, setting, afterUpdate)
+end
+
 ---@param aaName string
 ---@return boolean
 function Utils.SelfBuffAACheck(aaName)
@@ -1943,15 +2031,14 @@ function Utils.DoCamp()
     return Utils.GetXTHaterCount() == 0 and RGMercConfig.Globals.AutoTargetID == 0
 end
 
----@param config table
 ---@param tempConfig table
-function Utils.AutoCampCheck(config, tempConfig)
-    if not config.ReturnToCamp then return end
+function Utils.AutoCampCheck(tempConfig)
+    if not Utils.GetSetting('ReturnToCamp') then return end
 
     if mq.TLO.Me.Casting.ID() and not Utils.MyClassIs("brd") then return end
 
     -- chasing a toon dont use camnp.
-    if config.ChaseOn then return end
+    if Utils.GetSetting('ChaseOn') then return end
 
     -- camped in a different zone.
     if tempConfig.CampZoneId ~= mq.TLO.Zone.ID() then return end
@@ -1969,7 +2056,9 @@ function Utils.AutoCampCheck(config, tempConfig)
         return
     end
 
-    if distanceToCamp < config.AutoCampRadius then return end
+    if not Utils.GetSetting('CampHard') then
+        if distanceToCamp < Utils.GetSetting('AutoCampRadius') then return end
+    end
 
     if distanceToCamp > 5 then
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)

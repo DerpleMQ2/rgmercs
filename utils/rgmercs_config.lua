@@ -297,81 +297,13 @@ function Config:UpdateCommandHandlers()
             local handled, usageString = self:GetUsageText(config, true, moduleData.defaults)
 
             if handled then
-                if type(configData.Default) == 'number' then
-                    self.CommandHandlers[config:lower()] = {
-                        name = config,
-                        usage = usageString,
-                        subModule = moduleName,
-                        category = configData.Category,
-                        about = configData.Tooltip,
-                        handler = function(self, value)
-                            value = tonumber(value)
-                            if value > (moduleData.defaults[config].Max or 999) or value < (moduleData.defaults[config].Min or 0) then
-                                RGMercsLogger.log_info("\ayError: %s is not a valid setting for %s.", value, config)
-                                local _, update = self:GetUsageText(config, true, moduleData.defaults)
-                                RGMercsLogger.log_info(update)
-                                return
-                            end
-                            local _, update = self:GetUsageText(config, false, moduleData.defaults)
-                            RGMercsLogger.log_info("\a-y%s :: Before :: %s", config, update)
-                            moduleData.settings[config] = value
-                            _, update = self:GetUsageText(config, false, moduleData.defaults)
-                            RGMercsLogger.log_info("\ag%s :: After  :: %s", config, update)
-                            if moduleName == "Core" then
-                                self:SaveSettings(true)
-                            else
-                                RGMercModules:ExecModule(moduleName, "SaveSettings", true)
-                            end
-                        end,
-                    }
-                end
-                if type(configData.Default) == 'boolean' then
-                    self.CommandHandlers[config:lower()] = {
-                        name = config,
-                        usage = usageString,
-                        subModule = moduleName,
-                        category = configData.Category,
-                        about = configData.Tooltip,
-                        handler = function(self, value)
-                            local boolValue = false
-                            if value == "true" or value == "on" or (tonumber(value) or 0) >= 1 then
-                                boolValue = true
-                            end
-
-                            local _, update = self:GetUsageText(config, false, moduleData.defaults)
-                            RGMercsLogger.log_info("\a-y%s :: Before :: %-5s", config, update)
-                            moduleData.settings[config] = boolValue
-                            _, update = self:GetUsageText(config, false, moduleData.defaults)
-                            RGMercsLogger.log_info("\ag%s :: After  :: %-5ss", config, update)
-                            if moduleName == "Core" then
-                                self:SaveSettings(true)
-                            else
-                                RGMercModules:ExecModule(moduleName, "SaveSettings", true)
-                            end
-                        end,
-                    }
-                end
-                if type(configData.Default) == 'string' then
-                    self.CommandHandlers[config:lower()] = {
-                        name = config,
-                        usage = usageString,
-                        subModule = moduleName,
-                        category = configData.Category,
-                        about = configData.Tooltip,
-                        handler = function(self, value)
-                            local _, update = self:GetUsageText(config, false, moduleData.defaults)
-                            RGMercsLogger.log_info("\a-y%s :: Before :: \"%s\"", config, update)
-                            moduleData.settings[config] = value
-                            _, update = self:GetUsageText(config, false, moduleData.defaults)
-                            RGMercsLogger.log_info("\ag%s :: After  :: \"%s\"", config, update)
-                            if moduleName == "Core" then
-                                self:SaveSettings(true)
-                            else
-                                RGMercModules:ExecModule(moduleName, "SaveSettings", true)
-                            end
-                        end,
-                    }
-                end
+                self.CommandHandlers[config:lower()] = {
+                    name = config,
+                    usage = usageString,
+                    subModule = moduleName,
+                    category = configData.Category,
+                    about = configData.Tooltip,
+                }
             end
         end
     end
@@ -495,7 +427,7 @@ function Config:HandleBind(config, value)
     end
 
     if self.CommandHandlers[config:lower()] ~= nil then
-        self.CommandHandlers[config:lower()].handler(self, value)
+        RGMercUtils.SetSetting(config, value)
         handled = true
     else
         RGMercsLogger.log_error("\at%s\aw - \arNot a valid config setting!\ax", config)
