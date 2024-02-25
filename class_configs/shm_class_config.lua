@@ -1309,7 +1309,12 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget()
+                    local stacks = spell.StacksTarget()
+                    local numEffects = spell.NumEffects()
+                    for i = 1, numEffects do
+                        stacks = stacks and spell.Trigger(i).StacksTarget()
+                    end
+                    return not RGMercUtils.TargetHasBuff(spell, target) and stacks
                 end,
             },
             {

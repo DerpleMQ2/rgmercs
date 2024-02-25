@@ -336,6 +336,17 @@ end)
 
 -- [ END MEZ HANDLERS ] --
 
+-- [ SUMMONED HANDLERS ] --
+
+mq.event('Summoned', "You have been summoned!", function(_)
+    if RGMercUtils.GetSetting('DoAutoEngage') and not RGMercUtils.GetSetting('DoMelee') and not RGMercUtils.IAmMA() and RGMercUtils.GetSetting('ReturnToCamp') then
+        RGMercUtils.PrintGroupMessage("%s was just summoned -- returning to camp!", mq.TLO.Me.DisplayName())
+        RGMercModules:ExecModule("Movement", "DoAutoCampCheck")
+    end
+end)
+
+-- [ END SUMMONED HANDLERS ] --
+
 -- [ GAME EVENT HANDLERS ] --
 
 mq.event('Camping', "It will take you about #1# seconds to prepare your camp.", function(_, seconds)
