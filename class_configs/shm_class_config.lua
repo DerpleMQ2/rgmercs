@@ -862,8 +862,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    RGMercUtils.IsModeActive("Hybrid") and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -965,6 +964,13 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.GetSetting('DoAESlow')
+                end,
+            },
+            {
+                name = "Languid Bite",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.BuffActiveByID(mq.TLO.Spell("Languid Bite").RankName.ID())
                 end,
             },
             {
