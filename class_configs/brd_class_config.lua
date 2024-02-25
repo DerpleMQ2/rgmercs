@@ -1346,7 +1346,18 @@ local _ClassConfig = {
 
         },
     },
-
+    ['PullAbilities'] = {
+        {
+            id = 'Boastful Bellow',
+            Type = "AA",
+            DisplayName = 'Boastful Bellow',
+            AbilityName = 'Boastful Bellow',
+            AbilityRange = 250,
+            cond = function(self)
+                return mq.TLO.Me.AltAbility('Boastful Bellow')
+            end,
+        },
+    },
     ['DefaultConfig'] = {
         ['Mode']             = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
         ['UseAASelo']        = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true, },

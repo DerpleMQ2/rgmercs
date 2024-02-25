@@ -114,6 +114,10 @@ local _ClassConfig = {
         },
         ['SwarmPet'] = {
             ---SwarmPet >= LVL85
+            "Call Relentless Skeleton",
+            "Call Ruthless Skeleton",
+            "Call Ruinous Skeleton",
+            "Call Rumbling Skeleton",
             "Call Skeleton Thrall",
             "Call Skeleton Mass",
             "Call Skeleton Horde",

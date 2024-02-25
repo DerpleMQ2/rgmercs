@@ -1382,6 +1382,10 @@ function Module:GiveTime(combat_state)
                         local abilityName = pullAbility.AbilityName
                         if type(abilityName) == 'function' then abilityName = abilityName() end
                         RGMercUtils.UseSpell(abilityName, self.TempSettings.PullID, false)
+                    elseif pullAbility.Type:lower() == "aa" then
+                        local aaName = pullAbility.AbilityName
+                        if type(aaName) == 'function' then aaName = aaName() end
+                        RGMercUtils.UseAA(aaName, self.TempSettings.PullID)
                     else
                         RGMercsLogger.log_error("\arInvalid PullAbilityType: %s :: %s", pullAbility.Type, pullAbility.id)
                     end
