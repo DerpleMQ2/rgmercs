@@ -210,6 +210,9 @@ Config.DefaultConfig = {
     -- [ ASSIST ] --
     ['OutsideAssistList']   = { DisplayName = "List of Outsiders to Assist", Category = "Assist", Tooltip = "List of Outsiders to Assist", Type = "Custom", Default = {}, ConfigType = "Advanced", },
 
+    -- [ MOVEMENT ] --
+    ['PriorityFollow']      = { DisplayName = "Prioritize Follow", Category = "Movement", Tooltip = "If enabled you will follow more aggresively at the cost of rotations.", Default = false, ConfigType = "Advanced", },
+
     -- [ BURNS ] --
     ['BurnSize']            = { DisplayName = "Do Burn Size", Category = "Burns", Tooltip = "0=Off, 1=Small, 2=Medium, 3=Large", Default = 1, Min = 0, Max = 3, ConfigType = "Advanced", },
     ['BurnAuto']            = { DisplayName = "Auto Burn", Category = "Burns", Tooltip = "Automatically burn", Default = false, ConfigType = "Normal", },

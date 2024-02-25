@@ -613,6 +613,11 @@ function Module:GiveTime(combat_state)
     -- dead... whoops
     if mq.TLO.Me.Hovering() then return end
 
+    if RGMercUtils.ShouldPriorityFollow() then
+        RGMercsLogger.log_verbose("\arSkipping Class GiveTime because we are moving and follow is the priority.")
+        return
+    end
+
     -- Main Module logic goes here.
     if self.TempSettings.NewCombatMode then
         RGMercsLogger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[self.settings.Mode])

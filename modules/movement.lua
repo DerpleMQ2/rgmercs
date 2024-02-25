@@ -17,7 +17,7 @@ Module.Constants.GGHZones          = Set.new({ "poknowledge", "potranquility", "
 Module.Constants.CampfireNameToKit = {
     ['Regular Fellowship'] = 1,
     ['Empowered Fellowship'] = 2,
-    ['EScaled Wolf'] = 36,
+    ['Scaled Wolf'] = 36,
 }
 
 Module.DefaultConfig               = {

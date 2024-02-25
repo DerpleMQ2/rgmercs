@@ -1196,6 +1196,10 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
     -- Used for bards to dynamically weave properly
     if rotationTable.doFullRotation then start_step = 1 end
     for idx, entry in ipairs(rotationTable) do
+        if Utils.ShouldPriorityFollow() then
+            break
+        end
+
         if idx >= start_step then
             RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             lastStepIdx = idx
@@ -1321,8 +1325,9 @@ end
 
 ---Returns a setting from either the global or a module setting table.
 ---@param setting string #name of setting to get
+---@param failOk boolean? # if we cant find it that is okay.
 ---@return any|string|nil
-function Utils.GetSetting(setting)
+function Utils.GetSetting(setting, failOk)
     local ret = { module = "Base", value = RGMercConfig:GetSettings()[setting], }
 
     -- if we found it in the Global table we should alert if it is duplicated anywhere
@@ -1341,10 +1346,13 @@ function Utils.GetSetting(setting)
         end
     end
 
+
     if ret.value ~= nil then
         RGMercsLogger.log_super_verbose("\ag[Setting] \at'%s' \agfound in module \am%s", setting, ret.module)
     else
-        RGMercsLogger.log_error("\ag[Setting] \at'%s' \aywas requested but not found in any module!", setting)
+        if not failOk then
+            RGMercsLogger.log_error("\ag[Setting] \at'%s' \aywas requested but not found in any module!", setting)
+        end
     end
 
     return ret.value
@@ -2001,6 +2009,16 @@ function Utils.DoBuffCheck()
     if RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
 
     return true
+end
+
+---@return boolean
+function Utils.ShouldPriorityFollow()
+    local chaseSpawn = mq.TLO.Spawn("pc =" .. (Utils.GetSetting('ChaseTarget', true) or "NoOne"))
+    if chaseSpawn() and Utils.GetSetting('PriorityFollow') and Utils.GetSetting('ChaseOn') and (mq.TLO.Me.Moving() or (chaseSpawn.Distance() or 0) > Utils.GetSetting('ChaseDistance')) then
+        return true
+    end
+
+    return false
 end
 
 ---@return boolean
