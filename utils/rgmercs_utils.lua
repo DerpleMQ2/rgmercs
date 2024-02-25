@@ -155,6 +155,7 @@ function Utils.HandleDeath()
     RGMercModules:ExecAll("OnDeath")
 
     while mq.TLO.Me.Hovering() do
+        RGMercsLogger.log_debug("Trying to release...")
         if mq.TLO.Window("RespawnWnd").Open() and Utils.GetSetting('InstantRelease') then
             mq.TLO.Window("RespawnWnd").Child("RW_OptionsList").Select(1)
             mq.delay("1s")
@@ -166,7 +167,10 @@ function Utils.HandleDeath()
 
     mq.delay("1m", function() return (not mq.TLO.Me.Zoning()) end)
 
+    RGMercsLogger.log_debug("Done zoning post death.")
+
     if Utils.GetSetting('DoFellow') then
+        RGMercsLogger.log_debug("Doing fellowship post death.")
         if mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() == 0 then
             mq.delay("30s", function() return (mq.TLO.Me.CombatState():lower() == "active") end)
             Utils.DoCmd("/useitem \"Fellowship Registration Insignia\"")
