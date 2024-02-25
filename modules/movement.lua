@@ -26,6 +26,7 @@ Module.DefaultConfig               = {
     ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100, },
     ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
     ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
+    ['CampHard']         = { DisplayName = "Camp Hard", Category = "Camp", Tooltip = "Return to Camp Loc Everytime", Default = false, },
     ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; 3: Empowered Fellowship; 4: Scaled Wolf", Type = "Combo", ComboOptions = { 'Off', 'Regular Fellowship', 'Empowered Fellowship', "Scaled Wolf", }, Default = 2, Min = 1, Max = 4, },
     ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
 }
@@ -226,11 +227,11 @@ function Module:Campfire(camptype)
         end
     end
 
-    local spawnCount  = mq.TLO.SpawnCount("PC radius 50")()
+    local spawnCount  = mq.TLO.SpawnCount("PC radius 100")()
     local fellowCount = 0
 
     for i = 1, spawnCount do
-        local spawn = mq.TLO.NearestSpawn(i, "PC radius 50")
+        local spawn = mq.TLO.NearestSpawn(i, "PC radius 100")
 
         if spawn() and mq.TLO.Me.Fellowship.Member(spawn.CleanName()) then
             fellowCount = fellowCount + 1
@@ -278,7 +279,7 @@ end
 function Module:Render()
     ImGui.Text("Chase Module")
 
-    if self.settings and self.ModuleLoaded then
+    if self.settings and self.ModuleLoaded and RGMercConfig.Globals.SubmodulesLoaded then
         ImGui.Text(string.format("Chase Distance: %d", self.settings.ChaseDistance))
         ImGui.Text(string.format("Chase LOS Required: %s", self.settings.LineOfSight and "On" or "Off"))
 
@@ -407,6 +408,10 @@ function Module:OnZone()
     self:CampOff()
 end
 
+function Module:DoAutoCampCheck()
+    RGMercUtils.AutoCampCheck(self.TempSettings)
+end
+
 function Module:GiveTime(combat_state)
     if mq.TLO.Me.Hovering() and self.settings.ChaseOn then
         RGMercsLogger.log_warn("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
@@ -464,7 +469,7 @@ function Module:GiveTime(combat_state)
     end
 
     if RGMercUtils.DoCamp() then
-        RGMercUtils.AutoCampCheck(self.settings, self.TempSettings)
+        self:DoAutoCampCheck()
     end
 
     if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
