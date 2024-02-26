@@ -130,9 +130,6 @@ function Utils.SetTarget(targetId)
         if Utils.GetTargetID() ~= targetId then
             Utils.DoCmd("/target id %d", targetId)
             mq.delay(10)
-            if mq.TLO.Target.PctHPs() > 90 then
-                printf("*********Engage WARNING TARGET ABOVE 90 : %s", callerTracer)
-            end
         end
     end
 end
@@ -2138,7 +2135,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
             end
 
             if (Utils.GetTargetPctHPs() <= Utils.GetSetting('AutoAssistAt') or Utils.IAmMA()) and not Utils.GetTargetDead(target) then
-                if target.Distance() > Utils.GetTargetMaxRangeTo(target) then
+                if Utils.GetTargetDistance(target) > Utils.GetTargetMaxRangeTo(target) then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
                     if preEngageRoutine then

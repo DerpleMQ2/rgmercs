@@ -17,6 +17,9 @@ Module.TempSettings.AbortPull            = false
 Module.TempSettings.PullID               = 0
 Module.TempSettings.LastPullAbilityCheck = 0
 Module.TempSettings.LastPullerMercChec   = 0
+Module.TempSettings.HuntX                = 0
+Module.TempSettings.HuntY                = 0
+Module.TempSettings.HuntZ                = 0
 
 
 local PullStates              = {
@@ -135,6 +138,7 @@ Module.DefaultConfig                   = {
     ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pull Distance", Tooltip = "Distnace to pull", Default = 350, Min = 1, Max = 10000, },
     ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pull Distance", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 150, },
     ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pull Distance", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
+    ['PullRadiusHunt']     = { DisplayName = "Pull Radius Hunt", Category = "Pull Distance", Tooltip = "Distnace to pull in Hunt mode from your starting position", Default = 500, Min = 1, Max = 10000, },
     ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
     ['PullMaxCon']         = { DisplayName = "Pull Max Con", Category = "Pull Targets", Tooltip = "Max Con Mobs to consider pulling", Default = 5, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
     ['UsePullLevels']      = { DisplayName = "Use Pull Levels", Category = "Pull Targets", Tooltip = "Use Min and Max Levels Instead of Con.", Default = false, ConfigType = "Advanced", },
@@ -450,7 +454,9 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text(tostring(#self.TempSettings.PullTargets))
             ImGui.TableNextColumn()
-            ImGui.Text("Current Farm WP ID")
+            ImGui.Text("Hunt X,Y,Z")
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%d, %d, %d", self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ))
             ImGui.TableNextColumn()
             local wpId = self:GetCurrentWpId()
             local wpData = self:GetWPById(wpId)
@@ -827,7 +833,14 @@ function Module:FixPullerMerc()
 end
 
 function Module:FindTarget()
-    local pullRadius = self.Constants.PullModes[self.settings.PullMode] == "Farm" and self.settings.PullRadiusFarm or self.settings.PullRadius
+    local pullRadius = RGMercUtils.GetSetting('PullRadius')
+
+    if self:IsPullMode("Farm") then
+        pullRadius = RGMercUtils.GetSetting('PullRadiusFarm')
+    elseif self:IsPullMode("Hunt") then
+        pullRadius = RGMercUtils.GetSetting('PullRadiusHunt')
+    end
+
     local pullSearchString = string.format("npc radius %d targetable zradius %d range %d %d playerstate 0",
         pullRadius, self.settings.PullZRadius,
         (self.settings.UsePullLevels and self.settings.PullMinLevel or 1),
@@ -837,6 +850,9 @@ function Module:FindTarget()
         local wpId = self:GetCurrentWpId()
         local wpData = self:GetWPById(wpId)
         pullSearchString = pullSearchString .. string.format(" loc  %0.2f, %0.2f, %0.2f", wpData.x, wpData.y, wpData.z)
+        RGMercsLogger.log_debug("FindTarget :: Mode: Farm :: %s", pullSearchString)
+    elseif self:IsPullMode("Hunt") then
+        pullSearchString = pullSearchString .. string.format(" loc  %0.2f, %0.2f, %0.2f", self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ)
         RGMercsLogger.log_debug("FindTarget :: Mode: Farm :: %s", pullSearchString)
     else
         RGMercsLogger.log_debug("FindTarget :: Mode: %s :: %s", self.Constants.PullModes[self.settings.PullMode], pullSearchString)
@@ -946,6 +962,11 @@ function Module:CheckForAbort(pullID)
         return true
     end
 
+    if spawn.FeetWet() ~= mq.TLO.Me.FeetWet() then
+        RGMercsLogger.log_debug("\ar ALERT: Aborting feet wet mismatch \ax")
+        return true
+    end
+
     -- ignore distance if this is a manually requested pull
     if pullID ~= self.TempSettings.TargetSpawnID then
         if not self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadius then
@@ -1043,7 +1064,21 @@ function Module:GiveTime(combat_state)
     self:SetValidPullAbilities()
     self:FixPullerMerc()
 
+    if not RGMercUtils.GetSetting('DoPull') and (self.TempSettings.HuntX ~= 0 or self.TempSettings.HuntY ~= 0 or self.TempSettings.HuntZ ~= 0) then
+        self.TempSettings.HuntX = 0
+        self.TempSettings.HuntY = 0
+        self.TempSettings.HuntZ = 0
+        RGMercUtils.DoCmd("/mapfilter pullradius off")
+    end
+
     if not RGMercUtils.GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
+
+    if RGMercUtils.GetSetting('DoPull') and self:IsPullMode("Hunt") and (self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) then
+        self.TempSettings.HuntX = mq.TLO.Me.X()
+        self.TempSettings.HuntY = mq.TLO.Me.Y()
+        self.TempSettings.HuntZ = mq.TLO.Me.Z()
+        RGMercUtils.DoCmd("/mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadiusHunt'))
+    end
 
     if not mq.TLO.Navigation.MeshLoaded() then
         RGMercsLogger.log_debug("\ar ERROR: There's no mesh for this zone. Can't pull. \ax")
