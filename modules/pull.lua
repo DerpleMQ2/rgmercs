@@ -161,6 +161,18 @@ for _, v in pairs(Module.DefaultConfig) do
     end
 end
 
+Module.CommandHandlers = {
+    pulltarget = {
+        usage = "/rgl pulltarget",
+        about = "Pulls your current target using your rgmercs pull ability",
+        handler = function(self, ...)
+            self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
+            table.insert(self.TempSettings.PullTargets, { spawn = mq.TLO.Target, distance = mq.TLO.Target.Distance(), })
+            return true
+        end,
+    },
+}
+
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
@@ -1525,7 +1537,7 @@ function Module:DoGetState()
 end
 
 function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = {}, }
+    return { module = self._name, CommandHandlers = self.CommandHandlers, }
 end
 
 ---@param cmd string
@@ -1534,7 +1546,12 @@ end
 function Module:HandleBind(cmd, ...)
     local params = ...
     local handled = false
-    -- /rglua cmd handler
+
+    if self.CommandHandlers[cmd:lower()] ~= nil then
+        self.CommandHandlers[cmd:lower()].handler(self, params)
+        handled = true
+    end
+
     return handled
 end
 
