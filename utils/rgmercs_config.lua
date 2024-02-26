@@ -186,7 +186,7 @@ Config.DefaultConfig = {
     ['BigHealPoint']        = { DisplayName = "Big Heal Point", Category = "Heals", Tooltip = "Set to 0-100 for health point for Intervention", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
     ['GroupHealPoint']      = { DisplayName = "Group Heal Point", Category = "Heals", Tooltip = "Set to 0-100 for health point for Group Heal", Default = 85, Min = 1, Max = 100, ConfigType = "Advanced", },
     ['PetHealPoint']        = { DisplayName = "Pet Heal Point", Category = "Heals", Tooltip = "Set to 0-100 for health point for Pet Heal", Default = 85, Min = 1, Max = 100, ConfigType = "Advanced", },
-    ['GroupInjureCnt']      = { DisplayName = "Group Heal Point", Category = "Heals", Tooltip = "Number of group members to be injured before using a group heal spell.", Default = 3, Min = 1, Max = 5, ConfigType = "Advanced", },
+    ['GroupInjureCnt']      = { DisplayName = "Group Injured Count", Category = "Heals", Tooltip = "Number of group members to be injured before using a group heal spell.", Default = 3, Min = 1, Max = 5, ConfigType = "Advanced", },
     ['DoPetHeals']          = { DisplayName = "Do Pet Heals", Category = "Heals", Tooltip = "Heal Pets?", Default = false, ConfigType = "Advanced", },
     ['MaxHealPoint']        = { DisplayName = "Max Heal Point", Category = "Heals", Tooltip = "The point at which you stop healing.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
     ['LightHealPoint']      = { DisplayName = "Ligh tHeal Point", Category = "Heals", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
