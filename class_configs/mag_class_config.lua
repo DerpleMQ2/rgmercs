@@ -1186,6 +1186,19 @@ _ClassConfig      = {
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
             },
+            {
+                name = "Drop Cursor Items",
+                type = "CustomFunc",
+                cond = function(self)
+                    return mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0
+                end,
+                custom_func = function(self)
+                    if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
+                        RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
+                        RGMercUtils.DoCmd("/autoinventory")
+                    end
+                end,
+            },
         },
         ['Burn'] = {
             {
