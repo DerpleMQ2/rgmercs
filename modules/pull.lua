@@ -21,8 +21,7 @@ Module.TempSettings.HuntX                = 0
 Module.TempSettings.HuntY                = 0
 Module.TempSettings.HuntZ                = 0
 
-
-local PullStates              = {
+local PullStates                         = {
     ['PULL_IDLE']               = 1,
     ['PULL_GROUPWATCH_WAIT']    = 2,
     ['PULL_NAV_INTERRUPT']      = 3,
@@ -35,7 +34,7 @@ local PullStates              = {
     ['PULL_WAITING_SHOULDPULL'] = 10,
 }
 
-local PullStateDisplayStrings = {
+local PullStateDisplayStrings            = {
     ['PULL_IDLE']               = { Display = ICONS.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
     ['PULL_GROUPWATCH_WAIT']    = { Display = ICONS.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_NAV_INTERRUPT']      = { Display = ICONS.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
@@ -48,7 +47,7 @@ local PullStateDisplayStrings = {
     ['PULL_WAITING_SHOULDPULL'] = { Display = ICONS.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
 }
 
-local PullStatesIDToName      = {}
+local PullStatesIDToName                 = {}
 for k, v in pairs(PullStates) do PullStatesIDToName[v] = k end
 
 Module.TempSettings.PullState          = PullStates.PULL_IDLE
@@ -772,7 +771,7 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                 end
 
                 if returnToCamp then
-                    if RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
+                    if RGMercUtils.GetDistanceSquared(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200 ^ 2) then
                         RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
@@ -791,13 +790,13 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
                     if member.ID() == RGMercUtils.GetMainAssistId() then
-                        if returnToCamp and RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
+                        if returnToCamp and RGMercUtils.GetDistanceSquared(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200 ^ 2) then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(), campData.AutoCampY,
                                 campData.AutoCampX, campData.AutoCampZ, RGMercUtils.GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     else
-                        if RGMercUtils.GetDistance(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
+                        if RGMercUtils.GetDistanceSquared(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200 ^ 2) then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
                                 RGMercUtils.GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
@@ -913,6 +912,7 @@ function Module:FindTarget()
                             RGMercsLogger.log_debug("\agIgnoring mob in water water: %s", spawn.CleanName())
                             doInsert = false
                         end
+
                         RGMercsLogger.log_debug("\ayInsert Allowed: %s", doInsert and "\agYes", "\arNo")
 
                         if doInsert then
@@ -959,11 +959,6 @@ function Module:CheckForAbort(pullID)
 
     if not spawn or spawn.Dead() or not spawn.ID() or spawn.ID() == 0 then
         RGMercsLogger.log_debug("\ar ALERT: Aborting mob died or despawned \ax")
-        return true
-    end
-
-    if spawn.FeetWet() ~= mq.TLO.Me.FeetWet() then
-        RGMercsLogger.log_debug("\ar ALERT: Aborting feet wet mismatch \ax")
         return true
     end
 
@@ -1100,9 +1095,9 @@ function Module:GiveTime(combat_state)
             -- go back to camp.
             self:SetPullState(PullStates.PULL_WAITING_SHOULDPULL, reason)
             if campData.returnToCamp then
-                local distanceToCamp = RGMercUtils.GetDistance(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampY, campData.campSettings.AutoCampX)
-                if distanceToCamp > RGMercUtils.GetSetting('AutoCampRadius') then
-                    RGMercsLogger.log_debug("Distance to camp is %d and radius is %d - going closer.", distanceToCamp, RGMercUtils.GetSetting('AutoCampRadius'))
+                local distanceToCampSq = RGMercUtils.GetDistanceSquared(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampY, campData.campSettings.AutoCampX)
+                if distanceToCampSq > (RGMercUtils.GetSetting('AutoCampRadius') ^ 2) then
+                    RGMercsLogger.log_debug("Distance to camp is %d and radius is %d - going closer.", math.sqrt(distanceToCampSq), RGMercUtils.GetSetting('AutoCampRadius'))
                     RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
                 end
             end
@@ -1417,6 +1412,11 @@ function Module:GiveTime(combat_state)
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
                     mq.doevents()
+
+                    if mq.TLO.Target.FeetWet() ~= mq.TLO.Me.FeetWet() then
+                        RGMercsLogger.log_debug("\ar ALERT: Feet wet mismatch - Moving around\ax")
+                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, RGMercUtils.GetTargetDistance() * 0.9, requireLOS)
+                    end
 
                     if pullAbility.Type:lower() == "ability" then
                         if mq.TLO.Me.AbilityReady(pullAbility.id)() then
