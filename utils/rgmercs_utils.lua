@@ -2205,7 +2205,11 @@ function Utils.KillPCPet()
     RGMercsLogger.log_warn("\arKilling your pet!")
     local problemPetOwner = mq.TLO.Spawn(string.format("id %d", mq.TLO.Me.XTarget(1).ID())).Master.CleanName()
 
-    Utils.DoCmd("/dexecute %s /pet leave", problemPetOwner)
+    if problemPetOwner == mq.TLO.Me.DisplayName() then
+        Utils.DoCmd("/pet leave", problemPetOwner)
+    else
+        Utils.DoCmd("/dex %s /pet leave", problemPetOwner)
+    end
 end
 
 ---@param name string
