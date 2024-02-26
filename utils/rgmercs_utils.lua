@@ -130,9 +130,6 @@ function Utils.SetTarget(targetId)
         if Utils.GetTargetID() ~= targetId then
             Utils.DoCmd("/target id %d", targetId)
             mq.delay(10)
-            if mq.TLO.Target.PctHPs() > 90 then
-                printf("*********Engage WARNING TARGET ABOVE 90 : %s", callerTracer)
-            end
         end
     end
 end
@@ -155,6 +152,7 @@ function Utils.HandleDeath()
     RGMercModules:ExecAll("OnDeath")
 
     while mq.TLO.Me.Hovering() do
+        RGMercsLogger.log_debug("Trying to release...")
         if mq.TLO.Window("RespawnWnd").Open() and Utils.GetSetting('InstantRelease') then
             mq.TLO.Window("RespawnWnd").Child("RW_OptionsList").Select(1)
             mq.delay("1s")
@@ -166,7 +164,10 @@ function Utils.HandleDeath()
 
     mq.delay("1m", function() return (not mq.TLO.Me.Zoning()) end)
 
+    RGMercsLogger.log_debug("Done zoning post death.")
+
     if Utils.GetSetting('DoFellow') then
+        RGMercsLogger.log_debug("Doing fellowship post death.")
         if mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() == 0 then
             mq.delay("30s", function() return (mq.TLO.Me.CombatState():lower() == "active") end)
             Utils.DoCmd("/useitem \"Fellowship Registration Insignia\"")
@@ -2134,7 +2135,7 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
             end
 
             if (Utils.GetTargetPctHPs() <= Utils.GetSetting('AutoAssistAt') or Utils.IAmMA()) and not Utils.GetTargetDead(target) then
-                if target.Distance() > Utils.GetTargetMaxRangeTo(target) then
+                if Utils.GetTargetDistance(target) > Utils.GetTargetMaxRangeTo(target) then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
                     if preEngageRoutine then

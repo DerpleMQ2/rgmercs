@@ -1186,6 +1186,19 @@ _ClassConfig      = {
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
             },
+            {
+                name = "Drop Cursor Items",
+                type = "CustomFunc",
+                cond = function(self)
+                    return mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0
+                end,
+                custom_func = function(self)
+                    if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
+                        RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
+                        RGMercUtils.DoCmd("/autoinventory")
+                    end
+                end,
+            },
         },
         ['Burn'] = {
             {
@@ -1194,12 +1207,12 @@ _ClassConfig      = {
                 cond = function(self)
                     if not self.ResolvedActionMap['EarthPetItemSummon'] then return false end
                     local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
-                    return mq.TLO.FindItemCount(baseItem)() > 1
+                    return mq.TLO.FindItemCount(baseItem)() >= 1
                 end,
                 custom_func = function(self)
                     if not self.ResolvedActionMap['EarthPetItemSummon'] then return false end
                     local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
-                    if mq.TLO.FindItemCount(baseItem)() > 1 then
+                    if mq.TLO.FindItemCount(baseItem)() >= 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
                         return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
                     end
@@ -1213,12 +1226,12 @@ _ClassConfig      = {
                 cond = function(self)
                     if not self.ResolvedActionMap['FirePetItemSummon'] then return false end
                     local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
-                    return mq.TLO.FindItemCount(baseItem)() > 1
+                    return mq.TLO.FindItemCount(baseItem)() >= 1
                 end,
                 custom_func = function(self)
                     if not self.ResolvedActionMap['FirePetItemSummon'] then return false end
                     local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
-                    if mq.TLO.FindItemCount(baseItem)() > 1 then
+                    if mq.TLO.FindItemCount(baseItem)() >= 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
                         return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
                     end
