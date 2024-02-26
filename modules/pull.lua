@@ -21,8 +21,7 @@ Module.TempSettings.HuntX                = 0
 Module.TempSettings.HuntY                = 0
 Module.TempSettings.HuntZ                = 0
 
-
-local PullStates              = {
+local PullStates                         = {
     ['PULL_IDLE']               = 1,
     ['PULL_GROUPWATCH_WAIT']    = 2,
     ['PULL_NAV_INTERRUPT']      = 3,
@@ -35,7 +34,7 @@ local PullStates              = {
     ['PULL_WAITING_SHOULDPULL'] = 10,
 }
 
-local PullStateDisplayStrings = {
+local PullStateDisplayStrings            = {
     ['PULL_IDLE']               = { Display = ICONS.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
     ['PULL_GROUPWATCH_WAIT']    = { Display = ICONS.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_NAV_INTERRUPT']      = { Display = ICONS.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
@@ -48,7 +47,7 @@ local PullStateDisplayStrings = {
     ['PULL_WAITING_SHOULDPULL'] = { Display = ICONS.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
 }
 
-local PullStatesIDToName      = {}
+local PullStatesIDToName                 = {}
 for k, v in pairs(PullStates) do PullStatesIDToName[v] = k end
 
 Module.TempSettings.PullState          = PullStates.PULL_IDLE
@@ -914,10 +913,6 @@ function Module:FindTarget()
                             doInsert = false
                         end
 
-                        if mq.TLO.Me.FeetWet() ~= spawn.FeetWet() then
-                            RGMercsLogger.log_debug("\agIgnoring mob feetwet mismatch: %s", spawn.CleanName())
-                            doInsert = false
-                        end
                         RGMercsLogger.log_debug("\ayInsert Allowed: %s", doInsert and "\agYes", "\arNo")
 
                         if doInsert then
@@ -964,11 +959,6 @@ function Module:CheckForAbort(pullID)
 
     if not spawn or spawn.Dead() or not spawn.ID() or spawn.ID() == 0 then
         RGMercsLogger.log_debug("\ar ALERT: Aborting mob died or despawned \ax")
-        return true
-    end
-
-    if spawn.FeetWet() ~= mq.TLO.Me.FeetWet() then
-        RGMercsLogger.log_debug("\ar ALERT: Aborting feet wet mismatch \ax")
         return true
     end
 
@@ -1422,6 +1412,11 @@ function Module:GiveTime(combat_state)
                     startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
                     mq.doevents()
+
+                    if mq.TLO.Target.FeetWet() ~= mq.TLO.Me.FeetWet() then
+                        RGMercsLogger.log_debug("\ar ALERT: Feet wet mismatch - Moving around\ax")
+                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, RGMercUtils.GetTargetDistance() * 0.9, requireLOS)
+                    end
 
                     if pullAbility.Type:lower() == "ability" then
                         if mq.TLO.Me.AbilityReady(pullAbility.id)() then
