@@ -243,12 +243,16 @@ function Module:Render()
                         ImGui.PushStyleColor(ImGuiCol.Text, 0, 0, 0, 1)
                         ImGui.PushStyleColor(ImGuiCol.Button, self:GetColorForType(sv.Type))
                         if ImGui.Button(sv.Name, self.ButtonWidth, self.ButtonHeight) then
+                            local cmd = string.format("/casting \"%s\" -maxtries|10 gem%d", sv.Name, mq.TLO.Me.NumGems())
                             if sv.Type == "Single" then
-                                RGMercUtils.DoCmd(string.format("/dex %s /casting \"%s\" -maxtries|10 -targetid|%d gem%d", selectedPorter, sv.Name, RGMercUtils.GetTargetID(),
-                                    mq.TLO.Me.NumGems()))
-                            else
-                                RGMercUtils.DoCmd(string.format("/dex %s /casting \"%s\" -maxtries|10 gem%d", selectedPorter, sv.Name, mq.TLO.Me.NumGems()))
+                                cmd = cmd .. string.format(" -targetid|%d", RGMercUtils.GetTargetID())
                             end
+
+                            if selectedPorter ~= mq.TLO.Me.DisplayName() then
+                                cmd = string.format("/dex %s %s", selectedPorter, cmd)
+                            end
+
+                            RGMercUtils.DoCmd(cmd)
                         end
                         ImGui.PopStyleColor(2)
                         RGMercUtils.Tooltip(sv.Name)
