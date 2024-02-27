@@ -719,7 +719,7 @@ local _ClassConfig = {
                 name = "Stand Back Up",
                 type = "CustomFunc",
                 cond = function(self)
-                    return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
+                    return RGMercUtils.Feigning() and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
                 end,
                 custom_func = function(_)
                     RGMercUtils.DoCmd("/stand")
@@ -1024,7 +1024,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self) return RGMercUtils.BuffActiveByName("Shield of Darkness") and RGMercUtils.BuffActiveByName("Otherise") end,
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName)
+                    return RGMercUtils.GetSetting('DoUnity') and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1247,6 +1247,7 @@ local _ClassConfig = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['PetType']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "1 = War, 2 = Rog", Type = "Combo", ComboOptions = { 'War', 'Rog', }, Default = 1, Min = 1, Max = 2, },
         ['DoLich']            = { DisplayName = "Cast Lich", Category = "Spells and Abilities", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
+        ['DoUnity']           = { DisplayName = "Cast Unity", Category = "Spells and Abilities", Tooltip = "Enable casting Mortifiers Unity.", Default = true, },
         ['DeathBloomPercent'] = { DisplayName = "Death Bloom %", Category = "Spells and Abilities", Tooltip = "Mana % at which to cast Death Bloom", Default = 40, Min = 1, Max = 100, },
         ['DoSnare']           = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
         ['HPStopDOT']         = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },

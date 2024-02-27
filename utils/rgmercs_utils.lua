@@ -2609,15 +2609,22 @@ function Utils.IsSpawnXHater(spawnId)
 end
 
 function Utils.SetControlToon()
+    RGMercsLogger.log_verbose("Checking for best Control Toon")
     if Utils.GetSetting('AssistOutside') then
         if #Utils.GetSetting('OutsideAssistList') > 0 then
+            local maSpawn = Utils.GetMainAssistSpawn()
             for _, name in ipairs(Utils.GetSetting('OutsideAssistList')) do
+                if name == RGMercConfig.Globals.MainAssist and maSpawn.ID() > 0 and not maSpawn.Dead() then return end
+                RGMercsLogger.log_verbose("Testing %s for control", name)
                 local assistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
 
-                if assistSpawn() and assistSpawn.ID() ~= Utils.GetMainAssistId() then
+                if assistSpawn() and assistSpawn.ID() ~= Utils.GetMainAssistId() and not assistSpawn.Dead() then
                     RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
                     --TODO: NOT A VALID BASE CMD Utils.DoCmd("/squelch /xtarget assist %d", assistSpawn.ID())
                     RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
+                    return
+                elseif assistSpawn() and assistSpawn.ID() == Utils.GetMainAssistId() and not assistSpawn.Dead() then
+                    return
                 end
             end
         else
@@ -2627,10 +2634,10 @@ function Utils.SetControlToon()
                 RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
             end
         end
-    end
-
-    if Utils.GetMainAssistId() ~= Utils.GetGroupMainAssistID() and Utils.GetGroupMainAssistID() > 0 then
-        RGMercConfig.Globals.MainAssist = Utils.GetGroupMainAssistName()
+    else
+        if Utils.GetMainAssistId() ~= Utils.GetGroupMainAssistID() and Utils.GetGroupMainAssistID() > 0 then
+            RGMercConfig.Globals.MainAssist = Utils.GetGroupMainAssistName()
+        end
     end
 end
 
