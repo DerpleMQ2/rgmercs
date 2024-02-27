@@ -201,6 +201,9 @@ local _ClassConfig = {
         'Caster',
         'Healer',
     },
+    ['ModeChecks']    = {
+        IsMezzing = function() return true end,
+    },
     ['ItemSets']      = {
         ['Epic'] = {
             "Blade of Vesagran",
@@ -1064,6 +1067,17 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "InsultSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseInsult')
+                        and mq.TLO.Me.SpellReady(self.ResolvedActionMap['InsultSong'] or "")()
+                        -- If dot is about to wear off, recast
+                        and getDetSongDuration(songSpell) <= 4
+                        and mq.TLO.Me.PctMana() > 20
+                end,
+            },
+            {
                 name = "AllianceSong",
                 type = "Song",
                 cond = function(self, songSpell)
@@ -1128,16 +1142,6 @@ local _ClassConfig = {
                     return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseDiseaseDots') and
                         -- If dot is about to wear off, recast
                         getDetSongDuration(songSpell) <= 4
-                end,
-            },
-            {
-                name = "InsultSong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseInsult')
-                        and mq.TLO.Me.SpellReady(self.ResolvedActionMap['InsultSong'] or "")()
-                        -- If dot is about to wear off, recast
-                        and getDetSongDuration(songSpell) <= 4
                 end,
             },
             -- Regens
