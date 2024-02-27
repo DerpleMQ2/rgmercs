@@ -2609,9 +2609,12 @@ function Utils.IsSpawnXHater(spawnId)
 end
 
 function Utils.SetControlToon()
+    RGMercsLogger.log_verbose("Checking for best Control Toon")
     if Utils.GetSetting('AssistOutside') then
         if #Utils.GetSetting('OutsideAssistList') > 0 then
             for _, name in ipairs(Utils.GetSetting('OutsideAssistList')) do
+                if name == RGMercConfig.Globals.MainAssist then return end
+                RGMercsLogger.log_verbose("Testing %s for control", name)
                 local assistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
 
                 if assistSpawn() and assistSpawn.ID() ~= Utils.GetMainAssistId() then
