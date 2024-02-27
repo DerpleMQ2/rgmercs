@@ -2622,6 +2622,7 @@ function Utils.SetControlToon()
                     RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
                     --TODO: NOT A VALID BASE CMD Utils.DoCmd("/squelch /xtarget assist %d", assistSpawn.ID())
                     RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
+                    return
                 elseif assistSpawn() and assistSpawn.ID() == Utils.GetMainAssistId() and not assistSpawn.Dead() then
                     return
                 end
