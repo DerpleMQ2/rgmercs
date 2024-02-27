@@ -2627,10 +2627,10 @@ function Utils.SetControlToon()
                 RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
             end
         end
-    end
-
-    if Utils.GetMainAssistId() ~= Utils.GetGroupMainAssistID() and Utils.GetGroupMainAssistID() > 0 then
-        RGMercConfig.Globals.MainAssist = Utils.GetGroupMainAssistName()
+    else
+        if Utils.GetMainAssistId() ~= Utils.GetGroupMainAssistID() and Utils.GetGroupMainAssistID() > 0 then
+            RGMercConfig.Globals.MainAssist = Utils.GetGroupMainAssistName()
+        end
     end
 end
 
