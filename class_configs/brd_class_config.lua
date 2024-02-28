@@ -86,9 +86,12 @@ local function generateSongList()
 
     local function AddCriticalSongs()
         ConditionallyAddSong("DoAEMez", "MezAESong")
+        ConditionallyAddSong("DoMez", "MezSong")
         ConditionallyAddSong("DoSlow", "SlowSong")
         ConditionallyAddSong("DoAESlow", "AESlowSong")
-        ConditionallyAddSong("DoRunSpeed", "BardRunBuff")
+        if not RGMercUtils.GetSetting('UseAASelo') then
+            ConditionallyAddSong("DoRunSpeed", "BardRunBuff")
+        end
         -- TODO maybe someday
         --ConditionallyAddSong("DoCharm", "CharmSong")
         ConditionallyAddSong("DoDispel", "DispelSong")
@@ -1299,6 +1302,17 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Selo's Sonata",
+                type = "AA",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and
+                        RGMercUtils.GetSetting('UseAASelo') and
+                        RGMercUtils.GetSetting('DoRunSpeed')
+                        and not mq.TLO.Me.Invis()
+                end,
+            },
+            {
                 name = "CrescendoSong",
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
@@ -1342,8 +1356,8 @@ local _ClassConfig = {
                 name = "MainAriaSong",
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
-                cond = function(self, _)
-                    return not mq.TLO.Me.Invis()
+                cond = function(self, songSpell)
+                    return not mq.TLO.Me.Invis() and RGMercUtils.BuffSong(songSpell)
                 end,
             },
 
@@ -1383,6 +1397,7 @@ local _ClassConfig = {
         -- TODO
         --['DoCharm']       = { DisplayName = "Use Charm", Category = "Songs", Tooltip = Tooltips.CharmSong, Default = false },
         ['DoAEMez']          = { DisplayName = "Do AoE Mez", Category = "Combat", Tooltip = "AEMez", Default = false, },
+        ['DoMez']            = { DisplayName = "Do Mez", Category = "Combat", Tooltip = "STMez", Default = false, },
         ['AEMezCount']       = { DisplayName = "AoE Mez Count", Category = "Combat", Tooltip = "Mob count before AE mez casts", Default = 3, Min = 1, Max = 12, },
         --healer
         ['UseResist']        = { DisplayName = "Use Resists", Category = "Heal Songs", Tooltip = Tooltips.ResistSong, Default = false, },
