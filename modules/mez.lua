@@ -55,12 +55,14 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("\ar%s\ao Mez Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass, RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_info("\ar%s\ao Mez Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass,
+        RGMercConfig.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!", RGMercConfig.Globals.CurLoadedClass, settings_pickle_path)
+        RGMercsLogger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
+            RGMercConfig.Globals.CurLoadedClass, settings_pickle_path)
         self.settings = {}
         self:SaveSettings(false)
     else
@@ -114,7 +116,8 @@ function Module:Render()
 
     if self.ModuleLoaded then
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
+            self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig,
+                self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
             end
@@ -213,6 +216,7 @@ end
 
 function Module:MezNow(mezId, useAE, useAA)
     -- First thing we target the mob if we haven't already targeted them.
+    RGMercUtils.DoCmd("/attack off")
     RGMercUtils.SetTarget(mezId)
 
     local mezSpell = self:GetMezSpell()
@@ -266,10 +270,12 @@ function Module:MezNow(mezId, useAE, useAA)
             mq.doevents()
 
             if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
-                RGMercUtils.HandleMezAnnounce(string.format("\ar JUST MEZZED \aw -> \ag %s \aw on \ay %s \aw : \ar %d", "Dirge of the Sleepwalker",
+                RGMercUtils.HandleMezAnnounce(string.format("\ar JUST MEZZED \aw -> \ag %s \aw on \ay %s \aw : \ar %d",
+                    "Dirge of the Sleepwalker",
                     mq.TLO.Spawn(mezId).CleanName(), mezId))
             else
-                RGMercUtils.HandleMezAnnounce(string.format("\ar MEZ Failed: %s \ag -> \ay %s \ag <- \ar ID:%d", RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(mezId).CleanName(),
+                RGMercUtils.HandleMezAnnounce(string.format("\ar MEZ Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
+                    RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(mezId).CleanName(),
                     mezId))
             end
 
@@ -292,10 +298,12 @@ function Module:MezNow(mezId, useAE, useAA)
         mq.doevents()
 
         if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
-            RGMercUtils.HandleMezAnnounce(string.format("\ar JUST MEZZED \aw -> \ag %s \aw on \ay %s \aw : \ar %d", mezSpell.RankName(),
+            RGMercUtils.HandleMezAnnounce(string.format("\ar JUST MEZZED \aw -> \ag %s \aw on \ay %s \aw : \ar %d",
+                mezSpell.RankName(),
                 mq.TLO.Spawn(mezId).CleanName(), mezId))
         else
-            RGMercUtils.HandleMezAnnounce(string.format("\ar MEZ Failed: %s \ag -> \ay %s \ag <- \ar ID:%d", RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(mezId).CleanName(),
+            RGMercUtils.HandleMezAnnounce(string.format("\ar MEZ Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
+                RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(mezId).CleanName(),
                 mezId))
         end
 
@@ -334,8 +342,10 @@ function Module:AEMezCheck()
 
     -- Next make sure casting our AE won't anger ore mobs -- I'm lazy and not checking the AERange of the AA. I'm gonna assume if the
     -- AERange of the normal spell will piss them off, then the AA probably would too.
-    local angryMobCount = mq.TLO.SpawnCount(string.format("npc xtarhater loc %0.2f, %0.2f radius %d", nearestSpawn.X(), nearestSpawn.Y(), aeMezSpell.AERange() or 0))()
-    local chillMobCount = mq.TLO.SpawnCount(string.format("npc loc %0.2f, %0.2f radius %d", nearestSpawn.X(), nearestSpawn.Y(), aeMezSpell.AERange() or 0))()
+    local angryMobCount = mq.TLO.SpawnCount(string.format("npc xtarhater loc %0.2f, %0.2f radius %d", nearestSpawn.X(),
+        nearestSpawn.Y(), aeMezSpell.AERange() or 0))()
+    local chillMobCount = mq.TLO.SpawnCount(string.format("npc loc %0.2f, %0.2f radius %d", nearestSpawn.X(),
+        nearestSpawn.Y(), aeMezSpell.AERange() or 0))()
 
     -- Checking to see if we are auto attacking, or if we are actively casting a spell
     -- purpose for this is to catch auto attacking enchaters (who have lost their mind)
@@ -397,30 +407,36 @@ function Module:IsValidMezTarget(mobId)
 
     -- Is the mob ID in our mez immune list? If so, skip.
     if self.TempSettings.MezImmune[mobId] ~= nil then
-        RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d as it is in our immune list.", spawn.ID(), spawn.CleanName(), spawn.Level())
+        RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d as it is in our immune list.",
+            spawn.ID(), spawn.CleanName(), spawn.Level())
         return false
     end
     -- Here's where we can add a necro check to see if the spawn is undead or not. If it's not
     -- undead it gets added to the mez immune list.
     if spawn.Body.Name():lower() == "giant" then
-        RGMercsLogger.log_debug("\ayUpdateMezList: Adding ID: %d Name: %s Level: %d to our immune list as it is a giant.", spawn.ID(), spawn.CleanName(),
+        RGMercsLogger.log_debug(
+            "\ayUpdateMezList: Adding ID: %d Name: %s Level: %d to our immune list as it is a giant.", spawn.ID(),
+            spawn.CleanName(),
             spawn.Level())
         self:AddImmuneTarget(spawn.ID(), { id = spawn.ID(), name = spawn.CleanName(), })
         return false
     end
 
     if not spawn.LineOfSight() then
-        RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - No LOS.", spawn.ID(), spawn.CleanName(), spawn.Level())
+        RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - No LOS.", spawn.ID(),
+            spawn.CleanName(), spawn.Level())
         return false
     end
 
     if (spawn.PctHPs() or 0) < self.settings.MezStopHPs then
-        RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID(), spawn.CleanName(), spawn.Level())
+        RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID(),
+            spawn.CleanName(), spawn.Level())
         return false
     end
 
     if (spawn.Distance() or 999) > self.settings.MezRadius then
-        RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - Out of Mez Radius", spawn.ID(), spawn.CleanName(), spawn.Level())
+        RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d - Out of Mez Radius",
+            spawn.ID(), spawn.CleanName(), spawn.Level())
         return false
     end
 
@@ -449,11 +465,14 @@ function Module:UpdateMezList()
             local spawn = mq.TLO.NearestSpawn(i, searchString)
 
             if spawn and spawn() and spawn.ID() > 0 then
-                RGMercsLogger.log_debug("\ayUpdateMezList: Processing MobCount %d -- ID: %d Name: %s Level: %d BodyType: %s", i, spawn.ID(), spawn.CleanName(), spawn.Level(),
+                RGMercsLogger.log_debug(
+                    "\ayUpdateMezList: Processing MobCount %d -- ID: %d Name: %s Level: %d BodyType: %s", i, spawn.ID(),
+                    spawn.CleanName(), spawn.Level(),
                     spawn.Body.Name())
 
                 if self:IsValidMezTarget(spawn.ID()) then
-                    RGMercsLogger.log_debug("\agAdding to CC List: %d -- ID: %d Name: %s Level: %d BodyType: %s", i, spawn.ID(), spawn.CleanName(), spawn.Level(), spawn.Body.Name())
+                    RGMercsLogger.log_debug("\agAdding to CC List: %d -- ID: %d Name: %s Level: %d BodyType: %s", i,
+                        spawn.ID(), spawn.CleanName(), spawn.Level(), spawn.Body.Name())
                     self:AddCCTarget(spawn.ID())
                 end
             end
@@ -500,8 +519,10 @@ function Module:ProcessMezList()
                 -- We already fudge the mez timer when we set it.
                 local spell = mezSpell
                 if data.duration > (spell.MyCastTime() / 100) or spawn.Distance() > self.settings.MezRadius or not spawn.LineOfSight() then
-                    RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Timer(%s > %s) Distance(%d) LOS(%s)", id, RGMercUtils.FormatTime(data.duration / 1000),
-                        RGMercUtils.FormatTime(spell.MyCastTime() / 100), spawn.Distance(), RGMercUtils.BoolToColorString(spawn.LineOfSight()))
+                    RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Timer(%s > %s) Distance(%d) LOS(%s)", id,
+                        RGMercUtils.FormatTime(data.duration / 1000),
+                        RGMercUtils.FormatTime(spell.MyCastTime() / 100), spawn.Distance(),
+                        RGMercUtils.BoolToColorString(spawn.LineOfSight()))
                 else
                     if id == RGMercConfig.Globals.AutoTargetID then
                         RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Mob is MA's target skipping", id)
@@ -509,7 +530,8 @@ function Module:ProcessMezList()
                     else
                         RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Mob needs mezed.", id)
                         if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() then
-                            RGMercsLogger.log_debug(" \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start mez.")
+                            RGMercsLogger.log_debug(
+                            " \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start mez.")
                             RGMercUtils.DoCmd("/attack off")
                             mq.delay("3s", function() return not mq.TLO.Me.Combat() end)
                             RGMercUtils.DoCmd("/stopcast")
