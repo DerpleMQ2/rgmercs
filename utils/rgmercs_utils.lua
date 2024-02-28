@@ -2302,7 +2302,7 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
             local cur_spawn = mq.TLO.NearestSpawn(i, string.format("%s radius %d zradius %d", t, radius, radius))
 
             if cur_spawn() then
-                if cur_spawn.AssistName():len() > 0 then
+                if (cur_spawn.AssistName() or ""):len() > 0 then
                     RGMercsLogger.log_verbose("My Interest: %s =? Their Interest: %s", spawn.Name(),
                         cur_spawn.AssistName())
                     if cur_spawn.AssistName() == spawn.Name() then
