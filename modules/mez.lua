@@ -217,6 +217,8 @@ end
 function Module:MezNow(mezId, useAE, useAA)
     -- First thing we target the mob if we haven't already targeted them.
     RGMercUtils.DoCmd("/attack off")
+    local currentTargetID = mq.TLO.Target.ID()
+
     RGMercUtils.SetTarget(mezId)
 
     local mezSpell = self:GetMezSpell()
@@ -309,6 +311,8 @@ function Module:MezNow(mezId, useAE, useAA)
 
         mq.doevents()
     end
+
+    RGMercUtils.SetTarget(currentTargetID)
 end
 
 function Module:AEMezCheck()
@@ -531,7 +535,7 @@ function Module:ProcessMezList()
                         RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Mob needs mezed.", id)
                         if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() then
                             RGMercsLogger.log_debug(
-                            " \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start mez.")
+                                " \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start mez.")
                             RGMercUtils.DoCmd("/attack off")
                             mq.delay("3s", function() return not mq.TLO.Me.Combat() end)
                             RGMercUtils.DoCmd("/stopcast")
