@@ -627,11 +627,17 @@ local _ClassConfig = {
         castDLU = function(self)
             local shroudAction = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "Shroud")
             if not shroudAction then return false end
+            local shroudAA = mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)")
+            local numEffects = shroudAA.Spell.NumEffects()
 
             local res = shroudAction.Level() <=
-                (mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Spell.Level() or 0) and
-                mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").MinLevel() <= mq.TLO.Me.Level() and
-                mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)").Rank() > 0
+                (shroudAA.Spell.Level() or 0) and
+                shroudAA.MinLevel() <= mq.TLO.Me.Level() and
+                shroudAA.Rank() > 0
+
+            for i = 1, numEffects do
+                if not shroudAA.Spell.Trigger(i)() then return false end
+            end
 
             return res
         end,
