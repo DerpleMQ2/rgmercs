@@ -2,7 +2,8 @@ local mq                             = require('mq')
 local RGMercUtils                    = require("utils.rgmercs_utils")
 local Set                            = require("mq.Set")
 
-local Config                         = { _version = '1.0 Beta', _subVersion = "2023 Larions Song!", _name = "RGMercs Lua Edition", _author = 'Derple, Morisato, Greyn', }
+local Config                         = { _version = '1.0 Beta', _subVersion = "2023 Larions Song!", _name =
+"RGMercs Lua Edition", _author = 'Derple, Morisato, Greyn', }
 Config.__index                       = Config
 Config.settings                      = {}
 
@@ -25,11 +26,13 @@ Config.Globals.CastResult            = 0
 
 -- Constants
 Config.Constants                     = {}
-Config.Constants.RGCasters           = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD", "SHM", "WIZ", })
+Config.Constants.RGCasters           = Set.new({ "BRD", "BST", "CLR", "DRU", "ENC", "MAG", "NEC", "PAL", "RNG", "SHD",
+    "SHM", "WIZ", })
 Config.Constants.RGMelee             = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
 Config.Constants.RGHybrid            = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
 Config.Constants.RGTank              = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGModRod            = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG", "SHD", })
+Config.Constants.RGModRod            = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG",
+    "SHD", })
 Config.Constants.RGPetClass          = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
 Config.Constants.RGMezAnims          = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
 Config.Constants.ModRods             = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", }
@@ -189,7 +192,7 @@ Config.DefaultConfig = {
     ['GroupInjureCnt']      = { DisplayName = "Group Injured Count", Category = "Heals", Tooltip = "Number of group members to be injured before using a group heal spell.", Default = 3, Min = 1, Max = 5, ConfigType = "Advanced", },
     ['DoPetHeals']          = { DisplayName = "Do Pet Heals", Category = "Heals", Tooltip = "Heal Pets?", Default = false, ConfigType = "Advanced", },
     ['MaxHealPoint']        = { DisplayName = "Max Heal Point", Category = "Heals", Tooltip = "The point at which you stop healing.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
-    ['LightHealPoint']      = { DisplayName = "Ligh tHeal Point", Category = "Heals", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
+    ['LightHealPoint']      = { DisplayName = "Light Heal Point", Category = "Heals", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
     ['CompHealPoint']       = { DisplayName = "Comp Heal Point", Category = "Heals", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
     ['RemedyHealPoint']     = { DisplayName = "Remedy Heal Point", Category = "Heals", Tooltip = "Use Spells", Default = 80, Min = 1, Max = 99, },
 
@@ -339,7 +342,8 @@ function Config:GetUsageText(config, showUsageText, defaults)
     end
 
     usageString = usageString ..
-        string.format("%s %s %s", RGMercUtils.PadString(rangeText, 20, false), RGMercUtils.PadString(currentText, 20, false), RGMercUtils.PadString(defaultText, 20, false)
+        string.format("%s %s %s", RGMercUtils.PadString(rangeText, 20, false),
+            RGMercUtils.PadString(currentText, 20, false), RGMercUtils.PadString(defaultText, 20, false)
         )
 
     return handledType, usageString
@@ -410,7 +414,8 @@ function Config:HandleBind(config, value)
                             printf("\n\aoCategory: %s\aw", c)
                             printCategory = false
                         end
-                        printf("\am%-20s\aw - \atUsage: \ay%s\aw | %s", d.name, RGMercUtils.PadString(d.usage, 100, false), d.about)
+                        printf("\am%-20s\aw - \atUsage: \ay%s\aw | %s", d.name,
+                            RGMercUtils.PadString(d.usage, 100, false), d.about)
                     end
                 end
             end

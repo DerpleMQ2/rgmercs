@@ -195,12 +195,28 @@ function Module:ResetMezStates()
     self.TempSettings.MezTracker = {}
 end
 
+function Module:GetMezSpell()
+    if RGMercUtils.MyClassIs("BRD") then
+        return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSong")
+    end
+
+    return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSpell")
+end
+
+function Module:GetAEMezSpell()
+    if RGMercUtils.MyClassIs("BRD") then
+        return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezAESong")
+    end
+
+    return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezAESpell")
+end
+
 function Module:MezNow(mezId, useAE, useAA)
     -- First thing we target the mob if we haven't already targeted them.
     RGMercUtils.SetTarget(mezId)
 
-    local mezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSpell")
-    local aeMezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezAESpell")
+    local mezSpell = self:GetMezSpell()
+    local aeMezSpell = self:GetAEMezSpell()
 
     if useAE then
         RGMercsLogger.log_debug("Performing AE MEZ --> %d", mezId)
@@ -228,6 +244,7 @@ function Module:MezNow(mezId, useAE, useAA)
             if RGMercUtils.MyClassIs("brd") then
                 -- TODO songnow aemez
                 self.TempSettings.BardAEMezTimer = "30s"
+                RGMercUtils.UseSong(aeMezSpell.RankName(), mezId, false)
             else
                 RGMercUtils.UseSpell(aeMezSpell.RankName(), mezId, false)
             end
@@ -266,6 +283,7 @@ function Module:MezNow(mezId, useAE, useAA)
         -- TODO: Make spell now use songnow for brds
         if RGMercUtils.MyClassIs("brd") then
             -- TODO SongNow MezSpell
+            RGMercUtils.UseSong(mezSpell.RankName(), mezId, false)
         else
             -- This may not work for Bards but will work for NEC/ENCs
             RGMercUtils.UseSpell(mezSpell.RankName(), mezId, false)
@@ -293,7 +311,7 @@ function Module:AEMezCheck()
     local mezNPCPetFilter = string.format("npcpet radius %d targetable los playerstate 4", self.settings.MezRadius)
     local aeCount = mq.TLO.SpawnCount(mezNPCFilter)() + mq.TLO.SpawnCount(mezNPCPetFilter)()
 
-    local aeMezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezAESpell")
+    local aeMezSpell = self:GetAEMezSpell()
 
     if not aeMezSpell or not aeMezSpell() then return end
 
@@ -416,7 +434,7 @@ function Module:UpdateMezList()
         local minLevel = self.settings.MezMinLevel
         local maxLevel = self.settings.MezMaxLevel
 
-        local mezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSpell")
+        local mezSpell = self:GetMezSpell()
 
         if self.settings.AutoLevelRange and mezSpell and mezSpell() then
             minLevel = 0
@@ -449,7 +467,7 @@ function Module:ProcessMezList()
     -- Assume by default we never need to block for mez. We'll set this if-and-only-if
     -- we need to mez but our ability is on cooldown.
     RGMercsLogger.log_debug("\ayProcessMezList() :: Loop")
-    local mezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSpell")
+    local mezSpell = self:GetMezSpell()
 
     if RGMercUtils.GetTableSize(self.TempSettings.MezTracker) <= 1 then
         -- If we have only one spawn we're tracking, we don't need to be mezzing
@@ -529,8 +547,8 @@ function Module:ProcessMezList()
 end
 
 function Module:DoMez()
-    local mezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSpell")
-    local aeMezSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezAESpell")
+    local mezSpell = self:GetMezSpell()
+    local aeMezSpell = self:GetAEMezSpell()
     if RGMercUtils.GetXTHaterCount() >= self.settings.MezAECount and
         ((RGMercUtils.MyClassIs("brd") and self.TempSettings.BardAEMezTimer == 0) or
             (mq.TLO.Me.SpellReady(aeMezSpell)() or RGMercUtils.AAReady("Beam of Slumber"))) then

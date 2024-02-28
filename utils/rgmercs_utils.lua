@@ -123,7 +123,8 @@ function Utils.SetTarget(targetId)
     local info = debug.getinfo(4, "Snl")
 
     local callerTracer = string.format("\ao%s\aw::\ao%s()\aw:\ao%-04d\ax",
-        info and info.short_src and info.short_src:match("[^\\^/]*.lua$") or "unknown_file", info and info.name or "unknown_func", info and info.currentline or 0)
+        info and info.short_src and info.short_src:match("[^\\^/]*.lua$") or "unknown_file",
+        info and info.name or "unknown_func", info and info.currentline or 0)
     if targetId == mq.TLO.Target.ID() then return end
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if Utils.GetSetting('DoAutoTarget') then
@@ -1003,7 +1004,8 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
 
         local cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", spellName, targetId)
         Utils.DoCmd(cmd)
-        RGMercsLogger.log_debug("Running: \at'%s'", cmd)
+
+        mq.delay("1s", function() return mq.TLO.Me.Casting.ID() > 0 end)
 
         Utils.WaitCastFinish(targetSpawn)
 
@@ -1024,6 +1026,15 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
     local ret = false
 
     if entry.type == nil then return false end -- bad data.
+
+    local target = mq.TLO.Target
+
+    if target and target() and target.ID() == targetId then
+        if target.Mezzed and target.Mezzed.ID() and not Utils.GetSetting('AllowMezBreak') then
+            RGMercsLogger.log_debug("  OkayToEngage() Target is mezzed and not AllowMezBreak --> Not Casting!")
+            return false
+        end
+    end
 
     -- Run pre-activates
     if entry.pre_activate then
@@ -1099,7 +1110,8 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
 
     if entry.type:lower() == "customfunc" then
         if entry.custom_func then
-            ret = Utils.SafeCallFunc(string.format("Custom Func Entry: %s", entry.name), entry.custom_func, caller, targetId)
+            ret = Utils.SafeCallFunc(string.format("Custom Func Entry: %s", entry.name), entry.custom_func, caller,
+                targetId)
         else
             ret = false
         end
@@ -1160,7 +1172,8 @@ function Utils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId,
     local active = false
 
     if condArg ~= nil then
-        local logInfo = string.format("check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay), uiCheck(%s)", entry.name or "NoName",
+        local logInfo = string.format(
+            "check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay), uiCheck(%s)", entry.name or "NoName",
             (type(condArg) == 'userdata' and condArg() or condArg) or "None",
             condTarg.CleanName() or "None", Utils.BoolToColorString(uiCheck))
         pass = Utils.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg, uiCheck)
@@ -1212,6 +1225,10 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
                         stepsThisTime = stepsThisTime + 1
 
                         if steps > 0 and stepsThisTime >= steps then
+                            break
+                        end
+
+                        if RGMercConfig.Globals.PauseMain then
                             break
                         end
 
@@ -1285,7 +1302,8 @@ function Utils.SelfBuffCheck(spell)
     local res = not Utils.BuffActiveByID(spell.RankName.ID()) and spell.Stacks()
 
     ---@diagnostic disable-next-line: undefined-field
-    RGMercsLogger.log_verbose("\aySelfBuffCheck(\at%s\ay/\am%d\ay) Spell Obj => %s", spell.RankName(), spell.RankName.ID(),
+    RGMercsLogger.log_verbose("\aySelfBuffCheck(\at%s\ay/\am%d\ay) Spell Obj => %s", spell.RankName(),
+        spell.RankName.ID(),
         Utils.BoolToColorString(res))
 
     return res
@@ -1753,7 +1771,8 @@ function Utils.NavAroundCircle(target, radius, bDontStick)
         tgt_x = spawn_x + (-1 * radius * math.cos(tmp_degrees))
         tgt_y = spawn_y + (radius * math.sin(tmp_degrees))
 
-        RGMercsLogger.log_debug("\aw%d\ax tmp_degrees \aw%d\ax tgt_x \aw%0.2f\ax tgt_y \aw%02.f\ax", steps, tmp_degrees, tgt_x, tgt_y)
+        RGMercsLogger.log_debug("\aw%d\ax tmp_degrees \aw%d\ax tgt_x \aw%0.2f\ax tgt_y \aw%02.f\ax", steps, tmp_degrees,
+            tgt_x, tgt_y)
         -- First check that we can navigate to our new target
         if mq.TLO.Navigation.PathExists(string.format("locyxz %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z))() then
             -- Then check if our new spots has line of sight to our target.
@@ -1872,9 +1891,11 @@ function Utils.AutoMed()
 
     --If we're moving/following/navigating/sticking, don't med.
     if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
-        RGMercsLogger.log_verbose("Sit check returning early due to movement. Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s)",
+        RGMercsLogger.log_verbose(
+            "Sit check returning early due to movement. Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s)",
             me.Casting() or "None", Utils.BoolToColorString(me.Moving()), Utils.BoolToColorString(mq.TLO.Stick.Active()),
-            Utils.BoolToColorString(mq.TLO.Navigation.Active()), Utils.BoolToColorString(mq.TLO.MoveTo.Moving()), Utils.BoolToColorString(mq.TLO.AdvPath.Following()))
+            Utils.BoolToColorString(mq.TLO.Navigation.Active()), Utils.BoolToColorString(mq.TLO.MoveTo.Moving()),
+            Utils.BoolToColorString(mq.TLO.AdvPath.Following()))
         return
     end
 
@@ -1979,10 +2000,13 @@ function Utils.BuffSong(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
 
-    local res = Utils.SongMemed(songSpell) and (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= (songSpell.MyCastTime.Seconds() + 6)
-    RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), duration(%0.2f) < casttime(%0.2f) --> result(%s)", songSpell.Name(),
+    local res = Utils.SongMemed(songSpell) and
+        (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= (songSpell.MyCastTime.Seconds() + 6)
+    RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), duration(%0.2f) < casttime(%0.2f) --> result(%s)",
+        songSpell.Name(),
         Utils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
-        me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, songSpell.MyCastTime.Seconds() + 6, Utils.BoolToColorString(res))
+        me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, songSpell.MyCastTime.Seconds() + 6,
+        Utils.BoolToColorString(res))
     return res
 end
 
@@ -1992,7 +2016,8 @@ function Utils.DebuffSong(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
     local res = me.Gem(songSpell.Name()) and not Utils.TargetHasBuff(songSpell)
-    RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), targetHas(%s) --> result(%s)", songSpell.Name(), Utils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
+    RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), targetHas(%s) --> result(%s)", songSpell.Name(),
+        Utils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
         Utils.BoolToColorString(Utils.TargetHasBuff(songSpell)), Utils.BoolToColorString(res))
     return res
 end
@@ -2167,7 +2192,8 @@ function Utils.EngageTarget(autoTargetId, preEngageRoutine)
                     end
                 end
             else
-                RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.", Utils.GetTargetCleanName())
+                RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.",
+                    Utils.GetTargetCleanName())
             end
         else
             RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Utils.GetTargetCleanName())
@@ -2332,7 +2358,8 @@ function Utils.MATargetScan(radius, zradius)
 
         if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
             if not Utils.GetSetting('SafeTargeting') or not Utils.IsSpawnFightingStranger(xtSpawn, radius) then
-                RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
+                RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(),
+                    xtSpawn.Distance())
                 if (xtSpawn.Distance() or 999) <= radius then
                     -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                     -- get aggro data from the spawn data type.
@@ -2363,7 +2390,8 @@ function Utils.MATargetScan(radius, zradius)
                     end
                 end
             else
-                RGMercsLogger.log_verbose("XTarget %s [%d] Distance: %d - is fighting someone else - ignoring it.", xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
+                RGMercsLogger.log_verbose("XTarget %s [%d] Distance: %d - is fighting someone else - ignoring it.",
+                    xtSpawn.CleanName(), xtSpawn.ID(), xtSpawn.Distance())
             end
         end
     end
@@ -2462,7 +2490,8 @@ function Utils.FindTarget(validateFn)
                 (target.Type():lower() == "npc" or target.Type():lower() == "npcpet") and
                 target.Distance() < Utils.GetSetting('AssistRange') and
                 target.DistanceZ() < 20 and
-                target.Aggressive() then
+                target.Aggressive() and
+                target.Mezzed.ID() == nil then
                 RGMercsLogger.log_info("Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName(), target.ID())
                 RGMercConfig.Globals.AutoTargetID = target.ID()
             end
@@ -2499,8 +2528,8 @@ function Utils.FindTarget(validateFn)
             local queryResult = DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
             local assistTarget = mq.TLO.Spawn(queryResult)
             if queryResult then
-                RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
-                    assistTarget.CleanName() or "None")
+                RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s (%s)",
+                    assistTarget.CleanName() or "None", queryResult)
             end
 
             RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist,
@@ -2524,7 +2553,8 @@ function Utils.FindTarget(validateFn)
         end
     end
 
-    RGMercsLogger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", RGMercConfig.Globals.AutoTargetID or 0, mq.TLO.Target.ID())
+    RGMercsLogger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", RGMercConfig.Globals.AutoTargetID or 0,
+        mq.TLO.Target.ID())
     if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
         if not validateFn or validateFn(RGMercConfig.Globals.AutoTargetID) then
             Utils.SetTarget(RGMercConfig.Globals.AutoTargetID)
@@ -2622,6 +2652,7 @@ function Utils.SetControlToon()
                     RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
                     --TODO: NOT A VALID BASE CMD Utils.DoCmd("/squelch /xtarget assist %d", assistSpawn.ID())
                     RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
+                    DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
                     return
                 elseif assistSpawn() and assistSpawn.ID() == Utils.GetMainAssistId() and not assistSpawn.Dead() then
                     return
@@ -2637,6 +2668,7 @@ function Utils.SetControlToon()
     else
         if Utils.GetMainAssistId() ~= Utils.GetGroupMainAssistID() and Utils.GetGroupMainAssistID() > 0 then
             RGMercConfig.Globals.MainAssist = Utils.GetGroupMainAssistName()
+            DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
         end
     end
 end
@@ -2709,7 +2741,8 @@ function Utils.OkToEngagePreValidateId(targetId)
     end
 
     if Utils.GetSetting('SafeTargeting') and Utils.IsSpawnFightingStranger(target, 100) then
-        RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) is fighting Stranger --> Not Engaging", Utils.GetTargetCleanName())
+        RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) is fighting Stranger --> Not Engaging",
+            Utils.GetTargetCleanName())
         return false
     end
 
@@ -2718,20 +2751,26 @@ function Utils.OkToEngagePreValidateId(targetId)
         local assistCheck = (Utils.GetTargetPctHPs(target) <= Utils.GetSetting('AutoAssistAt') or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
-                RGMercsLogger.log_verbose("\ag  OkToEngageId(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!", Utils.GetTargetCleanName(target),
-                    Utils.GetTargetDistance(target), Utils.GetSetting('AssistRange'), Utils.GetTargetPctHPs(target), Utils.GetSetting('AutoAssistAt'), assistId,
+                RGMercsLogger.log_verbose(
+                    "\ag  OkToEngageId(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
+                    Utils.GetTargetCleanName(target),
+                    Utils.GetTargetDistance(target), Utils.GetSetting('AssistRange'), Utils.GetTargetPctHPs(target),
+                    Utils.GetSetting('AutoAssistAt'), assistId,
                     mq.TLO.Me.ID())
             end
             return true
         else
-            RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)", Utils.GetTargetCleanName(target),
+            RGMercsLogger.log_verbose(
+                "\ay  OkToEngageId(%s) AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
+                Utils.GetTargetCleanName(target),
                 target.CleanName(), target.ID(), Utils.BoolToColorString(distanceCheck), Utils.GetTargetDistance(target),
                 Utils.BoolToColorString(assistCheck))
             return false
         end
     end
 
-    RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) Okay to Engage Failed with Fall Through!", Utils.GetTargetCleanName(target),
+    RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) Okay to Engage Failed with Fall Through!",
+        Utils.GetTargetCleanName(target),
         Utils.BoolToColorString(pcCheck), Utils.BoolToColorString(mercCheck))
     return false
 end
@@ -2760,7 +2799,8 @@ function Utils.OkToEngage(autoTargetId)
     end
 
     if Utils.GetSetting('SafeTargeting') and Utils.IsSpawnFightingStranger(target, 100) then
-        RGMercsLogger.log_verbose("\ay  OkayToEngage() %s is fighting Stranger --> Not Engaging", Utils.GetTargetCleanName())
+        RGMercsLogger.log_verbose("\ay  OkayToEngage() %s is fighting Stranger --> Not Engaging",
+            Utils.GetTargetCleanName())
         return false
     end
 
@@ -2770,7 +2810,7 @@ function Utils.OkToEngage(autoTargetId)
     end
 
     -- if this target is from a target ID then it wont have .Mezzed
-    if target.Mezzed and target.Mezzed.ID() and not config.AllowMezBreak then
+    if target.Mezzed and target.Mezzed.ID() and not Utils.GetSetting('AllowMezBreak') then
         RGMercsLogger.log_debug("  OkayToEngage() Target is mezzed and not AllowMezBreak --> Not Engaging")
         return false
     end
@@ -2780,13 +2820,16 @@ function Utils.OkToEngage(autoTargetId)
         local assistCheck = (Utils.GetTargetPctHPs() <= config.AutoAssistAt or Utils.IsTanking() or Utils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
-                RGMercsLogger.log_verbose("\ag  OkayToEngage(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!", Utils.GetTargetCleanName(),
+                RGMercsLogger.log_verbose(
+                    "\ag  OkayToEngage(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
+                    Utils.GetTargetCleanName(),
                     target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
                     mq.TLO.Me.ID())
             end
             return true
         else
-            RGMercsLogger.log_verbose("\ay  OkayToEngage() AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
+            RGMercsLogger.log_verbose(
+                "\ay  OkayToEngage() AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
                 target.CleanName(), target.ID(), Utils.BoolToColorString(distanceCheck), Utils.GetTargetDistance(),
                 Utils.BoolToColorString(assistCheck))
             return false
@@ -2954,7 +2997,10 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
 
             if g ~= nil and g.spells ~= nil then
                 for _, s in ipairs(g.spells) do
-                    if s.name_func then s.name = Utils.SafeCallFunc("Spell Name Func", s.name_func, caller) or "Error in name_func!" end
+                    if s.name_func then
+                        s.name = Utils.SafeCallFunc("Spell Name Func", s.name_func, caller) or
+                            "Error in name_func!"
+                    end
                     local spellName = s.name
                     RGMercsLogger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, gem)
                     if abilitySets[spellName] == nil then
@@ -2966,7 +3012,8 @@ function Utils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                     local bestSpell = resolvedActionMap[spellName]
                     if bestSpell then
                         local bookSpell = mq.TLO.Me.Book(bestSpell.RankName())()
-                        local pass = Utils.SafeCallFunc(string.format("Spell Condition Check: %s", bestSpell() or "None"), s.cond, caller, bestSpell)
+                        local pass = Utils.SafeCallFunc(
+                            string.format("Spell Condition Check: %s", bestSpell() or "None"), s.cond, caller, bestSpell)
                         local loadedSpell = spellsToLoad[bestSpell.RankName()] or false
 
                         if pass and bestSpell and bookSpell and not loadedSpell then
@@ -3105,7 +3152,8 @@ end
 
 function Utils.DeleteOA(idx)
     if idx <= #Utils.GetSetting('OutsideAssistList') then
-        RGMercsLogger.log_info("\axOutside Assist \at%d\ax \ag%s\ax - \arDeleted!\ax", idx, Utils.GetSetting('OutsideAssistList')[idx])
+        RGMercsLogger.log_info("\axOutside Assist \at%d\ax \ag%s\ax - \arDeleted!\ax", idx,
+            Utils.GetSetting('OutsideAssistList')[idx])
         table.remove(Utils.GetSetting('OutsideAssistList'), idx)
         RGMercConfig:SaveSettings(false)
     else
@@ -3389,7 +3437,8 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
             end
             ImGui.TableNextColumn()
             if entry.cond then
-                local pass, active = Utils.TestConditionForEntry(caller, resolvedActionMap, entry, mq.TLO.Target.ID(), true)
+                local pass, active = Utils.TestConditionForEntry(caller, resolvedActionMap, entry, mq.TLO.Target.ID(),
+                    true)
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
@@ -3507,7 +3556,8 @@ function Utils.RenderProgressBar(pct, width, height)
     local label_x, _ = ImGui.CalcTextSize(text)
     ImGui.ProgressBar(pct, width, height, "")
     local end_x, end_y = ImGui.GetCursorPos()
-    ImGui.SetCursorPos(start_x + ((ImGui.GetWindowWidth() / 2) - (style.ItemSpacing.x + math.floor(label_x / 2))), start_y + style.ItemSpacing.y)
+    ImGui.SetCursorPos(start_x + ((ImGui.GetWindowWidth() / 2) - (style.ItemSpacing.x + math.floor(label_x / 2))),
+        start_y + style.ItemSpacing.y)
     ImGui.Text(text)
     ImGui.SetCursorPos(end_x, end_y)
 end
@@ -3660,7 +3710,8 @@ function Utils.RenderSettings(settings, defaults, categories, hideControls)
 
     if not hideControls then
         local changed = false
-        RGMercConfig:GetSettings().ShowAdvancedOpts, changed = Utils.RenderOptionToggle("show_adv_tog", "Show Advanced Options", RGMercConfig:GetSettings().ShowAdvancedOpts)
+        RGMercConfig:GetSettings().ShowAdvancedOpts, changed = Utils.RenderOptionToggle("show_adv_tog",
+            "Show Advanced Options", RGMercConfig:GetSettings().ShowAdvancedOpts)
         if changed then
             RGMercConfig:SaveSettings(true)
         end

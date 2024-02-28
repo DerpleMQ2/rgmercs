@@ -73,7 +73,8 @@ local function RenderTarget()
         else
             ImGui.PushStyleColor(ImGuiCol.Text, 1, 1, 1, 1)
         end
-        ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "", assistSpawn.ID() or 0, assistSpawn.Level() or 0,
+        ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
+            assistSpawn.ID() or 0, assistSpawn.Level() or 0,
             assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
         RGMercUtils.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
@@ -129,7 +130,8 @@ local function RGMercsGUI()
             local pressed
             ImGui.Image(derpImg:GetTextureID(), ImVec2(60, 60))
             ImGui.SameLine()
-            ImGui.Text(string.format("RGMercs [%s/%s] by: %s\nLoaded Char: %s\nClass Config: %s\nBuild: %s", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
+            ImGui.Text(string.format("RGMercs [%s/%s] by: %s\nLoaded Char: %s\nClass Config: %s\nBuild: %s",
+                RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
                 RGMercConfig.Globals.CurLoadedChar,
                 RGMercModules:ExecModule("Class", "GetVersionString"),
                 GitCommit.commitId or "None"))
@@ -162,14 +164,17 @@ local function RGMercsGUI()
                     if mq.TLO.Target.ID() > 0 and mq.TLO.Target.Type():lower() == "pc" and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
                         if ImGui.SmallButton("Set MA to Current Target") then
                             RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
+                            DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
                         end
                     end
-                    ImGui.Text("Stuck To: " .. (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
+                    ImGui.Text("Stuck To: " ..
+                        (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Config Options") then
                         ImGui.Indent()
                         if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
                             local settingsRef = RGMercConfig:GetSettings()
-                            settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig, RGMercConfig.DefaultCategories)
+                            settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig,
+                                RGMercConfig.DefaultCategories)
                             if pressed then
                                 RGMercConfig:SaveSettings(false)
                             end
@@ -184,7 +189,8 @@ local function RGMercsGUI()
                                     ImGui.PushID(n .. "_config_hdr")
                                     if s and submoduleDefaults[n] and submoduleCategories[n] then
                                         if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                            s, pressed, _ = RGMercUtils.RenderSettings(s, submoduleDefaults[n], submoduleCategories[n], true)
+                                            s, pressed, _ = RGMercUtils.RenderSettings(s, submoduleDefaults[n],
+                                                submoduleCategories[n], true)
                                             if pressed then
                                                 RGMercModules:ExecModule(n, "SaveSettings", true)
                                             end
@@ -219,7 +225,8 @@ local function RGMercsGUI()
 
             if RGMercsConsole then
                 local changed
-                RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level", RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
+                RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level",
+                    RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
                     #RGMercConfig.Constants.LogLevels)
 
                 if changed then
@@ -227,7 +234,8 @@ local function RGMercsGUI()
                 end
 
                 ImGui.SameLine()
-                RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file", "Log to File", RGMercConfig:GetSettings().LogToFile)
+                RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file",
+                    "Log to File", RGMercConfig:GetSettings().LogToFile)
 
                 if changed then
                     RGMercConfig:SaveSettings(false)
@@ -294,7 +302,8 @@ local function RGInit(...)
     end
 
     for k, v in ipairs(RGMercConfig.Constants.ExpansionIDToName) do
-        RGMercsLogger.log_debug("\ayExpansion \at%-22s\ao[\am%02d\ao]: %s", v, k, RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
+        RGMercsLogger.log_debug("\ayExpansion \at%-22s\ao[\am%02d\ao]: %s", v, k,
+            RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
     end
 
     -- TODO: Can turn this into an options parser later.
@@ -317,7 +326,8 @@ local function RGInit(...)
 
     -- TODO: Chat Begs
 
-    RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host If it exists! (/%s pause on)", mq.TLO.Me.Class.ShortName())
+    RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host If it exists! (/%s pause on)",
+        mq.TLO.Me.Class.ShortName())
     RGMercUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
 
     if RGMercUtils.CanUseAA("Companion's Discipline") then
@@ -335,13 +345,16 @@ local function RGInit(...)
 
     if mainAssist:len() > 0 then
         RGMercConfig.Globals.MainAssist = mainAssist
+        DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
         RGMercUtils.PopUp("Targetting %s for Main Assist", RGMercConfig.Globals.MainAssist)
         RGMercUtils.SetTarget(RGMercUtils.GetMainAssistId())
-        RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist, RGMercUtils.GetSetting('AutoAssistAt'))
+        RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist,
+            RGMercUtils.GetSetting('AutoAssistAt'))
     end
 
     if RGMercUtils.GetGroupMainAssistName() ~= mainAssist then
-        RGMercUtils.PopUp(string.format("Assisting: %s NOTICE: Group MainAssist [%s] != Your Assist Target [%s]. Is This On Purpose?", mainAssist,
+        RGMercUtils.PopUp(string.format(
+            "Assisting: %s NOTICE: Group MainAssist [%s] != Your Assist Target [%s]. Is This On Purpose?", mainAssist,
             RGMercUtils.GetGroupMainAssistName(), mainAssist))
     end
 
@@ -383,7 +396,7 @@ local function Main()
     if RGMercUtils.GetXTHaterCount() > 0 then
         curState = "Combat"
         --if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
-        if not RGMercUtils.FacingTarget() then
+        if not RGMercUtils.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() then
             --RGMercConfig.Globals.LastFaceTime = os.clock()
             RGMercUtils.DoCmd("/squelch /face")
         end
@@ -482,8 +495,10 @@ local function Main()
         ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
     local mercCheck = (mq.TLO.Target.Type() or "none"):lower() == "mercenary"
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
-        RGMercsLogger.log_debug("\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
-            RGMercUtils.BoolToColorString(mq.TLO.Me.Combat()), RGMercUtils.BoolToColorString(pcCheck), RGMercUtils.BoolToColorString(mercCheck))
+        RGMercsLogger.log_debug(
+            "\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
+            RGMercUtils.BoolToColorString(mq.TLO.Me.Combat()), RGMercUtils.BoolToColorString(pcCheck),
+            RGMercUtils.BoolToColorString(mercCheck))
         RGMercUtils.DoCmd("/attack off")
     end
 
