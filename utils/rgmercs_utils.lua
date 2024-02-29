@@ -1565,7 +1565,7 @@ end
 ---@return boolean
 function Utils.TargetHasBuffByName(buffName)
     if buffName == nil then return false end
-    return (mq.TLO.Target() and (mq.TLO.Target.FindBuff("name " .. buffName).ID() or 0) > 0) and true or false
+    return Utils.TargetHasBuff(mq.TLO.Spell(buffName))
 end
 
 ---@param target MQTarget|nil

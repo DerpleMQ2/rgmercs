@@ -1277,24 +1277,12 @@ local _ClassConfig = {
                 name = "GroupFocusSpell",
                 type = "Spell",
                 active_cond = function(self, spell)
-                    local havebuff = RGMercUtils.BuffActiveByID(spell.ID())
-                    local numEffects = spell.NumEffects()
-                    for i = 1, numEffects do
-                        havebuff = havebuff or RGMercUtils.BuffActiveByID(spell.Trigger(i).ID())
-                    end
-                    return havebuff
+                    return RGMercUtils.TargetHasBuff(spell)
                 end,
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    local havebuff = RGMercUtils.BuffActiveByID(spell.ID())
-                    local stacks = RGMercUtils.SpellStacksOnTarget(spell)
-                    local numEffects = spell.NumEffects()
-                    for i = 1, numEffects do
-                        stacks = stacks and spell.Trigger(i).StacksTarget()
-                        havebuff = havebuff or RGMercUtils.BuffActiveByID(spell.Trigger(i).ID())
-                    end
-                    return stacks and not havebuff
+                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
         },
@@ -1384,9 +1372,6 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    RGMercsLogger.log_debug("Condition for %s: notHasBuff(%s) and Stacks(%s)", spell.RankName.Name(),
-                        RGMercUtils.BoolToColorString(not RGMercUtils.TargetHasBuff(spell, target)),
-                        RGMercUtils.BoolToColorString(RGMercUtils.SpellStacksOnTarget(spell)))
                     return not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
@@ -1394,7 +1379,7 @@ local _ClassConfig = {
                 name = "HasteBuff",
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
-                    local focusSpell = self:GetResolvedActionMapItem('FocusSpell')
+                    local focusSpell = self:GetResolvedActionMapItem('SingleFocusSpell')
 
                     local focusLevelPass = focusSpell and (focusSpell.Level() or 0) <= 111 or true
 
@@ -1545,10 +1530,10 @@ local _ClassConfig = {
             spells = {
                 -- [ HEAL MODE ] --
                 { name = "GroupRenewalHoT", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
-                { name = "FocusSpell",      cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "GroupFocusSpell", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "CurseDoT1", },
-                { name = "FocusSpell", },
+                { name = "GroupFocusSpell", },
             },
             -- [ TLP FALL BACK ] --
             { name = "AEMaloSpell", cond = function(self) return RGMercUtils.GetSetting('DoAEMalo') end, },
