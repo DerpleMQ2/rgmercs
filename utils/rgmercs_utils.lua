@@ -2577,6 +2577,9 @@ function Utils.FindTarget(validateFn)
         else
             ---@diagnostic disable-next-line: undefined-field
             RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
+            if RGMercConfig.Globals.AutoTargetID == 0 then
+                RGMercConfig.Globals.AutoTargetID = tonumber(DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)) or 0
+            end
         end
     end
 
