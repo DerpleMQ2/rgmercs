@@ -2853,7 +2853,7 @@ function Utils.OkToEngage(autoTargetId)
                 RGMercsLogger.log_verbose(
                     "\ag  OkayToEngage(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
                     Utils.GetTargetCleanName(),
-                    target.Distance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
+                    Utils.GetTargetDistance(), config.AssistRange, Utils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
                     mq.TLO.Me.ID())
             end
             return true
