@@ -642,7 +642,7 @@ return {
             },
             {
                 name = "Alliance",
-                type = "Spell",
+                type = "AA",
                 cond = function(self, spell)
                     return RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and
                         not RGMercUtils.TargetHasBuff(spell)
