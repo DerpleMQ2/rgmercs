@@ -218,6 +218,14 @@ function Module:DestoryCampfire()
     mq.TLO.Window("FellowshipWnd").DoClose()
 end
 
+function Module:GetCampfireTypeName()
+    return self.DefaultConfig.MaintainCampfire.ComboOptions[self.settings.MaintainCampfire]
+end
+
+function Module:GetCampfireTypeID()
+    return self.Constants.CampfireNameToKit[self:GetCampfireTypeName()]
+end
+
 function Module:Campfire(camptype)
     if camptype == -1 then
         self:DestoryCampfire()
@@ -268,9 +276,10 @@ function Module:Campfire(camptype)
             end
         end
 
+        RGMercsLogger.log_debug("\atFellowship Campfire Type Selected: %s (%d)", camptype and "Override" or self:GetCampfireTypeName(), camptype or self:GetCampfireTypeID())
         mq.TLO.Window("FellowshipWnd").Child("FP_RefreshList").LeftMouseUp()
         mq.delay("1s")
-        mq.TLO.Window("FellowshipWnd").Child("FP_CampsiteKitList").Select(self.Constants.CampfireNameToKit[self.settings.MaintainCampfire] or camptype)
+        mq.TLO.Window("FellowshipWnd").Child("FP_CampsiteKitList").Select(camptype or self:GetCampfireTypeID())
         mq.delay("1s")
         mq.TLO.Window("FellowshipWnd").Child("FP_CreateCampsite").LeftMouseUp()
         mq.delay("5s", function() return mq.TLO.Me.Fellowship.Campfire() ~= nil end)
