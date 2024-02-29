@@ -1508,14 +1508,14 @@ end
 ---@return boolean
 function Utils.DotSpellCheck(hpStopDots, spell)
     if not spell or not spell() then return false end
-    return not Utils.TargetHasBuff(spell) and spell.StacksTarget() and Utils.GetTargetPctHPs() > hpStopDots
+    return not Utils.TargetHasBuff(spell) and Utils.SpellStacksOnTarget(spell) and Utils.GetTargetPctHPs() > hpStopDots
 end
 
 ---@param spell MQSpell
 ---@return boolean
 function Utils.DetSpellCheck(spell)
     if not spell or not spell() then return false end
-    return not Utils.TargetHasBuff(spell) and spell.StacksTarget()
+    return not Utils.TargetHasBuff(spell) and Utils.SpellStacksOnTarget(spell)
 end
 
 ---@param spell MQSpell
@@ -1531,7 +1531,34 @@ function Utils.TargetHasBuff(spell, buffTarget)
     if not spell or not spell() then return false end
     if not target or not target() then return false end
 
-    return (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
+    local numEffects = spell.NumEffects()
+
+    if (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0 then return true end
+
+    for i = 1, numEffects do
+        if (target.FindBuff("id " .. tostring(spell.Trigger(i).ID())).ID() or 0) > 0 then return true end
+    end
+
+    return false
+end
+
+---@param spell MQSpell # Must be Targetting Target.
+---@return boolean
+function Utils.SpellStacksOnTarget(spell)
+    local target = mq.TLO.Target
+
+    if not spell or not spell() then return false end
+    if not target or not target() then return false end
+
+    local numEffects = spell.NumEffects()
+
+    if not Utils.SpellStacksOnTarget(spell) then return false end
+
+    for i = 1, numEffects do
+        if not spell.Trigger(i).StacksTarget() then return false end
+    end
+
+    return true
 end
 
 ---@param buffName string
@@ -2310,8 +2337,8 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
                             cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
                         local checkName = cur_spawn and cur_spawn() or cur_spawn.CleanName() or "None"
 
-                        if cur_spawn.Type():lower() == "mercenary" then checkName = cur_spawn.Owner.CleanName() end
-                        if cur_spawn.Type():lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
+                        if (cur_spawn.Type() or ""):lower() == "mercenary" then checkName = cur_spawn.Owner.CleanName() end
+                        if (cur_spawn.Type() or ""):lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
 
                         if not Utils.IsSafeName(t, checkName) then
                             RGMercsLogger.log_verbose(
@@ -2945,8 +2972,7 @@ function Utils.DetAACheck(aaId)
     local me     = mq.TLO.Me
 
     return (not Utils.TargetHasBuff(me.AltAbility(aaId).Spell) and
-            not Utils.TargetHasBuff(me.AltAbility(aaId).Spell.Trigger(1))) and
-        (me.AltAbility(aaId).Spell.StacksTarget() or me.AltAbility(aaId).Spell.Trigger(1).StacksTarget())
+        Utils.SpellStacksOnTarget(me.AltAbility(aaId).Spell))
 end
 
 ---@param caller self

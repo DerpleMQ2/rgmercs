@@ -840,7 +840,7 @@ return {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
-                        spell.StacksTarget() and
+                        RGMercUtils.SpellStacksOnTarget(spell) and
                         spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct())
                 end,
             },
@@ -1026,7 +1026,7 @@ return {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1036,7 +1036,8 @@ return {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     local targetClass = target.Class.ShortName()
-                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1045,7 +1046,7 @@ return {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1055,7 +1056,8 @@ return {
                     local targetClass = target.Class.ShortName()
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1064,7 +1066,7 @@ return {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1074,7 +1076,8 @@ return {
                     local targetClass = target.Class.ShortName()
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and spell.StacksTarget()
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
         },
