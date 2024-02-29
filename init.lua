@@ -241,7 +241,7 @@ local function RGMercsGUI()
                     RGMercConfig:SaveSettings(false)
                 end
 
-                if ImGui.CollapsingHeader("Debug Output", ImGuiTreeNodeFlags.DefaultOpen) then
+                if ImGui.CollapsingHeader("RGMercs Output", ImGuiTreeNodeFlags.DefaultOpen) then
                     local cur_x, cur_y = ImGui.GetCursorPos()
                     local contentSizeX, contentSizeY = ImGui.GetContentRegionAvail()
                     if not RGMercsConsole.opacity then

@@ -757,7 +757,7 @@ local _ClassConfig = {
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
 
                     return (target and target.PctHPs() or 100) <= RGMercUtils.GetSetting('MainHealPoint') and
-                        RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
+                        RGMercUtils.GetSetting('DoHOT') and RGMercUtils.SpellStacksOnTarget(spell) and
                         not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
@@ -787,7 +787,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
+                    return RGMercUtils.GetSetting('DoHOT') and RGMercUtils.SpellStacksOnTarget(spell) and
                         not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
@@ -821,7 +821,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.GetSetting('DoHOT') and spell.StacksTarget() and
+                    return RGMercUtils.GetSetting('DoHOT') and RGMercUtils.SpellStacksOnTarget(spell) and
                         not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
@@ -1288,7 +1288,7 @@ local _ClassConfig = {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     local havebuff = RGMercUtils.BuffActiveByID(spell.ID())
-                    local stacks = spell.StacksTarget()
+                    local stacks = RGMercUtils.SpellStacksOnTarget(spell)
                     local numEffects = spell.NumEffects()
                     for i = 1, numEffects do
                         stacks = stacks and spell.Trigger(i).StacksTarget()
@@ -1306,7 +1306,7 @@ local _ClassConfig = {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercUtils.GetSetting('DoGrowth') and RGMercUtils.TargetClassIs("WAR", target) and not RGMercUtils.TargetHasBuff(spell, target) and
-                        spell.StacksTarget()
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1316,7 +1316,7 @@ local _ClassConfig = {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", }, target) and
-                        not RGMercUtils.TargetHasBuff(spell, target) and spell.StacksTarget()
+                        not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1327,7 +1327,7 @@ local _ClassConfig = {
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return mq.TLO.Me.Level() <= 85 and RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", }, target) and
                         not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.GetSetting('DoStatBuff') and
-                        spell.StacksTarget()
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1339,7 +1339,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.Level() <= 85 and
                         RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", "ROG", "MNK", "BER", "RNG", "BST", }, target) and
                         not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.GetSetting('DoStatBuff') and
-                        spell.StacksTarget()
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1351,7 +1351,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.Level() <= 85 and (spell.Level() or 0) >= 71 and
                         RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", "ROG", "MNK", "BER", "RNG", "BST", }, target) and
                         not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.GetSetting('DoStatBuff') and
-                        spell.StacksTarget()
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1363,7 +1363,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.Level() <= 85 and
                         RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", "ROG", "MNK", "BER", "RNG", "BST", }, target) and
                         not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.GetSetting('DoStatBuff') and
-                        spell.StacksTarget()
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1375,7 +1375,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.Level() <= 85 and
                         RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", "ROG", "MNK", "BER", "RNG", "BST", }, target) and
                         not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.GetSetting('DoStatBuff') and
-                        spell.StacksTarget()
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1384,12 +1384,10 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    local stacks = spell.StacksTarget()
-                    local numEffects = spell.NumEffects()
-                    for i = 1, numEffects do
-                        stacks = stacks and spell.Trigger(i).StacksTarget()
-                    end
-                    return not RGMercUtils.TargetHasBuff(spell, target) and stacks
+                    RGMercsLogger.log_debug("Condition for %s: notHasBuff(%s) and Stacks(%s)", spell.RankName.Name(),
+                        RGMercUtils.BoolToColorString(not RGMercUtils.TargetHasBuff(spell, target)),
+                        RGMercUtils.BoolToColorString(RGMercUtils.SpellStacksOnTarget(spell)))
+                    return not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1406,7 +1404,7 @@ local _ClassConfig = {
                     return focusLevelPass and
                         RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", "ROG", "MNK", "BER", "RNG", "BST", }, target) and
                         not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.GetSetting('DoHaste') and
-                        spell.StacksTarget()
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1416,7 +1414,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuff(spell) and spell.StacksTarget() and
+                    return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
                         not RGMercUtils.CanUseAA("Lupine Spirit") and target.Type() == "PC"
                 end,
             },
@@ -1434,7 +1432,7 @@ local _ClassConfig = {
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
 
                     return RGMercUtils.GetSetting('DoRunSpeed') and target.Type() == "PC" and RGMercUtils.CanUseAA(aaName) and
-                        RGMercUtils.TargetHasBuff(speedSpell) and speedSpell.StacksTarget()
+                        RGMercUtils.TargetHasBuff(speedSpell) and RGMercUtils.SpellStacksOnTarget(speedSpell)
                 end,
             },
         },
@@ -1521,7 +1519,7 @@ local _ClassConfig = {
                 -- [ HEAL MODE ] --
                 { name = "RecklessHeal3",    cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
-                { name = "CanniSpell",       cond = function(self) return RGMercUtils.Settings('DoSpellCanni') end, },
+                { name = "CanniSpell",       cond = function(self) return RGMercUtils.GetSetting('DoSpellCanni') end, },
                 -- [ TLP FALL BACK ] --
                 { name = "LowLvlAttackBuff", },
             },
@@ -1531,8 +1529,8 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "CanniSpell",       cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.Settings('DoSpellCanni') end, },
-                { name = "GrowthBuff",       cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.Settings('DoGrowth') end, },
+                { name = "CanniSpell",       cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoSpellCanni') end, },
+                { name = "GrowthBuff",       cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoGrowth') end, },
                 -- [ Hybrid MODE ] --
                 { name = "SlowProcBuff", },
                 -- [ TLP FALL BACK ] --
@@ -1650,8 +1648,8 @@ local _ClassConfig = {
         ['AACanniManaPct']    = { DisplayName = "AA Canni Mana %", Category = "Spells and Abilities", Tooltip = "Use Canni AA Under [X]% mana", Default = 70, Min = 1, Max = 100, },
         ['AACanniMinHP']      = { DisplayName = "AA Canni HP %", Category = "Spells and Abilities", Tooltip = "Dont Use Canni AA Under [X]% HP", Default = 70, Min = 1, Max = 100, },
         ['DoSpellCanni']      = { DisplayName = "Use Spell Canni", Category = "Spells and Abilities", Tooltip = "Use Canni Spell during downtime", Default = true, },
-        ['SpellCanniManaPct'] = { DisplayName = "AA Canni Mana %", Category = "Spells and Abilities", Tooltip = "Use Canni Spell Under [X]% mana", Default = 70, Min = 1, Max = 100, },
-        ['SpellCanniMinHP']   = { DisplayName = "AA Canni HP %", Category = "Spells and Abilities", Tooltip = "Dont Use Canni Spell Under [X]% HP", Default = 70, Min = 1, Max = 100, },
+        ['SpellCanniManaPct'] = { DisplayName = "Spell Canni Mana %", Category = "Spells and Abilities", Tooltip = "Use Canni Spell Under [X]% mana", Default = 70, Min = 1, Max = 100, },
+        ['SpellCanniMinHP']   = { DisplayName = "Spell Canni HP %", Category = "Spells and Abilities", Tooltip = "Dont Use Canni Spell Under [X]% HP", Default = 70, Min = 1, Max = 100, },
         ['DoGroupShrink']     = { DisplayName = "Group Shrink", Category = "Buffs", Tooltip = "Use Group Shrink Buff", Default = true, },
         ['DoGrowth']          = { DisplayName = "Use Growth", Category = "Buffs", Tooltip = "Use Growth Buff", Default = true, },
         ['DoAura']            = { DisplayName = "Use Aura", Category = "Buffs", Tooltip = "Use Aura (Pact of Wolf)", Default = true, },
