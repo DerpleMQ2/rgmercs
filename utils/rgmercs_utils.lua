@@ -1552,7 +1552,7 @@ function Utils.SpellStacksOnTarget(spell)
 
     local numEffects = spell.NumEffects()
 
-    if not Utils.SpellStacksOnTarget(spell) then return false end
+    if not spell.StacksTarget() then return false end
 
     for i = 1, numEffects do
         if not spell.Trigger(i).StacksTarget() then return false end
