@@ -2881,7 +2881,7 @@ function Utils.PetAttack(targetId)
 
     if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" then
         Utils.DoCmd("/squelch /pet attack %d", targetId)
-        Utils.DoCmd("/squelch /pet swarm %d", targetId)
+        Utils.DoCmd("/squelch /pet swarm")
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
     end
 end
