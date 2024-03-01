@@ -19,7 +19,7 @@ local _ClassConfig = {
     },
     ['ModeChecks']      = {
         -- necro can AA Rez
-        IsRezing = function() return true end,
+        IsRezing = function() return RGMercUtils.GetXTHaterCount() == 0 end,
     },
     ['Themes']          = {
         ['DPS'] = {
