@@ -89,6 +89,7 @@ function Module:Render()
     if self.ModuleLoaded then
         if ImGui.Button(RGMercUtils.GetSetting('DoDrag') and "Stop Dragging" or "Start Dragging", ImGui.GetWindowWidth() * .3, 25) then
             self.settings.DoDrag = not self.settings.DoDrag
+            self:SaveSettings(false)
         end
 
         if ImGui.CollapsingHeader("Config Options") then
