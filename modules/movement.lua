@@ -23,6 +23,7 @@ Module.Constants.CampfireNameToKit = {
 Module.DefaultConfig               = {
     ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = (RGMercConfig.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 15 or 60), Min = 10, Max = 300, },
     ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false, },
+    ['BreakOnDeath']     = { DisplayName = "Break On Death", Category = "Chase", Tooltip = "Stop chasing when you die.", Default = true, },
     ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100, },
     ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
     ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
@@ -149,7 +150,7 @@ function Module:ChaseOn(target)
         self.settings.ChaseTarget = chaseTarget.CleanName()
         self:SaveSettings(false)
 
-        RGMercsLogger.log_info("\ao Now Chasing \ag %s", chaseTarget.CleanName())
+        RGMercsLogger.log_info("\aoNow Chasing \ag%s", chaseTarget.CleanName())
     else
         RGMercsLogger.log_warn("\ayWarning:\ax Not a valid chase target!")
     end
@@ -167,10 +168,10 @@ function Module:RunCmd(cmd, ...)
 end
 
 function Module:ChaseOff()
-    self.settings.ChaseOn = false
-    self.settings.ChaseTarget = nil
-    self:SaveSettings(false)
     RGMercsLogger.log_warn("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
+    self.settings.ChaseOn = false
+    self.settings.ChaseTarget = ""
+    self:SaveSettings(false)
 end
 
 function Module:CampOn()
@@ -293,6 +294,14 @@ function Module:Campfire(camptype)
     end
 end
 
+function Module:ValidChaseTarget()
+    return (self.settings.ChaseTarget and self.settings.ChaseTarget:len() > 0)
+end
+
+function Module:GetChaseTarget()
+    return self.settings.ChaseTarget:len() > 0 and self.settings.ChaseTarget or "<Invalid>"
+end
+
 function Module:ShouldRender()
     return true
 end
@@ -302,10 +311,95 @@ function Module:Render()
 
     if self.settings and self.ModuleLoaded and RGMercConfig.Globals.SubmodulesLoaded then
         ImGui.Text(string.format("Chase Distance: %d", self.settings.ChaseDistance))
-        ImGui.Text(string.format("Chase LOS Required: %s", self.settings.LineOfSight and "On" or "Off"))
+        ImGui.Text(string.format("Chase LOS Required: %s", self.settings.RequireLoS == true and "On" or "Off"))
 
         local pressed
-        local chaseSpawn = mq.TLO.Spawn("pc =" .. (self.settings.ChaseTarget or "NoOne"))
+        local chaseSpawn = mq.TLO.Spawn("pc =" .. self:GetChaseTarget())
+
+        ImGui.Separator()
+
+        if ImGui.Button(RGMercUtils.GetSetting('ChaseOn') and "Chase Off" or "Chase On", ImGui.GetWindowWidth() * .3, 25) then
+            self:RunCmd("/rgl chase%s", RGMercUtils.GetSetting('ChaseOn') and "off" or "on")
+        end
+
+        if ImGui.BeginTable("ChaseInfoTable", 2, bit32.bor(ImGuiTableFlags.Borders)) then
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("Chase Target"))
+            ImGui.TableNextColumn()
+            ImGui.Text(self:GetChaseTarget())
+            ImGui.TableNextColumn()
+            ImGui.Text("Distance")
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%d", self.settings.ChaseTarget:len() > 0 and chaseSpawn.Distance() or 0))
+            ImGui.TableNextColumn()
+            ImGui.Text("ID")
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%d", self.settings.ChaseTarget:len() > 0 and chaseSpawn.ID() or 0))
+            ImGui.TableNextColumn()
+            ImGui.Text("Line of Sight")
+            ImGui.TableNextColumn()
+            if chaseSpawn.LineOfSight() then
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.8)
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
+            end
+            ImGui.Text(string.format("%s", self.settings.ChaseTarget:len() > 0 and (chaseSpawn.LineOfSight() and ICONS.FA_EYE or ICONS.FA_EYE_SLASH) or "N/A"))
+            ImGui.PopStyleColor(1)
+            ImGui.TableNextColumn()
+            ImGui.Text("Loc")
+            ImGui.TableNextColumn()
+            RGMercUtils.NavEnabledLoc(self.settings.ChaseTarget:len() > 0 and chaseSpawn.LocYXZ() or "0,0,0")
+            ImGui.EndTable()
+        end
+
+        ImGui.Separator()
+
+        if RGMercUtils.GetSetting('ReturnToCamp') then
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
+            if ImGui.Button("Break Camp", ImGui.GetWindowWidth() * .3, 25) then
+                self:CampOff()
+            end
+            ImGui.PopStyleVar(1)
+        else
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
+            if ImGui.Button("Set New Camp Here", ImGui.GetWindowWidth() * .3, 25) then
+                self:CampOn()
+            end
+            ImGui.PopStyleVar(1)
+        end
+
+        local me = mq.TLO.Me
+        local distanceToCamp = RGMercUtils.GetDistance(me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0)
+        if ImGui.BeginTable("CampInfoTable", 2, bit32.bor(ImGuiTableFlags.Borders)) then
+            ImGui.TableNextColumn()
+            ImGui.Text("Camp Set")
+
+            ImGui.TableNextColumn()
+            if RGMercUtils.GetSetting('ReturnToCamp') then
+                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.8)
+                ImGui.Text(ICONS.FA_FREE_CODE_CAMP)
+            else
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
+                ImGui.Text(ICONS.MD_NOT_INTERESTED)
+            end
+            ImGui.PopStyleColor(1)
+
+            ImGui.TableNextColumn()
+            ImGui.Text("Camp Location")
+            ImGui.TableNextColumn()
+            RGMercUtils.NavEnabledLoc(string.format("%d,%d,%d", self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0, self.TempSettings.AutoCampZ or 0))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("Distance to Camp"))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%d", self.TempSettings.CampZoneId == mq.TLO.Zone.ID() and distanceToCamp or 0))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("Camp Radius"))
+            ImGui.TableNextColumn()
+            ImGui.Text(string.format("%d", self.TempSettings.CampZoneId == mq.TLO.Zone.ID() and RGMercUtils.GetSetting("AutoCampRadius") or 0))
+            ImGui.EndTable()
+        end
+
+        ImGui.Separator()
 
         if ImGui.CollapsingHeader("Config Options") then
             self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
@@ -316,61 +410,6 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if chaseSpawn and chaseSpawn.ID() > 0 then
-            ImGui.Text(string.format("Chase Target: %s", self.settings.ChaseTarget))
-            ImGui.Indent()
-            ImGui.Text(string.format("Distance: %d", chaseSpawn.Distance()))
-            ImGui.Text(string.format("ID: %d", chaseSpawn.ID()))
-            ImGui.Text(string.format("LOS: "))
-            if chaseSpawn.LineOfSight() then
-                ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.8)
-            else
-                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
-            end
-            ImGui.SameLine()
-            ImGui.Text(string.format("%s", chaseSpawn.LineOfSight() and ICONS.FA_EYE or ICONS.FA_EYE_SLASH))
-            ImGui.PopStyleColor(1)
-            ImGui.Unindent()
-        else
-            ImGui.Indent()
-            ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
-            ImGui.Text(string.format("Chase Target Invalid!"))
-            ImGui.PopStyleColor(1)
-            ImGui.Unindent()
-        end
-
-        ImGui.Separator()
-
-        if RGMercUtils.GetSetting('ReturnToCamp') then
-            local me = mq.TLO.Me
-            local distanceToCamp = RGMercUtils.GetDistance(me.Y(), me.X(), self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampX or 0)
-            ImGui.Text("Camp Location")
-            ImGui.Indent()
-            ImGui.Text(string.format("X: %d, Y: %d, Z: %d", self.TempSettings.AutoCampX or 0, self.TempSettings.AutoCampY or 0, self.TempSettings.AutoCampZ or 0))
-            if self.TempSettings.CampZoneId > 0 then
-                ImGui.Text(string.format("Distance to Camp: %d", distanceToCamp))
-            end
-            ImGui.Unindent()
-
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
-            if ImGui.Button("Break Camp", ImGui.GetWindowWidth() * .3, 18) then
-                self:CampOff()
-            end
-            ImGui.PopStyleVar(1)
-        else
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
-            if ImGui.Button("Set New Camp Here", ImGui.GetWindowWidth() * .3, 18) then
-                self:CampOn()
-            end
-            ImGui.PopStyleVar(1)
-        end
-
-        local state, pressed = RGMercUtils.RenderOptionToggle("##chase_om", "Chase On", self.settings.ChaseOn)
-        if pressed then
-            self:RunCmd("/rgl chase%s", state and "on" or "off")
-        end
-
-        ImGui.Separator()
         ImGui.Text("Last Movement Command: %s", self.TempSettings.LastCmd)
     end
 end
@@ -401,11 +440,12 @@ function Module:DoClickies()
 end
 
 function Module:OnDeath()
+    if not RGMercUtils.GetSetting('BreakOnDeath') then return end
     if self.settings.ChaseTarget then
         RGMercsLogger.log_info("\awNOTICE:\ax You're dead. I'm not chasing %s anymore.", self.settings.ChaseTarget)
     end
     self.settings.ChaseOn = false
-    self.settings.ChaseTarget = nil
+    self.settings.ChaseTarget = ""
 end
 
 function Module:ShouldFollow()
@@ -507,7 +547,7 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    if self.settings.ChaseOn and not self.settings.ChaseTarget then
+    if self.settings.ChaseOn and not self:ValidChaseTarget() then
         self.settings.ChaseOn = false
         RGMercsLogger.log_warn("\awNOTICE:\ax \ayChase Target is invalid. Turning Chase Off!")
     end
