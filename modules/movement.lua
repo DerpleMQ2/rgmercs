@@ -475,10 +475,12 @@ end
 
 function Module:GiveTime(combat_state)
     if mq.TLO.Me.Hovering() and self.settings.ChaseOn then
-        RGMercsLogger.log_warn("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
-            self.settings.ChaseTarget)
-        self.settings.ChaseOn = false
-        self:SaveSettings()
+        if RGMercUtils.GetSetting('BreakOnDeath') then
+            RGMercsLogger.log_warn("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
+                self.settings.ChaseTarget)
+            self.settings.ChaseOn = false
+            self:SaveSettings()
+        end
         return
     end
 
