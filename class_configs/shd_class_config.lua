@@ -1061,7 +1061,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.EncroachingDarkness,
                 type = "AA",
                 cond = function(self)
-                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.SpellLoaded(spell) and RGMercUtils.DetAACheck(826)
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetAACheck(826)
                 end,
             },
             {
@@ -1069,7 +1069,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.SnareDOT,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.SpellLoaded(spell) and GMercUtils.DetSpellCheck(spell) and not mq.TLO.Me.AltAbility(826)()
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.SpellLoaded(spell) and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Me.AltAbility(826)()
                 end,
             },
 
