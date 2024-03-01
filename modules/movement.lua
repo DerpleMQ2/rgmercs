@@ -535,7 +535,7 @@ function Module:GiveTime(combat_state)
 
     if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
         if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and self.settings.MaintainCampfire > 1 then
-            RGMercsLogger.log_debug("Doing campfire maintainance")
+            --RGMercsLogger.log_debug("Doing campfire maintainance")
             self:Campfire()
         end
     else
