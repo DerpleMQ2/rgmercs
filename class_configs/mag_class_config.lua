@@ -971,7 +971,7 @@ _ClassConfig      = {
             -- If they Are Not a Mage - Also Give them Armor
             for i = 1, mq.TLO.Group.Members() do
                 local member = mq.TLO.Group.Member(i)
-                if member and member() and member.Pet.ID() > 0 and (member.Pet.Equipment("primary")() or 0) == 0 then
+                if member and member() and (member.Pet.ID() or 0) > 0 and (member.Pet.Equipment("primary")() or 0) == 0 then
                     if mq.TLO.Me.CombatState():lower() ~= "combat" then
                         self.ClassConfig.HelperFunctions.give_pet_toys(self, member.Pet.ID())
                     end
