@@ -31,6 +31,37 @@ Module.TempSettings.ShowFailedSpells      = false
 Module.TempSettings.ReloadingLoadouts     = true
 Module.TempSettings.NewCombatMode         = false
 
+Module.CommandHandlers                    = {
+    setmode = {
+        usage = "/rgl setmode <mode>",
+        about = "Make sets my mode to mode - this is a helper so you don't need to use an index.",
+        handler =
+            function(self, mode)
+                local newMode = nil
+                local newModeIdx = 0
+
+                for i, m in ipairs(self.ClassConfig.Modes) do
+                    if m:lower() == mode:lower() then
+                        newMode = m
+                        newModeIdx = i
+                        break
+                    end
+                end
+
+                if not newMode then
+                    RGMercsLogger.log_error("\arInvalid Mode: \am%s", mode)
+                    return true
+                end
+
+                if not self:IsModeActive(newMode) then
+                    self.settings.Mode = newModeIdx
+                    self:SetCombatMode(newMode)
+                    return true
+                end
+            end,
+    },
+}
+
 local function getConfigFileName()
     return mq.configDir ..
         '/rgmercs/PCConfigs/' ..
@@ -149,6 +180,10 @@ function Module:RescanLoadout()
 end
 
 function Module:SetCombatMode(mode)
+    if not RGMercUtils.TableContains(self.ClassConfig.Modes, mode) then
+        RGMercsLogger.log_error("\ayInvalid Mode: \am%s", mode)
+        return false
+    end
     RGMercsLogger.log_debug("\aySettings Combat Mode to: \am%s", mode)
     self.TempSettings.ReloadingLoadouts = true
 
@@ -758,7 +793,13 @@ function Module:GetVersionString()
 end
 
 function Module:GetCommandHandlers()
-    return { module = self._name, CommandHandlers = self.ClassConfig.CommandHandlers, }
+    local cmdHandlers = self.CommandHandlers or {}
+
+    for cmd, data in pairs(self.ClassConfig.CommandHandlers or {}) do
+        cmdHandlers[cmd] = data
+    end
+
+    return { module = self._name, CommandHandlers = cmdHandlers, }
 end
 
 ---@param cmd string
@@ -769,6 +810,10 @@ function Module:HandleBind(cmd, ...)
     -- /rglua cmd handler
     if self.ClassConfig.CommandHandlers and self.ClassConfig.CommandHandlers[cmd] then
         return RGMercUtils.SafeCallFunc(string.format("Command Handler: %s", cmd), self.ClassConfig.CommandHandlers[cmd].handler, self, ...)
+    end
+
+    if self.CommandHandlers and self.CommandHandlers[cmd] then
+        return RGMercUtils.SafeCallFunc(string.format("Command Handler: %s", cmd), self.CommandHandlers[cmd].handler, self, ...)
     end
     return handled
 end
