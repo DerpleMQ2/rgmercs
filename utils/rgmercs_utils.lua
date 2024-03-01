@@ -1561,6 +1561,25 @@ function Utils.SpellStacksOnTarget(spell)
     return true
 end
 
+---@param spell MQSpell # Must be Targetting Target.
+---@return boolean
+function Utils.SpellStacksOnMe(spell)
+    local target = mq.TLO.Target
+
+    if not spell or not spell() then return false end
+    if not target or not target() then return false end
+
+    local numEffects = spell.NumEffects()
+
+    if not spell.Stacks() then return false end
+
+    for i = 1, numEffects do
+        if not spell.Trigger(i).Stacks() then return false end
+    end
+
+    return true
+end
+
 ---@param buffName string
 ---@return boolean
 function Utils.TargetHasBuffByName(buffName)
