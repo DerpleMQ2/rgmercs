@@ -893,6 +893,15 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Ranged Combat',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.GetSetting('DoMelee') and not RGMercUtils.IsModeActive("Healer")
+            end,
+        },
+        {
             name = 'DPS',
             state = 1,
             steps = 1,
@@ -964,25 +973,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Eyes,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castWSU() and RGMercUtils.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "ShoutBuff",
-                type = "Spell",
-                tooltip = Tooltips.ShoutBuff,
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "GroupStrengthBuff",
-                type = "Spell",
-                tooltip = Tooltips.GroupStrengthBuff,
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return not castWSU() and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.BuffActiveByID(spell.ID()) and not RGMercUtils.GetSetting('DoMask')
                 end,
             },
             {
@@ -991,7 +982,34 @@ local _ClassConfig = {
                 tooltip = Tooltips.GroupPredatorBuff,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.SpellStacksOnMe(spell)
+                end,
+            },
+            {
+                name = "ShoutBuff",
+                type = "Spell",
+                tooltip = Tooltips.ShoutBuff,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.SpellStacksOnMe(spell) and not RGMercUtils.BuffActiveByName("Shared " .. spell.Name())
+                end,
+            },
+            {
+                name = "GroupStrengthBuff",
+                type = "Spell",
+                tooltip = Tooltips.GroupStrengthBuff,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.BuffActiveByName("Shared " .. spell.Name())
+                end,
+            },
+            {
+                name = "Rathe",
+                type = "Spell",
+                tooltip = Tooltips.Rathe,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.BuffActiveByName("Shared " .. spell.Name())
                 end,
             },
             {
@@ -1004,21 +1022,12 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Rathe",
-                type = "Spell",
-                tooltip = Tooltips.Rathe,
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
-                end,
-            },
-            {
                 name = "Coat",
                 type = "Spell",
                 tooltip = Tooltips.Coat,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
@@ -1027,7 +1036,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Mask,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.GetSetting('DoMask') and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
@@ -1045,7 +1054,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.DsBuff,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
@@ -1054,7 +1063,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SkinLike,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
@@ -1234,6 +1243,32 @@ local _ClassConfig = {
                 end,
             },
         },
+        ['Ranged Combat'] = {
+            {
+                name = "Ranged Mode",
+                type = "CustomFunc",
+                tooltip = Tooltips.RangedMode,
+                cond = function(self, combat_state) return not RGMercUtils.GetSetting('DoMelee') end,
+                custom_func = function(self)
+                    if not mq.TLO.Me.AutoFire() then
+                        RGMercUtils.DoCmd('/squelch face')
+                        RGMercUtils.DoCmd('/autofire on')
+                    end
+
+                    if RGMercUtils.GetSetting('NavCircle') and (RGMercUtils.GetTargetDistance() <= 30 or RGMercUtils.GetTargetDistance() >= 75) then
+                        RGMercUtils.NavAroundCircle(mq.TLO.Target, 45, true)
+                    end
+
+                    if not RGMercUtils.GetSetting('NavCircle') and RGMercUtils.GetTargetDistance() <= 30 then
+                        RGMercUtils.DoCmd("/stick 45 moveback")
+                    end
+
+                    if not RGMercUtils.GetSetting('NavCircle') and RGMercUtils.GetTargetDistance() >= 75 then
+                        RGMercUtils.DoCmd("/squelch /nav id %d |Distance=45", RGMercConfig.Globals.AutoTargetID)
+                    end
+                end,
+            },
+        },
         ['DPS'] = {
             {
                 name = "Guardian of the Forest",
@@ -1281,17 +1316,6 @@ local _ClassConfig = {
                 tooltip = Tooltips.PullOpener,
                 cond = function(self, spell)
                     return RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoReagentArrow')
-                end,
-            },
-            {
-                name = "Ranged Mode",
-                type = "CustomFunc",
-                tooltip = Tooltips.RangedMode,
-                cond = function(self, combat_state) return not RGMercUtils.GetSetting('DoMelee') end,
-                custom_func = function(self)
-                    RGMercUtils.DoCmd('/squelch face')
-                    RGMercUtils.DoCmd('/timed 4 /autofire on')
-                    mq.delay(400)
                 end,
             },
             {
@@ -1634,11 +1658,13 @@ local _ClassConfig = {
     },
     ['DefaultConfig']     = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
+        ['NavCircle']         = { DisplayName = "Nav Circle", Category = "Combat", Tooltip = "Use Nav to Circle your target.", Default = true, },
         ['DoSnare']           = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
         ['DoDot']             = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
         ['DoHeals']           = { DisplayName = "Cast Heals", Category = "Spells and Abilities", Tooltip = "Enable casting of Healing spells.", Default = true, },
         ['DoRegen']           = { DisplayName = "Cast Regen Spells", Category = "Spells and Abilities", Tooltip = "Enable casting of Regen spells.", Default = true, },
         ['DoRunSpeed']        = { DisplayName = "Cast Run Speed Buffs", Category = "Spells and Abilities", Tooltip = "Use Ranger Run Speed Buffs.", Default = true, },
+        ['DoMask']            = { DisplayName = "Cast Mask Spell", Category = "Spells and Abilities", Tooltip = "Use Ranger Mask Spell", Default = false, },
         ['DoAoE']             = { DisplayName = "Use AoEs", Category = "Spells and Abilities", Tooltip = "Enable AoE abilities and spells.", Default = false, },
         ['DoOpener']          = { DisplayName = "Use Openers", Category = "Spells and Abilities", Tooltip = "Use Opening Arrow Shot Silent Shot Line.", Default = true, },
         ['DoPoisonArrow']     = { DisplayName = "Use Poison Arrow", Category = "Spells and Abilities", Tooltip = "Enable use of Poison Arrow.", Default = true, },
