@@ -7,9 +7,10 @@ local Module             = { _version = '0.1a', _name = "Drag", _author = 'Derpl
 Module.__index           = Module
 Module.settings          = {}
 Module.DefaultConfig     = {
-    ['DoDrag']     = { DisplayName = "Drag Corpses", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = false, },
-    --['DoSearchDrag'] = { DisplayName = "Use Spawn Search Draging", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = false, },
-    ['SearchDrag'] = { DisplayName = "Spawn Search", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = "pccorpse group radius 60", },
+    ['DoDrag']       = { DisplayName = "Drag Corpses", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = false, },
+    ['DoSearchDrag'] = { DisplayName = "Use Spawn Search Draging", Category = "Drag", Tooltip = "Use Search to find drag targets", Default = false, },
+    ['SearchDrag']   = { DisplayName = "Spawn Search", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = "pccorpse group radius 60", },
+    ['DoDanNetDrag'] = { DisplayName = "Use DanNet Draging", Category = "Drag", Tooltip = "Use DanNet to find drag targets", Default = false, },
 }
 Module.DefaultCategories = {}
 
@@ -86,6 +87,10 @@ function Module:Render()
     ImGui.Text("Drag Module")
     local pressed
     if self.ModuleLoaded then
+        if ImGui.Button(RGMercUtils.GetSetting('DoDrag') and "Stop Dragging" or "Start Dragging", ImGui.GetWindowWidth() * .3, 25) then
+            self.settings.DoDrag = not self.settings.DoDrag
+        end
+
         if ImGui.CollapsingHeader("Config Options") then
             self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig,
                 self.DefaultCategories)
@@ -98,6 +103,7 @@ end
 
 function Module:Drag(corpse)
     if corpse and corpse() and corpse.Distance() > 10 then
+        RGMercsLogger.log_debug("Dragging: %s", corpse.DisplayName())
         RGMercUtils.SetTarget(corpse.ID())
         RGMercUtils.DoCmd("/corpse")
     end
@@ -105,16 +111,35 @@ end
 
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
+
+    local corpseSearch = "pccorpse %s radius 60"
     if RGMercUtils.GetSetting('DoDrag') then
-        local myCorpse = mq.TLO.Spawn(string.format("pccorpse %s radius 60", mq.TLO.Me.DisplayName()))
+        local myCorpse = mq.TLO.Spawn(string.format(corpseSearch, mq.TLO.Me.DisplayName()))
 
         self:Drag(myCorpse)
 
-        local numCorpses = mq.TLO.SpawnCount(RGMercUtils.GetSetting('SearchDrag'))()
+        if RGMercUtils.GetSetting('DoSearchDrag') then
+            local numCorpses = mq.TLO.SpawnCount(RGMercUtils.GetSetting('SearchDrag'))()
 
-        for i = numCorpses, 1, -1 do
-            local corpse = mq.TLO.NearestSpawn(i, RGMercUtils.GetSetting('SearchDrag'))
-            self:Drag(corpse)
+            for i = numCorpses, 1, -1 do
+                local corpse = mq.TLO.NearestSpawn(i, RGMercUtils.GetSetting('SearchDrag'))
+                self:Drag(corpse)
+            end
+        end
+
+        if RGMercUtils.GetSetting('DoDanNetDrag') then
+            local dannetPeers = mq.TLO.DanNet.PeerCount()
+            for i = 1, dannetPeers do
+                ---@diagnostic disable-next-line: redundant-parameter
+                local peer = mq.TLO.DanNet.Peers(i)()
+                if peer and peer:len() > 0 then
+                    RGMercsLogger.log_debug("Searching corpses for: %s", peer)
+                    local corpse = mq.TLO.Spawn(string.format(corpseSearch, peer))
+                    if corpse and corpse() then
+                        self:Drag(corpse)
+                    end
+                end
+            end
         end
     end
 end

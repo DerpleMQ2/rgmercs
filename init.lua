@@ -368,7 +368,7 @@ local function Main()
             RGMercModules:ExecAll("OnZone")
             notifyZoning = false
         end
-        mq.delay(1000)
+        mq.delay(100)
         return
     end
 
@@ -380,11 +380,12 @@ local function Main()
     end
 
     if RGMercConfig.Globals.PauseMain then
-        mq.delay(1000)
+        mq.delay(100)
         mq.doevents()
         if RGMercUtils.GetSetting('RunMovePaused') then
             RGMercModules:ExecModule("Movement", "GiveTime", curState)
         end
+        RGMercModules:ExecModule("Drag", "GiveTime", curState)
         return
     end
 
@@ -520,7 +521,7 @@ local function Main()
     RGMercModules:ExecAll("GiveTime", curState)
 
     mq.doevents()
-    mq.delay(100)
+    mq.delay(10)
 end
 
 -- Global Messaging callback
