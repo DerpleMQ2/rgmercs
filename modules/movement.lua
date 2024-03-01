@@ -299,7 +299,7 @@ function Module:ValidChaseTarget()
 end
 
 function Module:GetChaseTarget()
-    return self.settings.ChaseTarget:len() > 0 and self.settings.ChaseTarget or "<Invalid>"
+    return self.settings.ChaseTarget:len() > 0 and self.settings.ChaseTarget or "<None>"
 end
 
 function Module:ShouldRender()

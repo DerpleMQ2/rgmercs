@@ -663,12 +663,30 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'DPS',
+            name = 'Combat Maintenance',
             state = 1,
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
+            end,
+        },
+        {
+            name = 'Tanking',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and RGMercUtils.IsTanking()
+            end,
+        },
+        {
+            name = 'DPS',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not mq.TLO.Me.SpellInCooldown()
             end,
         },
     },
@@ -851,8 +869,7 @@ local _ClassConfig = {
             { name = "T`Vyl's Resolve", type = "AA", tooltip = Tooltips.Tyvls, },
         },
         ['Debuff'] = {},
-        ['Heal'] = {},
-        ['DPS'] = {
+        ['Combat Maintenance'] = {
             {
                 name = "ActivateShield",
                 type = "CustomFunc",
@@ -889,59 +906,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "AeTaunt",
-                type = "Spell",
-                tooltip = Tooltips.AeTaunt,
-                cond = function(self, spell)
-                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
-                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
-                end,
-            },
-            {
-                name = "Explosion of Hatred",
-                type = "AA",
-                tooltip = Tooltips.ExplosionOfHatred,
-                cond = function(self, _)
-                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
-                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
-                end,
-            },
-            {
-                name = "Explosion of Spite",
-                type = "AA",
-                tooltip = Tooltips.ExplosionOfSpite,
-                cond = function(self, _)
-                    return RGMercUtils.IsTanking() and mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
-                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
-                end,
-            },
-            {
-                name = "Taunt",
-                type = "Ability",
-                tooltip = Tooltips.Taunt,
-                cond = function(self, abilityName)
-                    return RGMercUtils.IsTanking() and mq.TLO.Me.AbilityReady(abilityName)() and
-                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
-                        RGMercUtils.GetTargetDistance() < 30
-                end,
-            },
-            {
-                name = "Terror",
-                type = "Spell",
-                tooltip = Tooltips.Terror,
-                cond = function(self)
-                    return RGMercUtils.IsTanking() and mq.TLO.Me.SecondaryPctAggro() > 60
-                end,
-            },
-            {
-                name = "Terror2",
-                type = "Spell",
-                tooltip = Tooltips.Terror,
-                cond = function(self)
-                    return RGMercUtils.IsTanking() and mq.TLO.Me.SecondaryPctAggro() > 60
-                end,
-            },
-            {
                 name = "MeleeMit",
                 type = "Disc",
                 tooltip = Tooltips.MeleeMit,
@@ -950,35 +914,11 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "ForPower",
-                type = "Spell",
-                tooltip = Tooltips.ForPower,
-                cond = function(self, spell)
-                    return RGMercUtils.IsTanking() and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
-                end,
-            },
-            {
-                name = "Encroaching Darknesss",
-                tooltip = Tooltips.EncroachingDarkness,
-                type = "AA",
-                cond = function(self)
-                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetAACheck(826)
-                end,
-            },
-            {
-                name = "SnareDOT",
-                type = "Spell",
-                tooltip = Tooltips.SnareDOT,
-                cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Me.AltAbility(826)()
-                end,
-            },
-            {
                 name = "Epic",
                 type = "Item",
                 tooltip = Tooltips.Epic,
-                cond = function(self)
-                    return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
+                cond = function(self, itemName)
+                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline"
                 end,
             },
             {
@@ -987,14 +927,6 @@ local _ClassConfig = {
                 tooltip = Tooltips.LeechCurse,
                 cond = function(self)
                     return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and mq.TLO.Me.PctHPs() < 50
-                end,
-            },
-            {
-                name = "Deflection",
-                type = "Disc",
-                tooltip = Tooltips.Deflection,
-                cond = function(self)
-                    return RGMercUtils.IsTanking() and mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
                 end,
             },
             {
@@ -1034,57 +966,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "PoisonDot",
-                type = "Spell",
-                tooltip = Tooltips.PoisonDot,
-                cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
-                end,
-            },
-            {
-                name = "DireDot",
-                type = "Spell",
-                tooltip = Tooltips.DireDot,
-                cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
-                end,
-            },
-            {
-                name = "Torrent",
-                type = "Spell",
-                tooltip = Tooltips.Torrent,
-                cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoTorrent') and not RGMercUtils.BuffActiveByID(spell.ID())
-                end,
-            },
-            {
-                name = "Spearnuke",
-                type = "Spell",
-                tooltip = Tooltips.Spearnuke,
-                cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()
-                end,
-            },
-            {
-                name = "BondTap",
-                type = "Spell",
-                tooltip = Tooltips.BondTap,
-                cond = function(self, spell)
-                    return not RGMercUtils.GetSetting('DoTorrent') and
-                        not RGMercUtils.BuffActiveByName(spell.Name() .. " Recourse")
-                end,
-            },
-            -- TODO: Verify this logic, it seems wrong
-            {
-                name = "Vicious Bite of Chaos",
-                type = "AA",
-                tooltip = Tooltips.ViciousBiteOfChaos,
-                cond = function(self)
-                    return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
-                        RGMercUtils.GetTargetDistance() < 35
-                end,
-            },
-            {
                 name = "Blade",
                 type = "Disc",
                 tooltip = Tooltips.Blade,
@@ -1102,12 +983,152 @@ local _ClassConfig = {
                         RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
                 end,
             },
+        },
+        ['Tanking'] = {
+            {
+                name = "AeTaunt",
+                type = "Spell",
+                tooltip = Tooltips.AeTaunt,
+                cond = function(self, spell)
+                    return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
+                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
+                end,
+            },
+            {
+                name = "Explosion of Hatred",
+                type = "AA",
+                tooltip = Tooltips.ExplosionOfHatred,
+                cond = function(self, _)
+                    return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
+                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
+                end,
+            },
+            {
+                name = "Explosion of Spite",
+                type = "AA",
+                tooltip = Tooltips.ExplosionOfSpite,
+                cond = function(self, _)
+                    return mq.TLO.SpawnCount("NPC radius 50 zradius 50")() >= RGMercUtils.GetSetting('AeTauntCnt') and
+                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AeTauntCnt')
+                end,
+            },
+            {
+                name = "Taunt",
+                type = "Ability",
+                tooltip = Tooltips.Taunt,
+                cond = function(self, abilityName)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and
+                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
+                        RGMercUtils.GetTargetDistance() < 30
+                end,
+            },
+            {
+                name = "Terror",
+                type = "Spell",
+                tooltip = Tooltips.Terror,
+                cond = function(self)
+                    return mq.TLO.Me.SecondaryPctAggro() > 60
+                end,
+            },
+            {
+                name = "Terror2",
+                type = "Spell",
+                tooltip = Tooltips.Terror,
+                cond = function(self)
+                    return mq.TLO.Me.SecondaryPctAggro() > 60
+                end,
+            },
+            {
+                name = "ForPower",
+                type = "Spell",
+                tooltip = Tooltips.ForPower,
+                cond = function(self, spell)
+                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
+                end,
+            },
+            {
+                name = "Deflection",
+                type = "Disc",
+                tooltip = Tooltips.Deflection,
+                cond = function(self)
+                    return mq.TLO.Me.ActiveDisc.Name() ~= "Leechcurse Discipline" and mq.TLO.Me.PctHPs() < 50
+                end,
+            },
+        },
+        ['DPS'] = {
+            {
+                name = "Encroaching Darknesss",
+                tooltip = Tooltips.EncroachingDarkness,
+                type = "AA",
+                cond = function(self)
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.SpellLoaded(spell) and RGMercUtils.DetAACheck(826)
+                end,
+            },
+            {
+                name = "SnareDOT",
+                type = "Spell",
+                tooltip = Tooltips.SnareDOT,
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.SpellLoaded(spell) and GMercUtils.DetSpellCheck(spell) and not mq.TLO.Me.AltAbility(826)()
+                end,
+            },
+
+            {
+                name = "PoisonDot",
+                type = "Spell",
+                tooltip = Tooltips.PoisonDot,
+                cond = function(self, spell)
+                    return RGMercUtils.SpellLoaded(spell) and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
+                end,
+            },
+            {
+                name = "DireDot",
+                type = "Spell",
+                tooltip = Tooltips.DireDot,
+                cond = function(self, spell)
+                    return RGMercUtils.SpellLoaded(spell) and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
+                end,
+            },
+            {
+                name = "Torrent",
+                type = "Spell",
+                tooltip = Tooltips.Torrent,
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoTorrent') and RGMercUtils.SpellLoaded(spell) and not RGMercUtils.TargetHasBuff(spell)
+                end,
+            },
+            {
+                name = "Spearnuke",
+                type = "Spell",
+                tooltip = Tooltips.Spearnuke,
+                cond = function(self, spell)
+                    return RGMercUtils.SpellLoaded(spell) and RGMercUtils.ManaCheck()
+                end,
+            },
+            {
+                name = "BondTap",
+                type = "Spell",
+                tooltip = Tooltips.BondTap,
+                cond = function(self, spell)
+                    return RGMercUtils.SpellLoaded(spell) and not RGMercUtils.GetSetting('DoTorrent') and
+                        not RGMercUtils.BuffActiveByName(spell.Name() .. " Recourse")
+                end,
+            },
+            {
+                name = "Vicious Bite of Chaos",
+                type = "AA",
+                tooltip = Tooltips.ViciousBiteOfChaos,
+                cond = function(self)
+                    return RGMercUtils.GetTargetPctHPs() > 5 and RGMercUtils.GetTargetDistance() < 35
+                end,
+            },
+
             {
                 name = "Dicho",
                 type = "Spell",
                 tooltip = Tooltips.Dicho,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartBigTap')
+                    return RGMercUtils.SpellLoaded(spell) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartBigTap')
                 end,
             },
             {
@@ -1115,7 +1136,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.DireTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartBigTap')
+                    return RGMercUtils.SpellLoaded(spell) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartBigTap')
                 end,
             },
             {
@@ -1123,7 +1144,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.BuffTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap') and
+                    return RGMercUtils.SpellLoaded(spell) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap') and
                         RGMercUtils.DetSpellCheck(spell)
                 end,
             },
@@ -1132,7 +1153,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.BiteTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
+                    return RGMercUtils.SpellLoaded(spell) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
                 end,
             },
             {
@@ -1140,7 +1161,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
+                    return RGMercUtils.SpellLoaded(spell) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
                 end,
             },
             {
@@ -1148,7 +1169,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
+                    return RGMercUtils.SpellLoaded(spell) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
                 end,
             },
             {
@@ -1156,8 +1177,7 @@ local _ClassConfig = {
                 type = "Ability",
                 tooltip = Tooltips.Bash,
                 cond = function(self)
-                    return mq.TLO.Me.AbilityReady("Bash")() and RGMercUtils.GetTargetID() > 0 and
-                        RGMercUtils.GetTargetDistance() < 30
+                    return mq.TLO.Me.AbilityReady("Bash")() and RGMercUtils.GetTargetDistance() < 30
                 end,
             },
             {
@@ -1165,8 +1185,7 @@ local _ClassConfig = {
                 type = "Ability",
                 tooltip = Tooltips.Slam,
                 cond = function(self)
-                    return mq.TLO.Me.AbilityReady("Slam")() and RGMercUtils.GetTargetID() > 0 and
-                        RGMercUtils.GetTargetDistance() < 30
+                    return mq.TLO.Me.AbilityReady("Slam")() and RGMercUtils.GetTargetDistance() < 30
                 end,
             },
         },

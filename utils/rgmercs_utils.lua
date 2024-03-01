@@ -549,6 +549,12 @@ function Utils.WaitCastReady(spell, maxWait)
     mq.delay(500)
 end
 
+function Utils.SpellLoaded(spell)
+    if not spell or not spell() then return false end
+
+    return (mq.TLO.Me.Gem(spell.RankName.Name())() ~= nil)
+end
+
 function Utils.WaitGlobalCoolDown()
     while mq.TLO.Me.SpellInCooldown() do
         mq.delay(100)
@@ -1008,6 +1014,11 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
         mq.delay("1s", function() return mq.TLO.Me.Casting.ID() > 0 end)
 
         Utils.WaitCastFinish(targetSpawn)
+
+        -- don't return control until we are done.
+        if Utils.GetSetting('WaitOnGlobalCooldown') then
+            Utils.WaitGlobalCoolDown()
+        end
 
         return true
     end
