@@ -705,23 +705,23 @@ return {
     },
     ['HelperFunctions']   = {
         BeastialAligmentCheck = function(self)
-            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and
+            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
                 not RGMercUtils.SongActive('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness')
         end,
         HHEFuryDiscCheckPrimary = function(self)
-            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and
+            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
                 not RGMercUtils.SongActive('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness') and
                 not RGMercUtils.PCAAReady("Bestial Alignment")
         end,
         HHEFuryDiscCheckSecondary = function(self)
-            return RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and
+            return RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
                 not RGMercUtils.SongActive('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness')
         end,
         FerociousnessCheck = function(self)
-            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and
+            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
                 not RGMercUtils.SongActive('Bestial Alignment')
         end,
     },
@@ -799,7 +799,8 @@ return {
                 type = "Item",
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'] or "None") and RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and
+                    return self.ClassConfig.HelperFunctions.BeastialAligmentCheck(self) and
+                        RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and
                         item.TimerReady() == 0
                 end,
             },
