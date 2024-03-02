@@ -622,6 +622,7 @@ function Utils.UseAA(aaName, targetId)
             mq.delay("2s", function() return not me.Combat() end)
         end
 
+        RGMercsLogger.log_debug("\awNOTICE:\ax Swapping target to %s [%d] to use %s", target.DisplayName(), targetId, aaName)
         Utils.SetTarget(targetId)
     end
 
@@ -1566,7 +1567,10 @@ function Utils.SpellStacksOnTarget(spell)
     if not spell.StacksTarget() then return false end
 
     for i = 1, numEffects do
-        if not spell.Trigger(i).StacksTarget() then return false end
+        local triggerSpell = spell.Trigger(i)
+        if triggerSpell and triggerSpell() then
+            if not triggerSpell.StacksTarget() then return false end
+        end
     end
 
     return true
@@ -1835,13 +1839,15 @@ function Utils.NavAroundCircle(target, radius, bDontStick)
             -- Then check if our new spots has line of sight to our target.
             if mq.TLO.LineOfSight(string.format("%0.2f,%0.2f,%0.2f:%0.2f,%0.2f,%0.2f", tgt_y, tgt_x, spawn_z, spawn_y, spawn_x, spawn_z))() then
                 -- Make sure it's a valid loc...
-                if mq.TLO.EverQuest.ValidLoc(string.format("%0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z))() then
-                    RGMercsLogger.log_debug("Found Valid Circling Loc: %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z)
+                if mq.TLO.EverQuest.ValidLoc(string.format("%0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z))() then
+                    RGMercsLogger.log_debug(" \ag--> Found Valid Circling Loc: %0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z)
                     Utils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z)
                     mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                     mq.delay("10s", function() return not mq.TLO.Navigation.Active() end)
                     Utils.DoCmd("/squelch /face fast")
                     return true
+                else
+                    RGMercsLogger.log_debug(" \ar--> Invalid Loc: %0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z)
                 end
             end
         end
@@ -1895,7 +1901,7 @@ end
 
 ---@return boolean
 function Utils.ShouldShrink()
-    return (Utils.GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2 and
+    return (Utils.GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2.2 and
         (Utils.GetSetting('ShrinkItem'):len() > 0)
 end
 
