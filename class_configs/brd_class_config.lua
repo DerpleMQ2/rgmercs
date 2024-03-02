@@ -1307,6 +1307,7 @@ local _ClassConfig = {
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, aaName)
                     return RGMercUtils.AAReady(aaName) and
+			not RGMercUtils.SelfBuffCheck("Selo's Accelerato") and
                         RGMercUtils.GetSetting('UseAASelo') and
                         RGMercUtils.GetSetting('DoRunSpeed')
                         and not mq.TLO.Me.Invis()
