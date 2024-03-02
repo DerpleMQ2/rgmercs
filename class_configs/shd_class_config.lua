@@ -1289,8 +1289,8 @@ local _ClassConfig = {
         {
             id = 'Terror',
             Type = "Spell",
-            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('Terror')() or "" end,
-            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('Terror')() or "" end,
+            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('Terror').RankName.Name() or "" end,
+            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('Terror').RankName.Name() or "" end,
             AbilityRange = 150,
             cond = function(self)
                 local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('Terror')
@@ -1301,8 +1301,8 @@ local _ClassConfig = {
         {
             id = 'ForPower',
             Type = "Spell",
-            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('ForPower')() or "" end,
-            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('ForPower')() or "" end,
+            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('ForPower').RankName.Name() or "" end,
+            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('ForPower').RankName.Name() or "" end,
             AbilityRange = 150,
             cond = function(self)
                 local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('ForPower')
