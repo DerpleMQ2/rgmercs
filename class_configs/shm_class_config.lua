@@ -1180,7 +1180,7 @@ local _ClassConfig = {
                 name = "Group Shrink",
                 type = "AA",
                 active_cond = function(self, _) return mq.TLO.Me.Height() < 2 end,
-                cond = function(self, _) return RGMercUtils.GetSetting('DoGroupShrink') and mq.TLO.Me.Height() > 2 end,
+                cond = function(self, _) return RGMercUtils.GetSetting('DoGroupShrink') and mq.TLO.Me.Height() > 2.2 end,
             },
             {
                 name = "PetSpell",
