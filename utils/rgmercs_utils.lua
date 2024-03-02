@@ -1839,13 +1839,15 @@ function Utils.NavAroundCircle(target, radius, bDontStick)
             -- Then check if our new spots has line of sight to our target.
             if mq.TLO.LineOfSight(string.format("%0.2f,%0.2f,%0.2f:%0.2f,%0.2f,%0.2f", tgt_y, tgt_x, spawn_z, spawn_y, spawn_x, spawn_z))() then
                 -- Make sure it's a valid loc...
-                if mq.TLO.EverQuest.ValidLoc(string.format("%0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z))() then
-                    RGMercsLogger.log_debug("Found Valid Circling Loc: %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z)
+                if mq.TLO.EverQuest.ValidLoc(string.format("%0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z))() then
+                    RGMercsLogger.log_debug(" \ag--> Found Valid Circling Loc: %0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z)
                     Utils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z)
                     mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                     mq.delay("10s", function() return not mq.TLO.Navigation.Active() end)
                     Utils.DoCmd("/squelch /face fast")
                     return true
+                else
+                    RGMercsLogger.log_debug(" \ar--> Invalid Loc: %0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z)
                 end
             end
         end
