@@ -986,7 +986,22 @@ local _ClassConfig = {
                 name = "Wind of Malaise",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoAEMalo')
+                    local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
+
+                    if not aaSpell or not aaSpell() then return false end
+
+                    return RGMercUtils.GetSetting('DoAEMalo') and RGMercUtils.DetSpellCheck(aaSpell) and RGMercUtils.SpellStacksOnTarget(aaSpell)
+                end,
+            },
+            {
+                name = "Malaise",
+                type = "AA",
+                cond = function(self, aaName)
+                    local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
+
+                    if not aaSpell or not aaSpell() then return false end
+
+                    return RGMercUtils.GetSetting('DoMalo') and RGMercUtils.DetSpellCheck(aaSpell)
                 end,
             },
             {
@@ -997,7 +1012,7 @@ local _ClassConfig = {
             {
                 name = "AESlowSpell",
                 type = "Spell",
-                cond = function(self, _) return RGMercUtils.GetSetting('DoAESlow') end,
+                cond = function(self, spell) return RGMercUtils.GetSetting('DoAESlow') and RGMercUtils.DetSpellCheck(spell) and RGMercUtils.SpellStacksOnTarget(spell) end,
             },
             {
                 name = "SlowSpell",
@@ -1024,13 +1039,6 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     return RGMercUtils.GetSetting('DoSlow') and
                         not RGMercUtils.TargetHasBuffByName(mq.TLO.Spell("Turgur's Swarm").Trigger(1).RankName.Name())
-                end,
-            },
-            {
-                name = "Malaise",
-                type = "AA",
-                cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoMalo')
                 end,
             },
             {

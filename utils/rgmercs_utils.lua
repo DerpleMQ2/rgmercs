@@ -622,6 +622,7 @@ function Utils.UseAA(aaName, targetId)
             mq.delay("2s", function() return not me.Combat() end)
         end
 
+        RGMercsLogger.log_debug("\awNOTICE:\ax Swapping target to %s [%d] to use %s", target.DisplayName(), targetId, aaName)
         Utils.SetTarget(targetId)
     end
 
@@ -1566,7 +1567,10 @@ function Utils.SpellStacksOnTarget(spell)
     if not spell.StacksTarget() then return false end
 
     for i = 1, numEffects do
-        if not spell.Trigger(i).StacksTarget() then return false end
+        local triggerSpell = spell.Trigger(i)
+        if triggerSpell and triggerSpell() then
+            if not triggerSpell.StacksTarget() then return false end
+        end
     end
 
     return true
