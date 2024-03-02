@@ -1895,7 +1895,7 @@ end
 
 ---@return boolean
 function Utils.ShouldShrink()
-    return (Utils.GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2 and
+    return (Utils.GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2.2 and
         (Utils.GetSetting('ShrinkItem'):len() > 0)
 end
 
