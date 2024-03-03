@@ -1318,6 +1318,7 @@ function Module:GiveTime(combat_state)
         local target = mq.TLO.Target
         self:SetPullState(PullStates.PULL_PULLING, self:GetPullStateTargetInfo())
 
+        startingXTargs = RGMercUtils.GetXTHaterIDs()
 
         if target and target.ID() > 0 then
             RGMercsLogger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
@@ -1332,7 +1333,6 @@ function Module:GiveTime(combat_state)
                 RGMercUtils.PetAttack(self.TempSettings.PullID)
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on pet pull to finish...")
-                    startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.PetAttack(self.TempSettings.PullID)
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
@@ -1361,7 +1361,6 @@ function Module:GiveTime(combat_state)
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on face pull to finish...")
-                    startingXTargs = RGMercUtils.GetXTHaterIDs()
                     mq.doevents()
 
                     RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
@@ -1386,7 +1385,6 @@ function Module:GiveTime(combat_state)
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
-                    startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.DoCmd("/ranged %d", self.TempSettings.PullID)
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
@@ -1408,7 +1406,6 @@ function Module:GiveTime(combat_state)
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
-                    startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.DoCmd("/attack")
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
@@ -1424,7 +1421,6 @@ function Module:GiveTime(combat_state)
                 mq.delay(5)
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...%s", RGMercUtils.BoolToColorString(successFn()))
-                    startingXTargs = RGMercUtils.GetXTHaterIDs()
                     RGMercUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
                     mq.doevents()
 
