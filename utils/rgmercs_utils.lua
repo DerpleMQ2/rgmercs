@@ -1858,7 +1858,7 @@ function Utils.NavAroundCircle(target, radius)
                 -- Make sure it's a valid loc...
                 if mq.TLO.EverQuest.ValidLoc(string.format("%0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z))() then
                     RGMercsLogger.log_debug(" \ag--> Found Valid Circling Loc: %0.2f %0.2f %0.2f", tgt_x, tgt_y, spawn_z)
-                    Utils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f", tgt_y, tgt_x, spawn_z)
+                    Utils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f facing=backward", tgt_y, tgt_x, spawn_z)
                     mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                     mq.delay("10s", function() return not mq.TLO.Navigation.Active() end)
                     Utils.DoCmd("/squelch /face fast")
