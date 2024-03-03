@@ -1986,7 +1986,7 @@ function Utils.AutoMed()
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
     if RGMercConfig:GetTimeSinceLastMove() < math.random(Utils.GetSetting('AfterMedCombatDelay')) then return end
 
-    if RGMercConfig.Constants.RGHybrid:contains(me.Class.ShortName()) then
+    if RGMercConfig.Constants.RGHybrid:contains(me.Class.ShortName()) or RGMercConfig.Constants.RGCasters:contains(me.Class.ShortName()) then
         -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
         -- the original stat checks.
         if me.PctHPs() >= Utils.GetSetting('HPMedPctStop') and me.PctMana() >= Utils.GetSetting('ManaMedPctStop') and me.PctEndurance() >= Utils.GetSetting('EndMedPctStop') then
@@ -1995,15 +1995,6 @@ function Utils.AutoMed()
         end
 
         if me.PctHPs() < Utils.GetSetting('HPMedPct') or me.PctMana() < Utils.GetSetting('ManaMedPct') or me.PctEndurance() < Utils.GetSetting('EndMedPct') then
-            forcesit = true
-        end
-    elseif RGMercConfig.Constants.RGCasters:contains(me.Class.ShortName()) then
-        if me.PctHPs() >= Utils.GetSetting('HPMedPctStop') and me.PctMana() >= Utils.GetSetting('ManaMedPctStop') then
-            RGMercConfig.Globals.InMedState = false
-            forcestand = true
-        end
-
-        if me.PctHPs() < Utils.GetSetting('HPMedPct') or me.PctMana() < Utils.GetSetting('ManaMedPct') then
             forcesit = true
         end
     elseif RGMercConfig.Constants.RGMelee:contains(me.Class.ShortName()) then
