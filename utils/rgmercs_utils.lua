@@ -1818,9 +1818,8 @@ end
 
 ---@param target MQTarget
 ---@param radius number
----@param bDontStick boolean
 ---@return boolean
-function Utils.NavAroundCircle(target, radius, bDontStick)
+function Utils.NavAroundCircle(target, radius)
     if not Utils.GetSetting('DoAutoEngage') then return false end
     if not target or not target() and not target.Dead() then return false end
     if not mq.TLO.Navigation.MeshLoaded() then return false end

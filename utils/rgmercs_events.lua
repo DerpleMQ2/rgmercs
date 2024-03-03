@@ -65,7 +65,7 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
     if RGMercUtils.GetSetting('DoAutoEngage') then
         if RGMercUtils.MyClassIs("rng") and not RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
             -- Basic stick code until we implement nav circumference
-            RGMercUtils.NavAroundCircle(mq.TLO.Target, 45, true)
+            RGMercUtils.NavAroundCircle(mq.TLO.Target, 45)
         end
     end
 

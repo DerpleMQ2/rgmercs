@@ -1265,7 +1265,7 @@ local _ClassConfig = {
                     end
 
                     if RGMercUtils.GetSetting('NavCircle') and (RGMercUtils.GetTargetDistance() <= 30 or RGMercUtils.GetTargetDistance() >= 75) then
-                        RGMercUtils.NavAroundCircle(mq.TLO.Target, 45, true)
+                        RGMercUtils.NavAroundCircle(mq.TLO.Target, 45)
                     end
 
                     if not RGMercUtils.GetSetting('NavCircle') and RGMercUtils.GetTargetDistance() <= 30 then
