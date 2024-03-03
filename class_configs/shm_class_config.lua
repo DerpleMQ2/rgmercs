@@ -1101,7 +1101,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
-                        RGMercUtils.DetGOMCheck(spell)
+                        RGMercUtils.DetGOMCheck()
                 end,
             },
             {

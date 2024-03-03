@@ -2987,12 +2987,10 @@ function Utils.AuraActiveByName(auraName)
     return auraOne or auraTwo
 end
 
----@param spell MQSpell
 ---@return boolean
-function Utils.DetGOMCheck(spell)
-    if not spell or spell() then return false end
+function Utils.DetGOMCheck()
     local me = mq.TLO.Me
-    return me.Song("Gift of Mana").ID() and me.Song("Gift of Mana").Base(3)() >= (spell.Level() or 0)
+    return me.Song("Gift of Mana").ID() ~= nil
 end
 
 ---@return boolean
