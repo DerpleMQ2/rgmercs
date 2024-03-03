@@ -24,13 +24,19 @@ mq.event("CantSee", "You cannot see your target.", function()
         --/delay 1 ${XAssist.XTFullHaterCount} > 0
         --}
     else
-        RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target!")
-        if RGMercUtils.GetSetting('DoAutoEngage') then
-            if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
-                RGMercUtils.DoCmd("/squelch /face fast")
-                RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
-                    (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+        local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
+        RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target - using custom combatNav!")
+        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
+            RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav)
+        else
+            RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
+            if RGMercUtils.GetSetting('DoAutoEngage') then
+                if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
+                    RGMercUtils.DoCmd("/squelch /face fast")
+                    RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
+                        (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
+                    RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+                end
             end
         end
     end
@@ -63,9 +69,11 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
 
     -- Only do non-pull code if autoengage is on
     if RGMercUtils.GetSetting('DoAutoEngage') then
-        if RGMercUtils.MyClassIs("rng") and not RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-            -- Basic stick code until we implement nav circumference
-            RGMercUtils.NavAroundCircle(mq.TLO.Target, 45)
+        if not RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
+            local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
+            if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
+                RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav)
+            end
         end
     end
 
@@ -89,11 +97,15 @@ local function tooFarHandler()
         RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
-        RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
-        if RGMercUtils.GetSetting('DoAutoEngage') then
-            if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
-                RGMercUtils.DoCmd("/squelch /face fast")
-                if RGMercUtils.GetSetting('DoMelee') then
+        local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
+        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
+            RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav)
+        elseif RGMercUtils.GetSetting('DoMelee') then
+            RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
+            if RGMercUtils.GetSetting('DoAutoEngage') then
+                if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
+                    RGMercUtils.DoCmd("/squelch /face fast")
+
                     RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
                         (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
                     RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
