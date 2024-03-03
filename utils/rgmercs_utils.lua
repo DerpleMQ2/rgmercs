@@ -2676,7 +2676,7 @@ function Utils.DiffXTHaterIDs(t)
     local xtCount = mq.TLO.Me.XTarget() or 0
 
     -- count is different things changed.
-    if #t ~= xtCount then return true end
+    -- if #t ~= xtCount then return true end
 
     local oldHaterSet = Set.new(t)
 
