@@ -452,8 +452,8 @@ end
 
 function Module:FindWorstHurtGroupMember(minHPs)
     local groupSize = mq.TLO.Group.Members()
-    local worstId = 0
-    local worstPct = minHPs
+    local worstId = mq.TLO.Me.ID()
+    local worstPct = mq.TLO.Me.PctHPs()
 
     RGMercsLogger.log_verbose("\ayChecking for worst Hurt Group Members. Group Count: %d", groupSize)
 
