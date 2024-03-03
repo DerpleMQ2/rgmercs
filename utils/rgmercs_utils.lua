@@ -2663,7 +2663,7 @@ function Utils.GetXTHaterIDs()
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.Aggressive() and xtarg.ID() ~= Utils.GetTargetID() then
+        if xtarg and xtarg.Aggressive() then
             table.insert(haters, xtarg.ID())
         end
     end
