@@ -3854,7 +3854,7 @@ function Utils.LoadSpellLoadOut(spellLoadOut)
         end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
-            Utils.MemorizeSpell(gem, selectedRank, 15000)
+            Utils.MemorizeSpell(gem, selectedRank, 1000)
         end
     end
 end
