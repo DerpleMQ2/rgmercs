@@ -628,7 +628,7 @@ local _ClassConfig = {
             local shroudAction = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "Shroud")
             if not shroudAction then return false end
             local shroudAA = mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)")
-            local numEffects = shroudAA.Spell.NumEffects()
+            local numEffects = shroudAA.Spell.NumEffects() or 0
 
             local res = shroudAction.Level() <=
                 (shroudAA.Spell.Level() or 0) and
