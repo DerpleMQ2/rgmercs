@@ -501,7 +501,7 @@ function Module:FindWorstHurtXT(minHPs)
     for i = 1, xtSize do
         local healTarget = mq.TLO.Me.XTarget(i)
 
-        if healTarget and healTarget() and (healTarget.Type() or "none"):lower() == "pc" then
+        if healTarget and healTarget() and RGMercUtils.TargetIsType("pc", healTarget) then
             if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
                 if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
                     RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
@@ -545,7 +545,7 @@ function Module:HealById(id)
         return
     end
 
-    if healTarget.Type():lower() == "npc" then
+    if RGMercUtils.TargetIsType("npc", healTarget) then
         RGMercsLogger.log_verbose("\ayHealById(%d):: Target is an NPC bailing", id)
         return
     end
@@ -577,7 +577,7 @@ function Module:HealById(id)
     self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0, }
 
     local newState = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
-        self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0, false)
+        self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0, self.CombatState == "Downtime")
 
     if selectedRotation.state then selectedRotation.state = newState end
 end

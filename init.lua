@@ -161,7 +161,7 @@ local function RGMercsGUI()
 
                     -- .. tostring(RGMercConfig.Globals.AutoTargetID))
                     ImGui.Text("MA: " .. (RGMercUtils.GetMainAssistSpawn().CleanName() or "None"))
-                    if mq.TLO.Target.ID() > 0 and mq.TLO.Target.Type():lower() == "pc" and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
+                    if mq.TLO.Target.ID() > 0 and RGMercUtils.TargetIsType("pc") and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
                         if ImGui.SmallButton("Set MA to Current Target") then
                             RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
                             DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
@@ -496,9 +496,9 @@ local function Main()
     end
 
     -- If target is not attackable then turn off attack
-    local pcCheck = (mq.TLO.Target.Type() or "none"):lower() == "pc" or
-        ((mq.TLO.Target.Type() or "none"):lower() == "pet" and (mq.TLO.Target.Master.Type() or "none"):lower() == "pc")
-    local mercCheck = (mq.TLO.Target.Type() or "none"):lower() == "mercenary"
+    local pcCheck = RGMercUtils.TargetIsType("pc") or
+        (RGMercUtils.TargetIsType("pet") and RGMercUtils.TargetIsType("pc", mq.TLO.Target.Master))
+    local mercCheck = RGMercUtils.TargetIsType("mercenary")
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
         RGMercsLogger.log_debug(
             "\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",

@@ -144,7 +144,7 @@ function Module:ChaseOn(target)
         chaseTarget = mq.TLO.Spawn("pc =" .. target)
     end
 
-    if chaseTarget() and chaseTarget.ID() > 0 and chaseTarget.Type() == "PC" then
+    if chaseTarget() and chaseTarget.ID() > 0 and RGMercUtils.TargetIsType("PC", chaseTarget) then
         self:CampOff()
         self.settings.ChaseOn = true
         self.settings.ChaseTarget = chaseTarget.CleanName()

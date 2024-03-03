@@ -284,7 +284,7 @@ function Utils.NPCDiscReady(discSpell)
     RGMercsLogger.log_super_verbose("NPCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
         Utils.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
-        mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and target.Type():lower() ~= "corpse" and
+        mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and not Utils.TargetIsType("corpse", target) and
         target.LineOfSight() and not target.Hovering()
 end
 
@@ -312,7 +312,7 @@ function Utils.NPCSpellReady(spell, targetId, healingSpell)
     if not target or not target() then return false end
 
     if me.SpellReady(spell.RankName.Name()) and me.CurrentMana() >= spell.Mana() then
-        if not me.Moving() and not me.Casting.ID() and target.Type():lower() ~= "corpse" then
+        if not me.Moving() and not me.Casting.ID() and not Utils.TargetIsType("corpse", target) then
             if target.LineOfSight() then
                 return true
             elseif healingSpell then
@@ -383,7 +383,7 @@ function Utils.GiveTo(toId, itemName, count)
     end
 
     -- Click OK on trade window and wait for it to go away
-    if mq.TLO.Target.Type():lower() == "pc" then
+    if Utils.TargetIsType("pc") then
         mq.delay("5s", function() return mq.TLO.Window("TradeWnd").Open() end)
         mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()
         mq.delay("5s", function() return not mq.TLO.Window("TradeWnd").Open() end)
@@ -395,7 +395,7 @@ function Utils.GiveTo(toId, itemName, count)
 
     -- We're giving something to a pet. In this case if the pet gives it back,
     -- get rid of it.
-    if mq.TLO.Target.Type():lower() == "pet" then
+    if Utils.TargetIsType("pet") then
         mq.delay("2s")
         if (mq.TLO.Cursor.ID() or 0) > 0 and mq.TLO.Cursor.NoRent() then
             RGMercsLogger.log_debug("\arGiveTo Pet return item - that ingreat!")
@@ -616,7 +616,7 @@ function Utils.UseAA(aaName, targetId)
     Utils.ActionPrep()
 
     if Utils.GetTargetID() ~= targetId and target() then
-        if me.Combat() and target.Type():lower() == "pc" then
+        if me.Combat() and Utils.TargetIsType("pc", target) then
             RGMercsLogger.log_info("\awNOTICE:\ax Turning off autoattack to cast on a PC.")
             Utils.DoCmd("/attack off")
             mq.delay("2s", function() return not me.Combat() end)
@@ -940,7 +940,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem, bAllowDead)
 
         local targetSpawn = mq.TLO.Spawn(targetId)
 
-        if targetSpawn() and targetSpawn.Type():lower() == "pc" then
+        if targetSpawn() and Utils.TargetIsType("pc", targetSpawn) then
             -- check to see if this is too powerful a spell
             local targetLevel    = targetSpawn.Level()
             local spellLevel     = spell.Level()
@@ -1687,6 +1687,23 @@ function Utils.GetTargetAggroPct()
     return (mq.TLO.Target.PctAggro() or 0)
 end
 
+---@param target spawn|groupmember|MQTarget?
+---@return string
+function Utils.GetTargetType(target)
+    local useTarget = target
+    if not useTarget then useTarget = mq.TLO.Target end
+    if not useTarget or not useTarget() then return "" end
+
+    return (useTarget.Type() or "")
+end
+
+---@param type string
+---@param target spawn|groupmember|MQTarget?
+---@return boolean
+function Utils.TargetIsType(type, target)
+    return Utils.GetTargetType(target):lower() == type:lower()
+end
+
 ---@param target MQTarget|nil
 ---@return boolean
 function Utils.GetTargetAggressive(target)
@@ -2374,8 +2391,8 @@ function Utils.IsSpawnFightingStranger(spawn, radius)
                             cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
                         local checkName = cur_spawn and cur_spawn() or cur_spawn.CleanName() or "None"
 
-                        if (cur_spawn.Type() or ""):lower() == "mercenary" then checkName = cur_spawn.Owner.CleanName() end
-                        if (cur_spawn.Type() or ""):lower() == "pet" then checkName = cur_spawn.Master.CleanName() end
+                        if Utils.TargetIsType("mercenary", cur_spawn) then checkName = cur_spawn.Owner.CleanName() end
+                        if Utils.TargetIsType("pet", cur_spawn) then checkName = cur_spawn.Master.CleanName() end
 
                         if not Utils.IsSafeName("pc", checkName) then
                             RGMercsLogger.log_verbose(
@@ -2528,7 +2545,7 @@ function Utils.FindTarget(validateFn)
     -- Handle cases where our autotarget is no longer valid because it isn't a valid spawn or is dead.
     if RGMercConfig.Globals.AutoTargetID ~= 0 then
         local autoSpawn = mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID))
-        if not autoSpawn or not autoSpawn() or (autoSpawn.Type() or "none"):lower() == "corpse" then
+        if not autoSpawn or not autoSpawn() or Utils.TargetIsType("corpse", autoSpawn) then
             RGMercsLogger.log_debug("\ayFindTarget() : Clearing Target because it is a corpse or no longer valid.")
             Utils.ClearTarget()
         end
@@ -2551,7 +2568,7 @@ function Utils.FindTarget(validateFn)
         if not Utils.GetSetting('DoAutoTarget') then
             -- Manual targetting let the manual user target any npc or npcpet.
             if RGMercConfig.Globals.AutoTargetID ~= target.ID() and
-                (target.Type():lower() == "npc" or target.Type():lower() == "npcpet") and
+                (Utils.TargetIsType("npc", target) or Utils.TargetIsType("npcpet", target)) and
                 target.Distance() < Utils.GetSetting('AssistRange') and
                 target.DistanceZ() < 20 and
                 target.Aggressive() and
@@ -2599,7 +2616,7 @@ function Utils.FindTarget(validateFn)
             RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist,
                 Utils.BoolToColorString(assistTarget.Aggressive()))
 
-            if assistTarget() and (assistTarget.Type():lower() == "npc" or assistTarget.Type():lower() == "npcpet") then
+            if assistTarget() and (Utils.TargetIsType("npc", assistTarget) or Utils.TargetIsType("npcpet", assistTarget)) then
                 RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
                     assistTarget.ID())
                 RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
@@ -2795,9 +2812,9 @@ function Utils.OkToEngagePreValidateId(targetId)
 
     if not target() or target.Dead() then return false end
 
-    local pcCheck = (target.Type() or "none"):lower() == "pc" or
-        ((target.Type() or "none"):lower() == "pet" and (target.Master.Type() or "none"):lower() == "pc")
-    local mercCheck = target.Type() == "mercenary"
+    local pcCheck = Utils.TargetIsType("pc", target) or
+        (Utils.TargetIsType("pet", target) and Utils.TargetIsType("pc", target.Master))
+    local mercCheck = Utils.TargetIsType("mercenary", target)
     if pcCheck or mercCheck then
         if not mq.TLO.Me.Combat() then
             RGMercsLogger.log_verbose(
@@ -2853,9 +2870,9 @@ function Utils.OkToEngage(autoTargetId)
 
     if not target() or target.Dead() then return false end
 
-    local pcCheck = (target.Type() or "none"):lower() == "pc" or
-        ((target.Type() or "none"):lower() == "pet" and (target.Master.Type() or "none"):lower() == "pc")
-    local mercCheck = target.Type() == "mercenary"
+    local pcCheck = Utils.TargetIsType("pc", target) or
+        (Utils.TargetIsType("pet", target) and Utils.TargetIsType("pc", target.Master))
+    local mercCheck = Utils.TargetIsType("mercenary", target)
     if pcCheck or mercCheck then
         if not mq.TLO.Me.Combat() then
             RGMercsLogger.log_verbose(
@@ -2916,7 +2933,7 @@ function Utils.PetAttack(targetId)
     if not target() then return end
     if pet.ID() == 0 then return end
 
-    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and target.Type() == "NPC" then
+    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and Utils.TargetIsType("NPC", target) then
         Utils.DoCmd("/squelch /pet attack %d", targetId)
         Utils.DoCmd("/squelch /pet swarm")
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())

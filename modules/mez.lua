@@ -508,7 +508,7 @@ function Module:ProcessMezList()
         local spawn = mq.TLO.Spawn(id)
         RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Checking...", id)
 
-        if not spawn or not spawn() or spawn.Dead() or spawn.Type():lower() == "corpse" then
+        if not spawn or not spawn() or spawn.Dead() or RGMercUtils.TargetIsType("corpse", spawn) then
             table.insert(removeList, id)
             RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Can't find mob removing...", id)
         else

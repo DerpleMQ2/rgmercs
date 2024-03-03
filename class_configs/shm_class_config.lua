@@ -1409,7 +1409,7 @@ local _ClassConfig = {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
-                        not RGMercUtils.CanUseAA("Lupine Spirit") and target.Type() == "PC"
+                        not RGMercUtils.CanUseAA("Lupine Spirit") and RGMercUtils.TargetIsType("PC", target)
                 end,
             },
             {
@@ -1425,7 +1425,7 @@ local _ClassConfig = {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
 
-                    return RGMercUtils.GetSetting('DoRunSpeed') and target.Type() == "PC" and RGMercUtils.CanUseAA(aaName) and
+                    return RGMercUtils.GetSetting('DoRunSpeed') and RGMercUtils.TargetIsType("PC", target) and RGMercUtils.CanUseAA(aaName) and
                         RGMercUtils.TargetHasBuff(speedSpell) and RGMercUtils.SpellStacksOnTarget(speedSpell)
                 end,
             },

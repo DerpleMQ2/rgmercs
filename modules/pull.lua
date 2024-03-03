@@ -276,7 +276,7 @@ end
 
 function Module:RenderMobList(displayName, settingName)
     if ImGui.CollapsingHeader(string.format("Pull %s", displayName)) then
-        if mq.TLO.Target() and mq.TLO.Target.Type() == "NPC" then
+        if mq.TLO.Target() and RGMercUtils.TargetIsType("NPC") then
             ImGui.PushID("##_small_btn_allow_target_" .. settingName)
             if ImGui.SmallButton(string.format("Add Target To %s", displayName)) then
                 self:AddMobToList(settingName, mq.TLO.Target.CleanName())
@@ -381,7 +381,7 @@ function Module:Render()
         end
         ImGui.PopStyleColor()
 
-        if mq.TLO.Target() and mq.TLO.Target.Type() == "NPC" then
+        if mq.TLO.Target() and RGMercUtils.TargetIsType("NPC") then
             ImGui.SameLine()
             if ImGui.Button("Pull Target " .. ICONS.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
                 self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
@@ -833,7 +833,8 @@ function Module:FixPullerMerc()
     for i = 1, groupCount do
         local merc = mq.TLO.Group.Member(i)
 
-        if merc and merc() and merc.Type() == "Mercenary" and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
+        ---@diagnostic disable-next-line: param-type-mismatch
+        if merc and merc() and RGMercUtils.TargetIsType("Mercenary", merc) and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
             if (merc.Distance() or 0) > RGMercUtils.GetSetting('AutoCampRadius') and (merc.Owner.Distance() or 0) < RGMercUtils.GetSetting('AutoCampRadius') then
                 RGMercUtils.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
                 mq.delay("10s", function() return (merc.Distance() or 0) < RGMercUtils.GetSetting('AutoCampRadius') end)
