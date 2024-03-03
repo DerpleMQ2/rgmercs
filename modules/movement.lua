@@ -21,7 +21,7 @@ Module.Constants.CampfireNameToKit = {
 }
 
 Module.DefaultConfig               = {
-    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = (RGMercConfig.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 15 or 60), Min = 10, Max = 300, },
+    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = (RGMercConfig.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60), Min = 10, Max = 300, },
     ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false, },
     ['BreakOnDeath']     = { DisplayName = "Break On Death", Category = "Chase", Tooltip = "Stop chasing when you die.", Default = true, },
     ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100, },
