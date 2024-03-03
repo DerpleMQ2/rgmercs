@@ -573,7 +573,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return mq.TLO.Spell(discSpell).NoExpendReagentID(1)() == -1 or
-                        (mq.TLO.FindItem(mq.TLO.Spell(discSpell).NoExpendReagentID(1)())() or 0) > 0 and
+                        (mq.TLO.FindItemCount(mq.TLO.Spell(discSpell).NoExpendReagentID(1)())() or 0) > 0 and
                         RGMercUtils.PCDiscReady(discSpell)
                 end,
             },
@@ -643,9 +643,9 @@ return {
             {
                 name = "Alliance",
                 type = "AA",
-                cond = function(self, spell)
+                cond = function(self, aaName)
                     return RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and
-                        not RGMercUtils.TargetHasBuff(spell)
+                        not RGMercUtils.TargetHasBuff(mq.TLO.AltAbility(aaName).Spell)
                 end,
             },
             {
