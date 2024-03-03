@@ -37,17 +37,12 @@ local _ClassConfig = {
         },
     },
     ['AbilitySets']       = {
-        ["SingleFocusSpell"] = {
+        ["FocusSpell"] = {
             -- Focus Spell - Lower Levels Mix in Single Target, Higher Prefer Group Target
-            "Inner Fire",           -- Level 1 - Single
-            "Talisman of Tnarg",    -- Level 32 - Single
-            "Talisman of Altuna",   -- Level 40 - Single
-            "Talisman of Kragg",    -- Level 55 - Single
-            "Unity of the Kromrif", -- Level 111 - Single
-            "Unity of the Vampyre", -- Level 116 - Single
-            "Celeritous Unity",     -- Level 121 - Single
-        },
-        ['GroupFocusSpell'] = {
+            "Inner Fire",                 -- Level 1 - Single
+            "Talisman of Tnarg",          -- Level 32 - Single
+            "Talisman of Altuna",         -- Level 40 - Single
+            "Talisman of Kragg",          -- Level 55 - Single
             "Khura's Focusing",           -- Level 60 - Group
             "Focus of the Seventh",       -- Level 65 - Group
             "Talisman of Wunshi",         -- Level 70 - Group
@@ -59,8 +54,11 @@ local _ClassConfig = {
             "Talisman of the Courageous", -- Level 100 - Group
             "Talisman of the Doomscale",  -- Level 105 - Group
             "Talisman of the Wulthan",    -- Level 110 - Group
+            "Unity of the Kromrif",       -- Level 111 - Single
             "Talisman of the Ry'Gorr",    -- Level 115 - Group
+            "Unity of the Vampyre",       -- Level 116 - Single
             "Talisman of the Usurper",    -- Level 120 - Group
+            "Celeritous Unity",           -- Level 121 - Single
             "Talisman of the Heroic",     -- Level 125 - Group
         },
         ["RunSpeedBuff"] = {
@@ -1284,13 +1282,14 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "GroupFocusSpell",
+                name = "FocusSpell",
                 type = "Spell",
                 active_cond = function(self, spell)
                     return RGMercUtils.TargetHasBuff(spell)
                 end,
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
+                    if (spell and spell() and ((spell.TargetType() or ""):lower() == "single")) then return false end
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
@@ -1377,10 +1376,12 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "SingleFocusSpell",
+                name = "FocusSpell",
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
+                    if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "single")) then return false end
+
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
@@ -1389,7 +1390,8 @@ local _ClassConfig = {
                 name = "HasteBuff",
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
-                    local focusSpell = self:GetResolvedActionMapItem('SingleFocusSpell')
+                    if RGMercUtils.CanUseAA("Talisman of Celerity") then return false end
+                    local focusSpell = self:GetResolvedActionMapItem('FocusSpell')
 
                     local focusLevelPass = focusSpell and (focusSpell.Level() or 0) <= 111 or true
 

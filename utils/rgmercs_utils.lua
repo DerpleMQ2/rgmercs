@@ -1486,7 +1486,7 @@ function Utils.SelfBuffAACheck(aaName)
     local buffNotActive = not Utils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID())
     local triggerNotActive = not Utils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
     local auraNotActive = not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID()
-    local stacks = mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name()).Stacks()
+    local stacks = Utils.SpellStacksOnMe(mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name()))
     local triggerStacks = (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
 
     --RGMercsLogger.log_verbose("SelfBuffAACheck(%s) abilityReady(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s) triggerStacks(%s)", aaName,
