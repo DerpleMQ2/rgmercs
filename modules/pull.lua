@@ -1367,6 +1367,7 @@ function Module:GiveTime(combat_state)
                     RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
 
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
+                        RGMercsLogger.log_debug("\arXtargs changed heading back to camp!")
                         break
                     end
 
