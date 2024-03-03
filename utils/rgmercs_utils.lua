@@ -2682,7 +2682,7 @@ function Utils.DiffXTHaterIDs(t)
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.Aggressive() and xtarg.ID() ~= Utils.GetTargetID() then
+        if xtarg and xtarg.Aggressive() then
             -- this target isn't in the old set.
             if not oldHaterSet:contains(xtarg.ID()) then return true end
         end
