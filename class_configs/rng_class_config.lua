@@ -1259,7 +1259,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.RangedMode,
                 cond = function(self, combat_state) return not RGMercUtils.GetSetting('DoMelee') end,
                 custom_func = function(self)
-                    RGMercUtils.SafeCallFunc("Ranger Custom Nav", self.ClassConfig.HelperFunctions.combatNav)
+                    RGMercUtils.SafeCallFunc("Ranger Custom Nav", self.ClassConfig.HelperFunctions.combatNav, false)
                 end,
             },
         },
@@ -1640,13 +1640,13 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions']   = {
-        combatNav = function()
+        combatNav = function(forceMove)
             if not mq.TLO.Me.AutoFire() then
                 RGMercUtils.DoCmd('/squelch face')
                 RGMercUtils.DoCmd('/autofire on')
             end
 
-            if RGMercUtils.GetSetting('NavCircle') and (RGMercUtils.GetTargetDistance() <= 30 or RGMercUtils.GetTargetDistance() >= 75) then
+            if RGMercUtils.GetSetting('NavCircle') and ((RGMercUtils.GetTargetDistance() <= 30 or RGMercUtils.GetTargetDistance() >= 75) or forceMove) then
                 RGMercUtils.NavAroundCircle(mq.TLO.Target, RGMercUtils.GetSetting('NavCircleDist'))
             end
 
@@ -1654,7 +1654,7 @@ local _ClassConfig = {
                 RGMercUtils.DoCmd("/stick %d moveback", RGMercUtils.GetSetting('NavCircleDist'))
             end
 
-            if not RGMercUtils.GetSetting('NavCircle') and RGMercUtils.GetTargetDistance() >= 75 then
+            if not RGMercUtils.GetSetting('NavCircle') and (RGMercUtils.GetTargetDistance() >= 75 or forceMove) then
                 RGMercUtils.DoCmd("/squelch /nav id %d facing=backward distance=%d", RGMercConfig.Globals.AutoTargetID, RGMercUtils.GetSetting('NavCircleDist'))
             end
         end,

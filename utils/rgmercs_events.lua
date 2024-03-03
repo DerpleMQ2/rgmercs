@@ -25,9 +25,9 @@ mq.event("CantSee", "You cannot see your target.", function()
         --}
     else
         local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
-        RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target - using custom combatNav!")
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
-            RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav)
+            RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target - using custom combatNav!")
+            RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, true)
         else
             RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
             if RGMercUtils.GetSetting('DoAutoEngage') then
@@ -72,7 +72,7 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
         if not RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
             local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
             if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
-                RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav)
+                RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, true)
             end
         end
     end
