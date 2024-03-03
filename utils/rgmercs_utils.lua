@@ -1532,9 +1532,10 @@ function Utils.DetSpellCheck(spell)
 end
 
 ---@param spell MQSpell
----@param buffTarget target|nil
+---@param buffTarget (target|spawn|character|fun():string|nil)?
 ---@return boolean
 function Utils.TargetHasBuff(spell, buffTarget)
+    ---@type target|spawn|character|fun():string|nil
     local target = mq.TLO.Target
 
     if buffTarget ~= nil and buffTarget.ID() > 0 then
@@ -1597,10 +1598,11 @@ function Utils.SpellStacksOnMe(spell)
 end
 
 ---@param buffName string
+---@param buffTarget (target|spawn|character|fun():string|nil)?
 ---@return boolean
-function Utils.TargetHasBuffByName(buffName)
+function Utils.TargetHasBuffByName(buffName, buffTarget)
     if buffName == nil then return false end
-    return Utils.TargetHasBuff(mq.TLO.Spell(buffName))
+    return Utils.TargetHasBuff(mq.TLO.Spell(buffName), buffTarget)
 end
 
 ---@param target MQTarget|nil
@@ -2967,7 +2969,8 @@ function Utils.BuffActiveByName(buffName)
         RGMercsLogger.log_error("\arUtils.BuffActiveByName was passed a non-string buffname! %s", type(buffName))
         return false
     end
-    return ((mq.TLO.Me.FindBuff("name " .. buffName).ID() or 0) > 0)
+
+    return Utils.TargetHasBuffByName(buffName, mq.TLO.Me)
 end
 
 ---@param buffId integer

@@ -944,9 +944,10 @@ local _ClassConfig = {
                 name = "Wildstalker's Unity (Azia)",
                 type = "AA",
                 tooltip = Tooltips.UnityBuff,
-                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or 0) end,
+                active_cond = function(self, aaName) return RGMercUtils.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell, mq.TLO.Me) end,
                 cond = function(self, aaName)
-                    return castWSU() and not RGMercUtils.BuffActiveByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName() or "")
+                    return castWSU() and not RGMercUtils.SpellStacksOnMe(mq.TLO.Me.AltAbility(aaName).Spell) and
+                        not RGMercUtils.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell, mq.TLO.Me)
                 end,
             },
             {
