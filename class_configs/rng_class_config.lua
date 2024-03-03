@@ -911,6 +911,15 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'DPS Buffs',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.IsModeActive("Healer")
+            end,
+        },
+        {
             name = 'Defense',
             state = 1,
             steps = 1,
@@ -1271,43 +1280,11 @@ local _ClassConfig = {
         },
         ['DPS'] = {
             {
-                name = "Guardian of the Forest",
-                type = "AA",
-                tooltip = Tooltips.GotF,
-                cond = function(self, spell)
-                    return not RGMercUtils.SongActive("Group Guardian of the Forest") and not RGMercUtils.SongActive("Outrider's Accuracy")
-                end,
-            },
-            {
-                name = "Outrider's Accuracy",
-                type = "AA",
-                tooltip = Tooltips.OA,
-                cond = function(self, spell)
-                    return not RGMercUtils.SongActive("Group Guardian of the Forest") and not RGMercUtils.SongActive("Guardian of the Forest")
-                end,
-            },
-            {
-                name = "Group Guardian of the Forest",
-                type = "AA",
-                tooltip = Tooltips.GGotF,
-                cond = function(self, spell)
-                    return not RGMercUtils.SongActive("Guardian of the Forest") and not RGMercUtils.SongActive("Outrider's Accuracy")
-                end,
-            },
-            {
-                name = "Epic",
-                type = "Item",
-                tooltip = Tooltips.Epic,
-                cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID()
-                end,
-            },
-            {
                 name = "ArrowOpener",
                 type = "Spell",
                 tooltip = Tooltips.ArrowOpener,
                 cond = function(self, spell)
-                    return RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoReagentArrow')
+                    return RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoOpener') and RGMercUtils.GetSetting('DoReagentArrow')
                 end,
             },
             {
@@ -1463,6 +1440,41 @@ local _ClassConfig = {
                     return not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.PctEndurance() < 30
                 end,
             },
+        },
+        ['DPS Buffs'] = {
+            {
+                name = "Guardian of the Forest",
+                type = "AA",
+                tooltip = Tooltips.GotF,
+                cond = function(self, spell)
+                    return not RGMercUtils.SongActive("Group Guardian of the Forest") and not RGMercUtils.SongActive("Outrider's Accuracy")
+                end,
+            },
+            {
+                name = "Outrider's Accuracy",
+                type = "AA",
+                tooltip = Tooltips.OA,
+                cond = function(self, spell)
+                    return not RGMercUtils.SongActive("Group Guardian of the Forest") and not RGMercUtils.SongActive("Guardian of the Forest")
+                end,
+            },
+            {
+                name = "Group Guardian of the Forest",
+                type = "AA",
+                tooltip = Tooltips.GGotF,
+                cond = function(self, spell)
+                    return not RGMercUtils.SongActive("Guardian of the Forest") and not RGMercUtils.SongActive("Outrider's Accuracy")
+                end,
+            },
+            {
+                name = "Epic",
+                type = "Item",
+                tooltip = Tooltips.Epic,
+                cond = function(self)
+                    return not mq.TLO.Me.ActiveDisc.ID()
+                end,
+            },
+
         },
         ['Defense'] = {
             {
