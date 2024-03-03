@@ -625,6 +625,35 @@ return {
             end,
         },
         {
+            name = 'Combat Buffs',
+            state = 1,
+            steps = 1,
+            timer = 30, -- only run every 30 seconds at most.
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state ==
+                    "Combat"
+            end,
+        },
+        {
+            name = 'Aggro Management',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state ==
+                    "Combat"
+            end,
+        },
+        {
+            name = 'Weaves',
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and RGMercUtils.GetSetting('WeaveAANukes') and
+                    mq.TLO.Me.SpellInCooldown()
+            end,
+        },
+        {
             name = 'DPS',
             state = 1,
             steps = 1,
@@ -695,17 +724,8 @@ return {
                 end,
             },
         },
-        ['DPS'] = {
-            {
-                name = "Etherealist's Unity",
-                type = "AA",
-                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
-                cond = function(self, aaName)
-                    local selfHPBuff = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
-                    local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and RGMercUtils.SelfBuffAACheck(aaName)
-                end,
-            },
+        ['Agro Management'] =
+        {
             {
                 name = "A Hole in Space",
                 type = "AA",
@@ -734,6 +754,20 @@ return {
                     return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
                 end,
             },
+
+        },
+        ['Combat Buffs'] =
+        {
+            {
+                name = "Etherealist's Unity",
+                type = "AA",
+                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
+                cond = function(self, aaName)
+                    local selfHPBuff = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
+                    local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
+                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
             {
                 name = "SelfRune1",
                 type = "Spell",
@@ -749,20 +783,6 @@ return {
                 end,
             },
             {
-                name = "FuseNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return RGMercUtils.DetGOMCheck(spell)
-                end,
-            },
-            {
-                name = "FireEtherealNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return RGMercUtils.DetGOMCheck(spell)
-                end,
-            },
-            {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
@@ -770,17 +790,80 @@ return {
                 end,
             },
             {
+                name = "HarvestSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                end,
+            },
+        },
+        ['Weaves'] = {
+            {
+                name = "Force of Ice",
+                type = "AA",
+                cond = function(self)
+                    return RGMercUtils.AAReady("Force of Ice")
+                end,
+            },
+            {
+                name = "Force of Will",
+                type = "AA",
+                cond = function(self)
+                    return RGMercUtils.AAReady("Force of Will")
+                end,
+            },
+            {
+                name = "Force of Flame",
+                type = "AA",
+                cond = function(self)
+                    return RGMercUtils.AAReady("Force of Flame")
+                end,
+            },
+        },
+
+        ['DPS'] = {
+            {
+                name = "FuseNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    if RGMercUtils.GetSetting('DoGOMCheck') then
+                        return RGMercUtils.DetGOMCheck(spell)
+                    end
+
+                    return true
+                end,
+            },
+            {
+                name = "FireEtherealNuke",
+                type = "Spell",
+                cond = function(self, spell)
+                    if RGMercUtils.GetSetting('DoGOMCheck') then
+                        return RGMercUtils.DetGOMCheck(spell)
+                    end
+
+                    return true
+                end,
+            },
+            {
                 name = "IceEtherealNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DetGOMCheck(spell)
+                    if RGMercUtils.GetSetting('DoGOMCheck') then
+                        return RGMercUtils.DetGOMCheck(spell)
+                    end
+
+                    return true
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DetGOMCheck(spell)
+                    if RGMercUtils.GetSetting('DoGOMCheck') then
+                        return RGMercUtils.DetGOMCheck(spell)
+                    end
+
+                    return true
                 end,
             },
             {
@@ -809,13 +892,6 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return mq.TLO.Me.Buff("Twincast").ID() == 0
-                end,
-            },
-            {
-                name = "HarvestSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
             {
@@ -894,29 +970,6 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.ManaCheck()
-                end,
-            },
-            {
-                name = "Force of Flame",
-                type = "AA",
-                cond = function(self)
-                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and
-                        not RGMercUtils.AAReady("Force of Will")
-                end,
-            },
-            {
-                name = "Force of Ice",
-                type = "AA",
-                cond = function(self)
-                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and RGMercUtils.AAReady("Force of Flame")
-                end,
-            },
-            {
-                name = "Force of Will",
-                type = "AA",
-                cond = function(self)
-                    return RGMercUtils.GetSetting('WeaveAANukes') and not mq.TLO.Me.SpellInCooldown() and not RGMercUtils.AAReady("Force of Ice") and
-                        not RGMercUtils.AAReady("Force of Flame")
                 end,
             },
         },
@@ -1133,6 +1186,7 @@ return {
         ['DoManaBurn']    = { DisplayName = "Use Mana Burn AA", Category = "Combat", Tooltip = "Enable usage of Mana Burn", Default = true, },
         ['DoSnare']       = { DisplayName = "Use Snare Spells", Category = "Combat", Tooltip = "Enable usage of Snares", Default = true, },
         ['DoRain']        = { DisplayName = "Use Rain Spells", Category = "Combat", Tooltip = "Enable usage of Rain Spells", Default = true, },
+        ['DoGOMCheck']    = { DisplayName = "Do GOM Check", Category = "Combat", Tooltip = "Check if you have Gift of Mana before casting big nukes.", Default = false, },
         ['HavestManaPct'] = { DisplayName = "Harvest Mana %", Category = "Utilities", Tooltip = "What Mana % to hit before using a harvest spell or aa.", Default = 85, Min = 1, Max = 99, },
     },
 }
