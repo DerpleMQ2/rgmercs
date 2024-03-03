@@ -1262,6 +1262,8 @@ function Module:GiveTime(combat_state)
         requireLOS = "off"
     end
 
+    RGMercUtils.DoCmd("/squelch /attack off")
+
     RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
 
     mq.delay(1000)
