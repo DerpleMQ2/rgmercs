@@ -1283,7 +1283,6 @@ function Module:GiveTime(combat_state)
                 abortPull = true
                 break
             end
-            startingXTargs = RGMercUtils.GetXTHaterIDs()
         else
             if RGMercUtils.GetXTHaterCount() > 0 then
                 RGMercsLogger.log_info("\awNOTICE:\ax Gained aggro -- aborting pull!")
@@ -1317,8 +1316,6 @@ function Module:GiveTime(combat_state)
     if abortPull == false then
         local target = mq.TLO.Target
         self:SetPullState(PullStates.PULL_PULLING, self:GetPullStateTargetInfo())
-
-        startingXTargs = RGMercUtils.GetXTHaterIDs()
 
         if target and target.ID() > 0 then
             RGMercsLogger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
