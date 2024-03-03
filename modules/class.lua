@@ -405,7 +405,7 @@ function Module:SelfCheckAndRez()
         local rezSpawn = mq.TLO.NearestSpawn(i, rezSearch)
 
         if rezSpawn() then
-            if self.ClassConfig.HelperFunctions.DoRez then
+            if self.ClassConfig.HelperFunctions and self.ClassConfig.HelperFunctions.DoRez then
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
                     RGMercUtils.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
