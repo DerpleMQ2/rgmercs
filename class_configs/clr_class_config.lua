@@ -760,7 +760,7 @@ local _ClassConfig = {
                 end
 
                 if RGMercUtils.PCSpellReady(self.ResolvedActionMap['RezSpell']) and RGMercUtils.GetXTHaterCount() == 0 and not RGMercUtils.CanUseAA("Blessing of Resurrection") then
-                    RGMercUtils.UseSpell(self.ResolvedActionMap['RezSpell'], corpseId, true)
+                    RGMercUtils.UseSpell(self.ResolvedActionMap['RezSpell'], corpseId, true, true)
                 end
             end
         end,

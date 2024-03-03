@@ -907,8 +907,9 @@ end
 ---@param spellName string
 ---@param targetId integer
 ---@param bAllowMem boolean
+---@param bAllowDead boolean?
 ---@return boolean
-function Utils.UseSpell(spellName, targetId, bAllowMem)
+function Utils.UseSpell(spellName, targetId, bAllowMem, bAllowDead)
     local me = mq.TLO.Me
     -- Immediately send bards to the song handler.
     if me.Class.ShortName():lower() == "brd" then
@@ -976,7 +977,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem)
             return false
         end
 
-        if targetSpawn() and targetSpawn.Dead() then
+        if not bAllowDead and targetSpawn() and targetSpawn.Dead() then
             RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s but my target (%d) is dead.",
                 spellName, targetId)
             return false

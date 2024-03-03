@@ -1561,7 +1561,7 @@ local _ClassConfig = {
                 end
 
                 if RGMercUtils.PCSpellReady(mq.TLO.Spell("Incarnate Anew")) then
-                    return RGMercUtils.UseSpell("Incarnate Anew", corpseId, true)
+                    return RGMercUtils.UseSpell("Incarnate Anew", corpseId, true, true)
                 end
             end
 
