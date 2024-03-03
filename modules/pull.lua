@@ -1324,9 +1324,9 @@ function Module:GiveTime(combat_state)
 
             local successFn = function() return RGMercUtils.GetXTHaterCount() > 0 end
 
-            if self:IsPullMode("Chain") then
-                successFn = function() return RGMercUtils.GetXTHaterCount() >= self.settings.ChainCount end
-            end
+            --if self:IsPullMode("Chain") then
+            --    successFn = function() return RGMercUtils.GetXTHaterCount() >= self.settings.ChainCount end
+            --end
 
             if self.settings.PullAbility == PullAbilityIDToName.PetPull then -- PetPull
                 RGMercUtils.PetAttack(self.TempSettings.PullID)
