@@ -24,6 +24,8 @@ mq.event("CantSee", "You cannot see your target.", function()
         --/delay 1 ${XAssist.XTFullHaterCount} > 0
         --}
     else
+        if mq.TLO.Me.Moving() then return end
+
         local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
             RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target - using custom combatNav!")
@@ -68,7 +70,7 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
     end
 
     -- Only do non-pull code if autoengage is on
-    if RGMercUtils.GetSetting('DoAutoEngage') then
+    if RGMercUtils.GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() then
         if not RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
             local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
             if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
@@ -98,6 +100,8 @@ local function tooFarHandler()
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
+        if mq.TLO.Me.Moving() then return end
+
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
             RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav)
         elseif RGMercUtils.GetSetting('DoMelee') then
