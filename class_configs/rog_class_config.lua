@@ -362,8 +362,8 @@ return {
             {
                 name = "EndRegen",
                 type = "Disc",
-                cond = function(self, _)
-                    return mq.TLO.Me.PctEndurance() < 21
+                cond = function(self, discSpell)
+                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.SongActive(discSpell.RankName.Name() or "") and mq.TLO.Me.PctEndurance() < 21
                 end,
             },
             {
