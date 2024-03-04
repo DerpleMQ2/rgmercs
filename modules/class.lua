@@ -30,6 +30,7 @@ Module.TempSettings.CureCheckTimer        = 0
 Module.TempSettings.ShowFailedSpells      = false
 Module.TempSettings.ReloadingLoadouts     = true
 Module.TempSettings.NewCombatMode         = false
+Module.TempSettings.MissingSpells         = {}
 
 Module.CommandHandlers                    = {
     setmode = {
@@ -199,6 +200,8 @@ function Module:SetCombatMode(mode)
         self.ClassConfig.OnModeChange(self, mode)
     end
 
+    self.TempSettings.MissingSpells = RGMercUtils.FindAllMissingSpells(self.ClassConfig.AbilitySets)
+
     RGMercModules:ExecAll("OnCombatModeChanged")
 end
 
@@ -246,6 +249,18 @@ function Module:Render()
 
             if RGMercUtils.GetTableSize(self.SpellLoadOut) > 0 then
                 RGMercUtils.RenderLoadoutTable(self.SpellLoadOut)
+            end
+            ImGui.Unindent()
+            ImGui.Separator()
+        end
+        if ImGui.CollapsingHeader("Missing Spells") then
+            ImGui.Indent()
+            if ImGui.SmallButton("Reload Missing Spells") then
+                self.TempSettings.MissingSpells = RGMercUtils.FindAllMissingSpells(self.ClassConfig.AbilitySets)
+            end
+
+            if #self.TempSettings.MissingSpells > 0 then
+                RGMercUtils.RenderLoadoutTable(self.TempSettings.MissingSpells)
             end
             ImGui.Unindent()
             ImGui.Separator()

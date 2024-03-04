@@ -426,6 +426,26 @@ function Utils.GetBestItem(t)
     return selectedItem
 end
 
+---@param varName string
+---@param spellList table
+---@param alreadyMissingSpells table
+---@return table
+function Utils.FindMissingSpells(varName, spellList, alreadyMissingSpells)
+    for _, spellName in ipairs(spellList or {}) do
+        local spell = mq.TLO.Spell(spellName)
+        if spell() ~= nil then
+            --RGMercsLogger.log_debug("Found %s level(%d) rank(%s)", s, spell.Level(), spell.RankName())
+            if spell.Level() <= mq.TLO.Me.Level() then
+                if not mq.TLO.Me.Book(spell.RankName.Name())() and not mq.TLO.Me.CombatAbility(spell.RankName.Name())() then
+                    table.insert(alreadyMissingSpells, { selectedSpellData = { name = varName, }, spell = spell, })
+                end
+            end
+        end -- end if spell nil check
+    end
+
+    return alreadyMissingSpells
+end
+
 ---@param spellList table
 ---@return MQSpell|nil
 function Utils.GetBestSpell(spellList, alreadyResolvedMap)
@@ -3023,6 +3043,18 @@ function Utils.DetAACheck(aaId)
         Utils.SpellStacksOnTarget(me.AltAbility(aaId).Spell))
 end
 
+---@param abilitySets table
+---@return table
+function Utils.FindAllMissingSpells(abilitySets)
+    local missingSpellList = {}
+
+    for varName, spellTable in pairs(abilitySets) do
+        missingSpellList = Utils.FindMissingSpells(varName, spellTable, missingSpellList)
+    end
+
+    return missingSpellList
+end
+
 ---@param caller self
 ---@param spellGemList table
 ---@param itemSets table
@@ -3439,7 +3471,10 @@ function Utils.RenderLoadoutTable(loadoutTable)
             ImGui.TableNextColumn()
             ImGui.Text(tostring(loadoutData.spell.Level()))
             ImGui.TableNextColumn()
-            ImGui.Text(loadoutData.spell.RankName())
+            local _, clicked = ImGui.Selectable(loadoutData.spell.RankName())
+            if clicked then
+                loadoutData.spell.Inspect()
+            end
         end
 
         ImGui.EndTable()
@@ -3542,11 +3577,22 @@ function Utils.RenderRotationTable(caller, name, rotationTable, resolvedActionMa
                     ImGui.Text(mappedAction)
                     ImGui.PopStyleColor()
                 else
-                    ImGui.Text(entry.name)
-                    ImGui.TableNextColumn()
-                    ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.2, 1.0, 1.0)
-                    ImGui.Text(mappedAction.RankName() or mappedAction.Name() or "None")
-                    ImGui.PopStyleColor()
+                    if entry.type:lower() == "spell" then
+                        ImGui.Text(entry.name)
+                        ImGui.TableNextColumn()
+                        ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.2, 1.0, 1.0)
+                        local _, clicked = ImGui.Selectable(mappedAction.RankName())
+                        if clicked then
+                            mappedAction.Inspect()
+                        end
+                        ImGui.PopStyleColor()
+                    else
+                        ImGui.Text(entry.name)
+                        ImGui.TableNextColumn()
+                        ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.2, 1.0, 1.0)
+                        ImGui.Text(mappedAction.Name() or "None")
+                        ImGui.PopStyleColor()
+                    end
                 end
             else
                 ImGui.Text(entry.name)
