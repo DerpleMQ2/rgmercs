@@ -429,18 +429,43 @@ end
 ---@param varName string
 ---@param spellList table
 ---@param alreadyMissingSpells table
+---@param highestOnly boolean
 ---@return table
-function Utils.FindMissingSpells(varName, spellList, alreadyMissingSpells)
+function Utils.FindMissingSpells(varName, spellList, alreadyMissingSpells, highestOnly)
+    local tmpTable = {}
     for _, spellName in ipairs(spellList or {}) do
         local spell = mq.TLO.Spell(spellName)
         if spell() ~= nil then
             --RGMercsLogger.log_debug("Found %s level(%d) rank(%s)", s, spell.Level(), spell.RankName())
             if spell.Level() <= mq.TLO.Me.Level() then
                 if not mq.TLO.Me.Book(spell.RankName.Name())() and not mq.TLO.Me.CombatAbility(spell.RankName.Name())() then
-                    table.insert(alreadyMissingSpells, { selectedSpellData = { name = varName, }, spell = spell, })
+                    table.insert(tmpTable, { selectedSpellData = { name = varName, }, missing = true, spell = spell, })
+                else
+                    table.insert(tmpTable, { selectedSpellData = { name = varName, }, missing = false, spell = spell, })
                 end
             end
         end -- end if spell nil check
+    end
+
+    if #tmpTable > 0 then
+        if not highestOnly then
+            for _, data in ipairs(tmpTable) do
+                RGMercsLogger.log_debug("Set[%s] : Spell[%s (%d)] : Have[%s]", data.selectedSpellData.name, data.spell.RankName(), data.spell.Level(),
+                    Utils.BoolToColorString(not data.missing))
+                if data.missing then
+                    table.insert(alreadyMissingSpells, data)
+                end
+            end
+        else
+            table.sort(tmpTable, function(a, b) return a.spell.Level() > b.spell.Level() end)
+            for _, data in ipairs(tmpTable) do
+                RGMercsLogger.log_debug("Set[%s] : Spell[%s (%d)]: Have[%s]", data.selectedSpellData.name, data.spell.RankName(), data.spell.Level(),
+                    Utils.BoolToColorString(not data.missing))
+            end
+            if tmpTable[1].missing then
+                table.insert(alreadyMissingSpells, tmpTable[1])
+            end
+        end
     end
 
     return alreadyMissingSpells
@@ -3044,12 +3069,13 @@ function Utils.DetAACheck(aaId)
 end
 
 ---@param abilitySets table
+---@param highestOnly boolean
 ---@return table
-function Utils.FindAllMissingSpells(abilitySets)
+function Utils.FindAllMissingSpells(abilitySets, highestOnly)
     local missingSpellList = {}
 
     for varName, spellTable in pairs(abilitySets) do
-        missingSpellList = Utils.FindMissingSpells(varName, spellTable, missingSpellList)
+        missingSpellList = Utils.FindMissingSpells(varName, spellTable, missingSpellList, highestOnly)
     end
 
     return missingSpellList

@@ -5,34 +5,35 @@ local Set                = require("mq.Set")
 local RGMercsClassLoader = require('utils.rgmercs_classloader')
 require('utils.rgmercs_datatypes')
 
-local Module                              = { _version = '0.1a', _name = "Class", _author = 'Derple', }
-Module.__index                            = Module
+local Module                                 = { _version = '0.1a', _name = "Class", _author = 'Derple', }
+Module.__index                               = Module
 
-Module.ModuleLoaded                       = false
-Module.SpellLoadOut                       = {}
-Module.ResolvedActionMap                  = {}
-Module.TempSettings                       = {}
-Module.CombatState                        = "None"
-Module.CurrentRotation                    = { name = "None", state = 0, }
-Module.ClassConfig                        = nil
-Module.DefaultCategories                  = nil
+Module.ModuleLoaded                          = false
+Module.SpellLoadOut                          = {}
+Module.ResolvedActionMap                     = {}
+Module.TempSettings                          = {}
+Module.CombatState                           = "None"
+Module.CurrentRotation                       = { name = "None", state = 0, }
+Module.ClassConfig                           = nil
+Module.DefaultCategories                     = nil
 
-Module.Constants                          = {}
-Module.Constants.RezSearchGroup           = "pccorpse group radius 100 zradius 50"
-Module.Constants.RezSearchOutOfGroup      = "pccorpse radius 100 zradius 50"
+Module.Constants                             = {}
+Module.Constants.RezSearchGroup              = "pccorpse group radius 100 zradius 50"
+Module.Constants.RezSearchOutOfGroup         = "pccorpse radius 100 zradius 50"
 
 -- Track the state of rotations between frames
-Module.TempSettings.RotationStates        = {}
-Module.TempSettings.HealingRotationStates = {}
-Module.TempSettings.RotationTimers        = {}
-Module.TempSettings.RezTimers             = {}
-Module.TempSettings.CureCheckTimer        = 0
-Module.TempSettings.ShowFailedSpells      = false
-Module.TempSettings.ReloadingLoadouts     = true
-Module.TempSettings.NewCombatMode         = false
-Module.TempSettings.MissingSpells         = {}
+Module.TempSettings.RotationStates           = {}
+Module.TempSettings.HealingRotationStates    = {}
+Module.TempSettings.RotationTimers           = {}
+Module.TempSettings.RezTimers                = {}
+Module.TempSettings.CureCheckTimer           = 0
+Module.TempSettings.ShowFailedSpells         = false
+Module.TempSettings.ReloadingLoadouts        = true
+Module.TempSettings.NewCombatMode            = false
+Module.TempSettings.MissingSpells            = {}
+Module.TempSettings.MissingSpellsHighestOnly = true
 
-Module.CommandHandlers                    = {
+Module.CommandHandlers                       = {
     setmode = {
         usage = "/rgl setmode <mode>",
         about = "Make sets my mode to mode - this is a helper so you don't need to use an index.",
@@ -200,7 +201,7 @@ function Module:SetCombatMode(mode)
         self.ClassConfig.OnModeChange(self, mode)
     end
 
-    self.TempSettings.MissingSpells = RGMercUtils.FindAllMissingSpells(self.ClassConfig.AbilitySets)
+    self.TempSettings.MissingSpells = RGMercUtils.FindAllMissingSpells(self.ClassConfig.AbilitySets, self.TempSettings.MissingSpellsHighestOnly)
 
     RGMercModules:ExecAll("OnCombatModeChanged")
 end
@@ -255,8 +256,14 @@ function Module:Render()
         end
         if ImGui.CollapsingHeader("Missing Spells") then
             ImGui.Indent()
-            if ImGui.SmallButton("Reload Missing Spells") then
-                self.TempSettings.MissingSpells = RGMercUtils.FindAllMissingSpells(self.ClassConfig.AbilitySets)
+            local pressed, anyPressed
+            pressed = ImGui.SmallButton("Reload Missing Spells")
+            anyPressed = pressed
+            ImGui.SameLine()
+            self.TempSettings.MissingSpellsHighestOnly, pressed = RGMercUtils.RenderOptionToggle("HighestOnly", "Highest Only", self.TempSettings.MissingSpellsHighestOnly)
+            anyPressed = anyPressed or pressed
+            if anyPressed then
+                self.TempSettings.MissingSpells = RGMercUtils.FindAllMissingSpells(self.ClassConfig.AbilitySets, self.TempSettings.MissingSpellsHighestOnly)
             end
 
             if #self.TempSettings.MissingSpells > 0 then
