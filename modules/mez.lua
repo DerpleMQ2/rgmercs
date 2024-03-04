@@ -181,6 +181,7 @@ end
 
 function Module:HandleMezBroke(mobName, breakerName)
     RGMercsLogger.log_debug("%s broke mez on ==> %s", breakerName, mobName)
+    RGMercUtils.HandleMezAnnounce(string.format("\ar MEZ Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName))
 end
 
 function Module:AddImmuneTarget(mobId, mobData)
