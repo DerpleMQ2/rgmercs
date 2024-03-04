@@ -1422,8 +1422,8 @@ local _ClassConfig = {
                 name = "EndRegenDisc",
                 type = "Disc",
                 tooltip = Tooltips.EndRegenDisc,
-                cond = function(self, discSepll)
-                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.SongActive(discSepll.RankName.Name() or "") and mq.TLO.Me.PctEndurance() < 30
+                cond = function(self, discSpell)
+                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.SongActive(discSpell.RankName.Name() or "") and mq.TLO.Me.PctEndurance() < 30
                 end,
             },
         },
