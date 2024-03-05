@@ -4,8 +4,6 @@ local animSpellGems      = mq.FindTextureAnimation('A_SpellGems')
 local ICONS              = require('mq.Icons')
 local ICON_SIZE          = 20
 
--- Global
-
 local Utils              = { _version = '0.2a', _name = "RGMercUtils", _author = 'Derple', }
 Utils.__index            = Utils
 Utils.Actors             = require('actors')
@@ -2453,7 +2451,7 @@ function Utils.DoCombatActions()
 
     -- We can't assume our target is our autotargetid for where this sub is used.
     local autoSpawn = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
-    if autoSpawn() and autoSpawn.Distance() > Utils.GetSetting('AssistRange') then return false end
+    if autoSpawn() and Utils.GetTargetDistance(autoSpawn) > Utils.GetSetting('AssistRange') then return false end
 
     return true
 end
