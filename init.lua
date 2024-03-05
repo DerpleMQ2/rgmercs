@@ -153,7 +153,7 @@ local function RGMercsGUI()
             ImGui.NewLine()
             ImGui.Separator()
 
-            if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.None) then
+            if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
                 ImGui.SetItemDefaultFocus()
                 if ImGui.BeginTabItem("RGMercsMain") then
                     ImGui.Text("Current State: " .. curState)
