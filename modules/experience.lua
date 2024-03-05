@@ -40,6 +40,7 @@ Module.DefaultConfig      = {
     ['ExpSecondsToStore'] = { DisplayName = "Seconds to Store", Category = "Monitoring", Tooltip = "The number of Seconds to keep in history.", Type = "Custom", Default = 30, Min = 10, Max = 120, Step = 5, },
     ['EnabledExpTracker'] = { DisplayName = "Enable Exp Tracker", Category = "Monitoring", Tooltip = "Enable Tracking Experience", Default = true, },
     ['ExpPlotFillLines']  = { DisplayName = "Enable Fill Lines", Category = "Graph", Tooltip = "Fill in the Plot Lines", Default = true, },
+    ['GraphMultiplier']   = { DisplayName = "Graph Multiplier", Category = "Graph", Tooltip = "What to multiply the graph numbers by to make it more readable.", Type = "Combo", ComboOptions = { '1', '10', '100', '1000', }, Default = 3, Min = 1, Max = 4, },
 }
 
 Module.DefaultCategories  = Set.new({})
@@ -138,21 +139,6 @@ function Module:Render()
     local pressed
     if not self.SettingsLoaded then return end
 
-    if os.clock() - self.LastExtentsCheck > 0.01 then
-        self.GoalMaxExpPerSec = 0
-        self.LastExtentsCheck = os.clock()
-        for _, expData in pairs(self.XPEvents) do
-            for idx, time in ipairs(expData.expEvents.DataY) do
-                -- is this entry visible?
-                local visible = expData.expEvents.DataX[idx] > os.clock() - self.settings.ExpSecondsToStore and
-                    expData.expEvents.DataX[idx] < os.clock()
-                if visible and time > self.GoalMaxExpPerSec then
-                    self.GoalMaxExpPerSec = (math.ceil(time / self.MaxStep) * self.MaxStep) * 1.25
-                end
-            end
-        end
-    end
-
     if ImGui.Button("Reset Stats", ImGui.GetWindowWidth() * .3, 25) then
         self:ClearStats()
     end
@@ -173,12 +159,29 @@ function Module:Render()
         ImGui.TableNextColumn()
         ImGui.Text("Exp / Sec")
         ImGui.TableNextColumn()
-        ImGui.Text(string.format("%2.3f%%", self.TrackXP.Experience.Total / (os.clock() - self.TrackXP.StartTime)))
+        ImGui.Text(string.format("%2.6f%%", (self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider) / (os.clock() - self.TrackXP.StartTime)))
         ImGui.TableNextColumn()
         ImGui.Text("AA / Sec")
         ImGui.TableNextColumn()
-        ImGui.Text(string.format("%2.3f%%", self.TrackXP.AAExperience.Total / (os.clock() - self.TrackXP.StartTime)))
+        ImGui.Text(string.format("%2.6f%%", (self.TrackXP.AAExperience.Total / self.TrackXP.XPTotalDivider) / (os.clock() - self.TrackXP.StartTime)))
         ImGui.EndTable()
+    end
+
+    local multiplier = tonumber(self.DefaultConfig.GraphMultiplier.ComboOptions[self.settings.GraphMultiplier])
+    if os.clock() - self.LastExtentsCheck > 0.01 then
+        self.GoalMaxExpPerSec = 0
+        self.LastExtentsCheck = os.clock()
+        for _, expData in pairs(self.XPEvents) do
+            for idx, exp in ipairs(expData.expEvents.DataY) do
+                exp = exp * multiplier
+                -- is this entry visible?
+                local visible = expData.expEvents.DataX[idx] > os.clock() - self.settings.ExpSecondsToStore and
+                    expData.expEvents.DataX[idx] < os.clock()
+                if visible and exp > self.GoalMaxExpPerSec then
+                    self.GoalMaxExpPerSec = (math.ceil(exp / self.MaxStep) * self.MaxStep) * 1.25
+                end
+            end
+        end
     end
 
     -- converge on new max recalc min and maxes
@@ -186,17 +189,33 @@ function Module:Render()
     if self.CurMaxExpPerSec > self.GoalMaxExpPerSec then self.CurMaxExpPerSec = self.CurMaxExpPerSec - 1 end
 
     if ImPlot.BeginPlot("Experience Tracker") then
-        ImPlot.SetupAxes("Time (s)", "Exp % 1000ths")
+        if self.settings.GraphMultiplier == 1 then
+            ImPlot.SetupAxes("Time (s)", "Exp %")
+        else
+            ImPlot.SetupAxes("Time (s)", string.format("Exp %% %sths", self.DefaultConfig.GraphMultiplier.ComboOptions[self.settings.GraphMultiplier]))
+        end
         ImPlot.SetupAxisLimits(ImAxis.X1, os.clock() - self.settings.ExpSecondsToStore, os.clock(), ImGuiCond.Always)
         ImPlot.SetupAxisLimits(ImAxis.Y1, 1, self.CurMaxExpPerSec, ImGuiCond.Always)
+
+
 
         for _, type in ipairs({ "Exp", "AA", }) do
             local expData = self.XPEvents[type]
             if expData then
-                ImPlot.PlotLine(type, expData.expEvents.DataX, expData.expEvents.DataY,
-                    #expData.expEvents.DataX,
-                    self.settings.ExpPlotFillLines and ImPlotLineFlags.Shaded or ImPlotLineFlags.None,
-                    expData.expEvents.Offset - 1)
+                local offset = expData.expEvents.Offset - 1
+                local count = #expData.expEvents.DataX
+                ImPlot.PlotLine(type,
+                    ---@diagnostic disable-next-line: param-type-mismatch
+                    function(n)
+                        local pos = (offset + n) % count
+                        if expData.expEvents.DataY[pos] == nil then
+                            return ImPlotPoint(0, 0)
+                        end
+
+                        return ImPlotPoint(expData.expEvents.DataX[pos], expData.expEvents.DataY[pos] * multiplier)
+                    end,
+                    count,
+                    self.settings.ExpPlotFillLines and ImPlotLineFlags.Shaded or ImPlotLineFlags.None)
             end
         end
 
@@ -283,7 +302,7 @@ function Module:GiveTime(combat_state)
 
         self.XPEvents.Exp.lastFrame = os.clock()
         ---@diagnostic disable-next-line: undefined-field
-        self.XPEvents.Exp.expEvents:AddPoint(os.clock(), (self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.StartTime)) * 1000)
+        self.XPEvents.Exp.expEvents:AddPoint(os.clock(), (self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.StartTime)))
 
         if mq.TLO.Me.PctAAExp() > 0 and self:CheckAAExpChanged() then
             RGMercsLogger.log_debug("\ayAA Gained: \ag%2.2f%% \aw|| \ayAA Total: \ag%2.2f%%", self.TrackXP.AAExperience.Gained / self.TrackXP.XPTotalDivider,
@@ -300,7 +319,7 @@ function Module:GiveTime(combat_state)
 
         self.XPEvents.AA.lastFrame = os.clock()
         ---@diagnostic disable-next-line: undefined-field
-        self.XPEvents.AA.expEvents:AddPoint(os.clock(), (self.TrackXP.AAExperience.Total / ((os.clock()) - self.TrackXP.StartTime)) * 1000)
+        self.XPEvents.AA.expEvents:AddPoint(os.clock(), (self.TrackXP.AAExperience.Total / ((os.clock()) - self.TrackXP.StartTime)))
     end
 end
 
