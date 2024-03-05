@@ -19,19 +19,18 @@ Module.LastExtentsCheck   = os.clock()
 Module.TrackXP            = {
     PlayerLevel = mq.TLO.Me.Level(),
     PlayerAA = mq.TLO.Me.AAPointsTotal(),
+    StartTime = os.clock(),
 
     XPTotalPerLevel = 100000,
     XPTotalDivider = 1000,
 
     Experience = {
         Base = mq.TLO.Me.Exp(),
-        StartTime = os.clock(),
         Total = 0,
         Gained = 0,
     },
     AAExperience = {
         Base = mq.TLO.Me.AAExp(),
-        StartTime = os.clock(),
         Total = 0,
         Gained = 0,
     },
@@ -108,6 +107,28 @@ function Module:Init()
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
+function Module:ClearStats()
+    self.TrackXP = {
+        PlayerLevel = mq.TLO.Me.Level(),
+        PlayerAA = mq.TLO.Me.AAPointsTotal(),
+        StartTime = os.clock(),
+
+        XPTotalPerLevel = 100000,
+        XPTotalDivider = 1000,
+
+        Experience = {
+            Base = mq.TLO.Me.Exp(),
+            Total = 0,
+            Gained = 0,
+        },
+        AAExperience = {
+            Base = mq.TLO.Me.AAExp(),
+            Total = 0,
+            Gained = 0,
+        },
+    }
+end
+
 function Module:ShouldRender()
     return true
 end
@@ -130,6 +151,34 @@ function Module:Render()
                 end
             end
         end
+    end
+
+    if ImGui.Button("Reset Stats", ImGui.GetWindowWidth() * .3, 25) then
+        self:ClearStats()
+    end
+
+    if ImGui.BeginTable("ExpStats", 2, bit32.bor(ImGuiTableFlags.Borders)) then
+        ImGui.TableNextColumn()
+        ImGui.Text("Exp Session Time")
+        ImGui.TableNextColumn()
+        ImGui.Text(RGMercUtils.FormatTime(os.clock() - self.TrackXP.StartTime))
+        ImGui.TableNextColumn()
+        ImGui.Text("Exp Gained")
+        ImGui.TableNextColumn()
+        ImGui.Text(string.format("%2.3f%%", self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider))
+        ImGui.TableNextColumn()
+        ImGui.Text("AA Gained")
+        ImGui.TableNextColumn()
+        ImGui.Text(string.format("%2.3f%%", self.TrackXP.AAExperience.Total / self.TrackXP.XPTotalDivider))
+        ImGui.TableNextColumn()
+        ImGui.Text("Exp / Sec")
+        ImGui.TableNextColumn()
+        ImGui.Text(string.format("%2.3f%%", self.TrackXP.Experience.Total / (os.clock() - self.TrackXP.StartTime)))
+        ImGui.TableNextColumn()
+        ImGui.Text("AA / Sec")
+        ImGui.TableNextColumn()
+        ImGui.Text(string.format("%2.3f%%", self.TrackXP.AAExperience.Total / (os.clock() - self.TrackXP.StartTime)))
+        ImGui.EndTable()
     end
 
     -- converge on new max recalc min and maxes
@@ -220,8 +269,8 @@ function Module:GiveTime(combat_state)
         if self:CheckExpChanged() then
             RGMercsLogger.log_debug("\ayXP Gained: \ag%02.3f%% \aw|| \ayXP Total: \ag%02.3f%% \aw|| \ayStart: \am%d \ayCur: \am%d \ayExp/Sec: \ag%2.3f%%",
                 self.TrackXP.Experience.Gained / self.TrackXP.XPTotalDivider,
-                self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider, self.TrackXP.Experience.StartTime, os.clock(),
-                self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.Experience.StartTime))
+                self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider, self.TrackXP.StartTime, os.clock(),
+                self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.StartTime))
         end
 
         if not self.XPEvents.Exp then
@@ -234,7 +283,7 @@ function Module:GiveTime(combat_state)
 
         self.XPEvents.Exp.lastFrame = os.clock()
         ---@diagnostic disable-next-line: undefined-field
-        self.XPEvents.Exp.expEvents:AddPoint(os.clock(), (self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.Experience.StartTime)) * 1000)
+        self.XPEvents.Exp.expEvents:AddPoint(os.clock(), (self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.StartTime)) * 1000)
 
         if mq.TLO.Me.PctAAExp() > 0 and self:CheckAAExpChanged() then
             RGMercsLogger.log_debug("\ayAA Gained: \ag%2.2f%% \aw|| \ayAA Total: \ag%2.2f%%", self.TrackXP.AAExperience.Gained / self.TrackXP.XPTotalDivider,
@@ -251,7 +300,7 @@ function Module:GiveTime(combat_state)
 
         self.XPEvents.AA.lastFrame = os.clock()
         ---@diagnostic disable-next-line: undefined-field
-        self.XPEvents.AA.expEvents:AddPoint(os.clock(), (self.TrackXP.AAExperience.Total / ((os.clock()) - self.TrackXP.Experience.StartTime)) * 1000)
+        self.XPEvents.AA.expEvents:AddPoint(os.clock(), (self.TrackXP.AAExperience.Total / ((os.clock()) - self.TrackXP.StartTime)) * 1000)
     end
 end
 
