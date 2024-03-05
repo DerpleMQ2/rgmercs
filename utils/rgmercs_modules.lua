@@ -12,7 +12,7 @@ function Module.load()
             Drag         = require("modules.drag").New(),
             Mez          = require("modules.mez").New(),
             Exp          = require("modules.experience").New(),
-            Performance  = require("modules.performance").New(),
+            Perf         = require("modules.performance").New(),
             Contributors = require("modules.contributors").New(),
         },
         module_order = {
@@ -23,7 +23,7 @@ function Module.load()
             "Mez",
             "Travel",
             "Exp",
-            "Performance",
+            "Perf",
             "Contributors",
         },
     }, Module)
@@ -67,8 +67,8 @@ function Module:ExecAll(fn, ...)
         ret[name] = module[fn](module, ...)
 
         if fn == "GiveTime" then
-            if self.modules.Performance then
-                self.modules.Performance:OnFrameExec(name, (os.clock() * 1000) - startTime)
+            if self.modules.Perf then
+                self.modules.Perf:OnFrameExec(name, (os.clock() * 1000) - startTime)
             end
         end
     end
