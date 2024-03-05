@@ -863,6 +863,7 @@ local _ClassConfig = {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
+                    (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
                     RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
             end,
         },
@@ -873,13 +874,16 @@ local _ClassConfig = {
                 local groupIds = { mq.TLO.Me.ID(), }
                 local count = mq.TLO.Group.Members()
                 for i = 1, count do
-                    table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                    local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+                    if RGMercUtils.GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
+                        table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                    end
                 end
-                return
-                    groupIds
+                return groupIds
             end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
+                    (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
                     RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
             end,
         },

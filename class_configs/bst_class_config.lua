@@ -648,10 +648,12 @@ return {
                 local groupIds = { mq.TLO.Me.ID(), }
                 local count = mq.TLO.Group.Members()
                 for i = 1, count do
-                    table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                    local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+                    if RGMercUtils.GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
+                        table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                    end
                 end
-                return
-                    groupIds
+                return groupIds
             end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
@@ -1038,7 +1040,7 @@ return {
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     local targetClass = target.Class.ShortName()
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
-                    RGMercUtils.SpellStacksOnTarget(spell)
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1058,7 +1060,7 @@ return {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
-                    RGMercUtils.SpellStacksOnTarget(spell)
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1078,7 +1080,7 @@ return {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
-                    RGMercUtils.SpellStacksOnTarget(spell)
+                        RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
         },

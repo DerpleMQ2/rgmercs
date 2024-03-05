@@ -1383,8 +1383,8 @@ local _ClassConfig = {
         ['UseRegenAura']     = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = false, },
         ['UseDynamicMelody'] = { DisplayName = "Use Dynamic Melody", Category = "Combat", Tooltip = Tooltips.UseMelody, Default = true, Advanced = true, },
 
-        ['UseEpic']          = { DisplayName = "Use Epic Click", Category = "Burns", Tooltip = "Use Epic 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always', }, Default = 1, Min = 1, Max = 3, },
-        ['UseFierceEye']     = { DisplayName = "Use Fierce Eye", Category = "Burns", Tooltip = "Use FierceEye 1-Never 2-Burns 3-Always", ComboOptions = { 'Never', 'Burns', 'Always', }, Default = 1, Min = 1, Max = 3, },
+        ['UseEpic']          = { DisplayName = "Use Epic Click", Category = "Burns", Tooltip = "Use Epic 1-Never 2-Burns 3-Always", Type = "Combo", ComboOptions = { 'Never', 'Burns', 'Always', }, Default = 1, Min = 1, Max = 3, },
+        ['UseFierceEye']     = { DisplayName = "Use Fierce Eye", Category = "Burns", Tooltip = "Use FierceEye 1-Never 2-Burns 3-Always", Type = "Combo", ComboOptions = { 'Never', 'Burns', 'Always', }, Default = 1, Min = 1, Max = 3, },
         ['UseFuneralDirge']  = { DisplayName = "Use Funeral Dirge", Category = "Burns", Tooltip = "Use Funeral Dirge", Default = true, },
 
         ['UseAlliance']      = { DisplayName = "Use Alliance", Category = "Combat", Tooltip = Tooltips.AllianceSong, Default = false, },
