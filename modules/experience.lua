@@ -128,10 +128,51 @@ function Module:ClearStats()
             Gained = 0,
         },
     }
+
+    self.XPEvents = {}
 end
 
 function Module:ShouldRender()
     return true
+end
+
+function Module:RenderShaded(type, currentData, otherData, multiplier)
+    if currentData then
+        local offset = currentData.expEvents.Offset - 1
+        local count = #currentData.expEvents.DataY
+
+        if RGMercUtils.GetSetting('ExpPlotFillLines') then
+            ImPlot.PlotShaded(type,
+                function(n)
+                    local pos = ((offset + n) % count) + 1
+                    return ImPlotPoint(currentData.expEvents.DataX[pos], currentData.expEvents.DataY[pos] * multiplier)
+                end,
+                function(n)
+                    local pos = ((offset + n) % count) + 1
+                    local lowerBound = 0
+                    if otherData and otherData.expEvents and otherData.expEvents.DataY[pos] and otherData.expEvents.DataY[pos] < currentData.expEvents.DataY[pos] then
+                        lowerBound = otherData.expEvents.DataY[pos]
+                    end
+                    return ImPlotPoint(currentData.expEvents.DataX[pos], lowerBound)
+                end,
+                count,
+                ImPlotShadedFlags.None)
+        end
+        ImPlot.PlotLine(type,
+            ---@diagnostic disable-next-line: param-type-mismatch
+            function(n)
+                local pos = ((offset + n) % count) + 1
+
+                if currentData.expEvents.DataY[pos] == nil then
+                    RGMercsLogger.log_error("Exp Plotter requested a plot point that doesn't exist! This should never happen! (o:%d n:%d c:%d p:%d)", offset, n, count, pos)
+                    return ImPlotPoint(0, 0)
+                end
+
+                return ImPlotPoint(currentData.expEvents.DataX[pos], currentData.expEvents.DataY[pos] * multiplier)
+            end,
+            count,
+            ImPlotLineFlags.None)
+    end
 end
 
 function Module:Render()
@@ -143,7 +184,7 @@ function Module:Render()
         self:ClearStats()
     end
 
-    local xpPerSecond = (self.TrackXP.Experience.Total) / (os.clock() - self.TrackXP.StartTime)
+    local xpPerSecond = (self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider) / (os.clock() - self.TrackXP.StartTime)
     if ImGui.BeginTable("ExpStats", 2, bit32.bor(ImGuiTableFlags.Borders)) then
         ImGui.TableNextColumn()
         ImGui.Text("Exp Session Time")
@@ -199,6 +240,7 @@ function Module:Render()
     if self.CurMaxExpPerSec < self.GoalMaxExpPerSec then self.CurMaxExpPerSec = self.CurMaxExpPerSec + 1 end
     if self.CurMaxExpPerSec > self.GoalMaxExpPerSec then self.CurMaxExpPerSec = self.CurMaxExpPerSec - 1 end
 
+
     if ImPlot.BeginPlot("Experience Tracker") then
         if self.settings.GraphMultiplier == 1 then
             ImPlot.SetupAxes("Time (s)", "Exp %")
@@ -208,27 +250,10 @@ function Module:Render()
         ImPlot.SetupAxisLimits(ImAxis.X1, os.clock() - self.settings.ExpSecondsToStore, os.clock(), ImGuiCond.Always)
         ImPlot.SetupAxisLimits(ImAxis.Y1, 1, self.CurMaxExpPerSec, ImGuiCond.Always)
 
-        for _, type in ipairs({ "Exp", "AA", }) do
-            local expData = self.XPEvents[type]
-            if expData then
-                local offset = expData.expEvents.Offset - 1
-                local count = #expData.expEvents.DataY
-                ImPlot.PlotLine(type,
-                    ---@diagnostic disable-next-line: param-type-mismatch
-                    function(n)
-                        local pos = ((offset + n) % count) + 1
-
-                        if expData.expEvents.DataY[pos] == nil then
-                            RGMercsLogger.log_error("Exp Plotter requested a plot point that doesn't exist! This should never happen! (o:%d n:%d c:%d p:%d)", offset, n, count, pos)
-                            return ImPlotPoint(0, 0)
-                        end
-
-                        return ImPlotPoint(expData.expEvents.DataX[pos], expData.expEvents.DataY[pos] * multiplier)
-                    end,
-                    count,
-                    self.settings.ExpPlotFillLines and ImPlotLineFlags.Shaded or ImPlotLineFlags.None)
-            end
-        end
+        ImPlot.PushStyleVar(ImPlotStyleVar.FillAlpha, 0.35)
+        self:RenderShaded("Exp", self.XPEvents.Exp, self.XPEvents.AA, multiplier)
+        self:RenderShaded("AA", self.XPEvents.AA, self.XPEvents.Exp, multiplier)
+        ImPlot.PopStyleVar()
 
         ImPlot.EndPlot()
     end
@@ -299,8 +324,10 @@ function Module:GiveTime(combat_state)
         if self:CheckExpChanged() then
             RGMercsLogger.log_debug("\ayXP Gained: \ag%02.3f%% \aw|| \ayXP Total: \ag%02.3f%% \aw|| \ayStart: \am%d \ayCur: \am%d \ayExp/Sec: \ag%2.3f%%",
                 self.TrackXP.Experience.Gained / self.TrackXP.XPTotalDivider,
-                self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider, self.TrackXP.StartTime, os.clock(),
-                self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.StartTime))
+                self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider,
+                self.TrackXP.StartTime,
+                os.clock(),
+                self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider / ((os.clock()) - self.TrackXP.StartTime))
         end
 
         if not self.XPEvents.Exp then
@@ -313,7 +340,7 @@ function Module:GiveTime(combat_state)
 
         self.XPEvents.Exp.lastFrame = os.clock()
         ---@diagnostic disable-next-line: undefined-field
-        self.XPEvents.Exp.expEvents:AddPoint(os.clock(), (self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.StartTime)))
+        self.XPEvents.Exp.expEvents:AddPoint(os.clock(), (self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.StartTime)) * 10)
 
         if mq.TLO.Me.PctAAExp() > 0 and self:CheckAAExpChanged() then
             RGMercsLogger.log_debug("\ayAA Gained: \ag%2.2f%% \aw|| \ayAA Total: \ag%2.2f%%", self.TrackXP.AAExperience.Gained / self.TrackXP.XPTotalDivider,
