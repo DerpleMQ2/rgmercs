@@ -143,6 +143,7 @@ function Module:Render()
         self:ClearStats()
     end
 
+    local xpPerSecond = (self.TrackXP.Experience.Total) / (os.clock() - self.TrackXP.StartTime)
     if ImGui.BeginTable("ExpStats", 2, bit32.bor(ImGuiTableFlags.Borders)) then
         ImGui.TableNextColumn()
         ImGui.Text("Exp Session Time")
@@ -159,12 +160,15 @@ function Module:Render()
         ImGui.TableNextColumn()
         ImGui.Text("Exp / Min")
         ImGui.TableNextColumn()
-        ImGui.Text(string.format("%2.3f%%", ((self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider) / (os.clock() - self.TrackXP.StartTime)) * 60))
+        ImGui.Text(string.format("%2.3f%%", xpPerSecond * 60))
+        ImGui.TableNextColumn()
+        ImGui.Text("Exp / Hr")
+        ImGui.TableNextColumn()
+        ImGui.Text(string.format("%2.3f%%", xpPerSecond * 3600))
         ImGui.TableNextColumn()
         ImGui.Text("Time To Level")
         ImGui.TableNextColumn()
         local xpToNextLevel = self.TrackXP.XPTotalPerLevel - mq.TLO.Me.Exp()
-        local xpPerSecond = (self.TrackXP.Experience.Total) / (os.clock() - self.TrackXP.StartTime)
         local secondsToLevel = xpToNextLevel / xpPerSecond
         ImGui.Text(string.format("%s", xpPerSecond <= 0 and "<Unknown>" or RGMercUtils.FormatTime(secondsToLevel, "%d Days %d Hours %d Mins")))
         ImGui.TableNextColumn()
@@ -204,8 +208,6 @@ function Module:Render()
         ImPlot.SetupAxisLimits(ImAxis.X1, os.clock() - self.settings.ExpSecondsToStore, os.clock(), ImGuiCond.Always)
         ImPlot.SetupAxisLimits(ImAxis.Y1, 1, self.CurMaxExpPerSec, ImGuiCond.Always)
 
-
-
         for _, type in ipairs({ "Exp", "AA", }) do
             local expData = self.XPEvents[type]
             if expData then
@@ -214,8 +216,10 @@ function Module:Render()
                 ImPlot.PlotLine(type,
                     ---@diagnostic disable-next-line: param-type-mismatch
                     function(n)
-                        local pos = (offset + n) % count
+                        local pos = (((offset) + (n)) % count) + 1
+
                         if expData.expEvents.DataY[pos] == nil then
+                            RGMercsLogger.log_error("Exp Plotter requested a plot point that doesn't exist! This should never happen! (o:%d n:%d c:%d p:%d)", offset, n, count, pos)
                             return ImPlotPoint(0, 0)
                         end
 
