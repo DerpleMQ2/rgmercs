@@ -64,13 +64,14 @@ function Utils.TableContains(t, value)
 end
 
 ---@param time integer # in seconds
+---@param formatString string? # in seconds
 ---@return string
-function Utils.FormatTime(time)
+function Utils.FormatTime(time, formatString)
     local days = math.floor(time / 86400)
     local hours = math.floor((time % 86400) / 3600)
     local minutes = math.floor((time % 3600) / 60)
     local seconds = math.floor((time % 60))
-    return string.format("%d:%02d:%02d:%02d", days, hours, minutes, seconds)
+    return string.format(formatString and formatString or "%d:%02d:%02d:%02d", days, hours, minutes, seconds)
 end
 
 ---@param msg string
