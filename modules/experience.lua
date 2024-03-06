@@ -216,7 +216,7 @@ function Module:Render()
                 ImPlot.PlotLine(type,
                     ---@diagnostic disable-next-line: param-type-mismatch
                     function(n)
-                        local pos = (((offset) + (n)) % count) + 1
+                        local pos = ((offset + n) % count) + 1
 
                         if expData.expEvents.DataY[pos] == nil then
                             RGMercsLogger.log_error("Exp Plotter requested a plot point that doesn't exist! This should never happen! (o:%d n:%d c:%d p:%d)", offset, n, count, pos)
