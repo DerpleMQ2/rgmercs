@@ -212,7 +212,7 @@ function Module:Render()
             local expData = self.XPEvents[type]
             if expData then
                 local offset = expData.expEvents.Offset - 1
-                local count = #expData.expEvents.DataX
+                local count = #expData.expEvents.DataY
                 ImPlot.PlotLine(type,
                     ---@diagnostic disable-next-line: param-type-mismatch
                     function(n)
