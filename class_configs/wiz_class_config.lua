@@ -35,6 +35,15 @@ return {
             "Dissident Fire",
             "Dichotomic Fire",
         },
+        ['ComboClaw'] = {
+            -- only here so that the loader does not complain
+        },
+        ['ComboNuke'] = {
+            -- only here so that the loader does not complain
+        },
+        ['ComboEtherealNuke'] = {
+            -- only here so that the loader does not complain
+        },
         ['IceClaw'] = {
             "Claw of the Void",
             "Claw of Gozzrem",
