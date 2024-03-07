@@ -74,6 +74,42 @@ function Utils.FormatTime(time, formatString)
     return string.format(formatString and formatString or "%d:%02d:%02d:%02d", days, hours, minutes, seconds)
 end
 
+function Utils.gsplit(text, pattern, plain)
+    local splitStart, length = 1, #text
+    return function()
+        if splitStart > 0 then
+            local sepStart, sepEnd = string.find(text, pattern, splitStart, plain)
+            local ret
+            if not sepStart then
+                ret = string.sub(text, splitStart)
+                splitStart = 0
+            elseif sepEnd < sepStart then
+                -- Empty separator!
+                ret = string.sub(text, splitStart, sepStart)
+                if sepStart < length then
+                    splitStart = sepStart + 1
+                else
+                    splitStart = 0
+                end
+            else
+                ret = sepStart > splitStart and string.sub(text, splitStart, sepStart - 1) or ''
+                splitStart = sepEnd + 1
+            end
+            return ret
+        end
+    end
+end
+
+function Utils.split(text, pattern, plain)
+    local ret = {}
+    if text ~= nil then
+        for match in Utils.gsplit(text, pattern, plain) do
+            table.insert(ret, match)
+        end
+    end
+    return ret
+end
+
 ---@param msg string
 ---@param ... any
 function Utils.PrintGroupMessage(msg, ...)

@@ -1,5 +1,6 @@
 --- @type Mq
 local mq              = require('mq')
+local RGMercUtils     = require("utils.rgmercs_utils")
 
 local actions         = {}
 
@@ -9,7 +10,7 @@ local logLeaderEnd    = '\ar]\ax\aw >>>'
 --- @type number
 local currentLogLevel = 3
 local logToFileAlways = false
-local logFilter       = nil
+local filters         = {}
 
 function actions.get_log_level() return currentLogLevel end
 
@@ -17,9 +18,11 @@ function actions.set_log_level(level) currentLogLevel = level end
 
 function actions.set_log_to_file(logToFile) logToFileAlways = logToFile end
 
-function actions.set_log_filter(filter) logFilter = filter end
+function actions.set_log_filter(filter)
+	filters = RGMercUtils.split(filter, "|")
+end
 
-function actions.clear_log_filter() logFilter = nil end
+function actions.clear_log_filter() filters = {} end
 
 local logLevels = {
 	['super_verbose'] = { level = 6, header = "\atSUPER\aw-\apVERBOSE\ax", },
@@ -54,8 +57,13 @@ local function log(logLevel, output, ...)
 		mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), fileHeader, fileTracer, fileOutput))
 	end
 
-	if logFilter ~= nil then
-		if callerTracer:find(logFilter) == nil and output:find(logFilter) == nil then return end
+	if #filters > 0 then
+		local found = false
+		for _, logFilter in ipairs(filters) do
+			if callerTracer:find(logFilter) or output:find(logFilter) then found = true end
+		end
+
+		if not found then return end
 	end
 
 	if RGMercsConsole ~= nil then

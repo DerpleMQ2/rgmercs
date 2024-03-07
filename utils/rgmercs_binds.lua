@@ -38,7 +38,7 @@ Bind.Handlers     = {
         end,
     },
     ['setlogfilter'] = {
-        usage = "/rgl setlogfilter <filter>",
+        usage = "/rgl setlogfilter <filter|filter|filter|...>",
         about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging)",
         handler = function(text)
             RGMercsLogger.set_log_filter(text)
