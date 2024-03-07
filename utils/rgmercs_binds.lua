@@ -102,6 +102,44 @@ Bind.Handlers     = {
             RGMercUtils.DoCmd("/dgga /notify RaidWindow RAID_AcceptButton leftmouseup")
         end,
     },
+    ['circle'] = {
+        usage = "/rgl circle <radius>",
+        about = "Will cause all of your Group RGMercs form a circle around you of radius.",
+        handler = function(radius)
+            if not radius then radius = 15 end
+
+            local groupCount = mq.TLO.Group.Members()
+            if groupCount < 1 then return end
+            local multiplier = 90
+
+            if groupCount == 2 then
+                multiplier = 318
+            elseif groupCount == 3 then
+                multiplier = 270
+            elseif groupCount == 4 then
+                multiplier = 245
+            elseif groupCount == 5 then
+                multiplier = 196
+            end
+
+            local myHeading = mq.TLO.Me.Heading.Degrees() - multiplier
+            local baseRadian = 360 / groupCount
+
+            for i = 1, groupCount do
+                local member = mq.TLO.Group.Member(i)
+                if member and member() then
+                    local xMove = math.cos(baseRadian * (i + myHeading))
+                    local yMove = math.sin(baseRadian * (i + myHeading))
+
+                    local xOff = mq.TLO.Me.X() + math.floor(radius * xMove)
+                    local yOff = mq.TLO.Me.Y() + math.floor(radius * yMove)
+
+                    RGMercUtils.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", member.DisplayName(), yOff, xOff, mq.TLO.Me.Z())
+                    RGMercUtils.DoCmd("/dex %s /timed 50 /face %s", member.DisplayName(), mq.TLO.Me.DisplayName())
+                end
+            end
+        end,
+    },
     ['help'] =
     {
         handler = function()
