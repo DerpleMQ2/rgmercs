@@ -806,6 +806,11 @@ local _ClassConfig = {
             {
                 name = "RecourseHeal",
                 type = "Spell",
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    return RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.TargetHasBuff(spell)
+                end,
             },
             {
                 name = "AESpiritualHeal",

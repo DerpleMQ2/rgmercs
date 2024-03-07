@@ -593,7 +593,29 @@ function Module:HealById(id)
                 rotation.name)
             -- since these are ordered by prioirty we can assume we are the best option.
             selectedRotation = rotation
-            break
+
+            self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0, }
+
+            -- If we need to heal others we should wait on the cooldown.
+            RGMercUtils.WaitGlobalCoolDown("Healing: ")
+
+            local newState, wasRun = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
+                self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0,
+                self.CombatState == "Downtime")
+
+            if selectedRotation.state then selectedRotation.state = newState end
+
+            if wasRun and RGMercUtils.GetLastCastResultName() == "CAST_SUCCESS" then
+                RGMercsLogger.log_verbose(
+                    "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \agSuccessful\aw!", id,
+                    rotation.name)
+                break
+            else
+                RGMercsLogger.log_verbose(
+                    "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \arNOT \awSuccessful! Conditions: wasRun(%s) castResult(%s) \ayGoing to keep trying!",
+                    id,
+                    rotation.name, RGMercUtils.BoolToColorString(wasRun), RGMercUtils.GetLastCastResultName())
+            end
         else
             RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \aris NOT\aw appropriate to use.", id,
                 rotation.name)
@@ -605,22 +627,14 @@ function Module:HealById(id)
         RGMercsLogger.log_verbose("\ayHealById(%d):: No appropriate heal rotation found. Bailling.", id)
         return
     end
-
-    self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0, }
-
-    -- If we need to heal others we should wait on the cooldown.
-    RGMercUtils.WaitGlobalCoolDown("Healing: ")
-
-    local newState = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
-        self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0, self.CombatState == "Downtime")
-
-    if selectedRotation.state then selectedRotation.state = newState end
 end
 
 function Module:RunHealRotation()
-    RGMercsLogger.log_verbose("\ao[Heals] Checking MA...")
-    self:HealById(RGMercUtils.GetMainAssistId())
-    RGMercsLogger.log_verbose("\ao[Heals] Checked MA...")
+    RGMercsLogger.log_verbose("\ao[Heals] Checking MA (HPs = %d)...", RGMercUtils.GetMainAssistPctHPs())
+    if RGMercUtils.GetMainAssistPctHPs() < RGMercUtils.GetSetting('MaxHealPoint') then
+        self:HealById(RGMercUtils.GetMainAssistId())
+        RGMercsLogger.log_verbose("\ao[Heals] Checked MA...")
+    end
 
     RGMercsLogger.log_verbose("\ao[Heals] Checking for injured friends...")
     self:HealById(self:FindWorstHurtGroupMember(RGMercUtils.GetSetting('MaxHealPoint')))

@@ -1256,11 +1256,12 @@ end
 ---@param steps integer|nil # number of success steps before we yeild back control - if nil we will run the whole rotation
 ---@param start_step integer|nil # setp to start on
 ---@param bAllowMem boolean # allow memorization of spells
----@return integer
+---@return integer, boolean
 function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem)
     local oldSpellInSlot = mq.TLO.Me.Gem(Utils.UseGem)
     local stepsThisTime  = 0
     local lastStepIdx    = 0
+    local anySuccess     = false
 
     -- This is useful when class config wants to re-check every rotation condition every run
     -- For example, if gem1 meets all condition criteria, it WILL cast repeatedly on every cast
@@ -1279,6 +1280,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
                 if pass == true then
                     local res = Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
                     if res == true then
+                        anySuccess = true
                         stepsThisTime = stepsThisTime + 1
 
                         if steps > 0 and stepsThisTime >= steps then
@@ -1328,7 +1330,7 @@ function Utils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, s
     RGMercsLogger.log_verbose("Ended RunRotation(step(%d), start_step(%d), next(%d))", steps, (start_step or -1),
         lastStepIdx)
 
-    return lastStepIdx
+    return lastStepIdx, anySuccess
 end
 
 ---@param spell MQSpell
@@ -1951,6 +1953,15 @@ function Utils.GetMainAssistId()
 end
 
 function Utils.GetMainAssistPctHPs()
+    local groupMember = mq.TLO.Group.Member(RGMercConfig.Globals.MainAssist)
+    if groupMember and groupMember() then
+        return groupMember.PctHPs()
+    end
+
+    local ret = tonumber(DanNet.observe(RGMercConfig.Globals.MainAssist, "Me.PctHPs", 1000))
+
+    if ret then return ret end
+
     return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist)).PctHPs() or 0
 end
 
