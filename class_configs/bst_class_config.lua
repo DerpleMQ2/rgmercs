@@ -1004,21 +1004,24 @@ return {
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
-                cond = function(self, spell)
+                cond = function(self, spell, target, uiCheck)
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuffByName(spell.RankName())
                 end,
             },
             {
                 name = "ManaRegenBuff",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName())
                 end,
             },
             {
                 name = "AvatarSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell, target, uiCheck)
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
                         RGMercUtils.GetSetting('DoAvatar')
                 end,
