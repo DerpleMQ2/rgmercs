@@ -3,6 +3,7 @@ local mq                 = require('mq')
 local RGMercUtils        = require("utils.rgmercs_utils")
 local Set                = require("mq.Set")
 local RGMercsClassLoader = require('utils.rgmercs_classloader')
+local Icons              = require('mq.Icons')
 require('utils.rgmercs_datatypes')
 
 local Module                                 = { _version = '0.1a', _name = "Class", _author = 'Derple', }
@@ -92,12 +93,12 @@ function Module:LoadSettings()
         end
     end
 
-    Module.TempSettings.RotationStates = {}
-    for i, m in ipairs(self.ClassConfig.RotationOrder or {}) do Module.TempSettings.RotationStates[i] = m end
+    self.TempSettings.RotationStates = {}
+    for i, m in ipairs(self.ClassConfig.RotationOrder or {}) do self.TempSettings.RotationStates[i] = m end
 
     -- these are different since they arent strickly ordered but based on conditions of the target.
-    Module.TempSettings.HealingRotationStates = {}
-    for i, m in pairs(self.ClassConfig.HealRotationOrder or {}) do Module.TempSettings.HealingRotationStates[i] = m end
+    self.TempSettings.HealingRotationStates = {}
+    for i, m in pairs(self.ClassConfig.HealRotationOrder or {}) do self.TempSettings.HealingRotationStates[i] = m end
 
     RGMercsLogger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass,
         RGMercConfig.Globals.CurLoadedChar)
@@ -279,7 +280,7 @@ function Module:Render()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
                     local rotationName = r.name
-                    if ImGui.CollapsingHeader(rotationName) then
+                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name,
                             self.ClassConfig.Rotations[r.name],
@@ -297,7 +298,8 @@ function Module:Render()
                 RGMercUtils.RenderRotationTableKey()
 
                 for _, r in pairs(self.TempSettings.HealingRotationStates) do
-                    if ImGui.CollapsingHeader(r.name) then
+                    local rotationName = r.name
+                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name,
                             self.ClassConfig.HealRotations[r.name],
@@ -316,6 +318,12 @@ end
 
 function Module:ResetRotation()
     for _, v in ipairs(self.TempSettings.RotationStates) do
+        if v.state then
+            v.state = 1
+        end
+    end
+    for _, v in ipairs(self.TempSettings.HealingRotationStates) do
+        RGMercsLogger.log_verbose("HealRotationsState(%s) reset from %d to 1", v.name, v.state)
         if v.state then
             v.state = 1
         end
@@ -556,7 +564,7 @@ end
 
 function Module:HealById(id)
     if id == 0 then return end
-    if not self.ClassConfig.HealRotationOrder then return end
+    if not self.TempSettings.HealingRotationStates then return end
 
     RGMercsLogger.log_verbose("\awHealById(%d)", id)
 
@@ -576,10 +584,11 @@ function Module:HealById(id)
 
     local selectedRotation = nil
 
-    for _, rotation in pairs(self.ClassConfig.HealRotationOrder or {}) do
+    for _, rotation in ipairs(self.TempSettings.HealingRotationStates or {}) do
         RGMercsLogger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id,
             rotation.name)
         if RGMercUtils.SafeCallFunc(string.format("Heal Rotation Condition Check for %s", rotation.name), rotation.cond, self, healTarget) then
+            rotation.lastCondCheck = true
             RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw appropriate to use.", id,
                 rotation.name)
             -- since these are ordered by prioirty we can assume we are the best option.
@@ -588,6 +597,7 @@ function Module:HealById(id)
         else
             RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \aris NOT\aw appropriate to use.", id,
                 rotation.name)
+            rotation.lastCondCheck = false
         end
     end
 
@@ -598,6 +608,9 @@ function Module:HealById(id)
 
     self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0, }
 
+    -- If we need to heal others we should wait on the cooldown.
+    RGMercUtils.WaitGlobalCoolDown("Healing: ")
+
     local newState = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
         self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0, self.CombatState == "Downtime")
 
@@ -605,6 +618,10 @@ function Module:HealById(id)
 end
 
 function Module:RunHealRotation()
+    RGMercsLogger.log_verbose("\ao[Heals] Checking MA...")
+    self:HealById(RGMercUtils.GetMainAssistId())
+    RGMercsLogger.log_verbose("\ao[Heals] Checked MA...")
+
     RGMercsLogger.log_verbose("\ao[Heals] Checking for injured friends...")
     self:HealById(self:FindWorstHurtGroupMember(RGMercUtils.GetSetting('MaxHealPoint')))
 
@@ -726,6 +743,7 @@ function Module:GiveTime(combat_state)
                     -- only do combat with a target.
                     if targetId and targetId > 0 then
                         if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state, mq.TLO.Spawn(targetId)) then
+                            r.lastCondCheck = true
                             RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
                             self.CurrentRotation = { name = r.name, state = r.state or 0, }
                             local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
@@ -733,6 +751,8 @@ function Module:GiveTime(combat_state)
 
                             if r.state then r.state = newState end
                             self.TempSettings.RotationTimers[r.name] = os.clock()
+                        else
+                            r.lastCondCheck = false
                         end
                     end
                 end

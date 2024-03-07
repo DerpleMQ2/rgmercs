@@ -599,11 +599,11 @@ function Utils.SpellLoaded(spell)
     return (mq.TLO.Me.Gem(spell.RankName.Name())() ~= nil)
 end
 
-function Utils.WaitGlobalCoolDown()
+function Utils.WaitGlobalCoolDown(logPrefix)
     while mq.TLO.Me.SpellInCooldown() do
         mq.delay(100)
         mq.doevents()
-        RGMercsLogger.log_verbose("Waiting for Global Cooldown to be ready...")
+        RGMercsLogger.log_verbose(logPrefix and logPrefix or "" .. "Waiting for Global Cooldown to be ready...")
     end
 end
 

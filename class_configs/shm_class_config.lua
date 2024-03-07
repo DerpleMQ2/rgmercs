@@ -888,12 +888,12 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'Splash',
+            name = 'Twin Heal',
             state = 1,
             steps = 1,
-            targetId = function(self) return { RGMercUtils.GetMainAssistId(), } end,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
+                return combat_state == "Combat" and RGMercUtils.GetSetting('DoTwinHeal') and
                     RGMercUtils.IsHealing() and not RGMercUtils.Feigning()
             end,
         },
@@ -929,23 +929,11 @@ local _ClassConfig = {
 
     },
     ['Rotations']         = {
-        ['Splash'] = {
+        ['Twin Heal'] = {
             {
                 name = "TwinHealNuke",
                 type = "Spell",
-                cond = function(self, _)
-                    local targetSpawn = RGMercUtils.GetAutoTarget()
-                    if RGMercUtils.GetTargetDistance(targetSpawn) < RGMercUtils.GetSetting('AssistRange') and
-                        not RGMercUtils.SongActive("Healing Twincast") and RGMercUtils.GetTargetPctHPs(targetSpawn) <= RGMercUtils.GetSetting('AutoAssistAt') then
-                        return true
-                    end
-                    return false
-                end,
-            },
-            {
-                name = "TwinHealNuke",
-                type = "Spell",
-                cond = function(self, _) return RGMercUtils.SongActive("Healing Twincast") end,
+                cond = function(self, _) return not RGMercUtils.SongActive("Healing Twincast") end,
             },
         },
         ['Burn'] = {
@@ -1020,7 +1008,7 @@ local _ClassConfig = {
             {
                 name = "SlowSpell",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return mq.TLO.Me.Gem(spell.RankName.Name())() and RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) end,
             },
             {
                 name = "Turgur's Virulent Swarm",
@@ -1047,7 +1035,7 @@ local _ClassConfig = {
             {
                 name = "DieaseSlow",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) end,
+                cond = function(self, spell) return mq.TLO.Me.Gem(spell.RankName.Name())() and RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) end,
             },
         },
         ['DPS'] = {
@@ -1639,6 +1627,7 @@ local _ClassConfig = {
     },
     ['DefaultConfig']     = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 2, Min = 1, Max = 2, },
+        ['DoTwinHeal']        = { DisplayName = "Cast Twin Heal Nuke", Category = "Spells and Abilities", Tooltip = "Use Twin Heal Nuke Spells", Default = true, },
         ['DoNuke']            = { DisplayName = "Cast Nukes", Category = "Spells and Abilities", Tooltip = "Use Nuke Spells", Default = true, },
         ['DoHOT']             = { DisplayName = "Cast HOTs", Category = "Spells and Abilities", Tooltip = "Use Heal Over Time Spells", Default = true, },
         -- Removing this as it is too confusing to explain when it would  be used.
