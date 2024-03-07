@@ -1379,7 +1379,7 @@ function Utils.SelfBuffPetCheck(spell)
         return false
     end
 
-    return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
+    return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and (not mq.TLO.Me.PetBuff(spell.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
 ---@param spell MQSpell|string
