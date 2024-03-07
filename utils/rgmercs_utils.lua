@@ -1955,12 +1955,12 @@ end
 function Utils.GetMainAssistPctHPs()
     local groupMember = mq.TLO.Group.Member(RGMercConfig.Globals.MainAssist)
     if groupMember and groupMember() then
-        return groupMember.PctHPs()
+        return groupMember.PctHPs() or 0
     end
 
     local ret = tonumber(DanNet.observe(RGMercConfig.Globals.MainAssist, "Me.PctHPs", 1000))
 
-    if ret then return ret end
+    if ret and type(ret) == 'number' then return ret end
 
     return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist)).PctHPs() or 0
 end
