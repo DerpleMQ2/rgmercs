@@ -688,7 +688,7 @@ local _ClassConfig = {
 
             local targetClass = target.Class.ShortName()
 
-            if mq.TLO.Me.CombatState():lower() == "combat" and (targetClass == "dru" or targetClass == "clr" or RGMercUtils.GetSetting('DoBattleRez')) then
+            if RGMercUtils.GetXTHaterCount() > 0 and (targetClass == "dru" or targetClass == "clr" or RGMercUtils.GetSetting('DoBattleRez')) then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
                     return RGMercUtils.UseItem("Staff of Forbidden Rites", corpseId)
                 end
@@ -696,7 +696,7 @@ local _ClassConfig = {
                 if RGMercUtils.AAReady("Call of the Wild") then
                     return RGMercUtils.UseAA("Call of the Wild", corpseId)
                 end
-            else
+            elseif RGMercUtils.GetXTHaterCount() == 0 then
                 if RGMercUtils.CanUseAA("Rejuvenation of Spirit") then
                     return RGMercUtils.UseAA("Rejuvenation of Spirit", corpseId)
                 end

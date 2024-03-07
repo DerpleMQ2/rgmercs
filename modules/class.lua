@@ -398,7 +398,7 @@ function Module:IsRezing()
         return self:IsHealing()
     end
 
-    return self.ClassConfig.ModeChecks.IsRezing() or self:IsHealing()
+    return self.ClassConfig.ModeChecks.IsRezing()
 end
 
 ---@return boolean
