@@ -1239,7 +1239,7 @@ local _ClassConfig = {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "AllianceSpell", },
+                { name = "AllianceSpell", cond = function(self) return RGMercUtils.GetSetting('DoAlliance') end, },
             },
         },
     },
