@@ -15,6 +15,10 @@ Module.MaxStep            = 50
 Module.GoalMaxExpPerSec   = 0
 Module.CurMaxExpPerSec    = 0
 Module.LastExtentsCheck   = os.clock()
+Module.XPPerSecond        = 0
+Module.XPToNextLevel      = 0
+Module.SecondsToLevel     = 0
+Module.TimeToLevel        = "<Unknown>"
 
 Module.TrackXP            = {
     PlayerLevel = mq.TLO.Me.Level(),
@@ -184,7 +188,6 @@ function Module:Render()
         self:ClearStats()
     end
 
-    local xpPerSecond = (self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider) / (os.clock() - self.TrackXP.StartTime)
     if ImGui.BeginTable("ExpStats", 2, bit32.bor(ImGuiTableFlags.Borders)) then
         ImGui.TableNextColumn()
         ImGui.Text("Exp Session Time")
@@ -201,17 +204,15 @@ function Module:Render()
         ImGui.TableNextColumn()
         ImGui.Text("Exp / Min")
         ImGui.TableNextColumn()
-        ImGui.Text(string.format("%2.3f%%", xpPerSecond * 60))
+        ImGui.Text(string.format("%2.3f%%", self.XPPerSecond * 60))
         ImGui.TableNextColumn()
         ImGui.Text("Exp / Hr")
         ImGui.TableNextColumn()
-        ImGui.Text(string.format("%2.3f%%", xpPerSecond * 3600))
+        ImGui.Text(string.format("%2.3f%%", self.XPPerSecond * 3600))
         ImGui.TableNextColumn()
         ImGui.Text("Time To Level")
         ImGui.TableNextColumn()
-        local xpToNextLevel = self.TrackXP.XPTotalPerLevel - mq.TLO.Me.Exp()
-        local secondsToLevel = xpToNextLevel / xpPerSecond
-        ImGui.Text(string.format("%s", xpPerSecond <= 0 and "<Unknown>" or RGMercUtils.FormatTime(secondsToLevel, "%d Days %d Hours %d Mins")))
+        ImGui.Text(string.format("%s", self.TimeToLevel))
         ImGui.TableNextColumn()
         ImGui.Text("AA / Min")
         ImGui.TableNextColumn()
@@ -220,21 +221,6 @@ function Module:Render()
     end
 
     local multiplier = tonumber(self.DefaultConfig.GraphMultiplier.ComboOptions[self.settings.GraphMultiplier])
-    if os.clock() - self.LastExtentsCheck > 0.01 then
-        self.GoalMaxExpPerSec = 0
-        self.LastExtentsCheck = os.clock()
-        for _, expData in pairs(self.XPEvents) do
-            for idx, exp in ipairs(expData.expEvents.DataY) do
-                exp = exp * multiplier
-                -- is this entry visible?
-                local visible = expData.expEvents.DataX[idx] > os.clock() - self.settings.ExpSecondsToStore and
-                    expData.expEvents.DataX[idx] < os.clock()
-                if visible and exp > self.GoalMaxExpPerSec then
-                    self.GoalMaxExpPerSec = (math.ceil(exp / self.MaxStep) * self.MaxStep) * 1.25
-                end
-            end
-        end
-    end
 
     -- converge on new max recalc min and maxes
     if self.CurMaxExpPerSec < self.GoalMaxExpPerSec then self.CurMaxExpPerSec = self.CurMaxExpPerSec + 1 end
@@ -342,6 +328,11 @@ function Module:GiveTime(combat_state)
         ---@diagnostic disable-next-line: undefined-field
         self.XPEvents.Exp.expEvents:AddPoint(os.clock(), (self.TrackXP.Experience.Total / ((os.clock()) - self.TrackXP.StartTime)) * 10)
 
+        self.XPPerSecond    = (self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider) / (os.clock() - self.TrackXP.StartTime)
+        self.XPToNextLevel  = self.TrackXP.XPTotalPerLevel - mq.TLO.Me.Exp()
+        self.SecondsToLevel = self.XPToNextLevel / (self.XPPerSecond * self.TrackXP.XPTotalDivider)
+        self.TimeToLevel    = self.XPPerSecond <= 0 and "<Unknown>" or RGMercUtils.FormatTime(self.SecondsToLevel, "%d Days %d Hours %d Mins")
+
         if mq.TLO.Me.PctAAExp() > 0 and self:CheckAAExpChanged() then
             RGMercsLogger.log_debug("\ayAA Gained: \ag%2.2f%% \aw|| \ayAA Total: \ag%2.2f%%", self.TrackXP.AAExperience.Gained / self.TrackXP.XPTotalDivider,
                 self.TrackXP.AAExperience.Total / self.TrackXP.XPTotalDivider)
@@ -358,6 +349,23 @@ function Module:GiveTime(combat_state)
         self.XPEvents.AA.lastFrame = os.clock()
         ---@diagnostic disable-next-line: undefined-field
         self.XPEvents.AA.expEvents:AddPoint(os.clock(), (self.TrackXP.AAExperience.Total / ((os.clock()) - self.TrackXP.StartTime)))
+    end
+
+    local multiplier = tonumber(self.DefaultConfig.GraphMultiplier.ComboOptions[self.settings.GraphMultiplier])
+    if os.clock() - self.LastExtentsCheck > 0.01 then
+        self.GoalMaxExpPerSec = 0
+        self.LastExtentsCheck = os.clock()
+        for _, expData in pairs(self.XPEvents) do
+            for idx, exp in ipairs(expData.expEvents.DataY) do
+                exp = exp * multiplier
+                -- is this entry visible?
+                local visible = expData.expEvents.DataX[idx] > os.clock() - self.settings.ExpSecondsToStore and
+                    expData.expEvents.DataX[idx] < os.clock()
+                if visible and exp > self.GoalMaxExpPerSec then
+                    self.GoalMaxExpPerSec = (math.ceil(exp / self.MaxStep) * self.MaxStep) * 1.25
+                end
+            end
+        end
     end
 end
 
