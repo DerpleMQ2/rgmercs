@@ -129,7 +129,7 @@ Module.TempSettings.ValidPullAbilities = {}
 
 Module.DefaultConfig                   = {
     ['DoPull']             = { DisplayName = "Enable Pulling", Category = "Pulling", Tooltip = "Enable pulling", Default = false, },
-    ['PullBackwards']      = { DisplayName = "Pull Facing Backwards", Category = "Pulling", Tooltip = "Run back to camp facing the mmob", Default = false, },
+    ['PullBackwards']      = { DisplayName = "Pull Facing Backwards", Category = "Pulling", Tooltip = "Run back to camp facing the mmob", Default = true, },
     ['AutoSetRoles']       = { DisplayName = "Auto Set Roles", Category = "Pulling", Tooltip = "Make yourself MA and Puller when you start pulls.", Default = true, },
     ['PullAbility']        = { DisplayName = "Pull Ability", Category = "Pulling", Tooltip = "What should we pull with?", Default = 1, Type = "Custom", },
     ['PullMode']           = { DisplayName = "Pull Mode", Category = "Pulling", Tooltip = "1 = Normal, 2 = Chain, 3 = Hunt, 4 = Farm", Type = "Custom", Default = 1, Min = 1, Max = 4, },
