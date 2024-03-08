@@ -257,6 +257,15 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Warrior Buffs',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning() and not RGMercUtils.BurnCheck()
+            end,
+        },
+        {
             name = 'DPS',
             state = 1,
             steps = 1,
@@ -608,6 +617,28 @@ local _ClassConfig = {
                 end,
             },
         },
+        ['Warrior Buffs'] = {
+            {
+                name = "groupac",
+                type = "Disc",
+                active_cond = function(self, discSpell)
+                    return RGMercUtils.SongActive(discSpell)
+                end,
+                cond = function(self, discSpell)
+                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell)
+                end,
+            },
+            {
+                name = "groupdodge",
+                type = "Disc",
+                active_cond = function(self, discSpell)
+                    return RGMercUtils.SongActive(discSpell)
+                end,
+                cond = function(self, discSpell)
+                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell)
+                end,
+            },
+        },
         ['Downtime'] = {
             {
                 name = "defenseac",
@@ -627,26 +658,6 @@ local _ClassConfig = {
                 end,
                 cond = function(self, discSpell)
                     return not mq.TLO.Me.Aura(1).ID() and mq.TLO.Me.CombatAbility(discSpell.RankName.Name())() and mq.TLO.Me.PctEndurance() > 10
-                end,
-            },
-            {
-                name = "groupac",
-                type = "Disc",
-                active_cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell)
-                end,
-                cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell)
-                end,
-            },
-            {
-                name = "groupdodge",
-                type = "Disc",
-                active_cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell)
-                end,
-                cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell)
                 end,
             },
             {
