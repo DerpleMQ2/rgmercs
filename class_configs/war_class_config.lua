@@ -396,7 +396,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15 and
-                        not RGMercUtils.SongActive(discSpell.BaseName())
+                        not RGMercUtils.SongActiveByName(discSpell.BaseName())
                 end,
             },
             {
@@ -521,7 +521,7 @@ local _ClassConfig = {
                 name = "Blade Guardian",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCAAReady(aaName) and not RGMercUtils.SongActive(aaName) and RGMercUtils.GetSetting('DoBuffs') and
+                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCAAReady(aaName) and not RGMercUtils.SongActiveByName(aaName) and RGMercUtils.GetSetting('DoBuffs') and
                         not RGMercUtils.GetSetting('DoDefense')
                 end,
             },
@@ -529,8 +529,8 @@ local _ClassConfig = {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.NPCAAReady(aaName) and not RGMercUtils.SongActive(aaName)
-                        and not RGMercUtils.SongActive('Group Bestial Alignment') and RGMercUtils.GetTargetMaxRangeTo() >= RGMercUtils.GetTargetDistance() and
+                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.NPCAAReady(aaName) and not RGMercUtils.SongActiveByName(aaName)
+                        and not RGMercUtils.SongActiveByName('Group Bestial Alignment') and RGMercUtils.GetTargetMaxRangeTo() >= RGMercUtils.GetTargetDistance() and
                         RGMercUtils.GetSetting('DoBuffs') and
                         RGMercUtils.GetSetting('DoBattleLeap')
                 end,
@@ -633,30 +633,30 @@ local _ClassConfig = {
                 name = "groupac",
                 type = "Disc",
                 active_cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell.BaseName())
+                    return RGMercUtils.SongActive(discSpell)
                 end,
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell.BaseName())
+                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell)
                 end,
             },
             {
                 name = "groupdodge",
                 type = "Disc",
                 active_cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell.BaseName())
+                    return RGMercUtils.SongActive(discSpell)
                 end,
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell.BaseName())
+                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell)
                 end,
             },
             {
                 name = "endregen",
                 type = "Disc",
                 active_cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell.BaseName())
+                    return RGMercUtils.SongActive(discSpell)
                 end,
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15 and not RGMercUtils.SongActive(discSpell.BaseName())
+                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15 and not RGMercUtils.SongActive(discSpell)
                 end,
             },
             {

@@ -1058,7 +1058,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self)
                     return RGMercUtils.GetTargetDistance() < RGMercUtils.GetSetting('AssistRange') and
-                        not RGMercUtils.SongActive("Healing Twincast") and
+                        not RGMercUtils.SongActiveByName("Healing Twincast") and
                         RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('AutoAssistAt')
                 end,
             },

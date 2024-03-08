@@ -458,7 +458,7 @@ local _ClassConfig = {
                 name = "FistsWu",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.SongActive(discSpell.RankName() or "None")
+                    return not RGMercUtils.SongActive(discSpell)
                 end,
             },
             {

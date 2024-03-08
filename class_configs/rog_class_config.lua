@@ -363,7 +363,7 @@ return {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.SongActive(discSpell.RankName.Name() or "") and mq.TLO.Me.PctEndurance() < 21
+                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.SongActive(discSpell) and mq.TLO.Me.PctEndurance() < 21
                 end,
             },
             {
@@ -389,7 +389,7 @@ return {
                 name = "Vision",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell.Name())
+                    return RGMercUtils.SongActiveByName(discSpell.Name())
                 end,
             },
             {

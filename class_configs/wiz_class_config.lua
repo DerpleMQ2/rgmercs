@@ -700,15 +700,15 @@ return {
                 name = "Arcane Destruction",
                 type = "AA",
                 cond = function(self)
-                    return not RGMercUtils.SongActive("Frenzied Devastation")
+                    return not RGMercUtils.SongActiveByName("Frenzied Devastation")
                 end,
             },
             {
                 name = "Arcane Fury",
                 type = "AA",
                 cond = function(self)
-                    return (not RGMercUtils.SongActive("Chromatic Haze")) and (not RGMercUtils.SongActive("Gift of Chromatic Haze")) and
-                        ((RGMercUtils.SongActive("Arcane Destruction")) or (RGMercUtils.SongActive("Frenzied Devastation")))
+                    return (not RGMercUtils.SongActiveByName("Chromatic Haze")) and (not RGMercUtils.SongActiveByName("Gift of Chromatic Haze")) and
+                        ((RGMercUtils.SongActiveByName("Arcane Destruction")) or (RGMercUtils.SongActiveByName("Frenzied Devastation")))
                 end,
             },
             {

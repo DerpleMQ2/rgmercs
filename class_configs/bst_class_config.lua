@@ -707,24 +707,24 @@ return {
     },
     ['HelperFunctions']   = {
         BeastialAligmentCheck = function(self)
-            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
-                not RGMercUtils.SongActive('Bestial Alignment') and
+            return not RGMercUtils.SongActiveByName(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
+                not RGMercUtils.SongActiveByName('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness')
         end,
         HHEFuryDiscCheckPrimary = function(self)
-            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
-                not RGMercUtils.SongActive('Bestial Alignment') and
+            return not RGMercUtils.SongActiveByName(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
+                not RGMercUtils.SongActiveByName('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness') and
                 not RGMercUtils.PCAAReady("Bestial Alignment")
         end,
         HHEFuryDiscCheckSecondary = function(self)
-            return RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
-                not RGMercUtils.SongActive('Bestial Alignment') and
+            return RGMercUtils.SongActiveByName(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
+                not RGMercUtils.SongActiveByName('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness')
         end,
         FerociousnessCheck = function(self)
-            return not RGMercUtils.SongActive(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
-                not RGMercUtils.SongActive('Bestial Alignment')
+            return not RGMercUtils.SongActiveByName(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
+                not RGMercUtils.SongActiveByName('Bestial Alignment')
         end,
     },
     ['Rotations']         = {
@@ -842,7 +842,7 @@ return {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell) and
                         spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct())
                 end,
@@ -1006,7 +1006,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuffByName(spell.RankName())
+                    return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
             {
@@ -1014,7 +1014,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName())
+                    return RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
             {
@@ -1022,7 +1022,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.GetSetting('DoAvatar')
                 end,
             },
@@ -1032,7 +1032,7 @@ return {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1042,7 +1042,7 @@ return {
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     local targetClass = target.Class.ShortName()
-                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
@@ -1052,7 +1052,7 @@ return {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1062,7 +1062,7 @@ return {
                     local targetClass = target.Class.ShortName()
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
@@ -1072,7 +1072,7 @@ return {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName()) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1082,7 +1082,7 @@ return {
                     local targetClass = target.Class.ShortName()
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+                    return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
@@ -1209,7 +1209,7 @@ return {
                 name = "PetGrowl",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not RGMercUtils.GetSetting('DoSwarmPet')) and not RGMercUtils.SongActive(spell.RankName())
+                    return (not RGMercUtils.GetSetting('DoSwarmPet')) and not RGMercUtils.SongActiveByName(spell.RankName())
                 end,
             },
         },

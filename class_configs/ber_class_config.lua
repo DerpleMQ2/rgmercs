@@ -550,8 +550,8 @@ return {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActive("Battle Leap Warcry") and
-                        not RGMercUtils.SongActive("Group Bestial Alignment")
+                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActiveByName("Battle Leap Warcry") and
+                        not RGMercUtils.SongActiveByName("Group Bestial Alignment")
                 end,
             },
             {
@@ -595,7 +595,7 @@ return {
                 name = "SharedBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell.RankName())
+                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActiveByName(discSpell.RankName())
                 end,
             },
             {
@@ -678,14 +678,14 @@ return {
                 name = "FrenzyBoost",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.BuffActiveByName(discSpell.Name() or "None")
+                    return not RGMercUtils.BuffActive(discSpell)
                 end,
             },
             {
                 name = "CryDmg",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.SongActive(discSpell.Name() or "None")
+                    return not RGMercUtils.SongActiveByName(discSpell.Name() or "None")
                 end,
             },
             {

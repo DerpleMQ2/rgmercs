@@ -883,6 +883,24 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'GroupBuff',
+            timer = 60, -- only run every 60 seconds top.
+            targetId = function(self)
+                local groupIds = { mq.TLO.Me.ID(), }
+                local count = mq.TLO.Group.Members()
+                for i = 1, count do
+                    local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+                    if RGMercUtils.GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
+                        table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                    end
+                end
+                return groupIds
+            end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
+        },
+        {
             name = 'Burn',
             state = 1,
             steps = 1,
@@ -1158,6 +1176,18 @@ local _ClassConfig = {
                 end,
             },
         },
+        ['GroupBuff'] = {
+            {
+                name = "Rathe",
+                type = "Spell",
+                tooltip = Tooltips.Rathe,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell, target, uiCheck)
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    return RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.TargetHasBuff(spell)
+                end,
+            },
+        },
         ['Burn'] = {
             {
                 name = "Pack Hunt",
@@ -1423,7 +1453,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.EndRegenDisc,
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.SongActive(discSpell.RankName.Name() or "") and mq.TLO.Me.PctEndurance() < 30
+                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.SongActiveByName(discSpell.RankName.Name() or "") and mq.TLO.Me.PctEndurance() < 30
                 end,
             },
         },
@@ -1433,7 +1463,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.GotF,
                 cond = function(self, spell)
-                    return not RGMercUtils.SongActive("Group Guardian of the Forest") and not RGMercUtils.SongActive("Outrider's Accuracy")
+                    return not RGMercUtils.SongActiveByName("Group Guardian of the Forest") and not RGMercUtils.SongActiveByName("Outrider's Accuracy")
                 end,
             },
             {
@@ -1441,7 +1471,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.OA,
                 cond = function(self, spell)
-                    return not RGMercUtils.SongActive("Group Guardian of the Forest") and not RGMercUtils.SongActive("Guardian of the Forest")
+                    return not RGMercUtils.SongActiveByName("Group Guardian of the Forest") and not RGMercUtils.SongActiveByName("Guardian of the Forest")
                 end,
             },
             {
@@ -1449,7 +1479,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.GGotF,
                 cond = function(self, spell)
-                    return not RGMercUtils.SongActive("Guardian of the Forest") and not RGMercUtils.SongActive("Outrider's Accuracy")
+                    return not RGMercUtils.SongActiveByName("Guardian of the Forest") and not RGMercUtils.SongActiveByName("Outrider's Accuracy")
                 end,
             },
             {

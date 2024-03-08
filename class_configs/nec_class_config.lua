@@ -1003,8 +1003,8 @@ local _ClassConfig = {
             --{
             --    name = "BestowBuff",
             --    type = "Spell",
-            --    active_cond = function(self, spell) return RGMercUtils.SongActive(spell.RankName()) end,
-            --    cond = function(self, spell) return not RGMercUtils.SongActive(spell.RankName()) end,
+            --    active_cond = function(self, spell) return RGMercUtils.SongActiveByName(spell.RankName()) end,
+            --    cond = function(self, spell) return not RGMercUtils.SongActiveByName(spell.RankName()) end,
             --},
         },
         ['Downtime'] = {
@@ -1057,15 +1057,15 @@ local _ClassConfig = {
             {
                 name = "Death Bloom",
                 type = "AA",
-                active_cond = function(self, aaName) return RGMercUtils.SongActive(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
+                active_cond = function(self, aaName) return RGMercUtils.SongActiveByName(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
                 cond = function(self, aaName) return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('DeathBloomPercent') end,
             },
             -- Leaving this out because it mems every 60s and thats wonky.
             --{
             --    name = "BestowBuff",
             --    type = "Spell",
-            --    active_cond = function(self, spell) return RGMercUtils.SongActive(spell.RankName()) end,
-            --    cond = function(self, spell) return not RGMercUtils.SongActive(spell.RankName()) end,
+            --    active_cond = function(self, spell) return RGMercUtils.SongActiveByName(spell.RankName()) end,
+            --    cond = function(self, spell) return not RGMercUtils.SongActiveByName(spell.RankName()) end,
             --},
             {
                 name = "PetSpellWar",

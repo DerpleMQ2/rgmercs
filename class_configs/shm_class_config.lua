@@ -938,7 +938,7 @@ local _ClassConfig = {
             {
                 name = "TwinHealNuke",
                 type = "Spell",
-                cond = function(self, _) return not RGMercUtils.SongActive("Healing Twincast") end,
+                cond = function(self, _) return not RGMercUtils.SongActiveByName("Healing Twincast") end,
             },
         },
         ['Burn'] = {
@@ -1047,7 +1047,7 @@ local _ClassConfig = {
             {
                 name = "AESpiritualHeal",
                 type = "Spell",
-                cond = function(self) return RGMercUtils.IsHealing() and RGMercUtils.SongActive("Healing Twincast") end,
+                cond = function(self) return RGMercUtils.IsHealing() and RGMercUtils.SongActiveByName("Healing Twincast") end,
             },
             {
                 name = "MeleeProcBuff",
@@ -1228,7 +1228,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return mq.TLO.Me.Aura(aaName)() ~= nil end,
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoAura') and not RGMercUtils.SongActive(aaName) and
+                    return RGMercUtils.GetSetting('DoAura') and not RGMercUtils.SongActiveByName(aaName) and
                         mq.TLO.Me.Aura(aaName)() == nil
                 end,
             },

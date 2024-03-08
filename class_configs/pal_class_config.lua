@@ -764,8 +764,8 @@ return {
                 name = "Spire of ChivalryValorous Rage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.Level() < 80 and RGMercUtils.AAReady(aaName) and not RGMercUtils.SongActive('Group Armor of the Inquisitor') and
-                        not RGMercUtils.SongActive('Armor of the Inquisitor') and not RGMercUtils.BuffActiveByName('Spire of Chivalry')
+                    return mq.TLO.Me.Level() < 80 and RGMercUtils.AAReady(aaName) and not RGMercUtils.SongActiveByName('Group Armor of the Inquisitor') and
+                        not RGMercUtils.SongActiveByName('Armor of the Inquisitor') and not RGMercUtils.BuffActiveByName('Spire of Chivalry')
                 end,
             },
             {

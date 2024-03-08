@@ -760,7 +760,7 @@ function Utils.UseItem(itemName, targetId)
         return
     end
 
-    if Utils.SongActive(item.Spell.RankName.Name()) then
+    if Utils.SongActive(item.Spell) then
         return
     end
 
@@ -1630,9 +1630,14 @@ function Utils.TargetHasBuff(spell, buffTarget)
     local numEffects = spell.NumEffects()
 
     if (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0 then return true end
+    if (target.FindBuff("id " .. tostring(spell.RankName.ID())).ID() or 0) > 0 then return true end
 
     for i = 1, numEffects do
-        if (target.FindBuff("id " .. tostring(spell.Trigger(i).ID())).ID() or 0) > 0 then return true end
+        local triggerSpell = spell.Trigger(i)
+        if triggerSpell and triggerSpell() then
+            if (target.FindBuff("id " .. tostring(triggerSpell.ID())).ID() or 0) > 0 then return true end
+            if (target.FindBuff("id " .. tostring(triggerSpell.RankName.ID())).ID() or 0) > 0 then return true end
+        end
     end
 
     return false
@@ -1663,17 +1668,17 @@ end
 ---@param spell MQSpell # Must be Targetting Target.
 ---@return boolean
 function Utils.SpellStacksOnMe(spell)
-    local target = mq.TLO.Target
-
     if not spell or not spell() then return false end
-    if not target or not target() then return false end
 
     local numEffects = spell.NumEffects()
 
     if not spell.Stacks() then return false end
 
     for i = 1, numEffects do
-        if not spell.Trigger(i).Stacks() then return false end
+        local triggerSpell = spell.Trigger(i)
+        if triggerSpell and triggerSpell() then
+            if not triggerSpell.Stacks() then return false end
+        end
     end
 
     return true
@@ -3041,15 +3046,34 @@ function Utils.ReagentCheck(spell)
     return true
 end
 
+---@param song MQSpell|buff|fun():string|nil
+---@return boolean
+function Utils.SongActive(song)
+    if not song or not song() then return false end
+
+    if mq.TLO.Me.Song(song.Name()) then return true end
+    if mq.TLO.Me.Song(song.RankName.Name()) then return true end
+
+    return false
+end
+
 ---@param songName string
 ---@return boolean
-function Utils.SongActive(songName)
+function Utils.SongActiveByName(songName)
     if not songName then return false end
     if type(songName) ~= "string" then
         RGMercsLogger.log_error("\arUtils.SongActive was passed a non-string songname! %s", type(songName))
         return false
     end
     return ((mq.TLO.Me.Song(songName).ID() or 0) > 0)
+end
+
+---@param spell MQSpell
+---@return boolean
+function Utils.BuffActive(spell)
+    if not spell or spell() then return false end
+
+    return Utils.TargetHasBuff(spell, mq.TLO.Me)
 end
 
 ---@param buffName string
@@ -3061,7 +3085,7 @@ function Utils.BuffActiveByName(buffName)
         return false
     end
 
-    return Utils.TargetHasBuffByName(buffName, mq.TLO.Me)
+    return Utils.BuffActive(mq.TLO.Spell(buffName))
 end
 
 ---@param buffId integer

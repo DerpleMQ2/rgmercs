@@ -1142,8 +1142,7 @@ local _ClassConfig = {
                 name = "Blessing of Ro",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return not RGMercUtils.TargetHasBuffByName(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).RankName
-                            .Name()) and
+                    return not RGMercUtils.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)) and
                         mq.TLO.FindItemCount(mq.TLO.Me.AltAbility("Blessing of Ro").Spell.Trigger(1).NoExpendReagentID(1)())() >
                         0
                 end,
@@ -1210,7 +1209,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName.Name()) and target and target and
+                    return not RGMercUtils.TargetHasBuff(spell) and target and target and
                         Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", }):contains(target.Class
                             .ShortName())
                 end,
@@ -1220,7 +1219,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName.Name()) and target and target and
+                    return not RGMercUtils.TargetHasBuff(spell) and target and target and
                         RGMercConfig.Constants.RGTank:contains(target.Class.ShortName())
                 end,
             },
@@ -1239,7 +1238,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
-                    return not RGMercUtils.TargetHasBuffByName(spell.RankName.Name()) and target and target and
+                    return not RGMercUtils.TargetHasBuff(spell) and target and target and
                         Set.new({ "SHD", "WAR", }):contains(target.Class.ShortName())
                 end,
             },
@@ -1258,7 +1257,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return true end,
                 cond = function(self, aaName, target)
-                    return not RGMercUtils.TargetHasBuffByName(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name()) and
+                    return not RGMercUtils.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell) and
                         target.ID() == RGMercUtils.GetMainAssistId()
                 end,
             },

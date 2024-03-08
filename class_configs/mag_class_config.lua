@@ -1255,7 +1255,7 @@ _ClassConfig      = {
                 name = "AllianceBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuffByName(self.ResolvedActionMap['AllianceBuff']) and
+                    return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance()
                 end,
             },
@@ -1462,7 +1462,7 @@ _ClassConfig      = {
             --       name = "AllianceBuff",
             --       type = "Spell",
             --      cond = function(self, spell)
-            --           return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuffByName(spell.RankName()) and
+            --           return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuff(spell) and
             --               RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance()
             --       end,
             --    },
@@ -1619,7 +1619,7 @@ _ClassConfig      = {
                 name = "PetManaConv",
                 type = "Spell",
                 cond = function(self, spell)
-                    return spell and spell() and not RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.AutoCast() or "").Name() or "") and mq.TLO.Me.Pet.ID() > 0
+                    return spell and spell() and not RGMercUtils.BuffActive(mq.TLO.Spell(spell.AutoCast() or "")) and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
