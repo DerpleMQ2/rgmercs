@@ -1370,6 +1370,10 @@ return {
         "Xi Thall",
     },
 
+    ["maiden's eye"] = {
+        'Quietus the Forgotten',
+    },
+
     ["mseru"] = {
         "A Giant Lightcrawler",
         "a Recuso Hunte",
