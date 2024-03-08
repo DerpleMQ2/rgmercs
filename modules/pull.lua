@@ -1443,7 +1443,7 @@ function Module:GiveTime(combat_state)
                     elseif pullAbility.Type:lower() == "spell" then
                         local abilityName = pullAbility.AbilityName
                         if type(abilityName) == 'function' then abilityName = abilityName() end
-                        RGMercUtils.UseSpell(abilityName, self.TempSettings.PullID, false)
+                        RGMercUtils.UseSpell(abilityName, self.TempSettings.PullID, false, false, true)
                     elseif pullAbility.Type:lower() == "aa" then
                         local aaName = pullAbility.AbilityName
                         if type(aaName) == 'function' then aaName = aaName() end

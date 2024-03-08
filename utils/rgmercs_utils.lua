@@ -988,8 +988,9 @@ end
 ---@param targetId integer
 ---@param bAllowMem boolean
 ---@param bAllowDead boolean?
+---@param overrideWaitForGlobalCooldown boolean?
 ---@return boolean
-function Utils.UseSpell(spellName, targetId, bAllowMem, bAllowDead)
+function Utils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown)
     local me = mq.TLO.Me
     -- Immediately send bards to the song handler.
     if me.Class.ShortName():lower() == "brd" then
@@ -1098,7 +1099,7 @@ function Utils.UseSpell(spellName, targetId, bAllowMem, bAllowDead)
         Utils.WaitCastFinish(targetSpawn)
 
         -- don't return control until we are done.
-        if Utils.GetSetting('WaitOnGlobalCooldown') then
+        if Utils.GetSetting('WaitOnGlobalCooldown') and not overrideWaitForGlobalCooldown then
             Utils.WaitGlobalCoolDown()
         end
 
