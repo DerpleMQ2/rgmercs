@@ -149,6 +149,7 @@ Module.DefaultConfig                   = {
     ['GroupWatchStopPct']  = { DisplayName = "Group Watch Stop %", Category = "Group Watch", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 40, Min = 1, Max = 100, },
     ['PullHPPct']          = { DisplayName = "Pull HP %", Category = "Group Watch", Tooltip = "Make sure you have at least this much HP %", Default = 60, Min = 1, Max = 100, },
     ['PullManaPct']        = { DisplayName = "Pull Mana %", Category = "Group Watch", Tooltip = "Make sure you have at least this much Mana %", Default = 60, Min = 1, Max = 100, },
+    ['PullEndPct']         = { DisplayName = "Pull End %", Category = "Group Watch", Tooltip = "Make sure you have at least this much Endurance %", Default = 30, Min = 1, Max = 100, },
     ['FarmWayPoints']      = { DisplayName = "Farming Waypoints", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullAllowList']      = { DisplayName = "Allow List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullDenyList']       = { DisplayName = "Deny List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
@@ -662,6 +663,11 @@ function Module:ShouldPull()
     if me.PctHPs() < self.settings.PullHPPct then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctHPs < %d", self.settings.PullHPPct)
         return false, string.format("PctHPs < %d", self.settings.PullHPPct)
+    end
+
+    if me.PctEndurance() < self.settings.PullEndPct then
+        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctEnd < %d", self.settings.PullEndPct)
+        return false, string.format("PctEnd < %d", self.settings.PullEndPct)
     end
 
     if me.MaxMana() > 0 and me.PctMana() < self.settings.PullManaPct then
