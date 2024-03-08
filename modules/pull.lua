@@ -129,13 +129,14 @@ Module.TempSettings.ValidPullAbilities = {}
 
 Module.DefaultConfig                   = {
     ['DoPull']             = { DisplayName = "Enable Pulling", Category = "Pulling", Tooltip = "Enable pulling", Default = false, },
+    ['PullBackwards']      = { DisplayName = "Pull Facing Backwards", Category = "Pulling", Tooltip = "Run back to camp facing the mmob", Default = false, },
     ['AutoSetRoles']       = { DisplayName = "Auto Set Roles", Category = "Pulling", Tooltip = "Make yourself MA and Puller when you start pulls.", Default = true, },
     ['PullAbility']        = { DisplayName = "Pull Ability", Category = "Pulling", Tooltip = "What should we pull with?", Default = 1, Type = "Custom", },
     ['PullMode']           = { DisplayName = "Pull Mode", Category = "Pulling", Tooltip = "1 = Normal, 2 = Chain, 3 = Hunt, 4 = Farm", Type = "Custom", Default = 1, Min = 1, Max = 4, },
     ['ChainCount']         = { DisplayName = "Chain Count", Category = "Pulling", Tooltip = "Number of mobs in chain pull mode on xtarg before we stop pulling", Default = 3, Min = 1, Max = 100, },
     ['PullDelay']          = { DisplayName = "Pull Delay", Category = "Pulling", Tooltip = "Seconds between pulls", Default = 5, Min = 1, Max = 300, },
     ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pull Distance", Tooltip = "Distnace to pull", Default = 350, Min = 1, Max = 10000, },
-    ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pull Distance", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 150, },
+    ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pull Distance", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 350, },
     ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pull Distance", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
     ['PullRadiusHunt']     = { DisplayName = "Pull Radius Hunt", Category = "Pull Distance", Tooltip = "Distnace to pull in Hunt mode from your starting position", Default = 500, Min = 1, Max = 10000, },
     ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
@@ -668,12 +669,12 @@ function Module:ShouldPull()
         return false, string.format("PctMana < %d", self.settings.PullManaPct)
     end
 
-    if RGMercUtils.SongActive("Restless Ice") then
+    if RGMercUtils.SongActiveByName("Restless Ice") then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
         return false, string.format("Restless Ice")
     end
 
-    if RGMercUtils.SongActive("Restless Ice Infection") then
+    if RGMercUtils.SongActiveByName("Restless Ice Infection") then
         RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
         return false, string.format("Ice Infection")
     end
@@ -1466,7 +1467,7 @@ function Module:GiveTime(combat_state)
         -- Nav back to camp.
         self:SetPullState(PullStates.PULL_RETURN_TO_CAMP, string.format("Camp Loc: %0.2f %0.2f %0.2f", start_y, start_x, start_z))
 
-        RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
+        RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, RGMercUtils.GetSetting('PullBackwards') and "facing=backward" or "")
         mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
 
         while mq.TLO.Navigation.Active() and (combat_state == "Downtime" or RGMercUtils.GetXTHaterCount() > 0) do
@@ -1474,7 +1475,7 @@ function Module:GiveTime(combat_state)
             if mq.TLO.Me.State():lower() == "feign" or mq.TLO.Me.Sitting() then
                 RGMercsLogger.log_debug("Standing up to Engage Target")
                 mq.TLO.Me.Stand()
-                RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", start_y, start_x, start_z)
+                RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, RGMercUtils.GetSetting('PullBackwards') and "facing=backward" or "")
                 mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
             end
 
