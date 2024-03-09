@@ -727,6 +727,7 @@ end
 
 ---@param itemName string
 ---@param targetId integer
+---@return boolean
 function Utils.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
@@ -736,38 +737,42 @@ function Utils.UseItem(itemName, targetId)
             mq.delay(10)
             Utils.DoCmd("/stopsong")
         else
-            RGMercsLogger.log_debug("\arCANT Use Item - Casting Window Open")
-            return
+            RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arCANT Use Item - Casting Window Open", itemName or "None")
+            return false
         end
     end
 
     if not itemName then
-        return
+        return false
     end
 
     local item = mq.TLO.FindItem("=" .. itemName)
 
     if not item() then
-        RGMercsLogger.log_debug("\arTried to use item '%s' - but it is not found!", itemName)
-        return
+        RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but it is not found!", itemName)
+        return false
     end
 
     if Utils.BuffActiveByID(item.Clicky.SpellID()) then
-        return
+        RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the clicky buff is already active!", itemName)
+        return false
     end
 
     if Utils.BuffActiveByID(item.Spell.ID()) then
-        return
+        RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the buff is already active!", itemName)
+        return false
     end
 
     if Utils.SongActive(item.Spell) then
-        return
+        RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the song buff is already active: %s!", itemName, item.Spell.Name())
+        return false
     end
 
     Utils.ActionPrep()
 
     if not me.ItemReady(itemName) then
-        return
+        RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but it is not ready!", itemName)
+        return false
     end
 
     local oldTargetId = Utils.GetTargetID()
@@ -776,7 +781,7 @@ function Utils.UseItem(itemName, targetId)
         mq.delay("2s", function() return Utils.GetTargetID() == targetId end)
     end
 
-    RGMercsLogger.log_debug("\aw Using Item \ag %s", itemName)
+    RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): Using Item!", itemName)
 
     local cmd = string.format("/useitem \"%s\"", itemName)
     Utils.DoCmd(cmd)
@@ -814,6 +819,8 @@ function Utils.UseItem(itemName, targetId)
     else
         Utils.DoCmd("/target clear")
     end
+
+    return true
 end
 
 ---@param spell MQSpell
@@ -1141,8 +1148,7 @@ function Utils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
 
         if not itemName then itemName = entry.name end
 
-        Utils.UseItem(itemName, targetId)
-        ret = true
+        ret = Utils.UseItem(itemName, targetId)
     end
 
     -- different from items in that they are configured by the user instead of the class.
@@ -3052,8 +3058,8 @@ end
 function Utils.SongActive(song)
     if not song or not song() then return false end
 
-    if mq.TLO.Me.Song(song.Name()) then return true end
-    if mq.TLO.Me.Song(song.RankName.Name()) then return true end
+    if mq.TLO.Me.Song(song.Name())() then return true end
+    if mq.TLO.Me.Song(song.RankName.Name())() then return true end
 
     return false
 end
