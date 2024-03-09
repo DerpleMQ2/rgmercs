@@ -653,6 +653,15 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Emergency',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() < 70
+            end,
+        },
+        {
             name = 'Burn',
             state = 1,
             steps = 1,
@@ -869,6 +878,20 @@ local _ClassConfig = {
             { name = "T`Vyl's Resolve", type = "AA", tooltip = Tooltips.Tyvls, },
         },
         ['Debuff'] = {},
+        ['Emergency'] = {
+            {
+                name = mq.TLO.Me.Inventory("Chest").Name(),
+                type = "Item",
+                active_cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return item() and RGMercUtils.TargetHasBuff(item.Spell, mq.TLO.Me)
+                end,
+                cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return RGMercUtils.GetSetting('DoChestClick') and item() and RGMercUtils.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
+                end,
+            },
+        },
         ['Combat Maintenance'] = {
             {
                 name = "ActivateShield",
@@ -897,18 +920,7 @@ local _ClassConfig = {
                     return true
                 end,
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
-                type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and RGMercUtils.TargetHasBuff(item.Spell, mq.TLO.Me)
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and RGMercUtils.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0 and mq.TLO.Me.PctHPs() < 70
-                end,
-            },
+
             {
                 name = mq.TLO.Me.Inventory("Charm").Name(),
                 type = "Item",
