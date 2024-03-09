@@ -253,8 +253,8 @@ end
 ---@return boolean
 function RGMercUtils.CanUseAA(aaName)
     local haveAbility = mq.TLO.Me.AltAbility(aaName)()
-    local levelCheck = mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level()
-    local rankCheck = mq.TLO.Me.AltAbility(aaName).Rank() > 0
+    local levelCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level()
+    local rankCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).Rank() > 0
     RGMercsLogger.log_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, RGMercUtils.BoolToColorString(haveAbility),
         RGMercUtils.BoolToColorString(levelCheck), RGMercUtils.BoolToColorString(rankCheck))
     return haveAbility and levelCheck and rankCheck
