@@ -264,7 +264,9 @@ end
 ---@param aaName string
 ---@return boolean
 function RGMercUtils.AAReady(aaName)
-    return RGMercUtils.CanUseAA(aaName) and mq.TLO.Me.AltAbilityReady(aaName)()
+    local ret = RGMercUtils.CanUseAA(aaName) and mq.TLO.Me.AltAbilityReady(aaName)()
+    RGMercsLogger.log_verbose("AAReady(%s): %s", aaName, RGMercUtils.BoolToColorString(ret))
+    return ret
 end
 
 ---@param abilityName string
