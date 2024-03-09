@@ -1096,7 +1096,7 @@ local _ClassConfig = {
         },
         ['DPS'] = {
             {
-                name = "Encroaching Darknesss",
+                name = "Encroaching Darkness",
                 tooltip = Tooltips.EncroachingDarkness,
                 type = "AA",
                 cond = function(self)

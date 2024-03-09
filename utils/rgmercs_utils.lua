@@ -255,7 +255,7 @@ function RGMercUtils.CanUseAA(aaName)
     local haveAbility = mq.TLO.Me.AltAbility(aaName)()
     local levelCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level()
     local rankCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).Rank() > 0
-    RGMercsLogger.log_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, RGMercUtils.BoolToColorString(haveAbility),
+    RGMercsLogger.log_super_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, RGMercUtils.BoolToColorString(haveAbility),
         RGMercUtils.BoolToColorString(levelCheck), RGMercUtils.BoolToColorString(rankCheck))
     return haveAbility and levelCheck and rankCheck
 end
@@ -270,7 +270,7 @@ end
 function RGMercUtils.AAReady(aaName)
     local canUse = RGMercUtils.CanUseAA(aaName)
     local ready = mq.TLO.Me.AltAbilityReady(aaName)()
-    RGMercsLogger.log_verbose("AAReady(%s): ready(%s) canUse(%s)", aaName, RGMercUtils.BoolToColorString(ready), RGMercUtils.BoolToColorString(canUse))
+    RGMercsLogger.log_super_verbose("AAReady(%s): ready(%s) canUse(%s)", aaName, RGMercUtils.BoolToColorString(ready), RGMercUtils.BoolToColorString(canUse))
     return ready and canUse
 end
 
