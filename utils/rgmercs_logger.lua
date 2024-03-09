@@ -60,7 +60,7 @@ local function log(logLevel, output, ...)
 	if #filters > 0 then
 		local found = false
 		for _, logFilter in ipairs(filters) do
-			if callerTracer:find(logFilter) or output:find(logFilter) then found = true end
+			if logFilter:len() > 0 and (callerTracer:find(logFilter) or output:find(logFilter)) then found = true end
 		end
 
 		if not found then return end
