@@ -403,6 +403,16 @@ function Module:Render()
                 RGMercUtils.DoGroupCmd("/rgl campon")
             end
         end
+        ImGui.SameLine()
+        if campData.returnToCamp then
+            if ImGui.Button("Break My Camp", ImGui.GetWindowWidth() * .3, 18) then
+                RGMercUtils.DoCmd("/rgl campoff")
+            end
+        else
+            if ImGui.Button("Set My Camp Here", ImGui.GetWindowWidth() * .3, 18) then
+                RGMercUtils.DoCmd("/rgl campon")
+            end
+        end
         ImGui.PopStyleVar(1)
 
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
