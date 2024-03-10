@@ -2790,13 +2790,6 @@ function RGMercUtils.FindTarget(validateFn)
                 RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
                     assistTarget.ID())
                 RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
-                if not RGMercUtils.IsSpawnXHater(RGMercConfig.Globals.AutoTargetID) then
-                    RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
-                    mq.delay("2s", function() return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID end)
-                    mq.cmd("/xtarget set 1 autohater")
-                    mq.delay(100)
-                    mq.cmd("/xtarget add")
-                end
             end
         else
             ---@diagnostic disable-next-line: undefined-field
@@ -2818,6 +2811,13 @@ function RGMercUtils.FindTarget(validateFn)
 
     RGMercsLogger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", RGMercConfig.Globals.AutoTargetID or 0,
         mq.TLO.Target.ID())
+
+    if RGMercConfig.Globals.AutoTargetID > 0 then
+        local assistSpawn = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
+        if assistSpawn and assistSpawn() and not assistSpawn.Dead() then
+            RGMercUtils.AddXTByName(1, assistSpawn.Name())
+        end
+    end
     if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
         if not validateFn or validateFn(RGMercConfig.Globals.AutoTargetID) then
             RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
@@ -2901,23 +2901,39 @@ function RGMercUtils.IsSpawnXHater(spawnId)
     return false
 end
 
+function RGMercUtils.AddXTByName(slot, name)
+    local spawnToAdd = mq.TLO.Spawn(name)
+    if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
+        RGMercUtils.DoCmd("/xtarget set %d %s", slot, name)
+    end
+end
+
 function RGMercUtils.SetControlToon()
     RGMercsLogger.log_verbose("Checking for best Control Toon")
     if RGMercUtils.GetSetting('AssistOutside') then
         if #RGMercUtils.GetSetting('OutsideAssistList') > 0 then
             local maSpawn = RGMercUtils.GetMainAssistSpawn()
+
+            if maSpawn.ID() > 0 and not maSpawn.Dead() then
+                -- make sure they are still in our XT.
+                RGMercUtils.AddXTByName(2, maSpawn.DisplayName())
+                return
+            end
+
             for _, name in ipairs(RGMercUtils.GetSetting('OutsideAssistList')) do
-                if name == RGMercConfig.Globals.MainAssist and maSpawn.ID() > 0 and not maSpawn.Dead() then return end
                 RGMercsLogger.log_verbose("Testing %s for control", name)
                 local assistSpawn = mq.TLO.Spawn(string.format("PC =%s", name))
 
                 if assistSpawn() and assistSpawn.ID() ~= RGMercUtils.GetMainAssistId() and not assistSpawn.Dead() then
                     RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
-                    --TODO: NOT A VALID BASE CMD RGMercUtils.DoCmd("/squelch /xtarget assist %d", assistSpawn.ID())
                     RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
                     DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
+
+                    RGMercUtils.AddXTByName(2, assistSpawn.DisplayName())
+
                     return
                 elseif assistSpawn() and assistSpawn.ID() == RGMercUtils.GetMainAssistId() and not assistSpawn.Dead() then
+                    RGMercUtils.AddXTByName(2, assistSpawn.DisplayName())
                     return
                 end
             end
