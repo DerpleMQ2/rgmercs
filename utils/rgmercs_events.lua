@@ -115,9 +115,14 @@ local function tooFarHandler()
                 if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
                     RGMercUtils.DoCmd("/squelch /face fast")
 
-                    RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
-                        (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                    RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+                    if RGMercUtils.GetTargetDistance() < 15 then
+                        RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Moving back 15.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0)
+                        RGMercUtils.DoCmd("/stick 15 moveback")
+                    else
+                        RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
+                            (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
+                        RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+                    end
                 end
             end
         end

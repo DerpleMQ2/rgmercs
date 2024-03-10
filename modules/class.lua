@@ -742,6 +742,23 @@ function Module:GiveTime(combat_state)
         self:RunCureRotation()
     end
 
+    if self:IsTanking() and RGMercUtils.GetSetting('MovebackWhenBehind') then
+        -- make sure nothing is behind us when tanking.
+        -- Maybe spawn search is failing us -- look through the xtarget list
+        local xtCount = mq.TLO.Me.XTarget()
+
+        for i = 1, xtCount do
+            local xtSpawn = mq.TLO.Me.XTarget(i)
+            if xtSpawn and xtSpawn() and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
+                RGMercsLogger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
+                    mq.TLO.Me.Heading.Degrees(),
+                    (xtSpawn.Heading.Degrees() or 0))
+                RGMercUtils.DoCmd("/stick moveback 20")
+                mq.delay(500)
+            end
+        end
+    end
+
     -- Downtime rotaiton will just run a full rotation to completion
     for _, r in ipairs(self.TempSettings.RotationStates) do
         RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)

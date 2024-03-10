@@ -1353,6 +1353,8 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
                             break
                         end
                     end
+                else
+                    RGMercsLogger.log_verbose("\aoFailed Condition RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
                 end
             else
                 local res = RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
@@ -2323,6 +2325,49 @@ function RGMercUtils.AutoCampCheck(tempConfig)
     end
 
     if distanceToCamp > 5 then
+        local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
+        if mq.TLO.Navigation.PathExists(navTo)() then
+            RGMercUtils.DoCmd("/nav %s", navTo)
+            mq.delay("2s", function() return mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 end)
+            while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
+                mq.delay(10)
+                mq.doevents()
+            end
+        else
+            RGMercUtils.DoCmd("/moveto loc %d %d|on", tempConfig.AutoCampY, tempConfig.AutoCampX)
+            while mq.TLO.MoveTo.Moving() and not mq.TLO.MoveTo.Stopped() do
+                mq.delay(10)
+                mq.doevents()
+            end
+        end
+    end
+
+    if mq.TLO.Navigation.Active() then
+        RGMercUtils.DoCmd("/nav stop")
+    end
+end
+
+---@param tempConfig table
+function RGMercUtils.CombatCampCheck(tempConfig)
+    if not RGMercUtils.GetSetting('ReturnToCamp') then return end
+
+    if mq.TLO.Me.Casting.ID() and not RGMercUtils.MyClassIs("brd") then return end
+
+    -- chasing a toon dont use camnp.
+    if RGMercUtils.GetSetting('ChaseOn') then return end
+
+    -- camped in a different zone.
+    if tempConfig.CampZoneId ~= mq.TLO.Zone.ID() then return end
+
+    local me = mq.TLO.Me
+
+    local distanceToCampSq = RGMercUtils.GetDistanceSquared(me.Y(), me.X(), tempConfig.AutoCampY, tempConfig.AutoCampX)
+
+    if not RGMercUtils.GetSetting('CampHard') then
+        if distanceToCampSq < RGMercUtils.GetSetting('AutoCampRadius') ^ 2 then return end
+    end
+
+    if distanceToCampSq > 25 then
         local navTo = string.format("locyxz %d %d %d", tempConfig.AutoCampY, tempConfig.AutoCampX, tempConfig.AutoCampZ)
         if mq.TLO.Navigation.PathExists(navTo)() then
             RGMercUtils.DoCmd("/nav %s", navTo)

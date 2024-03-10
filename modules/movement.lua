@@ -473,6 +473,10 @@ function Module:DoAutoCampCheck()
     RGMercUtils.AutoCampCheck(self.TempSettings)
 end
 
+function Module:DoCombatCampCheck()
+    RGMercUtils.CombatCampCheck(self.TempSettings)
+end
+
 function Module:GiveTime(combat_state)
     if mq.TLO.Me.Hovering() and self.settings.ChaseOn then
         if RGMercUtils.GetSetting('BreakOnDeath') then
@@ -533,6 +537,10 @@ function Module:GiveTime(combat_state)
 
     if RGMercUtils.DoCamp() then
         self:DoAutoCampCheck()
+    end
+
+    if (RGMercUtils.IsTanking() and RGMercUtils.GetSetting('MovebackWhenBehind')) and RGMercUtils.IHaveAggro(100) then
+        self:DoCombatCampCheck()
     end
 
     if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
