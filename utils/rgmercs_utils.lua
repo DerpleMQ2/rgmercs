@@ -2720,17 +2720,28 @@ function RGMercUtils.FindTarget(validateFn)
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
         if RGMercUtils.GetSetting('AssistOutside') then
-            local queryResult = DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
-            local assistTarget = mq.TLO.Spawn(queryResult)
-            if queryResult then
-                RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s (%s)",
-                    assistTarget.CleanName() or "None", queryResult)
+            ---@diagnostic disable-next-line: redundant-parameter
+            local peer = mq.TLO.DanNet.Peers(RGMercConfig.Globals.MainAssist)()
+            local assistTarget = nil
+
+            if peer:len() then
+                local queryResult = DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
+                assistTarget = mq.TLO.Spawn(queryResult)
+                if queryResult then
+                    RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s (%s)",
+                        assistTarget.CleanName() or "None", queryResult)
+                end
+            else
+                local assistSpawn = mq.TLO.Spawn(RGMercUtils.GetGroupMainAssistID())
+                if assistSpawn and assistSpawn() and assistSpawn.Aggressive() and (RGMercUtils.TargetIsType("npc", assistSpawn) or RGMercUtils.TargetIsType("npcpet", assistSpawn)) then
+                    RGMercConfig.Globals.AutoTargetID = RGMercUtils.GetGroupMainAssistID()
+                end
             end
 
             RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist,
-                RGMercUtils.BoolToColorString(assistTarget.Aggressive()))
+                RGMercUtils.BoolToColorString(assistTarget and assistTarget.Aggressive() or false))
 
-            if assistTarget() and (RGMercUtils.TargetIsType("npc", assistTarget) or RGMercUtils.TargetIsType("npcpet", assistTarget)) then
+            if assistTarget and assistTarget() and (RGMercUtils.TargetIsType("npc", assistTarget) or RGMercUtils.TargetIsType("npcpet", assistTarget)) then
                 RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
                     assistTarget.ID())
                 RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
@@ -2744,9 +2755,18 @@ function RGMercUtils.FindTarget(validateFn)
             end
         else
             ---@diagnostic disable-next-line: undefined-field
-            RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
-            if RGMercConfig.Globals.AutoTargetID == 0 then
-                RGMercConfig.Globals.AutoTargetID = tonumber(DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)) or 0
+            if mq.TLO.Raid.Members() > 0 then
+                RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(0) and mq.TLO.Me.RaidAssistTarget(0).ID()) or 0)
+                if RGMercConfig.Globals.AutoTargetID == 0 then
+                    RGMercConfig.Globals.AutoTargetID = tonumber(mq.TLO.Me.RaidAssistTarget(0).ID()) or 0
+                end
+            elseif mq.TLO.Group.Members() > 0 then
+                ---@diagnostic disable-next-line: undefined-field
+                RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
+                if RGMercConfig.Globals.AutoTargetID == 0 then
+                    ---@diagnostic disable-next-line: undefined-field
+                    RGMercConfig.Globals.AutoTargetID = tonumber(mq.TLO.Me.GroupAssistTarget.ID()) or 0
+                end
             end
         end
     end
