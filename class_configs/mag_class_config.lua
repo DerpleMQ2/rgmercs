@@ -871,7 +871,14 @@ _ClassConfig      = {
         {
             name = 'Pet Management',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
-            cond = function(self, combat_state) return true end,
+            cond = function(self, combat_state) return combat_state == "Downtime" end,
+        },
+        {
+            name = 'Combat Pet Management',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state) return combat_state ~= "Downtime" end,
         },
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
@@ -1187,7 +1194,7 @@ _ClassConfig      = {
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
             },
             {
-                name = "Pocket Pet",
+                name = "Store Pocket Pet",
                 type = "CustomFunc",
                 active_cond = function(self)
                     return self.TempSettings.PocketPet == true
@@ -1197,22 +1204,6 @@ _ClassConfig      = {
                     return not self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and RGMercUtils.GetXTHaterCount() == 0
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
-            },
-            {
-                name = "Engage Pocket Pet",
-                type = "CustomFunc",
-                cond = function(self)
-                    if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and RGMercUtils.GetXTHaterCount() > 0
-                end,
-                custom_func = function(self)
-                    if not self.TempSettings.Pocket then return false end
-
-                    RGMercUtils.UseAA("Companion's Suspension", 0)
-                    self.TempSettings.PocketPet = false
-
-                    return true
-                end,
             },
             {
                 name = "Drop Cursor Items",
@@ -1225,6 +1216,27 @@ _ClassConfig      = {
                         RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
                         RGMercUtils.DoCmd("/autoinventory")
                     end
+                end,
+            },
+        },
+        ['Combat Pet Management'] = {
+            {
+                name = "Engage Pocket Pet",
+                type = "CustomFunc",
+                active_cond = function(self)
+                    return self.TempSettings.PocketPet == true and mq.TLO.Me.Pet.ID() == 0
+                end,
+                cond = function(self)
+                    if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
+                    return self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetXTHaterCount() > 0
+                end,
+                custom_func = function(self)
+                    RGMercsLogger.log_info("\atPocketPet: \arNo pet while in combat! \agPulling out pocket pet")
+                    RGMercUtils.SetTarget(mq.TLO.Me.ID())
+                    RGMercUtils.UseAA("Companion's Suspension", mq.TLO.Me.ID())
+                    self.TempSettings.PocketPet = false
+
+                    return true
                 end,
             },
         },
