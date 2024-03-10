@@ -1184,7 +1184,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell, target, uiCheck)
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.TargetHasBuff(spell)
+                    return RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.TargetHasBuff(spell) and not RGMercUtils.TargetHasBuffByName("Shared " .. spell.Name())
                 end,
             },
         },

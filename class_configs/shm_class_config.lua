@@ -7,7 +7,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
-        IsRezing = function() return RGMercUtils.GetXTHaterCount() == 0 end,
+        IsRezing = function() return RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Heal',

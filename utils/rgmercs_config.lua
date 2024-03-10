@@ -204,7 +204,7 @@ Config.DefaultConfig = {
 
     -- [ REZ ] --
     ['RetryRezDelay']        = { DisplayName = "Retry Rez Delay", Category = "Rez", Tooltip = "Time in seconds of how often to try to rez a corpse.", Default = 6, Min = 1, Max = 60, ConfigType = "Advanced", },
-    ['DoBattleRez']          = { DisplayName = "Do Battle Rez", Category = "Rez", Tooltip = "Use Rez while in combat", Default = true, ConfigType = "Advanced", },
+    ['DoBattleRez']          = { DisplayName = "Do Battle Rez", Category = "Rez", Tooltip = "Use Rez while in combat", Default = RGMercUtils.MyClassIs("clr"), ConfigType = "Advanced", },
     ['BuffRezables']         = { DisplayName = "Buff Rezables", Category = "Rez", Tooltip = "If this PC has a corpse near us buff them even though they are likely to get rezed.", Default = false, ConfigType = "Advanced", },
 
     -- [ FELLOWSHIP ] --

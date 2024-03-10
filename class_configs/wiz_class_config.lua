@@ -746,7 +746,7 @@ return {
                 name = "A Hole in Space",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > 99 and RGMercUtils.IHaveAggro()
+                    return mq.TLO.Me.PctAggro() > 99 and RGMercUtils.IHaveAggro(100)
                 end,
             },
             {

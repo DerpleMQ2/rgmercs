@@ -1099,7 +1099,7 @@ _ClassConfig      = {
             end
         end,
         pet_management = function(self)
-            if not RGMercConfig:GetSettings().DoPet or (RGMercUtils.CanUseAA("Companion's Suspension)") and not RGMercUtils.AAReady("Companion's Suspension")) then
+            if not RGMercConfig:GetSettings().DoPet or (RGMercUtils.CanUseAA("Companion's Suspension") and not RGMercUtils.AAReady("Companion's Suspension")) then
                 return false
             end
 
@@ -1182,9 +1182,29 @@ _ClassConfig      = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and (self.TempSettings.PocketPet or RGMercUtils.GetXTHaterCount() == 0)
+                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and RGMercUtils.GetXTHaterCount() == 0
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
+            },
+            {
+                name = "Pocket Pet",
+                type = "CustomFunc",
+                active_cond = function(self)
+                    return self.TempSettings.PocketPet == true
+                end,
+                cond = function(self)
+                    if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
+                    return not self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and RGMercUtils.GetXTHaterCount() == 0
+                end,
+                custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
+            },
+            {
+                name = "Companion's Suspension",
+                type = "AA",
+                cond = function(self)
+                    if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
+                    return self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and RGMercUtils.GetXTHaterCount() > 0
+                end,
             },
             {
                 name = "Drop Cursor Items",

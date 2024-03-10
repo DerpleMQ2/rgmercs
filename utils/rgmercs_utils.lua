@@ -2901,11 +2901,45 @@ function RGMercUtils.Feigning()
     return mq.TLO.Me.State():lower() == "feign"
 end
 
+---@return number
+function RGMercUtils.GetHighestAggroPct()
+    local target     = mq.TLO.Target
+    local me         = mq.TLO.Me
+
+    local highestPct = target.PctAggro() or 0
+
+    local xtCount    = mq.TLO.Me.XTarget()
+
+    for i = 1, xtCount do
+        local xtSpawn = mq.TLO.Me.XTarget(i)
+
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
+            if xtSpawn.PctAggro() > highestPct then highestPct = xtSpawn.PctAggro() end
+        end
+    end
+
+    return highestPct
+end
+
+---@param pct number #Pct Aggro Minimum
 ---@return boolean
-function RGMercUtils.IHaveAggro()
+function RGMercUtils.IHaveAggro(pct)
     local target = mq.TLO.Target
     local me     = mq.TLO.Me
-    return (target() and target.AggroHolder() == me.CleanName()) and true or false
+
+    if (target() and target.PctAggro() >= pct) then return true end
+
+    local xtCount = mq.TLO.Me.XTarget()
+
+    for i = 1, xtCount do
+        local xtSpawn = mq.TLO.Me.XTarget(i)
+
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
+            if xtSpawn.PctAggro() >= pct then return true end
+        end
+    end
+
+    return false
 end
 
 ---@return boolean

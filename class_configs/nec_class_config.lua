@@ -675,7 +675,7 @@ local _ClassConfig = {
             name = 'Safety',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and (RGMercUtils.IHaveAggro(RGMercUtils.GetSetting('StartFDPct')) or RGMercUtils.Feigning())
             end,
         },
         {
@@ -704,22 +704,21 @@ local _ClassConfig = {
                 name = "Death Peace",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < 75 and (mq.TLO.Me.PctAggro() > 80 or mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID())
+                    return not RGMercUtils.Feigning() and RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < 75
                 end,
             },
             {
                 name = "Harm Shield",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not RGMercUtils.Feigning() and RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() > 75 and
-                        (mq.TLO.Me.PctAggro() > 80 or mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID())
+                    return not RGMercUtils.Feigning() and RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() >= 75
                 end,
             },
             {
                 name = "Stand Back Up",
                 type = "CustomFunc",
                 cond = function(self)
-                    return RGMercUtils.Feigning() and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
+                    return RGMercUtils.Feigning() and RGMercUtils.GetHighestAggroPct() <= RGMercUtils.GetSetting('StopFDPct')
                 end,
                 custom_func = function(_)
                     RGMercUtils.DoCmd("/stand")
@@ -1251,6 +1250,8 @@ local _ClassConfig = {
         ['DoUnity']           = { DisplayName = "Cast Unity", Category = "Spells and Abilities", Tooltip = "Enable casting Mortifiers Unity.", Default = true, },
         ['DeathBloomPercent'] = { DisplayName = "Death Bloom %", Category = "Spells and Abilities", Tooltip = "Mana % at which to cast Death Bloom", Default = 40, Min = 1, Max = 100, },
         ['DoSnare']           = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
+        ['StartFDPct']        = { DisplayName = "FD Aggro Pct", Category = "Aggro Management", Tooltip = "Aggro % at which to FD", Default = 90, Min = 1, Max = 99, },
+        ['StopFDPct']         = { DisplayName = "Stand Aggro Pct", Category = "Aggro Management", Tooltip = "Aggro % at which to Stand up from FD", Default = 80, Min = 1, Max = 99, },
         ['WakeDeadCorpseCnt'] = { DisplayName = "WtD Corpse Count", Category = "Spells and Abilities", Tooltip = "Number of Corpses before we cast Wake the Dead", Default = 5, Min = 1, Max = 20, },
         ['HPStopDOT']         = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
     },
