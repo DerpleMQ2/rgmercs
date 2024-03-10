@@ -104,7 +104,7 @@ end
 
 function Module:Drag(corpse)
     if corpse and corpse() and corpse.Distance() > 10 then
-        RGMercsLogger.log_debug("Dragging: %s", corpse.DisplayName())
+        RGMercsLogger.log_debug("Dragging: %s (%d)", corpse.DisplayName(), corpse.ID())
         RGMercUtils.SetTarget(corpse.ID())
         RGMercUtils.DoCmd("/corpse")
     end
@@ -135,8 +135,11 @@ function Module:GiveTime(combat_state)
                 local peer = mq.TLO.DanNet.Peers(i)()
                 if peer and peer:len() > 0 then
                     RGMercsLogger.log_debug("Searching corpses for: %s", peer)
-                    local corpse = mq.TLO.Spawn(string.format(corpseSearch, peer))
-                    if corpse and corpse() then
+                    local currentSearch = string.format(corpseSearch, peer)
+                    local numCorpses = mq.TLO.SpawnCount(currentSearch)()
+
+                    for i = numCorpses, 1, -1 do
+                        local corpse = mq.TLO.NearestSpawn(i, currentSearch)
                         self:Drag(corpse)
                     end
                 end

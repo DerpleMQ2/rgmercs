@@ -1372,6 +1372,7 @@ return {
 
     ["maiden's eye"] = {
         'Quietus the Forgotten',
+        "Darkmeat",
     },
 
     ["mseru"] = {
