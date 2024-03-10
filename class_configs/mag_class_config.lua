@@ -1199,11 +1199,19 @@ _ClassConfig      = {
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
             },
             {
-                name = "Companion's Suspension",
-                type = "AA",
+                name = "Engage Pocket Pet",
+                type = "CustomFunc",
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
                     return self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and RGMercUtils.GetXTHaterCount() > 0
+                end,
+                custom_func = function(self)
+                    if not self.TempSettings.Pocket then return false end
+
+                    RGMercUtils.UseAA("Companion's Suspension", 0)
+                    self.TempSettings.PocketPet = false
+
+                    return true
                 end,
             },
             {
