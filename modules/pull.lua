@@ -129,6 +129,7 @@ Module.TempSettings.ValidPullAbilities = {}
 
 Module.DefaultConfig                   = {
     ['DoPull']             = { DisplayName = "Enable Pulling", Category = "Pulling", Tooltip = "Enable pulling", Default = false, },
+    ['StopPullAfterDeath'] = { DisplayName = "Stop Pulling After Death", Category = "Pulling", Tooltip = "Stop pulling after you die and are rezed back.", Default = true, },
     ['PullBackwards']      = { DisplayName = "Pull Facing Backwards", Category = "Pulling", Tooltip = "Run back to camp facing the mmob", Default = true, },
     ['AutoSetRoles']       = { DisplayName = "Auto Set Roles", Category = "Pulling", Tooltip = "Make yourself MA and Puller when you start pulls.", Default = true, },
     ['PullAbility']        = { DisplayName = "Pull Ability", Category = "Pulling", Tooltip = "What should we pull with?", Default = 1, Type = "Custom", },
@@ -449,10 +450,6 @@ function Module:Render()
             ImGui.Text(self.TempSettings.PullStateReason:len() > 0 and self.TempSettings.PullStateReason or "N/A")
             ImGui.PopStyleColor()
             ImGui.TableNextColumn()
-            ImGui.Text("Should Pull")
-            ImGui.TableNextColumn()
-            ImGui.Text(self:ShouldPull() and "Yes" or "No")
-            ImGui.TableNextColumn()
             ImGui.Text("Pull Delay")
             ImGui.TableNextColumn()
             ImGui.Text(RGMercUtils.FormatTime(self.settings.PullDelay))
@@ -666,8 +663,9 @@ function Module:DeleteWayPoint(idx)
     end
 end
 
---- @return boolean, string
-function Module:ShouldPull()
+---@param campData table
+---@return boolean, string
+function Module:ShouldPull(campData)
     local me = mq.TLO.Me
 
     if me.PctHPs() < self.settings.PullHPPct then
@@ -737,6 +735,13 @@ function Module:ShouldPull()
         return false, string.format("XTargetCount(%d) > 0", RGMercUtils.GetXTHaterCount())
     end
 
+    if campData.returnToCamp and RGMercUtils.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius') ^ 2, 200 ^ 2) then
+        RGMercUtils.PrintGroupMessage("I am too far away from camp - Holding pulls!")
+        return false,
+            string.format("I am Too Far (%d) (%d,%d) (%d,%d)", RGMercUtils.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY),
+                me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY)
+    end
+
     return true, ""
 end
 
@@ -764,11 +769,13 @@ end
 ---@param classes table|nil # mq.Set type
 ---@param resourceStartPct number
 ---@param resourceStopPct number
+---@param campData table
 ---@return boolean, string
-function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, campData, returnToCamp)
+function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, campData)
     local groupCount = mq.TLO.Group.Members()
 
     if not groupCount or groupCount == 0 then return true, "" end
+    local maxDist = math.max(RGMercUtils.GetSetting('AutoCampRadius') ^ 2, 200 ^ 2)
 
     for i = 1, groupCount do
         local member = mq.TLO.Group.Member(i)
@@ -799,33 +806,35 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
                     return false, string.format("%s Out of Zone", member.CleanName())
                 end
 
-                if returnToCamp then
-                    if RGMercUtils.GetDistanceSquared(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200 ^ 2) then
+                if campData.returnToCamp then
+                    if RGMercUtils.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
                         RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
-                                RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY), member.X(), member.Y(), campData.AutoCampX,
-                                campData.AutoCampY)
+                                RGMercUtils.GetDistance(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY), member.X(), member.Y(),
+                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampY)
                     end
                 else
                     if (member.Distance() or 0) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
                         RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
-                                RGMercUtils.GetDistance(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY), member.X(), member.Y(), mq.TLO.Me.X(),
+                                RGMercUtils.GetDistance(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY), member.X(), member.Y(),
+                                mq.TLO.Me.X(),
                                 mq.TLO.Me.Y())
                     end
                 end
 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
                     if member.ID() == RGMercUtils.GetMainAssistId() then
-                        if returnToCamp and RGMercUtils.GetDistanceSquared(member.X(), member.Y(), campData.AutoCampX, campData.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200 ^ 2) then
-                            RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(), campData.AutoCampY,
-                                campData.AutoCampX, campData.AutoCampZ, RGMercUtils.GetSetting('AutoCampRadius'))
+                        if campData.returnToCamp and RGMercUtils.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
+                            RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(),
+                                campData.campSettings.AutoCampY,
+                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, RGMercUtils.GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     else
-                        if RGMercUtils.GetDistanceSquared(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200 ^ 2) then
+                        if RGMercUtils.GetDistanceSquared(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > maxDist then
                             RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
                                 RGMercUtils.GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
@@ -1119,7 +1128,7 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    local shouldPull, reason = self:ShouldPull()
+    local shouldPull, reason = self:ShouldPull(campData)
     if not shouldPull then
         if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
             -- go back to camp.
@@ -1146,14 +1155,13 @@ function Module:GiveTime(combat_state)
     self.TempSettings.LastPull = os.clock()
 
     if self.settings.GroupWatch == 2 then
-        local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct,
-            campData.campSettings, campData.returnToCamp)
+        local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
         if not groupReady then
             self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
             return
         end
     elseif self.settings.GroupWatch == 3 then
-        local groupReady, groupReason = self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData.campSettings, campData.returnToCamp)
+        local groupReady, groupReason = self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
         if not groupReady then
             self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
             return
@@ -1537,12 +1545,19 @@ end
 
 function Module:OnDeath()
     -- Death Handler
-    self.settings.DoPull = false
+    if RGMercUtils.GetSetting('StopPullAfterDeath') then
+        self.settings.DoPull = false
+    end
 end
 
 function Module:OnZone()
     -- Zone Handler
-    self.settings.DoPull = false
+    if RGMercUtils.GetSetting('StopPullAfterDeath') then
+        self.settings.DoPull = false
+    else
+        local campData = RGMercModules:ExecModule("Movement", "GetCampData")
+        self.settings.DoPull = campData.returnToCamp and campData.campSettings.CampZoneId == mq.TLO.Zone.ID()
+    end
 end
 
 function Module:DoGetState()
