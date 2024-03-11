@@ -2888,6 +2888,148 @@ function RGMercUtils.DiffXTHaterIDs(t)
     return false
 end
 
+function RGMercUtils.FindWorstHurtManaGroupMember(minMana)
+    local groupSize = mq.TLO.Group.Members()
+    local worstId = mq.TLO.Me.ID()
+    local worstPct = mq.TLO.Me.PctMana() < minMana and mq.TLO.Me.PctMana() or minMana
+
+    RGMercsLogger.log_verbose("\ayChecking for worst HurtMana Group Members. Group Count: %d", groupSize)
+
+    for i = 1, groupSize do
+        local healTarget = mq.TLO.Group.Member(i)
+
+        if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
+            if RGMercConfig.Constants.RGCasters:contains(healTarget.Class.ShortName() or "none") then -- berzerkers have special handing
+                if not healTarget.Dead() and healTarget.PctMana() < worstPct then
+                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                    worstPct = healTarget.PctMana()
+                    worstId = healTarget.ID()
+                end
+            end
+        end
+    end
+
+    if worstId > 0 then
+        RGMercsLogger.log_verbose("\agWorst HurtMana group member id is %d", worstId)
+    else
+        RGMercsLogger.log_verbose("\agNo one is HurtMana!")
+    end
+
+    return worstId
+end
+
+function RGMercUtils.FindWorstHurtGroupMember(minHPs)
+    local groupSize = mq.TLO.Group.Members()
+    local worstId = mq.TLO.Me.ID()
+    local worstPct = mq.TLO.Me.PctHPs() < minHPs and mq.TLO.Me.PctHPs() or minHPs
+
+    RGMercsLogger.log_verbose("\ayChecking for worst Hurt Group Members. Group Count: %d", groupSize)
+
+    for i = 1, groupSize do
+        local healTarget = mq.TLO.Group.Member(i)
+
+        if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
+            if (healTarget.Class.ShortName() or "none"):lower() ~= "ber" then -- berzerkers have special handing
+                if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
+                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                    worstPct = healTarget.PctHPs()
+                    worstId = healTarget.ID()
+                end
+
+                if RGMercUtils.GetSetting('DoPetHeals') then
+                    if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
+                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
+                            healTarget.Pet.DisplayName())
+                        worstPct = healTarget.Pet.PctHPs()
+                        worstId = healTarget.Pet.ID()
+                    end
+                end
+            else
+                RGMercsLogger.log_verbose("\aySkipping %s because they are a zerker", healTarget.DisplayName())
+            end
+        end
+    end
+
+    if worstId > 0 then
+        RGMercsLogger.log_verbose("\agWorst hurt group member id is %d", worstId)
+    else
+        RGMercsLogger.log_verbose("\agNo one is hurt!")
+    end
+
+    return worstId
+end
+
+function RGMercUtils.FindWorstHurtManaXT(minMana)
+    local xtSize = mq.TLO.Me.XTargetSlots()
+    local worstId = 0
+    local worstPct = minMana
+
+    RGMercsLogger.log_verbose("\ayChecking for worst HurtMana XTargs. XT Slot Count: %d", xtSize)
+
+    for i = 1, xtSize do
+        local healTarget = mq.TLO.Me.XTarget(i)
+
+        if healTarget and healTarget() and RGMercUtils.TargetIsType("pc", healTarget) then
+            if RGMercConfig.Constants.RGCasters:contains(healTarget.Class.ShortName()) then -- berzerkers have special handing
+                if not healTarget.Dead() and healTarget.PctMana() < worstPct then
+                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                    worstPct = healTarget.PctMana()
+                    worstId = healTarget.ID()
+                end
+            end
+        end
+    end
+
+    if worstId > 0 then
+        RGMercsLogger.log_verbose("\agWorst HurtMana xtarget id is %d", worstId)
+    else
+        RGMercsLogger.log_verbose("\agNo one is HurtMana!")
+    end
+
+    return worstId
+end
+
+function RGMercUtils.FindWorstHurtXT(minHPs)
+    local xtSize = mq.TLO.Me.XTargetSlots()
+    local worstId = 0
+    local worstPct = minHPs
+
+    RGMercsLogger.log_verbose("\ayChecking for worst Hurt XTargs. XT Slot Count: %d", xtSize)
+
+    for i = 1, xtSize do
+        local healTarget = mq.TLO.Me.XTarget(i)
+
+        if healTarget and healTarget() and RGMercUtils.TargetIsType("pc", healTarget) then
+            if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
+                if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
+                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                    worstPct = healTarget.PctHPs()
+                    worstId = healTarget.ID()
+                end
+
+                if RGMercUtils.GetSetting('DoPetHeals') then
+                    if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
+                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
+                            healTarget.Pet.DisplayName())
+                        worstPct = healTarget.Pet.PctHPs()
+                        worstId = healTarget.Pet.ID()
+                    end
+                end
+            else
+                RGMercsLogger.log_verbose("\aySkipping %s because they are a zerker", healTarget.DisplayName())
+            end
+        end
+    end
+
+    if worstId > 0 then
+        RGMercsLogger.log_verbose("\agWorst hurt xtarget id is %d", worstId)
+    else
+        RGMercsLogger.log_verbose("\agNo one is hurt!")
+    end
+
+    return worstId
+end
+
 ---@param spawnId number
 ---@return boolean
 function RGMercUtils.IsSpawnXHater(spawnId)

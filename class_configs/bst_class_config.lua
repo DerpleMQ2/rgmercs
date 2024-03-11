@@ -669,6 +669,16 @@ return {
             end,
         },
         {
+            name = 'Paragon',
+            targetId = function(self)
+                return { RGMercUtils.FindWorstHurtManaGroupMember(RGMercUtils.GetSetting('ParagonPct')),
+                    RGMercUtils.FindWorstHurtManaXT(RGMercUtils.GetSetting('ParagonPct')), }
+            end,
+            cond = function(self, combat_state)
+                return combat_state ~= "Downtime" and RGMercUtils.GetSetting('DoParagon')
+            end,
+        },
+        {
             name = 'Downtime Pet',
             targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
             cond = function(self, combat_state)
@@ -853,6 +863,22 @@ return {
                 cond = function(self, aaName, target)
                     return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.TargetHasBuffByName(aaName) and
                         (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (RGMercUtils.GetTargetSlowedPct())
+                end,
+            },
+        },
+        ['Paragon'] = {
+            {
+                name = "Focused Paragon of Spirit",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Paragon of Spirit",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
                 end,
             },
         },
@@ -1316,6 +1342,8 @@ return {
     ['DefaultConfig']     = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['DoCombatFero'] = { DisplayName = "Do Combat Fero", Category = "Combat", Tooltip = "Do Combat Fero", Default = true, },
+        ['DoParagon']    = { DisplayName = "Do Paragon", Category = "Combat", Tooltip = "Cast Paragon on lowest mana in Group / XT", Default = true, },
+        ['ParagonPct']   = { DisplayName = "Paragon Min Pct", Category = "Combat", Tooltip = "Minimum mana % before we cast Paragon on someone", Default = 60, Min = 1, Max = 99, },
         ['DoEpic']       = { DisplayName = "Do Epic", Category = "Abilities", Tooltip = "Enable using your epic clicky", Default = true, },
         ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
         ['DoRunSpeed']   = { DisplayName = "Do Run Speed", Category = "Buffs", Tooltip = "Do Run Speed Spells/AAs", Default = true, },
@@ -1329,5 +1357,4 @@ return {
         ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
         ['DoAvatar']     = { DisplayName = "Do Avatar", Category = "Buffs", Tooltip = "Buff Group/Pet with Avatar", Default = true, },
     },
-
 }

@@ -480,88 +480,6 @@ function Module:OOGCheckAndRez()
     end
 end
 
-function Module:FindWorstHurtGroupMember(minHPs)
-    local groupSize = mq.TLO.Group.Members()
-    local worstId = mq.TLO.Me.ID()
-    local worstPct = mq.TLO.Me.PctHPs()
-
-    RGMercsLogger.log_verbose("\ayChecking for worst Hurt Group Members. Group Count: %d", groupSize)
-
-    for i = 1, groupSize do
-        local healTarget = mq.TLO.Group.Member(i)
-
-        if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
-            if (healTarget.Class.ShortName() or "none"):lower() ~= "ber" then -- berzerkers have special handing
-                if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
-                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                    worstPct = healTarget.PctHPs()
-                    worstId = healTarget.ID()
-                end
-
-                if RGMercUtils.GetSetting('DoPetHeals') then
-                    if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
-                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
-                            healTarget.Pet.DisplayName())
-                        worstPct = healTarget.Pet.PctHPs()
-                        worstId = healTarget.Pet.ID()
-                    end
-                end
-            else
-                RGMercsLogger.log_verbose("\aySkipping %s because they are a zerker", healTarget.DisplayName())
-            end
-        end
-    end
-
-    if worstId > 0 then
-        RGMercsLogger.log_verbose("\agWorst hurt group member id is %d", worstId)
-    else
-        RGMercsLogger.log_verbose("\agNo one is hurt!")
-    end
-
-    return worstId
-end
-
-function Module:FindWorstHurtXT(minHPs)
-    local xtSize = mq.TLO.Me.XTargetSlots()
-    local worstId = 0
-    local worstPct = minHPs
-
-    RGMercsLogger.log_verbose("\ayChecking for worst Hurt XTargs. XT Slot Count: %d", xtSize)
-
-    for i = 1, xtSize do
-        local healTarget = mq.TLO.Me.XTarget(i)
-
-        if healTarget and healTarget() and RGMercUtils.TargetIsType("pc", healTarget) then
-            if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
-                if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
-                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                    worstPct = healTarget.PctHPs()
-                    worstId = healTarget.ID()
-                end
-
-                if RGMercUtils.GetSetting('DoPetHeals') then
-                    if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
-                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
-                            healTarget.Pet.DisplayName())
-                        worstPct = healTarget.Pet.PctHPs()
-                        worstId = healTarget.Pet.ID()
-                    end
-                end
-            else
-                RGMercsLogger.log_verbose("\aySkipping %s because they are a zerker", healTarget.DisplayName())
-            end
-        end
-    end
-
-    if worstId > 0 then
-        RGMercsLogger.log_verbose("\agWorst hurt xtarget id is %d", worstId)
-    else
-        RGMercsLogger.log_verbose("\agNo one is hurt!")
-    end
-
-    return worstId
-end
-
 function Module:HealById(id)
     if id == 0 then return end
     if not self.TempSettings.HealingRotationStates then return end
@@ -637,10 +555,10 @@ function Module:RunHealRotation()
     end
 
     RGMercsLogger.log_verbose("\ao[Heals] Checking for injured friends...")
-    self:HealById(self:FindWorstHurtGroupMember(RGMercUtils.GetSetting('MaxHealPoint')))
+    self:HealById(RGMercUtils.FindWorstHurtGroupMember(RGMercUtils.GetSetting('MaxHealPoint')))
 
     if RGMercUtils.GetSetting('AssistOutside') then
-        self:HealById(self:FindWorstHurtXT(RGMercUtils.GetSetting('MaxHealPoint')))
+        self:HealById(RGMercUtils.FindWorstHurtXT(RGMercUtils.GetSetting('MaxHealPoint')))
     end
 
     if mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('MaxHealPoint') then

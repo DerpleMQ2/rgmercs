@@ -411,7 +411,7 @@ function Module:IsValidMezTarget(mobId)
     local spawn = mq.TLO.Spawn(mobId)
 
     -- Is the mob ID in our mez immune list? If so, skip.
-    if self.TempSettings.MezImmune[mobId] ~= nil then
+    if self:IsMezImmune(mobId) then
         RGMercsLogger.log_debug("\ayUpdateMezList: Skipping Mob ID: %d Name: %s Level: %d as it is in our immune list.",
             spawn.ID(), spawn.CleanName(), spawn.Level())
         return false
