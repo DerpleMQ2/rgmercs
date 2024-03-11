@@ -198,11 +198,12 @@ function RGMercUtils.HandleDeath()
         end
     end
 
-    mq.delay("1m", function() return (not mq.TLO.Me.Zoning()) end)
+    mq.delay("2m", function() return (not mq.TLO.Me.Zoning()) end)
 
     RGMercsLogger.log_debug("Done zoning post death.")
 
-    if RGMercUtils.GetSetting('DoFellow') then
+    -- if we want do do fellowship but we arent in the fellowship zone (rezed)
+    if RGMercUtils.GetSetting('DoFellow') and not RGMercModules:ExecModule("Movement", "InCampZone") then
         RGMercsLogger.log_debug("Doing fellowship post death.")
         if mq.TLO.FindItem("Fellowship Registration Insignia").Timer.TotalSeconds() == 0 then
             mq.delay("30s", function() return (mq.TLO.Me.CombatState():lower() == "active") end)

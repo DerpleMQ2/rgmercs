@@ -191,6 +191,11 @@ function Module:GetCampData()
     return { returnToCamp = (self.settings.ReturnToCamp and self.TempSettings.CampZoneId == mq.TLO.Zone.ID()), campSettings = self.TempSettings, }
 end
 
+---@return boolean
+function Module:InCampZone()
+    return self.TempSettings.CampZoneId == mq.TLO.Zone.ID()
+end
+
 function Module:CampOff()
     self.settings.ReturnToCamp = false
     self:SaveSettings(false)
