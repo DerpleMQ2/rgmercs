@@ -160,9 +160,10 @@ local function RGMercsGUI()
                     ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
 
                     -- .. tostring(RGMercConfig.Globals.AutoTargetID))
-                    ImGui.Text("MA: " .. (RGMercUtils.GetMainAssistSpawn().CleanName() or "None"))
+                    ImGui.Text(string.format("MA: %-25s", (RGMercUtils.GetMainAssistSpawn().CleanName() or "None")))
                     if mq.TLO.Target.ID() > 0 and RGMercUtils.TargetIsType("pc") and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
-                        if ImGui.SmallButton("Set MA to Current Target") then
+                        ImGui.SameLine()
+                        if ImGui.SmallButton(string.format("Set MA to %s", RGMercUtils.GetTargetCleanName())) then
                             RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
                             DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
                         end
@@ -309,6 +310,10 @@ local function RGInit(...)
     -- TODO: Can turn this into an options parser later.
     if ... then
         mainAssist = ...
+    end
+
+    if (not mainAssist or mainAssist == "") and mq.TLO.Group.Members() > 0 then
+        mainAssist = mq.TLO.Group.MainAssist.DisplayName()
     end
 
     if not mainAssist or mainAssist == "" then
