@@ -2790,6 +2790,7 @@ function RGMercUtils.FindTarget(validateFn)
                 RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
                     assistTarget.ID())
                 RGMercConfig.Globals.AutoTargetID = assistTarget.ID()
+                RGMercUtils.AddXTByName(1, assistTarget.Name())
             end
         else
             ---@diagnostic disable-next-line: undefined-field
@@ -2812,12 +2813,6 @@ function RGMercUtils.FindTarget(validateFn)
     RGMercsLogger.log_verbose("FindTarget(): FoundTargetID(%d), myTargetId(%d)", RGMercConfig.Globals.AutoTargetID or 0,
         mq.TLO.Target.ID())
 
-    if RGMercConfig.Globals.AutoTargetID > 0 then
-        local assistSpawn = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
-        if assistSpawn and assistSpawn() and not assistSpawn.Dead() then
-            RGMercUtils.AddXTByName(1, assistSpawn.Name())
-        end
-    end
     if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
         if not validateFn or validateFn(RGMercConfig.Globals.AutoTargetID) then
             RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
