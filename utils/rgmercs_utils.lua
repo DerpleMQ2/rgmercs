@@ -2044,7 +2044,9 @@ function RGMercUtils.GetAutoTarget()
 end
 
 function RGMercUtils.GetAutoTargetPctHPs()
-    return mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID)).PctHPs() or 0
+    local autoTarget = RGMercUtils.GetAutoTarget()
+    if not autoTarget or not autoTarget() then return 0 end
+    return autoTarget.PctHPs() or 0
 end
 
 ---@return boolean
