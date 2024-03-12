@@ -108,7 +108,7 @@ local function tooFarHandler()
         if mq.TLO.Me.Moving() then return end
 
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
-            RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav)
+            RGMercUtils.SafeCallFunc("Custom Nav", classConfig.HelperFunctions.combatNav)
         elseif RGMercUtils.GetSetting('DoMelee') then
             RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
             if RGMercUtils.GetSetting('DoAutoEngage') then

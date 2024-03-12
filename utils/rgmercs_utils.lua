@@ -1869,7 +1869,7 @@ end
 
 ---@return boolean
 function RGMercUtils.IsMezzing()
-    return RGMercModules:ExecModule("Class", "IsMezzing")
+    return RGMercModules:ExecModule("Class", "IsMezzing") and RGMercUtils.GetSetting('MezOn')
 end
 
 ---@return boolean
@@ -2041,6 +2041,10 @@ end
 
 function RGMercUtils.GetAutoTarget()
     return mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID))
+end
+
+function RGMercUtils.GetAutoTargetPctHPs()
+    return mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID)).PctHPs() or 0
 end
 
 ---@return boolean
@@ -2293,7 +2297,9 @@ end
 
 ---@return boolean
 function RGMercUtils.DoCamp()
-    return RGMercUtils.GetXTHaterCount() == 0 and RGMercConfig.Globals.AutoTargetID == 0
+    return
+        (RGMercUtils.GetXTHaterCount() == 0 and RGMercConfig.Globals.AutoTargetID == 0) or
+        (not RGMercUtils.IsTanking() and RGMercUtils.GetAutoTargetPctHPs() > RGMercUtils.GetSetting('AssistAt'))
 end
 
 ---@param tempConfig table
