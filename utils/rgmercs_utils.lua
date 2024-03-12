@@ -2301,7 +2301,7 @@ end
 function RGMercUtils.DoCamp()
     return
         (RGMercUtils.GetXTHaterCount() == 0 and RGMercConfig.Globals.AutoTargetID == 0) or
-        (not RGMercUtils.IsTanking() and RGMercUtils.GetAutoTargetPctHPs() > RGMercUtils.GetSetting('AssistAt'))
+        (not RGMercUtils.IsTanking() and RGMercUtils.GetAutoTargetPctHPs() > RGMercUtils.GetSetting('AutoAssistAt'))
 end
 
 ---@param tempConfig table
