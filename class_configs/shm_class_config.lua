@@ -1282,13 +1282,10 @@ local _ClassConfig = {
                 name = "FocusSpell",
                 type = "Spell",
                 active_cond = function(self, spell)
-                    return RGMercUtils.TargetHasBuff(spell)
+                    return RGMercUtils.BuffActive(spell)
                 end,
-                cond = function(self, spell, target, uiCheck)
-                    -- force the target for StacksTarget to work.
-                    if (spell and spell() and ((spell.TargetType() or ""):lower() == "single")) then return false end
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
+                cond = function(self, spell)
+                    return not RGMercUtils.BuffActive(spell) and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
         },
