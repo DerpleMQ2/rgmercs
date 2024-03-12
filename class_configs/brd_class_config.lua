@@ -84,8 +84,8 @@ local function generateSongList()
     end
 
     local function AddCriticalSongs()
-        ConditionallyAddSong("DoAEMez", "MezAESong")
-        ConditionallyAddSong("DoMez", "MezSong")
+        ConditionallyAddSong("UseAEAAMez", "MezAESong")
+        ConditionallyAddSong("MezOn", "MezSong")
         ConditionallyAddSong("DoSlow", "SlowSong")
         ConditionallyAddSong("DoAESlow", "AESlowSong")
         if not RGMercUtils.GetSetting('UseAASelo') then
@@ -863,10 +863,10 @@ local _ClassConfig = {
                 name = "MezAESong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    local setting = RGMercUtils.GetSetting('DoAEMez')
+                    local setting = RGMercUtils.GetSetting('UseAEAAMez')
                     local memmed = RGMercUtils.SongMemed(songSpell)
                     local spellReady = mq.TLO.Me.SpellReady(songSpell)()
-                    local aeMezCt = RGMercUtils.GetSetting("AEMezCount")
+                    local aeMezCt = RGMercUtils.GetSetting("MezAECount")
 
                     local res = setting and memmed and spellReady
                         and RGMercUtils.GetXTHaterCount() >= aeMezCt
@@ -1396,9 +1396,9 @@ local _ClassConfig = {
 
         -- TODO
         --['DoCharm']       = { DisplayName = "Use Charm", Category = "Songs", Tooltip = Tooltips.CharmSong, Default = false },
-        ['DoAEMez']          = { DisplayName = "Do AoE Mez", Category = "Combat", Tooltip = "AEMez", Default = false, },
+        -- in mez config.['DoAEMez']          = { DisplayName = "Do AoE Mez", Category = "Combat", Tooltip = "AEMez", Default = false, },
         ['DoMez']            = { DisplayName = "Do Mez", Category = "Combat", Tooltip = "STMez", Default = false, },
-        ['AEMezCount']       = { DisplayName = "AoE Mez Count", Category = "Combat", Tooltip = "Mob count before AE mez casts", Default = 3, Min = 1, Max = 12, },
+        -- in mez config.['AEMezCount']       = { DisplayName = "AoE Mez Count", Category = "Combat", Tooltip = "Mob count before AE mez casts", Default = 3, Min = 1, Max = 12, },
         --healer
         ['UseResist']        = { DisplayName = "Use Resists", Category = "Heal Songs", Tooltip = Tooltips.ResistSong, Default = false, },
         ['UseReckless']      = { DisplayName = "Use Reckless", Category = "Heal Songs", Tooltip = Tooltips.RecklessSong, Default = false, },

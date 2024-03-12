@@ -1013,8 +1013,6 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         return RGMercUtils.UseSong(spellName, targetId, bAllowMem)
     end
 
-    local cursorIDBefore = mq.TLO.Cursor.ID()
-
     RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, RGMercUtils.BoolToColorString(bAllowMem))
 
     if me.Moving() then
@@ -1121,7 +1119,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
             RGMercUtils.WaitGlobalCoolDown()
         end
 
-        if mq.TLO.Cursor.ID() and mq.TLO.Cursor.ID() ~= cursorIDBefore then
+        if mq.TLO.Cursor.ID() then -- and mq.TLO.Cursor.ID() ~= cursorIDBefore then
             RGMercUtils.DoCmd("/autoinv")
         end
 

@@ -320,6 +320,8 @@ function Module:AEMezCheck()
     -- Bard AE Mez doesn't work like others, it's a PBAE we handle in class config
     if RGMercUtils.MyClassIs("brd") then return end
 
+    if not RGMercUtils.GetSetting('UseAEAAMez') then return end
+
     local mezNPCFilter = string.format("npc radius %d targetable los playerstate 4", self.settings.MezRadius)
     local mezNPCPetFilter = string.format("npcpet radius %d targetable los playerstate 4", self.settings.MezRadius)
     local aeCount = mq.TLO.SpawnCount(mezNPCFilter)() + mq.TLO.SpawnCount(mezNPCPetFilter)()

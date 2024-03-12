@@ -1273,7 +1273,7 @@ _ClassConfig      = {
                     local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
                     if mq.TLO.FindItemCount(baseItem)() >= 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
-                        return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
+                        return RGMercUtils.UseItem(invItem.Name(), RGMercConfig.Globals.AutoTargetID)
                     end
 
                     return false
@@ -1292,7 +1292,7 @@ _ClassConfig      = {
                     local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
                     if mq.TLO.FindItemCount(baseItem)() >= 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
-                        return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Me.ID())
+                        return RGMercUtils.UseItem(invItem.Name(), RGMercConfig.Globals.AutoTargetID)
                     end
 
                     return false
@@ -1425,7 +1425,7 @@ _ClassConfig      = {
                     local baseItem = self.ResolvedActionMap['FireOrbSummon'].RankName.Base(1)() or "None"
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
-                        return RGMercUtils.UseItem(invItem.Name(), mq.TLO.Target.ID())
+                        return RGMercUtils.UseItem(invItem.Name(), RGMercConfig.Globals.AutoTargetID)
                     end
                     return false
                 end,
