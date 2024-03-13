@@ -7,21 +7,25 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version        = "1.0 Beta",
-    _author         = "Derple",
-    ['Modes']       = {
+    _version         = "1.0 Beta",
+    _author          = "Derple",
+    ['Modes']        = {
         'Combo',
         'Fire',
         'Ice',
         'Magic',
     },
-    ['ItemSets']    = {
+    ['OnModeChange'] = function(self, mode)
+        -- if this is enabled the weaves will break.
+        RGMercConfig:GetSettings().WaitOnGlobalCooldown = false
+    end,
+    ['ItemSets']     = {
         ['Epic'] = {
             "Staff of Phenomenal Power",
             "Staff of Prismatic Power",
         },
     },
-    ['AbilitySets'] = {
+    ['AbilitySets']  = {
         ['AllianceSpell'] = {
             "Malarian Mantle",
             "Frostbound Conjunction",
@@ -543,7 +547,7 @@ return {
             "Mana Weave",
         },
     },
-    ['ChatBegList'] = {
+    ['ChatBegList']  = {
         ['WizBegs'] = {
             ['bindme'] = {
                 ['spell'] = "Bind Affinity",
@@ -656,6 +660,8 @@ return {
         },
         {
             name = 'Weaves',
+            state = 1,
+            steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and RGMercUtils.GetSetting('WeaveAANukes') and
@@ -664,6 +670,8 @@ return {
         },
         {
             name = 'Gift of Mana',
+            state = 1,
+            steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and (not RGMercUtils.GetSetting('DoGOMCheck') or RGMercUtils.DetGOMCheck())

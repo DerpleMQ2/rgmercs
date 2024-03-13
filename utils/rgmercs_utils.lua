@@ -1324,11 +1324,20 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
     -- Used for bards to dynamically weave properly
     if rotationTable.doFullRotation then start_step = 1 end
     for idx, entry in ipairs(rotationTable) do
-        if RGMercUtils.ShouldPriorityFollow() then
-            break
-        end
-
         if idx >= start_step then
+            if RGMercConfig.Globals.PauseMain then
+                break
+            end
+
+            if steps == 0 and RGMercUtils.GetXTHaterCount() > 0 then
+                RGMercsLogger.log_verbose("\arStopping Rotation Due to combat!")
+                break
+            end
+
+            if RGMercUtils.ShouldPriorityFollow() then
+                break
+            end
+
             RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             lastStepIdx = idx
             if entry.cond then
@@ -1346,11 +1355,6 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
                         if RGMercConfig.Globals.PauseMain then
                             break
                         end
-
-                        if steps == 0 and RGMercUtils.GetXTHaterCount() > 0 then
-                            RGMercsLogger.log_verbose("\arStopping Rotation Due to combat!")
-                            break
-                        end
                     end
                 else
                     RGMercsLogger.log_verbose("\aoFailed Condition RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
@@ -1361,11 +1365,6 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
                     stepsThisTime = stepsThisTime + 1
 
                     if steps > 0 and stepsThisTime >= steps then
-                        break
-                    end
-
-                    if steps == 0 and RGMercUtils.GetXTHaterCount() > 0 then
-                        RGMercsLogger.log_verbose("\arStopping Rotation Due to combat!")
                         break
                     end
                 end
@@ -2241,9 +2240,12 @@ end
 
 ---@return boolean
 function RGMercUtils.ShouldPriorityFollow()
-    local chaseSpawn = mq.TLO.Spawn("pc =" .. (RGMercUtils.GetSetting('ChaseTarget', true) or "NoOne"))
-    if chaseSpawn() and RGMercUtils.GetSetting('PriorityFollow') and RGMercUtils.GetSetting('ChaseOn') and (mq.TLO.Me.Moving() or (chaseSpawn.Distance() or 0) > RGMercUtils.GetSetting('ChaseDistance')) then
-        return true
+    if RGMercUtils.GetSetting('PriorityFollow') and RGMercUtils.GetSetting('ChaseOn') then
+        local chaseSpawn = mq.TLO.Spawn("pc =" .. (RGMercUtils.GetSetting('ChaseTarget', true) or "NoOne"))
+
+        if (mq.TLO.Me.Moving() or (chaseSpawn() and (chaseSpawn.Distance() or 0) > RGMercUtils.GetSetting('ChaseDistance'))) then
+            return true
+        end
     end
 
     return false

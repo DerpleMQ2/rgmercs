@@ -16,16 +16,18 @@ _ClassConfig      = {
         if mode == "PetTank" then
             RGMercUtils.DoCmd("/pet taunt on")
             RGMercUtils.DoCmd("/pet resume on")
-            RGMercConfig:GetSettings().AutoAssistAt  = 100
-            RGMercConfig:GetSettings().StayOnTarget  = false
-            RGMercConfig:GetSettings().DoAutoEngage  = true
-            RGMercConfig:GetSettings().DoAutoTarget  = true
-            RGMercConfig:GetSettings().AllowMezBreak = true
+            RGMercConfig:GetSettings().AutoAssistAt         = 100
+            RGMercConfig:GetSettings().StayOnTarget         = false
+            RGMercConfig:GetSettings().DoAutoEngage         = true
+            RGMercConfig:GetSettings().DoAutoTarget         = true
+            RGMercConfig:GetSettings().AllowMezBreak        = true
+            RGMercConfig:GetSettings().WaitOnGlobalCooldown = false
         else
             RGMercUtils.DoCmd("/pet taunt off")
             if RGMercUtils.GetSetting('AutoAssistAt') == 100 then
                 RGMercConfig:GetSettings().AutoAssistAt = 98
             end
+            RGMercConfig:GetSettings().WaitOnGlobalCooldown = false
             RGMercConfig:GetSettings().StayOnTarget = true
         end
     end,
@@ -938,10 +940,11 @@ _ClassConfig      = {
         },
         {
             name = 'Weaves',
+            state = 1,
+            steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    mq.TLO.Me.SpellInCooldown()
+                return combat_state == "Combat" and mq.TLO.Me.SpellInCooldown()
             end,
         },
         {
