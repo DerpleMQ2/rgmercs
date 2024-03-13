@@ -664,8 +664,7 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('WeaveAANukes') and
-                    mq.TLO.Me.SpellInCooldown()
+                return combat_state == "Combat" and RGMercUtils.GetSetting('WeaveAANukes') and mq.TLO.Me.SpellInCooldown()
             end,
         },
         {
