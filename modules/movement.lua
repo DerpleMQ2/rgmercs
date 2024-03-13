@@ -15,12 +15,49 @@ Module.TempSettings.LastCmd        = ""
 Module.Constants                   = {}
 Module.Constants.GGHZones          = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
 Module.Constants.CampfireNameToKit = {
-    ['Regular Fellowship'] = 1,
-    ['Empowered Fellowship'] = 2,
-    ['Scaled Wolf'] = 36,
+    ['Regular Fellowship']           = 1,
+    ['Empowered Fellowship']         = 2,
+    ['Empowered Barbarian']          = 3,
+    ['Empowered Dark Elf']           = 4,
+    ['Empowered Dwarf']              = 5,
+    ['Empowered Erudite']            = 6,
+    ['Empowered Gnome']              = 7,
+    ['Empowered Half Elf']           = 8,
+    ['Empowered Halfling']           = 9,
+    ['Empowered High Elf']           = 10,
+    ['Empowered Human']              = 11,
+    ['Empowered Iksar']              = 12,
+    ['Empowered Ogre']               = 13,
+    ['Empowered Troll']              = 14,
+    ['Empowered Vah Shir']           = 15,
+    ['Empowered Woodelf']            = 16,
+    ['Empowered Guktan']             = 17,
+    ['Empowered Drakkin']            = 18,
+    ['Empowered Earthen Elemental']  = 19,
+    ['Empowered Aery Elemental']     = 20,
+    ['Empowered Firey Elemental']    = 21,
+    ['Empowered Aqueous Elemental']  = 22,
+    ['Empowered Spirit Wolf']        = 23,
+    ['Empowered Werewolf']           = 24,
+    ['Empowered Evil Eye']           = 25,
+    ['Empowered Imp']                = 26,
+    ['Empowered Froglok']            = 27,
+    ['Empowered Scarecrow']          = 28,
+    ['Empowered Skeleton']           = 29,
+    ['Empowered Drybone Skeleton']   = 30,
+    ['Empowered Frostbone Skeleton'] = 31,
+    ['Empowered Orc']                = 32,
+    ['Empowered Goblin']             = 33,
+    ['Empowered Sporali']            = 34,
+    ['Empowered Fairy']              = 35,
+    ['Scaled Wolf']                  = 36,
 }
 
-Module.DefaultConfig               = {
+Module.Constants.CampfireTypes     = {}
+for t, _ in pairs(Module.Constants.CampfireNameToKit) do table.insert(Module.Constants.CampfireTypes, t) end
+table.sort(Module.Constants.CampfireTypes)
+
+Module.DefaultConfig     = {
     ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = (RGMercConfig.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60), Min = 10, Max = 300, },
     ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false, },
     ['BreakOnDeath']     = { DisplayName = "Break On Death", Category = "Chase", Tooltip = "Stop chasing when you die.", Default = true, },
@@ -28,11 +65,11 @@ Module.DefaultConfig               = {
     ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
     ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
     ['CampHard']         = { DisplayName = "Camp Hard", Category = "Camp", Tooltip = "Return to Camp Loc Everytime", Default = false, },
-    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; 3: Empowered Fellowship; 4: Scaled Wolf", Type = "Combo", ComboOptions = { 'Off', 'Regular Fellowship', 'Empowered Fellowship', "Scaled Wolf", }, Default = 2, Min = 1, Max = 4, },
+    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; 3: Empowered Fellowship; 4: Scaled Wolf", Type = "Combo", ComboOptions = Module.Constants.CampfireTypes, Default = 2, Min = 1, Max = #Module.Constants.CampfireTypes, },
     ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
 }
 
-Module.CommandHandlers             = {
+Module.CommandHandlers   = {
     chaseon = {
         usage = "/rgl chaseon <name?>",
         about = "Chase your current target or <name>",
@@ -70,7 +107,7 @@ Module.CommandHandlers             = {
     },
 }
 
-Module.DefaultCategories           = Set.new({})
+Module.DefaultCategories = Set.new({})
 for _, v in pairs(Module.DefaultConfig) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
