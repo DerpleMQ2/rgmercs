@@ -436,7 +436,7 @@ function Module:Render()
             ImGui.TableNextColumn()
             local stateData = PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
             local stateColor = stateData and ImGui.GetColorU32(stateData.Color.r or 1.0, stateData.Color.g or 1.0, stateData.Color.b or 1.0, stateData.Color.a or 1.0) or
-            ImGui.GetColorU32(1.0, 1.0, 1.0, 1.0)
+                ImGui.GetColorU32(1.0, 1.0, 1.0, 1.0)
             ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
             if not stateData then
                 ImGui.Text("Invalid State Data... This should auto resolve.")
@@ -1199,7 +1199,7 @@ function Module:GiveTime(combat_state)
             self:SetPullState(PullStates.PULL_MOVING_TO_WP, string.format("WP Id: %d", currentWpId))
             -- TODO: PreNav Actions
             if not self:NavToWaypoint(self:GetWPById(currentWpId)) then
-                self:SetPullState(PullStates.PULL_NAVINTERRUPT, "")
+                self:SetPullState(PullStates.PULL_NAV_INTERRUPT, "")
                 return
             else
                 self:SetPullState(PullStates.PULL_IDLE, "")
@@ -1245,7 +1245,7 @@ function Module:GiveTime(combat_state)
         local wpData = self:GetWPById(self:GetCurrentWpId())
         self:SetPullState(PullStates.PULL_MOVING_TO_WP, string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z))
         if not self:NavToWaypoint(string.format("%0.2f, %0.2f, %0.2f", wpData.y, wpData.x, wpData.z)) then
-            self:SetPullState(PullStates.PULL_NAVINTERRUPT, "")
+            self:SetPullState(PullStates.PULL_NAV_INTERRUPT, "")
             return
         else
             -- TODO: AtWP()
