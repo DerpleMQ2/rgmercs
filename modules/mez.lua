@@ -226,6 +226,7 @@ function Module:MezNow(mezId, useAE, useAA)
     local aeMezSpell = self:GetAEMezSpell()
 
     if useAE then
+        if not aeMezSpell or not aeMezSpell() then return end
         RGMercsLogger.log_debug("Performing AE MEZ --> %d", mezId)
         -- Only Enchanters have an AA AE Mez but we'll prefer the AE Spell if we can.
         -- TODO CHECK IF ITS READY
@@ -261,6 +262,7 @@ function Module:MezNow(mezId, useAE, useAA)
         -- In case they're mez immune
         mq.doevents()
     else
+        if not mezSpell or not mezSpell() then return end
         RGMercsLogger.log_debug("Performing Single Target MEZ --> %d", mezId)
         if useAA and RGMercUtils.MyClassIs("brd") and RGMercUtils.AARank("Dirge of the Sleepwalker") then
             -- Bard AA Mez is Dirge of the Sleepwalker
@@ -453,11 +455,13 @@ end
 function Module:UpdateMezList()
     local searchTypes = { "npc", "npcpet", }
 
+    local mezSpell = self:GetMezSpell()
+
+    if not mezSpell or not mezSpell() then return end
+
     for _, t in ipairs(searchTypes) do
         local minLevel = self.settings.MezMinLevel
         local maxLevel = self.settings.MezMaxLevel
-
-        local mezSpell = self:GetMezSpell()
 
         if self.settings.AutoLevelRange and mezSpell and mezSpell() then
             minLevel = 0
@@ -494,6 +498,8 @@ function Module:ProcessMezList()
     -- we need to mez but our ability is on cooldown.
     RGMercsLogger.log_debug("\ayProcessMezList() :: Loop")
     local mezSpell = self:GetMezSpell()
+
+    if not mezSpell or not mezSpell() then return end
 
     if RGMercUtils.GetTableSize(self.TempSettings.MezTracker) <= 1 then
         -- If we have only one spawn we're tracking, we don't need to be mezzing
@@ -578,7 +584,7 @@ end
 function Module:DoMez()
     local mezSpell = self:GetMezSpell()
     local aeMezSpell = self:GetAEMezSpell()
-    if RGMercUtils.GetXTHaterCount() >= self.settings.MezAECount and
+    if aeMezSpell and aeMezSpell() and RGMercUtils.GetXTHaterCount() >= self.settings.MezAECount and
         ((RGMercUtils.MyClassIs("brd") and self.TempSettings.BardAEMezTimer == 0) or
             (mq.TLO.Me.SpellReady(aeMezSpell)() or RGMercUtils.AAReady("Beam of Slumber"))) then
         self:AEMezCheck()
@@ -590,7 +596,7 @@ function Module:DoMez()
         self:UpdateMezList()
     end
 
-    if (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell)()) and RGMercUtils.GetTableSize(self.TempSettings.MezTracker) >= 1 then
+    if mezSpell and mezSpell() and (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell)()) and RGMercUtils.GetTableSize(self.TempSettings.MezTracker) >= 1 then
         self:ProcessMezList()
     end
 end
