@@ -3134,7 +3134,7 @@ function RGMercUtils.IHaveAggro(pct)
     local target = mq.TLO.Target
     local me     = mq.TLO.Me
 
-    if (target() and target.PctAggro() >= pct) then return true end
+    if (target() and (target.PctAggro() or 0) >= pct) then return true end
 
     local xtCount = mq.TLO.Me.XTarget()
 
