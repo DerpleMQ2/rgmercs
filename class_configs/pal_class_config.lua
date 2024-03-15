@@ -655,32 +655,41 @@ return {
             {
                 name = "WaveHeal",
                 type = "Spell",
-                cond = function(self, _) return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
+                active_cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName)
+                    if mq.TLO.Group() then return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end
+                end,
             },
             {
                 name = "WaveHeal2",
                 type = "Spell",
-                cond = function(self, _) return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
+                active_cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName)
+                    if mq.TLO.Group() then return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end
+                end,
             },
             {
                 name = "Aurora",
                 type = "Spell",
-                cond = function(self, _) return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
+                active_cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName)
+                    if mq.TLO.Group() then return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end
+                end,
             },
             {
                 name = "Gift of Life",
                 type = "AA",
+                active_cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
                 cond = function(self, aaName)
-                    return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') and
-                        RGMercUtils.AAReady(aaName)
+                    if mq.TLO.Group() then return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end
                 end,
             },
             {
                 name = "Hand of Piety",
                 type = "AA",
+                active_cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
                 cond = function(self, aaName)
-                    return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') and
-                        RGMercUtils.AAReady(aaName)
+                    if mq.TLO.Group() then return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end
                 end,
             },
             {
