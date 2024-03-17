@@ -304,7 +304,7 @@ function Config:UpdateCommandHandlers()
 
     for moduleName, moduleSettings in pairs(submoduleSettings) do
         for setting, _ in pairs(moduleSettings or {}) do
-            local handled, usageString = self:GetUsageText(setting, true, submoduleDefaults[moduleName])
+            local handled, usageString = self:GetUsageText(setting or "", true, submoduleDefaults[moduleName] or {})
 
             if handled then
                 self.CommandHandlers[setting:lower()] = {

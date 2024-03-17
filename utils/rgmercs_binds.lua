@@ -34,7 +34,7 @@ Bind.Handlers     = {
         handler = function(text)
             RGMercUtils.DoCmd("/squelch /dggaexecute /target id %d", RGMercUtils.GetTargetID())
             mq.delay(5)
-            RGMercUtils.DoCmd("/squelch /dggaexecute /say %s", text)
+            RGMercUtils.DoCmd("/squelch /dggaexecute /timed %d /say %s", math.ceil(math.random(20)), text)
         end,
     },
     ['setlogfilter'] = {
