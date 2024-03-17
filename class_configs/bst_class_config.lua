@@ -1032,7 +1032,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuff(spell)
+                    return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1156,7 +1156,8 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     return RGMercUtils.GetSetting('DoEpic') and
-                        mq.TLO.FindItem(itemName)() and (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil or mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
+                        mq.TLO.FindItem(itemName)() and mq.TLO.Me.ItemReady(itemName) and
+                        (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil or mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
                 end,
             },
             {
