@@ -174,6 +174,38 @@ Module.CommandHandlers = {
             return true
         end,
     },
+    pulldeny = {
+        usage = "/rgl pulldeny \"<name>\"",
+        about = "Puts <name> on the pull deny list",
+        handler = function(self, name)
+            self:AddMobToList("PullDenyList", name)
+            return true
+        end,
+    },
+    pullallow = {
+        usage = "/rgl pullallow \"<name>\"",
+        about = "Puts <name> on the pull allow list",
+        handler = function(self, name)
+            self:AddMobToList("PullAllowList", name)
+            return true
+        end,
+    },
+    pulldenyrm = {
+        usage = "/rgl pulldenyrm \"<name>\"",
+        about = "Removes <name> from the pull deny list",
+        handler = function(self, name)
+            self:AddMobToList("PullDenyList", name)
+            return true
+        end,
+    },
+    pullallowrm = {
+        usage = "/rgl pullallowrm \"<name>\"",
+        about = "Removes <name> from the pull allow list",
+        handler = function(self, name)
+            self:AddMobToList("PullAllowList", name)
+            return true
+        end,
+    },
 }
 
 local function getConfigFileName()
