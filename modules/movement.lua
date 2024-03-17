@@ -53,7 +53,7 @@ Module.Constants.CampfireNameToKit = {
     ['Scaled Wolf']                  = 36,
 }
 
-Module.Constants.CampfireTypes     = {}
+Module.Constants.CampfireTypes     = { 'All Off', }
 for t, _ in pairs(Module.Constants.CampfireNameToKit) do table.insert(Module.Constants.CampfireTypes, t) end
 table.sort(Module.Constants.CampfireTypes)
 
@@ -266,7 +266,7 @@ function Module:GetCampfireTypeName()
 end
 
 function Module:GetCampfireTypeID()
-    return self.Constants.CampfireNameToKit[self:GetCampfireTypeName()]
+    return self.Constants.CampfireNameToKit[self:GetCampfireTypeName()] or 0
 end
 
 function Module:Campfire(camptype)
@@ -282,7 +282,7 @@ function Module:Campfire(camptype)
         return
     end
 
-    if self.settings.MaintainCampfire then
+    if self.settings.MaintainCampfire > 2 then
         if mq.TLO.FindItemCount("Fellowship Campfire Materials") == 0 then
             self.settings.MaintainCampfire = 2 -- Regular Fellowship
             self:SaveSettings(false)
