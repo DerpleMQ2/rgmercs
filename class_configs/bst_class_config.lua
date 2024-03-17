@@ -1048,7 +1048,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target, uiCheck)
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell) and
+                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
                         RGMercUtils.GetSetting('DoAvatar')
                 end,
             },
