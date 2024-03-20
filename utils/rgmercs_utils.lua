@@ -1251,7 +1251,7 @@ end
 
 function RGMercUtils.GetEntryConditionArg(map, entry)
     local condArg = map[entry.name] or mq.TLO.Spell(entry.name)
-    if (entry.type:lower() ~= "spell" and entry.type:lower() ~= "song") and (not condArg or not condArg() or entry.type:lower() == "aa") then
+    if (entry.type:lower() ~= "spell" and entry.type:lower() ~= "song") and (not condArg or entry.type:lower() == "aa") then
         condArg = entry.name
     end
 
