@@ -717,23 +717,27 @@ return {
     },
     ['HelperFunctions']   = {
         BeastialAligmentCheck = function(self)
-            return not RGMercUtils.SongActiveByName(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
+            local discSpell = self.ResolvedActionMap['HHEFuryDisc']
+            return discSpell and discSpell() and not RGMercUtils.SongActiveByName(discSpell.RankName()) and
                 not RGMercUtils.SongActiveByName('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness')
         end,
         HHEFuryDiscCheckPrimary = function(self)
-            return not RGMercUtils.SongActiveByName(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
+            local discSpell = self.ResolvedActionMap['HHEFuryDisc']
+            return discSpell and discSpell() and not RGMercUtils.SongActiveByName(discSpell.RankName()) and
                 not RGMercUtils.SongActiveByName('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness') and
                 not RGMercUtils.PCAAReady("Bestial Alignment")
         end,
         HHEFuryDiscCheckSecondary = function(self)
-            return RGMercUtils.SongActiveByName(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
+            local discSpell = self.ResolvedActionMap['HHEFuryDisc']
+            return discSpell and discSpell() and not RGMercUtils.SongActiveByName(discSpell.RankName()) and
                 not RGMercUtils.SongActiveByName('Bestial Alignment') and
                 not RGMercUtils.BuffActiveByName('Ferociousness')
         end,
         FerociousnessCheck = function(self)
-            return not RGMercUtils.SongActiveByName(self.ResolvedActionMap['HHEFuryDisc'].RankName() or "None") and
+            local discSpell = self.ResolvedActionMap['HHEFuryDisc']
+            return discSpell and discSpell() and not RGMercUtils.SongActiveByName(discSpell.RankName()) and
                 not RGMercUtils.SongActiveByName('Bestial Alignment')
         end,
     },
@@ -959,7 +963,7 @@ return {
                 name = "BeastialBuffDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.BuffActiveByID(discSpell.ID())
+                    return RGMercUtils.BuffActive(discSpell)
                 end,
             },
             {
