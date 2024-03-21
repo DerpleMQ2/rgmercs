@@ -1536,10 +1536,10 @@ local _ClassConfig = {
             spells = {
                 -- [ HEAL MODE ] --
                 { name = "GroupRenewalHoT", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
-                { name = "GroupFocusSpell", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "FocusSpell",      cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "CurseDoT1", },
-                { name = "GroupFocusSpell", },
+                { name = "FocusSpell", },
             },
             -- [ TLP FALL BACK ] --
             { name = "AEMaloSpell", cond = function(self) return RGMercUtils.GetSetting('DoAEMalo') end, },
