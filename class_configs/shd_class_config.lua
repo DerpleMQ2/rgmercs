@@ -1010,7 +1010,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Blade,
                 cond = function(self)
                     return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
-                        RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
+                        RGMercUtils.GetTargetDistance() < 35 and ((mq.TLO.Me.Inventory("mainhand").Type() or ""):find("2H"))
                 end,
             },
             {
@@ -1019,7 +1019,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Crimson,
                 cond = function(self)
                     return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
-                        RGMercUtils.GetTargetDistance() < 35 and (mq.TLO.Me.Inventory("mainhand").Type():find("2H"))
+                        RGMercUtils.GetTargetDistance() < 35 and ((mq.TLO.Me.Inventory("mainhand").Type() or ""):find("2H"))
                 end,
             },
         },
