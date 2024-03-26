@@ -1028,7 +1028,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.GroupStrengthBuff,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.BuffActiveByName("Shared " .. spell.Name())
+                    return RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.BuffActiveByName("Shared " .. spell.Name()) and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
