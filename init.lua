@@ -395,7 +395,7 @@ local function Main()
             RGMercModules:ExecModule("Movement", "GiveTime", curState)
         end
         RGMercModules:ExecModule("Drag", "GiveTime", curState)
-        RGMercModules:ExecModule("Exp", "GiveTime", curState)
+        --RGMercModules:ExecModule("Exp", "GiveTime", curState)
         return
     end
 
