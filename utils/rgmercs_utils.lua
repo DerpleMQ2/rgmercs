@@ -3380,7 +3380,7 @@ end
 ---@return boolean
 function RGMercUtils.BuffActiveByID(buffId)
     if not buffId then return false end
-    return ((mq.TLO.Me.FindBuff("id " .. tostring(buffId)).ID() or 0) > 0)
+    return RGMercUtils.BuffActive(mq.TLO.Spell(buffId))
 end
 
 ---@param auraName string

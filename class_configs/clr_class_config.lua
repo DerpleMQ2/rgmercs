@@ -1178,14 +1178,14 @@ local _ClassConfig = {
                     local aaSpell = mq.TLO.Spell(mq.TLO.Me.AltAbility("Saint's Unity").Spell.Trigger(1).BaseName() or "")
                     local aaLevel = aaSpell and aaSpell.Level() or 0
                     return aaLevel < (spell.Level() or 0) and RGMercUtils.GetSetting('DoDruid') and spell.Stacks() and RGMercUtils.CanUseAA('Spirit Mastery') and
-                        not RGMercUtils.BuffActiveByID(spell.ID() or 0)
+                        not RGMercUtils.BuffActive(spell)
                 end,
             },
             {
                 name = "GroupHealProcBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return spell.Stacks() and not RGMercUtils.BuffActiveByID(spell.ID())
+                    return RGMercUtils.SpellStacksOnMe(spell) and not RGMercUtils.BuffActive(spell)
                 end,
             },
         },
@@ -1357,7 +1357,7 @@ local _ClassConfig = {
         ['VetManaPCT']      = { DisplayName = "Vet Mana PCT", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 70, Min = 1, Max = 99, },
         ['DivineBuffOn']    = { DisplayName = "Divine Buff On", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
         ['DoDruid']         = { DisplayName = "Do Druid", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = false, },
-        ['DoCh']            = { DisplayName = "Do Ch", Category = "Heals", Tooltip = "Use Spells", Default = false, },
+        ['DoCH']            = { DisplayName = "Do CH", Category = "Heals", Tooltip = "Use Spells", Default = false, },
         ['DoSymbol']        = { DisplayName = "Do Symbol", Category = "Heals", Tooltip = "Use Spells", Default = false, },
     }, -- end DefaultConfig
 }
