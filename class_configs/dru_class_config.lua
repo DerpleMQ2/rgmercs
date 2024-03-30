@@ -1207,11 +1207,11 @@ local _ClassConfig = {
             {
                 name = "AtkBuff",
                 type = "Spell",
-                active_cond = function(self, spell) return true end,
-                cond = function(self, spell, target)
-                    return not RGMercUtils.TargetHasBuff(spell) and target and target and
-                        Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", }):contains(target.Class
-                            .ShortName())
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell, target, uiCheck)
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
+                        Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", }):contains((target.Class.ShortName() or ""))
                 end,
             },
             {
