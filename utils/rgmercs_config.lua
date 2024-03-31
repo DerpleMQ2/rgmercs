@@ -164,7 +164,7 @@ Config.DefaultConfig = {
     -- [ COMBAT ] --
     ['SafeTargeting']        = { DisplayName = "Use Safe Targeting", Category = "Combat", Tooltip = "Do not target mobs that are fighting others.", Default = true, ConfigType = "Advanced", },
     ['AssistOutside']        = { DisplayName = "Assist Outside of Group", Category = "Combat", Tooltip = "Allow assisting characters outside of your group.", Default = false, ConfigType = "Advanced", },
-    ['AssistRange']          = { DisplayName = "Assist Range", Category = "Combat", Tooltip = "Distance to the target before you engage.", Default = Config.Constants.RGCasters:contains(Config.Globals.CurLoadedClass) and 90 or 45, Min = 15, Max = 200, ConfigType = "Advanced", },
+    ['AssistRange']          = { DisplayName = "Assist Range", Category = "Combat", Tooltip = "Distance to the target before you engage.", Default = Config.Constants.RGCasters:contains(Config.Globals.CurLoadedClass) and 90 or 45, Min = 0, Max = 200, ConfigType = "Advanced", },
     ['MAScanZRange']         = { DisplayName = "Main Assist Scan ZRange", Category = "Combat", Tooltip = "Distance in Z direction to look for targets.", Default = 45, Min = 15, Max = 200, ConfigType = "Advanced", },
     ['AutoAssistAt']         = { DisplayName = "Auto Assist At", Category = "Combat", Tooltip = "Melee attack when target hits [x] HP %.", Default = 98, Min = 1, Max = 100, ConfigType = "Advanced", },
     ['StickHow']             = { DisplayName = "Stick How", Category = "Combat", Tooltip = "Custom /stick command", Default = "", ConfigType = "Advanced", },
