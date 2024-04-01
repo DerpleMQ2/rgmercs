@@ -1137,20 +1137,12 @@ local _ClassConfig = {
 
             },
             {
-                name = "TashSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
-                end,
-            },
-            {
                 name = "Bite of Tashani",
                 type = "AA",
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
                     return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
                 end,
-
             },
             {
                 name = "TwinCast",
@@ -1164,14 +1156,14 @@ local _ClassConfig = {
                 name = "DoTSpell1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoDot') and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoDot') and RGMercUtils.DetSpellCheck(spell) and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoDicho') and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoDicho') and RGMercUtils.DetSpellCheck(spell) and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
                 end,
             },
             {
@@ -1192,7 +1184,7 @@ local _ClassConfig = {
                 name = "ManaDrainSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (mq.TLO.Target.CurrentMana() or 0) > 10
+                    return (mq.TLO.Target.CurrentMana() or 0) > 10 and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
                 end,
             },
         },
@@ -1245,7 +1237,8 @@ local _ClassConfig = {
                 name = "TashSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
+                    return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetSpellCheck(spell) and not mq.TLO.Target.Tashed() and
+                        mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDebuff')
                 end,
             },
             {
@@ -1261,7 +1254,7 @@ local _ClassConfig = {
                 name = "StripBuffSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoStripBuff') and mq.TLO.Target.Beneficial()
+                    return RGMercUtils.GetSetting('DoStripBuff') and mq.TLO.Target.Beneficial() and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDebuff')
                 end,
             },
             {
@@ -1287,28 +1280,29 @@ local _ClassConfig = {
                 name = "CripSlowSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (RGMercUtils.GetSetting('DoSlow') or RGMercUtils.GetSetting('DoCripple')) and RGMercUtils.DetSpellCheck(spell)
+                    return (RGMercUtils.GetSetting('DoSlow') or RGMercUtils.GetSetting('DoCripple')) and RGMercUtils.DetSpellCheck(spell) and
+                        mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDebuff')
                 end,
             },
             {
                 name = "SlowSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDebuff')
                 end,
             },
             {
                 name = "CrippleSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDebuff')
                 end,
             },
             {
                 name = "ManaDrainSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DetSpellCheck(spell) and mq.TLO.Target.CurrentMana() > 10
+                    return RGMercUtils.DetSpellCheck(spell) and mq.TLO.Target.CurrentMana() > 10 and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
                 end,
             },
         },
