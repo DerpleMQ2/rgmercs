@@ -61,6 +61,10 @@ Module.CommandHandlers                       = {
                     self:SetCombatMode(newMode)
                     return true
                 end
+
+                RGMercsLogger.log_info("\awMode successfully set to: \am%s", newMode)
+
+                return true
             end,
     },
 }
