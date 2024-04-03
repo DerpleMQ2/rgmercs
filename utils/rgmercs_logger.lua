@@ -49,12 +49,14 @@ local function log(logLevel, output, ...)
 
 	if (... ~= nil) then output = string.format(output, ...) end
 
+	local now = string.format("%.03f", mq.gettime() / 1000)
+
 	-- only log out warnings and errors
 	if logLevels[logLevel].level <= 2 or logToFileAlways then
 		local fileOutput = output:gsub("\a.", "")
 		local fileHeader = logLevels[logLevel].header:gsub("\a.", "")
 		local fileTracer = callerTracer:gsub("\a.", "")
-		mq.cmd(string.format('/mqlog [%s:%s(%s)] %s', mq.TLO.Me.Name(), fileHeader, fileTracer, fileOutput))
+		mq.cmd(string.format('/mqlog [%s:%s(%s)] <%s> %s', mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
 	end
 
 	if #filters > 0 then
@@ -71,7 +73,7 @@ local function log(logLevel, output, ...)
 		RGMercsConsole:AppendText(consoleText)
 	end
 
-	printf('%s\aw:%s\aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, callerTracer, logLeaderEnd, output)
+	printf('%s\aw:%s \aw<\at%s\aw> \aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, now, callerTracer, logLeaderEnd, output)
 end
 
 function actions.GenerateShortcuts()
