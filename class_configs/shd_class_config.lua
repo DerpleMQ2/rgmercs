@@ -808,7 +808,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.VOT,
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID()) end,
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName)
+                    return RGMercUtils.GetSetting('UseVoT') and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1366,6 +1366,7 @@ local _ClassConfig = {
         ['DoAE']            = { DisplayName = "Use AE Taunts", Category = "Spells and Abilities", Tooltip = "Enable casting AE Taunt spells.", Default = true, },
         ['AeTauntCnt']      = { DisplayName = "AE Taunt Count", Category = "Spells and Abilities", Tooltip = "Minimum number of haters before using AE Taunt.", Default = 2, Min = 1, Max = 10, },
         ['HPStopDOT']       = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
+        ['UseVoT']          = { DisplayName = "Use Voice of Thule", Category = "Spells and Abilities", Tooltip = "Cast Voice of Thule", Default = true, },
         ['FlashHP']         = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
         ['DoChestClick']    = { DisplayName = "Do Check Click", Category = "Equipment", Tooltip = "Click your chest item", Default = true, },
         ['DoCharmClick']    = { DisplayName = "Do Charm Click", Category = "Equipment", Tooltip = "Click your charm item", Default = true, },
