@@ -1368,6 +1368,16 @@ local _ClassConfig = {
         {
             id = 'Boastful Bellow',
             Type = "AA",
+            DisplayName = 'Sonic Disturbance',
+            AbilityName = 'Sonic Disturbance',
+            AbilityRange = 250,
+            cond = function(self)
+                return mq.TLO.Me.AltAbility('Sonic Disturbance')
+            end,
+        },
+        {
+            id = 'Boastful Bellow',
+            Type = "AA",
             DisplayName = 'Boastful Bellow',
             AbilityName = 'Boastful Bellow',
             AbilityRange = 250,
