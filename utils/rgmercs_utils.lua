@@ -567,15 +567,15 @@ function RGMercUtils.WaitCastFinish(target)
     local maxWait = maxWaitOrig
 
     ---@diagnostic disable-next-line: undefined-field
-    while mq.TLO.Me.Casting() and (not mq.TLO.Cast.Ready()) do
+    while mq.TLO.Me.Casting() do
         RGMercsLogger.log_verbose("Waiting to Finish Casting...")
-        mq.delay(100)
+        mq.delay(10)
         if target() and RGMercUtils.GetTargetPctHPs() <= 0 or (RGMercUtils.GetTargetID() ~= target.ID()) then
             mq.TLO.Me.StopCast()
             return
         end
 
-        maxWait = maxWait - 100
+        maxWait = maxWait - 10
 
         if maxWait <= 0 then
             local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d",
@@ -1080,8 +1080,6 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
             return false
         end
 
-        RGMercUtils.WaitGlobalCoolDown()
-
         if (RGMercUtils.GetXTHaterCount() > 0 or not bAllowMem) and (not RGMercUtils.CastReady(spellName) or not mq.TLO.Me.Gem(spellName)()) then
             RGMercsLogger.log_debug("\ayI tried to cast %s but it was not ready and we are in combat - moving on.",
                 spellName)
@@ -1101,6 +1099,8 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         end
 
         RGMercUtils.WaitCastReady(spellName, spellRequiredMem and (5 * 60 * 100) or 5000)
+
+        RGMercUtils.WaitGlobalCoolDown()
 
         -- wait another little bit.
         mq.delay(500)
@@ -2920,7 +2920,7 @@ function RGMercUtils.FindWorstHurtManaGroupMember(minMana)
         RGMercsLogger.log_verbose("\agNo one is HurtMana!")
     end
 
-    return worstId
+    return (worstPct < 100 and worstId or 0)
 end
 
 function RGMercUtils.FindWorstHurtGroupMember(minHPs)
@@ -2961,7 +2961,7 @@ function RGMercUtils.FindWorstHurtGroupMember(minHPs)
         RGMercsLogger.log_verbose("\agNo one is hurt!")
     end
 
-    return worstId
+    return (worstPct < 100 and worstId or 0)
 end
 
 function RGMercUtils.FindWorstHurtManaXT(minMana)
@@ -4286,7 +4286,7 @@ function RGMercUtils.LoadSpellLoadOut(spellLoadOut)
         end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
-            RGMercUtils.MemorizeSpell(gem, selectedRank, 1000)
+            RGMercUtils.MemorizeSpell(gem, selectedRank, 15000)
         end
     end
 end
