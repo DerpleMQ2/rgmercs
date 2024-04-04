@@ -873,6 +873,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Slow Downtime',
+            timer = 30,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
+                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
+        },
+        {
             name = 'GroupBuff',
             timer = 60, -- only run every 60 seconds top.
             targetId = function(self)
@@ -1223,6 +1233,8 @@ local _ClassConfig = {
                         mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('SpellCanniMinHP')
                 end,
             },
+        },
+        ['Slow Downtime'] = {
             {
                 name = "Pact of the Wolf",
                 type = "AA",
