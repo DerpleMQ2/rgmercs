@@ -513,8 +513,6 @@ local function Main()
         RGMercUtils.DoCmd("/attack off")
     end
 
-    -- TODO: Fix Curing
-
     -- Revive our mercenary if they're dead and we're using a mercenary
     if RGMercUtils.GetSetting('DoMercenary') then
         if mq.TLO.Me.Mercenary.State():lower() == "dead" then

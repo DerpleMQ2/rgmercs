@@ -1468,16 +1468,18 @@ function RGMercUtils.GetSetting(setting, failOk)
 
     -- if we found it in the Global table we should alert if it is duplicated anywhere
     -- else as that could get confusing.
-    local submoduleSettings = RGMercModules:ExecAll("GetSettings")
-    for name, settings in pairs(submoduleSettings) do
-        if settings[setting] ~= nil then
-            if not ret.value then
-                ret = { module = name, value = settings[setting], }
-            else
-                RGMercsLogger.log_error(
-                    "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Returning first but this should be fixed!",
-                    setting,
-                    ret.module, name)
+    if RGMercModules then -- this could be run before we are fully done loading.
+        local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+        for name, settings in pairs(submoduleSettings) do
+            if settings[setting] ~= nil then
+                if not ret.value then
+                    ret = { module = name, value = settings[setting], }
+                else
+                    RGMercsLogger.log_error(
+                        "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Returning first but this should be fixed!",
+                        setting,
+                        ret.module, name)
+                end
             end
         end
     end
