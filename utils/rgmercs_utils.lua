@@ -2507,14 +2507,14 @@ end
 function RGMercUtils.IsNamed(spawn)
     if not spawn() then return false end
 
+    for _, n in ipairs(RGMercUtils.NamedList) do
+        if spawn.Name() == n or spawn.CleanName() == n then return true end
+    end
+
     ---@diagnostic disable-next-line: undefined-field
     if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil then
         ---@diagnostic disable-next-line: undefined-field
         return mq.TLO.SpawnMaster.HasSpawn(spawn.ID() or 0)
-    end
-
-    for _, n in ipairs(RGMercUtils.NamedList) do
-        if spawn.Name() == n or spawn.CleanName() == n then return true end
     end
 
     return false
@@ -3782,7 +3782,7 @@ function RGMercUtils.RenderZoneNamed()
         ImGui.TableHeadersRow()
 
         for idx, name in ipairs(RGMercUtils.NamedList) do
-            local spawn = mq.TLO.Spawn(string.format("NPC =%s", name))
+            local spawn = mq.TLO.Spawn(string.format("NPC %s", name))
             if RGMercUtils.ShowDownNamed or (spawn() and spawn.ID() > 0) then
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(idx))
