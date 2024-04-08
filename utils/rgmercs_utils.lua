@@ -3303,7 +3303,7 @@ function RGMercUtils.OkToEngage(autoTargetId)
     return false
 end
 
-function RGMercUtils.PetAttack(targetId)
+function RGMercUtils.PetAttack(targetId, sendSwarm)
     local pet = mq.TLO.Me.Pet
 
     local target = mq.TLO.Spawn(targetId)
@@ -3313,7 +3313,9 @@ function RGMercUtils.PetAttack(targetId)
 
     if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and RGMercUtils.TargetIsType("NPC", target) then
         RGMercUtils.DoCmd("/squelch /pet attack %d", targetId)
-        RGMercUtils.DoCmd("/squelch /pet swarm")
+        if sendSwarm then
+            RGMercUtils.DoCmd("/squelch /pet swarm")
+        end
         RGMercsLogger.log_debug("Pet sent to attack target: %s!", target.Name())
     end
 end
