@@ -1050,6 +1050,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return RGMercUtils.GetSetting('UseBellow')
+                        and not RGMercUtils.SongActiveByName("Boastful Bellow")
                         and RGMercUtils.AAReady(aaName)
                         and mq.TLO.Me.PctEndurance() > 20 -- Bellow DEVOURS endurance
                 end,
