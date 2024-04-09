@@ -1391,10 +1391,10 @@ function Module:GiveTime(combat_state)
             end
 
             if self.settings.PullAbility == PullAbilityIDToName.PetPull then -- PetPull
-                RGMercUtils.PetAttack(self.TempSettings.PullID)
+                RGMercUtils.PetAttack(self.TempSettings.PullID, false)
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on pet pull to finish...")
-                    RGMercUtils.PetAttack(self.TempSettings.PullID)
+                    RGMercUtils.PetAttack(self.TempSettings.PullID, false)
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
