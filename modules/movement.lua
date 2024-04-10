@@ -459,7 +459,7 @@ end
 function Module:DoClickies()
     if not RGMercUtils.GetSetting('UseClickies') then return end
 
-    for i = 1, 4 do
+    for i = 1, 12 do
         local setting = RGMercUtils.GetSetting(string.format("ClickyItem%d", i))
         if setting and setting:len() > 0 then
             local item = mq.TLO.FindItem(setting)
