@@ -457,7 +457,10 @@ function Module:UpdateMezList()
 
     local mezSpell = self:GetMezSpell()
 
-    if not mezSpell or not mezSpell() then return end
+    if not mezSpell or not mezSpell() then
+        RGMercsLogger.log_verbose("\ayayUpdateMezList: No mez spell - bailing!")
+        return
+    end
 
     for _, t in ipairs(searchTypes) do
         local minLevel = self.settings.MezMinLevel
@@ -598,6 +601,9 @@ function Module:DoMez()
 
     if mezSpell and mezSpell() and (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell)()) and RGMercUtils.GetTableSize(self.TempSettings.MezTracker) >= 1 then
         self:ProcessMezList()
+    else
+        RGMercsLogger.log_verbose("DoMez() : Skipping Mez list processing: Spell(%s) Ready(%s)", mezSpell and mezSpell() or "None",
+            RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(mezSpell)()))
     end
 end
 
