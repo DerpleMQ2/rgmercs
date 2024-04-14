@@ -599,11 +599,11 @@ function Module:DoMez()
         self:UpdateMezList()
     end
 
-    if mezSpell and mezSpell() and (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell)()) and RGMercUtils.GetTableSize(self.TempSettings.MezTracker) >= 1 then
+    if mezSpell and mezSpell() and (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()) and RGMercUtils.GetTableSize(self.TempSettings.MezTracker) >= 1 then
         self:ProcessMezList()
     else
-        RGMercsLogger.log_verbose("DoMez() : Skipping Mez list processing: Spell(%s) Ready(%s)", mezSpell and mezSpell() or "None",
-            RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(mezSpell)()))
+        RGMercsLogger.log_verbose("DoMez() : Skipping Mez list processing: Spell(%s) Ready(%s) TableSize(%d)", mezSpell and mezSpell() or "None",
+            RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(mezSpell)()), RGMercUtils.GetTableSize(self.TempSettings.MezTracker))
     end
 end
 
