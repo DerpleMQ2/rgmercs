@@ -231,8 +231,8 @@ function Module:MezNow(mezId, useAE, useAA)
         -- Only Enchanters have an AA AE Mez but we'll prefer the AE Spell if we can.
         -- TODO CHECK IF ITS READY
         if useAA and RGMercUtils.MyClassIs("enc") and
-            not RGMercUtils.NPCSpellReady(aeMezSpell.RankName.Name()) and
-            RGMercUtils.AAReady("Beam of Slumber") and self.settings.UserAEAAmez then
+            not RGMercUtils.NPCSpellReady(aeMezSpell.RankName.Name(), mezId, false) and
+            RGMercUtils.AAReady("Beam of Slumber") and self.settings.UseAEAAMez then
             -- This is a beam AE so I need ot face the target and  cast.
             RGMercUtils.DoCmd("/face fast")
             -- Delay to wait till face finishes
@@ -241,7 +241,7 @@ function Module:MezNow(mezId, useAE, useAA)
             RGMercUtils.UseAA("Beam of Slumber", mezId)
             RGMercUtils.HandleMezAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"))
             -- reset timers
-        elseif RGMercUtils.NPCSpellReady(aeMezSpell.RankName.Name()) then
+        elseif RGMercUtils.NPCSpellReady(aeMezSpell.RankName.Name(), mezId, false) then
             -- If we're here we're not doing AA-based AE Mezzing. We're either using our bard song or
             -- ENCH/NEC Spell
             RGMercUtils.HandleMezAnnounce(string.format("\aw I AM \ar AE SPELL MEZZING \ag %s", aeMezSpell.RankName()))

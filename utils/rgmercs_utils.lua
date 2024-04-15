@@ -347,7 +347,7 @@ function RGMercUtils.NPCSpellReady(spellName, targetId, healingSpell)
     local me = mq.TLO.Me
     local spell = mq.TLO.Spell(spellName)
 
-    if targetId == 0 then targetId = mq.TLO.Target.ID() end
+    if (targetId == 0 or not targetId) then targetId = mq.TLO.Target.ID() end
 
     if not spell or not spell() then return false end
 
@@ -357,7 +357,7 @@ function RGMercUtils.NPCSpellReady(spellName, targetId, healingSpell)
 
     if not target or not target() then return false end
 
-    if me.SpellReady(spell.RankName.Name()) and me.CurrentMana() >= spell.Mana() then
+    if me.SpellReady(spell.RankName.Name())() and me.CurrentMana() >= spell.Mana() then
         if not me.Moving() and not me.Casting.ID() and not RGMercUtils.TargetIsType("corpse", target) then
             if target.LineOfSight() then
                 return true
