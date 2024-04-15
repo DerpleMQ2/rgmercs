@@ -706,6 +706,7 @@ local _ClassConfig = {
         },
         ['MezSpell'] = {
             "Flummox",
+            "Addle",
             "Deceive",
             "Delude",
             "Bewilder",
