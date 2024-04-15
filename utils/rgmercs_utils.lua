@@ -1656,17 +1656,17 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
 
     local numEffects = spell.NumEffects()
 
-    --RGMercsLogger.log_verbose("TargetHasBuff() Searching for spell ID: %d on %s", spell.ID(), target.DisplayName())
+    RGMercsLogger.log_verbose("TargetHasBuff() Searching for spell(%s) ID: %d on %s", spell.Name(), spell.ID(), target.DisplayName())
     if (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0 then return true end
-    --RGMercsLogger.log_verbose("TargetHasBuff() Searching for rank spell ID: %d on %s", spell.RankName.ID(), target.DisplayName())
+    RGMercsLogger.log_verbose("TargetHasBuff() Searching for rank spell(%s) ID: %d on %s", spell.RankName.Name(), spell.RankName.ID(), target.DisplayName())
     if (target.FindBuff("id " .. tostring(spell.RankName.ID())).ID() or 0) > 0 then return true end
 
     for i = 1, numEffects do
         local triggerSpell = spell.Trigger(i)
         if triggerSpell and triggerSpell() then
-            --RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger spell ID: %d on %s", triggerSpell.ID(), target.DisplayName())
+            RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger spell ID: %d on %s", triggerSpell.ID(), target.DisplayName())
             if (target.FindBuff("id " .. tostring(triggerSpell.ID())).ID() or 0) > 0 then return true end
-            --RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger rank spell ID: %d on %s", triggerSpell.ID(), target.DisplayName())
+            RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger rank spell ID: %d on %s", triggerSpell.ID(), target.DisplayName())
             if (target.FindBuff("id " .. tostring(triggerSpell.RankName.ID())).ID() or 0) > 0 then return true end
         end
     end
