@@ -339,10 +339,13 @@ function RGMercUtils.PCAAReady(aaName)
         mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0)
 end
 
+---@param spellName string
+---@param targetId number
+---@param healingSpell boolean
 ---@return boolean
-function RGMercUtils.NPCSpellReady(spell, targetId, healingSpell)
+function RGMercUtils.NPCSpellReady(spellName, targetId, healingSpell)
     local me = mq.TLO.Me
-    local spell = mq.TLO.Spell(spell)
+    local spell = mq.TLO.Spell(spellName)
 
     if targetId == 0 then targetId = mq.TLO.Target.ID() end
 

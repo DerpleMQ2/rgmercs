@@ -231,7 +231,7 @@ function Module:MezNow(mezId, useAE, useAA)
         -- Only Enchanters have an AA AE Mez but we'll prefer the AE Spell if we can.
         -- TODO CHECK IF ITS READY
         if useAA and RGMercUtils.MyClassIs("enc") and
-            not RGMercUtils.NPCSpellReady(aeMezSpell) and
+            not RGMercUtils.NPCSpellReady(aeMezSpell.RankName.Name()) and
             RGMercUtils.AAReady("Beam of Slumber") and self.settings.UserAEAAmez then
             -- This is a beam AE so I need ot face the target and  cast.
             RGMercUtils.DoCmd("/face fast")
@@ -241,7 +241,7 @@ function Module:MezNow(mezId, useAE, useAA)
             RGMercUtils.UseAA("Beam of Slumber", mezId)
             RGMercUtils.HandleMezAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"))
             -- reset timers
-        elseif RGMercUtils.NPCSpellReady(aeMezSpell) then
+        elseif RGMercUtils.NPCSpellReady(aeMezSpell.RankName.Name()) then
             -- If we're here we're not doing AA-based AE Mezzing. We're either using our bard song or
             -- ENCH/NEC Spell
             RGMercUtils.HandleMezAnnounce(string.format("\aw I AM \ar AE SPELL MEZZING \ag %s", aeMezSpell.RankName()))
@@ -560,7 +560,7 @@ function Module:ProcessMezList()
                         mq.delay(500, function() return mq.TLO.Target.BuffsPopulated() end)
 
                         local maxWait = 5000
-                        while not RGMercUtils.NPCSpellReady(mezSpell) and maxWait > 0 do
+                        while not RGMercUtils.NPCSpellReady(mezSpell.RankName.Name()) and maxWait > 0 do
                             mq.delay(100)
                             maxWait = maxWait - 100
                         end
@@ -589,7 +589,7 @@ function Module:DoMez()
     local aeMezSpell = self:GetAEMezSpell()
     if aeMezSpell and aeMezSpell() and RGMercUtils.GetXTHaterCount() >= self.settings.MezAECount and
         ((RGMercUtils.MyClassIs("brd") and self.TempSettings.BardAEMezTimer == 0) or
-            (mq.TLO.Me.SpellReady(aeMezSpell)() or RGMercUtils.AAReady("Beam of Slumber"))) then
+            (mq.TLO.Me.SpellReady(aeMezSpell.RankName.Name())() or RGMercUtils.AAReady("Beam of Slumber"))) then
         self:AEMezCheck()
     end
 
