@@ -793,6 +793,12 @@ local _ClassConfig = {
 
         },
         {
+            name = 'Pet Management',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state) return combat_state == "Downtime" end,
+
+        },
+        {
             name = 'GroupBuff',
             timer = 60, -- only run every 60 seconds top.
             targetId = function(self)
@@ -838,6 +844,20 @@ local _ClassConfig = {
 
     },
     ['Rotations']     = {
+        ['Pet Management'] = {
+            {
+                name = "PetSpell",
+                type = "Spell",
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
+                cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 end,
+            },
+            {
+                name = "PetBuffSpell",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.ID()).ID() end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
+            },
+        },
         ['SelfBuff'] = {
             {
                 name = "SelfHPBuff",
@@ -869,12 +889,7 @@ local _ClassConfig = {
                 active_cond = function(self, aaName) return RGMercUtils.BuffActiveByName(aaName) end,
                 cond = function(self, aaName) return RGMercUtils.SelfBuffAACheck(aaName) end,
             },
-            {
-                name = "PetBuffSpell",
-                type = "Spell",
-                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.ID()).ID() end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
-            },
+
             {
                 name = "Azure Mind Crystal",
                 type = "AA",
