@@ -1278,7 +1278,8 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
-                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and RGMercUtils.GetXTHaterCount() > 2 and
+                    return RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
+                        RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('SlowCount') and
                         mq.TLO.Target.Slowed() == nil
                 end,
             },
@@ -1298,7 +1299,7 @@ local _ClassConfig = {
                     end
 
                     return RGMercUtils.GetSetting('DoSlow') and detAACheck and
-                        (envelopingCheck or RGMercUtils.GetXTHaterCount() > 2) and slowedCheck
+                        (envelopingCheck or RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('SlowCount')) and slowedCheck
                 end,
             },
             {
@@ -1425,6 +1426,7 @@ local _ClassConfig = {
     ['DefaultConfig'] = {
         ['Mode']          = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['DoLearners']    = { DisplayName = "Do Learners", Category = "Spells & Abilities", Tooltip = "Set to use the Learner's Aura instead of the Mana Regen Aura.", Default = false, },
+        ['SlowCount']     = { DisplayName = "Slow Count", Category = "Spells & Abilities", Tooltip = "Number of XT Haters before we start slowing", Min = 1, Default = 3, Max = 10, },
         ['DoTash']        = { DisplayName = "Do Tash", Category = "Spells & Abilities", Tooltip = "Cast Tash Spells", Default = true, },
         ['DoTwincastDPS'] = { DisplayName = "Do Twincast DPS", Category = "Spells & Abilities", Tooltip = "Cast Twincast during DPS rotation", Default = true, },
         ['DoDot']         = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
