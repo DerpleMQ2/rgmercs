@@ -1285,7 +1285,7 @@ local _ClassConfig = {
             {
                 name = "Slowing Helix",
                 type = "AA",
-                cond = function(self, aaName, uiCheck)
+                cond = function(self, aaName, _, uiCheck)
                     if mq.TLO.Target.ID() <= 0 then return false end
 
                     local detAACheck = RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
