@@ -375,29 +375,46 @@ end
 ---@param healingSpell boolean?
 ---@return boolean
 function RGMercUtils.NPCAAReady(aaName, targetId, healingSpell)
+    RGMercsLogger.log_verbose("NPCAAReady(%s)", aaName)
     local me = mq.TLO.Me
     local ability = mq.TLO.Me.AltAbility(aaName)
 
     if targetId == 0 or not targetId then targetId = mq.TLO.Target.ID() end
 
-    if not ability or not ability() then return false end
+    if not ability or not ability() then
+        RGMercsLogger.log_verbose("NPCAAReady(%s) - Don't have ability.", aaName)
+        return false
+    end
 
-    if me.Stunned() then return false end
+    if me.Stunned() then
+        RGMercsLogger.log_verbose("NPCAAReady(%s) - Stunned", aaName)
+        return false
+    end
 
     local target = mq.TLO.Spawn(string.format("id %d", targetId))
 
-    if not target or not target() or target.Dead() then return false end
+    if not target or not target() or target.Dead() then
+        RGMercsLogger.log_verbose("NPCAAReady(%s) - Target Dead", aaName)
+        return false
+    end
 
     if RGMercUtils.AAReady(aaName) and me.CurrentMana() >= ability.Spell.Mana() and me.CurrentEndurance() >= ability.Spell.EnduranceCost() then
         if RGMercUtils.MyClassIs("brd") or (not me.Moving() and not me.Casting.ID()) then
+            RGMercsLogger.log_verbose("NPCAAReady(%s) - Check LOS", aaName)
             if target.LineOfSight() then
+                RGMercsLogger.log_verbose("NPCAAReady(%s) - Success", aaName)
                 return true
             elseif healingSpell == true then
+                RGMercsLogger.log_verbose("NPCAAReady(%s) - Healing Success", aaName)
                 return true
             end
         end
+    else
+        RGMercsLogger.log_verbose("NPCAAReady(%s) CurrentMana(%d) >= SpellMana(%d) CurrentEnd(%d) >= SpellEnd(%d)", aaName, me.CurrentMana(), ability.Spell.Mana(),
+            me.CurrentEndurance(), ability.Spell.EnduranceCost())
     end
 
+    RGMercsLogger.log_verbose("NPCAAReady(%s) - Failed", aaName)
     return false
 end
 
