@@ -28,6 +28,21 @@ Bind.Handlers     = {
             RGMercConfig:HandleBind(config, value)
         end,
     },
+    ['backoff'] = {
+        usage = "/rgl backoff <on|off>",
+        about = "Toggles or sets backoff flag",
+        handler = function(config, value)
+            if value ~= nil then
+                RGMercConfig.Globals.BackOffFlag = not RGMercConfig.Globals.BackOffFlag
+            elseif value:lower() == "on" then
+                RGMercConfig.Globals.BackOffFlag = true
+            else
+                RGMercConfig.Globals.BackOffFlag = false
+            end
+
+            RGMercsLogger.log_info("\ayBackoff \awset to: ", RGMercUtils.BoolToColorString(RGMercUtils.Globals.BackOffFlag))
+        end,
+    },
     ['qsay'] = {
         usage = "/rgl qsay <text>",
         about = "All RGMercs will target your target and say your <text>",
