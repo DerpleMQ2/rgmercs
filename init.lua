@@ -143,7 +143,12 @@ local function RGMercsGUI()
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
             end
 
-            if ImGui.Button(RGMercConfig.Globals.PauseMain and "PAUSED" or "Running", (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
+            local pauseLabel = RGMercConfig.Globals.PauseMain and "PAUSED" or "Running"
+            if RGMercConfig.Globals.BackOffFlag then
+                pauseLabel = pauseLabel .. " [Backoff]"
+            end
+
+            if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
                 RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
             end
             ImGui.PopStyleColor()
