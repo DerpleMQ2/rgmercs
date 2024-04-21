@@ -1356,7 +1356,7 @@ return {
         ['DoPetSlow']    = { DisplayName = "Do Pet Slow", Category = "Buffs", Tooltip = "DoPetSlow", Default = true, },
         ['DoSlow']       = { DisplayName = "Do Slow", Category = "Buffs", Tooltip = "DoSlow", Default = true, },
         ['DoSwarmPet']   = { DisplayName = "Do Swarm Pet", Category = "Buffs", Tooltip = "DoSwarmPet", Default = true, },
-        ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoAoe']        = { DisplayName = "Do AoE", Category = "Abilities", Tooltip = "Enable using AoE Abilities", Default = true, },
         ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
         ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },

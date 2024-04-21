@@ -1368,7 +1368,7 @@ local _ClassConfig = {
         ['HPStopDOT']       = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
         ['UseVoT']          = { DisplayName = "Use Voice of Thule", Category = "Spells and Abilities", Tooltip = "Cast Voice of Thule", Default = true, },
         ['FlashHP']         = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
-        ['DoChestClick']    = { DisplayName = "Do Check Click", Category = "Equipment", Tooltip = "Click your chest item", Default = true, },
+        ['DoChestClick']    = { DisplayName = "Do Chest Click", Category = "Equipment", Tooltip = "Click your chest item", Default = true, },
         ['DoCharmClick']    = { DisplayName = "Do Charm Click", Category = "Equipment", Tooltip = "Click your charm item", Default = true, },
         ['StartBigTap']     = { DisplayName = "Use Big Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100, },
         ['StartLifeTap']    = { DisplayName = "Use Life Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100, },

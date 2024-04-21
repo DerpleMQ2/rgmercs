@@ -525,7 +525,7 @@ return {
         ['PoisonName']      = { DisplayName = "Poison Item", Category = "Poison", Tooltip = "Click the poison you want to use here", Type = "ClickyItem", Default = "", },
         ['PoisonClicky']    = { DisplayName = "Poison Clicky", Category = "Poison", Tooltip = "Click the poison summoner you want to use here", Type = "ClickyItem", Default = "", },
         ['PoisonItemCount'] = { DisplayName = "Poison Item Count", Category = "Poison", Tooltip = "Min number of poison before we start summoning more", Default = 3, Min = 1, Max = 50, },
-        ['DoChestClick']    = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoChestClick']    = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoEpic']          = { DisplayName = "Do Epic Click", Category = "Utilities", Tooltip = "Click your epic item", Default = true, },
         ['DoHideSneak']     = { DisplayName = "Do Hide/Sneak Click", Category = "Utilities", Tooltip = "Use Hide/Sneak during Downtime", Default = true, },
     },

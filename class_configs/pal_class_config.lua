@@ -1397,7 +1397,7 @@ return {
         ['FlashHP']      = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
         ['TotHealPoint'] = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 30, Min = 1, Max = 100, },
         ['LayHandsPct']  = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
-        ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoReverseDS']  = { DisplayName = "Do Reverse DS", Category = "Utilities", Tooltip = "Cast Reverse DS", Default = true, },
         ['SummonArrows'] = { DisplayName = "Summon Arrows", Category = "Utilities", Tooltip = "Enable Summon Arrows", Default = true, },
         ['DoBrells']     = { DisplayName = "Do Brells", Category = "Group Buffs", Tooltip = "Enable Casting Brells", Default = true, },

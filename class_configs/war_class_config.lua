@@ -687,7 +687,7 @@ local _ClassConfig = {
         ['DoAEAgro']     = { DisplayName = "Do AE Agro", Category = "Combat", Tooltip = "Enable AoE Agro (Tank Mode Only)", Default = true, },
         ['DoAEHate']     = { DisplayName = "Do AE Hate", Category = "Combat", Tooltip = "Enable AoE Hate (Tank Mode Only)", Default = true, },
         ['DoBandolier']  = { DisplayName = "Use Bandolier", Category = "Equipment", Tooltip = "Enable Swapping of items using the bandolier.", Default = false, },
-        ['DoChestClick'] = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoDefense']    = { DisplayName = "Do Defense", Category = "Combat", Tooltip = "Do Defense", Default = true, },
         ['DoBattleLeap'] = { DisplayName = "Do Battle Leap", Category = "Combat", Tooltip = "Do Battle Leap", Default = true, },
         ['DoSnare']      = { DisplayName = "Use Snares", Category = "Combat", Tooltip = "Enable casting Snare abilities.", Default = true, },

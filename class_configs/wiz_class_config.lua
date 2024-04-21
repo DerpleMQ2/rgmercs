@@ -1216,7 +1216,7 @@ return {
     },
     ['DefaultConfig'] = {
         ['Mode']          = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 3, Min = 1, Max = 4, },
-        ['DoChestClick']  = { DisplayName = "Do Check Click", Category = "Utilities", Tooltip = "Click your chest item", Default = false, },
+        ['DoChestClick']  = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = false, },
         ['JoltAggro']     = { DisplayName = "Jolt Aggro %", Category = "Combat", Tooltip = "Aggro at which to use Jolt", Default = 65, Min = 1, Max = 100, },
         ['WeaveAANukes']  = { DisplayName = "Weave AA Nukes", Category = "Combat", Tooltip = "Weave in AA Nukes", Default = true, },
         ['DoManaBurn']    = { DisplayName = "Use Mana Burn AA", Category = "Combat", Tooltip = "Enable usage of Mana Burn", Default = true, },
