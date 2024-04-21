@@ -1774,8 +1774,8 @@ _ClassConfig      = {
             gem = 3,
             spells = {
 
-                { name = "SwarmPet",  cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
-                { name = "FireNuke1", },
+                { name = "SwarmPet",     cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
+                { name = "FireBoltNuke", },
             },
         },
         {
