@@ -161,6 +161,7 @@ Config.DefaultConfig = {
     ['EndMedPctStop']        = { DisplayName = "Med Endurance % Stop", Category = "Meditation", Tooltip = "What Endurance % to hit before stopping medding.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
     ['HPMedPctStop']         = { DisplayName = "Med HP % Stop", Category = "Meditation", Tooltip = "What HP % to hit before stopping medding.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
     ['AfterMedCombatDelay']  = { DisplayName = "After Combat Med Delay", Category = "Meditation", Tooltip = "How long to delay after combat in seconds before sitting.", Default = 6, Min = 0, Max = 60, ConfigType = "Advanced", },
+    ['StandWhenDone']        = { DisplayName = "Stand When Done Medding", Category = "Meditation", Tooltip = "Stand when done medding or wait until combat.", Default = true, },
 
     -- [ MERCENCARY ] --
     ['DoMercenary']          = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = true, ConfigType = "Normal", },

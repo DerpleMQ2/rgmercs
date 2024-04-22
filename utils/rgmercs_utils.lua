@@ -2182,7 +2182,7 @@ function RGMercUtils.AutoMed()
         end
     end
 
-    if me.Sitting() and forcestand and not RGMercUtils.Memorizing then
+    if RGMercUtils.GetSetting('StandWhenDone') and me.Sitting() and forcestand and not RGMercUtils.Memorizing then
         RGMercConfig.Globals.InMedState = false
         RGMercsLogger.log_debug("Forcing stand - all conditions met.")
         me.Stand()

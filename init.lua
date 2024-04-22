@@ -410,6 +410,11 @@ local function Main()
     end
 
     if RGMercUtils.GetXTHaterCount() > 0 then
+        if curState == "Downtime" and mq.TLO.Me.Sitting() then
+            -- if switching into combat state stand up.
+            mq.TLO.Me.Stand()
+        end
+
         curState = "Combat"
         --if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
         if RGMercUtils.GetSetting('FaceTarget') and not RGMercUtils.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
