@@ -2545,17 +2545,33 @@ end
 ---@param name string
 ---@return boolean
 function RGMercUtils.IsSafeName(t, name)
-    if mq.TLO.DanNet(name)() then return true end
-
-    for _, n in ipairs(RGMercUtils.GetSetting('OutsideAssistList')) do
-        if name == n then return true end
+    RGMercsLogger.log_verbose("IsSafeName(%s)", name)
+    if mq.TLO.DanNet(name)() then
+        RGMercsLogger.log_verbose("IsSafeName(%s): Dannet Safe", name)
+        return true
     end
 
-    if mq.TLO.Group.Member(name)() then return true end
-    if mq.TLO.Raid.Member(name)() then return true end
+    for _, n in ipairs(RGMercUtils.GetSetting('OutsideAssistList')) do
+        if name == n then
+            RGMercsLogger.log_verbose("IsSafeName(%s): OA Safe", name)
+            return true
+        end
+    end
+
+    if mq.TLO.Group.Member(name)() then
+        RGMercsLogger.log_verbose("IsSafeName(%s): Group Safe", name)
+        return true
+    end
+    if mq.TLO.Raid.Member(name)() then
+        RGMercsLogger.log_verbose("IsSafeName(%s): Raid Safe", name)
+        return true
+    end
 
     if mq.TLO.Me.Guild() ~= nil then
-        if mq.TLO.Spawn(string.format("%s =%s", t, name)).Guild() == mq.TLO.Me.Guild() then return true end
+        if mq.TLO.Spawn(string.format("%s =%s", t, name)).Guild() == mq.TLO.Me.Guild() then
+            RGMercsLogger.log_verbose("IsSafeName(%s): Guild Safe", name)
+            return true
+        end
     end
 
     return false
