@@ -2574,6 +2574,7 @@ function RGMercUtils.IsSafeName(t, name)
         end
     end
 
+    RGMercsLogger.log_verbose("IsSafeName(%s): false", name)
     return false
 end
 
