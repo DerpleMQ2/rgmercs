@@ -499,6 +499,7 @@ end
 function Module:ProcessMezList()
     -- Assume by default we never need to block for mez. We'll set this if-and-only-if
     -- we need to mez but our ability is on cooldown.
+    RGMercUtils.DoCmd("/attack off")
     RGMercsLogger.log_debug("\ayProcessMezList() :: Loop")
     local mezSpell = self:GetMezSpell()
 
