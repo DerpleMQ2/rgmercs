@@ -19,7 +19,7 @@ function actions.set_log_level(level) currentLogLevel = level end
 function actions.set_log_to_file(logToFile) logToFileAlways = logToFile end
 
 function actions.set_log_filter(filter)
-	filters = RGMercUtils.split(filter, "|")
+	filters = RGMercUtils.split(filter:lower(), "|")
 end
 
 function actions.clear_log_filter() filters = {} end
@@ -61,8 +61,9 @@ local function log(logLevel, output, ...)
 
 	if #filters > 0 then
 		local found = false
+		local lowerOutput = output:lower()
 		for _, logFilter in ipairs(filters) do
-			if logFilter:len() > 0 and (callerTracer:find(logFilter) or output:find(logFilter)) then found = true end
+			if logFilter:len() > 0 and (callerTracer:find(logFilter) or lowerOutput:find(logFilter)) then found = true end
 		end
 
 		if not found then return end
