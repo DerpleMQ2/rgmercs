@@ -1456,6 +1456,16 @@ local _ClassConfig = {
                     return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.SongActiveByName(discSpell.RankName.Name() or "") and mq.TLO.Me.PctEndurance() < 30
                 end,
             },
+            {
+                name = "Disarm",
+                type = "Ability",
+                tooltip = Tooltips.Taunt,
+                cond = function(self, abilityName)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and
+                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
+                        RGMercUtils.GetTargetDistance() < 30
+                end,
+            },
         },
         ['DPS Buffs'] = {
             {
