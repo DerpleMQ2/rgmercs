@@ -350,7 +350,7 @@ return {
                     if RGMercUtils.GetSetting('AutoAxeCount') == 0 then return false end
                     local spell = mq.TLO.Spell(self.ResolvedActionMap['AutoAxe1'].Name())
                     if not spell or not spell() then return false end
-                    if mq.TLO.FindItemBankCount(spell.ReagentID(1)())() == 0 then return false end
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
 
                     local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['AutoAxe1'], mq.TLO.Me.ID())
                     RGMercUtils.DoCmd("/autoinv")
@@ -367,7 +367,7 @@ return {
                     if RGMercUtils.GetSetting('AutoAxe2Count') == 0 then return false end
                     local spell = mq.TLO.Spell(self.ResolvedActionMap['AutoAxe2'].Name())
                     if not spell or not spell() then return false end
-                    if mq.TLO.FindItemBankCount(spell.ReagentID(1)())() == 0 then return false end
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
 
                     local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['AutoAxe2'], mq.TLO.Me.ID())
                     RGMercUtils.DoCmd("/autoinv")
@@ -384,7 +384,7 @@ return {
                     if RGMercUtils.GetSetting('DichoAxeCount') == 0 then return false end
                     local spell = mq.TLO.Spell(self.ResolvedActionMap['DichoAxe'].Name())
                     if not spell or not spell() then return false end
-                    if mq.TLO.FindItemBankCount(spell.ReagentID(1)())() == 0 then return false end
+                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
 
                     local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['DichoAxe'], mq.TLO.Me.ID())
                     RGMercUtils.DoCmd("/autoinv")
