@@ -375,6 +375,28 @@ return {
                 end,
             },
             {
+                name = "SummonBluntAxes",
+                type = "CustomFunc",
+                custom_func = function(self)
+                    if not RGMercUtils.GetSetting('SummonAxes2') then return false end
+					
+					if not mq.TLO.Me.CombatAbilityReady('Blunt Axe')() then return false end
+--                    if not RGMercUtils.PCDiscReady('Blunt Axe') then return false end
+
+                    if mq.TLO.FindItemCount('Blunt Axe')() > RGMercUtils.GetSetting('AutoAxe2Count') then return false end
+                    if RGMercUtils.GetSetting('AutoAxe2Count') == 0 then return false end
+--                    local spell = mq.TLO.Spell('Blunt Axe')
+--                    if not spell or not spell() then return false end
+--                    if mq.TLO.FindItemBankCount(59933)() == 0 then return false end
+                    if mq.TLO.FindItemCount('Basic Axe Components')() == 0 then return false end
+
+					RGMercUtils.DoCmd("/squelch /doability Blunt Axe")
+                    local ret = true
+                    RGMercUtils.DoCmd("/autoinv")
+                    return ret
+                end,
+            },
+            {
                 name = "SummonDichoAxe",
                 type = "CustomFunc",
                 custom_func = function(self)
@@ -552,6 +574,13 @@ return {
                 cond = function(self, aaName)
                     return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActiveByName("Battle Leap Warcry") and
                         not RGMercUtils.SongActiveByName("Group Bestial Alignment")
+                end,
+            },
+            {
+                name = "Leg Strke",
+                type = "Ability",
+                cond = function(self, discSpell)
+                    return mq.TLO.Me.CombatAbilityReady("Leg Strike")()
                 end,
             },
             {
