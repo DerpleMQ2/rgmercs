@@ -620,6 +620,18 @@ local _ClassConfig = {
             },
         },
     },
+    ['PullAbilities'] = {
+        {
+            id = 'Distant Strike',
+            Type = "AA",
+            DisplayName = 'Distant Strike',
+            AbilityName = 'Distant Strike',
+            AbilityRange = 250,
+            cond = function(self)
+                return mq.TLO.Me.AltAbility('Distant Strike')
+            end,
+        },
+    },
     ['DefaultConfig'] = {
         ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['DoIntimidation'] = { DisplayName = "Do Intimidation", Category = "Combat", Tooltip = "Select Use Intimidation", Default = false, },

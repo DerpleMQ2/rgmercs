@@ -499,6 +499,7 @@ end
 function Module:ProcessMezList()
     -- Assume by default we never need to block for mez. We'll set this if-and-only-if
     -- we need to mez but our ability is on cooldown.
+    RGMercUtils.DoCmd("/attack off")
     RGMercsLogger.log_debug("\ayProcessMezList() :: Loop")
     local mezSpell = self:GetMezSpell()
 
@@ -603,7 +604,8 @@ function Module:DoMez()
         self:ProcessMezList()
     else
         RGMercsLogger.log_verbose("DoMez() : Skipping Mez list processing: Spell(%s) Ready(%s) TableSize(%d)", mezSpell and mezSpell() or "None",
-            RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()), RGMercUtils.GetTableSize(self.TempSettings.MezTracker))
+            mezSpell and mezSpell() and RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()) or "NoSpell",
+            RGMercUtils.GetTableSize(self.TempSettings.MezTracker))
     end
 end
 
