@@ -1363,7 +1363,8 @@ local _ClassConfig = {
         {
             gem = 5,
             spells = {
-                { name = "NdtBuff", },
+--                { name = "NdtBuff", },
+                { name = "NdtBuff", cond = function(self) return RGMercUtils.GetSetting('DoNDTBuff') end, },
             },
         },
         {
