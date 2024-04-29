@@ -1696,7 +1696,8 @@ local _ClassConfig = {
             end
 
             if not RGMercUtils.GetSetting('NavCircle') and (RGMercUtils.GetTargetDistance() >= 75 or forceMove) then
-                RGMercUtils.DoCmd("/squelch /nav id %d facing=backward distance=%d", RGMercConfig.Globals.AutoTargetID, RGMercUtils.GetSetting('NavCircleDist'))
+--                RGMercUtils.DoCmd("/squelch /nav id %d facing=backward distance=%d", RGMercConfig.Globals.AutoTargetID, RGMercUtils.GetSetting('NavCircleDist'))
+                RGMercUtils.DoCmd("/squelch /nav id %d distance=%d", RGMercConfig.Globals.AutoTargetID, RGMercUtils.GetSetting('NavCircleDist'))
             end
         end,
     },
