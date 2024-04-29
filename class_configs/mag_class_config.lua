@@ -1484,17 +1484,17 @@ _ClassConfig      = {
                 end,
             },
             {
+                name = "FireBoltNuke",
+                type = "Spell",
+                cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
+            },
+            {
                 name = "FireNuke1",
                 type = "Spell",
                 cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
             },
             {
                 name = "FireNuke2",
-                type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
-            },
-            {
-                name = "FireBoltNuke",
                 type = "Spell",
                 cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
             },
