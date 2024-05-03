@@ -778,7 +778,7 @@ local _ClassConfig = {
                 name = "Life Burn",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctAggro() <= 25
+                    return RGMercUtils.GetSetting('DoLifeBurn') and RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctAggro() <= 25
                 end,
             },
             {
@@ -1252,6 +1252,7 @@ local _ClassConfig = {
         ['PetType']           = { DisplayName = "Pet Class", Category = "Combat", Tooltip = "1 = War, 2 = Rog", Type = "Combo", ComboOptions = { 'War', 'Rog', }, Default = 1, Min = 1, Max = 2, },
         ['DoLich']            = { DisplayName = "Cast Lich", Category = "Spells and Abilities", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
         ['BattleRez']         = { DisplayName = "Battle Rez", Category = "Spells and Abilities", Tooltip = "Do Rezes during combat.", RequiresLoadoutChange = true, Default = true, },
+        ['DoLifeBurn']        = { DisplayName = "Use Life Burn", Category = "Spells and Abilities", Tooltip = "Use Life Burn AA if your aggro is below 25%.", Default = true, },
         ['DoUnity']           = { DisplayName = "Cast Unity", Category = "Spells and Abilities", Tooltip = "Enable casting Mortifiers Unity.", Default = true, },
         ['DeathBloomPercent'] = { DisplayName = "Death Bloom %", Category = "Spells and Abilities", Tooltip = "Mana % at which to cast Death Bloom", Default = 40, Min = 1, Max = 100, },
         ['DoSnare']           = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
