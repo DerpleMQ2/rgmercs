@@ -42,6 +42,29 @@ local _ClassConfig = {
             { element = ImGuiCol.FrameBgActive,    color = { r = 0.2, g = 0.05, b = 0.6, a = 1.0, }, },
         },
     },
+    ['CommandHandlers'] = {
+        startlich = {
+            usage = "/rgl startlich",
+            about = "Start your Lich Spell [Note: This will enabled DoLich if it is not already]",
+            handler =
+                function(self)
+                    RGMercUtils.SetSetting('DoLich', true)
+                    RGMercUtils.SafeCallFunc("Start Necro Lich", self.ClassConfig.HelperFunctions.StartLich, self)
+
+                    return true
+                end,
+        },
+        stoplich = {
+            usage = "/rgl stoplich",
+            about = "Stop your Lich Spell [Note: This will NOT disable DoLich]",
+            handler =
+                function(self)
+                    RGMercUtils.SafeCallFunc("Stop Necro Lich", self.ClassConfig.HelperFunctions.CancelLich, self)
+
+                    return true
+                end,
+        },
+    },
     ['ItemSets']        = {
         ['Epic'] = {
             "Deathwhisper",
@@ -674,6 +697,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Lich Management',
+            timer = 10,
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return true
+            end,
+        },
+        {
             -- this will always run first in combat to check for things like FD or stand up
             -- if you add to it make sure it remains pretty short because everythign will be
             -- evalutated before we move to combat.
@@ -704,6 +737,32 @@ local _ClassConfig = {
         },
     },
     ['Rotations']       = {
+        ['Lich Management'] = {
+            {
+                name = "LichSpell",
+                type = "Spell",
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoLich') and RGMercUtils.SelfBuffCheck(spell) and
+                        (not RGMercUtils.GetSetting('DoUnity') or not RGMercUtils.AAReady("Mortifier's Unity")) and
+                        mq.TLO.Me.PctHPs() > RGMercUtils.GetSetting('StopLichHP') and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('StopLichMana')
+                end,
+            },
+            {
+                name = "LichControl",
+                type = "CustomFunc",
+                active_cond = function(self, spell) return true end,
+                cond = function(self, _)
+                    local lichSpell = self:GetResolvedActionMapItem('LichSpell')
+
+                    return lichSpell and lichSpell() and RGMercUtils.BuffActive(lichSpell) and
+                        (mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StopLichHP') or mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('StopLichMana'))
+                end,
+                custom_func = function(self)
+                    RGMercUtils.SafeCallFunc("Stop Necro Lich", self.ClassConfig.HelperFunctions.CancelLich, self)
+                end,
+            },
+        },
         ['Safety'] = {
             {
                 name = "Death Peace",
@@ -1050,15 +1109,6 @@ local _ClassConfig = {
                 cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
             },
             {
-                name = "LichSpell",
-                type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoLich') and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.AAReady("Mortifier's Unity") and
-                        mq.TLO.Me.PctHPs() > 30
-                end,
-            },
-            {
                 name = "Death Bloom",
                 type = "AA",
                 active_cond = function(self, aaName) return RGMercUtils.SongActiveByName(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
@@ -1121,6 +1171,21 @@ local _ClassConfig = {
     },
     ['HelperFunctions'] = {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
+        CancelLich = function(self)
+            -- detspa means detremental spell affect and 0 mean HPs
+            -- spa is positive spell affect and 15 means mana
+            local lichName = mq.TLO.Me.FindBuff("detspa 0 and spa 15")()
+            mq.cmdf("/removebuff %s", lichName)
+        end,
+
+        StartLich = function(self)
+            local lichSpell = self:GetResolvedActionMapItem('LichSpell')
+
+            if lichSpell and lichSpell() then
+                RGMercUtils.UseSpell(lichSpell.RankName.Name(), mq.TLO.Me.ID(), false)
+            end
+        end,
+
         DoRez = function(self, corpseId)
             if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
                 RGMercUtils.SetTarget(corpseId)
@@ -1250,7 +1315,6 @@ local _ClassConfig = {
     ['DefaultConfig']   = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['PetType']           = { DisplayName = "Pet Class", Category = "Combat", Tooltip = "1 = War, 2 = Rog", Type = "Combo", ComboOptions = { 'War', 'Rog', }, Default = 1, Min = 1, Max = 2, },
-        ['DoLich']            = { DisplayName = "Cast Lich", Category = "Spells and Abilities", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
         ['BattleRez']         = { DisplayName = "Battle Rez", Category = "Spells and Abilities", Tooltip = "Do Rezes during combat.", RequiresLoadoutChange = true, Default = true, },
         ['DoLifeBurn']        = { DisplayName = "Use Life Burn", Category = "Spells and Abilities", Tooltip = "Use Life Burn AA if your aggro is below 25%.", Default = true, },
         ['DoUnity']           = { DisplayName = "Cast Unity", Category = "Spells and Abilities", Tooltip = "Enable casting Mortifiers Unity.", Default = true, },
@@ -1260,6 +1324,9 @@ local _ClassConfig = {
         ['StopFDPct']         = { DisplayName = "Stand Aggro Pct", Category = "Aggro Management", Tooltip = "Aggro % at which to Stand up from FD", Default = 80, Min = 1, Max = 99, },
         ['WakeDeadCorpseCnt'] = { DisplayName = "WtD Corpse Count", Category = "Spells and Abilities", Tooltip = "Number of Corpses before we cast Wake the Dead", Default = 5, Min = 1, Max = 20, },
         ['HPStopDOT']         = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
+        ['DoLich']            = { DisplayName = "Cast Lich", Category = "Lich", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
+        ['StopLichHP']        = { DisplayName = "Stop Lich HP", Category = "Lich", Tooltip = "Cancel Lich at HP Pct [x]", RequiresLoadoutChange = false, Default = 25, Min = 1, Max = 99, },
+        ['StopLichMana']      = { DisplayName = "Stop Lich Mana", Category = "Lich", Tooltip = "Cancel Lich at Mana Pct [x]", RequiresLoadoutChange = false, Default = 100, Min = 1, Max = 100, },
     },
 
 }

@@ -1243,8 +1243,7 @@ function RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllo
 
     if entry.type:lower() == "customfunc" then
         if entry.custom_func then
-            ret = RGMercUtils.SafeCallFunc(string.format("Custom Func Entry: %s", entry.name), entry.custom_func, caller,
-                targetId)
+            ret = RGMercUtils.SafeCallFunc(string.format("Custom Func Entry: %s", entry.name), entry.custom_func, caller, targetId)
         else
             ret = false
         end
@@ -1539,7 +1538,7 @@ function RGMercUtils.MakeValidSetting(module, setting, value)
         return value
     elseif type(defaultConfig[setting].Default) == 'boolean' then
         local boolValue = false
-        if value == "true" or value == "on" or (tonumber(value) or 0) >= 1 then
+        if value == true or value == "true" or value == "on" or (tonumber(value) or 0) >= 1 then
             boolValue = true
         end
 
