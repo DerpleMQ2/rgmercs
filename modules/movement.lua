@@ -65,7 +65,7 @@ Module.DefaultConfig     = {
     ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
     ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
     ['CampHard']         = { DisplayName = "Camp Hard", Category = "Camp", Tooltip = "Return to Camp Loc Everytime", Default = false, },
-    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; 3: Empowered Fellowship; 4: Scaled Wolf", Type = "Combo", ComboOptions = Module.Constants.CampfireTypes, Default = 2, Min = 1, Max = #Module.Constants.CampfireTypes, },
+    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;", Type = "Combo", ComboOptions = Module.Constants.CampfireTypes, Default = 36, Min = 1, Max = #Module.Constants.CampfireTypes, },
     ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
 }
 
@@ -284,7 +284,7 @@ function Module:Campfire(camptype)
 
     if self.settings.MaintainCampfire > 2 then
         if mq.TLO.FindItemCount("Fellowship Campfire Materials") == 0 then
-            self.settings.MaintainCampfire = 2 -- Regular Fellowship
+            self.settings.MaintainCampfire = 36 -- Regular Fellowship
             self:SaveSettings(false)
             RGMercsLogger.log_info("Fellowship Campfire Materials Not Found. Setting to Regular Fellowship.")
         end
