@@ -1041,6 +1041,10 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         return false
     end
 
+    if mq.TLO.Cursor.ID() then
+        RGMercUtils.DoCmd("/autoinv")
+    end
+
     if spellName then
         local spell = mq.TLO.Spell(spellName)
 
@@ -1137,10 +1141,6 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         -- don't return control until we are done.
         if RGMercUtils.GetSetting('WaitOnGlobalCooldown') and not overrideWaitForGlobalCooldown then
             RGMercUtils.WaitGlobalCoolDown()
-        end
-
-        if mq.TLO.Cursor.ID() then -- and mq.TLO.Cursor.ID() ~= cursorIDBefore then
-            RGMercUtils.DoCmd("/autoinv")
         end
 
         return true
