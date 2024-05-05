@@ -27,7 +27,7 @@ local _ClassConfig = {
             "Night's Calming",
             "Convalesce",
         },
-        ['Aura'] = {
+        ['MonkAura'] = {
             "Disciple's Aura",
             "Master's Aura",
         },
