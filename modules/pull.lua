@@ -367,7 +367,7 @@ function Module:RenderPullTargets()
             local _, clicked = ImGui.Selectable(spawn.CleanName() or "Unknown")
             if clicked then
                 RGMercsLogger.log_debug("Targetting: %d", spawn.ID() or 0)
-                mq.cmdf("/target id %d", spawn.ID() or 0)
+                RGMercUtils.DoCmd("/target id %d", spawn.ID() or 0)
             end
             ImGui.PopID()
             ImGui.TableNextColumn()

@@ -383,7 +383,7 @@ end)
 
 mq.event('FallToGround', "#1# has fallen to the ground#*#", function(_, who)
     if who == mq.TLO.Me.DisplayName() and RGMercUtils.GetSetting('StandFailedFD') then
-        mq.cmd("/stand")
+        RGMercUtils.DoCmd("/stand")
     end
 end)
 

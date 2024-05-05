@@ -724,8 +724,8 @@ function Module:GiveTime(combat_state)
 end
 
 function Module:OnDeath()
-    mq.cmd("/nav stop")
-    mq.cmd("/stick off")
+    RGMercUtils.DoCmd("/nav stop")
+    RGMercUtils.DoCmd("/stick off")
 end
 
 function Module:OnZone()
