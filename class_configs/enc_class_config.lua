@@ -1290,16 +1290,14 @@ local _ClassConfig = {
                     if mq.TLO.Target.ID() <= 0 then return false end
 
                     local detAACheck = RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
-                    local envelopingCheck = not RGMercUtils.NPCAAReady("Enveloping Helix", mq.TLO.Target.ID(), false)
-                    local slowedCheck = mq.TLO.Target.Slowed() == nil
+                    local slowedCheck = mq.TLO.Target.Slowed() == nil or RGMercUtils.GetTargetSlowedPct() < 50
 
                     if not uiCheck then
-                        RGMercsLogger.log_verbose("Enc: Slowing Helix: detAA(%s), enveloping(%s), slowed(%s)", RGMercUtils.BoolToColorString(detAACheck),
-                            RGMercUtils.BoolToColorString(envelopingCheck), RGMercUtils.BoolToColorString(slowedCheck))
+                        RGMercsLogger.log_verbose("Enc: Slowing Helix: detAA(%s), slowed(%s), slowedPct(%d)", RGMercUtils.BoolToColorString(detAACheck),
+                            RGMercUtils.BoolToColorString(slowedCheck), RGMercUtils.GetTargetSlowedPct())
                     end
 
-                    return RGMercUtils.GetSetting('DoSlow') and detAACheck and
-                        (envelopingCheck or RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('SlowCount')) and slowedCheck
+                    return RGMercUtils.GetSetting('DoSlow') and detAACheck and slowedCheck
                 end,
             },
             {
