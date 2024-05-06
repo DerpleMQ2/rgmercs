@@ -1175,7 +1175,7 @@ local _ClassConfig = {
             -- detspa means detremental spell affect and 0 mean HPs
             -- spa is positive spell affect and 15 means mana
             local lichName = mq.TLO.Me.FindBuff("detspa 0 and spa 15")()
-            mq.cmdf("/removebuff %s", lichName)
+            RGMercUtils.DoCmd("/removebuff %s", lichName)
         end,
 
         StartLich = function(self)

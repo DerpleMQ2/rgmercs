@@ -621,12 +621,13 @@ end
 
 ---@param gem integer
 ---@param spell string
+---@param waitSpellReady boolean
 ---@param maxWait number # max wait in ms
-function RGMercUtils.MemorizeSpell(gem, spell, maxWait)
+function RGMercUtils.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
     RGMercUtils.DoCmd("/memspell %d \"%s\"", gem, spell)
 
-    while (mq.TLO.Me.Gem(gem)() ~= spell or not mq.TLO.Me.SpellReady(gem)()) and maxWait > 0 do
+    while (mq.TLO.Me.Gem(gem)() ~= spell or (not waitSpellReady or (not mq.TLO.Me.SpellReady(gem)()))) and maxWait > 0 do
         RGMercsLogger.log_verbose("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         mq.delay(100)
         maxWait = maxWait - 100
@@ -970,7 +971,7 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem)
         local spellRequiredMem = false
         if not me.Gem(songName)() then
             RGMercsLogger.log_debug("\ay%s is not memorized - meming!", songName)
-            RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, songName, 5000)
+            RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, songName, true, 5000)
             spellRequiredMem = true
         end
 
@@ -1113,7 +1114,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         local spellRequiredMem = false
         if not me.Gem(spellName)() then
             RGMercsLogger.log_debug("\ay%s is not memorized - meming!", spellName)
-            RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, spellName, 25000)
+            RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, spellName, true, 25000)
             spellRequiredMem = true
         end
 
@@ -1394,7 +1395,7 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
 
     if RGMercUtils.GetXTHaterCount() == 0 and oldSpellInSlot() and mq.TLO.Me.Gem(RGMercUtils.UseGem)() ~= oldSpellInSlot.Name() then
         RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, RGMercUtils.UseGem)
-        RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, oldSpellInSlot.Name(), 15000)
+        RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, oldSpellInSlot.Name(), true, 15000)
     end
 
     -- Move to the next step
@@ -4326,7 +4327,7 @@ function RGMercUtils.LoadSpellLoadOut(spellLoadOut)
         end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
-            RGMercUtils.MemorizeSpell(gem, selectedRank, 15000)
+            RGMercUtils.MemorizeSpell(gem, selectedRank, false, 15000)
         end
     end
 end
