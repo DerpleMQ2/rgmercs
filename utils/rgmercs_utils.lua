@@ -2136,7 +2136,7 @@ function RGMercUtils.AutoMed()
     local forcestand = false
 
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
-    if RGMercConfig:GetTimeSinceLastMove() < math.random(RGMercUtils.GetSetting('AfterMedCombatDelay')) then return end
+    if RGMercConfig:GetTimeSinceLastMove() < math.random(RGMercUtils.GetSetting('AfterMedCombatDelay')) and RGMercUtils.GetSetting('DoMed') ~= 2 then return end
 
     if RGMercConfig.Constants.RGHybrid:contains(me.Class.ShortName()) or RGMercConfig.Constants.RGCasters:contains(me.Class.ShortName()) then
         -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
@@ -2171,7 +2171,7 @@ function RGMercUtils.AutoMed()
         RGMercUtils.GetSetting('ManaMedPct'), me.PctEndurance(),
         RGMercUtils.GetSetting('EndMedPct'), RGMercUtils.BoolToColorString(forcesit), RGMercUtils.BoolToColorString(forcestand))
 
-    if RGMercUtils.GetXTHaterCount() > 0 then
+    if RGMercUtils.GetXTHaterCount() > 0 and RGMercUtils.GetSetting('DoMed') ~= 2 then
         if RGMercUtils.GetSetting('DoMelee') then
             forcesit = false
             forcestand = true
