@@ -459,6 +459,9 @@ end
 function Module:DoClickies()
     if not RGMercUtils.GetSetting('UseClickies') then return end
 
+    -- don't use clickies when we are trying to med.
+    if mq.TLO.Me.Sitting() then return end
+
     for i = 1, 12 do
         local setting = RGMercUtils.GetSetting(string.format("ClickyItem%d", i))
         if setting and setting:len() > 0 then
@@ -466,15 +469,19 @@ function Module:DoClickies()
             RGMercsLogger.log_verbose("Looking for clicky item: %s found: %s", setting, RGMercUtils.BoolToColorString(item() ~= nil))
 
             if item then
-                if (item.RequiredLevel() or 0) <= mq.TLO.Me.Level() then
-                    if not RGMercUtils.BuffActiveByID(item.Clicky.Spell.RankName.ID() or 0) and RGMercUtils.SpellStacksOnMe(item.Clicky.Spell.RankName) then
-                        RGMercsLogger.log_verbose("\aaCasting Item: \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                        RGMercUtils.UseItem(item.Name(), mq.TLO.Me.ID())
+                if item.Timer.TotalSeconds() == 0 then
+                    if (item.RequiredLevel() or 0) <= mq.TLO.Me.Level() then
+                        if not RGMercUtils.BuffActiveByID(item.Clicky.Spell.RankName.ID() or 0) and RGMercUtils.SpellStacksOnMe(item.Clicky.Spell.RankName) then
+                            RGMercsLogger.log_verbose("\aaCasting Item: \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
+                            RGMercUtils.UseItem(item.Name(), mq.TLO.Me.ID())
+                        else
+                            RGMercsLogger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay Already Active!", item.Name(), item.Clicky.Spell.RankName.Name())
+                        end
                     else
-                        RGMercsLogger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay Already Active!", item.Name(), item.Clicky.Spell.RankName.Name())
+                        RGMercsLogger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay I am too low level to use this clicky!", item.Name(), item.Clicky.Spell.RankName.Name())
                     end
                 else
-                    RGMercsLogger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay I am too low level to use this clicky!", item.Name(), item.Clicky.Spell.RankName.Name())
+                    RGMercsLogger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
                 end
             end
         end
