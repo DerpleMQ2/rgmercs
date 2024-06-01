@@ -960,6 +960,10 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem)
             return false
         end
 
+        if mq.TLO.Cursor.ID() then
+            RGMercUtils.DoCmd("/autoinv")
+        end
+
         local targetSpawn = mq.TLO.Spawn(targetId)
 
         if (RGMercUtils.GetXTHaterCount() > 0 or not bAllowMem) and (not RGMercUtils.CastReady(songName) or not mq.TLO.Me.Gem(songName)()) then
