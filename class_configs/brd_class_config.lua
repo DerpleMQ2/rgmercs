@@ -68,6 +68,8 @@ local function generateSongList()
 
     --------------------------------------------------------------------------------------
     local function addSong(songToAdd)
+        if songCount > mq.TLO.Me.NumGems() then return end
+
         songCount = songCount + 1
         table.insert(songCache, {
             gem = songCount,
