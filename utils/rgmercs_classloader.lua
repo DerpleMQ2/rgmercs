@@ -22,18 +22,8 @@ function ClassLoader.load(class)
             customConfigLoaded = true
         end
     end
-    local classConfig
-    if overrideClassConfig['FullConfig'] ~= nil then
-        if overrideClassConfig['FullConfig'] then
-            RGMercsLogger.log_info("\agFull Replacement Config Loaded")
-            classConfig = {}
-            classConfig = overrideClassConfig
-            classConfig.IsCustom = customConfigLoaded
-            return classConfig
-        end
-    else
-        classConfig = ClassLoader.mergeTables(baseClassConfig, overrideClassConfig)
-    end
+
+    local classConfig = ClassLoader.mergeTables(baseClassConfig, overrideClassConfig)
     classConfig.IsCustom = customConfigLoaded
     return classConfig
 end
@@ -42,7 +32,7 @@ function ClassLoader.mergeTables(tblA, tblB)
     for k, v in pairs(tblB) do
         if type(v) == "table" then
             if type(tblA[k] or false) == "table" then
-                ClassLoader.mergeTables(tblA[k] or {}, tblB[k] or {})
+                ClassLoader.mergeTables({}, tblB[k] or {})
             else
                 tblA[k] = v
             end
