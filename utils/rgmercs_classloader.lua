@@ -30,17 +30,30 @@ end
 
 function ClassLoader.mergeTables(tblA, tblB)
     for k, v in pairs(tblB) do
-        if type(v) == "table" then
-            if type(tblA[k] or false) == "table" then
-                ClassLoader.mergeTables({}, tblB[k] or {})
+        if v == nil then
+            -- Remove key from tblA if value in tblB is nil
+            tblA[k] = nil
+        elseif type(v) == "table" then
+            if type(tblA[k]) == "table" then
+                if #v > 0 or next(v) == nil then
+                    -- Directly assign the list from tblB to tblA
+                    tblA[k] = v
+                else
+                    -- Recursive call to merge nested tables
+                    tblA[k] = ClassLoader.mergeTables(tblA[k], v)
+                end
             else
+                -- If tblA[k] is not a table, directly assign tblB[k]
                 tblA[k] = v
             end
         else
+            -- Directly assign the value if it's not a table
             tblA[k] = v
         end
     end
     return tblA
 end
+
+
 
 return ClassLoader
