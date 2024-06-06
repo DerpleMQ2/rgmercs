@@ -661,10 +661,11 @@ local _ClassConfig = {
             "Incite Ally",
             "Infuse Ally",
             "Imbue Ally",
-            "Sanction Ally",
-            "Empower Ally",
-            "Energize Ally",
-            "Necrotize Ally",
+            --The below spells deal PBAE damage on fade and should not be casually used (later spells drop this effect)
+            --"Sanction Ally",
+            --"Empower Ally",
+            --"Energize Ally",
+            --"Necrotize Ally",
         },
         ['PetHaste'] = {
             ---Pet Haste Spell * Var Name:, string outer
