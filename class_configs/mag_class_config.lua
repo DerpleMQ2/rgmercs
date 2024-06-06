@@ -1484,17 +1484,17 @@ _ClassConfig      = {
                 end,
             },
             {
+                name = "FireBoltNuke",
+                type = "Spell",
+                cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
+            },
+            {
                 name = "FireNuke1",
                 type = "Spell",
                 cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
             },
             {
                 name = "FireNuke2",
-                type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
-            },
-            {
-                name = "FireBoltNuke",
                 type = "Spell",
                 cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
             },
@@ -1821,21 +1821,21 @@ _ClassConfig      = {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "PetHealSpell", },
+                { name = "DichoSpell", },
             },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "DichoSpell", },
+                { name = "TwinCast", },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "TwinCast", },
+                { name = "GatherMana", },
             },
         },
         {
@@ -1849,7 +1849,7 @@ _ClassConfig      = {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "GatherMana", },
+                { name = "PetHealSpell", },
             },
         },
     },
