@@ -3593,6 +3593,10 @@ end
 function RGMercUtils.GetDynamicTooltipForSpell(action)
     local resolvedItem = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", action)
 
+    if not resolvedItem or not resolvedItem() then
+        return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, "None", "None")
+    end
+
     return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None",
         resolvedItem.Description() or "None")
 end
