@@ -396,25 +396,31 @@ function Module:Render()
     if mq.TLO.Me.Hovering() then return end
 
     if self.ModuleLoaded and RGMercConfig.Globals.SubmodulesLoaded then
-        if RGMercUtils.GetSetting('DoPull') then
-            ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
-        else
-            ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
-        end
-
-        if ImGui.Button(RGMercUtils.GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
-            self.settings.DoPull = not self.settings.DoPull
-            if RGMercUtils.GetSetting('AutoSetRoles') and mq.TLO.Group.Leader() == mq.TLO.Me.DisplayName() then
-                -- in hunt mode we follow around.
-
-                if self.Constants.PullModes[self.settings.PullMode] ~= "Hunt" then
-                    RGMercUtils.DoCmd("/grouproles %s %s 3", RGMercUtils.GetSetting('DoPull') and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
-                end
-                RGMercUtils.DoCmd("/grouproles set %s 2", RGMercConfig.Globals.MainAssist)                                                   -- set MA
+        if mq.TLO.Navigation.MeshLoaded() then
+            if RGMercUtils.GetSetting('DoPull') then
+                ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
+            else
+                ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
             end
-            self:SaveSettings(false)
+
+            if ImGui.Button(RGMercUtils.GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
+                self.settings.DoPull = not self.settings.DoPull
+                if RGMercUtils.GetSetting('AutoSetRoles') and mq.TLO.Group.Leader() == mq.TLO.Me.DisplayName() then
+                    -- in hunt mode we follow around.
+
+                    if self.Constants.PullModes[self.settings.PullMode] ~= "Hunt" then
+                        RGMercUtils.DoCmd("/grouproles %s %s 3", RGMercUtils.GetSetting('DoPull') and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
+                    end
+                    RGMercUtils.DoCmd("/grouproles set %s 2", RGMercConfig.Globals.MainAssist)                                                   -- set MA
+                end
+                self:SaveSettings(false)
+            end
+            ImGui.PopStyleColor()
+        else
+            ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
+            ImGui.Button("No Nav Mesh Loaded!", ImGui.GetWindowWidth() * .3, 25)
+            ImGui.PopStyleColor()
         end
-        ImGui.PopStyleColor()
 
         if mq.TLO.Target() and RGMercUtils.TargetIsType("NPC") then
             ImGui.SameLine()
@@ -1153,8 +1159,8 @@ function Module:GiveTime(combat_state)
     end
 
     if not mq.TLO.Navigation.MeshLoaded() then
-        RGMercsLogger.log_debug("\ar ERROR: There's no mesh for this zone. Can't pull. \ax")
-        RGMercsLogger.log_debug("\ar Disabling Pulling. \ax")
+        RGMercsLogger.log_error("\ar ERROR: There's no mesh for this zone. Can't pull. \ax")
+        RGMercsLogger.log_error("\ar Disabling Pulling. \ax")
         self.settings.DoPull = false
         return
     end
