@@ -35,7 +35,7 @@ local Tooltips     = {
     CallAtk             = "Spell Line: Increase Attack / Decrease HP Per Tick",
     AeTaunt             = "Spell Line: PBAE Hate Increase + Taunt",
     PoisonDot           = "Spell Line: Poison Dot",
-    Spearnuke           = "Spell Line: Instacast Disease Nuke",
+    SpearNuke           = "Spell Line: Instacast Disease Nuke",
     BondTap             = "Spell Line: LifeTap DOT",
     DireTap             = "Spell Line: LifeTap",
     LifeTap             = "Spell Line: LifeTap",
@@ -1137,9 +1137,9 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Spearnuke",
+                name = "SpearNuke",
                 type = "Spell",
-                tooltip = Tooltips.Spearnuke,
+                tooltip = Tooltips.SpearNuke,
                 cond = function(self, spell)
                     return RGMercUtils.SpellLoaded(spell) and RGMercUtils.ManaCheck()
                 end,
