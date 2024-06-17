@@ -4,7 +4,7 @@ local Set                            = require("mq.Set")
 
 local Config                         = {
     _version = '1.0 Beta',
-    _subVersion = "2023 Larions Song!",
+    _subVersion = "2023 Laurion\'s Song!",
     _name =
     "RGMercs Lua Edition",
     _author = 'Derple, Morisato, Greyn',
