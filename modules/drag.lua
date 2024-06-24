@@ -8,9 +8,9 @@ Module.__index           = Module
 Module.settings          = {}
 Module.DefaultConfig     = {
     ['DoDrag']       = { DisplayName = "Drag Corpses", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = false, },
-    ['DoSearchDrag'] = { DisplayName = "Use Spawn Search Draging", Category = "Drag", Tooltip = "Use Search to find drag targets", Default = false, },
+    ['DoSearchDrag'] = { DisplayName = "Use Spawn Search Dragging", Category = "Drag", Tooltip = "Use Search to find drag targets", Default = false, },
     ['SearchDrag']   = { DisplayName = "Spawn Search", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = "pccorpse group radius 60", },
-    ['DoDanNetDrag'] = { DisplayName = "Use DanNet Draging", Category = "Drag", Tooltip = "Use DanNet to find drag targets", Default = false, },
+    ['DoDanNetDrag'] = { DisplayName = "Use DanNet Dragging", Category = "Drag", Tooltip = "Use DanNet to find drag targets", Default = false, },
 }
 Module.DefaultCategories = {}
 
