@@ -1372,10 +1372,10 @@ local _ClassConfig = {
         ['DoCharmClick']    = { DisplayName = "Do Charm Click", Category = "Equipment", Tooltip = "Click your charm item", Default = true, },
         ['StartBigTap']     = { DisplayName = "Use Big Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100, },
         ['StartLifeTap']    = { DisplayName = "Use Life Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Life Taps.", Default = 100, Min = 1, Max = 100, },
-        ['MantleCount']     = { DisplayName = "Mantle Count", Category = "Discipllines", Tooltip = "Number of mobs around you before you use Mantle Disc.", Default = 3, Min = 1, Max = 10, },
-        ['CarapaceCount']   = { DisplayName = "Carapace Count", Category = "Discipllines", Tooltip = "Number of mobs around you before you use Carapace Disc.", Default = 3, Min = 1, Max = 10, },
-        ['CurseGuardCount'] = { DisplayName = "Curse Guard Count", Category = "Discipllines", Tooltip = "Number of mobs around you before you use Curse Guard Disc.", Default = 3, Min = 1, Max = 10, },
-        ['UnholyCount']     = { DisplayName = "Unholy Count", Category = "Discipllines", Tooltip = "Number of mobs around you before you use Unholy Disc.", Default = 3, Min = 1, Max = 10, },
+        ['MantleCount']     = { DisplayName = "Mantle Count", Category = "Disciplines", Tooltip = "Number of mobs around you before you use Mantle Disc.", Default = 3, Min = 1, Max = 10, },
+        ['CarapaceCount']   = { DisplayName = "Carapace Count", Category = "Disciplines", Tooltip = "Number of mobs around you before you use Carapace Disc.", Default = 3, Min = 1, Max = 10, },
+        ['CurseGuardCount'] = { DisplayName = "Curse Guard Count", Category = "Disciplines", Tooltip = "Number of mobs around you before you use Curse Guard Disc.", Default = 3, Min = 1, Max = 10, },
+        ['UnholyCount']     = { DisplayName = "Unholy Count", Category = "Disciplines", Tooltip = "Number of mobs around you before you use Unholy Disc.", Default = 3, Min = 1, Max = 10, },
     },
 }
 
