@@ -38,7 +38,7 @@ local PullStateDisplayStrings            = {
     ['PULL_IDLE']               = { Display = ICONS.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
     ['PULL_GROUPWATCH_WAIT']    = { Display = ICONS.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_NAV_INTERRUPT']      = { Display = ICONS.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
-    ['PULL_SCAN']               = { Display = ICONS.FA_EYE, Text = "Scanning for Targest", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_SCAN']               = { Display = ICONS.FA_EYE, Text = "Scanning for Targets", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_PULLING']            = { Display = ICONS.FA_BULLSEYE, Text = "Pulling", Color = { r = 0.8, g = 0.03, b = 0.02, a = 1.0, }, },
     ['PULL_MOVING_TO_WP']       = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_NAV_TO_TARGET']      = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
