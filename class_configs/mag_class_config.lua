@@ -1605,9 +1605,8 @@ _ClassConfig      = {
                 cond = function(self, spell)
                     local modRodSpell = self.ResolvedActionMap['ManaRodSummon']
                     if not modRodSpell or not modRodSpell() then return false end
-                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.RankName.Base(1)()).Name()
                     return RGMercUtils.GetSetting('SummonModRods') and (mq.TLO.Me.AltAbility("Summon Modulation Shard").ID() or 0) == 0 and
-                        mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
+                        mq.TLO.FindItemCount(modRodSpell.RankName.Base(1)() or "")() == 0 and
                         (mq.TLO.Cursor.ID() or 0) == 0
                 end,
             },
@@ -1617,9 +1616,8 @@ _ClassConfig      = {
                 cond = function(self, aaName)
                     local modRodSpell = mq.TLO.Spell(aaName)
                     if not modRodSpell or not modRodSpell() then return false end
-                    self.TempSettings.GroupModRod = mq.TLO.FindItem(modRodSpell.RankName.Base(1)()).Name()
                     return RGMercUtils.GetSetting('SummonModRods') and
-                        mq.TLO.FindItemCount(self.TempSettings.GroupModRod) == 0 and
+                        mq.TLO.FindItemCount(modRodSpell.RankName.Base(1)() or "")() == 0 and
                         (mq.TLO.Cursor.ID() or 0) == 0 and RGMercUtils.AAReady(aaName)
                 end,
             },
