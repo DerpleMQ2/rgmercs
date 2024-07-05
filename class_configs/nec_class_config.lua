@@ -70,6 +70,10 @@ local _ClassConfig = {
             "Deathwhisper",
             "Soulwhisper",
         },
+        ['OoW_Chest'] = {
+            "Blightbringer's Tunic of the Grave",
+            "Deathcaller's Robe",
+        },
     },
     ['AbilitySets']     = {
         ['SelfHPBuff'] = {
@@ -987,6 +991,13 @@ local _ClassConfig = {
             },
         },
         ['Burn'] = {
+            {
+                name = "OoW_Chest",
+                type = "Item",
+                cond = function(self, itemName)
+                    return mq.TLO.FindItemCount(itemName)() ~= 0
+				end,
+            },
             {
                 name = "Funeral Pyre",
                 type = "AA",
