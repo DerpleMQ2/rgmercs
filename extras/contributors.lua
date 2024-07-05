@@ -6,4 +6,5 @@ return {
     'Werkfakter',
     'SonicZentropy',
     'Tiddliestix',
+    "Algar",
 }
