@@ -72,7 +72,7 @@ local _ClassConfig = {
         },
         ['OoW_Chest'] = {
             "Blightbringer's Tunic of the Grave",
-			"Deathcaller's Robe",
+            "Deathcaller's Robe",
         },
     },
     ['AbilitySets']     = {
@@ -997,7 +997,7 @@ local _ClassConfig = {
                 cond = function(self, itemName)
                     return mq.TLO.FindItemCount(itemName)() ~= 0
 				end,
-			},
+            },
             {
                 name = "Funeral Pyre",
                 type = "AA",
