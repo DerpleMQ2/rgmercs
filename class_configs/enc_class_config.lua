@@ -1230,7 +1230,7 @@ local _ClassConfig = {
 
             },
             {
-                name = "alculated Insanity",
+                name = "Calculated Insanity",
                 type = "AA",
                 cond = function(self, aaName) return true end,
 
@@ -1246,6 +1246,18 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName) return true end,
 
+            },
+            {
+                name = mq.TLO.Me.Inventory("Chest").Name(),
+                type = "Item",
+                active_cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
+                end,
+                cond = function(self)
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                end,
             },
         },
         ['Debuff'] = {
@@ -1435,6 +1447,7 @@ local _ClassConfig = {
         ['DoGroupAbsorb'] = { DisplayName = "Do Group Absorb", Category = "Spells and Abilities", Tooltip = "Enable casting the Group Absorb line with -Hate Proc.", Default = true, },
         ['DoAggroRune']   = { DisplayName = "Do Aggro Rune", Category = "Spells and Abilities", Tooltip = "Enable casting the Tank Aggro Rune", Default = true, },
         ['DoStripBuff']   = { DisplayName = "Do Strip Buffs", Category = "Spells and Abilities", Tooltip = "Enable casting buff canceler spells.", Default = true, },
+        ['DoChestClick']  = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
     },
 }
 
