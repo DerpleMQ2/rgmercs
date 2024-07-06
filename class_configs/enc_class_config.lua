@@ -913,13 +913,13 @@ local _ClassConfig = {
                 name = "AuraBuff2",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell) return not RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell) return RGMercUtils.CanUseAA('Auroria Mastery') and not RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
             },
             {
                 name = "AuraBuff3",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell) return RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell) return RGMercUtils.CanUseAA('Auroria Mastery') and RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
             },
 
         },
