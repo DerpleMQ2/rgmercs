@@ -1338,6 +1338,18 @@ local _ClassConfig = {
             end,
         },
         {
+            id = 'SnareDOT',
+            Type = "Spell",
+            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('SnareDOT').RankName.Name() or "" end,
+            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('SnareDOT').RankName.Name() or "" end,
+            AbilityRange = 150,
+            cond = function(self)
+                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('SnareDOT')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
             id = 'ForPower',
             Type = "Spell",
             DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('ForPower').RankName.Name() or "" end,
