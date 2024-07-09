@@ -56,7 +56,17 @@ local function log(logLevel, output, ...)
 		local fileOutput = output:gsub("\a.", "")
 		local fileHeader = logLevels[logLevel].header:gsub("\a.", "")
 		local fileTracer = callerTracer:gsub("\a.", "")
-		mq.cmd(string.format('/mqlog [%s:%s(%s)] <%s> %s', mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
+		local logDir = mq.TLO.MacroQuest.Path().."/Logs/"
+		local fileName = string.format("RGMercs_%s_%s.log", mq.TLO.Me.Name(), logLevel)
+		local filepath = string.format("%s%s", logDir, fileName)
+
+		local file = io.open(filepath, "a")
+		if file then
+			file:write(string.format("[%s:%s(%s)] <%s> %s\n", mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
+			file:close()
+		else
+			mq.cmd("/echo Could not open log file for writing.")
+		end
 	end
 
 	if #filters > 0 then
