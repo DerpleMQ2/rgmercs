@@ -4,6 +4,7 @@ local RGMercUtils     = require("utils.rgmercs_utils")
 
 local actions         = {}
 
+local logFileOpened	  = ""
 local logLeaderStart  = '\ar[\ax\agRGMercs'
 local logLeaderEnd    = '\ar]\ax\aw >>>'
 
@@ -11,6 +12,8 @@ local logLeaderEnd    = '\ar]\ax\aw >>>'
 local currentLogLevel = 3
 local logToFileAlways = false
 local filters         = {}
+
+local logFileHandle   = nil
 
 function actions.get_log_level() return currentLogLevel end
 
@@ -32,6 +35,26 @@ local logLevels = {
 	['warn']          = { level = 2, header = "\ayWARN   \ax", },
 	['error']         = { level = 1, header = "\arERROR  \ax", },
 }
+
+local function openLogFile()
+	local logDir = mq.TLO.MacroQuest.Path().."/Logs/"
+	local newFileName = string.format("RGMercs_%s.log", mq.TLO.Me.Name())
+	local newFilePath = string.format("%s%s", logDir, newFileName)
+
+	if logFileHandle and logFileOpened ~= newFilePath then
+		logFileHandle:close()
+		logFileHandle = nil
+		logFileOpened = ""
+	end
+
+	if not logFileHandle then
+		logFileHandle = io.open(newFilePath, "a")
+		logFileOpened = newFilePath
+		if not logFileHandle then
+			mq.cmd("/echo Could not open log file for writing.")
+		end
+	end
+end
 
 local function getCallStack()
 	local info = debug.getinfo(4, "Snl")
@@ -56,16 +79,10 @@ local function log(logLevel, output, ...)
 		local fileOutput = output:gsub("\a.", "")
 		local fileHeader = logLevels[logLevel].header:gsub("\a.", "")
 		local fileTracer = callerTracer:gsub("\a.", "")
-		local logDir = mq.TLO.MacroQuest.Path().."/Logs/"
-		local fileName = string.format("RGMercs_%s_%s.log", mq.TLO.Me.Name(), logLevel)
-		local filepath = string.format("%s%s", logDir, fileName)
 
-		local file = io.open(filepath, "a")
-		if file then
-			file:write(string.format("[%s:%s(%s)] <%s> %s\n", mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
-			file:close()
-		else
-			mq.cmd("/echo Could not open log file for writing.")
+		openLogFile()
+		if logFileHandle then
+			logFileHandle:write(string.format("[%s:%s(%s)] <%s> %s\n", mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
 		end
 	end
 
