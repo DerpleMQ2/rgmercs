@@ -839,8 +839,8 @@ end
 
 ---comment
 ---@param classes table|nil # mq.Set type
----@param resourceStartPct number
----@param resourceStopPct number
+---@param resourceStartPct number -- resume pulls at this pct
+---@param resourceStopPct number -- stop pulls at this pct
 ---@param campData table
 ---@return boolean, string
 function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, campData)
@@ -854,17 +854,20 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
 
         if member and member.ID() > 0 then
             if not classes or classes:contains(member.Class.ShortName()) then
-                local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceStopPct or resourceStartPct
+                local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceStartPct or resourceStopPct
                 if member.PctHPs() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
+                    RGMercsLogger.log_warn("\arMember is low on hp - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%s \aoStopPct: \at%s \ayStartPct: \at%s \aoPullState: \at%s",resourcePct,resourceStopPct,resourceStartPct, self.TempSettings.PullState)
                     return false, string.format("%s Low HP", member.CleanName())
                 end
-                if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct then
+                if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct  then
                     RGMercUtils.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
+                    RGMercsLogger.log_warn("\arMember is low on mana - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%s \aoStopPct: \at%s \ayStartPct: \at%s \aoPullState: \at%s",resourcePct,resourceStopPct,resourceStartPct, self.TempSettings.PullState)
                     return false, string.format("%s Low Mana", member.CleanName())
                 end
-                if member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
+                if member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct  then
                     RGMercUtils.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
+                    RGMercsLogger.log_warn("\arMember is low on endurance - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%s \aoStopPct: \at%s \ayStartPct: \at%s \aoPullState: \at%s",resourcePct,resourceStopPct,resourceStartPct, self.TempSettings.PullState)
                     return false, string.format("%s Low End", member.CleanName())
                 end
 
