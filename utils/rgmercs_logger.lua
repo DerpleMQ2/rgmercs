@@ -4,7 +4,7 @@ local RGMercUtils     = require("utils.rgmercs_utils")
 
 local actions         = {}
 
-local logFileOpened	  = ""
+local logFileOpened   = ""
 local logLeaderStart  = '\ar[\ax\agRGMercs'
 local logLeaderEnd    = '\ar]\ax\aw >>>'
 
@@ -19,7 +19,16 @@ function actions.get_log_level() return currentLogLevel end
 
 function actions.set_log_level(level) currentLogLevel = level end
 
-function actions.set_log_to_file(logToFile) logToFileAlways = logToFile end
+function actions.set_log_to_file(logToFile)
+	if logToFileAlways ~= logToFile then
+		logToFileAlways = logToFile
+		if not logToFileAlways and logFileHandle then
+			logFileHandle:close()
+			logFileHandle = nil
+			logFileOpened = ""
+		end
+	end
+end
 
 function actions.set_log_filter(filter)
 	filters = RGMercUtils.split(filter:lower(), "|")
@@ -83,6 +92,7 @@ local function log(logLevel, output, ...)
 		openLogFile()
 		if logFileHandle then
 			logFileHandle:write(string.format("[%s:%s(%s)] <%s> %s\n", mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
+			logFileHandle:flush() -- Ensure the output is immediately written to the file
 		end
 	end
 
