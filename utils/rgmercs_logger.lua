@@ -4,7 +4,7 @@ local RGMercUtils     = require("utils.rgmercs_utils")
 
 local actions         = {}
 
-local logFileOpened   = ""
+local logFileOpened   = nil
 local logLeaderStart  = '\ar[\ax\agRGMercs'
 local logLeaderEnd    = '\ar]\ax\aw >>>'
 
@@ -25,7 +25,7 @@ function actions.set_log_to_file(logToFile)
 		if not logToFileAlways and logFileHandle then
 			logFileHandle:close()
 			logFileHandle = nil
-			logFileOpened = ""
+			logFileOpened = nil
 		end
 	end
 end
@@ -53,14 +53,14 @@ local function openLogFile()
 	if logFileHandle and logFileOpened ~= newFilePath then
 		logFileHandle:close()
 		logFileHandle = nil
-		logFileOpened = ""
+		logFileOpened = nil
 	end
 
 	if not logFileHandle then
 		logFileHandle = io.open(newFilePath, "a")
 		logFileOpened = newFilePath
 		if not logFileHandle then
-			mq.cmd("/echo Could not open log file for writing.")
+			print("Could not open log file for writing.")
 		end
 	end
 end
