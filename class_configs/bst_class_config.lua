@@ -872,17 +872,18 @@ return {
         },
         ['Paragon'] = {
             {
-                name = "Focused Paragon of Spirit",
+                name = "Paragon of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
                     return RGMercUtils.AAReady(aaName)
                 end,
             },
             {
-                name = "Paragon of Spirit",
+                name = "Focused Paragon of Spirits",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return RGMercUtils.AAReady(aaName) and not
+					    RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
                 end,
             },
         },
