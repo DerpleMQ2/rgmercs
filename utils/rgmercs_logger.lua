@@ -3,7 +3,7 @@ local mq              = require('mq')
 local RGMercUtils     = require("utils.rgmercs_utils")
 
 local actions         = {}
-
+local logDir = mq.TLO.MacroQuest.Path("Logs")()
 local logFileOpened   = nil
 local logLeaderStart  = '\ar[\ax\agRGMercs'
 local logLeaderEnd    = '\ar]\ax\aw >>>'
@@ -46,9 +46,8 @@ local logLevels = {
 }
 
 local function openLogFile()
-	local logDir = mq.TLO.MacroQuest.Path().."/Logs/"
 	local newFileName = string.format("RGMercs_%s.log", mq.TLO.Me.Name())
-	local newFilePath = string.format("%s%s", logDir, newFileName)
+	local newFilePath = string.format("%s/%s", logDir, newFileName)
 
 	if logFileHandle and logFileOpened ~= newFilePath then
 		logFileHandle:close()
