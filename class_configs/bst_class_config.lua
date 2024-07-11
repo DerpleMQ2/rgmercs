@@ -669,21 +669,21 @@ return {
             end,
         },
         {
-            name = 'Paragon',
-            targetId = function(self)
-                return { RGMercUtils.FindWorstHurtManaGroupMember(RGMercUtils.GetSetting('ParagonPct')),
-                    RGMercUtils.FindWorstHurtManaXT(RGMercUtils.GetSetting('ParagonPct')), }
-            end,
-            cond = function(self, combat_state)
-                return combat_state ~= "Downtime" and RGMercUtils.GetSetting('DoParagon')
-            end,
-        },
-        {
             name = 'Downtime Pet',
             targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     RGMercUtils.DoBuffCheck() and mq.TLO.Me.Pet.ID() > 0 and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
+        },
+        {
+            name = 'FocusedParagon',
+            targetId = function(self)
+                return { RGMercUtils.FindWorstHurtManaGroupMember(RGMercUtils.GetSetting('ParagonPct')),
+                    RGMercUtils.FindWorstHurtManaXT(RGMercUtils.GetSetting('ParagonPct')), }
+            end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and RGMercUtils.GetSetting('DoParagon') and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell) and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -872,14 +872,7 @@ return {
         },
         ['Paragon'] = {
             {
-                name = "Focused Paragon of Spirit",
-                type = "AA",
-                cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
-                end,
-            },
-            {
-                name = "Paragon of Spirit",
+                name = "Focused Paragon of Spirits",
                 type = "AA",
                 cond = function(self, aaName)
                     return RGMercUtils.AAReady(aaName)
@@ -892,6 +885,13 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return mq.TLO.Me.Pet.ID() == 0
+                end,
+            },
+            {
+                name = "Paragon of Spirit",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoParagon') and (mq.TLO.Group.LowMana(RGMercUtils.GetSetting('ParagonPct'))() or -1) > 0
                 end,
             },
             {

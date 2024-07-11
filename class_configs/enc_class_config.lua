@@ -790,14 +790,19 @@ local _ClassConfig = {
         {
             name = 'SelfBuff',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
-            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
 
         },
         {
-            name = 'Pet Management',
-            targetId = function(self) return { mq.TLO.Me.ID(), } end,
-            cond = function(self, combat_state) return combat_state == "Downtime" end,
-
+            name = 'PetBuff',
+            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and
+                    RGMercUtils.DoBuffCheck() and mq.TLO.Me.Pet.ID() > 0 and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
         },
         {
             name = 'GroupBuff',
@@ -813,7 +818,10 @@ local _ClassConfig = {
                 end
                 return groupIds
             end,
-            cond = function(self, combat_state) return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
+                    RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
         },
         {
             name = 'Debuff',
@@ -845,13 +853,7 @@ local _ClassConfig = {
 
     },
     ['Rotations']     = {
-        ['Pet Management'] = {
-            {
-                name = "PetSpell",
-                type = "Spell",
-                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
-                cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 end,
-            },
+        ['PetBuff'] = {
             {
                 name = "PetBuffSpell",
                 type = "Spell",
@@ -860,6 +862,12 @@ local _ClassConfig = {
             },
         },
         ['SelfBuff'] = {
+            {
+                name = "PetSpell",
+                type = "Spell",
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
+                cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 end,
+            },
             {
                 name = "SelfHPBuff",
                 type = "Spell",
@@ -993,7 +1001,8 @@ local _ClassConfig = {
                     if not RGMercUtils.GetSetting('DoNDTBuff') then return false end
                     if not target or not target() then return false end
 
-                    if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+                    if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
+                        and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
 
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
                     return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.SpellStacksOnTarget(spell)
