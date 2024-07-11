@@ -683,8 +683,7 @@ return {
                     RGMercUtils.FindWorstHurtManaXT(RGMercUtils.GetSetting('ParagonPct')), }
             end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('DoParagon') and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
-                    and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and RGMercUtils.GetSetting('DoParagon') and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell) and not RGMercUtils.Feigning()
             end,
         },
         {
