@@ -870,7 +870,7 @@ return {
                 end,
             },
         },
-        ['Paragon'] = {
+        ['FocusedParagon'] = {
             {
                 name = "Focused Paragon of Spirits",
                 type = "AA",
