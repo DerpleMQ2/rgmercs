@@ -3,7 +3,8 @@ local mq              = require('mq')
 local RGMercUtils     = require("utils.rgmercs_utils")
 
 local actions         = {}
-
+local logDir = mq.TLO.MacroQuest.Path("Logs")()
+local logFileOpened   = nil
 local logLeaderStart  = '\ar[\ax\agRGMercs'
 local logLeaderEnd    = '\ar]\ax\aw >>>'
 
@@ -12,11 +13,22 @@ local currentLogLevel = 3
 local logToFileAlways = false
 local filters         = {}
 
+local logFileHandle   = nil
+
 function actions.get_log_level() return currentLogLevel end
 
 function actions.set_log_level(level) currentLogLevel = level end
 
-function actions.set_log_to_file(logToFile) logToFileAlways = logToFile end
+function actions.set_log_to_file(logToFile)
+	if logToFileAlways ~= logToFile then
+		logToFileAlways = logToFile
+		if not logToFileAlways and logFileHandle then
+			logFileHandle:close()
+			logFileHandle = nil
+			logFileOpened = nil
+		end
+	end
+end
 
 function actions.set_log_filter(filter)
 	filters = RGMercUtils.split(filter:lower(), "|")
@@ -32,6 +44,25 @@ local logLevels = {
 	['warn']          = { level = 2, header = "\ayWARN   \ax", },
 	['error']         = { level = 1, header = "\arERROR  \ax", },
 }
+
+local function openLogFile()
+	local newFileName = string.format("RGMercs_%s.log", mq.TLO.Me.Name())
+	local newFilePath = string.format("%s/%s", logDir, newFileName)
+
+	if logFileHandle and logFileOpened ~= newFilePath then
+		logFileHandle:close()
+		logFileHandle = nil
+		logFileOpened = nil
+	end
+
+	if not logFileHandle then
+		logFileHandle = io.open(newFilePath, "a")
+		logFileOpened = newFilePath
+		if not logFileHandle then
+			print("Could not open log file for writing.")
+		end
+	end
+end
 
 local function getCallStack()
 	local info = debug.getinfo(4, "Snl")
@@ -56,7 +87,12 @@ local function log(logLevel, output, ...)
 		local fileOutput = output:gsub("\a.", "")
 		local fileHeader = logLevels[logLevel].header:gsub("\a.", "")
 		local fileTracer = callerTracer:gsub("\a.", "")
-		mq.cmd(string.format('/mqlog [%s:%s(%s)] <%s> %s', mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
+
+		openLogFile()
+		if logFileHandle then
+			logFileHandle:write(string.format("[%s:%s(%s)] <%s> %s\n", mq.TLO.Me.Name(), fileHeader, fileTracer, now, fileOutput))
+			logFileHandle:flush() -- Ensure the output is immediately written to the file
+		end
 	end
 
 	if #filters > 0 then

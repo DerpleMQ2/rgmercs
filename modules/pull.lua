@@ -20,6 +20,8 @@ Module.TempSettings.LastPullerMercChec   = 0
 Module.TempSettings.HuntX                = 0
 Module.TempSettings.HuntY                = 0
 Module.TempSettings.HuntZ                = 0
+Module.TempSettings.MyPaths              = {}
+Module.TempSettings.SelectedPath         = "None"
 
 local PullStates                         = {
     ['PULL_IDLE']               = 1,
@@ -235,7 +237,11 @@ function Module:LoadSettings()
     else
         self.settings = config()
     end
-
+    local pathsFile = string.format('%s/MyUI/MyPaths/MyPaths_Paths.lua', mq.configDir)
+    local pathsConfig, err = loadfile(pathsFile)
+    if not err and pathsConfig then
+        Module.TempSettings.MyPaths = pathsConfig()
+    end
     -- turn off at startup for safety
     self.settings.DoPull = false
 
@@ -541,7 +547,33 @@ function Module:Render()
                 self:CreateWayPointHere()
             end
             ImGui.PopID()
+            if self.TempSettings.MyPaths[mq.TLO.Zone.ShortName()] then
+                ImGui.SameLine()
+                if ImGui.SmallButton('Reload Paths##ReloadPaths') then
+                    self.TempSettings.MyPaths = dofile(string.format('%s/MyUI/MyPaths/MyPaths_Paths.lua', mq.configDir))
+                end
+                ImGui.SetNextItemWidth(120)
+                if ImGui.BeginCombo("MyPaths Path Avail##SelectPath", self.TempSettings.SelectedPath) then
+                    for name, data in pairs(self.TempSettings.MyPaths[mq.TLO.Zone.ShortName()]) do
+                        local isSelected = name == self.TempSettings.SelectedPath
+                        if ImGui.Selectable(name, isSelected) then
+                            self.TempSettings.SelectedPath = name
+                        end
+                    end
+                    ImGui.EndCombo()
+                end
+                if self.TempSettings.SelectedPath ~= "None" then
+                    self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] = {}
+                    for step, data in pairs(self.TempSettings.MyPaths[mq.TLO.Zone.ShortName()][self.TempSettings.SelectedPath]) do
+                        local mpy, mpx, mpz = data.loc:match("([^,]+),%s*([^,]+),%s*([^,]+)")
+                        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][step] = {x = tonumber(mpx), y = tonumber(mpy), z = tonumber(mpz)}
+                    end
+                end
 
+            else
+                Module.TempSettings.MyPaths = 'None'
+            end
+            
             if ImGui.BeginTable("Waypoints", 3, bit32.bor(ImGuiTableFlags.Borders)) then
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 40.0)
                 ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthStretch), 150.0)
@@ -549,6 +581,7 @@ function Module:Render()
                 ImGui.TableHeadersRow()
 
                 local waypointList = self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] or {}
+
                 for idx, wpData in ipairs(waypointList) do
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(idx))
@@ -806,11 +839,11 @@ end
 
 ---comment
 ---@param classes table|nil # mq.Set type
----@param resourceStartPct number
----@param resourceStopPct number
+---@param resourceResumePct number -- Resume pulls at this pct
+---@param resourcePausePct number -- Hold pulls at this pct
 ---@param campData table
 ---@return boolean, string
-function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, campData)
+function Module:CheckGroupForPull(classes, resourceResumePct, resourcePausePct, campData)
     local groupCount = mq.TLO.Group.Members()
 
     if not groupCount or groupCount == 0 then return true, "" end
@@ -821,17 +854,20 @@ function Module:CheckGroupForPull(classes, resourceStartPct, resourceStopPct, ca
 
         if member and member.ID() > 0 then
             if not classes or classes:contains(member.Class.ShortName()) then
-                local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceStopPct or resourceStartPct
+                local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceResumePct or resourcePausePct
                 if member.PctHPs() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
+                    RGMercsLogger.log_verbose("\arMember is low on Health - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",resourcePct,resourcePausePct,resourceResumePct, self.TempSettings.PullState)
                     return false, string.format("%s Low HP", member.CleanName())
                 end
-                if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct then
+                if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct  then
                     RGMercUtils.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
+                    RGMercsLogger.log_verbose("\arMember is low on Mana - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",resourcePct,resourcePausePct,resourceResumePct, self.TempSettings.PullState)
                     return false, string.format("%s Low Mana", member.CleanName())
                 end
-                if member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
+                if member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct  then
                     RGMercUtils.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
+                    RGMercsLogger.log_verbose("\arMember is low on Endurance - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",resourcePct,resourcePausePct,resourceResumePct, self.TempSettings.PullState)
                     return false, string.format("%s Low End", member.CleanName())
                 end
 
