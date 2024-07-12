@@ -377,12 +377,13 @@ local function RGInit(...)
 end
 
 local function Main()
-    if mq.TLO.Me.Zoning() then
+    if mq.TLO.Zone.ID() ~= RGMercConfig.Globals.CurZoneId then
         if notifyZoning then
             RGMercModules:ExecAll("OnZone")
             notifyZoning = false
         end
         mq.delay(100)
+        RGMercConfig.Globals.CurZoneId = mq.TLO.Zone.ID()
         return
     end
 

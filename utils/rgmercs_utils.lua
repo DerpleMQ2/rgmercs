@@ -198,7 +198,7 @@ function RGMercUtils.HandleDeath()
         end
     end
 
-    mq.delay("2m", function() return (not mq.TLO.Me.Zoning()) end)
+    mq.delay("2m", function() return (mq.TLO.Zone.ID() ~= RGMercConfig.Globals.CurZoneId) end)
 
     RGMercsLogger.log_debug("Done zoning post death.")
 
