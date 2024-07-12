@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-doc-field
 -- Global
 ---@class ScrollingPlotBuffer
 ---@field MaxSize number
