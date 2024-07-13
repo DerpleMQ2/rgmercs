@@ -683,7 +683,8 @@ return {
                     RGMercUtils.FindWorstHurtManaXT(RGMercUtils.GetSetting('ParagonPct')), }
             end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('DoParagon') and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell) and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and RGMercUtils.GetSetting('DoParagon') and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell) and
+                not RGMercUtils.Feigning()
             end,
         },
         {
@@ -1160,7 +1161,7 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     return RGMercUtils.GetSetting('DoEpic') and
-                        mq.TLO.FindItem(itemName)() and mq.TLO.Me.ItemReady(itemName) and
+                        mq.TLO.FindItem(itemName)() and mq.TLO.Me.ItemReady(itemName)() and
                         (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil or mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
                 end,
             },
