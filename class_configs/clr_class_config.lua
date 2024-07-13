@@ -1168,7 +1168,7 @@ local _ClassConfig = {
                     local selfBuffHPLevel = selfBuffHP and selfBuffHP.Level() or 0
                     local aaSpell = mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName)() and mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).BaseName() or "")
                     local aaLevel = aaSpell and aaSpell.Level() or 0
-                    return RGMercUtils.AAReady(aaName) and selfBuffHPLevel <= aaLevel
+                    return RGMercUtils.AAReady(aaName) and selfBuffHPLevel <= aaLevel and RGMercUtils.SpellStacksOnMe(aaSpell)
                 end,
             },
             {
