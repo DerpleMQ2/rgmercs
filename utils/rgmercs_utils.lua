@@ -2206,8 +2206,8 @@ function RGMercUtils.ClickModRod()
 
     for _, itemName in ipairs(RGMercConfig.Constants.ModRods) do
         local item = mq.TLO.FindItem(itemName)
-        if item() and item.Timer() == 0 then
-            RGMercUtils.DoCmd("/useitem \"%s\"", itemName)
+        if item() and item.TimerReady() == 0 then
+            RGMercUtils.DoCmd("/useitem \"%s\"", item)
             return
         end
     end
