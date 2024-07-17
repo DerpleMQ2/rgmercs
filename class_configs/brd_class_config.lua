@@ -29,6 +29,7 @@ local Tooltips                    = {
     PulseRegenSong   = "Song Line: HP/Mana/Endurence Regen Increases Healing Yield",
     ChorusRegenSong  = "Song Line: AE HP/Mana Regen",
     CantataRegenSong = "Song Line: Group HP/Mana Regen",
+    EnduringBreathSong = "Song Line: Enduring Breath",
     CasterAriaSong   = "Song Line: Fire DD Damage Increase + Effiency",
     SlowSong         = "Song Line: Melee Attack Slow",
     AESlowSong       = "Song Line: PBAE Melee Attack Slow",
@@ -142,9 +143,13 @@ local function generateSongList()
         ConditionallyAddSong("UsePulse", "PulseRegenSong")
         ConditionallyAddSong("UseCantata", "CantataRegenSong")
     end
+    local function AddEnduringBreathSongs()
+        ConditionallyAddSong("UseEnduringBreath", "EnduringBreathSong")
+    end
     -----------------------------------------------------------------------------------------
 
     AddCriticalSongs()
+    AddEnduringBreathSongs()
     if RGMercUtils.IsModeActive("General") then
         AddMainGroupDPSSongs()
         AddSelfDPSSongs()
@@ -417,6 +422,9 @@ local _ClassConfig = {
             "Cantata of Soothing",
             "Hymn of Restoration",
         },
+        ['EnduringBreathSong'] = {
+            "Tarew's Aquatic Ayre",
+        },
         ['WarMarchSong'] = {
             -- WarMarchSong Level Range 10 - 114
             "War March of Nokk", -- 125
@@ -512,7 +520,6 @@ local _ClassConfig = {
             "Fatesong of the Gelidran",
             "Garadell's Fatesong",
         },
-
         ['PotencySong'] = {
             -- Fire & Magic Dots song
             "Tatalros' Psalm of Potency", -- 125
@@ -1178,6 +1185,13 @@ local _ClassConfig = {
                     return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseCantata")
                 end,
             },
+            {
+                name = "EnduringBreathSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return RGMercUtils.BuffSong(songSpell) and RGMercUtils.GetSetting("UseEnduringBreath")
+                end,
+            },
             -- Melee DPS
             {
                 name = "SufferingSong",
@@ -1336,6 +1350,15 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "EnduringBreathSong",
+                type = "Song",
+                targetId = function(self) return { mq.TLO.Me.ID(), } end,
+                cond = function(self, songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.BuffSong(songSpell)
+                        and not mq.TLO.Me.Invis()
+                end,
+            },
+            {
                 name = "ResistSong",
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
@@ -1421,6 +1444,8 @@ local _ClassConfig = {
         ['UseAmp']           = { DisplayName = "Use Amp", Category = "Regen Songs", Tooltip = Tooltips.AmpSong, Default = false, },
         ['UseChorus']        = { DisplayName = "Use Chorus", Category = "Regen Songs", Tooltip = Tooltips.ChorusRegenSong, Default = true, },
         ['UseCantata']       = { DisplayName = "Use Cantata", Category = "Regen Songs", Tooltip = Tooltips.CantataRegenSong, Default = false, },
+        ['UseEnduringBreath']  = { DisplayName = "Use Enduring Breath", Category = "Regen Songs", Tooltip = Tooltips.EnduringBreathSong, Default = false, },
+
         ['UseCrescendo']     = { DisplayName = "Use Crescendo", Category = "Regen Songs", Tooltip = Tooltips.CrescendoSong, Default = true, },
         ['UseAccelerando']   = { DisplayName = "Use Accelerando", Category = "Regen Songs", Tooltip = Tooltips.AccelerandoSong, Default = false, },
         --DPS
