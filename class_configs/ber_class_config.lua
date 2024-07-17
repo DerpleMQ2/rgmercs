@@ -695,7 +695,7 @@ return {
                 name = "Drawn to Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Target.Distance() > 15
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetTargetDistance() > 15
                 end,
             },
             {
