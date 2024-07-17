@@ -157,9 +157,6 @@ end
 function RGMercUtils.SetTarget(targetId)
     local info = debug.getinfo(4, "Snl")
 
-    local callerTracer = string.format("\ao%s\aw::\ao%s()\aw:\ao%-04d\ax",
-        info and info.short_src and info.short_src:match("[^\\^/]*.lua$") or "unknown_file",
-        info and info.name or "unknown_func", info and info.currentline or 0)
     if targetId == mq.TLO.Target.ID() then return end
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if RGMercUtils.GetSetting('DoAutoTarget') then
