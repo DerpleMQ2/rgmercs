@@ -596,18 +596,19 @@ local _ClassConfig = {
             "Mental Appropriation",
             "Cognitive Appropriation",
         },
-        ['ChromaNuke'] = {
+        --Unused table, temporarily removed - was causing conflicts while resolving NukeSpell1 action maps (will revisit nukes later)
+        -- ['ChromaNuke'] = {
             --- Chromatic Lowest Nuke - Normal -- >=LVL73
-            "Polycascading Assault",
-            "Polyfluorescent Assault",
-            "Polyrefractive Assault",
-            "Phantasmal Assault",
-            "Arcane Assault",
-            "Spectral Assault",
-            "Polychaotic Assault",
-            "Multichromatic Assault",
-            "Polychromatic Assault",
-        },
+            -- "Polycascading Assault",
+            -- "Polyfluorescent Assault",
+            -- "Polyrefractive Assault",
+            -- "Phantasmal Assault",
+            -- "Arcane Assault",
+            -- "Spectral Assault",
+            -- "Polychaotic Assault",
+            -- "Multichromatic Assault",
+            -- "Polychromatic Assault",
+        -- },
         ['CripSlowSpell'] = {
             --- Slow Cripple Combo Spell - Beginning @ Level 88
             "Constraining Coil",
@@ -866,7 +867,7 @@ local _ClassConfig = {
                 name = "PetSpell",
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
-                cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 end,
+                cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell) end,
             },
             {
                 name = "SelfHPBuff",
@@ -964,9 +965,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     if not target or not target() then return false end
 
-                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
-
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
@@ -976,9 +975,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     if not target or not target() then return false end
 
-                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
-
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
@@ -1016,9 +1013,8 @@ local _ClassConfig = {
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
-                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
@@ -1030,9 +1026,8 @@ local _ClassConfig = {
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
-                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
