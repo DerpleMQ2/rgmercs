@@ -920,7 +920,13 @@ local _ClassConfig = {
                     return true
                 end,
             },
-
+            {
+                name = "Shield Flash",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('FlashHP')
+                end,
+            },
             {
                 name = mq.TLO.Me.Inventory("Charm").Name(),
                 type = "Item",
@@ -1379,7 +1385,7 @@ local _ClassConfig = {
         ['AeTauntCnt']      = { DisplayName = "AE Taunt Count", Category = "Spells and Abilities", Tooltip = "Minimum number of haters before using AE Taunt.", Default = 2, Min = 1, Max = 10, },
         ['HPStopDOT']       = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
         ['UseVoT']          = { DisplayName = "Use Voice of Thule", Category = "Spells and Abilities", Tooltip = "Cast Voice of Thule", Default = true, },
-        ['FlashHP']         = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
+        ['FlashHP']         = { DisplayName = "Use Shield Flash", Category = "Combat", Tooltip = "Your HP % before we use Shield Flash.", Default = 35, Min = 1, Max = 100, },
         ['DoChestClick']    = { DisplayName = "Do Chest Click", Category = "Equipment", Tooltip = "Click your chest item", Default = true, },
         ['DoCharmClick']    = { DisplayName = "Do Charm Click", Category = "Equipment", Tooltip = "Click your charm item", Default = true, },
         ['StartBigTap']     = { DisplayName = "Use Big Taps", Category = "Spells and Abilities", Tooltip = "Your HP % before we use Big Taps.", Default = 80, Min = 1, Max = 100, },
