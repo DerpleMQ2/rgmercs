@@ -1394,9 +1394,9 @@ return {
     ['DefaultConfig']     = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
         ['DoNuke']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['FlashHP']      = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
-        ['TotHealPoint'] = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 30, Min = 1, Max = 100, },
-        ['LayHandsPct']  = { DisplayName = "Flash HP", Category = "Combat", Tooltip = "TODO: No Idea", Default = 35, Min = 1, Max = 100, },
+        ['FlashHP']      = { DisplayName = "Use Shield Flash", Category = "Combat", Tooltip = "Your HP % before we use Shield Flash.", Default = 35, Min = 1, Max = 100, },
+        ['TotHealPoint'] = { DisplayName = "ToT HealPoint", Category = "Combat", Tooltip = "HP % before we use Target of Target heals.", Default = 30, Min = 1, Max = 100, },
+        ['LayHandsPct']  = { DisplayName = "Use Lay on Hands", Category = "Combat", Tooltip = "HP % before we use Lay on Hands.", Default = 35, Min = 1, Max = 100, },
         ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoReverseDS']  = { DisplayName = "Do Reverse DS", Category = "Utilities", Tooltip = "Cast Reverse DS", Default = true, },
         ['SummonArrows'] = { DisplayName = "Summon Arrows", Category = "Utilities", Tooltip = "Enable Summon Arrows", Default = true, },
