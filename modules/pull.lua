@@ -1023,7 +1023,7 @@ function Module:FindTarget()
                             RGMercsLogger.log_debug("\atPULL::FindTarget \ayNo Allow/Deny List to Check!")
                         end
 
-                        if RGMercUtils.GetSetting('PullMobsInWater') and spawn.FeetWet() then
+                        if spawn.FeetWet() and not RGMercUtils.GetSetting('PullMobsInWater') then
                             RGMercsLogger.log_debug("\atPULL::FindTarget \agIgnoring mob in water water: %s", spawn.CleanName())
                             doInsert = false
                         end
