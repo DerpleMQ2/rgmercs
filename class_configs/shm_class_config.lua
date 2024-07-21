@@ -15,6 +15,9 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
+            if RGMercUtils.AAReady("Radiant Cure") then
+                return RGMercUtils.UseAA("Radiant Cure", targetId)
+            end
             local cureSpell = RGMercUtils.GetResolvedActionMapItem('CureSpell')
             if cureSpell and cureSpell() then
                 return RGMercUtils.UseSpell(cureSpell.RankName.Name(), targetId, true)
