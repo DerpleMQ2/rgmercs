@@ -15,7 +15,7 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if RGMercUtils.CanUseAA("Radiant Cure") then
+            if RGMercUtils.AAReady("Radiant Cure") then
                 return RGMercUtils.UseAA("Radiant Cure", targetId)
             end
 

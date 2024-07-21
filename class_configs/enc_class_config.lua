@@ -916,21 +916,24 @@ local _ClassConfig = {
                 name = "AuraBuff1",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell) return not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell)
+				    if RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.CanUseAA('Auroria Mastery') then return false end
+				    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) end,
             },
             {
                 name = "AuraBuff2",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell) return RGMercUtils.CanUseAA('Auroria Mastery') and not RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell)
+                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) and not RGMercUtils.GetSetting('DoLearners') end,
             },
             {
                 name = "AuraBuff3",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell) return RGMercUtils.CanUseAA('Auroria Mastery') and RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.AuraActiveByName(spell.Name()) and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('DoLearners') and RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) end,
             },
-
         },
         ['GroupBuff'] = {
             -- TODO : Macro group buff rotation never was hooked up ask Mori about this later.
