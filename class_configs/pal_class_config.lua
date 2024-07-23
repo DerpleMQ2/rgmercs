@@ -1168,7 +1168,7 @@ return {
                 name = "Divine Protector's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and self.ClassConfig.HelperFunctions.castDPU(self)
+                    return RGMercUtils.SelfBuffAACheck(aaName) and self.ClassConfig.HelperFunctions.castDPU(self)
                 end,
             },
             {
