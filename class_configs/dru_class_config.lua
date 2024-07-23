@@ -747,6 +747,21 @@ local _ClassConfig = {
     },
     ['HealRotationOrder'] = {
         {
+            name  = 'BigHealPoint',
+            state = 1,
+            steps = 1,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint') end,
+        },
+        {
+            name = 'GroupHealPoint',
+            state = 1,
+            steps = 1,
+            cond = function(self, target)
+                return (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) >
+                    RGMercUtils.GetSetting('GroupInjureCnt')
+            end,
+        },
+        {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
@@ -754,6 +769,88 @@ local _ClassConfig = {
         },
     },
     ['HealRotations']     = {
+		["BigHealPoint"] = {
+			{
+                name = "QuickHealSurge",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.PCSpellReady(spell)
+                end,
+            },
+			{
+                name = "QuickGroupHeal",
+                type = "Spell",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.PCSpellReady(spell) and (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                end,
+            },
+			{
+                name = "Blessing of Tunare",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.PCSpellReady(spell) and (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                end,
+            },
+			{
+                name = "Wildtender's Survival",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.AAReady(aaName) and (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                end,
+            },
+            {
+                name = "Swarm of Fireflies",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Convergence of Spirits",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+			{
+                name = "Forceful Rejuvenation",
+                type = "AA",
+				cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+        },
+		["GroupHealPoint"] = {
+			{
+                name = "Blessing of Tunare",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return RGMercUtils.AAReady(aaName) and (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint')
+                end,
+            },
+			{
+                name = "QuickGroupHeal",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.PCSpellReady(spell)
+				end,
+            },
+            {
+                name = "Wildtender's Survival",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+			{
+                name = "LongGroupHeal",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.PCSpellReady(spell)
+                end,
+            },
+
+		},
         ["MainHealPoint"] = {
             {
                 name = "QuickHeal",
@@ -763,59 +860,18 @@ local _ClassConfig = {
             {
                 name = "LongHeal1",
                 type = "Spell",
-                cond = function(self, _) return true end,
-            },
-            {
-                name = "QuickHealSurge",
-                type = "Spell",
-                cond = function(self, _) return true end,
+                cond = function(self, spell)
+                    return RGMercUtils.PCSpellReady(spell)
+                end,
             },
             {
                 name = "LongHeal2",
                 type = "Spell",
-                cond = function(self, _) return true end,
-            },
-            {
-                name = "QuickGroupHeal",
-                type = "Spell",
-                cond = function(self, _)
-                    return (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) >
-                        RGMercUtils.GetSetting('GroupInjureCnt')
+                cond = function(self, spell)
+                    return RGMercUtils.PCSpellReady(spell)
                 end,
             },
-            {
-                name = "Wildtender's Survival",
-                type = "AA",
-                cond = function(self, _)
-                    return (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) >
-                        RGMercUtils.GetSetting('GroupInjureCnt')
-                end,
-            },
-            {
-                name = "QuickGroupHeal",
-                type = "Spell",
-                cond = function(self, _, target)
-                    return RGMercUtils.GetTargetPctHPs(target) <
-                        RGMercUtils.GetSetting('BigHealPoint')
-                end,
-            },
-            {
-                name = "Blessing of Tunare",
-                type = "AA",
-                cond = function(self, _, target)
-                    return RGMercUtils.GetTargetPctHPs(target) <
-                        RGMercUtils.GetSetting('BigHealPoint')
-                end,
-            },
-            {
-                name = "Convergence of Spirits",
-                type = "AA",
-                cond = function(self, _, target)
-                    return RGMercUtils.GetTargetPctHPs(target) <
-                        RGMercUtils.GetSetting('BigHealPoint')
-                end,
-            },
-        },
+		},
     },
     ['RotationOrder']     = {
         -- Downtime doesn't have state because we run the whole rotation at once.
@@ -1387,17 +1443,11 @@ local _ClassConfig = {
         {
             gem = 4,
             spells = {
+				-- [ BOTH MODES ] --
+				 { name = "QuickHeal",      cond = function(self) return mq.TLO.Me.Level() >= 90 end, },
                 -- [ MANA MODE ] --
-                {
-                    name = "QuickHeal",
-                    cond = function(self)
-                        return mq.TLO.Me.Level() >= 84 and
-                            RGMercUtils.IsModeActive("Mana")
-                    end,
-                },
                 { name = "QuickRoarDD",     cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
-                -- [ HEAL MODE ] --
-                { name = "PromHeal",        cond = function(self) return mq.TLO.Me.Level() >= 78 end, },
+                -- [ HEAL MODE ] --              
                 { name = "HordeDOT",        cond = function(self) return true end, },
                 -- [ Fall Back ]--
                 { name = "RoDebuff",        cond = function(self) return RGMercUtils.GetSetting("DoFire") end, },
