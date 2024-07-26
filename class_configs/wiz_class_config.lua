@@ -382,7 +382,7 @@ return {
             "Neurofreeze",
             "Cortexfreeze",
             "Synapsefreeze",
-            "Flashfreeze",
+            --"Flashfreeze", This is not a jolt, it is an instant nuke that we don't use/have a table for.
             "Skullfreeze",
             "Thoughtfreeze",
             "Brainfreeze",
