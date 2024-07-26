@@ -383,7 +383,7 @@ local _ClassConfig = {
             "Unified Hand of Assurance",
             "Unified Hand of Righteousness",
             "Unified Hand of Persistence",
-            "Unified Hand of Helmsbane",
+            "Unified Hand of Infallibility",
         },
         ['TankBuff'] = {
             --Tank Buff Traditionally Shining Series of Buffs
@@ -453,7 +453,7 @@ local _ClassConfig = {
             "Unified Hand of Jorlleag",
             "Unified Hand of Assurance",
             "Unified Hand of the Diabo",
-            "Unified Hand of Infallibility",
+            "Unified Hand of Helmsbane",
         },
         ['HPBuff'] = {
             ----Single Target HP Buffs
