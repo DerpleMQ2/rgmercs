@@ -780,7 +780,7 @@ local _ClassConfig = {
 			{
                 name = "QuickGroupHeal",
                 type = "Spell",
-                cond = function(self, aaName, target)
+                cond = function(self, spell, target)
                     return RGMercUtils.PCSpellReady(spell) and (target.ID() or 0) == RGMercUtils.GetMainAssistId()
                 end,
             },
@@ -788,7 +788,7 @@ local _ClassConfig = {
                 name = "Blessing of Tunare",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.PCSpellReady(spell) and (target.ID() or 0) == RGMercUtils.GetMainAssistId()
+                    return RGMercUtils.AAReady(aaName) and (target.ID() or 0) == RGMercUtils.GetMainAssistId()
                 end,
             },
 			{
