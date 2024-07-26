@@ -51,6 +51,15 @@ local _ClassConfig = {
             "Kreljnok's Sword of Eternal Power",
             "Champion's Sword of Eternal Power",
         },
+        ['Rabbit'] = {
+            "Vicious Rabbit",
+        },
+        ['Mariner'] = {
+            "Amulet of the Drowned Mariner",
+        },
+        ['Shard'] = {
+            "Dancing Shard of Ice",
+        },
     },
     ['AbilitySets']     = {
         ['meleemit'] = {
@@ -377,6 +386,30 @@ local _ClassConfig = {
         },
         ['DPS'] = {
             {
+                name = "Shard",
+                type = "Item",
+                cond = function(self, itemName)
+                --  Dancing Shard
+                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
+            {
+                name = "Mariner",
+                type = "Item",
+                cond = function(self, itemName)
+                --  Summon Mariner
+                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
+            {
+                name = "Rabbit",
+                type = "Item",
+                cond = function(self, itemName)
+                --  Summon Rabbit
+                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
+            {
                 name = "aeroar",
                 type = "Disc",
                 cond = function(self, discSpell)
@@ -673,9 +706,9 @@ local _ClassConfig = {
             {
                 name = "Huntsman's Ethereal Quiver",
                 type = "Item",
-                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 1 end,
+                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.FindItemCount("Ethereal Arrow")() < 1 and mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
+                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
                 end,
             },
         },
@@ -683,11 +716,11 @@ local _ClassConfig = {
 
     ['DefaultConfig']   = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
-        ['SummonArrows'] = { DisplayName = "Summon Arrows", Category = "Utilities", Tooltip = "Enable Summon Arrows", Default = true, },
+        ['SummonArrows'] = { DisplayName = "Summon Arrows", Category = "Equipment", Tooltip = "Enable Summon Arrows", Default = true, },
         ['DoAEAgro']     = { DisplayName = "Do AE Agro", Category = "Combat", Tooltip = "Enable AoE Agro (Tank Mode Only)", Default = true, },
         ['DoAEHate']     = { DisplayName = "Do AE Hate", Category = "Combat", Tooltip = "Enable AoE Hate (Tank Mode Only)", Default = true, },
         ['DoBandolier']  = { DisplayName = "Use Bandolier", Category = "Equipment", Tooltip = "Enable Swapping of items using the bandolier.", Default = false, },
-        ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Equipment", Tooltip = "Click your chest item", Default = true, },
         ['DoDefense']    = { DisplayName = "Do Defense", Category = "Combat", Tooltip = "Do Defense", Default = true, },
         ['DoBattleLeap'] = { DisplayName = "Do Battle Leap", Category = "Combat", Tooltip = "Do Battle Leap", Default = true, },
         ['DoSnare']      = { DisplayName = "Use Snares", Category = "Combat", Tooltip = "Enable casting Snare abilities.", Default = true, },
@@ -696,3 +729,4 @@ local _ClassConfig = {
 
 
 return _ClassConfig
+
