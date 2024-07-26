@@ -51,15 +51,6 @@ local _ClassConfig = {
             "Kreljnok's Sword of Eternal Power",
             "Champion's Sword of Eternal Power",
         },
-        ['Rabbit'] = {
-            "Vicious Rabbit",
-        },
-        ['Mariner'] = {
-            "Amulet of the Drowned Mariner",
-        },
-        ['Shard'] = {
-            "Dancing Shard of Ice",
-        },
     },
     ['AbilitySets']     = {
         ['meleemit'] = {
@@ -385,30 +376,6 @@ local _ClassConfig = {
 
         },
         ['DPS'] = {
-            {
-                name = "Shard",
-                type = "Item",
-                cond = function(self, itemName)
-                --  Dancing Shard
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
-            },
-            {
-                name = "Mariner",
-                type = "Item",
-                cond = function(self, itemName)
-                --  Summon Mariner
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
-            },
-            {
-                name = "Rabbit",
-                type = "Item",
-                cond = function(self, itemName)
-                --  Summon Rabbit
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
-            },
             {
                 name = "aeroar",
                 type = "Disc",
