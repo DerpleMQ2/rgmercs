@@ -1150,7 +1150,7 @@ local _ClassConfig = {
                 name = "aurabuff1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.CanUseAA('Spirit Mastery') and not RGMercUtils.AuraActiveByName("Reverent Aura") and RGMercUtils.SpellStacksOnMe(spell)
+                    return RGMercUtils.CanUseAA('Spirit Mastery') and not RGMercUtils.AuraActiveByName(spell.BaseName()) and not RGMercUtils.AuraActiveByName("Reverent Aura") and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
