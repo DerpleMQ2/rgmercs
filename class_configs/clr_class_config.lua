@@ -1205,7 +1205,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercUtils.GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.BuffActive(spell)
                 end,
             },
         },
