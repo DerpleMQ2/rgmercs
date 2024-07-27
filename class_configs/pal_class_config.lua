@@ -7,10 +7,34 @@ return {
     ['ModeChecks']        = {
         IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
         IsHealing = function() return true end,
+        IsCuring = function() return RGMercUtils.GetSetting('DoCures') end,
+        IsRezing = function() return (RGMercUtils.GetSetting('DoBattleRez') and not RGMercUtils.IsTanking()) or RGMercUtils.GetXTHaterCount() == 0 end,
+            --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
     },
     ['Modes']             = {
         'Tank',
         'DPS',
+    },
+    ['Cures']             = {
+        CureNow = function(self, type, targetId)
+            if RGMercUtils.AAReady("Radiant Cure") then
+                return RGMercUtils.UseAA("Radiant Cure", targetId)
+            end
+            -- TODO: Consider the impact of memorizing cures outside of combat or increasing number of options in settings
+            -- local cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
+
+            -- if type:lower() == "poison" then
+                -- cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
+            -- elseif type:lower() == "curse" then
+                -- cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
+            --TODO: Add Corruption AbilitySets
+            -- elseif type:lower() == "corruption" then
+                -- cureSpell = RGMercUtils.GetResolvedActionMapItem('')
+            -- end
+
+            -- if not cureSpell or not cureSpell() then return false end
+            -- return RGMercUtils.UseSpell(cureSpell.RankName.Name(), targetId, true)
+        end,
     },
     ['ItemSets']          = {
         ['Epic'] = {
@@ -627,6 +651,25 @@ return {
             local DPULevel = mq.TLO.Spell(mq.TLO.Me.AltAbility("Divine Protector's Unity").Spell.Trigger(1).BaseName()).Level() or 0
 
             return furyProcLevel <= DPULevel
+        end,
+       --Did not include Staff of Forbidden Rites, GoR refresh is very fast and rez is 96%
+		DoRez = function(self, corpseId)
+
+            if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
+                RGMercUtils.SetTarget(corpseId)
+
+                local target = mq.TLO.Target
+
+                if not target or not target() then return false end
+
+                if mq.TLO.Target.Distance() > 25 then
+                    RGMercUtils.DoCmd("/corpse")
+                end
+
+                if RGMercUtils.AAReady("Gift of Resurrection") then
+                    return RGMercUtils.UseAA("Gift of Resurrection", corpseId)
+                end
+            end
         end,
     },
     ['HealRotationOrder'] = {

@@ -988,9 +988,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     if not target or not target() then return false end
 
-                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() < 0 then return false end
-
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
@@ -1025,7 +1023,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target, uiCheck)
-                    if not self.DoGroupAbsorb then return false end
+                    if not RGMercUtils.GetSetting('DoGroupAbsorb') then return false end
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
@@ -1180,6 +1178,13 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.GetSetting('DoDot') and RGMercUtils.DetSpellCheck(spell) and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
+                end,
+            },
+            {
+                name = "ManaDot",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.IsNamed(mq.TLO.Target) and RGMercUtils.DetSpellCheck(spell) and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
                 end,
             },
             {
@@ -1414,14 +1419,14 @@ local _ClassConfig = {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "RuneNuke", cond = function(self) return true end, },
+                { name = "SingleRune", cond = function(self) return true end, },
             },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "DebuffDot", cond = function(self) return true end, },
+                { name = "GroupSpellShield", cond = function(self) return true end, },
             },
         },
         {
