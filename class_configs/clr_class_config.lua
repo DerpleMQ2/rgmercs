@@ -383,7 +383,7 @@ local _ClassConfig = {
             "Unified Hand of Assurance",
             "Unified Hand of Righteousness",
             "Unified Hand of Persistence",
-            "Unified Hand of Helmsbane",
+            "Unified Hand of Infallibility",
         },
         ['TankBuff'] = {
             --Tank Buff Traditionally Shining Series of Buffs
@@ -453,7 +453,7 @@ local _ClassConfig = {
             "Unified Hand of Jorlleag",
             "Unified Hand of Assurance",
             "Unified Hand of the Diabo",
-            "Unified Hand of Infallibility",
+            "Unified Hand of Helmsbane",
         },
         ['HPBuff'] = {
             ----Single Target HP Buffs
@@ -1150,7 +1150,7 @@ local _ClassConfig = {
                 name = "aurabuff1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.CanUseAA('Spirit Mastery') and not RGMercUtils.AuraActiveByName("Reverent Aura") and RGMercUtils.SpellStacksOnMe(spell)
+                    return RGMercUtils.CanUseAA('Spirit Mastery') and not RGMercUtils.AuraActiveByName(spell.BaseName()) and not RGMercUtils.AuraActiveByName("Reverent Aura") and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
@@ -1205,7 +1205,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target, uiCheck)
                     -- force the target for StacksTarget to work.
                     if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercUtils.GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.BuffActive(spell)
                 end,
             },
         },
