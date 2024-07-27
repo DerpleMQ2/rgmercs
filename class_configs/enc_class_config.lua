@@ -923,9 +923,9 @@ local _ClassConfig = {
             {
                 name = "AuraBuff2",
                 type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
+                active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) and not RGMercUtils.AuraActiveByName("Mana Ripple") end,
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) and not RGMercUtils.GetSetting('DoLearners') end,
+                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) and not RGMercUtils.AuraActiveByName("Mana Ripple") and not RGMercUtils.GetSetting('DoLearners') end,
             },
             {
                 name = "AuraBuff3",
