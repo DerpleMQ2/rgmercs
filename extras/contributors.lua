@@ -7,4 +7,7 @@ return {
     'SonicZentropy',
     'Tiddliestix',
     "Algar",
+    "Grimmier",
+    "cannonballdex",
+    "RobbanEQ",
 }
