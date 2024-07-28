@@ -300,9 +300,17 @@ return {
             "Lesser Familiar",
             "Minor Familiar",
         },
+        ['MeleeGuard'] = {
+            "Shield of Inescapability",
+            "Shield of Inevitability",
+            "Shield of Destiny",
+            "Shield of Order",
+            "Shield of Consequence",
+            "Shield of Fate",
+        },
         ['SelfRune1'] = {
-            "Aegis of Remembrance",
-            "Aegis of the Umbra",
+            "Mail of the Crystalwing",
+            "Scales of the Crystalwing",
             "Aegis of the Crystalwing",
             "Armor of Wirn",
             "Armor of the Codex",
@@ -795,9 +803,16 @@ return {
                 name = "SelfRune1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell) and mq.TLO.FindItemCount('Peridot')() > 0
+                    return RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
+            {
+                name = "MeleeGuard",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },          
             {
                 name = "GambitSpell",
                 type = "Spell",
@@ -1036,6 +1051,13 @@ return {
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
+            {
+                name = "MeleeGuard",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },  
             {
                 name = "FamiliarBuff",
                 type = "Spell",
