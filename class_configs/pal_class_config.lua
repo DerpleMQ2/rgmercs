@@ -1437,6 +1437,7 @@ return {
     ['DefaultConfig']     = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
         ['DoNuke']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
+        ['DoCures']       = { DisplayName = "Do Cures", Category = "Spells and Abilities", Tooltip = "Use cure spells and abilities", Default = true, },
         ['FlashHP']      = { DisplayName = "Use Shield Flash", Category = "Combat", Tooltip = "Your HP % before we use Shield Flash.", Default = 35, Min = 1, Max = 100, },
         ['TotHealPoint'] = { DisplayName = "ToT HealPoint", Category = "Combat", Tooltip = "HP % before we use Target of Target heals.", Default = 30, Min = 1, Max = 100, },
         ['LayHandsPct']  = { DisplayName = "Use Lay on Hands", Category = "Combat", Tooltip = "HP % before we use Lay on Hands.", Default = 35, Min = 1, Max = 100, },

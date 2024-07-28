@@ -650,34 +650,6 @@ return {
         "Spyhunter Zath`ran",
     },
 
-    ["charasistwo"] = {
-        "Embalming Fluid",
-        "Howling Spectre",
-        "Mortiferous Protector",
-        "Reanimated Plaguebone",
-        "Sentient Bile",
-        "Skeletal Procurator",
-        "The Crypt Devourer",
-        "The Crypt Excavator",
-        "The Crypt Feaster",
-        "The Crypt Keeper",
-        "The Crypt Spectre",
-        "The Golem Master",
-        "The Skeleton Sepulcher",
-        "The Spectre Sepulcher",
-        "The Spectre Spiritualist",
-        "The Undertaker Lord",
-        "The Fabled Crypt Devourer",
-        "The Fabled Crypt Excavator",
-        "The Fabled Crypt Feaster",
-        "The Fabled Crypt Keeper",
-        "The Fabled Crypt Spectre",
-        "The Fabled Crypt Wurm",
-        "The Fabled Drusella Sathir",
-        "The Fabled Mortiferous Protector",
-        "Drusella Sathir",
-    },
-
     ["kaesora"] = {
         "failed crypt raider",
         "frenzied strathbone",
@@ -777,8 +749,6 @@ return {
         "Myconid Spore King",
         "sebilite guardian",
         "Sebilite Protector",
-        "Tolapumj",
-        "Trakanon",
         "frenzied pox scarab",
     },
 
@@ -951,16 +921,7 @@ return {
     ["[[[ ---- the scars of velious ---- "] = {
     },
 
-    ["cobaltscartwo"] = {
-        "Kelorek`Dar",
-        "Adella Undertow",
-        "Kirezelbough",
-        "Morwenna Undertow",
-        "Octave Sforzando",
-        "Ol' Grinnin' Finley",
-        "Pikebreath",
-        "Skolskin Haeger",
-    },
+
 
     ["crystaltwob"] = {
         "Crystal Grinder",
@@ -969,43 +930,13 @@ return {
         "Queen Dracnia",
     },
 
-    ["necropolistwo"] = {
-        "a massive dracoliche",
-        "a moon bat",
-        "a ravenous entropy serpent",
-        "a restless warlord",
-        "a toxic phase spider",
-        "another great green slime",
-        "Dustbinder Tarlin",
-        "Foulfang",
-        "Jaled Dar's trapped shade",
-        "Queen Kitlaa",
-        "restless Dominator Yisaki",
-        "restless Vaniki",
-        "restless Warmaster Ultvara",
-        "Seeker Larada",
-    },
+
 
     ["eastwastes"] = {
         "Chief Ry`Gorr",
         "Firbrand the Black",
         "a Ry`Gorr minstrel",
         "Warden Bruke",
-    },
-
-    ["greatdividetwo"] = {
-        "a forgotten raid leader",
-        "a tizmak augur",
-        "Blizzent",
-        "Bloodmaw",
-        "Gerton Dumkin",
-        "Gorul Longshanks",
-        "Laima Ratgur",
-        "Loremaster Metiheib the Lost",
-        "Lost Squire of Narandi",
-        "Margidor",
-        "Orfur, Priest of Zek",
-        "Thosgromri Warmgranite",
     },
 
     ["the iceclad ocean"] = {
@@ -1124,16 +1055,6 @@ return {
         "The Fabled Mistress Latazura",
     },
 
-    ["skyshrinetwo"] = {
-        "a blessed racnar",
-        "Dagarn the Destroyer",
-        "Lord Koi'Doken",
-        "Professor Atkru",
-        "Shoen the Fanatic",
-        "Templeton the Clear",
-        "Ziglark Whisperwing",
-    },
-
     ["the sleeper's tomb"] = {
         "Kildrukaun the Ancient",
         "Milas An'Rev",
@@ -1197,16 +1118,7 @@ return {
         "Wuoshi",
     },
 
-    ["westwastestwo"] = {
-        "a restless behemoth",
-        "Blasphemous Steel",
-        "Bliddlethliclaus",
-        "Feltinth the Caring",
-        "Miscreation the Timeless",
-        "Pastletlith the Temperate",
-        "Rildar Blackstone",
-        "Shrapnel",
-    },
+
 
     ["[[[ ---- the shadows of luclin ---- "] = {
     },
@@ -1557,42 +1469,6 @@ return {
         "Bile Spew",
         "Tawro Icequake",
         "Radir Fireshower",
-    },
-
-    ["vexthaltwo"] = {
-        "Eom Centien Xakra Dat",
-        "Eom Centien Xakra Kel",
-        "Eom Centien Xakra Set",
-        "Eom Liako Xakra Dat",
-        "Eom Liako Xakra Kel",
-        "Eom Liako Xakra Set",
-        "Eom Senshali Xakra Dat",
-        "Eom Senshali Xakra Kel",
-        "Eom Senshali Xakra Set",
-        "Eom Thall Xakra Dat",
-        "Eom Thall Xakra Kel",
-        "Eom Thall Xakra Set",
-        "Eom Va Liako Xakra Dat",
-        "Eom Va Liako Xakra Kel",
-        "Eom Va Liako Xakra Set",
-        "Eom Zethon Xakra Dat",
-        "Eom Zethon Xakra Kel",
-        "Eom Zethon Xakra Set",
-        "Aten Ha Ra",
-        "Diabo Xi Va",
-        "Diabo Xi Va Temariel",
-        "Diabo Xi Xin",
-        "Diabo Xi Xin Thall",
-        "Kaas Thox Xi Ans Dyek",
-        "Kaas Thox Xi Aten Ha Ra Dat",
-        "Kaas Thox Xi Aten Ha Ra Set",
-        "Thall Va Kelun",
-        "Thall Va Xakra",
-        "Thall Va Xakra Dat",
-        "Thall Va Xakra Set",
-        "Thall Xundraux Diabo",
-        "Va Dyn Khar",
-        "Va Xi Aten Ha Ra",
     },
 
     ["pofire"] = {
@@ -3872,195 +3748,7 @@ return {
         "Bonescale",
         "Kar`Zok Overlord",
     },
-
-    ["overtheretwo"] = {
-        "a bluff golem",
-        "a grotesque succulent",
-        "a Kar`Zok lacerator",
-        "a majestic cockatrice",
-        "an iron sentinel",
-        "Banshee",
-        "Bloodstalker",
-        "Drakis",
-        "Fang",
-        "Janissary Virzak",
-        "Myrmidon Tundak",
-        "Needle",
-        "Observer Eyrzekla",
-        "Rigelon the Watcher",
-        "Saber",
-    },
-
-    ["gorowyn"] = {
-        "Artikla, Fereth Despot",
-        "Elkikatar",
-        "Gnaw",
-        "Head Boiler Akett",
-        "High Arcron Zeklor",
-        "Hissilith, the Brittlebones",
-        "Overlord Klerkon",
-        "Overlord Teralov",
-        "Overlord Tevik",
-        "Rekatok One-Eye",
-        "The Magmalisk",
-        "Wulthan High Inquisitor Kraz",
-    },
-
-    ["the howling stone"] = {
-        "Deka the Reaper",
-        "Embalming Goo",
-        "General V`Deers, the Arisen",
-        "Nureya Arisen",
-        "Shandral Arisen",
-        "The Arisen Admiral Tylix",
-        "The Arisen Dragoon T`Vem",
-        "The Arisen Dragoon T`Vex",
-        "The Great Sentinel",
-        "The Underlord",
-        "Tormented Adalora",
-        "Vermistipus",
-    },
-
-    ["sathir's tomb"] = {
-        "a Kar`zok grave robber",
-        "a Kar`zok infiltrator",
-        "Arisen Gloriant Kra`du",
-        "Xalgoz the Arisen",
-    },
-
-    ["stratos"] = {
-        "Cloud Iron Lance",
-        "Daring Cloud Spear",
-        "Dawnbreeze",
-        "Dour Eighth Guardian",
-        "Eastern Radiant Glance",
-        "Glassbeak Stormbreaker",
-        "Horizon of Destiny",
-        "Infinite Horizon Star",
-        "Silver Eyes Dread",
-        "Starshine, Icebreaker",
-        "Triumphal Still Sky",
-        "Wild Blossom Star",
-    },
-
-    ["the plane of smoke"] = {
-        "Dirge of Lost Horizons",
-        "Savage Irony of Will",
-        "Silent Silken Song",
-        "Soothing Wings of Mist",
-        "Strength of Undefeated Starfall",
-        "Wandering Spring Soul",
-    },
-
-    ["esianti: place of the winds"] = {
-        "Blessed Wind",
-        "Copper Star",
-        "Depth of Iron",
-        "Iron Lance",
-        "Jericog Merkin",
-        "Leaping Eyes",
-        "Rusted Stalactite",
-        "Sapphire Hammer",
-        "Sepping Gladness",
-        "Sky Blade",
-        "Veiled Sage",
-        "Warrior's Cleft",
-    },
-
-    ["empyr: realms of ash"] = {
-        "Ashes",
-        "Assassin of the Perfect Dusk",
-        "Final Rainbow",
-        "Flail",
-        "Fluttering Ruby Prince",
-        "Iron Heart",
-        "Mischief Darkheart",
-        "Shockstone",
-        "Sister of the Invisible Heart",
-        "Stalwart Flicker",
-        "The Burning Mist",
-        "Wilting Flames",
-    },
-
-    ["aalishai: palace of embers"] = {
-        "Evasion Understanding Flow",
-        "Final Blade Lord",
-        "Ghost Glass Bitter",
-        "Ruby Icefall Blossom",
-        "Shield Spirit's Laugh",
-        "Sixth Consuming Master",
-        "Steam Wave Slicer",
-        "Stout Stone Beaten",
-        "Unconquering Sand Dirge",
-        "Venom of the Fallen Star",
-        "Whispering Depths Sigh",
-        "White Iron Rainbow",
-    },
-
-    ["mearatas"] = {
-        "an ancient air warden",
-        "an ancient fire warden",
-        "an ancient stone warden",
-        "an ancient water warden",
-        "Flowing Horizon Halo",
-        "Forsaken Cloud Sapphire",
-        "Glaring Moon Void",
-        "Platinum Rainbow Spire",
-        "Radiant Amber Lotus",
-        "Tsunami Sol Blood",
-        "Whispering Frost",
-        "Blistering Star",
-    },
-
-    ["gnomemtn"] = {
-        "A Non-Standard Deviation",
-        "Ambassador of Loving",
-        "Best Museum Security",
-        "Bloodmoon Chief Eclipse",
-        "Bloodmoon Howler Trolog",
-        "Breaker",
-        "Consul of Cooperation",
-        "Fractured Sweeper",
-        "Grash, Bloodmoon Growler",
-        "Healer Prime",
-        "Malfunctioning Iron Legion Hug",
-        "Master Mechanic",
-        "Repair for Pieces",
-        "Tatters",
-    },
-
-    ["eastwastestwo"] = {
-        "a returned dracoliche",
-        "Bolman",
-        "Cadcane the Unmourned",
-        "Coldears",
-        "Mahaha",
-        "Monolith the Unstoppable",
-        "Servant of the Sleeper",
-        "Sofia the Quiet",
-        "Vekboz Wolfpunch",
-        "Windchill",
-        "Zburator the Damned",
-    },
-
-    ["crystaltwoa"] = {
-        "Ry`Gorr Herbalist",
-        "Ry`Gorr Inspector",
-    },
-
-    ["kaeltwo"] = {
-        "Black Fang",
-        "Direfang",
-        "Drendar Blackblade",
-        "Fjokar Frozenshard",
-        "Irrek Bloodfist",
-        "Kallis Stormcaller",
-        "Keldor Dek`Torek",
-        "Klraggek the Slayer",
-        "Velden Dragonbane",
-        "Vkjen Thunderslayer",
-    },
-
+    
     ["the plane of valor"] = {
         "A Traglimite Frog",
     },
@@ -4148,74 +3836,451 @@ return {
         "Aneuk Nyrt Ymosa",
     },
 
-    ["firefallpass"] = {
-        "Bedrock Burrower",
-        "Diabo Xi Vesta",
-        "Firefallizard",
-        "Fowl Matriarch",
-        "Igneous Insect",
-        "Rock Lobber",
+--RoS
+
+    ["charasisb"] = {
+        "a Kar`zok grave robber",
+        "a Kar`zok infiltrator",
+        "Arisen Gloriant Kra`du",
+        "Xalgoz the Arisen",
+    },	
+	
+	["overtheretwo"] = {
+        "a bluff golem",
+        "a grotesque succulent",
+        "a Kar`Zok lacerator",
+        "a majestic cockatrice",
+        "an iron sentinel",
+        "Banshee",
+        "Bloodstalker",
+        "Drakis",
+        "Fang",
+        "Janissary Virzak",
+        "Myrmidon Tundak",
+        "Needle", --Cleanname has a false positive
+        "Observer Eyrzekla",
+        "Rigelon the Watcher",
+        "Saber", --Cleanname has a false positive
     },
 
-    ["shadeweaver's tangle"] = {
-        "Commander Esline",
-        "Molten Wildfire",
-        "Scorched Cackling Bones",
-        "Shak Dathor Overlord",
-        "Sharp Claw",
-        "Stoneclaw Broodmother",
-        "Thorn Petal",
+    ["gorowyn"] = {
+        "Artikla, Fereth Despot",
+        "Elkikatar",
+        "Gnaw",
+        "Head Boiler Akett",
+        "High Arcron Zeklor",
+        "Hissilith, the Brittlebones",
+        "Overlord Klerkon",
+        "Overlord Teralov",
+        "Overlord Tevik",
+        "Rekatok One-Eye",
+        "The Magmalisk",
+        "Wulthan High Inquisitor Kraz",
     },
 
-    ["sharvahltwo"] = {
-        "Crimsonclaw",
-        "Geerot Stabgut",
-        "Gheg Gorespit",
-        "Kurati the Feral",
-        "Tailfang",
-        "Toraji, Korath`s Warder",
-        "Wiggle",
+    ["charasistwo"] = {
+        "Deka the Reaper",
+        "Embalming Goo",
+        "General V`Deers, the Arisen",
+        "Nureya Arisen",
+        "Shandral Arisen",
+        "The Arisen Admiral Tylix",
+        "The Arisen Dragoon T`Vem",
+        "The Arisen Dragoon T`Vex",
+        "The Great Sentinel",
+        "The Underlord",
+        "Tormented Adalora",
+        "Vermistipus",
+    },
+	
+	["veeshantwo"] = {
+		"Blood-Thirsty Racnar",
+        "Elder Azeron",
+        "Elder Ekron",
+        "Ellarr Stormcloud",
+        "Kluzen the Protector",
+        "Magma Basilisk",
+        "Milyex Vioren",
+        "Qunard Ashenclaw",
+        "Travenro the Skygazer",
+	},
+	
+--TBL
+
+    ["esianti"] = {
+        "Blessed Wind",
+        "Copper Star",
+        "Depth of Iron",
+        "Iron Lance",
+        "Jericog Merkin",
+        "Leaping Eyes",
+        "Rusted Stalactite",
+        "Sapphire Hammer",
+        "Sepping Gladness",
+        "Sky Blade",
+        "Veiled Sage",
+        "Warrior's Cleft",
+    },
+	
+    ["trialsofsmoke"] = {
+        "Dirge of Lost Horizons",
+        "Savage Irony of Will",
+        "Silent Silken Song",
+        "Soothing Wings of Mist",
+        "Strength of Undefeated Starfall",
+        "Wandering Spring Soul",
     },
 
-    ["paludaltwo"] = {
-        "Arly Golyeck",
-        "Herachuel",
-        "Maricella Slithra",
-        "Merrimore Ychansk",
-        "Toxiplax",
-        "Vahlkamph",
+    ["stratos"] = {
+        "Cloud Iron Lance",
+        "Daring Cloud Spear",
+        "Dawnbreeze",
+        "Dour Eighth Guardian",
+        "Eastern Radiant Glance",
+        "Glassbeak Stormbreaker",
+        "Horizon of Destiny",
+        "Infinite Horizon Star",
+        "Silver Eyes Dread",
+        "Starshine, Icebreaker",
+        "Triumphal Still Sky",
+        "Wild Blossom Star",
     },
-
-    ["ruins of shadow haven"] = {
-        "Brute",
+	
+    ["empyr"] = {
+        "Ashes",
+        "Assassin of the Perfect Dusk",
+        "Final Rainbow",
         "Flail",
-        "Mace",
-        "Overgrowth",
-        "Skitter",
-        "Stone Chitin",
-        "Velutipes",
+        "Fluttering Ruby Prince",
+        "Iron Heart",
+        "Mischief Darkheart",
+        "Shockstone",
+        "Sister of the Invisible Heart",
+        "Stalwart Flicker",
+        "The Burning Mist",
+        "Wilting Flames",
+    },	
+	
+    ["aalishai"] = {
+        "Evasion Understanding Flow",
+        "Final Blade Lord",
+        "Ghost Glass Bitter",
+        "Ruby Icefall Blossom",
+        "Shield Spirit's Laugh",
+        "Sixth Consuming Master",
+        "Steam Wave Slicer",
+        "Stout Stone Beaten",
+        "Unconquering Sand Dirge",
+        "Venom of the Fallen Star",
+        "Whispering Depths Sigh",
+        "White Iron Rainbow",
     },
 
-    ["deepshade"] = {
-        "Agaricusus",
-        "Ayoaenae",
-        "Bavanjam",
-        "Drinil",
-        "Faceted Windra",
-        "Psylopsybyl",
-        "Sehtab Mahlinee",
+    ["mearatas"] = {
+        "an ancient air warden",
+        "an ancient fire warden",
+        "an ancient stone warden",
+        "an ancient water warden",
+        "Flowing Horizon Halo",
+        "Forsaken Cloud Sapphire",
+        "Glaring Moon Void",
+        "Platinum Rainbow Spire",
+        "Radiant Amber Lotus",
+        "Tsunami Sol Blood",
+        "Whispering Frost",
+        "Blistering Star",
     },
 
-    ["darklightcaverns"] = {
-        "Chromatic Widow Queen",
-        "Eelworm",
-        "Geoxyle",
-        "Kezhda the Frenzied",
-        "Mycorrhizal Mutation",
-        "Rabid Rhizanthella",
-        "Variegated Monstera",
+	["chamberoftears"] = {
+	
+	},
+	
+    ["gnomemtn"] = {
+        "A Non-Standard Deviation",
+        "Ambassador of Loving",
+        "Best Museum Security",
+        "Bloodmoon Chief Eclipse",
+        "Bloodmoon Howler Trolog",
+        "Breaker",
+        "Consul of Cooperation",
+        "Fractured Sweeper",
+        "Grash, Bloodmoon Growler",
+        "Healer Prime",
+        "Malfunctioning Iron Legion Hug",
+        "Master Mechanic",
+        "Repair for Pieces",
+        "Tatters",
+    },
+	
+--ToV
+
+    ["eastwastestwo"] = {
+        "a returned dracoliche",
+        "Bolman",
+        "Cadcane the Unmourned",
+        "Coldears",
+        "Mahaha",
+        "Monolith the Unstoppable",
+        "Servant of the Sleeper",
+        "Sofia the Quiet",
+        "Vekboz Wolfpunch",
+        "Windchill",
+        "Zburator the Damned",
     },
 
+	["frozenshadowtwo"] = {
+        
+    },
+	
+    ["crystaltwoa"] = {
+        "Ry`Gorr Herbalist",
+        "Ry`Gorr Inspector",
+    },
+	
+	["greatdividetwo"] = {
+        "a forgotten raid leader",
+        "a tizmak augur",
+        "Blizzent",
+        "Bloodmaw",
+        "Gerton Dumkin",
+        "Gorul Longshanks",
+        "Laima Ratgur",
+        "Loremaster Metiheib the Lost",
+        "Lost Squire of Narandi",
+        "Margidor",
+        "Orfur, Priest of Zek",
+        "Thosgromri Warmgranite",
+    },
+	
+	["velketortwo"] = {
+		
+	},
+
+    ["kaeltwo"] = {
+        "Black Fang",
+        "Direfang",
+        "Drendar Blackblade",
+        "Fjokar Frozenshard",
+        "Irrek Bloodfist",
+        "Kallis Stormcaller",
+        "Keldor Dek`Torek",
+        "Klraggek the Slayer",
+        "Velden Dragonbane",
+        "Vkjen Thunderslayer",
+    },
+
+--CoV
+	["sleepertwo"] = {
+	
+    },
+
+    ["necropolistwo"] = {
+        "a massive dracoliche",
+        "a moon bat",
+        "a ravenous entropy serpent",
+        "a restless warlord",
+        "a toxic phase spider",
+        "another great green slime",
+        "Dustbinder Tarlin",
+        "Foulfang",
+        "Jaled Dar's trapped shade",
+        "Queen Kitlaa",
+        "restless Dominator Yisaki",
+        "restless Vaniki",
+        "restless Warmaster Ultvara",
+        "Seeker Larada",
+    },
+
+	["cobaltscartwo"] = {
+        "Delmare Undertow",
+		"Desirae Fanfare",
+        "Kirezelbough",
+        "Morwenna Undertow",
+        "Octave Sforzando",
+        "Ol' Grinnin' Finley",
+        "Pikebreath",
+        "Skolskin Haeger",
+    },
+
+    ["westwastestwo"] = {
+        "a restless behemoth",
+        "Blasphemous Steel",
+        "Bliddlethliclaus",
+        "Feltinth the Caring",
+        "Miscreation the Timeless",
+        "Pastletlith the Temperate",
+        "Rildar Blackstone",
+        "Shrapnel",
+    },
+
+    ["skyshrinetwo"] = {
+        "a blessed racnar",
+        "Dagarn the Destroyer",
+        "Lord Koi'Doken",
+        "Professor Atkru",
+        "Shoen the Fanatic",
+        "Templeton the Clear",
+        "Ziglark Whisperwing",
+    },
+
+	["templeveeshantwo"] = {
+	
+	},
+	
+--ToL
+	["maidentwo"] = {
+		"Centien Rashen Xaui",
+		"Darkmeat",
+		"Diabo Xi Akuel",
+		"Lucca Brightfeld",
+		"Namdrows",
+		"Quietus the Forgotten",
+		"Temariel Xi Tetoracu",
+		"Tess Zelinstein",
+		"Txiki",
+		"Xenacious Von Deek",
+    },
+	
+	["umbraltwo"] = {
+		"Bloodwretch",
+		"Captain Resh Sogran",
+		"Fleshrot",
+		"Fyrthek Fior",
+		"Gantru Shojralen",
+		"Nightfall",
+		"Rumblecrush",
+		"Shak Dathor Warlord",
+		"Sylra Fris",
+		"Telaris Xeturisun",
+    },
+
+	["akhevatwo"] = {
+        "Centi Thall",
+		"Diabo Tatrua",
+		"Diabo Va Thall",
+		"Diabo Xi Va",
+		"Diabo Xi Xin",
+		"The Protector ",    
+    },
+	
+	["vexthaltwo"] = {
+		"Diabo Xi Va Temariel",
+		"Diabo Xi Xin Thall",
+		"Kaas Thox Xi Ans Dyek",
+		"Thall Va Kelun",
+		"Thall Xundraux Diabo",
+		"Thox Xakra",
+		"Va Xakra",
+    },
+
+	["shadowvalley"] = {
+        "a scorched terror",
+		"a tenebrous slight",
+		"an avaricious mass",
+		"an illusive dim",
+		"Ander, Wolf of Shadows",
+		"Bynn the Tormented",
+		"Tearc, Shade Keeper",     
+    },
+
+	["basilica"] = {
+        "Congealed Shadow Mass",
+		"Dark Agent of Luclin",
+		"Gloomclaw",
+		"Irate Servant of Luclin",
+		"Itzal, Luclin's Hunter",
+		"Mistakenly Animated Salt Golem",
+		"Xetheg, Luclin's Warden",
+    },
+
+	["bloodfalls"] = {
+		"A Retainer of Shadow",
+		"Centien Xi Va Xakra",
+		"Coagulus",
+		"Cruor",
+		"Lady Constance",
+		"Nikolas the Exiled",
+		"Pli Xin Liako",        
+    },
+
+	["maidenhouseint"] = {
+	
+    },
+
+--NoS
+	["shadowhaventwo"] = {
+		"Brute",
+		"Flail",
+		"Mace",
+		"Overgrowth",
+		"Skitter",
+		"Stone Chitin",
+		"Velutipes",
+    },
+
+	["sharvahltwo"] = {
+		"Crimsonclaw",
+		"Geerot Stabgut",
+		"Gheg Gorespit",
+		"Kurati the Feral",
+		"Tailfang",
+		"Toraji, Korath`s Warder",
+		"Wiggle",
+    },
+
+	["paludaltwo"] = {
+		"Arly Golyeck",
+		"Herachuel",
+		"Maricella Slithra",
+		"Merrimore Ychansk",
+		"Toxiplax",
+		"Vahlkamph",
+    },
+	
+	["shadeweavertwo"] = {
+		"Commander Esline",
+		"Molten Wildfire",
+		"Scorched Cackling Bones",
+		"Shak Dathor Overlord",
+		"Sharp Claw",
+		"Stoneclaw Broodmother",
+		"ThornPetal",
+    },
+
+	["darklightcaverns"] = {
+		"Chromatic Widow Queen",
+		"Eelworm",
+		"Geoxyle",
+		"Kezhdathe Frenzied",
+		"Mycorrhizal Mutation",
+		"Rabid Rhizanthella",
+		"Variegated Monstera",
+    },
+
+	["deepshade"] = {
+		"Agaricusus",
+		"Ayoaenae",
+		"Bavanjam",
+		"Drinil",
+		"Faceted Windra",
+		"Psylopsybyl",
+		"Sehtab Mahlinee",
+    },
+
+	["firefallpass"] = {
+		"Bedrock Burrower",
+		"Diabo Xi Vesta",
+		"Firefallizard",
+		"Fowl Matriarch",
+		"Igneous Insect",
+		"Rock Lobber",
+    },
+
+	["hollowshadetwo"] = {
+	
+    },
+
+--LS
     ["laurioninn"] = {
         "a brood queen",
         "a dijinn",
