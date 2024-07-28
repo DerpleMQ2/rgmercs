@@ -1014,8 +1014,9 @@ local _ClassConfig = {
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
-
+                    --TODO: Fix this, TargetHasBuff is a bandaid, spamcasting on tank without it even though we are using CheckPCNeedsBuff
                     return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
+                        and not RGMercUtils.TargetHasBuff(spell, target)
                 end,
             },
             {
@@ -1163,6 +1164,20 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     if mq.TLO.Target.ID() <= 0 then return false end
                     return RGMercUtils.GetSetting('DoTash') and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed()
+                end,
+            },
+            {
+                name = "UseAzureMindCrystal",
+                type = "CustomFunc",
+                cond = function(self)
+                    if not RGMercUtils.CanUseAA("Azure Mind Crystal") then return false end
+                    local crystal = mq.TLO.FindItem("Azure Mind Crystal")
+                        ---@diagnostic disable-next-line: param-type-mismatch
+                    return crystal and crystal() and mq.TLO.FindItem(crystal).TimerReady() == 0 and mq.TLO.Me.PctMana() <= RGMercUtils.GetSetting('ModRodManaPct')
+                end,
+                custom_func = function(self)
+                    local crystal = mq.TLO.FindItem("Azure Mind Crystal")
+                    return RGMercUtils.UseItem(crystal.Name(), mq.TLO.Me.ID())
                 end,
             },
             {
