@@ -744,14 +744,14 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
         },
@@ -812,7 +812,7 @@ return {
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
-            },          
+            },
             {
                 name = "GambitSpell",
                 type = "Spell",
@@ -824,14 +824,14 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
         },
@@ -1057,7 +1057,7 @@ return {
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
-            },  
+            },
             {
                 name = "FamiliarBuff",
                 type = "Spell",
@@ -1080,14 +1080,14 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
             {
@@ -1099,7 +1099,8 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoChestClick') and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and item() and item.Spell.Stacks() and
+                        item.TimerReady() == 0
                 end,
             },
             {
@@ -1237,14 +1238,14 @@ return {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode']          = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 3, Min = 1, Max = 4, },
-        ['DoChestClick']  = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = false, },
-        ['JoltAggro']     = { DisplayName = "Jolt Aggro %", Category = "Combat", Tooltip = "Aggro at which to use Jolt", Default = 65, Min = 1, Max = 100, },
-        ['WeaveAANukes']  = { DisplayName = "Weave AA Nukes", Category = "Combat", Tooltip = "Weave in AA Nukes", Default = true, },
-        ['DoManaBurn']    = { DisplayName = "Use Mana Burn AA", Category = "Combat", Tooltip = "Enable usage of Mana Burn", Default = true, },
-        ['DoSnare']       = { DisplayName = "Use Snare Spells", Category = "Combat", Tooltip = "Enable usage of Snares", Default = true, },
-        ['DoRain']        = { DisplayName = "Use Rain Spells", Category = "Combat", Tooltip = "Enable usage of Rain Spells", Default = true, },
-        ['DoGOMCheck']    = { DisplayName = "Do GOM Check", Category = "Combat", Tooltip = "Check if you have Gift of Mana before casting big nukes.", Default = false, },
-        ['HavestManaPct'] = { DisplayName = "Harvest Mana %", Category = "Utilities", Tooltip = "What Mana % to hit before using a harvest spell or aa.", Default = 85, Min = 1, Max = 99, },
+        ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 3, Min = 1, Max = 4, },
+        ['DoChestClick']   = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = false, },
+        ['JoltAggro']      = { DisplayName = "Jolt Aggro %", Category = "Combat", Tooltip = "Aggro at which to use Jolt", Default = 65, Min = 1, Max = 100, },
+        ['WeaveAANukes']   = { DisplayName = "Weave AA Nukes", Category = "Combat", Tooltip = "Weave in AA Nukes", Default = true, },
+        ['DoManaBurn']     = { DisplayName = "Use Mana Burn AA", Category = "Combat", Tooltip = "Enable usage of Mana Burn", Default = true, },
+        ['DoSnare']        = { DisplayName = "Use Snare Spells", Category = "Combat", Tooltip = "Enable usage of Snares", Default = true, },
+        ['DoRain']         = { DisplayName = "Use Rain Spells", Category = "Combat", Tooltip = "Enable usage of Rain Spells", Default = true, },
+        ['DoGOMCheck']     = { DisplayName = "Do GOM Check", Category = "Combat", Tooltip = "Check if you have Gift of Mana before casting big nukes.", Default = false, },
+        ['HarvestManaPct'] = { DisplayName = "Harvest Mana %", Category = "Utilities", Tooltip = "What Mana % to hit before using a harvest spell or aa.", Default = 85, Min = 1, Max = 99, },
     },
 }
