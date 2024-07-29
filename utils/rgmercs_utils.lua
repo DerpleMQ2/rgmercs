@@ -302,7 +302,7 @@ function RGMercUtils.PCSpellReady(spell)
     if me.Stunned() then return false end
 
     return me.CurrentMana() > spell.Mana() and (me.Casting.ID() or 0) == 0 and me.Book(spell.RankName.Name())() ~= nil and
-        not me.Moving()
+        not (me.Moving() and (spell.MyCastTime() or -1) > 0)
 end
 
 ---@param discSpell MQSpell
