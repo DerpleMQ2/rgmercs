@@ -1099,7 +1099,7 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoChestClick') and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HavestManaPct') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
