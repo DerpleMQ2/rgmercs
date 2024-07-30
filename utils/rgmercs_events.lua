@@ -160,10 +160,18 @@ end)
 -- [ END MEM SPELL HANDLERS ] --
 
 -- [ SCRIBE SPELL HANDLERS ] --
+mq.event('Begin Scribe', "Beginning to scribe #1#...", function(spell)
+    RGMercUtils.Memorizing = true
+end)
 
 mq.event('End Scribe', "You have finished scribing #1#.", function(spell)
+	RGMercUtils.Memorizing = false
     -- Rescan spell list
     RGMercModules:ExecModule("Class", "RescanLoadout")
+end)
+
+mq.event('Abort Scribe', "Aborting scribing of spell.", function()
+    RGMercUtils.Memorizing = false
 end)
 
 -- [ END SCRIBE SPELL HANDLERS ] --
