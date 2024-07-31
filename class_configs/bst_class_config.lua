@@ -1162,7 +1162,7 @@ return {
                 cond = function(self, itemName)
                     return RGMercUtils.GetSetting('DoEpic') and
                         mq.TLO.FindItem(itemName)() and mq.TLO.Me.ItemReady(itemName)() and
-                        (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil or mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
+                        (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil and mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
                 end,
             },
             {
