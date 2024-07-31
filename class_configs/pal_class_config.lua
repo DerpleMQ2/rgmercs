@@ -815,7 +815,7 @@ return {
     ['Rotations']         = {
         ['Burn'] = {
             {
-                name = "Spire of ChivalryValorous Rage",
+                name = "Spire of Chivalry",
                 type = "AA",
                 cond = function(self, aaName)
                     return mq.TLO.Me.Level() < 80 and RGMercUtils.AAReady(aaName) and not RGMercUtils.SongActiveByName('Group Armor of the Inquisitor') and
