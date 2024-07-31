@@ -195,9 +195,9 @@ function RGMercUtils.HandleDeath()
         end
     end
 
-    mq.delay("2m", function() return (mq.TLO.Zone.ID() ~= RGMercConfig.Globals.CurZoneId) end)
+    mq.delay("2m", function() return not mq.TLO.Me.Hovering() or (mq.TLO.Zone.ID() ~= RGMercConfig.Globals.CurZoneId) end)
 
-    RGMercsLogger.log_debug("Done zoning post death.")
+    RGMercsLogger.log_debug("Fishfood no more! Accepted rez or finished zoning post death.")
 
     -- if we want do do fellowship but we arent in the fellowship zone (rezed)
     if RGMercUtils.GetSetting('DoFellow') and not RGMercModules:ExecModule("Movement", "InCampZone") then
