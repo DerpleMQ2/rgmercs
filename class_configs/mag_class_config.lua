@@ -1200,6 +1200,31 @@ _ClassConfig      = {
 
             return true
         end,
+        HandleItemSummon = function(self, itemSource, scope) --scope: "personal" or "group" summons
+            if not itemSource and itemSource() then return false end
+			if not scope then return false end
+			
+			mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Spell(itemSource).RankName.Base(1)() end)
+			
+			if not mq.TLO.Cursor() then 
+				RGMercsLogger.log_debug("No valid item found on cursor, item handling aborted.")
+				return false
+			end
+			
+			RGMercsLogger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
+		
+			if scope == "group" then 
+				RGMercUtils.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
+				mq.delay(100)
+				RGMercUtils.DoGroupCmd("/autoinventory")
+			elseif scope == "personal" then
+				mq.delay(50)
+				RGMercUtils.DoCmd("/autoinventory")
+			else
+				RGMercsLogger.log_debug("Invalid scope sent: (%s). Item handling aborted.", scope)
+				return false
+			end
+        end,
     },
     ['Rotations']         = {
         ['Pet Management'] = {
@@ -1227,19 +1252,20 @@ _ClassConfig      = {
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
             },
-            {
-                name = "Drop Cursor Items",
-                type = "CustomFunc",
-                cond = function(self)
-                    return mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0
-                end,
-                custom_func = function(self)
-                    if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
-                        RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
-                        RGMercUtils.DoCmd("/autoinventory")
-                    end
-                end,
-            },
+            --removed temporarily and will be eliminated when autoinventory on individual entries have been widely tested
+            -- {
+            --     name = "Drop Cursor Items",
+            --     type = "CustomFunc",
+            --     cond = function(self)
+            --         return mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0
+            --     end,
+            --     custom_func = function(self)
+            --         if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
+            --             RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
+            --             RGMercUtils.DoCmd("/autoinventory")
+            --         end
+            --     end,
+            -- },
         },
         ['Combat Pet Management'] = {
             {
@@ -1609,6 +1635,11 @@ _ClassConfig      = {
                         mq.TLO.FindItemCount(modRodSpell.RankName.Base(1)() or "")() == 0 and
                         (mq.TLO.Cursor.ID() or 0) == 0
                 end,
+                post_activate = function(self, spell, success)
+                    if success then 
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "group")
+                    end
+                end,
             },
             {
                 name = "Summon Modulation Shard",
@@ -1620,12 +1651,22 @@ _ClassConfig      = {
                         mq.TLO.FindItemCount(modRodSpell.RankName.Base(1)() or "")() == 0 and
                         (mq.TLO.Cursor.ID() or 0) == 0 and RGMercUtils.AAReady(aaName)
                 end,
+                post_activate = function(self, aaName, success)
+                    if success then 
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, aaName, "group")
+                    end
+                end,
             },
             {
                 name = "SelfManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "") == 0 and (mq.TLO.Cursor.ID() or 0) == 0
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0 and (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+                post_activate = function(self, spell, success)
+                    if success then
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                    end
                 end,
             },
             {
@@ -1663,6 +1704,11 @@ _ClassConfig      = {
                 cond = function(self, spell)
                     return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
                 end,
+                post_activate = function(self, spell, success)
+                    if success then 
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                    end
+                end,
             },
             {
                 name = "EarthPetItemSummon",
@@ -1670,12 +1716,22 @@ _ClassConfig      = {
                 cond = function(self, spell)
                     return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
                 end,
+                post_activate = function(self, spell, success)
+                    if success then 
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                    end
+                end,
             },
             {
                 name = "FirePetItemSummon",
                 type = "Spell",
                 cond = function(self, spell)
                     return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
+                end,
+                post_activate = function(self, spell, success)
+                    if success then 
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                    end
                 end,
             },
             {

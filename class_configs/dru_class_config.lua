@@ -540,20 +540,6 @@ local _ClassConfig = {
             "Moonfire",
             "Frost",
         },
-        ['RemoteDD'] = {
-            -- Spell vars Added for Bobcatts New Mode.While keeping originals Intact! for other modes.
-            "Remote Moonrake",
-            "Remote Sunshock",
-            "Remote Moonflash",
-            "Remote Sunblaze",
-            "Remote Moonflame",
-            "Remote Sunflash",
-            "Remote Moonfire",
-            "Remote Sunfire",
-            "Remote Sunburst",
-            "Remote Sunflare",
-            "Remote Manaflux",
-        },
         ['SelfShield'] = {
             -- Self Shield Buff
             "Shadespine Coat",
@@ -947,16 +933,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "RemoteSunDD",
-                type = "Spell",
-                cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("Heal")
-                        and RGMercUtils.GetSetting('DoFire')
-                        and RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoNuke') and
-                        RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct')
-                end,
-            },
-            {
                 name = "ChillDOT",
                 type = "Spell",
                 cond = function(self, spell)
@@ -964,16 +940,6 @@ local _ClassConfig = {
                         and not RGMercUtils.GetSetting('DoFire')
                         and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
                         RGMercUtils.GetSetting('DoDot')
-                end,
-            },
-            {
-                name = "RemoteMoonDD",
-                type = "Spell",
-                cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("Heal")
-                        and not RGMercUtils.GetSetting('DoFire')
-                        and RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoNuke') and
-                        RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct')
                 end,
             },
             {
@@ -1004,9 +970,9 @@ local _ClassConfig = {
                 name = "SunDOT",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("Mana")
-                        and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
-                        RGMercUtils.GetSetting('DoDot')
+                    return RGMercUtils.IsModeActive("Mana") or (RGMercUtils.IsModeActive("Heal")
+                        and RGMercUtils.GetSetting('DoFire')) and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
+                        and RGMercUtils.GetSetting('DoDot')
                 end,
             },
             {
@@ -1028,12 +994,21 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "RemoteDD",
+                name = "RemoteSunDD",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("Mana")
-                        and RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetTargetPctHPs() > 40 and
-                        mq.TLO.Me.PctMana() > 40
+                    return RGMercUtils.GetSetting('DoFire')
+                        and RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoNuke') and
+                        RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct')
+                end,
+            },
+            {
+                name = "RemoteMoonDD",
+                type = "Spell",
+                cond = function(self, spell)
+                    return not RGMercUtils.GetSetting('DoFire')
+                        and RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoNuke') and
+                        RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct')
                 end,
             },
             {
@@ -1278,9 +1253,11 @@ local _ClassConfig = {
                 name = "TempHPBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
-                cond = function(self, spell, target)
-                    return not RGMercUtils.TargetHasBuff(spell) and target and target and
-                        RGMercConfig.Constants.RGTank:contains(target.Class.ShortName())
+                cond = function(self, spell, target, uiCheck)
+                    -- force the target for StacksTarget to work.
+                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    return RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell)
+                        and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1435,7 +1412,7 @@ local _ClassConfig = {
                 -- [ MANA MODE ] --
                 { name = "WinterFireDD",   cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "QuickHealSurge", cond = function(self) return mq.TLO.Me.Level() >= 90 end, },
+                { name = "QuickGroupHeal", cond = function(self) return mq.TLO.Me.Level() >= 90 end, },
                 { name = "QuickRoarDD",    cond = function(self) return true end, },
                 -- [ Fall Back ]--
                 { name = "IceRainNuke",    cond = function(self) return true end, },
@@ -1471,14 +1448,20 @@ local _ClassConfig = {
         {
             gem = 6,
             spells = {
-                -- [ MANA MODE ] --
+                -- [ BOTH MODES ] --
                 {
-                    name = "RemoteDD",
+                    name = "RemoteSunDD",
                     cond = function(self)
-                        return mq.TLO.Me.Level() >= 83 and
-                            RGMercUtils.IsModeActive("Mana")
+                        return mq.TLO.Me.Level() >= 83 and RGMercUtils.GetSetting('DoFire')
                     end,
                 },
+                {
+                    name = "RemoteMoonDD",
+                    cond = function(self)
+                        return mq.TLO.Me.Level() >= 83 and not RGMercUtils.GetSetting('DoFire')
+                    end,
+                },
+                -- [ MANA MODE ] --
                 { name = "RoDebuff",            cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
                 { name = "SunrayDOT",           cond = function(self) return mq.TLO.Me.Level() >= 73 end, },
@@ -1494,7 +1477,8 @@ local _ClassConfig = {
                 -- [ MANA MODE ] --
                 { name = "SunMoonDot",  cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "FrostDebuff", cond = function(self) return mq.TLO.Me.Level() >= 74 end, },
+                { name = "FrostDebuff", cond = function(self) return mq.TLO.Me.Level() >= 74 and not RGMercUtils.GetSetting('DoFire') end, },
+				{ name = "ReptileCombatInnate", cond = function(self) return RGMercUtils.CanUseAA("Blessing of Ro") end, },
                 { name = "RoDebuff",    cond = function(self) return true end, },
                 -- [ Fall Back ]--
                 { name = "HordeDOT",    cond = function(self) return true end, },
@@ -1531,6 +1515,7 @@ local _ClassConfig = {
                 },
                 { name = "IceDD",           cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
+				{ name = "SunDOT",        cond = function(self) return RGMercUtils.GetSetting("DoFire") end, },
                 { name = "IceBreathDebuff", cond = function(self) return true end, },
             },
         },
@@ -1551,7 +1536,9 @@ local _ClassConfig = {
                 -- [ MANA MODE ] --
                 { name = "TempHPBuff",  cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "RemoteSunDD", cond = function(self) return true end, },
+                { name = "DichoSpell", cond = function(self) return mq.TLO.Me.Level() >= 101 end, },
+                { name = "GroupCure",  cond = function(self) return true end, },
+                { name = "ReptileCombatInnate", cond = function(self) return true end, },
             },
         },
         {
@@ -1568,9 +1555,7 @@ local _ClassConfig = {
                 },
                 { name = "ChillDOT",   cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "DichoSpell", cond = function(self) return mq.TLO.Me.Level() >= 101 end, },
                 { name = "GroupCure",  cond = function(self) return true end, },
-
             },
         },
         {
@@ -1623,9 +1608,11 @@ local _ClassConfig = {
             return false
         end,
     },
+    --TODO: These are nearly all in need of Display and Tooltip updates.
     ['DefaultConfig']     = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
-        ['DoFire']       = { DisplayName = "Cast Fire Spells", Category = "Spells and Abilities", Tooltip = "Use Fire Spells", Default = true, },
+        --TODO: This is confusing because it is actually a choice between fire and ice and should be rewritten (need time to update conditions above)
+        ['DoFire']       = { DisplayName = "Cast Fire Spells", Category = "Spells and Abilities", Tooltip = "Use Fire Spells", RequiresLoadoutChange = true, Default = true, },
         ['DoRain']       = { DisplayName = "Cast Rain Spells", Category = "Spells and Abilities", Tooltip = "Use Rain Spells", Default = true, },
         ['DoRunSpeed']   = { DisplayName = "Cast Run Speed", Category = "Spells and Abilities", Tooltip = "Cast Run Speed Spells", Default = true, },
         ['DoNuke']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
