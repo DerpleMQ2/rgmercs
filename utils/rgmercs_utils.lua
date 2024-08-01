@@ -1396,7 +1396,7 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
 
     if RGMercUtils.GetXTHaterCount() == 0 and oldSpellInSlot() and mq.TLO.Me.Gem(RGMercUtils.UseGem)() ~= oldSpellInSlot.Name() then
         RGMercsLogger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, RGMercUtils.UseGem)
-        RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, oldSpellInSlot.Name(), true, 15000)
+        RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, oldSpellInSlot.Name(), false, 15000)
     end
 
     -- Move to the next step
