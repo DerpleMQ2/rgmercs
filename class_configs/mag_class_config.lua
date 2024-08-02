@@ -1202,28 +1202,28 @@ _ClassConfig      = {
         end,
         HandleItemSummon = function(self, itemSource, scope) --scope: "personal" or "group" summons
             if not itemSource and itemSource() then return false end
-			if not scope then return false end
-			
-			mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Spell(itemSource).RankName.Base(1)() end)
-			
-			if not mq.TLO.Cursor() then 
-				RGMercsLogger.log_debug("No valid item found on cursor, item handling aborted.")
-				return false
-			end
-			
-			RGMercsLogger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
-		
-			if scope == "group" then 
-				RGMercUtils.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
-				mq.delay(100)
-				RGMercUtils.DoGroupCmd("/autoinventory")
-			elseif scope == "personal" then
-				mq.delay(50)
-				RGMercUtils.DoCmd("/autoinventory")
-			else
-				RGMercsLogger.log_debug("Invalid scope sent: (%s). Item handling aborted.", scope)
-				return false
-			end
+            if not scope then return false end
+
+            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Spell(itemSource).RankName.Base(1)() end)
+
+            if not mq.TLO.Cursor() then
+                RGMercsLogger.log_debug("No valid item found on cursor, item handling aborted.")
+                return false
+            end
+
+            RGMercsLogger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
+
+            if scope == "group" then
+                RGMercUtils.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
+                mq.delay(100)
+                RGMercUtils.DoGroupCmd("/autoinventory")
+            elseif scope == "personal" then
+                mq.delay(50)
+                RGMercUtils.DoCmd("/autoinventory")
+            else
+                RGMercsLogger.log_debug("Invalid scope sent: (%s). Item handling aborted.", scope)
+                return false
+            end
         end,
     },
     ['Rotations']         = {
@@ -1582,8 +1582,8 @@ _ClassConfig      = {
             {
                 name = "LongDurDmgShield",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                cond = function(self, spell, target)
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
@@ -1636,7 +1636,7 @@ _ClassConfig      = {
                         (mq.TLO.Cursor.ID() or 0) == 0
                 end,
                 post_activate = function(self, spell, success)
-                    if success then 
+                    if success then
                         RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "group")
                     end
                 end,
@@ -1652,7 +1652,7 @@ _ClassConfig      = {
                         (mq.TLO.Cursor.ID() or 0) == 0 and RGMercUtils.AAReady(aaName)
                 end,
                 post_activate = function(self, aaName, success)
-                    if success then 
+                    if success then
                         RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, aaName, "group")
                     end
                 end,
@@ -1705,7 +1705,7 @@ _ClassConfig      = {
                     return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
                 end,
                 post_activate = function(self, spell, success)
-                    if success then 
+                    if success then
                         RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
                     end
                 end,
@@ -1717,7 +1717,7 @@ _ClassConfig      = {
                     return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
                 end,
                 post_activate = function(self, spell, success)
-                    if success then 
+                    if success then
                         RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
                     end
                 end,
@@ -1729,7 +1729,7 @@ _ClassConfig      = {
                     return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
                 end,
                 post_activate = function(self, spell, success)
-                    if success then 
+                    if success then
                         RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
                     end
                 end,

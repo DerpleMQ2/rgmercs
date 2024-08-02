@@ -853,9 +853,9 @@ local _ClassConfig = {
             {
                 name = "ChaoticDebuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return not RGMercUtils.TargetHasBuff(spell) and spell.Trigger(2).StacksTarget()
                 end,
             },
@@ -996,7 +996,7 @@ local _ClassConfig = {
                 type = "Item",
                 cond = function(self, itemName)
                     return mq.TLO.FindItemCount(itemName)() ~= 0
-				end,
+                end,
             },
             {
                 name = "Funeral Pyre",
