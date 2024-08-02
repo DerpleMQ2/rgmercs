@@ -853,21 +853,18 @@ end
 ---@param spell MQSpell
 ---@param targetId number
 ---@param targetName string
----@param uiCheck boolean # UI Cannot do DanNet checks.
-function RGMercUtils.CheckPCNeedsBuff(spell, targetId, targetName, uiCheck)
+function RGMercUtils.CheckPCNeedsBuff(spell, targetId, targetName)
     if not spell or not spell() then return false end
     if targetId == mq.TLO.Me.ID() then
         return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() == nil
     elseif mq.TLO.DanNet(targetName)() == nil then
         -- Target.
-        if uiCheck == false then
-            RGMercUtils.SetTarget(targetId)
-            mq.delay("2s", function() return mq.TLO.Target.BuffsPopulated() end)
-        end
+        RGMercUtils.SetTarget(targetId)
+        mq.delay("2s", function() return mq.TLO.Target.BuffsPopulated() end)
         return mq.TLO.Target.FindBuff("id " .. tostring(spell.ID()))() == nil
     else
         -- DanNet
-        local ret = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spell.ID()), uiCheck and 0 or 1000)
+        local ret = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spell.ID()), 1000)
 
         return (ret == "NULL") or not ret
     end
@@ -1300,7 +1297,7 @@ end
 ---@param entry table
 ---@param targetId integer
 ---@return boolean, boolean # check pass and active pass
-function RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId, uiCheck)
+function RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
     local condArg = RGMercUtils.GetEntryConditionArg(resolvedActionMap, entry)
     local condTarg = mq.TLO.Spawn(targetId)
     local pass = false
@@ -1308,21 +1305,19 @@ function RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, tar
 
     if condArg ~= nil then
         local logInfo = string.format(
-            "check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay), uiCheck(%s)", entry.name or "NoName",
-            (type(condArg) == 'userdata' and condArg() or condArg) or "None",
-            condTarg.CleanName() or "None", RGMercUtils.BoolToColorString(uiCheck))
-        pass = RGMercUtils.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg, uiCheck)
+            "check failed - Entry(\at%s\ay), condArg(\at%s\ay), condTarg(\at%s\ay)", entry.name or "NoName",
+            (type(condArg) == 'userdata' and condArg() or condArg) or "None", condTarg.CleanName() or "None")
+        pass = RGMercUtils.SafeCallFunc("Condition " .. logInfo, entry.cond, caller, condArg, condTarg)
 
         if entry.active_cond then
             active = RGMercUtils.SafeCallFunc("Active " .. logInfo, entry.active_cond, caller, condArg)
         end
     end
 
-    if not uiCheck then
-        RGMercsLogger.log_verbose("\ay   :: Testing Condition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
-            entry.name, entry.type, condArg or "None",
-            condTarg.CleanName() or "None", RGMercUtils.BoolToColorString(pass))
-    end
+    RGMercsLogger.log_verbose("\ay   :: Testing Condition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
+        entry.name, entry.type, condArg or "None", condTarg.CleanName() or "None", RGMercUtils.BoolToColorString(pass))
+
+    entry.lastRun = { pass = pass, active = active, }
 
     return pass, active
 end
@@ -1363,7 +1358,7 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
             RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
             lastStepIdx = idx
             if entry.cond then
-                local pass = RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId, false)
+                local pass = RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
                 if pass == true then
                     local res = RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
                     if res == true then
@@ -3976,8 +3971,11 @@ function RGMercUtils.RenderRotationTable(caller, name, rotationTable, resolvedAc
             end
             ImGui.TableNextColumn()
             if entry.cond then
-                local pass, active = RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, mq.TLO.Target.ID(),
-                    true)
+                local pass, active = false, false
+
+                if entry.lastRun then
+                    pass, active = entry.lastRun.pass, entry.lastRun.active
+                end
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)

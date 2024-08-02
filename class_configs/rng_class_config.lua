@@ -1182,8 +1182,8 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Rathe,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell, target, uiCheck)
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                cond = function(self, spell, target)
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.TargetHasBuff(spell) and not RGMercUtils.TargetHasBuffByName("Shared " .. spell.Name())
                 end,
             },

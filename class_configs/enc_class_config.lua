@@ -598,16 +598,16 @@ local _ClassConfig = {
         },
         --Unused table, temporarily removed - was causing conflicts while resolving NukeSpell1 action maps (will revisit nukes later)
         -- ['ChromaNuke'] = {
-            --- Chromatic Lowest Nuke - Normal -- >=LVL73
-            -- "Polycascading Assault",
-            -- "Polyfluorescent Assault",
-            -- "Polyrefractive Assault",
-            -- "Phantasmal Assault",
-            -- "Arcane Assault",
-            -- "Spectral Assault",
-            -- "Polychaotic Assault",
-            -- "Multichromatic Assault",
-            -- "Polychromatic Assault",
+        --- Chromatic Lowest Nuke - Normal -- >=LVL73
+        -- "Polycascading Assault",
+        -- "Polyfluorescent Assault",
+        -- "Polyrefractive Assault",
+        -- "Phantasmal Assault",
+        -- "Arcane Assault",
+        -- "Spectral Assault",
+        -- "Polychaotic Assault",
+        -- "Multichromatic Assault",
+        -- "Polychromatic Assault",
         -- },
         ['CripSlowSpell'] = {
             --- Slow Cripple Combo Spell - Beginning @ Level 88
@@ -917,22 +917,26 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
                 cond = function(self, spell)
-				    if RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.CanUseAA('Auroria Mastery') then return false end
-				    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) end,
+                    if RGMercUtils.GetSetting('DoLearners') and not RGMercUtils.CanUseAA('Auroria Mastery') then return false end
+                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name())
+                end,
             },
             {
                 name = "AuraBuff2",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) and not RGMercUtils.AuraActiveByName("Mana Ripple") end,
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) and not RGMercUtils.AuraActiveByName("Mana Ripple") and not RGMercUtils.GetSetting('DoLearners') end,
+                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) and not RGMercUtils.AuraActiveByName("Mana Ripple") and
+                        not RGMercUtils.GetSetting('DoLearners')
+                end,
             },
             {
                 name = "AuraBuff3",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.AuraActiveByName(spell.Name()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoLearners') and RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name()) end,
+                    return RGMercUtils.GetSetting('DoLearners') and RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.Name())
+                end,
             },
         },
         ['GroupBuff'] = {
@@ -941,81 +945,83 @@ local _ClassConfig = {
                 name = "ManaRegen",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
                 end,
             },
             {
                 name = "HasteBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
                 end,
             },
             {
                 name = "GroupSpellShield",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not target or not target() then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
                 name = "GroupDoTShield",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not target or not target() then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
                 name = "GroupAuspiceBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not target or not target() then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
                 name = "NdtBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoNDTBuff') then return false end
                     if not target or not target() then return false end
 
                     if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
-                        and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+                        and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then
+                        return false
+                    end
 
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.SpellStacksOnTarget(spell)
+                    RGMercUtils.SetTarget(target.ID() or 0)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
                 name = "SingleRune",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
                     --TODO: Fix this, TargetHasBuff is a bandaid, spamcasting on tank without it even though we are using CheckPCNeedsBuff
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
                         and not RGMercUtils.TargetHasBuff(spell, target)
                 end,
             },
@@ -1023,26 +1029,26 @@ local _ClassConfig = {
                 name = "GroupRune",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoGroupAbsorb') then return false end
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
                 name = "AggroRune",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoAggroRune') then return false end
                     if not target or not target() then return false end
 
                     if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName(), uiCheck)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
                 end,
             },
         },
@@ -1172,7 +1178,7 @@ local _ClassConfig = {
                 cond = function(self)
                     if not RGMercUtils.CanUseAA("Azure Mind Crystal") then return false end
                     local crystal = mq.TLO.FindItem("Azure Mind Crystal")
-                        ---@diagnostic disable-next-line: param-type-mismatch
+                    ---@diagnostic disable-next-line: param-type-mismatch
                     return crystal and crystal() and mq.TLO.FindItem(crystal).TimerReady() == 0 and mq.TLO.Me.PctMana() <= RGMercUtils.GetSetting('ModRodManaPct')
                 end,
                 custom_func = function(self)
@@ -1325,17 +1331,14 @@ local _ClassConfig = {
             {
                 name = "Slowing Helix",
                 type = "AA",
-                cond = function(self, aaName, _, uiCheck)
+                cond = function(self, aaName, _)
                     if mq.TLO.Target.ID() <= 0 then return false end
 
                     local detAACheck = RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                     local slowedCheck = mq.TLO.Target.Slowed() == nil or RGMercUtils.GetTargetSlowedPct() < 50
 
-                    if not uiCheck then
-                        RGMercsLogger.log_verbose("Enc: Slowing Helix: detAA(%s), slowed(%s), slowedPct(%d)", RGMercUtils.BoolToColorString(detAACheck),
-                            RGMercUtils.BoolToColorString(slowedCheck), RGMercUtils.GetTargetSlowedPct())
-                    end
-
+                    RGMercsLogger.log_verbose("Enc: Slowing Helix: detAA(%s), slowed(%s), slowedPct(%d)", RGMercUtils.BoolToColorString(detAACheck),
+                        RGMercUtils.BoolToColorString(slowedCheck), RGMercUtils.GetTargetSlowedPct())
                     return RGMercUtils.GetSetting('DoSlow') and detAACheck and slowedCheck
                 end,
             },

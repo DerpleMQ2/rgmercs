@@ -684,7 +684,7 @@ return {
             end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and RGMercUtils.GetSetting('DoParagon') and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell) and
-                not RGMercUtils.Feigning()
+                    not RGMercUtils.Feigning()
             end,
         },
         {
@@ -854,9 +854,9 @@ return {
             {
                 name = "SlowSpell",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell) and
                         spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct())
@@ -1035,24 +1035,24 @@ return {
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                cond = function(self, spell, target)
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
                 name = "ManaRegenBuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                cond = function(self, spell, target)
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell)
                 end,
             },
             {
                 name = "AvatarSpell",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                cond = function(self, spell, target)
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
                         RGMercUtils.GetSetting('DoAvatar')
                 end,
@@ -1060,18 +1060,18 @@ return {
             {
                 name = "GroupAtkBuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
                 name = "SingleAtkHPBuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     local targetClass = target.Class.ShortName()
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell)
@@ -1080,19 +1080,19 @@ return {
             {
                 name = "GroupAtkHPBuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
                 name = "SingleAtkHPBuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     local targetClass = target.Class.ShortName()
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell)
                 end,
@@ -1100,19 +1100,19 @@ return {
             {
                 name = "GroupFocusSpell",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
                 name = "SingleFocusSpell",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     local targetClass = target.Class.ShortName()
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return (targetClass == "WAR" or targetClass == "PAL" or targetClass == "SHD") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell)
                 end,

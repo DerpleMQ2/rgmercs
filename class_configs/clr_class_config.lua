@@ -811,9 +811,9 @@ local _ClassConfig = {
             {
                 name = "Celestial Regeneration",
                 type = "AA",
-                cond = function(self, aaName, target, uiCheck)
+                cond = function(self, aaName, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     local spell = mq.TLO.AltAbility(aaName).Spell
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and
                         RGMercUtils.SpellStacksOnTarget(spell) and
@@ -823,9 +823,9 @@ local _ClassConfig = {
             {
                 name = "Exquisite Benediction",
                 type = "AA",
-                cond = function(self, aaName, target, uiCheck) -- note: Is aaName the correct arg here? or should be 'spell'?
+                cond = function(self, aaName, target) -- note: Is aaName the correct arg here? or should be 'spell'?
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     local spell = mq.TLO.AltAbility(aaName).Spell
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and
                         RGMercUtils.SpellStacksOnTarget(spell) and
@@ -835,9 +835,9 @@ local _ClassConfig = {
             {
                 name = "groupheal",
                 type = "spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and
                         RGMercUtils.SpellStacksOnTarget(spell) and
                         not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
@@ -1150,7 +1150,8 @@ local _ClassConfig = {
                 name = "aurabuff1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.CanUseAA('Spirit Mastery') and not RGMercUtils.AuraActiveByName(spell.BaseName()) and not RGMercUtils.AuraActiveByName("Reverent Aura") and RGMercUtils.SpellStacksOnMe(spell)
+                    return RGMercUtils.CanUseAA('Spirit Mastery') and not RGMercUtils.AuraActiveByName(spell.BaseName()) and not RGMercUtils.AuraActiveByName("Reverent Aura") and
+                    RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
@@ -1193,18 +1194,18 @@ local _ClassConfig = {
             {
                 name = "SymbolBuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercUtils.GetSetting('DoSymbol') and RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", }, target) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
                 name = "AegoBuff",
                 type = "Spell",
-                cond = function(self, spell, target, uiCheck)
+                cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    if not uiCheck then RGMercUtils.SetTarget(target.ID() or 0) end
+                    RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercUtils.GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.BuffActive(spell)
                 end,
             },
