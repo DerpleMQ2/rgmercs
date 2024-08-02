@@ -607,8 +607,8 @@ return {
                     end
 
                     -- Cast the spell. Will report if need to memorize or don't have the spell
-                    mq.cmd('/if (${Cast.Ready[exodus]}) /casting "exodus" alt')
-                    mq.cmdf('/timed 1 /if (${Me.Book["%s"]}>0) /casting "%s"', portName, portName)
+                    mq.cmd('/if (${Cast.Ready[exodus]}) /cast "exodus" alt')
+                    mq.cmdf('/timed 1 /if (${Me.Book["%s"]}>0) /cast "%s"', portName, portName)
                     mq.cmdf('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
 
                     -- Have to memorize

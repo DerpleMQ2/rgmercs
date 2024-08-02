@@ -191,6 +191,7 @@ Config.DefaultConfig = {
     ['AutoStandFD']          = { DisplayName = "Stand from FD in Combat", Category = "Combat", Tooltip = "Auto stands you up from FD if combat starts.", Default = true, ConfigType = "Normal", },
     ['WaitOnGlobalCooldown'] = { DisplayName = "Wait on Global Cooldown", Category = "Combat", Tooltip = "Wait on Global Cooldown before trying to cast more spells (Should NOT be used by classes that have Weave rotations!)", Default = false, ConfigType = "Advanced", },
     ['FaceTarget']           = { DisplayName = "Face Target in Combat", Category = "Combat", Tooltip = "Periodically /face your target while in combat.", Default = true, ConfigType = "Advanced", },
+    ['CastReadyDelayFact']   = { DisplayName = "Cast Ready Delay Factor", Category = "Combat", Tooltip = "Wait Ping * [n] ms before saying we are ready to cast.", Default = 0, Min = 0, Max = 10, ConfigType = "Advanced", },
 
     -- [ Tanking ] --
     ['MovebackWhenTank']     = { DisplayName = "Moveback as Tank", Category = "Tanking", Tooltip = "Adds 'moveback' to stick command when tanking. Helpful to keep mobs from getting behind you.", Default = false, ConfigType = "Advanced", },

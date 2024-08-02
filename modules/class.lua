@@ -286,7 +286,7 @@ function Module:Render()
                     local rotationName = r.name
                     if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
-                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name,
+                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(r.name,
                             self.ClassConfig.Rotations[r.name],
                             self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
                         ImGui.Unindent()
@@ -305,7 +305,7 @@ function Module:Render()
                     local rotationName = r.name
                     if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
-                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(self, r.name,
+                        self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(r.name,
                             self.ClassConfig.HealRotations[r.name],
                             self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
                         ImGui.Unindent()
