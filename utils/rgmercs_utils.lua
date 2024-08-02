@@ -3951,14 +3951,13 @@ function RGMercUtils.RenderRotationTableKey()
     end
 end
 
----@param caller self               # self object of the caller to pass back into coditions
 ---@param name string               # name of the rotation table
 ---@param rotationTable table       # rotation Table to render
 ---@param resolvedActionMap table   # map of AbilitySet items to resolved spells and abilities
 ---@param rotationState integer     # current state
 ---@param showFailed boolean        # show items that fail their conitionals
 ---@return boolean
-function RGMercUtils.RenderRotationTable(caller, name, rotationTable, resolvedActionMap, rotationState, showFailed)
+function RGMercUtils.RenderRotationTable(name, rotationTable, resolvedActionMap, rotationState, showFailed)
     if ImGui.BeginTable("Rotation_" .. name, rotationState > 0 and 5 or 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
