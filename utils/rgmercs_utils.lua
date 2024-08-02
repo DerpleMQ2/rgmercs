@@ -4298,7 +4298,9 @@ function RGMercUtils.RenderSettings(settings, defaults, categories, hideControls
 
     table.sort(settingNames,
         function(k1, k2)
-            if defaults[k1].Category == defaults[k2].Category then
+            if (defaults[k1].Index ~= nil or defaults[k2].Index ~= nil) and (defaults[k1].Index ~= defaults[k2].Index) then
+                return (defaults[k1].Index or 999) < (defaults[k2].Index or 999)
+            elseif defaults[k1].Category == defaults[k2].Category then
                 return defaults[k1].DisplayName < defaults[k2].DisplayName
             else
                 return defaults[k1].Category < defaults[k2].Category
