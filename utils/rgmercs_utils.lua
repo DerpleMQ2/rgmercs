@@ -155,7 +155,7 @@ end
 
 ---@param targetId integer
 function RGMercUtils.SetTarget(targetId)
-    local info = debug.getinfo(4, "Snl")
+    if targetId == 0 then return end
 
     if targetId == mq.TLO.Target.ID() then return end
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
@@ -652,7 +652,7 @@ function RGMercUtils.WaitCastReady(spell, maxWait)
     end
 
     -- account for lag
-    mq.delay(500)
+    -- mq.delay(500)
 end
 
 function RGMercUtils.SpellLoaded(spell)
@@ -1126,20 +1126,36 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         RGMercUtils.WaitGlobalCoolDown()
 
         -- wait another little bit.
-        mq.delay(500)
+        --mq.delay(500)
 
         RGMercUtils.ActionPrep()
 
-        local cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", spellName, targetId)
-        RGMercUtils.DoCmd(cmd)
+        local retryCount = 5
 
-        mq.delay("1s", function() return mq.TLO.Me.Casting.ID() > 0 end)
+        --local cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", spellName, targetId)
+        if targetId > 0 then
+            RGMercUtils.SetTarget(targetId)
+        end
 
-        RGMercUtils.WaitCastFinish(targetSpawn)
+        local cmd = string.format("/cast \"%s\"", spellName)
+        RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_RESULT_NONE)
+
+        repeat
+            RGMercsLogger.log_verbose("\ayUseSpell(): Attempting to cast: %s", spellName)
+            RGMercUtils.DoCmd(cmd)
+            RGMercsLogger.log_verbose("\ayUseSpell(): Waiting to start cast: %s", spellName)
+            mq.delay("1s", function() return mq.TLO.Me.Casting.ID() > 0 end)
+            RGMercsLogger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
+            RGMercUtils.WaitCastFinish(targetSpawn)
+            RGMercsLogger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s reties left = %d", spellName, RGMercUtils.GetLastCastResultName(), retryCount)
+            retryCount = retryCount - 1
+        until RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or retryCount < 0
 
         -- don't return control until we are done.
         if RGMercUtils.GetSetting('WaitOnGlobalCooldown') and not overrideWaitForGlobalCooldown then
+            RGMercsLogger.log_verbose("\ayUseSpell(): Waiting on Global Cooldown After Casting: %s", spellName)
             RGMercUtils.WaitGlobalCoolDown()
+            RGMercsLogger.log_verbose("\agUseSpell(): Done Waiting on Global Cooldown After Casting: %s", spellName)
         end
 
         return true

@@ -165,7 +165,7 @@ mq.event('Begin Scribe', "Beginning to scribe #1#...", function(spell)
 end)
 
 mq.event('End Scribe', "You have finished scribing #1#.", function(spell)
-	RGMercUtils.Memorizing = false
+    RGMercUtils.Memorizing = false
     -- Rescan spell list
     RGMercModules:ExecModule("Class", "RescanLoadout")
 end)
