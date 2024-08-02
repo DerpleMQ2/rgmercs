@@ -1301,18 +1301,6 @@ local _ClassConfig = {
         },
         ['Downtime'] = {
             {
-                name = "Nature's Boon",
-                type = "AA",
-                active_cond = function(self, aaName)
-                    return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName)
-                        .Spell.ID())
-                end,
-                cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('WardsPlease') and
-                        not RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID())
-                end,
-            },
-            {
                 name = "SelfShield",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,

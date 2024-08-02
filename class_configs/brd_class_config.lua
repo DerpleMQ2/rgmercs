@@ -1256,23 +1256,20 @@ local _ClassConfig = {
         },
 
         ['Downtime'] = {
-            -- #TODO: these should probably go in a buff rotation or perhaps downtime, but it'll require remem'ing the aura song
-            --{
-            --    name = "BardDPSAura",
-            --    type = "Song",
-            --    cond = function(self, songSpell)
-            --        return RGMercUtils.SongMemed(songSpell) and not RGMercUtils.AuraActiveByName(songSpell.RankName()) and
-            --            not RGMercUtils.GetSetting('UseRegenAura')
-            --    end,
-            --},
-            --{
-            --    name = "BardRegenAura",
-            --    type = "Song",
-            --    cond = function(self, songSpell)
-            --        return RGMercUtils.SongMemed(songSpell) and not RGMercUtils.AuraActiveByName(songSpell.RankName()) and
-            --            RGMercUtils.GetSetting('UseRegenAura')
-            --    end,
-            --},
+            {
+               name = "BardDPSAura",
+               type = "Song",
+               cond = function(self, songSpell)
+                   return not RGMercUtils.AuraActiveByName(songSpell.RankName()) and RGMercUtils.GetSetting('UseAura') == 1
+               end,
+            },
+            {
+               name = "BardRegenAura",
+               type = "Song",
+               cond = function(self, songSpell)
+                   return not RGMercUtils.AuraActiveByName(songSpell.RankName()) and RGMercUtils.GetSetting('UseAura') == 2
+               end,
+            },
             {
                 name = "SymphonyOfBattle",
                 type = "Item",
@@ -1411,7 +1408,7 @@ local _ClassConfig = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
         ['UseAASelo']         = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true, },
         ['DoRunSpeed']        = { DisplayName = "Cast Run Speed Buffs", Category = "Buffs", Tooltip = "Use Selos.", Default = true, },
-        ['UseRegenAura']      = { DisplayName = "Use Regen Aura", Category = "Buffs", Tooltip = "UseRegenAura", Default = false, },
+        ['UseAura']           = { DisplayName = "Use Bard Aura", Category = "Buffs", Tooltip = "Select the Aura to be used, if any.", Type = "Combo", ComboOptions = { 'DPS', 'Regen', 'None' }, Default = 1, Min = 1, Max = 3, RequiresLoadoutChange = true,},
         ['UseDynamicMelody']  = { DisplayName = "Use Dynamic Melody", Category = "Combat", Tooltip = Tooltips.UseMelody, Default = true, Advanced = true, },
 
         ['UseEpic']           = { DisplayName = "Use Epic Click", Category = "Burns", Tooltip = "Use Epic 1-Never 2-Burns 3-Always", Type = "Combo", ComboOptions = { 'Never', 'Burns', 'Always', }, Default = 1, Min = 1, Max = 3, },
