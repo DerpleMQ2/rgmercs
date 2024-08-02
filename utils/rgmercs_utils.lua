@@ -1132,7 +1132,6 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
 
         local retryCount = 5
 
-        --local cmd = string.format("/casting \"%s\" -maxtries|5 -targetid|%d", spellName, targetId)
         if targetId > 0 then
             RGMercUtils.SetTarget(targetId)
         end
