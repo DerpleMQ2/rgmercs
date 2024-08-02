@@ -652,7 +652,8 @@ function RGMercUtils.WaitCastReady(spell, maxWait)
     end
 
     -- account for lag
-    -- mq.delay(500)
+    local pingDelay = mq.TLO.EverQuest.Ping() * RGMercUtils.GetSetting('CastReadyDelayFact')
+    mq.delay(pingDelay)
 end
 
 function RGMercUtils.SpellLoaded(spell)
