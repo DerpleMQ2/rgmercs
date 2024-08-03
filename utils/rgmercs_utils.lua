@@ -649,7 +649,7 @@ function RGMercUtils.WaitCastReady(spell, maxWait)
 
         maxWait = maxWait - 1
 
-        if (maxWait % 10 == 0) then
+        if (maxWait % 100 == 0) then
             RGMercsLogger.log_verbose("Waiting for spell '%s' to be ready...", spell)
         end
     end
