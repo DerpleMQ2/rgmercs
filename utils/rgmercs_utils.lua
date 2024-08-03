@@ -640,15 +640,18 @@ end
 ---@param maxWait number # how many ms to wait before giving up
 function RGMercUtils.WaitCastReady(spell, maxWait)
     while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
-        mq.delay(100)
+        mq.delay(1)
         mq.doevents()
         if RGMercUtils.GetXTHaterCount() > 0 then
             RGMercsLogger.log_debug("I was interruped by combat while waiting to cast %s.", spell)
             return
         end
 
-        maxWait = maxWait - 100
-        RGMercsLogger.log_verbose("Waiting for spell '%s' to be ready...", spell)
+        maxWait = maxWait - 1
+
+        if (maxWait % 10 == 0) then
+            RGMercsLogger.log_verbose("Waiting for spell '%s' to be ready...", spell)
+        end
     end
 
     -- account for lag
