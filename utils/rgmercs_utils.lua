@@ -990,7 +990,7 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem)
         end
 
         RGMercUtils.WaitCastReady(songName, spellRequiredMem and (5 * 60 * 100) or 5000)
-        mq.delay(500)
+        --mq.delay(500)
 
         RGMercUtils.ActionPrep()
 

@@ -905,16 +905,6 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'Twin Heal',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return { RGMercUtils.GetMainAssistId(), } end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('DoTwinHeal') and
-                    RGMercUtils.IsHealing() and not RGMercUtils.Feigning()
-            end,
-        },
-        {
             name = 'Debuff',
             state = 1,
             steps = 1,
@@ -955,6 +945,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Twin Heal',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercUtils.GetMainAssistId(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and RGMercUtils.GetSetting('DoTwinHeal') and RGMercUtils.IsHealing() and
+                    RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('AutoAssistAt') and not RGMercUtils.Feigning()
+            end,
+        },
+        {
             name = 'HealDPS',
             state = 1,
             steps = 1,
@@ -971,7 +971,7 @@ local _ClassConfig = {
             {
                 name = "TwinHealNuke",
                 type = "Spell",
-                cond = function(self, _) return not RGMercUtils.SongActiveByName("Healing Twincast") end,
+                cond = function(self, spell) return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.SongActiveByName("Healing Twincast") end,
             },
         },
         ['Burn'] = {
@@ -1644,6 +1644,7 @@ local _ClassConfig = {
             spells = {
                 -- [ HEAL MODE ] --
                 { name = "GroupRenewalHoT", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "CureSpell",       cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 { name = "FocusSpell",      cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "CurseDoT1", },
@@ -1681,7 +1682,8 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "TwinHealNuke", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
+                { name = "TwinHealNuke", cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoTwinHeal') end, },
+                { name = "CureSpell",    cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 -- [ Hybrid MODE ] --
                 { name = "CurseDoT2", },
             },
@@ -1739,7 +1741,7 @@ local _ClassConfig = {
     },
     ['DefaultConfig']     = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 2, Min = 1, Max = 2, },
-        ['DoTwinHeal']        = { DisplayName = "Cast Twin Heal Nuke", Category = "Spells and Abilities", Tooltip = "Use Twin Heal Nuke Spells", Default = true, },
+        ['DoTwinHeal']        = { DisplayName = "Cast Twin Heal Nuke", Category = "Spells and Abilities", Tooltip = "Use Twin Heal Nuke Spells", RequiresLoadoutChange = true, Default = true, },
         ['DoNuke']            = { DisplayName = "Cast Nukes", Category = "Spells and Abilities", Tooltip = "Use Nuke Spells", Default = true, },
         ['DoHOT']             = { DisplayName = "Cast HOTs", Category = "Spells and Abilities", Tooltip = "Use Heal Over Time Spells", Default = true, },
         -- Removing this as it is too confusing to explain when it would  be used.

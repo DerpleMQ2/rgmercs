@@ -675,7 +675,7 @@ function Module:GiveTime(combat_state)
                 RGMercsLogger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(),
                     (xtSpawn.Heading.Degrees() or 0))
-                RGMercUtils.DoCmd("/stick moveback 20")
+                RGMercUtils.DoCmd("/stick moveback %s", RGMercUtils.GetSetting('MovebackDistance'))
                 mq.delay(500)
             end
         end

@@ -478,15 +478,15 @@ local _ClassConfig = {
             "Snare",
             "Tangling Weeds",
         },
-        ['TwincastNuke'] = {
+        ['TwinHealNuke'] = {
             -- Druid Twincast
             "Sundew Blessing",
             "Sunrise Blessing",
             "Sunbreeze Blessing",
-            "SunBeam Blessing",
-            "SunFire Blessing",
-            "SunFlash Blessing",
-            "SunRake Blessing",
+            "Sunbeam Blessing",
+            "Sunfire Blessing",
+            "Sunflash Blessing",
+            "Sunrake Blessing",
             "Sunwarmth Blessing",
         },
         ['IceNuke'] = {
@@ -909,6 +909,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Twin Heal',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercUtils.GetMainAssistId(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and RGMercUtils.GetSetting('DoTwinHeal') and RGMercUtils.IsHealing() and
+                    RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('AutoAssistAt') and not RGMercUtils.Feigning()
+            end,
+        },
+        {
             name = 'DPS',
             state = 1,
             steps = 1,
@@ -1165,6 +1175,13 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     return true
                 end,
+            },
+        },
+        ['Twin Heal'] = {
+            {
+                name = "TwinHealNuke",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.SongActiveByName("Healing Twincast") end,
             },
         },
         ['Debuff'] = {
@@ -1486,7 +1503,8 @@ local _ClassConfig = {
                 },
                 { name = "RootSpells",   cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "TwincastNuke", cond = function(self) return true end, },
+                { name = "TwinHealNuke", cond = function(self) return RGMercUtils.GetSetting("DoTwinHeal") end, },
+                { name = "GroupCure", cond = function(self) return true end, },
             },
         },
         {
@@ -1544,6 +1562,7 @@ local _ClassConfig = {
                 { name = "ChillDOT",  cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
                 { name = "GroupCure", cond = function(self) return true end, },
+                { name = "ReptileCombatInnate", cond = function(self) return true end, },
             },
         },
         {
@@ -1608,6 +1627,7 @@ local _ClassConfig = {
         ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
         ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
+        ['DoTwinHeal']   = { DisplayName = "Cast Twin Heal Nuke", Category = "Spells and Abilities", Tooltip = "Use Twin Heal Nuke Spells", RequiresLoadoutChange = true, Default = true, },
     },
 }
 

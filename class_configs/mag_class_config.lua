@@ -1214,11 +1214,13 @@ _ClassConfig      = {
             RGMercsLogger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
 
             if scope == "group" then
+                local delay = RGMercUtils.GetSetting('AIGroupDelay')
                 RGMercUtils.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
-                mq.delay(100)
+                mq.delay(delay)
                 RGMercUtils.DoGroupCmd("/autoinventory")
             elseif scope == "personal" then
-                mq.delay(50)
+                local delay = RGMercUtils.GetSetting('AISelfDelay')
+                mq.delay(delay)
                 RGMercUtils.DoCmd("/autoinventory")
             else
                 RGMercsLogger.log_debug("Invalid scope sent: (%s). Item handling aborted.", scope)
@@ -1920,6 +1922,8 @@ _ClassConfig      = {
         ['DoForce']        = { DisplayName = "Do Force", Category = "Spells & Abilities", Tooltip = "Use Force of Elements AA", Default = true, },
         ['DoMagicNuke']    = { DisplayName = "Do Magic Nuke", Category = "Spells & Abilities", Tooltip = "Use Magic nukes instead of Fire", Default = false, },
         ['DoChestClick']   = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
+        ['AISelfDelay']    = { DisplayName = "Autoinv Delay (Self)", Category = "Utilities", Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.", Default = 50, Min = 1, Max = 250, },
+		['AIGroupDelay']   = { DisplayName = "Autoinv Delay (Group)", Category = "Utilities", Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.", Default = 150, Min = 1, Max = 500, },
         ['DoMalo']         = { DisplayName = "Cast Malo", Category = "Debuffs", Tooltip = "Do Malo Spells/AAs", Default = true, },
         ['DoAEMalo']       = { DisplayName = "Cast AE Malo", Category = "Debuffs", Tooltip = "Do AE Malo Spells/AAs", Default = false, },
     },
