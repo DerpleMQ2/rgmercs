@@ -669,8 +669,8 @@ return {
             end,
         },
         {
-            name = 'Downtime Pet',
-            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
+            name = 'Pet Downtime',
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     RGMercUtils.DoBuffCheck() and mq.TLO.Me.Pet.ID() > 0 and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
@@ -1155,7 +1155,7 @@ return {
             --    end,
             --},
         },
-        ['Downtime Pet'] = {
+        ['Pet Downtime'] = {
             {
                 name = "Epic",
                 type = "Item",
