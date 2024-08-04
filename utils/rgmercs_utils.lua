@@ -2994,14 +2994,14 @@ function RGMercUtils.FindWorstHurtGroupMember(minHPs)
 
         if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
             if (healTarget.Class.ShortName() or "none"):lower() ~= "ber" then -- berzerkers have special handing
-                if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
+                if not healTarget.Dead() and (healTarget.PctHPs() or 101) < worstPct then
                     RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
                     worstPct = healTarget.PctHPs()
                     worstId = healTarget.ID()
                 end
 
                 if RGMercUtils.GetSetting('DoPetHeals') then
-                    if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
+                    if healTarget.Pet.ID() > 0 and (healTarget.Pet.PctHPs() or 101) < worstPct then
                         RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
                             healTarget.Pet.DisplayName())
                         worstPct = healTarget.Pet.PctHPs()
