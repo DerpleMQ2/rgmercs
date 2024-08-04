@@ -504,6 +504,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "parryall",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctHPs() < 30
+                end,
+            },
+            {
                 name = "absorball",
                 type = "Disc",
                 cond = function(self, discSpell)
