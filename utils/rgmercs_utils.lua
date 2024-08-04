@@ -589,6 +589,8 @@ function RGMercUtils.WaitCastFinish(target)
         mq.delay(10)
         if target() and RGMercUtils.GetTargetPctHPs() <= 0 or (RGMercUtils.GetTargetID() ~= target.ID()) then
             mq.TLO.Me.StopCast()
+            RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because target(%d) is dead with no HP(%d) or not our currentTarget(%d)", target.ID(),
+                RGMercUtils.GetTargetPctHPs(), RGMercUtils.GetTargetID())
             return
         end
 
