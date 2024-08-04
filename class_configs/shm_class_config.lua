@@ -983,6 +983,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Spire of Ancestors",
+                type = "AA",
+                cond = function(self, aaName)
+                    return true
+                end,
+            },
+            {
                 name = "Epic",
                 type = "Item",
                 cond = function(self)
@@ -1245,9 +1252,18 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Spire of Ancestors",
+                type = "AA",
+                cond = function(self, aaName)
+                    return true
+                end,
+            },
+            {
                 name = "Epic",
                 type = "Item",
-                cond = function(self) return true end,
+                cond = function(self) 
+                    return true 
+                end,
             },
             {
                 name = "Spirit Call",
