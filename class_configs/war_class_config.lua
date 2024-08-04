@@ -286,6 +286,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Spire of the Warlord",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.PCAAReady(aaName)
+                end,
+            },
+            {
                 name = "parryall",
                 type = "Disc",
                 cond = function(self, discSpell)
