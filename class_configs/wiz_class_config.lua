@@ -705,6 +705,13 @@ return {
                 end,
             },
             {
+                name = "Spire of Arcanum",
+                type = "AA",
+                cond = function(self)
+                    return true
+                end,
+            },
+            {
                 name = "Silent Casting",
                 type = "AA",
                 cond = function(self)
