@@ -1154,7 +1154,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
             RGMercUtils.WaitCastFinish(targetSpawn)
             mq.doevents()
             mq.delay(1)
-            RGMercsLogger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s reties left = %d", spellName, RGMercUtils.GetLastCastResultName(), retryCount)
+            RGMercsLogger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, RGMercUtils.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
         until RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or retryCount < 0
 
