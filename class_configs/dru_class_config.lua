@@ -469,7 +469,6 @@ local _ClassConfig = {
         ['SnareSpells'] = {
             -- Snare Spells
             "Thornmaw Vines",
-            "Hungry Vines",
             "Serpent Vines",
             "Entangle",
             "Mire Thorns",
@@ -1226,10 +1225,18 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Entrap",
+                tooltip = "AA: Snare",
+                type = "AA",
+                cond = function(self)
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetAACheck(219)
+                end,
+            },
+            {
                 name = "SnareSpells",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetTargetPctHPs(target) < 50
+                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetTargetPctHPs(target) < 50
                 end,
             },
             {
@@ -1401,7 +1408,13 @@ local _ClassConfig = {
                             RGMercUtils.IsModeActive("Mana")
                     end,
                 },
-                { name = "SnareSpells",    cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
+                {
+                    name = "SnareSpells",
+                    cond = function(self)
+                        return RGMercUtils.GetSetting('DoSnare')
+                            and RGMercUtils.IsModeActive("Mana")
+                    end,
+                },
                 -- [ HEAL MODE ] --
                 { name = "QuickHealSurge", cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
                 { name = "LongHeal2",      cond = function(self) return true end, },
@@ -1471,7 +1484,7 @@ local _ClassConfig = {
                 -- [ HEAL MODE ] --
                 { name = "SunrayDOT",           cond = function(self) return mq.TLO.Me.Level() >= 73 end, },
                 { name = "ReptileCombatInnate", cond = function(self) return true end, },
-                { name = "SnareSpells",         cond = function(self) return true end, },
+                { name = "SnareSpells",         cond = function(self) return RGMercUtils.GetSetting('DoSnare') end, },
                 -- [ Fall Back ]--
                 { name = "HordeDOT",            cond = function(self) return true end, },
             },
@@ -1487,7 +1500,7 @@ local _ClassConfig = {
                 { name = "RoDebuff",            cond = function(self) return true end, },
                 -- [ Fall Back ]--
                 { name = "HordeDOT",            cond = function(self) return true end, },
-                { name = "SnareSpells",         cond = function(self) return true end, },
+                { name = "SnareSpells",         cond = function(self) return RGMercUtils.GetSetting('DoSnare') end, },
             },
         },
         {
@@ -1504,7 +1517,7 @@ local _ClassConfig = {
                 { name = "RootSpells",   cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
                 { name = "TwinHealNuke", cond = function(self) return RGMercUtils.GetSetting("DoTwinHeal") end, },
-                { name = "GroupCure", cond = function(self) return true end, },
+                { name = "GroupCure",    cond = function(self) return true end, },
             },
         },
         {
@@ -1559,9 +1572,9 @@ local _ClassConfig = {
                             RGMercUtils.IsModeActive("Mana")
                     end,
                 },
-                { name = "ChillDOT",  cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
+                { name = "ChillDOT",            cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "GroupCure", cond = function(self) return true end, },
+                { name = "GroupCure",           cond = function(self) return true end, },
                 { name = "ReptileCombatInnate", cond = function(self) return true end, },
             },
         },
@@ -1624,6 +1637,7 @@ local _ClassConfig = {
         ['DoRunSpeed']   = { DisplayName = "Cast Run Speed", Category = "Spells and Abilities", Tooltip = "Cast Run Speed Spells", Default = true, },
         ['DoNuke']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
         ['NukePct']      = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 90, Min = 1, Max = 100, },
+        ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
         ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
         ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
