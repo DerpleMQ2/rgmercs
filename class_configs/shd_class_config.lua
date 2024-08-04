@@ -841,6 +841,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Spire of the Reavers",
+                type = "AA",
+                cond = function(self, aaName)
+                    return true
+                end,
+            },
+            {
                 name = "SpiteStrike",
                 type = "Disc",
                 tooltip = Tooltips.SpikeStrike,
