@@ -803,7 +803,7 @@ function RGMercUtils.UseItem(itemName, targetId)
 
     -- validate this wont kill us.
     if item.Spell() and item.Spell.HasSPA(0)() then
-        for i = 1, item.Spell.NumEffects() + 1 do
+        for i = 1, item.Spell.NumEffects() do
             if item.Spell.Attrib(i)() == 0 then
                 if mq.TLO.Me.CurrentHPs() + item.Spell.Base(i)() <= 0 then
                     RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but it would kill me!: %s! HPs: %d SpaHP: %d", itemName, item.Spell.Name(),
