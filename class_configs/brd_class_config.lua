@@ -69,8 +69,6 @@ local function generateSongList()
 
     --------------------------------------------------------------------------------------
     local function addSong(songToAdd)
-        if songCount > mq.TLO.Me.NumGems() then return end
-
         songCount = songCount + 1
         table.insert(songCache, {
             gem = songCount,
@@ -81,6 +79,7 @@ local function generateSongList()
     end
 
     local function ConditionallyAddSong(settingToCheck, songToAdd)
+        if songCount >= mq.TLO.Me.NumGems() then return end
         if RGMercUtils.GetSetting(settingToCheck) then
             addSong(songToAdd)
         end
@@ -1260,14 +1259,14 @@ local _ClassConfig = {
                name = "BardDPSAura",
                type = "Song",
                cond = function(self, songSpell)
-                   return not RGMercUtils.AuraActiveByName(songSpell.RankName()) and RGMercUtils.GetSetting('UseAura') == 1
+                   return not RGMercUtils.AuraActiveByName(songSpell()) and RGMercUtils.GetSetting('UseAura') == 1
                end,
             },
             {
                name = "BardRegenAura",
                type = "Song",
                cond = function(self, songSpell)
-                   return not RGMercUtils.AuraActiveByName(songSpell.RankName()) and RGMercUtils.GetSetting('UseAura') == 2
+                   return not RGMercUtils.AuraActiveByName(songSpell()) and RGMercUtils.GetSetting('UseAura') == 2
                end,
             },
             {
