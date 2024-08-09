@@ -2115,7 +2115,7 @@ function RGMercUtils.ShouldMount()
 
     local passCheckMountOne = ((RGMercUtils.GetSetting('DoMount') == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0))
     local passCheckMountTwo = ((RGMercUtils.GetSetting('DoMount') == 3 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
-    local passMountItemGivesBlessing = true
+    local passMountItemGivesBlessing = false
 
     if passCheckMountTwo then
         local mountItem = mq.TLO.FindItem(RGMercUtils.GetSetting('MountItem'))
@@ -2124,7 +2124,7 @@ function RGMercUtils.ShouldMount()
         end
     end
 
-    return passBasicChecks and passCheckMountOne or (passCheckMountTwo and passMountItemGivesBlessing)
+    return passBasicChecks and (passCheckMountOne or (passCheckMountTwo and passMountItemGivesBlessing))
 end
 
 ---@return boolean
