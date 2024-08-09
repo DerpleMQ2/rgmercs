@@ -2,8 +2,12 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version          = "1.0 Beta",
-    _author           = "Derple",
+    _version          = "1.3 Beta",
+    -- 1.1 added Dicho to rotation -SCVOne
+    -- 1.2 added Bfrenzy  timer 11 -SCVOne
+    -- 1.3 seperated DPS into 3 sections to increase freq of attacks -SCVOne
+
+    _author           = "Derple, SCVOne",
     ['Modes']         = {
         'DPS',
     },
@@ -43,7 +47,6 @@ return {
         },
         ['Dfrenzy'] = {
             "Eviscerating Frenzy",
-            "Heightened Frenzy",
             "Oppressing Frenzy",
             "Overpowering Frenzy",
             "Overwhelming Frenzy",
@@ -52,6 +55,24 @@ return {
             "Demolishing Frenzy",
             "Mangling Frenzy",
             "Vindicating Frenzy",
+        },
+        ['Bfrenzy'] = {
+            "Torrid Frenzy",
+            "Steel Frenzy",
+            "Augmented Frenzy",
+            "Stormwild Frenzy",
+            "Fighting Frenzy",
+            "Combat Frenzy",
+            "Restless Frenzy",
+            "Battle Frenzy",
+            "Amplified Frenzy",
+            "Fearless Frenzy",
+            "Buttressed Frenzy",
+            "Blinding Frenzy",
+            "Heightened Frenzy",
+            -- "Desperate Frenzy",
+            "Magnified Frenzy",
+            "Bolstered Frenzy",
         },
         ['Dvolley'] = {
             "Rage Volley",
@@ -337,6 +358,24 @@ return {
                 return combat_state == "Combat" and not RGMercUtils.Feigning()
             end,
         },
+        {
+            name = 'DPS2',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'DPS3',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
     },
     ['Rotations']     = {
         ['Downtime'] = {
@@ -550,14 +589,6 @@ return {
                 end,
             },
             {
-                name = "Battle Leap",
-                type = "AA",
-                cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActiveByName("Battle Leap Warcry") and
-                        not RGMercUtils.SongActiveByName("Group Bestial Alignment")
-                end,
-            },
-            {
                 name = "Frenzy",
                 type = "Ability",
                 cond = function(self, abilityName)
@@ -721,6 +752,32 @@ return {
                 type = "Ability",
                 cond = function(self, abilityName)
                     return RGMercUtils.GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
+                end,
+            },
+        },
+        ['DPS2'] = {
+            {
+                name = "Battle Leap",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActiveByName("Battle Leap Warcry") and
+                        not RGMercUtils.SongActiveByName("Group Bestial Alignment")
+                end,
+            },
+        },
+        ['DPS3'] = {
+            {
+                name = "Dicho",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return RGMercUtils.PCDiscReady(discSpell)
+                end,
+            },
+            {
+                name = "Bfrenzy",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return RGMercUtils.PCDiscReady(discSpell)
                 end,
             },
         },
