@@ -801,6 +801,19 @@ function RGMercUtils.UseItem(itemName, targetId)
         return false
     end
 
+    -- validate this wont kill us.
+    if item.Spell() and item.Spell.HasSPA(0) then
+        for i = 1, item.Spell.NumEffects() + 1 do
+            if item.Spell.Attrib(i)() == 0 then
+                if mq.TLO.Me.CurrentHPs() + item.Spell.Base(i)() <= 0 then
+                    RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but it would kill me!: %s! HPs: %d SpaHP: %d", itemName, item.Spell.Name(),
+                        mq.TLO.Me.CurrentHPs(), item.Spell.Base(i)())
+                    return false
+                end
+            end
+        end
+    end
+
     RGMercUtils.ActionPrep()
 
     if not me.ItemReady(itemName) then
@@ -2098,8 +2111,7 @@ end
 function RGMercUtils.ShouldMount()
     if RGMercUtils.GetSetting('DoMount') == 1 then return false end
 
-    local passBasicChecks = not RGMercUtils.GetSetting('DoMelee') and RGMercUtils.GetSetting('MountItem'):len() > 0 and
-        mq.TLO.Zone.Outdoor()
+    local passBasicChecks = not RGMercUtils.GetSetting('DoMelee') and RGMercUtils.GetSetting('MountItem'):len() > 0 and mq.TLO.Zone.Outdoor()
 
     local passCheckMountOne = ((RGMercUtils.GetSetting('DoMount') == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0))
     local passCheckMountTwo = ((RGMercUtils.GetSetting('DoMount') == 3 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
@@ -2222,7 +2234,7 @@ function RGMercUtils.ClickModRod()
     for _, itemName in ipairs(RGMercConfig.Constants.ModRods) do
         local item = mq.TLO.FindItem(itemName)
         if item() and item.TimerReady() == 0 then
-            RGMercUtils.DoCmd("/useitem \"%s\"", item.Name())
+            RGMercUtils.UseItem(item.Name(), mq.TLO.Me.ID())
             return
         end
     end
