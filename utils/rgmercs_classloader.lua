@@ -38,6 +38,37 @@ function ClassLoader.load(class)
     return classConfig
 end
 
+function ClassLoader.writeCustomConfig(class)
+    -- Define file paths
+    local base_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua",mq.luaDir, class:lower())
+    local custom_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
+
+    -- Load the default config file content
+    local file = io.open(base_config_file, "r")
+    if not file then
+        RGMercsLogger.log_error("Failed to Load Base Class Config: %s", base_config_file)
+        return
+    end
+
+    local content = file:read("*all")
+    file:close()
+
+    -- Find the location of the _author line and insert FullConfig
+    local updated_content = content:gsub("(_author%s*=%s*[%S%s]-\n)", "%1    FullConfig = true,\n")
+
+    -- Write the updated content to the custom config file
+    local custom_file = io.open(custom_config_file, "w")
+    if not custom_file then
+        RGMercsLogger.log_error("Failed to Write Custom Core Class Config: %s", custom_config_file)
+        return
+    end
+
+    custom_file:write(updated_content)
+    custom_file:close()
+
+    RGMercsLogger.log_info("Custom Core Class Config Written: %s", custom_config_file)
+end
+
 function ClassLoader.mergeTables(tblA, tblB)
     for k, v in pairs(tblB) do
         if type(v) == "table" then
