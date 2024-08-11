@@ -135,7 +135,9 @@ local function RGMercsGUI()
                 RGMercConfig.Globals.CurLoadedChar,
                 RGMercModules:ExecModule("Class", "GetVersionString"),
                 GitCommit.commitId or "None"))
-
+            if ImGui.SmallButton('Create Custom Config') then
+                RGMercModules:ExecModule("Class", "WriteCustomConfig")
+            end
 
             if not RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)

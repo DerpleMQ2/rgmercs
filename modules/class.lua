@@ -132,6 +132,10 @@ function Module:LoadSettings()
     self:RescanLoadout()
 end
 
+function Module:WriteCustomConfig()
+    RGMercsClassLoader.writeCustomConfig(RGMercConfig.Globals.CurLoadedClass)
+end
+
 function Module:GetSettings()
     return self.settings
 end
