@@ -2478,7 +2478,7 @@ function RGMercUtils.EngageTarget(autoTargetId)
 
                     local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
                     if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.PreEngage then
-                        classConfig.HelperFunctions.PreEngage()
+                        classConfig.HelperFunctions.PreEngage(target)
                     end
 
 

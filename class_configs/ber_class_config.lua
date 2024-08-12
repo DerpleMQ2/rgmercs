@@ -783,7 +783,7 @@ return {
         },
     },
     ['HelperFunctions'] = {
-        PreEngage = function(self, target)
+        PreEngage = function(target)
             local openerAbility = RGMercUtils.GetResolvedActionMapItem('CheapShot')
 
             RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
