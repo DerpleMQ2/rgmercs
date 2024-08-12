@@ -788,7 +788,7 @@ return {
 
             RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
-            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility) and mq.TLO.Me.PctEndurance() >= 5 and RGMercUtils.GetSetting("DoOpener") and RGMercUtils.GetTargetDistance() < 50 then
+            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.PctEndurance() >= 5 and RGMercUtils.GetSetting("DoOpener") and RGMercUtils.GetTargetDistance() < 50 then
                 RGMercUtils.UseDisc(openerAbility, target)
                 RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else

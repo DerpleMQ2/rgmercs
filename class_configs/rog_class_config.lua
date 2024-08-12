@@ -2,18 +2,18 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version          = "1.0 Beta",
-    _author           = "Derple",
-    ['Modes']         = {
+    _version            = "1.0 Beta",
+    _author             = "Derple",
+    ['Modes']           = {
         'DPS',
     },
-    ['ItemSets']      = {
+    ['ItemSets']        = {
         ['Epic'] = {
             "Fatestealer",
             "Nightshade, Blade of Entropy",
         },
     },
-    ['AbilitySets']   = {
+    ['AbilitySets']     = {
         ["ConditionedReflexes"] = {
             "Conditioned Reflexes",
             "Practiced Reflexes",
@@ -211,7 +211,7 @@ return {
             "Poisonous Conjunction", -- Level 103
         },
     },
-    ['RotationOrder'] = {
+    ['RotationOrder']   = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
@@ -249,7 +249,7 @@ return {
             end,
         },
     },
-    ['Rotations']     = {
+    ['Rotations']       = {
         ['Burn'] = {
             {
                 name = "Shadow's Flanking",
@@ -506,7 +506,7 @@ return {
             },
         },
     },
-    ['Spells']        = {
+    ['Spells']          = {
         { name = "", gem = 1, },
         { name = "", gem = 2, },
         { name = "", gem = 3, },
@@ -520,8 +520,25 @@ return {
         { name = "", gem = 11, },
         { name = "", gem = 12, },
     },
-    ['DefaultConfig'] = {
+    ['HelperFunctions'] = {
+        PreEngage = function(target)
+            local openerAbility = RGMercUtils.GetResolvedActionMapItem('SneakAttack')
+
+            RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
+
+            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.AbilityReady("Hide")() and RGMercUtils.GetSetting("DoOpener") and mq.TLO.Me.Invis() then
+                RGMercUtils.UseDisc(openerAbility, target)
+                RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
+            else
+                RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Hide Ready = %s, Invis = %s", openerAbility or "None",
+                    RGMercUtils.BoolToColorString(RGMercUtils.GetSetting("DoOpener")), RGMercUtils.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
+                    RGMercUtils.BoolToColorString(mq.TLO.Me.Invis()))
+            end
+        end,
+    },
+    ['DefaultConfig']   = {
         ['Mode']            = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
+        ['DoOpener']        = { DisplayName = "Use Openers", Category = "Abilities", Tooltip = "Use Opening Arrow Shot Silent Shot Line.", Default = true, },
         ['PoisonName']      = { DisplayName = "Poison Item", Category = "Poison", Tooltip = "Click the poison you want to use here", Type = "ClickyItem", Default = "", },
         ['PoisonClicky']    = { DisplayName = "Poison Clicky", Category = "Poison", Tooltip = "Click the poison summoner you want to use here", Type = "ClickyItem", Default = "", },
         ['PoisonItemCount'] = { DisplayName = "Poison Item Count", Category = "Poison", Tooltip = "Min number of poison before we start summoning more", Default = 3, Min = 1, Max = 50, },
