@@ -2454,8 +2454,7 @@ function RGMercUtils.CombatCampCheck(tempConfig)
 end
 
 ---@param autoTargetId integer
----@param preEngageRoutine fun()|nil
-function RGMercUtils.EngageTarget(autoTargetId, preEngageRoutine)
+function RGMercUtils.EngageTarget(autoTargetId)
     if not RGMercUtils.GetSetting('DoAutoEngage') then return end
 
     local target = mq.TLO.Target
@@ -2476,9 +2475,12 @@ function RGMercUtils.EngageTarget(autoTargetId, preEngageRoutine)
                 if RGMercUtils.GetTargetDistance(target) > RGMercUtils.GetTargetMaxRangeTo(target) then
                     RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
-                    if preEngageRoutine then
-                        preEngageRoutine()
+
+                    local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
+                    if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.PreEngage then
+                        classConfig.HelperFunctions.PreEngage()
                     end
+
 
                     RGMercUtils.NavInCombat(autoTargetId, RGMercUtils.GetTargetMaxRangeTo(target), false)
                 else

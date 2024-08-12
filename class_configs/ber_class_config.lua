@@ -2,16 +2,16 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version          = "1.3 Beta",
+    _version            = "1.3 Beta",
     -- 1.1 added Dicho to rotation -SCVOne
     -- 1.2 added Bfrenzy  timer 11 -SCVOne
     -- 1.3 seperated DPS into 3 sections to increase freq of attacks -SCVOne
 
-    _author           = "Derple, SCVOne",
-    ['Modes']         = {
+    _author             = "Derple, SCVOne",
+    ['Modes']           = {
         'DPS',
     },
-    ['ItemSets']      = {
+    ['ItemSets']        = {
         ['Epic'] = {
             "Vengeful Taelosian Blood Axe",
             "Raging Taelosian Alloy Axe",
@@ -20,7 +20,7 @@ return {
             "Cohort's Warmonger Coat",
         },
     },
-    ['AbilitySets']   = {
+    ['AbilitySets']     = {
         ['EndRegen'] = {
             "Second Wind",
             "Third Wind",
@@ -329,7 +329,7 @@ return {
             "Jarring Impact",
         },
     },
-    ['RotationOrder'] = {
+    ['RotationOrder']   = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
@@ -377,7 +377,7 @@ return {
             end,
         },
     },
-    ['Rotations']     = {
+    ['Rotations']       = {
         ['Downtime'] = {
             {
                 name = "SummonAxes",
@@ -782,9 +782,25 @@ return {
             },
         },
     },
-    ['DefaultConfig'] = {
+    ['HelperFunctions'] = {
+        PreEngage = function(self, target)
+            local openerAbility = RGMercUtils.GetResolvedActionMapItem('CheapShot')
+
+            RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
+
+            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility) and mq.TLO.Me.PctEndurance() >= 5 and RGMercUtils.GetSetting("DoOpener") and RGMercUtils.GetTargetDistance() < 50 then
+                RGMercUtils.UseDisc(openerAbility, target)
+                RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
+            else
+                RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Distance to Target = %d, Endurance = %d", openerAbility or "None",
+                    RGMercUtils.BoolToColorString(RGMercUtils.GetSetting("DoOpener")), RGMercUtils.GetTargetDistance(), mq.TLO.Me.PctEndurance() or 0)
+            end
+        end,
+    },
+    ['DefaultConfig']   = {
         ['Mode']            = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['DoEpic']          = { DisplayName = "Do Epic", Category = "Abilities", Tooltip = "Enable using your epic clicky", Default = true, },
+        ['DoOpener']        = { DisplayName = "Use Openers", Category = "Abilities", Tooltip = "Use Opening Arrow Shot Silent Shot Line.", Default = true, },
         ['DoBattleLeap']    = { DisplayName = "Do Battle Leap", Category = "Abilities", Tooltip = "Enable using Battle Leap", Default = true, },
         ['DoIntimidate']    = { DisplayName = "Do Intimidate", Category = "Abilities", Tooltip = "Enable using Intimidate", Default = true, },
         ['DoAoe']           = { DisplayName = "Do AoE", Category = "Abilities", Tooltip = "Enable using AoE Abilities", Default = true, },
