@@ -527,7 +527,7 @@ function Module:HealById(id)
 
             local newState, wasRun = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
                 self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0,
-                self.CombatState == "Downtime")
+                self.CombatState == "Downtime", selectedRotation.doFullRotation or false)
 
             if selectedRotation.state then selectedRotation.state = newState end
 
@@ -704,7 +704,7 @@ function Module:GiveTime(combat_state)
                             RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
                             self.CurrentRotation = { name = r.name, state = r.state or 0, }
                             local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
-                                self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime")
+                                self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime", r.doFullRotation or false)
 
                             if r.state then r.state = newState end
                             self.TempSettings.RotationTimers[r.name] = os.clock()

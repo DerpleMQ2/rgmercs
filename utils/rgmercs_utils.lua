@@ -1365,8 +1365,9 @@ end
 ---@param steps integer|nil # number of success steps before we yeild back control - if nil we will run the whole rotation
 ---@param start_step integer|nil # setp to start on
 ---@param bAllowMem boolean # allow memorization of spells
+---@param bDoFullRotation boolean # Start at step 1 every time
 ---@return integer, boolean
-function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem)
+function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation)
     local oldSpellInSlot = mq.TLO.Me.Gem(RGMercUtils.UseGem)
     local stepsThisTime  = 0
     local lastStepIdx    = 0
@@ -1375,7 +1376,7 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
     -- This is useful when class config wants to re-check every rotation condition every run
     -- For example, if gem1 meets all condition criteria, it WILL cast repeatedly on every cast
     -- Used for bards to dynamically weave properly
-    if rotationTable.doFullRotation then start_step = 1 end
+    if bDoFullRotation then start_step = 1 end
     for idx, entry in ipairs(rotationTable) do
         if idx >= start_step then
             if RGMercConfig.Globals.PauseMain then

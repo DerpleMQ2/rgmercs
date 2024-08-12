@@ -759,6 +759,9 @@ local _ClassConfig = {
             name = 'DPSDynamic',
             state = 1,
             steps = 1,
+            -- This makes the full rotation execute each round,
+            -- so it'll never pick up and resume wherever it left off the previous cast
+            doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning() and
@@ -1009,9 +1012,6 @@ local _ClassConfig = {
             },
         },
         ['DPSDynamic'] = {
-            -- This makes the full rotation execute each round,
-            --so it'll never pick up and resume wherever it left off the previous cast
-            doFullRotation = true,
             -- Kludge that addresses bards not attempting to start attacking until after a song completes
             -- Uncomment if you'd like to occasionally start attacking earlier than normal
             --[[{
@@ -1256,18 +1256,18 @@ local _ClassConfig = {
 
         ['Downtime'] = {
             {
-               name = "BardDPSAura",
-               type = "Song",
-               cond = function(self, songSpell)
-                   return not RGMercUtils.AuraActiveByName(songSpell()) and RGMercUtils.GetSetting('UseAura') == 1
-               end,
+                name = "BardDPSAura",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return not RGMercUtils.AuraActiveByName(songSpell()) and RGMercUtils.GetSetting('UseAura') == 1
+                end,
             },
             {
-               name = "BardRegenAura",
-               type = "Song",
-               cond = function(self, songSpell)
-                   return not RGMercUtils.AuraActiveByName(songSpell()) and RGMercUtils.GetSetting('UseAura') == 2
-               end,
+                name = "BardRegenAura",
+                type = "Song",
+                cond = function(self, songSpell)
+                    return not RGMercUtils.AuraActiveByName(songSpell()) and RGMercUtils.GetSetting('UseAura') == 2
+                end,
             },
             {
                 name = "SymphonyOfBattle",
@@ -1407,7 +1407,7 @@ local _ClassConfig = {
         ['Mode']              = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
         ['UseAASelo']         = { DisplayName = "Use AA Selo", Category = "Buffs", Tooltip = "Do Selo's AAs", Default = true, },
         ['DoRunSpeed']        = { DisplayName = "Cast Run Speed Buffs", Category = "Buffs", Tooltip = "Use Selos.", Default = true, },
-        ['UseAura']           = { DisplayName = "Use Bard Aura", Category = "Buffs", Tooltip = "Select the Aura to be used, if any.", Type = "Combo", ComboOptions = { 'DPS', 'Regen', 'None' }, Default = 1, Min = 1, Max = 3, RequiresLoadoutChange = true,},
+        ['UseAura']           = { DisplayName = "Use Bard Aura", Category = "Buffs", Tooltip = "Select the Aura to be used, if any.", Type = "Combo", ComboOptions = { 'DPS', 'Regen', 'None', }, Default = 1, Min = 1, Max = 3, RequiresLoadoutChange = true, },
         ['UseDynamicMelody']  = { DisplayName = "Use Dynamic Melody", Category = "Combat", Tooltip = Tooltips.UseMelody, Default = true, Advanced = true, },
 
         ['UseEpic']           = { DisplayName = "Use Epic Click", Category = "Burns", Tooltip = "Use Epic 1-Never 2-Burns 3-Always", Type = "Combo", ComboOptions = { 'Never', 'Burns', 'Always', }, Default = 1, Min = 1, Max = 3, },
