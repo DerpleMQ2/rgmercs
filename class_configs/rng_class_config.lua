@@ -1685,6 +1685,21 @@ local _ClassConfig = {
                 RGMercUtils.DoCmd("/squelch /nav id %d facing=backward distance=%d", RGMercConfig.Globals.AutoTargetID, RGMercUtils.GetSetting('NavCircleDist'))
             end
         end,
+
+        PreEngage = function(target)
+            local openerAbility = RGMercUtils.GetResolvedActionMapItem('ArrowOpener')
+
+            RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility.RankName.Name() or "None")
+
+            if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting("ManaToNuke") and RGMercUtils.NPCSpellReady(openerAbility, target.ID(), false) then
+                RGMercUtils.DoCmd("/squelch /face")
+                RGMercUtils.UseSpell(openerAbility.RankName.Name(), target.ID(), false)
+                RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility.RankName.Name() or "None")
+            else
+                RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %sd", openerAbility.RankName.Name() or "None",
+                    RGMercUtils.BoolToColorString(RGMercUtils.GetSetting("DoOpener")))
+            end
+        end,
     },
     ['PullAbilities']     = {
         {
