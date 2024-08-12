@@ -430,7 +430,8 @@ _ClassConfig      = {
             -- Mage Pet Aura
             "Arcane Distillect",
         },
-        ['SingleDS'] = {
+        --not used
+        --[[ ['SingleDS'] = {
             -- Single target Dmg Shields For Pets
             "Forgefire Coat",
             "Emberweave Coat",
@@ -451,7 +452,7 @@ _ClassConfig      = {
             "Inferno Shield",
             "Shield of Flame",
             "Shield of Fire",
-        },
+        },]] --
         ['FireShroud'] = {
             -- Defensive Proc 3-6m Buff
             "Igneous Veil",
@@ -1923,7 +1924,7 @@ _ClassConfig      = {
         ['DoMagicNuke']    = { DisplayName = "Do Magic Nuke", Category = "Spells & Abilities", Tooltip = "Use Magic nukes instead of Fire", Default = false, },
         ['DoChestClick']   = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['AISelfDelay']    = { DisplayName = "Autoinv Delay (Self)", Category = "Utilities", Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.", Default = 50, Min = 1, Max = 250, },
-		['AIGroupDelay']   = { DisplayName = "Autoinv Delay (Group)", Category = "Utilities", Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.", Default = 150, Min = 1, Max = 500, },
+        ['AIGroupDelay']   = { DisplayName = "Autoinv Delay (Group)", Category = "Utilities", Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.", Default = 150, Min = 1, Max = 500, },
         ['DoMalo']         = { DisplayName = "Cast Malo", Category = "Debuffs", Tooltip = "Do Malo Spells/AAs", Default = true, },
         ['DoAEMalo']       = { DisplayName = "Cast AE Malo", Category = "Debuffs", Tooltip = "Do AE Malo Spells/AAs", Default = false, },
     },
