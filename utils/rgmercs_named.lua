@@ -4097,7 +4097,7 @@ return {
         "Kirezelbough",
         "Morwenna Undertow",
         "Octave Sforzando",
-        "Ol' Grinnin' Finley",
+        "Ol` Grinnin` Finley",
         "Pikebreath",
         "Skolskin Haeger",
     },
