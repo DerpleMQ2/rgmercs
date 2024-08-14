@@ -9,7 +9,7 @@ return {
         IsHealing = function() return true end,
         IsCuring = function() return RGMercUtils.GetSetting('DoCures') end,
         IsRezing = function() return (RGMercUtils.GetSetting('DoBattleRez') and not RGMercUtils.IsTanking()) or RGMercUtils.GetXTHaterCount() == 0 end,
-            --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
+        --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
     },
     ['Modes']             = {
         'Tank',
@@ -24,12 +24,12 @@ return {
             -- local cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
 
             -- if type:lower() == "poison" then
-                -- cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
+            -- cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
             -- elseif type:lower() == "curse" then
-                -- cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
+            -- cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
             --TODO: Add Corruption AbilitySets
             -- elseif type:lower() == "corruption" then
-                -- cureSpell = RGMercUtils.GetResolvedActionMapItem('')
+            -- cureSpell = RGMercUtils.GetResolvedActionMapItem('')
             -- end
 
             -- if not cureSpell or not cureSpell() then return false end
@@ -652,9 +652,8 @@ return {
 
             return furyProcLevel <= DPULevel
         end,
-       --Did not include Staff of Forbidden Rites, GoR refresh is very fast and rez is 96%
-		DoRez = function(self, corpseId)
-
+        --Did not include Staff of Forbidden Rites, GoR refresh is very fast and rez is 96%
+        DoRez = function(self, corpseId)
             if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
                 RGMercUtils.SetTarget(corpseId)
 
@@ -743,14 +742,6 @@ return {
                 cond = function(self, aaName)
                     return RGMercUtils.PCAAReady(aaName) and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('LayHandsPct')
                 end,
-                ['HealRotationOrder'] = {
-                    {
-                        name = 'LowLevelHealPoint',
-                        state = 1,
-                        steps = 1,
-                        cond = function(self, target) return mq.TLO.Me.Level() < 85 and (target.PctHPs() or 999) < RGMercUtils.GetSetting('LightHealPoint') end,
-                    },
-                },
             },
         },
     },
@@ -1437,7 +1428,7 @@ return {
     ['DefaultConfig']     = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
         ['DoNuke']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
-        ['DoCures']       = { DisplayName = "Do Cures", Category = "Spells and Abilities", Tooltip = "Use cure spells and abilities", Default = true, },
+        ['DoCures']      = { DisplayName = "Do Cures", Category = "Spells and Abilities", Tooltip = "Use cure spells and abilities", Default = true, },
         ['FlashHP']      = { DisplayName = "Use Shield Flash", Category = "Combat", Tooltip = "Your HP % before we use Shield Flash.", Default = 35, Min = 1, Max = 100, },
         ['TotHealPoint'] = { DisplayName = "ToT HealPoint", Category = "Combat", Tooltip = "HP % before we use Target of Target heals.", Default = 30, Min = 1, Max = 100, },
         ['LayHandsPct']  = { DisplayName = "Use Lay on Hands", Category = "Combat", Tooltip = "HP % before we use Lay on Hands.", Default = 35, Min = 1, Max = 100, },
