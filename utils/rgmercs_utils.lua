@@ -626,11 +626,15 @@ function RGMercUtils.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
     RGMercUtils.DoCmd("/memspell %d \"%s\"", gem, spell)
 
+    RGMercUtils.Memorizing = true
+
     while (mq.TLO.Me.Gem(gem)() ~= spell or (waitSpellReady and not mq.TLO.Me.SpellReady(gem)())) and maxWait > 0 do
-        RGMercsLogger.log_verbose("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
+        RGMercsLogger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         mq.delay(100)
         maxWait = maxWait - 100
     end
+
+    RGMercUtils.Memorizing = false
 end
 
 ---@param spell string

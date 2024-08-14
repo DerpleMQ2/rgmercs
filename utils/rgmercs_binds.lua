@@ -52,6 +52,14 @@ Bind.Handlers     = {
             RGMercUtils.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)
         end,
     },
+    ['cast'] = {
+        usage = "/rgl cast \"<spell>\" <targetId?>",
+        about = "All RGMercs will memorize and cast <spell> you can pass an optional <target id>",
+        handler = function(spell, targetId)
+            RGMercsLogger.log_debug("\atCasting: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
+            RGMercUtils.UseSpell(spell, targetId and tonumber(targetId) or mq.TLO.Target.ID(), true)
+        end,
+    },
     ['setlogfilter'] = {
         usage = "/rgl setlogfilter <filter|filter|filter|...>",
         about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging)",

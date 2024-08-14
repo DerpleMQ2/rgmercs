@@ -243,9 +243,9 @@ function Module:Render()
                         ImGui.PushStyleColor(ImGuiCol.Text, 0, 0, 0, 1)
                         ImGui.PushStyleColor(ImGuiCol.Button, self:GetColorForType(sv.Type))
                         if ImGui.Button(sv.Name, self.ButtonWidth, self.ButtonHeight) then
-                            local cmd = string.format("/casting \"%s\" -maxtries|10 gem%d", sv.Name, mq.TLO.Me.NumGems())
+                            local cmd = string.format("/rgl cast \"%s\"", sv.Name)
                             if sv.Type == "Single" then
-                                cmd = cmd .. string.format(" -targetid|%d", RGMercUtils.GetTargetID())
+                                cmd = cmd .. string.format(" %d", RGMercUtils.GetTargetID())
                             end
 
                             if selectedPorter ~= mq.TLO.Me.DisplayName() then
