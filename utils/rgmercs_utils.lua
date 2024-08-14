@@ -1366,8 +1366,9 @@ end
 ---@param start_step integer|nil # setp to start on
 ---@param bAllowMem boolean # allow memorization of spells
 ---@param bDoFullRotation boolean # Start at step 1 every time
+---@param fnRotationCond fun()|nil # rotation condition func
 ---@return integer, boolean
-function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation)
+function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation, fnRotationCond)
     local oldSpellInSlot = mq.TLO.Me.Gem(RGMercUtils.UseGem)
     local stepsThisTime  = 0
     local lastStepIdx    = 0
@@ -1383,9 +1384,13 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
                 break
             end
 
-            if steps == 0 and RGMercUtils.GetXTHaterCount() > 0 then
-                RGMercsLogger.log_verbose("\arStopping Rotation Due to combat!")
-                break
+            if fnRotationCond then
+                local curState = RGMercUtils.GetXTHaterCount() > 0 and "Combat" or "Downtime"
+
+                if not RGMercUtils.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, curState) then
+                    RGMercsLogger.log_verbose("\arStopping Rotation Due to combat!")
+                    break
+                end
             end
 
             if RGMercUtils.ShouldPriorityFollow() then

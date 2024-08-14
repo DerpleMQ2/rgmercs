@@ -527,7 +527,7 @@ function Module:HealById(id)
 
             local newState, wasRun = RGMercUtils.RunRotation(self, self:GetHealRotationTable(selectedRotation.name), id,
                 self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0,
-                self.CombatState == "Downtime", selectedRotation.doFullRotation or false)
+                self.CombatState == "Downtime", selectedRotation.doFullRotation or false, nil)
 
             if selectedRotation.state then selectedRotation.state = newState end
 
@@ -699,12 +699,12 @@ function Module:GiveTime(combat_state)
                 for _, targetId in ipairs(targetTable) do
                     -- only do combat with a target.
                     if targetId and targetId > 0 then
-                        if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state, mq.TLO.Spawn(targetId)) then
+                        if RGMercUtils.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
                             r.lastCondCheck = true
                             RGMercsLogger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
                             self.CurrentRotation = { name = r.name, state = r.state or 0, }
                             local newState = RGMercUtils.RunRotation(self, self:GetRotationTable(r.name), targetId,
-                                self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime", r.doFullRotation or false)
+                                self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime", r.doFullRotation or false, r.cond)
 
                             if r.state then r.state = newState end
                             self.TempSettings.RotationTimers[r.name] = os.clock()
