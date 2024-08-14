@@ -1392,7 +1392,7 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
                 local curState = RGMercUtils.GetXTHaterCount() > 0 and "Combat" or "Downtime"
 
                 if not RGMercUtils.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, curState) then
-                    RGMercsLogger.log_verbose("\arStopping Rotation Due to combat!")
+                    RGMercsLogger.log_verbose("\arStopping Rotation Due to condition check failure!")
                     break
                 end
             end
