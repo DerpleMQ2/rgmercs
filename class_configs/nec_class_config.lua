@@ -1194,9 +1194,9 @@ local _ClassConfig = {
     ['HelperFunctions'] = {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         CancelLich = function(self)
-            -- detspa means detremental spell affect and 0 mean HPs
-            -- spa is positive spell affect and 15 means mana
-            local lichName = mq.TLO.Me.FindBuff("detspa 0 and spa 15")()
+            -- detspa means detremental spell affect
+            -- spa is positive spell affect
+            local lichName = mq.TLO.Me.FindBuff("detspa hp and spa mana")()
             RGMercUtils.DoCmd("/removebuff %s", lichName)
         end,
 
