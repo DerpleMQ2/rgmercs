@@ -3618,10 +3618,10 @@ function RGMercUtils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
         end
     end
 
-    if #spellLoadOut >= mq.TLO.Me.NumGems() then
-        RGMercsLogger.log_error(
-            "\arYour spell loadout count is the same as your number of gems. This might cause your character to sit and remem often! Consider fixing this!")
-    end
+    --if #spellLoadOut >= mq.TLO.Me.NumGems() then
+    --    RGMercsLogger.log_error(
+    --        "\aoYour spell loadout count is the same as your number of gems.")
+    --end
 
     return resolvedActionMap, spellLoadOut
 end
