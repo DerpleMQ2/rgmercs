@@ -53,6 +53,7 @@ return {
             "Crush of E'Ci",         -- Level 110
             "Crush of Restless Ice", -- Level 115
             "Crush of the Umbra",    -- Level 120
+            "Crush of the Heroic",   -- Level 124
         },
         ["CrushTimer5"] = {
             -- Timer 5 - Crush
@@ -64,17 +65,19 @@ return {
             "Crush of the Timorous Deep", -- Level 107
             "Crush of the Grotto",        -- Level 112
             "Crush of the Twilight Sea",  -- Level 117
+            "Crush of the Wayunder",      -- Level 122
         },
         ["HealNuke"] = {
             -- Timer 7 - HealNuke
-            "Glorious Vindication",  -- Level 85
-            "Glorious Exoneration",  -- Level 90
-            "Glorious Exculpation",  -- Level 95
-            "Glorious Expurgation",  -- Level 100
-            "Brilliant Vindication", -- Level 105
-            "Brilliant Exoneration", -- Level 110
-            "Brilliant Exculpation", -- Level 115
-            "Brilliant Acquittal",   -- Level 120
+            "Glorious Vindication",     -- Level 85
+            "Glorious Exoneration",     -- Level 90
+            "Glorious Exculpation",     -- Level 95
+            "Glorious Expurgation",     -- Level 100
+            "Brilliant Vindication",    -- Level 105
+            "Brilliant Exoneration",    -- Level 110
+            "Brilliant Exculpation",    -- Level 115
+            "Brilliant Acquittal",      -- Level 120
+            "Brilliant Denouncement",   -- Level 125
         },
         ["TempHP"] = {
             "Steely Stance",
@@ -85,6 +88,7 @@ return {
             "Defiant Stance",
             "Stormwall Stance",
             "Adamant Stance",
+            "Unwavering Stance",
         },
         ["Preservation"] = {
             -- Timer 12 - Preservation
@@ -97,6 +101,7 @@ return {
             "Preservation of Rodcet",       -- Level 110
             "Preservation of the Grotto",   -- Level 115
             "Preservation of the Basilica", -- Level 120
+            "Preservation of the Fern",     -- Level 125
         },
         ["Lowaggronuke"] = {
             --- Nuke Heal Target - Censure
@@ -107,6 +112,7 @@ return {
             "Censure",
             "Remonstrate",
             "Upbraid",
+            "Chastise",
         },
         ["Incoming"] = {
             -- Harmonius Blessing - Empires of Kunark spell
@@ -128,9 +134,11 @@ return {
             "Remembrance",  -- Level 106
             "Requiem",      -- Level 111
             "Hymnal",       -- Level 116
+            "Revelation",   -- Level 121
         },
         ["Healproc"] = {
             --- Proc Buff Heal target of Target => LVL 97
+            "Restoring Steel",
             "Regenerating Steel",
             "Rejuvenating Steel",
             "Reinvigorating Steel",
@@ -138,7 +146,8 @@ return {
             "Renewing Steel",
         },
         ["FuryProc"] = {
-            -- - Fury Proc Strike  67 - 115
+            -- - Fury Proc Strike  67+
+            "Avowed Fury",
             "Wrathful Fury",
             "Silvered Fury",
             "Pious Fury",
@@ -160,6 +169,7 @@ return {
             "Aurora of Dayspring",
             "Aurora of Morninglight",
             "Aurora of Wakening",
+            "Aurora of Realizing",
         },
         ["StunTimer5"] = {
             -- Timer 5 - Hate Stun
@@ -178,6 +188,7 @@ return {
             "Force of the Timorous Deep", -- Level 110
             "Force of the Grotto",        -- Level 115
             "Force of the Umbra",         -- Level 120
+            "Force of the Wayunder",      -- Level 125
         },
         ["StunTimer4"] = {
             -- Timer 4 - Hate Stun
@@ -194,9 +205,11 @@ return {
             "Merciful Force",  -- Level 106
             "Sincere Force",   -- Level 111
             "Pious Force",     -- Level 116
+            "Avowed Force",    -- Level 121
         },
         ["Healstun"] = {
             --- Heal Stuns T3 12s recast
+            "Force of the Avowed", --Level 124
             "Force of Generosity",
             "Force of Reverence",
             "Force of Ardency",
@@ -205,6 +218,7 @@ return {
         },
         ["Healward"] = {
             --- Healing ward Heals Target of target and wards self. Divination based heal/ward
+            "Protective Acceptance",
             "Protective Revelation",
             "Protective Confession",
             "Protective Devotion",
@@ -236,6 +250,8 @@ return {
             "Hand of the Stormwall Keeper",  -- Level 115 - Group
             "Shadewell Keeper",              -- Level 117
             "Hand of the Dreaming Keeper",   -- Level 120 - Group
+            "Fernshade Keeper",              -- Level 122
+            "Hand of the Fernshade Keeper",  -- Level 125 - Group
         },
         ["Brells"] = {
             "Brell's Tenacious Barrier",
@@ -252,9 +268,11 @@ return {
             "Brell's Stalwart Shield",
             "Brell's Mountainous Barrier",
             "Brell's Steadfast Aegis",
+            "Brell's Unbreakable Palisade",
         },
         ["Splashcure"] = {
             ---, Spells
+            "Splash of Heroism",
             "Splash of Repentance",
             "Splash of Sanctification",
             "Splash of Purification",
@@ -273,12 +291,13 @@ return {
         },
         ["Affirmation"] = {
             --- Improved Super Taunt - Gets you Aggro for X seconds and reduces other Haters generation.
+            "Unconditional Affirmation",
+            "Unending Affirmation",
             "Unrelenting Affirmation",
             "Undivided Affirmation",
             "Unbroken Affirmation",
             "Unflinching Affirmation",
             "Unyielding Affirmation",
-            "Unending Affirmation",
         },
         ["Doctrine"] = {
             --- Undead DD
@@ -286,9 +305,11 @@ return {
             "Doctrine of Rescission",
             "Doctrine of Exculpation",
             "Doctrine of Abolishment",
+            "Doctrine of Repudiation",
         },
         ["WaveHeal"] = {
-            --- Group Wave heal 39-115
+            --- Group Wave heal 39-124
+            "Wave of Regret",
             "Wave of Bereavement",
             "Wave of Propitiation",
             "Wave of Expiation",
@@ -333,6 +354,7 @@ return {
             "Exaltation",
             "Propitiation",
             "Culpability",
+            "Angst",
         },
         ["Reverseds"] = {
             --- Reverse DS
@@ -346,6 +368,7 @@ return {
             "Mark of the Commander",
             "Mark of the Jade Cohort",
             "Mark of the Eclipsed Cohort",
+            "Mark of the Forgotten Hero",
         },
         ["Cleansehot"] = {
             --- Pally Hot
@@ -363,6 +386,7 @@ return {
             "Merciful Cleansing",   -- Level 108
             "Sincere Cleansing",    -- Level 113
             "Forthright Cleansing", -- Level 118
+            "Avowed Cleansing",     -- Level 123
         },
         ["BurstHeal"] = {
             --- Burst Heal - heals target or Target of target 73-115
@@ -376,6 +400,7 @@ return {
             "Burst of Morninglight",
             "Burst of Wakening",
             "Burst of Dawnbreak",
+            "Burst of Sunspring",
         },
         ["ArmorSelfBuff"] = {
             --- Self Buff Armor Line Ac/Hp/Mana regen
@@ -391,6 +416,7 @@ return {
             "Armor of Steadfast Faith",   -- Level 108
             "Armor of Steadfast Grace",   -- Level 113
             "Armor of Unyielding Grace",  -- Level 118
+            "Armor of Heroic Faith",      -- Level 118
         },
         ["Righteousstrike"] = {
             --- Righteous Strikes Line
@@ -401,6 +427,8 @@ return {
             "Righteous Umbrage",
             "Righteous Condemnation",
             "Righteous Antipathy",
+            "Righteous Censure",
+            "Righteous Disdain",
         },
         ["Symbol"] = {
             "Symbol of Liako",
@@ -418,6 +446,8 @@ return {
             "Symbol of Pinzarn",
             "Symbol of Ryltan",
             "Symbol of Transal",
+            "Symbol of Sevalak",
+            "Symbol of Thormir",
         },
         ["LessonStun"] = {
             --- Lesson Stun - Timer 6
@@ -434,14 +464,16 @@ return {
             "Lesson of Expiation",            -- Level 107
             "Lesson of Propitiation",         -- Level 112
             "Lesson of Guilt",                -- Level 117
+            "Lesson of Remembrance",          -- Level 117
         },
         ["Audacity"] = {
             -- Hate magic Debuff Over time
-            "Ardent,",
-            "Fervent,",
-            "Sanctimonious,",
-            "Devout,",
-            "Righteous,",
+            "Fanatical Audacity",
+            "Ardent Audacity,",
+            "Fervent Audacity,",
+            "Sanctimonious Audacity,",
+            "Devout Audacity,",
+            "Righteous Audacity,",
         },
         ["LightHeal"] = {
             -- Target Light Heal
@@ -468,8 +500,10 @@ return {
             "Merciful Light",  -- Level 107
             "Sincere Light",   -- Level 112
             "Raptured Light",  -- Level 117
+            "Avowed Light",    -- Level 122
         },
         ["Pacify"] = {
+            "Assuring Words",
             "Placating Words",
             "Tranquil Words",
             "Propitiate",
@@ -495,6 +529,7 @@ return {
             "Merciful Touch",
             "Sincere Touch",
             "Soothing Touch",
+            "Avowed Touch",
         },
         ["Dicho"] = {
             --- Dissident Stun
@@ -525,6 +560,7 @@ return {
             "Refute for Honor",
             "Protest for Honor",
             "Parlay for Honor",
+            "Petition for Honor",
         },
         ["Piety"] = {
             -- One Off Buffs
@@ -582,6 +618,7 @@ return {
             "Hiatus",
             "Relax",
             "Night's Calming",
+            "Convalesce",
         },
         ["meleemit"] = {
             -- Withstand Combat Line of Defense - Update to format once tested
@@ -593,9 +630,11 @@ return {
             "Spurn",
             "Thwart",
             "Repudiate",
+            "Gird",
         },
         ["Armordisc"] = {
             --- Armor Timer 11
+            "Armor of Avowal",
             "Armor of the Forthright",
             "Armor of Sincerity",
             "Armor of Mercy",
@@ -616,6 +655,7 @@ return {
         },
         ["Mantle"] = {
             ---Mantle Line of Discipline Timer 5 defensive burn
+            "Mantle of the Remembered",
             "Supernal Mantle",
             "Mantle of the Sapphire Cohort",
             "Kar`Zok Mantle",
