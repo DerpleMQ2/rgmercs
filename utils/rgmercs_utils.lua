@@ -1818,6 +1818,12 @@ function RGMercUtils.GetTargetDistance(target)
     return (target and target.Distance() or (mq.TLO.Target.Distance() or 9999))
 end
 
+---@param target MQTarget|spawn|nil
+---@return number
+function RGMercUtils.GetTargetDistanceZ(target)
+    return (target and target.DistanceZ() or (mq.TLO.Target.DistanceZ() or 9999))
+end
+
 ---@param target MQTarget|nil
 ---@return number
 function RGMercUtils.GetTargetMaxRangeTo(target)
@@ -2820,11 +2826,11 @@ function RGMercUtils.FindTarget(validateFn)
             -- Manual targetting let the manual user target any npc or npcpet.
             if RGMercConfig.Globals.AutoTargetID ~= target.ID() and
                 (RGMercUtils.TargetIsType("npc", target) or RGMercUtils.TargetIsType("npcpet", target)) and
-                target.Distance() < RGMercUtils.GetSetting('AssistRange') and
-                target.DistanceZ() < 20 and
-                target.Aggressive() and
+                RGMercUtils.GetTargetDistance(target) < RGMercUtils.GetSetting('AssistRange') and
+                RGMercUtils.GetTargetDistanceZ(target) < 20 and
+                RGMercUtils.GetTargetAggressive(target) and
                 target.Mezzed.ID() == nil then
-                RGMercsLogger.log_info("Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName(), target.ID())
+                RGMercsLogger.log_info("Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName() or "None", target.ID())
                 RGMercConfig.Globals.AutoTargetID = target.ID()
             end
         else
