@@ -1689,6 +1689,8 @@ local _ClassConfig = {
         PreEngage = function(target)
             local openerAbility = RGMercUtils.GetResolvedActionMapItem('ArrowOpener')
 
+            if not openerAbility then return end
+
             RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility.RankName.Name() or "None")
 
             if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting("ManaToNuke") and RGMercUtils.NPCSpellReady(openerAbility, target.ID(), false) then
