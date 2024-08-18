@@ -197,7 +197,7 @@ Config.DefaultConfig = {
     ['MovebackWhenTank']     = { DisplayName = "Moveback as Tank", Category = "Tanking", Tooltip = "Adds 'moveback' to stick command when tanking. Helpful to keep mobs from getting behind you.", Default = false, ConfigType = "Advanced", },
     ['MovebackWhenBehind']   = { DisplayName = "Moveback if Mob Behind", Category = "Tanking", Tooltip = "Causes you to move back if we detect an XTarget is behind you when tanking.", Default = true, ConfigType = "Advanced", },
     ['MovebackDistance']     = { DisplayName = "Units to Moveback", Category = "Tanking", Tooltip = "Default: 20. May require adjustment based on runspeed.", Default = 20, Min = 1, Max = 40, ConfigType = "Advanced", },
-    
+
     -- [ Wards ] --
     ['WardsPlease']          = { DisplayName = "Enable Wards", Category = "Wards", Tooltip = "Enable Ward Type Spells", Default = true, ConfigType = "Normal", },
 
