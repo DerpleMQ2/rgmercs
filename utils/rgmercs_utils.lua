@@ -1,3 +1,4 @@
+--- RGMerc Utils Functions.
 local mq                       = require('mq')
 local Set                      = require('mq.set')
 local animSpellGems            = mq.FindTextureAnimation('A_SpellGems')
@@ -17,6 +18,7 @@ RGMercUtils.Memorizing         = false
 RGMercUtils.UseGem             = mq.TLO.Me.NumGems()
 RGMercUtils.ConfigFilter       = ""
 
+--- Checks to see if a file exists on the local drive.
 ---@param path string
 ---@return boolean
 function RGMercUtils.file_exists(path)
@@ -29,6 +31,7 @@ function RGMercUtils.file_exists(path)
     end
 end
 
+--- Actors to tell all clients that something changed.
 ---@param module string
 ---@param event string
 ---@param data table|nil
