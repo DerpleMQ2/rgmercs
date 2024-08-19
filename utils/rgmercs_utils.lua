@@ -587,7 +587,6 @@ function RGMercUtils.WaitCastFinish(target)
         1000
     local maxWait = maxWaitOrig
 
-    ---@diagnostic disable-next-line: undefined-field
     while mq.TLO.Me.Casting() do
         RGMercsLogger.log_verbose("Waiting to Finish Casting...")
         mq.delay(10)
@@ -1481,10 +1480,9 @@ function RGMercUtils.SelfBuffCheck(spell)
         --RGMercsLogger.log_verbose("\arSelfBuffCheck() Spell Invalid")
         return false
     end
-    ---@diagnostic disable-next-line: undefined-field
+
     local res = not RGMercUtils.BuffActiveByID(spell.RankName.ID()) and spell.Stacks()
 
-    ---@diagnostic disable-next-line: undefined-field
     RGMercsLogger.log_verbose("\aySelfBuffCheck(\at%s\ay/\am%d\ay) Spell Obj => %s", spell.RankName(),
         spell.RankName.ID(),
         RGMercUtils.BoolToColorString(res))
@@ -2895,7 +2893,6 @@ function RGMercUtils.FindTarget(validateFn)
                 RGMercUtils.AddXTByName(1, assistTarget.Name())
             end
         else
-            ---@diagnostic disable-next-line: undefined-field
             if mq.TLO.Raid.Members() > 0 then
                 RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(0) and mq.TLO.Me.RaidAssistTarget(0).ID()) or 0)
                 if RGMercConfig.Globals.AutoTargetID == 0 then
@@ -3497,7 +3494,6 @@ end
 ---@return boolean
 function RGMercUtils.DetGambitCheck()
     local me = mq.TLO.Me
-    ---@type MQSpell
     local gambitSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "GambitSpell")
 
     return (gambitSpell and gambitSpell() and ((me.Song(gambitSpell.RankName.Name()).ID() or 0) > 0)) and true or false
@@ -3654,7 +3650,6 @@ end
 function RGMercUtils.GetDynamicTooltipForAA(action)
     local resolvedItem = mq.TLO.Spell(action)
 
-    ---@diagnostic disable-next-line: undefined-field
     return string.format("Use %s Spell : %s\n\nThis Spell:\n%s", action, resolvedItem() or "None",
         resolvedItem.Description() or "None")
 end
@@ -4300,7 +4295,7 @@ end
 ---@param settings table
 ---@param defaults table
 ---@param categories table
----@param hideControls boolean
+---@param hideControls? boolean
 ---@return table: settings
 ---@return boolean: any_pressed
 ---@return boolean: requires_new_loadout
