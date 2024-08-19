@@ -1105,7 +1105,7 @@ local _ClassConfig = {
             {
                 name = "Mortifier's Unity",
                 type = "AA",
-                active_cond = function(self) return RGMercUtils.BuffActiveByName("Shield of Darkness") and RGMercUtils.BuffActiveByName("Otherise") end,
+                active_cond = function(self) return RGMercUtils.BuffActiveByName("Shield of Darkness") and RGMercUtils.BuffActiveByName("Otherside") end,
                 cond = function(self, aaName)
                     return RGMercUtils.GetSetting('DoUnity') and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
