@@ -582,7 +582,8 @@ function RGMercUtils.GetBestSpell(spellList, alreadyResolvedMap)
 end
 
 ---@param target MQSpawn
-function RGMercUtils.WaitCastFinish(target)
+---@param bAllowDead boolean
+function RGMercUtils.WaitCastFinish(target, bAllowDead)
     local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime.TotalSeconds() or 0) + ((mq.TLO.EverQuest.Ping() * 2 / 100) + 1)) *
         1000
     local maxWait = maxWaitOrig
@@ -590,11 +591,23 @@ function RGMercUtils.WaitCastFinish(target)
     while mq.TLO.Me.Casting() do
         RGMercsLogger.log_verbose("Waiting to Finish Casting...")
         mq.delay(10)
-        if target() and RGMercUtils.GetTargetPctHPs(target) <= 0 then
+        if target() and RGMercUtils.GetTargetPctHPs(target) <= 0 and not bAllowDead then
             mq.TLO.Me.StopCast()
             RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", target.ID(),
                 RGMercUtils.GetTargetPctHPs())
             return
+        end
+
+        if target() and RGMercUtils.GetTargetID() > 0 and target.ID() ~= RGMercUtils.GetTargetID() then
+            mq.TLO.Me.StopCast()
+            RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", target.ID(),
+                RGMercUtils.GetTargetPctHPs())
+            return
+        end
+
+        if target() and target.ID() ~= RGMercUtils.GetTargetID() then
+            RGMercsLogger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", target.ID(),
+                RGMercUtils.GetTargetPctHPs())
         end
 
         maxWait = maxWait - 10
@@ -1171,7 +1184,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
             RGMercsLogger.log_verbose("\ayUseSpell(): Waiting to start cast: %s", spellName)
             mq.delay("1s", function() return mq.TLO.Me.Casting.ID() > 0 end)
             RGMercsLogger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
-            RGMercUtils.WaitCastFinish(targetSpawn)
+            RGMercUtils.WaitCastFinish(targetSpawn, bAllowDead or false)
             mq.doevents()
             mq.delay(1)
             RGMercsLogger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, RGMercUtils.GetLastCastResultName(), retryCount)
