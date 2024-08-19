@@ -590,10 +590,10 @@ function RGMercUtils.WaitCastFinish(target)
     while mq.TLO.Me.Casting() do
         RGMercsLogger.log_verbose("Waiting to Finish Casting...")
         mq.delay(10)
-        if target() and RGMercUtils.GetTargetPctHPs() <= 0 or (RGMercUtils.GetTargetID() ~= target.ID()) then
+        if target() and RGMercUtils.GetTargetPctHPs(target) <= 0 then
             mq.TLO.Me.StopCast()
-            RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because target(%d) is dead with no HP(%d) or not our currentTarget(%d)", target.ID(),
-                RGMercUtils.GetTargetPctHPs(), RGMercUtils.GetTargetID())
+            RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", target.ID(),
+                RGMercUtils.GetTargetPctHPs())
             return
         end
 
@@ -1032,7 +1032,7 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem)
         end
 
         -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
-        mq.delay(500, function() return me.Casting.ID() == 0 end)
+        mq.delay(500, function() return me.Casting.ID() == nil end)
 
 
         if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
