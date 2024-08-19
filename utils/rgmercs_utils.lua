@@ -535,6 +535,7 @@ function RGMercUtils.FindMissingSpells(varName, spellList, alreadyMissingSpells,
 end
 
 ---@param spellList table
+---@param alreadyResolvedMap table # table of already resolved items
 ---@return MQSpell|nil
 function RGMercUtils.GetBestSpell(spellList, alreadyResolvedMap)
     local highestLevel = 0
@@ -4299,6 +4300,7 @@ end
 ---@param settings table
 ---@param defaults table
 ---@param categories table
+---@param hideControls boolean
 ---@return table: settings
 ---@return boolean: any_pressed
 ---@return boolean: requires_new_loadout
