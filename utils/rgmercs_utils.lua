@@ -594,20 +594,18 @@ function RGMercUtils.WaitCastFinish(target, bAllowDead)
         if target() and RGMercUtils.GetTargetPctHPs(target) <= 0 and not bAllowDead then
             mq.TLO.Me.StopCast()
             RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", target.ID(),
-                RGMercUtils.GetTargetPctHPs())
+                RGMercUtils.GetTargetPctHPs(target))
             return
         end
 
         if target() and RGMercUtils.GetTargetID() > 0 and target.ID() ~= RGMercUtils.GetTargetID() then
             mq.TLO.Me.StopCast()
-            RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", target.ID(),
-                RGMercUtils.GetTargetPctHPs())
+            RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", target.ID(), RGMercUtils.GetTargetID())
             return
         end
 
         if target() and target.ID() ~= RGMercUtils.GetTargetID() then
-            RGMercsLogger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", target.ID(),
-                RGMercUtils.GetTargetPctHPs())
+            RGMercsLogger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", target.ID(), RGMercUtils.GetTargetID())
         end
 
         maxWait = maxWait - 10
@@ -1036,10 +1034,29 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem)
 
         mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
 
+        -- while the casting window is open, still do movement if not paused or if movement enabled during pause.
         while mq.TLO.Window("CastingWindow").Open() do
             if not RGMercConfig.Globals.PauseMain or RGMercUtils.GetSetting('RunMovePaused') then
                 RGMercModules:ExecModule("Movement", "GiveTime", "Combat")
             end
+
+            if targetSpawn() and RGMercUtils.GetTargetPctHPs(targetSpawn) <= 0 then
+                mq.TLO.Me.StopCast()
+                RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", targetSpawn.ID(),
+                    RGMercUtils.GetTargetPctHPs(targetSpawn))
+                break
+            end
+
+            if targetSpawn() and RGMercUtils.GetTargetID() > 0 and targetSpawn.ID() ~= RGMercUtils.GetTargetID() then
+                mq.TLO.Me.StopCast()
+                RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", targetSpawn.ID(), RGMercUtils.GetTargetID())
+                break
+            end
+
+            if targetSpawn() and targetSpawn.ID() ~= RGMercUtils.GetTargetID() then
+                RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", targetSpawn.ID(), RGMercUtils.GetTargetID())
+            end
+
             mq.doevents()
             mq.delay(1)
         end
