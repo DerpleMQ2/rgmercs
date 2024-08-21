@@ -148,6 +148,7 @@ Module.DefaultConfig                   = {
     ['PullMinLevel']       = { DisplayName = "Pull Min Level", Category = "Pull Targets", Tooltip = "Min Level Mobs to consider pulling", Default = mq.TLO.Me.Level() - 3, Min = 1, Max = 150, ConfigType = "Advanced", },
     ['PullMaxLevel']       = { DisplayName = "Pull Max Level", Category = "Pull Targets", Tooltip = "Max Level Mobs to consider pulling", Default = mq.TLO.Me.Level() + 3, Min = 1, Max = 150, ConfigType = "Advanced", },
     ['GroupWatch']         = { DisplayName = "Enable Group Watch", Category = "Group Watch", Tooltip = "1 = Off, 2 = Healers, 3 = Everyone", Type = "Combo", ComboOptions = { 'Off', 'Healers', 'Everyone', }, Default = 2, Min = 1, Max = 3, },
+    ['GroupWatchEnd']      = { DisplayName = "Watch Group Endurance", Category = "Group Watch", Tooltip = "Check for Endurance on Group Members", Default = false, },
     ['GroupWatchStartPct'] = { DisplayName = "Group Watch Start %", Category = "Group Watch", Tooltip = "If your group member is above [X]% resource, start pulls again.", Default = 80, Min = 1, Max = 100, },
     ['GroupWatchStopPct']  = { DisplayName = "Group Watch Stop %", Category = "Group Watch", Tooltip = "If your group member is below [X]% resource, stop pulls.", Default = 40, Min = 1, Max = 100, },
     ['PullHPPct']          = { DisplayName = "Pull HP %", Category = "Group Watch", Tooltip = "Make sure you have at least this much HP %", Default = 60, Min = 1, Max = 100, },
@@ -566,14 +567,13 @@ function Module:Render()
                     self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()] = {}
                     for step, data in pairs(self.TempSettings.MyPaths[mq.TLO.Zone.ShortName()][self.TempSettings.SelectedPath]) do
                         local mpy, mpx, mpz = data.loc:match("([^,]+),%s*([^,]+),%s*([^,]+)")
-                        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][step] = {x = tonumber(mpx), y = tonumber(mpy), z = tonumber(mpz)}
+                        self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][step] = { x = tonumber(mpx), y = tonumber(mpy), z = tonumber(mpz), }
                     end
                 end
-
             else
                 Module.TempSettings.MyPaths = 'None'
             end
-            
+
             if ImGui.BeginTable("Waypoints", 3, bit32.bor(ImGuiTableFlags.Borders)) then
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 40.0)
                 ImGui.TableSetupColumn('Loc', (ImGuiTableColumnFlags.WidthStretch), 150.0)
@@ -857,17 +857,21 @@ function Module:CheckGroupForPull(classes, resourceResumePct, resourcePausePct, 
                 local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceResumePct or resourcePausePct
                 if member.PctHPs() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
-                    RGMercsLogger.log_verbose("\arMember is low on Health - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",resourcePct,resourcePausePct,resourceResumePct, self.TempSettings.PullState)
+                    RGMercsLogger.log_verbose("\arMember is low on Health - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
+                        resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
                     return false, string.format("%s Low HP", member.CleanName())
                 end
-                if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct  then
+                if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
-                    RGMercsLogger.log_verbose("\arMember is low on Mana - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",resourcePct,resourcePausePct,resourceResumePct, self.TempSettings.PullState)
+                    RGMercsLogger.log_verbose("\arMember is low on Mana - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
+                        resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
                     return false, string.format("%s Low Mana", member.CleanName())
                 end
-                if member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct  then
+                if RGMercUtils.GetSetting('GroupWatchEnd') and member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
                     RGMercUtils.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
-                    RGMercsLogger.log_verbose("\arMember is low on Endurance - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",resourcePct,resourcePausePct,resourceResumePct, self.TempSettings.PullState)
+                    RGMercsLogger.log_verbose(
+                        "\arMember is low on Endurance - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d", resourcePct,
+                        resourcePausePct, resourceResumePct, self.TempSettings.PullState)
                     return false, string.format("%s Low End", member.CleanName())
                 end
 
