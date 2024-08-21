@@ -2280,6 +2280,11 @@ function RGMercUtils.ClickModRod()
     if me.PctMana() > RGMercUtils.GetSetting('ModRodManaPct') or me.PctHPs() < 60 then return end
 
     for _, itemName in ipairs(RGMercConfig.Constants.ModRods) do
+        while mq.TLO.Cursor.Name() == itemName do
+            mq.cmd("/squelch /autoinv")
+            mq.delay(10)
+        end
+
         local item = mq.TLO.FindItem(itemName)
         if item() and item.TimerReady() == 0 then
             RGMercUtils.UseItem(item.Name(), mq.TLO.Me.ID())
