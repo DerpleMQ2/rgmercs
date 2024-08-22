@@ -2967,12 +2967,6 @@ function RGMercUtils.HandleMezAnnounce(msg)
 end
 
 ---@param printDebug boolean?
----@return integer
-function RGMercUtils.GetXTHaterCount(printDebug)
-    return #RGMercUtils.GetXTHaterIDs(printDebug)
-end
-
----@param printDebug boolean?
 ---@return table # list of haters.
 function RGMercUtils.GetXTHaterIDs(printDebug)
     local xtCount = mq.TLO.Me.XTarget() or 0
@@ -2990,6 +2984,12 @@ function RGMercUtils.GetXTHaterIDs(printDebug)
     end
 
     return haters
+end
+
+---@param printDebug boolean?
+---@return integer
+function RGMercUtils.GetXTHaterCount(printDebug)
+    return #RGMercUtils.GetXTHaterIDs(printDebug)
 end
 
 ---@param t table # Set of haters.
