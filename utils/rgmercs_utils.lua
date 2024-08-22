@@ -2993,10 +2993,11 @@ function RGMercUtils.GetXTHaterCount(printDebug)
 end
 
 ---@param t table # Set of haters.
+---@param printDebug boolean?
 ---@return boolean
-function RGMercUtils.DiffXTHaterIDs(t)
+function RGMercUtils.DiffXTHaterIDs(t, printDebug)
     local oldHaterSet = Set.new(t)
-    local curHaters   = RGMercUtils.GetXTHaterIDs()
+    local curHaters   = RGMercUtils.GetXTHaterIDs(printDebug)
 
     for _, xtargID in ipairs(curHaters) do
         if not oldHaterSet:contains(xtargID) then return true end
