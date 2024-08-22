@@ -4,7 +4,6 @@ local RGMercUtils = require("utils.rgmercs_utils")
 return {
     _version              = "1.0",
     _author               = "Derple, Algar",
-    ['FullConfig']        = true,
     ['Modes']             = {
         'DPS',
     },
