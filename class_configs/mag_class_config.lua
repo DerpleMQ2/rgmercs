@@ -1878,7 +1878,7 @@ _ClassConfig      = {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "PetHealSpell", },
+                { name = "GatherMana", },
             },
         },
         {
@@ -1906,7 +1906,7 @@ _ClassConfig      = {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "GatherMana", },
+                { name = "PetHealSpell", },
             },
         },
     },
