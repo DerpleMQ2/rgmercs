@@ -2969,30 +2969,22 @@ end
 ---@param printDebug boolean?
 ---@return integer
 function RGMercUtils.GetXTHaterCount(printDebug)
-    local xtCount = mq.TLO.Me.XTarget() or 0
-    local haterCount = 0
-
-    for i = 1, xtCount do
-        local xtarg = mq.TLO.Me.XTarget(i)
-        -- no aggro info under 20.
-        if xtarg and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") then
-            if printDebug then
-                RGMercsLogger.log_verbose("GetXTHaterCount(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
-            end
-            haterCount = haterCount + 1
-        end
-    end
-    return haterCount
+    return #RGMercUtils.GetXTHaterIDs(printDebug)
 end
 
+---@param printDebug boolean?
 ---@return table # list of haters.
-function RGMercUtils.GetXTHaterIDs()
+function RGMercUtils.GetXTHaterIDs(printDebug)
     local xtCount = mq.TLO.Me.XTarget() or 0
     local haters = {}
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.Aggressive() then
+        if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") then
+            if printDebug then
+                RGMercsLogger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
+            end
+
             table.insert(haters, xtarg.ID())
         end
     end
@@ -3003,19 +2995,11 @@ end
 ---@param t table # Set of haters.
 ---@return boolean
 function RGMercUtils.DiffXTHaterIDs(t)
-    local xtCount = mq.TLO.Me.XTarget() or 0
-
-    -- count is different things changed.
-    -- if #t ~= xtCount then return true end
-
     local oldHaterSet = Set.new(t)
+    local curHaters   = RGMercUtils.GetXTHaterIDs()
 
-    for i = 1, xtCount do
-        local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.Aggressive() then
-            -- this target isn't in the old set.
-            if not oldHaterSet:contains(xtarg.ID()) then return true end
-        end
+    for _, xtargID in ipairs(curHaters) do
+        if not oldHaterSet:contains(xtargID) then return true end
     end
 
     return false
