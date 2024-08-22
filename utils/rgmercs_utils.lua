@@ -644,6 +644,10 @@ function RGMercUtils.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
 
     while (mq.TLO.Me.Gem(gem)() ~= spell or (waitSpellReady and not mq.TLO.Me.SpellReady(gem)())) and maxWait > 0 do
         RGMercsLogger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
+        if mq.TLO.Me.CombatState():lower() == "combat" then
+            RGMercsLogger.log_verbose("MemorizeSpell() I was interrupted by combat while waiting for spell '%s' to load in slot %d'! Aborting.", spell, gem)
+            break
+        end
         mq.delay(100)
         maxWait = maxWait - 100
     end
