@@ -252,7 +252,7 @@ function Module:MezNow(mezId, useAE, useAA)
             if RGMercUtils.MyClassIs("brd") then
                 -- TODO songnow aemez
                 self.TempSettings.BardAEMezTimer = "30s"
-                RGMercUtils.UseSong(aeMezSpell.RankName(), mezId, false)
+                RGMercUtils.UseSong(aeMezSpell.RankName(), mezId, false, 5)
             else
                 RGMercUtils.UseSpell(aeMezSpell.RankName(), mezId, false)
             end
@@ -294,7 +294,7 @@ function Module:MezNow(mezId, useAE, useAA)
         -- TODO: Make spell now use songnow for brds
         if RGMercUtils.MyClassIs("brd") then
             -- TODO SongNow MezSpell
-            RGMercUtils.UseSong(mezSpell.RankName(), mezId, false)
+            RGMercUtils.UseSong(mezSpell.RankName(), mezId, false, 5)
         else
             -- This may not work for Bards but will work for NEC/ENCs
             RGMercUtils.UseSpell(mezSpell.RankName(), mezId, false)

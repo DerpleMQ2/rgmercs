@@ -964,8 +964,9 @@ end
 ---@param songName string
 ---@param targetId integer
 ---@param bAllowMem boolean
+---@param retryCount integer?
 ---@return boolean
-function RGMercUtils.UseSong(songName, targetId, bAllowMem)
+function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
     if not songName then return false end
     local me = mq.TLO.Me
     RGMercsLogger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, RGMercUtils.BoolToColorString(bAllowMem))
@@ -1027,39 +1028,45 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem)
         RGMercsLogger.log_verbose("\ag %s \ar =>> \ay %s \ar <<=", songName, targetSpawn.CleanName() or "None")
         -- TODO Swap Instruments
 
-        RGMercUtils.DoCmd("/cast \"%s\"", songName)
+        retryCount = retryCount or 0
 
-        mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
+        repeat
+            RGMercUtils.DoCmd("/cast \"%s\"", songName)
 
-        -- while the casting window is open, still do movement if not paused or if movement enabled during pause.
-        while mq.TLO.Window("CastingWindow").Open() do
-            if not RGMercConfig.Globals.PauseMain or RGMercUtils.GetSetting('RunMovePaused') then
-                RGMercModules:ExecModule("Movement", "GiveTime", "Combat")
+            mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
+
+            -- while the casting window is open, still do movement if not paused or if movement enabled during pause.
+            while mq.TLO.Window("CastingWindow").Open() do
+                if not RGMercConfig.Globals.PauseMain or RGMercUtils.GetSetting('RunMovePaused') then
+                    RGMercModules:ExecModule("Movement", "GiveTime", "Combat")
+                end
+
+                if targetId > 0 and targetId ~= mq.TLO.Me.ID() then
+                    if targetSpawn() and RGMercUtils.GetTargetPctHPs(targetSpawn) <= 0 then
+                        mq.TLO.Me.StopCast()
+                        RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", targetSpawn.ID(),
+                            RGMercUtils.GetTargetPctHPs(targetSpawn))
+                        break
+                    end
+
+                    if targetSpawn() and RGMercUtils.GetTargetID() > 0 and targetSpawn.ID() ~= RGMercUtils.GetTargetID() then
+                        mq.TLO.Me.StopCast()
+                        RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", targetSpawn.ID(),
+                            RGMercUtils.GetTargetID())
+                        break
+                    end
+
+                    if targetSpawn() and targetSpawn.ID() ~= RGMercUtils.GetTargetID() then
+                        RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", targetSpawn.ID(),
+                            RGMercUtils.GetTargetID())
+                    end
+                end
+                mq.doevents()
+                mq.delay(1)
             end
 
-            if targetId > 0 and targetId ~= mq.TLO.Me.ID() then
-                if targetSpawn() and RGMercUtils.GetTargetPctHPs(targetSpawn) <= 0 then
-                    mq.TLO.Me.StopCast()
-                    RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", targetSpawn.ID(),
-                        RGMercUtils.GetTargetPctHPs(targetSpawn))
-                    break
-                end
-
-                if targetSpawn() and RGMercUtils.GetTargetID() > 0 and targetSpawn.ID() ~= RGMercUtils.GetTargetID() then
-                    mq.TLO.Me.StopCast()
-                    RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", targetSpawn.ID(),
-                        RGMercUtils.GetTargetID())
-                    break
-                end
-
-                if targetSpawn() and targetSpawn.ID() ~= RGMercUtils.GetTargetID() then
-                    RGMercsLogger.log_debug("UseSong::WaitSingFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", targetSpawn.ID(),
-                        RGMercUtils.GetTargetID())
-                end
-            end
-            mq.doevents()
-            mq.delay(1)
-        end
+            retryCount = retryCount - 1
+        until RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or retryCount < 0
 
         -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
         mq.delay(500, function() return me.Casting.ID() == nil end)
@@ -1285,7 +1292,7 @@ function RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllo
         if not spell or not spell() then
             ret = false
         else
-            ret = RGMercUtils.UseSong(spell.RankName(), targetId, bAllowMem)
+            ret = RGMercUtils.UseSong(spell.RankName(), targetId, bAllowMem, entry.retries)
 
             RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", entry.name, spell.RankName(),
                 ret and "\agSuccess" or "\arFailed!")
