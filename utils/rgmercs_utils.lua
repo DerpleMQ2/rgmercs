@@ -1084,8 +1084,9 @@ end
 ---@param bAllowMem boolean
 ---@param bAllowDead boolean?
 ---@param overrideWaitForGlobalCooldown boolean?
+---@param retryCount integer?
 ---@return boolean
-function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown)
+function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown, retryCount)
     local me = mq.TLO.Me
     -- Immediately send bards to the song handler.
     if me.Class.ShortName():lower() == "brd" then
@@ -1190,7 +1191,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
 
         RGMercUtils.ActionPrep()
 
-        local retryCount = 5
+        retryCount = retryCount or 5
 
         if targetId > 0 then
             RGMercUtils.SetTarget(targetId)
@@ -1279,7 +1280,7 @@ function RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllo
         if not spell or not spell() then
             ret = false
         else
-            ret = RGMercUtils.UseSpell(spell.RankName(), targetId, bAllowMem)
+            ret = RGMercUtils.UseSpell(spell.RankName(), targetId, bAllowMem, entry.allowDead, entry.overrideWaitForGlobalCooldown, entry.retries)
 
             RGMercsLogger.log_debug("Trying To Cast %s - %s :: %s", entry.name, spell.RankName(),
                 ret and "\agSuccess" or "\arFailed!")
