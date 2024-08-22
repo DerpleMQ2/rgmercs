@@ -340,8 +340,8 @@ function RGMercUtils.PCAAReady(aaName)
 end
 
 ---@param spellName string
----@param targetId number
----@param healingSpell boolean
+---@param targetId number?
+---@param healingSpell boolean?
 ---@return boolean
 function RGMercUtils.NPCSpellReady(spellName, targetId, healingSpell)
     local me = mq.TLO.Me
