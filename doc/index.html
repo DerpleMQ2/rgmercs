@@ -209,7 +209,7 @@
 </td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#RGMercUtils.WaitCastFinish">RGMercUtils.WaitCastFinish (target)</a></td>
+	<td class="name" nowrap><a href="#RGMercUtils.WaitCastFinish">RGMercUtils.WaitCastFinish (target, bAllowDead)</a></td>
 	<td class="summary">
 
 </td>
@@ -269,11 +269,11 @@
 </td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#RGMercUtils.UseSong">RGMercUtils.UseSong (songName, targetId, bAllowMem)</a></td>
+	<td class="name" nowrap><a href="#RGMercUtils.UseSong">RGMercUtils.UseSong (songName, targetId, bAllowMem, retryCount)</a></td>
 	<td class="summary">Modified Version of UseSpell to accomodate Songs</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#RGMercUtils.UseSpell">RGMercUtils.UseSpell (spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown)</a></td>
+	<td class="name" nowrap><a href="#RGMercUtils.UseSpell">RGMercUtils.UseSpell (spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown, retryCount)</a></td>
 	<td class="summary">
 
 </td>
@@ -739,19 +739,19 @@
 	<td class="summary">This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#RGMercUtils.GetXTHaterCount">RGMercUtils.GetXTHaterCount ()</a></td>
+	<td class="name" nowrap><a href="#RGMercUtils.GetXTHaterIDs">RGMercUtils.GetXTHaterIDs (printDebug)</a></td>
 	<td class="summary">
 
 </td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#RGMercUtils.GetXTHaterIDs">RGMercUtils.GetXTHaterIDs ()</a></td>
+	<td class="name" nowrap><a href="#RGMercUtils.GetXTHaterCount">RGMercUtils.GetXTHaterCount (printDebug)</a></td>
 	<td class="summary">
 
 </td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#RGMercUtils.DiffXTHaterIDs">RGMercUtils.DiffXTHaterIDs (t)</a></td>
+	<td class="name" nowrap><a href="#RGMercUtils.DiffXTHaterIDs">RGMercUtils.DiffXTHaterIDs (t, printDebug)</a></td>
 	<td class="summary">
 
 </td>
@@ -1709,7 +1709,7 @@
 </dd>
     <dt>
     <a name = "RGMercUtils.WaitCastFinish"></a>
-    <strong>RGMercUtils.WaitCastFinish (target)</strong>
+    <strong>RGMercUtils.WaitCastFinish (target, bAllowDead)</strong>
     </dt>
     <dd>
 
@@ -1721,6 +1721,9 @@
     <ul>
         <li><span class="parameter">target</span>
          MQSpawn
+        </li>
+        <li><span class="parameter">bAllowDead</span>
+         boolean
         </li>
     </ul>
 
@@ -1970,7 +1973,7 @@
 </dd>
     <dt>
     <a name = "RGMercUtils.UseSong"></a>
-    <strong>RGMercUtils.UseSong (songName, targetId, bAllowMem)</strong>
+    <strong>RGMercUtils.UseSong (songName, targetId, bAllowMem, retryCount)</strong>
     </dt>
     <dd>
     Modified Version of UseSpell to accomodate Songs
@@ -1987,6 +1990,9 @@
         <li><span class="parameter">bAllowMem</span>
          boolean
         </li>
+        <li><span class="parameter">retryCount</span>
+         integer?
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -2001,7 +2007,7 @@
 </dd>
     <dt>
     <a name = "RGMercUtils.UseSpell"></a>
-    <strong>RGMercUtils.UseSpell (spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown)</strong>
+    <strong>RGMercUtils.UseSpell (spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown, retryCount)</strong>
     </dt>
     <dd>
 
@@ -2025,6 +2031,9 @@
         </li>
         <li><span class="parameter">overrideWaitForGlobalCooldown</span>
          boolean?
+        </li>
+        <li><span class="parameter">retryCount</span>
+         integer?
         </li>
     </ul>
 
@@ -4074,29 +4083,8 @@
 
 </dd>
     <dt>
-    <a name = "RGMercUtils.GetXTHaterCount"></a>
-    <strong>RGMercUtils.GetXTHaterCount ()</strong>
-    </dt>
-    <dd>
-
-
-
-
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        integer
-    </ol>
-
-
-
-
-</dd>
-    <dt>
     <a name = "RGMercUtils.GetXTHaterIDs"></a>
-    <strong>RGMercUtils.GetXTHaterIDs ()</strong>
+    <strong>RGMercUtils.GetXTHaterIDs (printDebug)</strong>
     </dt>
     <dd>
 
@@ -4104,6 +4092,12 @@
 
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">printDebug</span>
+         boolean?
+        </li>
+    </ul>
 
     <h3>Returns:</h3>
     <ol>
@@ -4116,8 +4110,35 @@
 
 </dd>
     <dt>
+    <a name = "RGMercUtils.GetXTHaterCount"></a>
+    <strong>RGMercUtils.GetXTHaterCount (printDebug)</strong>
+    </dt>
+    <dd>
+
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">printDebug</span>
+         boolean?
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        integer
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "RGMercUtils.DiffXTHaterIDs"></a>
-    <strong>RGMercUtils.DiffXTHaterIDs (t)</strong>
+    <strong>RGMercUtils.DiffXTHaterIDs (t, printDebug)</strong>
     </dt>
     <dd>
 
@@ -4129,6 +4150,9 @@
     <ul>
         <li><span class="parameter">t</span>
          table # Set of haters.
+        </li>
+        <li><span class="parameter">printDebug</span>
+         boolean?
         </li>
     </ul>
 
@@ -5126,7 +5150,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/ldoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2024-08-18 22:01:47 </i>
+<i style="float:right;">Last updated 2024-08-22 08:38:41 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
