@@ -3034,7 +3034,7 @@ function RGMercUtils.FindWorstHurtManaGroupMember(minMana)
         RGMercsLogger.log_verbose("\agNo one is HurtMana!")
     end
 
-    return (worstPct < 100 and worstId or 0)
+    return (worstPct < minMana and worstId or 0)
 end
 
 function RGMercUtils.FindWorstHurtGroupMember(minHPs)
