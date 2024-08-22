@@ -1139,7 +1139,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
 
         -- Check for Reagents
         if not RGMercUtils.ReagentCheck(spell) then
-            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have Reagents for.",
+            RGMercsLogger.log_debug("\arCasting Failed: I tried to cast a spell %s I don't have Reagents for.",
                 spellName)
             return false
         end
@@ -1153,7 +1153,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
 
         -- If we're combat casting we need to both have the same swimming status
         if targetId == 0 or (targetSpawn() and targetSpawn.FeetWet() ~= me.FeetWet()) then
-            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.",
+            RGMercsLogger.log_debug("\arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.",
                 spellName, targetId)
             return false
         end
