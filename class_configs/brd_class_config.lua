@@ -192,7 +192,6 @@ end
 local _ClassConfig = {
     _version            = "2.0 beta",
     _author             = "Algar, Derple, Tiddliestix, SonicZentropy",
-    ['FullConfig']      = true,
     ['Modes']           = { --simply determine the priority you gem spells in. Perhaps one day this could be configured to save different loadouts/change options.
         'General',
         'Tank',
@@ -1266,7 +1265,7 @@ local _ClassConfig = {
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, songSpell)
                     if RGMercUtils.GetSetting('UseRunBuff') ~= 3 then return false end
-                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
+                    return (mq.TLO.Me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0) <= 4
                 end,
             },
             {
@@ -1275,7 +1274,7 @@ local _ClassConfig = {
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, songSpell)
                     if RGMercUtils.GetSetting('UseRunBuff') ~= 2 then return false end
-                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
+                    return (mq.TLO.Me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0) <= 15
                 end,
             },
             {
