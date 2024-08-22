@@ -2966,8 +2966,9 @@ function RGMercUtils.HandleMezAnnounce(msg)
     end
 end
 
+---@param printDebug boolean?
 ---@return integer
-function RGMercUtils.GetXTHaterCount()
+function RGMercUtils.GetXTHaterCount(printDebug)
     local xtCount = mq.TLO.Me.XTarget() or 0
     local haterCount = 0
 
@@ -2975,6 +2976,9 @@ function RGMercUtils.GetXTHaterCount()
         local xtarg = mq.TLO.Me.XTarget(i)
         -- no aggro info under 20.
         if xtarg and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") then
+            if printDebug then
+                RGMercsLogger.log_verbose("GetXTHaterCount(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
+            end
             haterCount = haterCount + 1
         end
     end

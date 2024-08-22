@@ -448,7 +448,7 @@ local function Main()
     if RGMercUtils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
         RGMercUtils.EngageTarget(RGMercConfig.Globals.AutoTargetID)
     else
-        if RGMercUtils.GetXTHaterCount() > 0 and RGMercUtils.GetTargetID() > 0 and not RGMercUtils.IsMezzing() then
+        if RGMercUtils.GetXTHaterCount(true) > 0 and RGMercUtils.GetTargetID() > 0 and not RGMercUtils.IsMezzing() then
             RGMercsLogger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
             RGMercUtils.ClearTarget()
         end
