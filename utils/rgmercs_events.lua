@@ -225,6 +225,10 @@ mq.event('Fizzle2', "You miss a note, bringing your song to a close#*#", functio
     RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_FIZZLE)
 end)
 
+mq.event('Fizzle3', "You miss a note, bringing your #*#", function()
+    RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_FIZZLE)
+end)
+
 mq.event('Interrupted1', "Your spell is interrupted#*#", function()
     RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_INTERRUPTED)
 end)

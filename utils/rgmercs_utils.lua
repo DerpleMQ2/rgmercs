@@ -1064,14 +1064,11 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem)
         -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
         mq.delay(500, function() return me.Casting.ID() == nil end)
 
-
-        if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
-            RGMercUtils.DoCmd("/stopsong")
-            return true
-        end
-
         RGMercUtils.DoCmd("/stopsong")
+
+        return RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS
     end
+
     return false
 end
 
