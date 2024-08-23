@@ -3061,7 +3061,7 @@ function RGMercUtils.FindWorstHurtGroupMember(minHPs)
                 end
 
                 if RGMercUtils.GetSetting('DoPetHeals') then
-                    if healTarget.Pet.ID() > 0 and (healTarget.Pet.PctHPs() or 101) < worstPct then
+                    if (healTarget.Pet.ID() or 0) > 0 and (healTarget.Pet.PctHPs() or 101) < (worstPct or 0) then
                         RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
                             healTarget.Pet.DisplayName())
                         worstPct = healTarget.Pet.PctHPs()
