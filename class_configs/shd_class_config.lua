@@ -710,6 +710,16 @@ local _ClassConfig = {
     ['Rotations']       = {
         ['Downtime'] = {
             {
+                name = "PetSpell",
+                type = "Spell",
+                tooltip = Tooltips.PetSpell,
+                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
+                cond = function(
+                    self, spell)
+                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and RGMercUtils.ReagentCheck(spell)
+                end,
+            },
+            {
                 name = "Dark Lord's Unity (Azia)",
                 type = "AA",
                 tooltip = Tooltips.DLUA,
@@ -821,16 +831,6 @@ local _ClassConfig = {
             },
         },
         ['Pet Downtime'] = {
-            {
-                name = "PetSpell",
-                type = "Spell",
-                tooltip = Tooltips.PetSpell,
-                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
-                cond = function(
-                    self, spell)
-                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and RGMercUtils.ReagentCheck(spell)
-                end,
-            },
             {
                 name = "PetHaste",
                 type = "Spell",
