@@ -1246,6 +1246,20 @@ _ClassConfig      = {
                 end,
             },
             {
+                name = "PetIceFlame",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
+                name = "PetHaste",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.SelfBuffPetCheck(spell)
+                end,
+            },
+            {
                 name = "Pet Management",
                 type = "CustomFunc",
                 active_cond = function(self)
@@ -1430,21 +1444,21 @@ _ClassConfig      = {
                 name = "SurgeDS1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("PetTank") and not RGMercUtils.SelfBuffCheck(spell) and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['SurgeDS1'] or "")() == nil)
+                    return RGMercUtils.IsModeActive("PetTank") and not RGMercUtils.SelfBuffPetCheck(spell) and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['SurgeDS1'] or "")() == nil)
                 end,
             },
             {
                 name = "SurgeDS2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("PetTank") and not RGMercUtils.SelfBuffCheck(spell) and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['SurgeDS2'] or "")() == nil)
+                    return RGMercUtils.IsModeActive("PetTank") and RGMercUtils.SelfBuffPetCheck(spell) and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['SurgeDS2'] or "")() == nil)
                 end,
             },
             {
                 name = "ShortDurDmgShield",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("PetTank") and not RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.IsModeActive("PetTank") and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1764,20 +1778,6 @@ _ClassConfig      = {
                 cond = function(self, itemName)
                     return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")() and mq.TLO.FindItem(itemName).TimerReady() == 0 and
                         mq.TLO.Me.Pet.ID() > 0
-                end,
-            },
-            {
-                name = "PetIceFlame",
-                type = "Spell",
-                cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell)
-                end,
-            },
-            {
-                name = "PetHaste",
-                type = "Spell",
-                cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
