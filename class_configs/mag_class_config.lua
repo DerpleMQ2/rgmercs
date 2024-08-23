@@ -5,7 +5,6 @@ _ClassConfig      = {
     _version              = "0.2B",
     _author               = "Derple, Morisato",
     ['ModeChecks']        = {
-        IsHealing = function() return true end,
         IsTanking = function() return RGMercUtils.IsModeActive("PetTank") end,
     },
     ['Modes']             = {
