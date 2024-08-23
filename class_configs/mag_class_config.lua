@@ -905,7 +905,7 @@ _ClassConfig      = {
         },
         {
             name = 'Downtime',
-            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.ID(), mq.TLO.Me.Pet.ID(), } or { mq.TLO.Me.ID(), } end,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
@@ -1231,6 +1231,20 @@ _ClassConfig      = {
     },
     ['Rotations']         = {
         ['Pet Management'] = {
+            {
+                name = "HandlePetToys",
+                type = "CustomFunc",
+                custom_func = function(self)
+                    return self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
+                end,
+            },
+            {
+                name = "PetAura",
+                type = "Spell",
+                cond = function(self, spell)
+                    return not RGMercUtils.AuraActiveByName(spell.BaseName())
+                end,
+            },
             {
                 name = "Pet Management",
                 type = "CustomFunc",
@@ -1593,24 +1607,10 @@ _ClassConfig      = {
         },
         ['Downtime'] = {
             {
-                name = "HandlePetToys",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    return mq.TLO.Me.Pet.ID() > 0 and self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
-                end,
-            },
-            {
                 name = "HandleGroupToys",
                 type = "CustomFunc",
                 custom_func = function(self)
                     return self.ClassConfig.HelperFunctions.group_toys and self.ClassConfig.HelperFunctions.group_toys(self) or false
-                end,
-            },
-            {
-                name = "PetAura",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.Pet.ID() > 0 and not RGMercUtils.AuraActiveByName(spell.BaseName())
                 end,
             },
             {

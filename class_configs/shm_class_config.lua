@@ -875,6 +875,15 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Pet Downtime',
+            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and
+                    (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
+                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
+        },
+        {
             name = 'Slow Downtime',
             timer = 30,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
@@ -1261,8 +1270,8 @@ local _ClassConfig = {
             {
                 name = "Epic",
                 type = "Item",
-                cond = function(self) 
-                    return true 
+                cond = function(self)
+                    return true
                 end,
             },
             {
@@ -1326,12 +1335,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "PetBuffSpell",
-                type = "Spell",
-                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
-            },
-            {
                 name = "Cannibalization",
                 type = "AA",
                 cond = function(self, aaName)
@@ -1346,6 +1349,14 @@ local _ClassConfig = {
                     return RGMercUtils.GetSetting('DoSpellCanni') and RGMercUtils.CastReady(spell.RankName()) and
                         mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('SpellCanniManaPct') and mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('SpellCanniMinHP')
                 end,
+            },
+        },
+        ['Pet Downtime'] = {
+            {
+                name = "PetBuffSpell",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffPetCheck(spell) end,
             },
         },
         ['Slow Downtime'] = {

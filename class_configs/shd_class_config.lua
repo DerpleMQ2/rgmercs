@@ -653,6 +653,14 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Pet Downtime',
+            targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and
+                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+            end,
+        },
+        {
             name = 'Emergency',
             state = 1,
             steps = 1,
@@ -811,6 +819,8 @@ local _ClassConfig = {
                     return RGMercUtils.GetSetting('UseVoT') and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
             },
+        },
+        ['Pet Downtime'] = {
             {
                 name = "PetSpell",
                 type = "Spell",
