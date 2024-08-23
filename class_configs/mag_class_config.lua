@@ -1240,6 +1240,9 @@ _ClassConfig      = {
             {
                 name = "PetAura",
                 type = "Spell",
+                active_cond = function(self, spell)
+                    return RGMercUtils.AuraActiveByName(spell.BaseName()) ~= nil
+                end,
                 cond = function(self, spell)
                     return not RGMercUtils.AuraActiveByName(spell.BaseName())
                 end,
@@ -1247,6 +1250,9 @@ _ClassConfig      = {
             {
                 name = "PetIceFlame",
                 type = "Spell",
+                active_cond = function(self, spell)
+                    return mq.TLO.Me.PetBuff(spell.RankName.Name())() ~= nil or mq.TLO.Me.PetBuff(spell.Name())() ~= nil
+                end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffPetCheck(spell)
                 end,
@@ -1254,6 +1260,9 @@ _ClassConfig      = {
             {
                 name = "PetHaste",
                 type = "Spell",
+                active_cond = function(self, spell)
+                    return mq.TLO.Me.PetBuff(spell.RankName.Name())() ~= nil or mq.TLO.Me.PetBuff(spell.Name())() ~= nil
+                end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffPetCheck(spell)
                 end,
@@ -1612,6 +1621,9 @@ _ClassConfig      = {
             {
                 name = "LongDurDmgShield",
                 type = "Spell",
+                active_cond = function(self, spell)
+                    return RGMercUtils.BuffActive(spell)
+                end,
                 cond = function(self, spell, target)
                     RGMercUtils.SetTarget(target.ID() or 0)
                     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
