@@ -853,21 +853,7 @@ _ClassConfig      = {
         },
     },
     ['HealRotationOrder'] = {
-        {
-            name = 'PetHealPoint',
-            state = 1,
-            steps = 1,
-            cond = function(self, _) return (mq.TLO.Me.Pet.PctHPs() or 100) < RGMercUtils.GetSetting('PetHealPct') end,
-        },
-    },
-    ['HealRotations']     = {
-        ["PetHealPoint"] = {
-            {
-                name = "PetHealSpell",
-                type = "Spell",
-                cond = function(self, spell) return RGMercUtils.PCSpellReady(spell) end,
-            },
-        },
+
     },
     ['RotationOrder']     = {
         {
@@ -883,6 +869,13 @@ _ClassConfig      = {
             cond = function(self, combat_state) return combat_state ~= "Downtime" end,
         },
         -- Downtime doesn't have state because we run the whole rotation at once.
+        {
+            name = 'PetHealPoint',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
+            cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 and (mq.TLO.Me.Pet.PctHPs() or 100) < RGMercUtils.GetSetting('PetHealPct') end,
+        },
         {
             name = 'GroupBuff',
             timer = 60, -- only run every 60 seconds top.
@@ -1229,6 +1222,13 @@ _ClassConfig      = {
         end,
     },
     ['Rotations']         = {
+        ["PetHealPoint"] = {
+            {
+                name = "PetHealSpell",
+                type = "Spell",
+                cond = function(self, spell) return RGMercUtils.PCSpellReady(spell) end,
+            },
+        },
         ['Pet Management'] = {
             {
                 name = "HandlePetToys",
