@@ -600,7 +600,8 @@ function RGMercUtils.WaitCastFinish(target, bAllowDead)
 
         if target() and RGMercUtils.GetTargetID() > 0 and target.ID() ~= RGMercUtils.GetTargetID() then
             mq.TLO.Me.StopCast()
-            RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", target.ID(), RGMercUtils.GetTargetID())
+            RGMercsLogger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%s/%d) is no longer myTarget(%s/%d)", target.CleanName() or "", target.ID(),
+                RGMercUtils.GetTargetCleanName(), RGMercUtils.GetTargetID())
             return
         end
 
@@ -3454,9 +3455,11 @@ function RGMercUtils.ReagentCheck(spell)
         return false
     end
 
-    if spell.NoExpendReagentID(1)() > 0 and mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() == 0 then
-        RGMercsLogger.log_verbose("Missing NoExpendReagent: (%d)", spell.NoExpendReagentID(1)())
-        return false
+    if (mq.TLO.MacroQuest.BuildName():lower() or "") ~= "emu" then
+        if spell.NoExpendReagentID(1)() > 0 and mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() == 0 then
+            RGMercsLogger.log_verbose("Missing NoExpendReagent: (%d)", spell.NoExpendReagentID(1)())
+            return false
+        end
     end
 
     return true
