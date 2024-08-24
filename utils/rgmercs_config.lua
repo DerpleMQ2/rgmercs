@@ -132,6 +132,8 @@ Config.DefaultConfig = {
     ['DoMount']              = { DisplayName = "Do Mount", Category = "Utilities", Tooltip = "0 = Disabled, 1 = Enabled, 2 = Dismount but Keep Buff", Type = "Combo", ComboOptions = { 'Off', 'Mount', 'Buff Only', }, Default = 1, Min = 1, Max = 3, ConfigType = "Normal", },
     ['ShrinkItem']           = { DisplayName = "Shrink Item", Category = "Utilities", Tooltip = "Item to use to Shrink yourself", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
     ['DoShrink']             = { DisplayName = "Do Shrink", Category = "Utilities", Tooltip = "Enable auto shrinking", Default = false, ConfigType = "Normal", },
+    ['ShrinkPetItem']        = { DisplayName = "Shrink Pet Item", Category = "Utilities", Tooltip = "Item to use to Shrink your pet", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
+    ['DoShrinkPet']          = { DisplayName = "Do Pet Shrink", Category = "Utilities", Tooltip = "Enable auto shrinking your pet", Default = false, ConfigType = "Normal", },
     ['PriorityHealing']      = { DisplayName = "Priority Healing", Category = "Utilities", Tooltip = "Prioritize Healing over Combat", Default = false, ConfigType = "Advanced", },
     ['ClarityPotion']        = { DisplayName = "Clarity Potion", Category = "Utilities", Tooltip = "Name of your Clarity Pot", Default = "Distillate of Clarity", ConfigType = "Advanced", },
     ['RunMovePaused']        = { DisplayName = "Run Movement on Pause", Category = "Utilities", Tooltip = "Runs the Movement/Chase module even if the Main loop is paused", Default = false, ConfigType = "Advanced", },

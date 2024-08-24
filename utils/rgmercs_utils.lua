@@ -2176,6 +2176,12 @@ function RGMercUtils.ShouldShrink()
 end
 
 ---@return boolean
+function RGMercUtils.ShouldShrinkPet()
+    return (RGMercUtils.GetSetting('DoShrinkPet') and true or false) and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() > 2.2 and
+        (RGMercUtils.GetSetting('ShrinkPetItem'):len() > 0)
+end
+
+---@return boolean
 function RGMercUtils.ShouldMount()
     if RGMercUtils.GetSetting('DoMount') == 1 then return false end
 

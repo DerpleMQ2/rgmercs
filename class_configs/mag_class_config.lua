@@ -1603,7 +1603,7 @@ _ClassConfig      = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and RGMercUtils.GetXTHaterCount() == 0
+                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet')
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
             },
@@ -1615,7 +1615,7 @@ _ClassConfig      = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return not self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and RGMercUtils.GetXTHaterCount() == 0
+                    return not self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet')
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
             },
