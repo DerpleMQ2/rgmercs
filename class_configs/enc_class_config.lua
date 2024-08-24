@@ -5,7 +5,8 @@ local _ClassConfig = {
     _version          = "1.0 Beta",
     _author           = "Derple",
     ['ModeChecks']    = {
-        IsMezzing = function() return true end,
+        CanMez     = function() return true end,
+        IsMezzing  = function() return true end,
         IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
     },
     ['Modes']         = {
@@ -1006,7 +1007,9 @@ local _ClassConfig = {
                     if not RGMercUtils.GetSetting('DoNDTBuff') or not RGMercUtils.CastReady(spell.RankName) then return false end
                     --Single target versions of the spell will only be used on Melee, group versions will be cast if they are missing from any groupmember
                     if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
-                        and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+                        and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then
+                        return false
+                    end
 
                     RGMercUtils.SetTarget(target.ID() or 0)
                     return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.SpellStacksOnTarget(spell)

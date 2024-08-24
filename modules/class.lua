@@ -425,6 +425,14 @@ function Module:IsMezzing()
     return self.ClassConfig.ModeChecks.IsMezzing()
 end
 
+---@return boolean
+function Module:CanMez()
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.CanMez then
+        return false
+    end
+    return self.ClassConfig.ModeChecks.CanMez()
+end
+
 function Module:GetTheme()
     if self.ClassConfig and self.ClassConfig.Themes then
         return self.ClassConfig.Themes[self:GetClassModeName()]

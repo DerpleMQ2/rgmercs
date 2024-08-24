@@ -105,7 +105,7 @@ function Module:Init()
 end
 
 function Module:ShouldRender()
-    return RGMercModules:ExecModule("Class", "IsMezzing")
+    return RGMercModules:ExecModule("Class", "CanMez")
 end
 
 function Module:Render()

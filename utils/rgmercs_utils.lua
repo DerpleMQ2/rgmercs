@@ -1980,6 +1980,11 @@ function RGMercUtils.IsMezzing()
 end
 
 ---@return boolean
+function RGMercUtils.CanMez()
+    return RGMercModules:ExecModule("Class", "CanMez")
+end
+
+---@return boolean
 function RGMercUtils.BurnCheck()
     local settings = RGMercConfig:GetSettings()
     local autoBurn = settings.BurnAuto and

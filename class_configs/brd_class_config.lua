@@ -200,8 +200,9 @@ local _ClassConfig = {
     },
 
     ['ModeChecks']      = {
+        CanMez    = function() return true end,
         IsMezzing = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
-        IsCuring = function() return RGMercUtils.GetSetting('UseCure') end,
+        IsCuring  = function() return RGMercUtils.GetSetting('UseCure') end,
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
