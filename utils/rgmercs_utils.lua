@@ -2711,7 +2711,7 @@ function RGMercUtils.IsSpawnFightingStranger(spawn, radius)
                             cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
                         local checkName = cur_spawn and cur_spawn() or cur_spawn.CleanName() or "None"
 
-                        if RGMercUtils.TargetIsType("mercenary", cur_spawn) then checkName = cur_spawn.Owner.CleanName() end
+                        if RGMercUtils.TargetIsType("mercenary", cur_spawn) and cur_spawn.Owner() then checkName = cur_spawn.Owner.CleanName() end
                         if RGMercUtils.TargetIsType("pet", cur_spawn) then checkName = cur_spawn.Master.CleanName() end
 
                         if not RGMercUtils.IsSafeName("pc", checkName) then
