@@ -909,7 +909,7 @@ return {
                 name = "Warder's Gift",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.Pet.PctHPs > 50 and RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Me.Pet.PctHPs() > 50 and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
