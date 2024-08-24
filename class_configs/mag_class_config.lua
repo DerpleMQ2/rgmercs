@@ -1267,30 +1267,6 @@ _ClassConfig      = {
                     return RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
-            {
-                name = "Pet Management",
-                type = "CustomFunc",
-                active_cond = function(self)
-                    return mq.TLO.Me.Pet.ID() > 0
-                end,
-                cond = function(self)
-                    if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and RGMercUtils.GetXTHaterCount() == 0
-                end,
-                custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
-            },
-            {
-                name = "Store Pocket Pet",
-                type = "CustomFunc",
-                active_cond = function(self)
-                    return self.TempSettings.PocketPet == true
-                end,
-                cond = function(self)
-                    if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return not self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and RGMercUtils.GetXTHaterCount() == 0
-                end,
-                custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
-            },
             --removed temporarily and will be eliminated when autoinventory on individual entries have been widely tested
             -- {
             --     name = "Drop Cursor Items",
@@ -1509,18 +1485,6 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "<<None>>",
-                name_func = function(self)
-                    if not self.ModuleLoaded then return "" end
-                    return string.format("%sPetSpell", self.ClassConfig.DefaultConfig.PetType.ComboOptions[RGMercUtils.GetSetting('PetType')])
-                end,
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.FindItemCount(RGMercUtils.GetSetting('SelfModRod'))() == 0 and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct') and
-                        mq.TLO.Me.PctHPs() >= 60
-                end,
-            },
-            {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell)
@@ -1631,6 +1595,30 @@ _ClassConfig      = {
             },
         },
         ['Downtime'] = {
+            {
+                name = "Pet Management",
+                type = "CustomFunc",
+                active_cond = function(self)
+                    return mq.TLO.Me.Pet.ID() > 0
+                end,
+                cond = function(self)
+                    if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
+                    return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetSetting('DoPet') and RGMercUtils.GetXTHaterCount() == 0
+                end,
+                custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
+            },
+            {
+                name = "Store Pocket Pet",
+                type = "CustomFunc",
+                active_cond = function(self)
+                    return self.TempSettings.PocketPet == true
+                end,
+                cond = function(self)
+                    if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
+                    return not self.TempSettings.PocketPet and RGMercUtils.GetSetting('DoPocketPet') and RGMercUtils.GetXTHaterCount() == 0
+                end,
+                custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
+            },
             {
                 name = "HandleGroupToys",
                 type = "CustomFunc",

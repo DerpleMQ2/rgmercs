@@ -1501,9 +1501,12 @@ function RGMercUtils.SelfBuffPetCheck(spell)
     if mq.TLO.Me.BlockedPetBuff(spell.ID())() then
         return false
     end
-    RGMercsLogger.log_verbose("\atSelfBuffPetCheck(%s) RankPetBuff(%s/%s) PetBuff(%s) Stacks(%s)", spell.RankName.Name(),
+    RGMercsLogger.log_verbose("\atSelfBuffPetCheck(%s) RankPetBuff(%s) PetBuff(%s) Stacks(%s)",
+        spell.RankName.Name(),
         RGMercUtils.BoolToColorString(not mq.TLO.Me.PetBuff(spell.RankName.Name())()),
-        RGMercUtils.BoolToColorString(not mq.TLO.Me.PetBuff(spell.Name())()), RGMercUtils.BoolToColorString(spell.StacksPet()))
+        RGMercUtils.BoolToColorString(not mq.TLO.Me.PetBuff(spell.Name())()),
+        RGMercUtils.BoolToColorString(spell.StacksPet()))
+
     return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and (not mq.TLO.Me.PetBuff(spell.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
