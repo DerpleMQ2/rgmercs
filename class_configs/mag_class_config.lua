@@ -858,7 +858,7 @@ _ClassConfig      = {
     ['RotationOrder']     = {
         {
             name = 'Pet Management',
-            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
             cond = function(self, combat_state) return combat_state == "Downtime" end,
         },
         {
