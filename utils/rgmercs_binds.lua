@@ -56,8 +56,10 @@ Bind.Handlers     = {
         usage = "/rgl cast \"<spell>\" <targetId?>",
         about = "All RGMercs will memorize and cast <spell> you can pass an optional <target id>",
         handler = function(spell, targetId)
+            targetId = targetId and tonumber(targetId)
+            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
             RGMercsLogger.log_debug("\atCasting: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
-            RGMercUtils.UseSpell(spell, targetId and tonumber(targetId) or mq.TLO.Target.ID() or mq.TLO.Me.ID(), true)
+            RGMercUtils.UseSpell(spell, targetId, true)
         end,
     },
     ['setlogfilter'] = {
