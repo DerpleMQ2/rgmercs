@@ -1751,7 +1751,7 @@ end
 ---@return boolean
 function RGMercUtils.DanNetFindBuff(id, peerName)
     local buffSearch = string.format("Me.FindBuff[id %d].ID", id)
-    RGMercsLogger.log_debug("DanNetFindBuff(%d, %s) : %s", id, peerName, buffSearch)
+    RGMercsLogger.log_verbose("DanNetFindBuff(%d, %s) : %s", id, peerName, buffSearch)
     return (DanNet.observe(peerName, buffSearch, 1000) or "null"):lower() ~= "null"
 end
 
