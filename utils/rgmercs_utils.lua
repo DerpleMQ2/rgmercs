@@ -2248,7 +2248,7 @@ end
 
 ---@return boolean
 function RGMercUtils.ShouldShrinkPet()
-    return (RGMercUtils.GetSetting('DoShrinkPet') and true or false) and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() > 2.2 and
+    return (RGMercUtils.GetSetting('DoShrinkPet') and true or false) and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() > 1.8 and
         (RGMercUtils.GetSetting('ShrinkPetItem'):len() > 0)
 end
 
