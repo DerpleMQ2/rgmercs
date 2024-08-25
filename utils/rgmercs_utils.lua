@@ -1825,6 +1825,10 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
 
     if peerCheck ~= nil then return peerCheck end
 
+    if mq.TLO.Target.ID() ~= target.ID() then
+        RGMercUtils.SetTarget(target.ID())
+    end
+
     local numEffects = spell.NumEffects()
 
     local ret = (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
