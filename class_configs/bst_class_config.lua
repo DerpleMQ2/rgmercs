@@ -1414,14 +1414,14 @@ return {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Maelstrom", },
+                { name = "PoiBite", },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "PoiBite", },
+                { name = "Maelstrom", },
             },
         },
         {
