@@ -2258,9 +2258,9 @@ end
 function RGMercUtils.ShouldMount()
     if RGMercUtils.GetSetting('DoMount') == 1 then return false end
 
-    local passBasicChecks = not RGMercUtils.GetSetting('DoMelee') and RGMercUtils.GetSetting('MountItem'):len() > 0 and mq.TLO.Zone.Outdoor()
+    local passBasicChecks = RGMercUtils.GetSetting('MountItem'):len() > 0 and mq.TLO.Zone.Outdoor()
 
-    local passCheckMountOne = ((RGMercUtils.GetSetting('DoMount') == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0))
+    local passCheckMountOne = (not RGMercUtils.GetSetting('DoMelee') and (RGMercUtils.GetSetting('DoMount') == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0))
     local passCheckMountTwo = ((RGMercUtils.GetSetting('DoMount') == 3 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
     local passMountItemGivesBlessing = false
 

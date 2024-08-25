@@ -129,7 +129,7 @@ for i, v in ipairs(Config.Constants.ConColors) do Config.Constants.ConColorsName
 Config.DefaultConfig = {
     -- [ UTILITIES ] --
     ['MountItem']            = { DisplayName = "Mount Item", Category = "Utilities", Tooltip = "Item to use to cast Mount", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
-    ['DoMount']              = { DisplayName = "Do Mount", Category = "Utilities", Tooltip = "0 = Disabled, 1 = Enabled, 2 = Dismount but Keep Buff", Type = "Combo", ComboOptions = { 'Off', 'Mount', 'Buff Only', }, Default = 1, Min = 1, Max = 3, ConfigType = "Normal", },
+    ['DoMount']              = { DisplayName = "Do Mount", Category = "Utilities", Tooltip = "1 = Disabled, 2 = Enabled, 3 = Dismount but Keep Buff", Type = "Combo", ComboOptions = { 'Off', 'Mount', 'Buff Only', }, Default = 1, Min = 1, Max = 3, ConfigType = "Normal", },
     ['ShrinkItem']           = { DisplayName = "Shrink Item", Category = "Utilities", Tooltip = "Item to use to Shrink yourself", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
     ['DoShrink']             = { DisplayName = "Do Shrink", Category = "Utilities", Tooltip = "Enable auto shrinking", Default = false, ConfigType = "Normal", },
     ['ShrinkPetItem']        = { DisplayName = "Shrink Pet Item", Category = "Utilities", Tooltip = "Item to use to Shrink your pet", Type = "ClickyItem", Default = "", ConfigType = "Normal", },
