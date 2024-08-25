@@ -1750,7 +1750,9 @@ end
 ---@param peerName string
 ---@return boolean
 function RGMercUtils.DanNetFindBuff(id, peerName)
-    return (DanNet.observe(peerName, string.format("Me.FindBuff[id %d].ID", id), 1000):lower() or "null") ~= "null"
+    local buffSearch = string.format("Me.FindBuff[id %d].ID", id)
+    RGMercsLogger.log_debug("DanNetFindBuff(%d, %s) : %s", id, peerName, buffSearch)
+    return (DanNet.observe(peerName, buffSearch, 1000) or "null"):lower() ~= "null"
 end
 
 ---@param spell MQSpell
