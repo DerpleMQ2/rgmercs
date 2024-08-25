@@ -878,7 +878,7 @@ _ClassConfig      = {
         },
         {
             name = 'GroupBuff',
-            timer = 60, -- only run every 60 seconds top.
+            timer = 5, -- only run every 60 seconds top.
             targetId = function(self)
                 local groupIds = { mq.TLO.Me.ID(), }
                 local count = mq.TLO.Group.Members()
@@ -1589,8 +1589,7 @@ _ClassConfig      = {
                     return RGMercUtils.BuffActive(spell)
                 end,
                 cond = function(self, spell, target)
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
         },

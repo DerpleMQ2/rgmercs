@@ -571,6 +571,10 @@ function Module:GiveTime(combat_state)
             RGMercUtils.UseItem(RGMercUtils.GetSetting('ShrinkItem'), mq.TLO.Me.ID())
         end
 
+        if RGMercUtils.ShouldShrinkPet() then
+            RGMercUtils.UseItem(RGMercUtils.GetSetting('ShrinkPetItem'), mq.TLO.Me.Pet.ID())
+        end
+
         if RGMercUtils.ShouldMount() then
             RGMercsLogger.log_debug("\ayMounting...")
             RGMercUtils.UseItem(RGMercUtils.GetSetting('MountItem'), mq.TLO.Me.ID())

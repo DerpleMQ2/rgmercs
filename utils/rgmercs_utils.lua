@@ -1746,6 +1746,65 @@ function RGMercUtils.DetSpellCheck(spell)
     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
 end
 
+---@param id integer
+---@param peerName string
+---@return boolean
+function RGMercUtils.DanNetFindBuff(id, peerName)
+    return (DanNet.observe(peerName, string.format("Me.FindBuff[id %d].ID", id), 1000):lower() or "null") ~= "null"
+end
+
+---@param spell MQSpell
+---@param peerName string
+---@return boolean|nil
+function RGMercUtils.PeerHasBuff(spell, peerName)
+    peerName = (peerName or ""):lower()
+    local peerFound = false
+
+    local dannetPeers = mq.TLO.DanNet.PeerCount()
+    for i = 1, dannetPeers do
+        ---@diagnostic disable-next-line: redundant-parameter
+        local peer = mq.TLO.DanNet.Peers(i)()
+        if peer == peerName then
+            peerFound = true
+            break
+        end
+    end
+
+    if not peerFound then
+        RGMercsLogger.log_verbose("PeerHasBuff() Peer '%s' not found falling back.", peerName)
+        return nil
+    end
+
+    if not spell or not spell() then return false end
+
+    local numEffects = spell.NumEffects()
+
+    local ret = RGMercUtils.DanNetFindBuff(spell.ID(), peerName)
+    RGMercsLogger.log_verbose("PeerHasBuff() Searching for spell(%s) ID: %d on %s :: %s", spell.Name(), spell.ID(), peerName, RGMercUtils.BoolToColorString(ret))
+    if ret then return true end
+
+    ret = RGMercUtils.DanNetFindBuff(spell.RankName.ID(), peerName)
+    RGMercsLogger.log_verbose("PeerHasBuff() Searching for rank spell(%s) ID: %d on %s :: %s", spell.RankName.Name(), spell.RankName.ID(), peerName,
+        RGMercUtils.BoolToColorString(ret))
+    if ret then return true end
+
+    for i = 1, numEffects do
+        local triggerSpell = spell.Trigger(i)
+        if triggerSpell and triggerSpell() then
+            ret = RGMercUtils.DanNetFindBuff(triggerSpell.ID(), peerName)
+            RGMercsLogger.log_verbose("PeerHasBuff() Searching for trigger spell ID: %d on %s :: %s", triggerSpell.ID(), peerName, RGMercUtils.BoolToColorString(ret))
+            if ret then return true end
+
+            ret = RGMercUtils.DanNetFindBuff(triggerSpell.RankName.ID(), peerName)
+            RGMercsLogger.log_verbose("PeerHasBuff() Searching for trigger rank spell ID: %d on %s :: %s", triggerSpell.ID(), peerName, RGMercUtils.BoolToColorString(ret))
+            if ret then return true end
+        end
+    end
+
+    RGMercsLogger.log_verbose("PeerHasBuff() Failed to find spell: %s on %s", spell.Name(), peerName)
+    return false
+end
+
 ---@param spell MQSpell
 ---@param buffTarget (target|spawn|character|fun():string|nil)?
 ---@return boolean
@@ -1760,24 +1819,36 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
     if not spell or not spell() then return false end
     if not target or not target() then return false end
 
+    local peerCheck = RGMercUtils.PeerHasBuff(spell, target.CleanName())
+
+    if peerCheck ~= nil then return peerCheck end
+
     local numEffects = spell.NumEffects()
 
-    RGMercsLogger.log_verbose("TargetHasBuff() Searching for spell(%s) ID: %d on %s", spell.Name(), spell.ID(), target.DisplayName())
-    if (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0 then return true end
-    RGMercsLogger.log_verbose("TargetHasBuff() Searching for rank spell(%s) ID: %d on %s", spell.RankName.Name(), spell.RankName.ID(), target.DisplayName())
-    if (target.FindBuff("id " .. tostring(spell.RankName.ID())).ID() or 0) > 0 then return true end
+    local ret = (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
+    RGMercsLogger.log_verbose("TargetHasBuff() Searching for spell(%s) ID: %d on %s :: %s", spell.Name(), spell.ID(), target.DisplayName(), RGMercUtils.BoolToColorString(ret))
+    if ret then return true end
+
+    ret = (target.FindBuff("id " .. tostring(spell.RankName.ID())).ID() or 0) > 0
+    RGMercsLogger.log_verbose("TargetHasBuff() Searching for rank spell(%s) ID: %d on %s :: %s", spell.RankName.Name(), spell.RankName.ID(), target.DisplayName(),
+        RGMercUtils.BoolToColorString(ret))
+    if ret then return true end
 
     for i = 1, numEffects do
         local triggerSpell = spell.Trigger(i)
         if triggerSpell and triggerSpell() then
-            RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger spell ID: %d on %s", triggerSpell.ID(), target.DisplayName())
-            if (target.FindBuff("id " .. tostring(triggerSpell.ID())).ID() or 0) > 0 then return true end
-            RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger rank spell ID: %d on %s", triggerSpell.ID(), target.DisplayName())
-            if (target.FindBuff("id " .. tostring(triggerSpell.RankName.ID())).ID() or 0) > 0 then return true end
+            ret = (target.FindBuff("id " .. tostring(triggerSpell.ID())).ID() or 0) > 0
+            RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger spell ID: %d on %s :: %s", triggerSpell.ID(), target.DisplayName(), RGMercUtils.BoolToColorString(ret))
+            if ret then return true end
+
+            ret = (target.FindBuff("id " .. tostring(triggerSpell.RankName.ID())).ID() or 0) > 0
+            RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger rank spell ID: %d on %s :: %s", triggerSpell.ID(), target.DisplayName(),
+                RGMercUtils.BoolToColorString(ret))
+            if ret then return true end
         end
     end
 
-    --RGMercsLogger.log_verbose("TargetHasBuff() Failed to find spell: %d on %s", spell.Name(), target.DisplayName())
+    RGMercsLogger.log_verbose("TargetHasBuff() Failed to find spell: %d on %s", spell.Name(), target.DisplayName())
     return false
 end
 
