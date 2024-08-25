@@ -2649,6 +2649,9 @@ function RGMercUtils.EngageTarget(autoTargetId)
 
                     if not mq.TLO.Me.Combat() then
                         RGMercsLogger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", RGMercUtils.GetTargetCleanName())
+                        if RGMercUtils.IAmMA() and RGMercUtils.GetSetting('AnnounceTarget') then
+                            RGMercUtils.PrintGroupMessage('TANKING-> %s <- ID:%d', RGMercUtils.GetTargetCleanName(), autoTargetId)
+                        end
                         RGMercUtils.DoCmd("/attack on")
                     end
                 end
@@ -2933,9 +2936,9 @@ end
 ---@param validateFn function? # Function which is run before changing targets to avoid target strobing
 function RGMercUtils.FindTarget(validateFn)
     RGMercsLogger.log_verbose("FindTarget()")
-    if mq.TLO.Spawn(string.format("id %d pcpet xtarhater", mq.TLO.Me.XTarget(1).ID())).ID() > 0 then
+    if mq.TLO.Spawn(string.format("id %d pcpet xtarhater", mq.TLO.Me.XTarget(1).ID())).ID() > 0 and RGMercUtils.GetSetting('ForceKillPet')then
         RGMercsLogger.log_verbose("FindTarget() Determined that xtarget(1)=%s is a pcpet xtarhater",
-            mq.TLO.Me.XTarget(1).CleanName())
+        mq.TLO.Me.XTarget(1).CleanName())
         RGMercUtils.KillPCPet()
     end
 
