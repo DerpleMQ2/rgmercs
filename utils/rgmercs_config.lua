@@ -199,7 +199,7 @@ Config.DefaultConfig = {
     ['MovebackWhenTank']     = { DisplayName = "Moveback as Tank", Category = "Tanking", Tooltip = "Adds 'moveback' to stick command when tanking. Helpful to keep mobs from getting behind you.", Default = false, ConfigType = "Advanced", },
     ['MovebackWhenBehind']   = { DisplayName = "Moveback if Mob Behind", Category = "Tanking", Tooltip = "Causes you to move back if we detect an XTarget is behind you when tanking.", Default = true, ConfigType = "Advanced", },
     ['MovebackDistance']     = { DisplayName = "Units to Moveback", Category = "Tanking", Tooltip = "Default: 20. May require adjustment based on runspeed.", Default = 20, Min = 1, Max = 40, ConfigType = "Advanced", },
-    ['ForceKillPet']     = { DisplayName = "Force Kill Pet", Category = "Tanking", Tooltip = "Force kill pcpet if on xtarget.", Default = true, ConfigType = "Advanced", },
+    ['ForceKillPet']         = { DisplayName = "Force Kill Pet", Category = "Tanking", Tooltip = "Force kill pcpet if on xtarget.", Default = true, ConfigType = "Advanced", },
 
     -- [ Wards ] --
     ['WardsPlease']          = { DisplayName = "Enable Wards", Category = "Wards", Tooltip = "Enable Ward Type Spells", Default = true, ConfigType = "Normal", },
@@ -257,9 +257,9 @@ Config.DefaultConfig = {
     ['ShowAdvancedOpts']     = { DisplayName = "Show Advanced Options", Category = "UI", Tooltip = "Show Advanced Options", Type = "Custom", Default = false, ConfigType = "Advanced", },
 
     -- [ ANNOUNCEMENTS ] --
-    ['AnnounceTarget']     = { DisplayName = "Announce Target", Category = "Announcements", Tooltip = "Announces Target over DanNet in kissassist format, incase you are running a mixed set on your group.Config", Default = false, ConfigType = "Advanced", },
-    ['MezAnnounce']      = { DisplayName = "Mez Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts.", ConfigType = "Normal",  },
-    ['MezAnnounceGroup'] = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group.", ConfigType = "Normal",  },
+    ['AnnounceTarget']       = { DisplayName = "Announce Target", Category = "Announcements", Tooltip = "Announces Target over DanNet in kissassist format, incase you are running a mixed set on your group.Config", Default = false, ConfigType = "Advanced", },
+    ['MezAnnounce']          = { DisplayName = "Mez Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts.", ConfigType = "Normal", },
+    ['MezAnnounceGroup']     = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group.", ConfigType = "Normal", },
 
 }
 
