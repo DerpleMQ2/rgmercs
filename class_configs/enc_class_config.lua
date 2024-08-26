@@ -6,8 +6,11 @@ local _ClassConfig = {
     _author           = "Derple",
     ['ModeChecks']    = {
         CanMez     = function() return true end,
+        CanCharm   = function() return true end,
         IsMezzing  = function() return true end,
-        IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
+        
+        -- IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
     },
     ['Modes']         = {
         'Mez',
@@ -1315,6 +1318,14 @@ local _ClassConfig = {
 
             },
             {
+                name = "CharmSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return RGMercUtils.GetSetting('CharmOn') and RGMercUtils.DetSpellCheck(spell) and mq.TLO.Pet.ID() == 0 and
+                        mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDebuff')
+                end,
+            },
+            {
                 name = "StripBuffSpell",
                 type = "Spell",
                 cond = function(self, spell)
@@ -1406,6 +1417,7 @@ local _ClassConfig = {
         {
             gem = 5,
             spells = {
+                { name = "CharmSpell", },
                 { name = "NdtBuff", },
             },
         },

@@ -2065,8 +2065,18 @@ function RGMercUtils.IsMezzing()
 end
 
 ---@return boolean
+function RGMercUtils.IsCharming()
+    return RGMercModules:ExecModule("Class", "IsCharming")
+end
+
+---@return boolean
 function RGMercUtils.CanMez()
     return RGMercModules:ExecModule("Class", "CanMez")
+end
+
+---@return boolean
+function RGMercUtils.CanCharm()
+    return RGMercModules:ExecModule("Class", "CanCharm")
 end
 
 ---@return boolean
@@ -3064,6 +3074,18 @@ function RGMercUtils.HandleMezAnnounce(msg)
     if RGMercUtils.GetSetting('MezAnnounce') then
         RGMercUtils.PrintGroupMessage(msg)
         if RGMercUtils.GetSetting('MezAnnounceGroup') then
+            local cleanMsg = msg:gsub("\a.", "")
+            RGMercUtils.DoCmd("/gsay %s", cleanMsg)
+        end
+    else
+        RGMercsLogger.log_debug(msg)
+    end
+end
+
+function RGMercUtils.HandleCharmAnnounce(msg)
+    if RGMercUtils.GetSetting('CharmAnnounce') then
+        RGMercUtils.PrintGroupMessage(msg)
+        if RGMercUtils.GetSetting('CharmAnnounceGroup') then
             local cleanMsg = msg:gsub("\a.", "")
             RGMercUtils.DoCmd("/gsay %s", cleanMsg)
         end
