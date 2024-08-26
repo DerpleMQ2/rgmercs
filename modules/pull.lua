@@ -569,6 +569,7 @@ function Module:Render()
                         local mpy, mpx, mpz = data.loc:match("([^,]+),%s*([^,]+),%s*([^,]+)")
                         self.settings.FarmWayPoints[mq.TLO.Zone.ShortName()][step] = { x = tonumber(mpx), y = tonumber(mpy), z = tonumber(mpz), }
                     end
+                    self.TempSettings.SelectedPath = "None"
                 end
             else
                 Module.TempSettings.MyPaths = 'None'
