@@ -100,7 +100,10 @@ local function tooFarHandler()
     end
 
     if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-        RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target!")
+        RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
+            RGMercUtils.GetTargetCleanName(),
+            RGMercUtils.GetTargetDistance())
+
         RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
