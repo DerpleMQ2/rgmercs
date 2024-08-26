@@ -1815,7 +1815,7 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
     local target = mq.TLO.Target
 
     if buffTarget ~= nil and buffTarget.ID() > 0 then
-        target = buffTarget
+        target = mq.TLO.Me.ID() == buffTarget.ID() and mq.TLO.Me or buffTarget
     end
 
     if not spell or not spell() then return false end
@@ -1825,7 +1825,7 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
 
     if peerCheck ~= nil then return peerCheck end
 
-    if mq.TLO.Target.ID() ~= target.ID() then
+    if mq.TLO.Me.ID() ~= target.ID() then
         RGMercUtils.SetTarget(target.ID())
     end
 
@@ -2040,7 +2040,7 @@ end
 
 ---@param mode string
 ---@return boolean
-function RGMercUtils.IsModeActive(mode)
+function RGMercUtils.log_vIsModeActive(mode)
     return RGMercModules:ExecModule("Class", "IsModeActive", mode)
 end
 
@@ -2936,9 +2936,9 @@ end
 ---@param validateFn function? # Function which is run before changing targets to avoid target strobing
 function RGMercUtils.FindTarget(validateFn)
     RGMercsLogger.log_verbose("FindTarget()")
-    if mq.TLO.Spawn(string.format("id %d pcpet xtarhater", mq.TLO.Me.XTarget(1).ID())).ID() > 0 and RGMercUtils.GetSetting('ForceKillPet')then
+    if mq.TLO.Spawn(string.format("id %d pcpet xtarhater", mq.TLO.Me.XTarget(1).ID())).ID() > 0 and RGMercUtils.GetSetting('ForceKillPet') then
         RGMercsLogger.log_verbose("FindTarget() Determined that xtarget(1)=%s is a pcpet xtarhater",
-        mq.TLO.Me.XTarget(1).CleanName())
+            mq.TLO.Me.XTarget(1).CleanName())
         RGMercUtils.KillPCPet()
     end
 
