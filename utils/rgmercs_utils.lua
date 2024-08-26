@@ -2040,7 +2040,7 @@ end
 
 ---@param mode string
 ---@return boolean
-function RGMercUtils.log_vIsModeActive(mode)
+function RGMercUtils.IsModeActive(mode)
     return RGMercModules:ExecModule("Class", "IsModeActive", mode)
 end
 
