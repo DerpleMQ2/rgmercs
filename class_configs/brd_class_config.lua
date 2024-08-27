@@ -90,7 +90,7 @@ local function generateSongList()
         end
         ConditionallyAddSong("UseEndBreath", "EndBreathSong", 16)
         -- TODO maybe someday
-       ConditionallyAddSong("DoCharmSongs", "CharmSong", 12)
+        ConditionallyAddSong("CharmOn", "CharmSong", 16)
         ConditionallyAddSong("DoDispel", "DispelSong", 40)
     end
 
@@ -204,7 +204,7 @@ local _ClassConfig = {
         CanCharm = function() return true end,
         IsMezzing = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
         IsCuring  = function() return RGMercUtils.GetSetting('UseCure') end,
-        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') and RGMercUtils.GetSetting('DoCharmSongs') end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') and RGMercUtils.GetSetting('CharmOn') end,
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
@@ -643,16 +643,9 @@ local _ClassConfig = {
             "Coalition of Sticks and Stones",
         },
         ['CharmSong'] = {
-            "Voice of Suja", -- 125
-            "Omiyad's Demand",
-            "Voice of the Diabo",
-            "Silisia's Demand",
-            "Dawnbreeze's Demand",
-            "Solon's Bewitching Bravura",
-            "Desirae's Demand",
-            -- Low Level Aria Song - before Combination of Effects Under Level 68
-            "Battlecry of the Vah Shir",
-            "Warsong of the Vah Shir",
+            "Call of the Banshee", -- 65
+            "Solon's Bewitching Bravura", --39
+            "Solon's Song of the Sirens", --27
         },
         ['ReflexStrike'] = {
             -- Bard ReflexStrike - Restores mana to group
@@ -1435,7 +1428,6 @@ local _ClassConfig = {
         ['UseFading']      = { DisplayName = "Use Combat Escape", Category = "Utility/Items/Misc", Index = 9, Tooltip = "Use Fading Memories when you have aggro and you aren't the Main Assist.", Default = true, ConfigType = "Advanced", },
         ['RefreshDT']      = { DisplayName = "Downtime Threshold", Category = "Utility/Items/Misc", Index = 10, Tooltip = "The duration threshold for refreshing a buff song outside of combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.", Default = 12, Min = 0, Max = 30, ConfigType = "Advanced", },
         ['RefreshCombat']  = { DisplayName = "Combat Threshold", Category = "Utility/Items/Misc", Index = 11, Tooltip = "The duration threshold for refreshing a buff song in combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.", Default = 6, Min = 0, Max = 30, ConfigType = "Advanced", },
-        ['DoCharmSongs']   = { DisplayName = "Charm Songs", Category = "Utility/Items/Misc", Index = 12, Tooltip = "Use Charm Songs", Default = false, ConfigType = "Advanced", },
     },
     ['Spells']          = { getSpellCallback = generateSongList, },
 }
