@@ -120,7 +120,7 @@ function Module:Render()
 
 		ImGui.Separator()
 		-- CCEd targets
-		if ImGui.CollapsingHeader("CC Target List") then
+		if ImGui.CollapsingHeader("Charm Target List") then
 			if ImGui.BeginTable("CharmedList", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
 				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
@@ -153,11 +153,12 @@ function Module:Render()
 
 		ImGui.Separator()
 		-- Immune targets
-		if ImGui.CollapsingHeader("Immune Target List") then
-			if ImGui.BeginTable("Immune", 2, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
+		if ImGui.CollapsingHeader("Invalid Charm Targets") then
+			if ImGui.BeginTable("Immune", 3, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
 				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
 				ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 250.0)
+				ImGui.TableSetupColumn('Body', (ImGuiTableColumnFlags.WidthFixed), 90.0)
 				ImGui.PopStyleColor()
 				ImGui.TableHeadersRow()
 				for id, data in pairs(self.TempSettings.CharmImmune) do
@@ -165,6 +166,8 @@ function Module:Render()
 					ImGui.Text(tostring(id))
 					ImGui.TableNextColumn()
 					ImGui.Text(string.format("%s", data.name))
+					ImGui.TableNextColumn()
+					ImGui.Text(string.format("%s", data.body))
 				end
 				ImGui.EndTable()
 			end
@@ -219,22 +222,19 @@ function Module:CharmNow(charmId, useAA)
 		else
 			if RGMercUtils.MyClassIs("brd") then
 				RGMercsLogger.log_debug("Performing Bard CHARM --> %d", charmId)
-				RGMercUtils.HandleCharmAnnounce(string.format("Performing Bard CHARM --> %d", charmId))
 				-- TODO SongNow CharmSpell
 				RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
 			else
 				-- This may not work for Bards but will work for DRU/NEC/ENCs
 				RGMercUtils.UseSpell(charmSpell.RankName(), charmId, false)
 				RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
-				RGMercUtils.HandleCharmAnnounce(string.format("Performing CHARM --> %d", charmId))
 			end
 		end
 
 		mq.doevents()
 
 		if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or mq.TLO.Pet.ID() > 0 then
-			RGMercUtils.HandleCharmAnnounce(string.format("\ar JUST Charmed \aw -> \ag %s \aw on \ay %s \aw : \ar %d",
-				charmSpell.RankName(),
+			RGMercUtils.HandleCharmAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s \aw : \ar %d",
 				mq.TLO.Spawn(charmId).CleanName(), charmId))
 		else
 			RGMercUtils.HandleCharmAnnounce(string.format("\ar CHARM Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
@@ -292,20 +292,13 @@ function Module:IsValidCharmTarget(mobId)
 			RGMercsLogger.log_debug(
 				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.", spawn.ID(),
 				spawn.CleanName(),spawn.Level())
-			RGMercUtils.HandleCharmAnnounce(string.format("\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.", spawn.ID(),
-				spawn.CleanName(),spawn.Level()))
-			self:AddImmuneTarget(spawn.ID(), { id = spawn.ID(), name = spawn.CleanName(), })
 			return false
 		end
-	end
-	if RGMercUtils.MyClassIs('NEC') then
+	elseif RGMercUtils.MyClassIs('NEC') then
 		if spawn.Body.Name() ~= "Undead" then
 			RGMercsLogger.log_debug(
 				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.", spawn.ID(),
 				spawn.CleanName(),spawn.Level())
-			RGMercUtils.HandleCharmAnnounce(string.format("\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.", spawn.ID(),
-				spawn.CleanName(),spawn.Level()))
-			self:AddImmuneTarget(spawn.ID(), { id = spawn.ID(), name = spawn.CleanName(), })
 			return false
 		end
 	end
@@ -348,13 +341,14 @@ function Module:UpdateCharmList()
 			maxLevel = charmSpell.MaxLevel()
 			self.settings.CharmMaxLevel = maxLevel
 		end
+		-- streamline search by body type for druids/necros this saves work when checking invalid.
 		local npcType = ''
 		if RGMercUtils.MyClassIs("dru") then
-			npcType = 'body Animal'
+			npcType = ' body Animal'
 		elseif RGMercUtils.MyClassIs("nec") then
-			npcType = 'body Undead'
+			npcType = ' body Undead'
 		end
-		local searchString = string.format("%s radius %d zradius %d range %d %d targetable playerstate 4 %s", t,
+		local searchString = string.format("%s radius %d zradius %d range %d %d targetable playerstate 4%s", t,
 			self.settings.CharmRadius * 2, self.settings.CharmZRadius * 2, minLevel, maxLevel, npcType)
 
 		local mobCount = mq.TLO.SpawnCount(searchString)()
