@@ -17,6 +17,7 @@ Module.TempSettings.CharmTracker     = {}
 Module.DefaultConfig               = {
 	-- [ CHARM ] --
 	['CharmOn']            = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", },
+	['DireCharm']            = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
 	['CharmStartCount']    = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
 	['MaxCharmCount']      = { DisplayName = "Max Charm Count", Category = "Charm Pet", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", },
 	['CharmRadius']        = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
@@ -212,13 +213,17 @@ function Module:CharmNow(charmId, useAA)
 		if not charmSpell or not charmSpell() then return end
 		RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
 
-		-- TODO: Make spell now use songnow for brds
-		if RGMercUtils.MyClassIs("brd") then
-			-- TODO SongNow CharmSpell
-			RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
+		if RGMercUtils.GetSetting("DireCharm") and RGMercUtils.UseAA("Dire Charm", charmId) then
+			RGMercsLogger.log_debug("Performing DIRE CHARM --> %d", charmId)
+			RGMercUtils.HandleCharmAnnounce(string.format("Performing DIRE CHARM --> %d", charmId))
 		else
-			-- This may not work for Bards but will work for NEC/ENCs
-			RGMercUtils.UseSpell(charmSpell.RankName(), charmId, false)
+			if RGMercUtils.MyClassIs("brd") then
+				-- TODO SongNow CharmSpell
+				RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
+			else
+				-- This may not work for Bards but will work for DRU/NEC/ENCs
+				RGMercUtils.UseSpell(charmSpell.RankName(), charmId, false)
+			end
 		end
 
 		mq.doevents()

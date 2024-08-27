@@ -2,8 +2,8 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    _version          = "1.0 Beta",
-    _author           = "Derple",
+    _version          = "1.1 Beta",
+    _author           = "Derple, Grimmier",
     ['ModeChecks']    = {
         CanMez     = function() return true end,
         CanCharm   = function() return true end,

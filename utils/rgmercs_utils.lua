@@ -711,9 +711,9 @@ function RGMercUtils.ActionPrep()
     end
 end
 
----@param aaName string
----@param targetId integer
----@return boolean
+---@param aaName string @ AA Ability Name
+---@param targetId integer @ Target ID
+---@return boolean @ Success
 function RGMercUtils.UseAA(aaName, targetId)
     local me = mq.TLO.Me
     local oldTargetId = mq.TLO.Target.ID()
