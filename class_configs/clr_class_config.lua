@@ -1057,6 +1057,7 @@ local _ClassConfig = {
             {
                 name = "twincastnuke",
                 type = "Spell",
+                retries = 0,
                 cond = function(self)
                     return RGMercUtils.GetTargetDistance() < RGMercUtils.GetSetting('AssistRange') and
                         not RGMercUtils.SongActiveByName("Healing Twincast") and
@@ -1151,7 +1152,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.CanUseAA('Spirit Mastery') and not RGMercUtils.AuraActiveByName(spell.BaseName()) and not RGMercUtils.AuraActiveByName("Reverent Aura") and
-                    RGMercUtils.SpellStacksOnMe(spell)
+                        RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
