@@ -2982,7 +2982,7 @@ function RGMercUtils.FindTarget(validateFn)
                 RGMercUtils.GetTargetDistance(target) < RGMercUtils.GetSetting('AssistRange') and
                 RGMercUtils.GetTargetDistanceZ(target) < 20 and
                 RGMercUtils.GetTargetAggressive(target) and
-                target.Mezzed.ID() == nil then
+                target.Mezzed.ID() == nil and target.Charmed.ID() == nil then
                 RGMercsLogger.log_info("Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName() or "None", target.ID())
                 RGMercConfig.Globals.AutoTargetID = target.ID()
             end
@@ -3070,25 +3070,32 @@ function RGMercUtils.FindTarget(validateFn)
     end
 end
 
+-- cleaned up message handlers for announcements
 function RGMercUtils.HandleMezAnnounce(msg)
-    if RGMercUtils.GetSetting('MezAnnounce') then
+    if RGMercUtils.GetSetting('MezAnnounceGroup') and RGMercUtils.GetSetting('MezAnnounce') then
+        local cleanMsg = msg:gsub("\a.", "")
+        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
         RGMercUtils.PrintGroupMessage(msg)
-        if RGMercUtils.GetSetting('MezAnnounceGroup') then
-            local cleanMsg = msg:gsub("\a.", "")
-            RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-        end
+    elseif RGMercUtils.GetSetting('MezAnnounceGroup') then
+        local cleanMsg = msg:gsub("\a.", "")
+        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
+    elseif RGMercUtils.GetSetting('MezAnnounce') then
+        RGMercUtils.PrintGroupMessage(msg)
     else
         RGMercsLogger.log_debug(msg)
     end
 end
 
 function RGMercUtils.HandleCharmAnnounce(msg)
-    if RGMercUtils.GetSetting('CharmAnnounce') then
+    if RGMercUtils.GetSetting('CharmAnnounceGroup') and RGMercUtils.GetSetting('CharmAnnounce') then
+        local cleanMsg = msg:gsub("\a.", "")
+        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
         RGMercUtils.PrintGroupMessage(msg)
-        if RGMercUtils.GetSetting('CharmAnnounceGroup') then
-            local cleanMsg = msg:gsub("\a.", "")
-            RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-        end
+    elseif RGMercUtils.GetSetting('CharmAnnounceGroup') then
+        local cleanMsg = msg:gsub("\a.", "")
+        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
+    elseif RGMercUtils.GetSetting('CharmAnnounce') then
+        RGMercUtils.PrintGroupMessage(msg)
     else
         RGMercsLogger.log_debug(msg)
     end
