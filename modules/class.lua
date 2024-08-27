@@ -426,11 +426,27 @@ function Module:IsMezzing()
 end
 
 ---@return boolean
+function Module:IsCharming()
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsMezzing then
+        return false
+    end
+    return self.ClassConfig.ModeChecks.IsCharming()
+end
+
+---@return boolean
 function Module:CanMez()
     if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.CanMez then
         return false
     end
     return self.ClassConfig.ModeChecks.CanMez()
+end
+
+---@return boolean
+function Module:CanCharm()
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.CanCharm then
+        return false
+    end
+    return self.ClassConfig.ModeChecks.CanCharm()
 end
 
 function Module:GetTheme()

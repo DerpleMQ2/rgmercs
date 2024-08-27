@@ -2,12 +2,14 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    _version          = "1.0 Beta",
-    _author           = "Derple",
+    _version          = "1.1 Beta",
+    _author           = "Derple, Grimmier",
     ['ModeChecks']    = {
         CanMez     = function() return true end,
-        IsMezzing  = function() return true end,
-        IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
+        CanCharm   = function() return true end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
+        IsMezzing  = function() return true end,        
+        -- IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
     },
     ['Modes']         = {
         'Mez',
@@ -1406,6 +1408,7 @@ local _ClassConfig = {
         {
             gem = 5,
             spells = {
+                { name = "CharmSpell", cond = function(self) return RGMercUtils.GetSetting('CharmOn') end, },
                 { name = "NdtBuff", },
             },
         },

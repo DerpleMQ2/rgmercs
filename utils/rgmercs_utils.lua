@@ -711,9 +711,9 @@ function RGMercUtils.ActionPrep()
     end
 end
 
----@param aaName string
----@param targetId integer
----@return boolean
+---@param aaName string @ AA Ability Name
+---@param targetId integer @ Target ID
+---@return boolean @ Success
 function RGMercUtils.UseAA(aaName, targetId)
     local me = mq.TLO.Me
     local oldTargetId = mq.TLO.Target.ID()
@@ -2065,8 +2065,18 @@ function RGMercUtils.IsMezzing()
 end
 
 ---@return boolean
+function RGMercUtils.IsCharming()
+    return RGMercModules:ExecModule("Class", "IsCharming")
+end
+
+---@return boolean
 function RGMercUtils.CanMez()
     return RGMercModules:ExecModule("Class", "CanMez")
+end
+
+---@return boolean
+function RGMercUtils.CanCharm()
+    return RGMercModules:ExecModule("Class", "CanCharm")
 end
 
 ---@return boolean
@@ -3064,6 +3074,18 @@ function RGMercUtils.HandleMezAnnounce(msg)
     if RGMercUtils.GetSetting('MezAnnounce') then
         RGMercUtils.PrintGroupMessage(msg)
         if RGMercUtils.GetSetting('MezAnnounceGroup') then
+            local cleanMsg = msg:gsub("\a.", "")
+            RGMercUtils.DoCmd("/gsay %s", cleanMsg)
+        end
+    else
+        RGMercsLogger.log_debug(msg)
+    end
+end
+
+function RGMercUtils.HandleCharmAnnounce(msg)
+    if RGMercUtils.GetSetting('CharmAnnounce') then
+        RGMercUtils.PrintGroupMessage(msg)
+        if RGMercUtils.GetSetting('CharmAnnounceGroup') then
             local cleanMsg = msg:gsub("\a.", "")
             RGMercUtils.DoCmd("/gsay %s", cleanMsg)
         end

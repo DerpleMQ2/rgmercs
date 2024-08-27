@@ -52,6 +52,9 @@ local Tooltips      = {
 }
 
 local function generateSongList()
+    if mq.TLO.Plugin('MQ2Medley').IsLoaded() then
+        mq.cmd("/plugin medley unload")
+    end
     RGMercsLogger.log_info(
         "Bard Gem List being calculated. *** PLEASE NOTE: Click-happy behavior when selecting songs in the configuration may lead to low uptime or songs not being gemmed at all! YOU HAVE BEEN WARNED. ***")
     local songCache = { CollapseGems = true, }
@@ -90,7 +93,7 @@ local function generateSongList()
         end
         ConditionallyAddSong("UseEndBreath", "EndBreathSong", 16)
         -- TODO maybe someday
-        --ConditionallyAddSong("DoCharm", "CharmSong")
+        ConditionallyAddSong("CharmOn", "CharmSong", 16)
         ConditionallyAddSong("DoDispel", "DispelSong", 40)
     end
 
@@ -190,8 +193,8 @@ local function generateSongList()
 end
 
 local _ClassConfig = {
-    _version            = "2.0 beta",
-    _author             = "Algar, Derple, Tiddliestix, SonicZentropy",
+    _version            = "2.1 beta",
+    _author             = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
     ['Modes']           = { --simply determine the priority you gem spells in. Perhaps one day this could be configured to save different loadouts/change options.
         'General',
         'Tank',
@@ -201,8 +204,10 @@ local _ClassConfig = {
 
     ['ModeChecks']      = {
         CanMez    = function() return true end,
+        CanCharm = function() return true end,
         IsMezzing = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
         IsCuring  = function() return RGMercUtils.GetSetting('UseCure') end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
@@ -641,15 +646,9 @@ local _ClassConfig = {
             "Coalition of Sticks and Stones",
         },
         ['CharmSong'] = {
-            "Voice of Suja", -- 125
-            "Omiyad's Demand",
-            "Voice of the Diabo",
-            "Silisia's Demand",
-            "Dawnbreeze's Demand",
-            "Desirae's Demand",
-            -- Low Level Aria Song - before Combination of Effects Under Level 68
-            "Battlecry of the Vah Shir",
-            "Warsong of the Vah Shir",
+            "Call of the Banshee", -- 65
+            "Solon's Bewitching Bravura", --39
+            "Solon's Song of the Sirens", --27
         },
         ['ReflexStrike'] = {
             -- Bard ReflexStrike - Restores mana to group

@@ -3,12 +3,14 @@ local RGMercUtils  = require("utils.rgmercs_utils")
 local Set          = require('mq.Set')
 
 local _ClassConfig = {
-    _version              = "1.0 Beta",
-    _author               = "Derple",
+    _version              = "1.1 Beta",
+    _author               = "Derple, Grimmier",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return RGMercUtils.IsModeActive("Heal") end,
         IsRezing = function() return RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        CanCharm   = function() return true end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
     },
     ['Modes']             = {
         'Heal',
@@ -76,6 +78,15 @@ local _ClassConfig = {
             "Bosquetender's Breeze",
             "Fawnwalker's Breeze",
             "Nightwhisper's Breeze",
+        },
+        ['CharmSpell'] = { 
+            -- Charm Spells >= 14
+            "Tunare's Request",
+            "Call of Karana",
+            "Allure of the Wild",
+            "Beguile Animals",
+            "Charm Animals",
+            "Befriend Animal",
         },
         ['QuickHealSurge'] = {
             -- Main Quick heal >=75
@@ -1431,6 +1442,7 @@ local _ClassConfig = {
                 { name = "WinterFireDD",   cond = function(self) return RGMercUtils.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
                 { name = "QuickGroupHeal", cond = function(self) return mq.TLO.Me.Level() >= 90 end, },
+                { name = "CharmSpell", cond = function(self) return RGMercUtils.GetSetting('CharmOn') end, },
                 { name = "QuickRoarDD",    cond = function(self) return true end, },
                 -- [ Fall Back ]--
                 { name = "IceRainNuke",    cond = function(self) return true end, },

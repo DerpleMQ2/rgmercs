@@ -12,14 +12,16 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    _version            = "0.1a",
-    _author             = "Derple",
+    _version            = "0.2a",
+    _author             = "Derple, Grimmier",
     ['Modes']           = {
         'DPS',
     },
     ['ModeChecks']      = {
         -- necro can AA Rez
         IsRezing = function() return RGMercUtils.GetSetting('BattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        CanCharm   = function() return true end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
     },
     ['Themes']          = {
         ['DPS'] = {
@@ -123,7 +125,14 @@ local _ClassConfig = {
             -- Fd Spell
             "Death Peace",
         },
-
+        ['CharmSpell'] = {
+            -- Charm Spells >= 20
+            "Enslave Death",
+            "Thrall of Bones",
+            "Cajole Undead",
+            "Beguile Undead",
+            "Dominate Undead",
+        },
         ---DPS
         ['AllianceSpell'] = {
             -- Alliance Spells
@@ -1278,6 +1287,7 @@ local _ClassConfig = {
             gem = 7,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "CharmSpell", cond = function(self) return RGMercUtils.GetSetting('CharmOn') end, },
                 { name = "ScentDebuff", cond = function(self) return mq.TLO.Me.Level() < 89 end, },
                 { name = "Disease3", },
                 { name = "Disease1", },
