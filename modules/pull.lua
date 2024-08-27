@@ -990,7 +990,12 @@ function Module:FindTarget()
         local skipSpawn = false
 
         if spawn and (spawn.ID() or 0) > 0 and spawn.Targetable() then
-            if self:IsPullMode("Chain") then
+            if spawn.Master.Type() == 'PC' then 
+                if RGMercUtils.IsSpawnXHater(spawn.ID()) then
+                    RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) is Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
+                    skipSpawn = true
+                end
+            elseif self:IsPullMode("Chain") then
                 if RGMercUtils.IsSpawnXHater(spawn.ID()) then
                     RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) Already on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
                     skipSpawn = true
