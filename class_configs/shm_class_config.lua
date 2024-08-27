@@ -980,6 +980,7 @@ local _ClassConfig = {
             {
                 name = "TwinHealNuke",
                 type = "Spell",
+                retries = 0,
                 cond = function(self, spell) return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.SongActiveByName("Healing Twincast") end,
             },
         },
