@@ -131,6 +131,7 @@ Module.TempSettings.ValidPullAbilities = {}
 
 Module.DefaultConfig                   = {
     ['DoPull']             = { DisplayName = "Enable Pulling", Category = "Pulling", Tooltip = "Enable pulling", Default = false, },
+    ['PullDebuffed']       = { DisplayName = "Pull While Debuffed", Category = "Pulling", Tooltip = "Pull in spite of being debuffed (Not ignored: Rez Sickness, Snare, Root.)", Default = false, ConfigType = "Advanced", },
     ['StopPullAfterDeath'] = { DisplayName = "Stop Pulling After Death", Category = "Pulling", Tooltip = "Stop pulling after you die and are rezed back.", Default = true, },
     ['PullBackwards']      = { DisplayName = "Pull Facing Backwards", Category = "Pulling", Tooltip = "Run back to camp facing the mmob", Default = true, },
     ['AutoSetRoles']       = { DisplayName = "Auto Set Roles", Category = "Pulling", Tooltip = "Make yourself MA and Puller when you start pulls.", Default = true, },
@@ -756,16 +757,6 @@ function Module:ShouldPull(campData)
         return false, string.format("PctMana < %d", self.settings.PullManaPct)
     end
 
-    if RGMercUtils.SongActiveByName("Restless Ice") then
-        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
-        return false, string.format("Restless Ice")
-    end
-
-    if RGMercUtils.SongActiveByName("Restless Ice Infection") then
-        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
-        return false, string.format("Ice Infection")
-    end
-
     if RGMercUtils.BuffActiveByName("Resurrection Sickness") then return false, string.format("Resurrection Sickness") end
 
     if (me.Snared.ID() or 0 > 0) then
@@ -778,24 +769,36 @@ function Module:ShouldPull(campData)
         return false, string.format("Rooted")
     end
 
-    if (me.Poisoned.ID() or 0 > 0) and not (me.Tashed.ID()) or 0 > 0 then
-        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am poisoned!")
-        return false, string.format("Poisoned")
-    end
+    if not RGMercUtils.GetSetting('PullDebuffed') then
+        if RGMercUtils.SongActiveByName("Restless Ice") then
+            RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
+            return false, string.format("Restless Ice")
+        end
 
-    if (me.Diseased.ID() or 0 > 0) then
-        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am diseased!")
-        return false, string.format("Diseased")
-    end
+        if RGMercUtils.SongActiveByName("Restless Ice Infection") then
+            RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
+            return false, string.format("Ice Infection")
+        end
 
-    if (me.Cursed.ID() or 0 > 0) then
-        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am cursed!")
-        return false, string.format("Cursed")
-    end
+        if (me.Poisoned.ID() or 0 > 0) and not (me.Tashed.ID()) or 0 > 0 then
+            RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am poisoned!")
+            return false, string.format("Poisoned")
+        end
 
-    if (me.Corrupted.ID() or 0 > 0) then
-        RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am corrupted!")
-        return false, string.format("Corrupted")
+        if (me.Diseased.ID() or 0 > 0) then
+            RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am diseased!")
+            return false, string.format("Diseased")
+        end
+
+        if (me.Cursed.ID() or 0 > 0) then
+            RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am cursed!")
+            return false, string.format("Cursed")
+        end
+
+        if (me.Corrupted.ID() or 0 > 0) then
+            RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am corrupted!")
+            return false, string.format("Corrupted")
+        end
     end
 
     if self:IsPullMode("Chain") and RGMercUtils.GetXTHaterCount() >= self.settings.ChainCount then
