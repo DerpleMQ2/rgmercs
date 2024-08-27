@@ -448,7 +448,7 @@ local function Main()
     if RGMercUtils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
         RGMercUtils.EngageTarget(RGMercConfig.Globals.AutoTargetID)
     else
-        if RGMercUtils.GetXTHaterCount(true) > 0 and RGMercUtils.GetTargetID() > 0 and not RGMercUtils.IsMezzing() then
+        if RGMercUtils.GetXTHaterCount(true) > 0 and RGMercUtils.GetTargetID() > 0 and not RGMercUtils.IsMezzing() and not RGMercUtils.IsCharming() then
             RGMercsLogger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
             RGMercUtils.ClearTarget()
         end
@@ -460,14 +460,14 @@ local function Main()
         -- have switched off to mez or heal after the initial find target check and the target
         -- may have changed by this point.
         if not RGMercUtils.GetSetting('PriorityHealing') then
-            if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing()) then
+            if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing() or not RGMercUtils.IsCharming()) then
                 RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
             end
         end
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
             RGMercConfig.Globals.LastPetCmd = os.clock()
-            if RGMercUtils.GetSetting('DoPet') and (RGMercUtils.GetTargetPctHPs(RGMercUtils.GetAutoTarget()) <= RGMercUtils.GetSetting('PetEngagePct')) then
+            if ((RGMercUtils.GetSetting('DoPet') or RGMercUtils.GetSetting('CharmOn') ) and mq.TLO.Pet.ID() ~= 0) and (RGMercUtils.GetTargetPctHPs(RGMercUtils.GetAutoTarget()) <= RGMercUtils.GetSetting('PetEngagePct')) then
                 RGMercUtils.PetAttack(RGMercConfig.Globals.AutoTargetID, true)
             end
         end

@@ -1159,7 +1159,7 @@ local _ClassConfig = {
                         RGMercUtils.DoCmd("/pet leave")
                     end
                 end,
-                cond = function(self, spell) return RGMercUtils.GetSetting('PetType') == 1 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "war") end,
+                cond = function(self, spell) return RGMercUtils.GetSetting('PetType') == 1 and not RGMercUtils.GetSetting('CharmOn') and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "war") end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
                     if success and pet.ID() > 0 then
@@ -1176,7 +1176,7 @@ local _ClassConfig = {
                         RGMercUtils.DoCmd("/pet leave")
                     end
                 end,
-                cond = function(self, _) return RGMercUtils.GetSetting('PetType') == 2 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "rog") end,
+                cond = function(self, _) return RGMercUtils.GetSetting('PetType') == 2 and not RGMercUtils.GetSetting('CharmOn') and  (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "rog") end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
                     if success and pet.ID() > 0 then

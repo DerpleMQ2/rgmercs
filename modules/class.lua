@@ -427,7 +427,7 @@ end
 
 ---@return boolean
 function Module:IsCharming()
-    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsMezzing then
+    if not self.ClassConfig or not self.ClassConfig.ModeChecks or not self.ClassConfig.ModeChecks.IsCharming then
         return false
     end
     return self.ClassConfig.ModeChecks.IsCharming()

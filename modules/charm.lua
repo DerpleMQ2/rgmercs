@@ -20,6 +20,7 @@ Module.DefaultConfig               = {
 	['DireCharm']            = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
 	['CharmStartCount']    = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
 	['MaxCharmCount']      = { DisplayName = "Max Charm Count", Category = "Charm Pet", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", },
+	['AutoLevelRangeCharm']   = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", },
 	['CharmRadius']        = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
 	['CharmZRadius']       = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", },
 	['CharmMinLevel']      = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
@@ -119,7 +120,7 @@ function Module:Render()
 
 		ImGui.Separator()
 		-- CCEd targets
-		if ImGui.CollapsingHeader("CC Target List") then
+		if ImGui.CollapsingHeader("Charm Target List") then
 			if ImGui.BeginTable("CharmedList", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
 				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
@@ -152,11 +153,12 @@ function Module:Render()
 
 		ImGui.Separator()
 		-- Immune targets
-		if ImGui.CollapsingHeader("Immune Target List") then
-			if ImGui.BeginTable("Immune", 2, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
+		if ImGui.CollapsingHeader("Invalid Charm Targets") then
+			if ImGui.BeginTable("Immune", 3, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
 				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
 				ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 250.0)
+				ImGui.TableSetupColumn('Body', (ImGuiTableColumnFlags.WidthFixed), 90.0)
 				ImGui.PopStyleColor()
 				ImGui.TableHeadersRow()
 				for id, data in pairs(self.TempSettings.CharmImmune) do
@@ -164,6 +166,8 @@ function Module:Render()
 					ImGui.Text(tostring(id))
 					ImGui.TableNextColumn()
 					ImGui.Text(string.format("%s", data.name))
+					ImGui.TableNextColumn()
+					ImGui.Text(string.format("%s", data.body))
 				end
 				ImGui.EndTable()
 			end
@@ -211,26 +215,26 @@ function Module:CharmNow(charmId, useAA)
 	local charmSpell = self:GetCharmSpell()
 
 		if not charmSpell or not charmSpell() then return end
-		RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
 
 		if RGMercUtils.GetSetting("DireCharm") and RGMercUtils.UseAA("Dire Charm", charmId) then
 			RGMercsLogger.log_debug("Performing DIRE CHARM --> %d", charmId)
 			RGMercUtils.HandleCharmAnnounce(string.format("Performing DIRE CHARM --> %d", charmId))
 		else
 			if RGMercUtils.MyClassIs("brd") then
+				RGMercsLogger.log_debug("Performing Bard CHARM --> %d", charmId)
 				-- TODO SongNow CharmSpell
 				RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
 			else
 				-- This may not work for Bards but will work for DRU/NEC/ENCs
 				RGMercUtils.UseSpell(charmSpell.RankName(), charmId, false)
+				RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
 			end
 		end
 
 		mq.doevents()
 
-		if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
-			RGMercUtils.HandleCharmAnnounce(string.format("\ar JUST Charmed \aw -> \ag %s \aw on \ay %s \aw : \ar %d",
-				charmSpell.RankName(),
+		if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or mq.TLO.Pet.ID() > 0 then
+			RGMercUtils.HandleCharmAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s \aw : \ar %d",
 				mq.TLO.Spawn(charmId).CleanName(), charmId))
 		else
 			RGMercUtils.HandleCharmAnnounce(string.format("\ar CHARM Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
@@ -283,22 +287,21 @@ function Module:IsValidCharmTarget(mobId)
 	end
 	-- Here's where we can add a necro check to see if the spawn is undead or not. If it's not
 	-- undead it gets added to the charm immune list.
-	if RGMercUtils.MyClassIs('nec') and spawn.Body.Name():lower() ~= "undead" then
-		RGMercsLogger.log_debug(
-			"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.", spawn.ID(),
-			spawn.CleanName(),
-			spawn.Level())
-		self:AddImmuneTarget(spawn.ID(), { id = spawn.ID(), name = spawn.CleanName(), })
-		return false
-	elseif RGMercUtils.MyClassIs('dru') and spawn.Body.Name():lower() ~= "animal" then
-		RGMercsLogger.log_debug(
-			"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.", spawn.ID(),
-			spawn.CleanName(),
-			spawn.Level())
-		self:AddImmuneTarget(spawn.ID(), { id = spawn.ID(), name = spawn.CleanName(), })
-		return false
+	if RGMercUtils.MyClassIs('DRU') then
+		if spawn.Body.Name() ~= "Animal" then
+			RGMercsLogger.log_debug(
+				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.", spawn.ID(),
+				spawn.CleanName(),spawn.Level())
+			return false
+		end
+	elseif RGMercUtils.MyClassIs('NEC') then
+		if spawn.Body.Name() ~= "Undead" then
+			RGMercsLogger.log_debug(
+				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.", spawn.ID(),
+				spawn.CleanName(),spawn.Level())
+			return false
+		end
 	end
-
 	if not spawn.LineOfSight() then
 		RGMercsLogger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - No LOS.", spawn.ID(),
 			spawn.CleanName(), spawn.Level())
@@ -333,9 +336,20 @@ function Module:UpdateCharmList()
 	for _, t in ipairs(searchTypes) do
 		local minLevel = self.settings.CharmMinLevel
 		local maxLevel = self.settings.CharmMaxLevel
-
-		local searchString = string.format("%s radius %d zradius %d range %d %d targetable playerstate 4", t,
-			self.settings.CharmRadius * 2, self.settings.CharmZRadius * 2, minLevel, maxLevel)
+		if self.settings.AutoLevelRangeCharm and charmSpell and charmSpell() then
+			minLevel = 0
+			maxLevel = charmSpell.MaxLevel()
+			self.settings.CharmMaxLevel = maxLevel
+		end
+		-- streamline search by body type for druids/necros this saves work when checking invalid.
+		local npcType = ''
+		if RGMercUtils.MyClassIs("dru") then
+			npcType = ' body Animal'
+		elseif RGMercUtils.MyClassIs("nec") then
+			npcType = ' body Undead'
+		end
+		local searchString = string.format("%s radius %d zradius %d range %d %d targetable playerstate 4%s", t,
+			self.settings.CharmRadius * 2, self.settings.CharmZRadius * 2, minLevel, maxLevel, npcType)
 
 		local mobCount = mq.TLO.SpawnCount(searchString)()
 		RGMercsLogger.log_debug("\ayUpdateCharmList: Search String: '\at%s\ay' -- Count :: \am%d", searchString, mobCount)
@@ -349,7 +363,7 @@ function Module:UpdateCharmList()
 					spawn.Body.Name())
 
 				if self:IsValidCharmTarget(spawn.ID()) then
-					RGMercsLogger.log_debug("\agAdding to CC List: %d -- ID: %d Name: %s Level: %d BodyType: %s", i,
+					RGMercsLogger.log_debug("\agAdding to Charm List: %d -- ID: %d Name: %s Level: %d BodyType: %s", i,
 						spawn.ID(), spawn.CleanName(), spawn.Level(), spawn.Body.Name())
 					self:AddCCTarget(spawn.ID())
 				end
@@ -363,6 +377,7 @@ end
 function Module:ProcessCharmList()
 	-- Assume by default we never need to block for charm. We'll set this if-and-only-if
 	-- we need to charm but our ability is on cooldown.
+	if mq.TLO.Me.Pet.ID() ~= 0 then return end
 	RGMercUtils.DoCmd("/attack off")
 	RGMercsLogger.log_debug("\ayProcessCharmList() :: Loop")
 	local charmSpell = self:GetCharmSpell()
@@ -435,12 +450,12 @@ end
 function Module:DoCharm()
 	local charmSpell = self:GetCharmSpell()
 	self:UpdateTimings()
-	if mq.TLO.Pet.ID() > 0 then return end
+	
 	if RGMercUtils.GetXTHaterCount() >= self.settings.CharmStartCount then
 		self:UpdateCharmList()
 	end
 
-	if charmSpell and charmSpell() and (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) and
+	if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or RGMercUtils.GetSetting("DireCharm"))  and
 		RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 		self:ProcessCharmList()
 	else
