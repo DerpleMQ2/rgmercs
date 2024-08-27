@@ -961,7 +961,9 @@ _ClassConfig      = {
             return true
         end,
         give_pet_toys = function(self, petId)
-            self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Weapon", petId)
+            if RGMercUtils.GetSetting('DoPetWeapons') then
+                self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Weapon", petId)
+            end
             if RGMercUtils.GetSetting('DoPetArmor') then
                 self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Armor", petId)
             end
@@ -1912,6 +1914,7 @@ _ClassConfig      = {
         ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
         ['DoPocketPet']    = { DisplayName = "Do Pocket Pet", Category = "Pet", Tooltip = "Pocket your pet during downtime", Default = true, },
         ['DoPetArmor']     = { DisplayName = "Do Pet Armor", Category = "Pet", Tooltip = "Summon Armor for Pets", Default = true, },
+        ['DoPetWeapons']   = { DisplayName = "Do Pet Weapons", Category = "Pet", Tooltip = "Summon Weapons for Pets", Default = true, },
         ['PetType']        = { DisplayName = "Pet Type", Category = "Pet", Tooltip = "1 = Fire, 2 = Water, 3 = Earth, 4 = Air", Type = "Combo", ComboOptions = { 'Fire', 'Water', 'Earth', 'Air', }, Default = 1, Min = 1, Max = 4, },
         ['DoPetHeirlooms'] = { DisplayName = "Do Pet Heirlooms", Category = "Pet", Tooltip = "Summon Heirlooms for Pets", Default = true, },
         ['PetHealPct']     = { DisplayName = "Pet Heal %", Category = "Pet", Tooltip = "Heal pet at [X]% HPs", Default = 80, Min = 1, Max = 99, },
