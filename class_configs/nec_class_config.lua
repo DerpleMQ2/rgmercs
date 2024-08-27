@@ -20,6 +20,8 @@ local _ClassConfig = {
     ['ModeChecks']      = {
         -- necro can AA Rez
         IsRezing = function() return RGMercUtils.GetSetting('BattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        CanCharm   = function() return true end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
     },
     ['Themes']          = {
         ['DPS'] = {
@@ -123,7 +125,7 @@ local _ClassConfig = {
             -- Fd Spell
             "Death Peace",
         },
-
+        ['CharmSpell'] = {},
         ---DPS
         ['AllianceSpell'] = {
             -- Alliance Spells

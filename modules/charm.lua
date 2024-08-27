@@ -210,34 +210,8 @@ function Module:CharmNow(charmId, useAA)
 	local charmSpell = self:GetCharmSpell()
 
 		if not charmSpell or not charmSpell() then return end
-		RGMercsLogger.log_debug("Performing Single Target CHARM --> %d", charmId)
-		if useAA and RGMercUtils.MyClassIs("brd") and RGMercUtils.AARank("Dirge of the Sleepwalker") then
-			-- Bard AA Charm is Dirge of the Sleepwalker
-			-- Only bards have single target AA Charm
-			-- Cast and Return
-			RGMercUtils.HandleCharmAnnounce("\aw I AM USING \ar BRD AA CHARM \ag Dirge of the Sleepwalker")
-			RGMercUtils.UseAA("Dirge of the Sleepwalker", charmId)
-			RGMercUtils.HandleCharmAnnounce("\aw I JUST CAST \ar BRD AA CHARM \ag Dirge of the Sleepwalker")
+		RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
 
-			mq.doevents()
-
-			if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
-				RGMercUtils.HandleCharmAnnounce(string.format("\ar JUST Charmed \aw -> \ag %s \aw on \ay %s \aw : \ar %d",
-					"Dirge of the Sleepwalker",
-					mq.TLO.Spawn(charmId).CleanName(), charmId))
-			else
-				RGMercUtils.HandleCharmAnnounce(string.format("\ar CHARM Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
-					RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(charmId).CleanName(),
-					charmId))
-			end
-
-			mq.doevents()
-
-			return
-		end
-
-		-- Added this If to avoid rewriting SpellNow to be bard friendly.
-		-- we can just invoke The bard SongNow which already accounts for all the weird bard stuff
 		-- TODO: Make spell now use songnow for brds
 		if RGMercUtils.MyClassIs("brd") then
 			-- TODO SongNow CharmSpell
@@ -304,9 +278,16 @@ function Module:IsValidCharmTarget(mobId)
 	end
 	-- Here's where we can add a necro check to see if the spawn is undead or not. If it's not
 	-- undead it gets added to the charm immune list.
-	if spawn.Body.Name():lower() == "giant" then
+	if RGMercUtils.MyClassIs('nec') and spawn.Body.Name():lower() ~= "undead" then
 		RGMercsLogger.log_debug(
-			"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is a giant.", spawn.ID(),
+			"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.", spawn.ID(),
+			spawn.CleanName(),
+			spawn.Level())
+		self:AddImmuneTarget(spawn.ID(), { id = spawn.ID(), name = spawn.CleanName(), })
+		return false
+	elseif RGMercUtils.MyClassIs('dru') and spawn.Body.Name():lower() ~= "animal" then
+		RGMercsLogger.log_debug(
+			"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.", spawn.ID(),
 			spawn.CleanName(),
 			spawn.Level())
 		self:AddImmuneTarget(spawn.ID(), { id = spawn.ID(), name = spawn.CleanName(), })
@@ -335,7 +316,7 @@ function Module:IsValidCharmTarget(mobId)
 end
 
 function Module:UpdateCharmList()
-	local searchTypes = { "npc", "npcpet", }
+	local searchTypes = { "npc", }
 
 	local charmSpell = self:GetCharmSpell()
 
@@ -348,10 +329,6 @@ function Module:UpdateCharmList()
 		local minLevel = self.settings.CharmMinLevel
 		local maxLevel = self.settings.CharmMaxLevel
 
-		if self.settings.AutoLevelRange and charmSpell and charmSpell() then
-			minLevel = 0
-			maxLevel = charmSpell.MaxLevel()
-		end
 		local searchString = string.format("%s radius %d zradius %d range %d %d targetable playerstate 4", t,
 			self.settings.CharmRadius * 2, self.settings.CharmZRadius * 2, minLevel, maxLevel)
 
@@ -394,6 +371,7 @@ function Module:ProcessCharmList()
 
 	local removeList = {}
 	for id, data in pairs(self.TempSettings.CharmTracker) do
+		if mq.TLO.Pet.ID() > 0 then break end
 		local spawn = mq.TLO.Spawn(id)
 		RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Checking...", id)
 
@@ -406,16 +384,9 @@ function Module:ProcessCharmList()
 				RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Mob id is in immune list - removing...", id)
 				table.insert(removeList, id)
 			else
-				-- Our mob is still alive, but their charm timer isn't up or they're out of x/y range
-				-- Only worry about charming if their charm timer less than the time it will take to cast
-				-- the charm spell. MyCastTime is in ms, timer is in deciseconds.
-				-- We already fudge the charm timer when we set it.
-				local spell = charmSpell
-				if data.duration < (spell.MyCastTime() / 100) or spawn.Distance() > self.settings.CharmRadius or not spawn.LineOfSight() then
-					RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Timer(%s > %s) Distance(%d) LOS(%s)", id,
-						RGMercUtils.FormatTime(data.duration / 1000),
-						RGMercUtils.FormatTime(spell.MyCastTime() / 100), spawn.Distance(),
-						RGMercUtils.BoolToColorString(spawn.LineOfSight()))
+				if spawn.Distance() > self.settings.CharmRadius or not spawn.LineOfSight() then
+					RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Distance(%d) LOS(%s)", id,
+						spawn.Distance(), RGMercUtils.BoolToColorString(spawn.LineOfSight()))
 				else
 					if id == RGMercConfig.Globals.AutoTargetID then
 						RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Mob is MA's target skipping", id)
@@ -443,11 +414,6 @@ function Module:ProcessCharmList()
 						end
 
 						self:CharmNow(id, false)
-
-						if mq.TLO.Pet.ID() > 0 then
-							-- update the timer.
-							return
-						end
 					end
 				end
 			end

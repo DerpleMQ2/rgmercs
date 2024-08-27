@@ -90,7 +90,7 @@ local function generateSongList()
         end
         ConditionallyAddSong("UseEndBreath", "EndBreathSong", 16)
         -- TODO maybe someday
-       -- ConditionallyAddSong("DoCharmSongs", "CharmSong")
+       ConditionallyAddSong("DoCharmSongs", "CharmSong", 12)
         ConditionallyAddSong("DoDispel", "DispelSong", 40)
     end
 
@@ -204,7 +204,7 @@ local _ClassConfig = {
         CanCharm = function() return true end,
         IsMezzing = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
         IsCuring  = function() return RGMercUtils.GetSetting('UseCure') end,
-        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') and RGMercUtils.GetSetting('DoCharmSongs') end,
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
@@ -648,6 +648,7 @@ local _ClassConfig = {
             "Voice of the Diabo",
             "Silisia's Demand",
             "Dawnbreeze's Demand",
+            "Solon's Bewitching Bravura",
             "Desirae's Demand",
             -- Low Level Aria Song - before Combination of Effects Under Level 68
             "Battlecry of the Vah Shir",

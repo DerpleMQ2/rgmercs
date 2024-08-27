@@ -9,6 +9,8 @@ local _ClassConfig = {
         IsHealing = function() return true end,
         IsCuring = function() return RGMercUtils.IsModeActive("Heal") end,
         IsRezing = function() return RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        CanCharm   = function() return true end,
+        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
     },
     ['Modes']             = {
         'Heal',
@@ -77,6 +79,7 @@ local _ClassConfig = {
             "Fawnwalker's Breeze",
             "Nightwhisper's Breeze",
         },
+        ['CharmSpell'] = { },
         ['QuickHealSurge'] = {
             -- Main Quick heal >=75
             "Adrenaline Deluge",
