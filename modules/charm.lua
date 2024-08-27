@@ -19,13 +19,13 @@ Module.DefaultConfig               = {
 	['CharmOn']            = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", },
 	['DireCharm']            = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
 	['CharmStartCount']    = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
-	['MaxCharmCount']      = { DisplayName = "Max Charm Count", Category = "Charm Pet", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", },
-	['AutoLevelRangeCharm']   = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", },
 	['CharmRadius']        = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
 	['CharmZRadius']       = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", },
-	['CharmMinLevel']      = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
-	['CharmMaxLevel']      = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
+	['AutoLevelRangeCharm']   = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", },
 	['CharmStopHPs']       = { DisplayName = "Charm Stop HPs", Category = "Charm Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to charm", },
+	['CharmMinLevel']      = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
+	['CharmMaxLevel']      = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
+	['DireCharmMaxLvl']      = { DisplayName = "DireCharm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
 }
 
 Module.DefaultCategories           = Set.new({})
@@ -92,8 +92,13 @@ end
 
 function Module:Init()
 	RGMercsLogger.log_info("\agInitializing Charm Module...")
+	-- bards don't have DireCharm so hide the settings.
+	if RGMercUtils.MyClassIs("BRD") then
+		self.DefaultConfig['DireCharm'] = nil
+		self.DefaultConfig['DireCharmMaxLvl'] = nil
+	end
 	self:LoadSettings()
-
+	
 	self.ModuleLoaded = true
 
 	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
@@ -216,9 +221,10 @@ function Module:CharmNow(charmId, useAA)
 
 		if not charmSpell or not charmSpell() then return end
 
-		if RGMercUtils.GetSetting("DireCharm") and RGMercUtils.UseAA("Dire Charm", charmId) then
+		if RGMercUtils.GetSetting("DireCharm") and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
 			RGMercsLogger.log_debug("Performing DIRE CHARM --> %d", charmId)
 			RGMercUtils.HandleCharmAnnounce(string.format("Performing DIRE CHARM --> %d", charmId))
+			RGMercUtils.UseAA("Dire Charm", charmId)
 		else
 			if RGMercUtils.MyClassIs("brd") then
 				RGMercsLogger.log_debug("Performing Bard CHARM --> %d", charmId)
@@ -254,11 +260,6 @@ end
 
 function Module:AddCCTarget(mobId)
 	if mobId == 0 then return end
-
-	if #self.TempSettings.CharmTracker >= self.settings.MaxCharmCount and self.TempSettings.CharmTracker[mobId] == nil then
-		RGMercsLogger.log_debug("\awNOTICE:\ax Unable to charm %d - charm list is full", mobId)
-		return false
-	end
 
 	if self:IsCharmImmune(mobId) then
 		RGMercsLogger.log_debug("\awNOTICE:\ax Unable to charm %d - it is immune", mobId)
