@@ -159,6 +159,7 @@ Module.DefaultConfig                   = {
     ['PullAllowList']      = { DisplayName = "Allow List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullDenyList']       = { DisplayName = "Deny List", Category = "", Tooltip = "", Type = "Custom", Default = {}, },
     ['PullMobsInWater']    = { DisplayName = "Pull Mobs In Water", Category = "Pulling", Tooltip = "Pull Mobs that are in water bodies? If you are low level you might drown.", Default = false, },
+    ['PullSafeZones']      = { DisplayName = "SafeZones", Category = "", Tooltip = "", Type = "Custom", Default = { "poknowledge", "neighborhood", "guildhall", "guildlobby", "bazaar", }, },
 }
 
 Module.DefaultCategories               = Set.new({})
@@ -1190,6 +1191,16 @@ end
 function Module:GiveTime(combat_state)
     self:SetValidPullAbilities()
     self:FixPullerMerc()
+    if RGMercUtils.GetSetting('DoPull') then
+        for _, v in pairs(self.settings.PullSafeZones) do
+            if v == mq.TLO.Zone.ShortName() then
+                local safeZone = mq.TLO.Zone.ShortName()
+                RGMercsLogger.log_debug("\ar ALERT: In a safe zone \at%s \ax-\ar Disabling Pulling. \ax", safeZone)
+                self.settings.DoPull = false
+                break
+            end
+        end
+    end
 
     if not RGMercUtils.GetSetting('DoPull') and (self.TempSettings.HuntX ~= 0 or self.TempSettings.HuntY ~= 0 or self.TempSettings.HuntZ ~= 0) then
         self.TempSettings.HuntX = 0
