@@ -7,7 +7,7 @@ local _ClassConfig = {
     ['ModeChecks']    = {
         CanMez     = function() return true end,
         CanCharm   = function() return true end,
-        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
+        IsCharming  = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 )end,
         IsMezzing  = function() return true end,        
         -- IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
     },

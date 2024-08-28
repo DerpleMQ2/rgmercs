@@ -21,7 +21,7 @@ local _ClassConfig = {
         -- necro can AA Rez
         IsRezing = function() return RGMercUtils.GetSetting('BattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
         CanCharm   = function() return true end,
-        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
+        IsCharming  = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 )end,
     },
     ['Themes']          = {
         ['DPS'] = {
@@ -775,7 +775,7 @@ local _ClassConfig = {
                 type = "CustomFunc",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, _)
-                    local lichSpell = self:GetResolvedActionMapItem('LichSpell')
+                    local lichSpell = RGMercUtils.GetResolvedActionMapItem('LichSpell')
 
                     return lichSpell and lichSpell() and RGMercUtils.BuffActive(lichSpell) and
                         (mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StopLichHP') or mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('StopLichMana'))
@@ -1210,7 +1210,7 @@ local _ClassConfig = {
         end,
 
         StartLich = function(self)
-            local lichSpell = self:GetResolvedActionMapItem('LichSpell')
+            local lichSpell = RGMercUtils.GetResolvedActionMapItem('LichSpell')
 
             if lichSpell and lichSpell() then
                 RGMercUtils.UseSpell(lichSpell.RankName.Name(), mq.TLO.Me.ID(), false)

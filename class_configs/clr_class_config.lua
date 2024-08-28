@@ -1166,7 +1166,7 @@ local _ClassConfig = {
                 name = "Saint's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    local selfBuffHP = self:GetResolvedActionMapItem('SelfBuffhp')
+                    local selfBuffHP = RGMercUtils.GetResolvedActionMapItem('SelfBuffhp')
                     local selfBuffHPLevel = selfBuffHP and selfBuffHP.Level() or 0
                     local aaSpell = mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName)() and mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).BaseName() or "")
                     local aaLevel = aaSpell and aaSpell.Level() or 0
@@ -1267,7 +1267,7 @@ local _ClassConfig = {
                 {
                     name = "Icespellcure",
                     cond = function(self)
-                        local yaulpSpell = self:GetResolvedActionMapItem('yaulpspell')
+                        local yaulpSpell = RGMercUtils.GetResolvedActionMapItem('yaulpspell')
                         local yaulpSpellLevel = yaulpSpell and yaulpSpell.Level() or 0
                         local yaulpAA = mq.TLO.Me.AltAbility('Yaulp')
                         local yaulpAALevel = yaulpAA and yaulpAA.Spell.BaseName() and mq.TLO.Spell(yaulpAA.Spell.BaseName()).Level() or 0
