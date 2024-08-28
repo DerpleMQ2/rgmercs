@@ -214,14 +214,14 @@ function Module:CharmNow(charmId, useAA)
 	-- First thing we target the mob if we haven't already targeted them.
 	RGMercUtils.DoCmd("/attack off")
 	local currentTargetID = mq.TLO.Target.ID()
-
+	if charmId == RGMercConfig.Globals.AutoTargetID then return end
 	RGMercUtils.SetTarget(charmId)
 
 	local charmSpell = self:GetCharmSpell()
 
 		if not charmSpell or not charmSpell() then return end
-
-		if RGMercUtils.GetSetting("DireCharm") and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
+		local dCharm = not RGMercUtils.MyClassIs("BRD") and RGMercUtils.GetSetting("DireCharm") or false
+		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
 			RGMercsLogger.log_debug("Performing DIRE CHARM --> %d", charmId)
 			RGMercUtils.HandleCharmAnnounce(string.format("Performing DIRE CHARM --> %d", charmId))
 			RGMercUtils.UseAA("Dire Charm", charmId)
