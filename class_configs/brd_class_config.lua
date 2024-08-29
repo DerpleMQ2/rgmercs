@@ -1127,7 +1127,7 @@ local _ClassConfig = {
                 name = "EndBreathSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseEndBreath') and mq.TLO.Me.FeetWet() then return false end
+                    if not RGMercUtils.GetSetting('UseEndBreath') then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
