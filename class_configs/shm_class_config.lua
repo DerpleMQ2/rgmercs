@@ -1522,7 +1522,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if RGMercUtils.CanUseAA("Talisman of Celerity") then return false end
-                    local focusSpell = self:GetResolvedActionMapItem('FocusSpell')
+                    local focusSpell = RGMercUtils.GetResolvedActionMapItem('FocusSpell')
 
                     local focusLevelPass = focusSpell and (focusSpell.Level() or 0) <= 111 or true
 
