@@ -302,7 +302,10 @@ local function RGInit(...)
         "MQ2DanNet", })
 
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
-
+    local args = { ... }
+    if args[1] == "mini" then
+        RGMercConfig.Globals.Minimized = true
+    end
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
     RGMercModules:ExecAll("Init")
     RGMercConfig.Globals.SubmodulesLoaded = true
