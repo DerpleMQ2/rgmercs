@@ -302,9 +302,17 @@ local function RGInit(...)
         "MQ2DanNet", })
 
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
+
     local args = { ... }
-    if args[1] == "mini" then
-        RGMercConfig.Globals.Minimized = true
+    -- check mini argument before loading other modules so it minimizes as soon as possible.
+    if args and #args > 0 then
+        RGMercsLogger.log_info("Arguments passed to RGMercs: %s", table.concat(args, ", "))
+        for _, v in ipairs(args) do
+            if v == "mini" then
+                RGMercConfig.Globals.Minimized = true
+                break
+            end
+        end
     end
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
     RGMercModules:ExecAll("Init")
@@ -328,8 +336,13 @@ local function RGInit(...)
     end
 
     -- TODO: Can turn this into an options parser later.
-    if ... then
-        mainAssist = ...
+    if args and #args > 0 then
+        for _, v in ipairs(args) do
+            if v ~= "mini" then
+                mainAssist = v
+                break
+            end
+        end
     end
 
     if (not mainAssist or mainAssist == "") and mq.TLO.Group.Members() > 0 then
