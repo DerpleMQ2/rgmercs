@@ -165,6 +165,13 @@ Bind.Handlers     = {
             end
         end,
     },
+    ['mini'] = {
+        usage = "/rgl mini",
+        about = "Toggle minimizing of the RGMercs window",
+        handler = function()
+            RGMercConfig.Globals.Minimized = not RGMercConfig.Globals.Minimized
+        end,
+    },
     ['help'] =
     {
         handler = function()
