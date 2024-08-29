@@ -165,6 +165,11 @@ end
 
 function Module:Init()
     RGMercsLogger.log_info("Chase Module Loaded.")
+    if RGMercConfig.Globals.BuildType == 'Emu' then
+        self.DefaultConfig['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp",
+        Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;", Type = "Combo",
+        ComboOptions = Module.Constants.CampfireTypes, Default = 1, Min = 1, Max = #Module.Constants.CampfireTypes, }
+    end
     self:LoadSettings()
     self.ModuleLoaded = true
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
