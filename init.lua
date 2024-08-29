@@ -123,10 +123,14 @@ local function RGMercsGUI()
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
         ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, RGMercConfig:GetSettings().ScrollBarRounding)
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, RGMercConfig:GetSettings().FrameEdgeRounding)
-        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
+        if not RGMercConfig.Globals.Minimized then
+            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
+        else
+            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI, bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar))
+        end
         ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
 
-        if shouldDrawGUI then
+        if shouldDrawGUI and not RGMercConfig.Globals.Minimized then
             local pressed
             ImGui.Image(derpImg:GetTextureID(), ImVec2(60, 60))
             ImGui.SameLine()
@@ -138,7 +142,10 @@ local function RGMercsGUI()
             if ImGui.SmallButton('Create Custom Config') then
                 RGMercModules:ExecModule("Class", "WriteCustomConfig")
             end
-
+            ImGui.SameLine()
+            if ImGui.SmallButton('Minimize') then
+                RGMercConfig.Globals.Minimized = true
+            end
             if not RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
             else
@@ -262,6 +269,10 @@ local function RGMercsGUI()
                     end
                     ImGui.Separator()
                 end
+            end
+        elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
+            if ImGui.ImageButton('RGMercsButton',derpImg:GetTextureID(), ImVec2(30, 30)) then
+                RGMercConfig.Globals.Minimized = false
             end
         end
 
