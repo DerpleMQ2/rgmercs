@@ -9,7 +9,7 @@ local _ClassConfig = {
             usage = "/rgl defdisc",
             about = "Uses best warrior melee mitigation disc",
             handler = function(self, ...)
-                local discSpell = self:GetResolvedActionMapItem('meleemit')
+                local discSpell = RGMercUtils.GetResolvedActionMapItem('meleemit')
 
                 if discSpell and discSpell() and RGMercUtils.PCDiscReady(discSpell) then
                     if RGMercUtils.BuffActiveByName('Night\'s Endless Terror') then
@@ -28,7 +28,7 @@ local _ClassConfig = {
             usage = "/rgl evadedisc",
             about = "Uses best warrior evasion disc",
             handler = function(self, ...)
-                local discSpell = self:GetResolvedActionMapItem('missall')
+                local discSpell = RGMercUtils.GetResolvedActionMapItem('missall')
 
                 if discSpell and discSpell() and RGMercUtils.PCDiscReady(discSpell) then
                     RGMercUtils.UseDisc(discSpell, RGMercUtils.GetTargetID())
@@ -490,7 +490,7 @@ local _ClassConfig = {
                 name = "aehealhate",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    local stHate = self:GetResolvedActionMapItem('singlehealhate')
+                    local stHate = RGMercUtils.GetResolvedActionMapItem('singlehealhate')
                     return RGMercUtils.IsModeActive("Tank") and RGMercUtils.GetSetting('DoAEHate') and RGMercUtils.PCDiscReady(discSpell) and
                         not RGMercUtils.BuffActiveByID(discSpell.ID()) and (stHate and not RGMercUtils.BuffActiveByID(stHate.ID()))
                 end,

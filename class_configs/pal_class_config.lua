@@ -687,7 +687,7 @@ return {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         castDPU = function(self)
             if not mq.TLO.Me.AltAbility("Divine Protector's Unity")() then return false end
-            local furyProcLevel = self:GetResolvedActionMapItem('FuryProc') and self:GetResolvedActionMapItem('FuryProc').Level() or 0
+            local furyProcLevel = RGMercUtils.GetResolvedActionMapItem('FuryProc') and RGMercUtils.GetResolvedActionMapItem('FuryProc').Level() or 0
             local DPULevel = mq.TLO.Spell(mq.TLO.Me.AltAbility("Divine Protector's Unity").Spell.Trigger(1).BaseName()).Level() or 0
 
             return furyProcLevel <= DPULevel
