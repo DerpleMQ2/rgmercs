@@ -203,11 +203,11 @@ local _ClassConfig = {
     },
 
     ['ModeChecks']      = {
-        CanMez    = function() return true end,
-        CanCharm = function() return true end,
-        IsMezzing = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
-        IsCuring  = function() return RGMercUtils.GetSetting('UseCure') end,
-        IsCharming  = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 )end,
+        CanMez     = function() return true end,
+        CanCharm   = function() return true end,
+        IsMezzing  = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
+        IsCuring   = function() return RGMercUtils.GetSetting('UseCure') end,
+        IsCharming = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
@@ -646,7 +646,7 @@ local _ClassConfig = {
             "Coalition of Sticks and Stones",
         },
         ['CharmSong'] = {
-            "Call of the Banshee", -- 65
+            "Call of the Banshee",        -- 65
             "Solon's Bewitching Bravura", --39
             "Solon's Song of the Sirens", --27
         },
@@ -755,11 +755,14 @@ local _ClassConfig = {
             if RGMercUtils.GetXTHaterCount() == 0 then threshold = RGMercUtils.GetSetting('RefreshDT') end
 
             local res = RGMercUtils.SongMemed(songSpell) and
-                (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= threshold
-            RGMercsLogger.log_verbose("\ayRefreshBuffSong(%s) => memed(%s), duration(%0.2f) < reusetime(%0.2f) --> result(%s)",
+                ((me.Buff(songSpell.Name()).Duration.TotalSeconds() or 999) <= threshold or
+                (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= threshold)
+            RGMercsLogger.log_verbose("\ayRefreshBuffSong(%s) => memed(%s), song: duration(%0.2f) < reusetime(%0.2f) buff: duration(%0.2f) < reusetime(%0.2f) --> result(%s)",
                 songSpell.Name(),
                 RGMercUtils.BoolToColorString(me.Gem(songSpell.RankName.Name())() ~= nil),
                 me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, threshold,
+                me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0,
+                threshold,
                 RGMercUtils.BoolToColorString(res))
             return res
         end,
@@ -1097,14 +1100,22 @@ local _ClassConfig = {
                 name = "MainAriaSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 18
+                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
                 name = "WarMarchSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return (mq.TLO.Me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= 18
+                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
+                end,
+            },
+            {
+                name = "EndBreathSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    if not (RGMercUtils.GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
+                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
         },
@@ -1127,7 +1138,7 @@ local _ClassConfig = {
                 name = "EndBreathSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseEndBreath') then return false end
+                    if not (RGMercUtils.GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1265,7 +1276,7 @@ local _ClassConfig = {
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, songSpell)
                     if RGMercUtils.GetSetting('UseRunBuff') ~= 3 then return false end
-                    return (mq.TLO.Me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0) <= 4
+                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
@@ -1274,7 +1285,7 @@ local _ClassConfig = {
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, songSpell)
                     if RGMercUtils.GetSetting('UseRunBuff') ~= 2 then return false end
-                    return (mq.TLO.Me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0) <= 15
+                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
             {
@@ -1315,6 +1326,14 @@ local _ClassConfig = {
                 cond = function(self, itemName)
                     if not RGMercUtils.GetSetting('UseSoBItems') then return false end
                     return RGMercUtils.SelfBuffCheck("Symphony of Battle") and mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
+            {
+                name = "EndBreathSong",
+                type = "Song",
+                cond = function(self, songSpell)
+                    if not (RGMercUtils.GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
+                    return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
         },

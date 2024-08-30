@@ -2858,7 +2858,7 @@ function RGMercUtils.MATargetScan(radius, zradius)
                         if xtSpawn.PctAggro() < 100 and RGMercUtils.IsTanking() then
                             -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
                             if RGMercConfig.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
-                                RGMercsLogger.log_verbose("Have not fully aggro'd %s -- returning %s [%d]",
+                                RGMercsLogger.log_verbose("\agHave not fully aggro'd %s -- returning %s [%d]",
                                     xtSpawn.CleanName(), xtSpawn.CleanName(), xtSpawn.ID())
                                 return xtSpawn.ID() or 0
                             end
@@ -2867,7 +2867,7 @@ function RGMercUtils.MATargetScan(radius, zradius)
 
                     -- If a name has take priority.
                     if RGMercUtils.IsNamed(xtSpawn) then
-                        RGMercsLogger.log_verbose("Found Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
+                        RGMercsLogger.log_verbose("\agFound Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
                         return xtSpawn.ID() or 0
                     end
 
@@ -2876,9 +2876,12 @@ function RGMercUtils.MATargetScan(radius, zradius)
                     end
 
                     if (xtSpawn.PctHPs() or 100) < lowestHP then
+                        RGMercsLogger.log_verbose("\atFound Possible Target: %s :: %d --  Storing for Lowest HP Check", xtSpawn.CleanName(), xtSpawn.ID())
                         lowestHP = xtSpawn.PctHPs() or 0
                         killId = xtSpawn.ID() or 0
                     end
+                else
+                    RGMercsLogger.log_verbose("\ar%s distance[%d] is out of radius: %d", xtSpawn.CleanName(), xtSpawn.Distance() or 0, radius)
                 end
             else
                 RGMercsLogger.log_verbose("XTarget %s [%d] Distance: %d - is fighting someone else - ignoring it.",

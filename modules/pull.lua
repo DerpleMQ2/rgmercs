@@ -88,7 +88,7 @@ Module.Constants.PullAbilities         = {
         id = "AutoAttack",
         Type = "Special",
         DisplayName = "Auto Attack",
-        AbilityRange = 5,
+        AbilityRange = 2,
         cond = function(self)
             return true
         end,
@@ -991,7 +991,7 @@ function Module:FindTarget()
         local skipSpawn = false
 
         if spawn and (spawn.ID() or 0) > 0 and spawn.Targetable() then
-            if spawn.Master.Type() == 'PC' then 
+            if spawn.Master.Type() == 'PC' then
                 if RGMercUtils.IsSpawnXHater(spawn.ID()) then
                     RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) is Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
                     skipSpawn = true

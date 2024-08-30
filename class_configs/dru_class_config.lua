@@ -10,7 +10,7 @@ local _ClassConfig = {
         IsCuring   = function() return RGMercUtils.IsModeActive("Heal") end,
         IsRezing   = function() return RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
         CanCharm   = function() return true end,
-        IsCharming  = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 )end,
+        IsCharming = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
     },
     ['Modes']             = {
         'Heal',
