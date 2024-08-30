@@ -271,8 +271,20 @@ local function RGMercsGUI()
                 end
             end
         elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
-            if ImGui.ImageButton('RGMercsButton',derpImg:GetTextureID(), ImVec2(30, 30)) then
-                RGMercConfig.Globals.Minimized = false
+            if RGMercConfig.Globals.PauseMain then
+                if ImGui.ImageButton('RGMercsButton',derpImg:GetTextureID(), ImVec2(30, 30),ImVec2(0.0,0.0), ImVec2(1, 1), ImVec4(0,0,0,0),ImVec4(1,0,0,1)) then
+                    RGMercConfig.Globals.Minimized = false
+                end
+                if ImGui.IsItemHovered() then
+                    ImGui.SetTooltip("RGMercs is Paused")
+                end
+            else
+                if ImGui.ImageButton('RGMercsButton',derpImg:GetTextureID(), ImVec2(30, 30)) then
+                    RGMercConfig.Globals.Minimized = false
+                end
+                if ImGui.IsItemHovered() then
+                    ImGui.SetTooltip("RGMercs is Running")
+                end
             end
         end
 
