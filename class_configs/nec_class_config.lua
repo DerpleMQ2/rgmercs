@@ -19,9 +19,9 @@ local _ClassConfig = {
     },
     ['ModeChecks']      = {
         -- necro can AA Rez
-        IsRezing = function() return RGMercUtils.GetSetting('BattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        IsRezing   = function() return RGMercUtils.GetSetting('BattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
         CanCharm   = function() return true end,
-        IsCharming  = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 )end,
+        IsCharming = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
     },
     ['Themes']          = {
         ['DPS'] = {
@@ -1159,7 +1159,8 @@ local _ClassConfig = {
                         RGMercUtils.DoCmd("/pet leave")
                     end
                 end,
-                cond = function(self, spell) return RGMercUtils.GetSetting('PetType') == 1 and not RGMercUtils.GetSetting('CharmOn') and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "war") end,
+                cond = function(self, spell) return RGMercUtils.GetSetting('PetType') == 1 and not RGMercUtils.GetSetting('CharmOn') and
+                    (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "war") end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
                     if success and pet.ID() > 0 then
@@ -1176,7 +1177,8 @@ local _ClassConfig = {
                         RGMercUtils.DoCmd("/pet leave")
                     end
                 end,
-                cond = function(self, _) return RGMercUtils.GetSetting('PetType') == 2 and not RGMercUtils.GetSetting('CharmOn') and  (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "rog") end,
+                cond = function(self, _) return RGMercUtils.GetSetting('PetType') == 2 and not RGMercUtils.GetSetting('CharmOn') and
+                    (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "rog") end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
                     if success and pet.ID() > 0 then
@@ -1287,7 +1289,7 @@ local _ClassConfig = {
             gem = 7,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "CharmSpell", cond = function(self) return RGMercUtils.GetSetting('CharmOn') end, },
+                { name = "CharmSpell",  cond = function(self) return RGMercUtils.GetSetting('CharmOn') end, },
                 { name = "ScentDebuff", cond = function(self) return mq.TLO.Me.Level() < 89 end, },
                 { name = "Disease3", },
                 { name = "Disease1", },

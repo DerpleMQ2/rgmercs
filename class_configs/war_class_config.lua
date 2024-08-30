@@ -710,4 +710,3 @@ local _ClassConfig = {
 
 
 return _ClassConfig
-

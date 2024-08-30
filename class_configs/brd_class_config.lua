@@ -203,11 +203,11 @@ local _ClassConfig = {
     },
 
     ['ModeChecks']      = {
-        CanMez    = function() return true end,
-        CanCharm = function() return true end,
-        IsMezzing = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
-        IsCuring  = function() return RGMercUtils.GetSetting('UseCure') end,
-        IsCharming  = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 )end,
+        CanMez     = function() return true end,
+        CanCharm   = function() return true end,
+        IsMezzing  = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
+        IsCuring   = function() return RGMercUtils.GetSetting('UseCure') end,
+        IsCharming = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
@@ -646,7 +646,7 @@ local _ClassConfig = {
             "Coalition of Sticks and Stones",
         },
         ['CharmSong'] = {
-            "Call of the Banshee", -- 65
+            "Call of the Banshee",        -- 65
             "Solon's Bewitching Bravura", --39
             "Solon's Song of the Sirens", --27
         },

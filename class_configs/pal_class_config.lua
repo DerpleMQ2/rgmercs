@@ -69,15 +69,15 @@ return {
         },
         ["HealNuke"] = {
             -- Timer 7 - HealNuke
-            "Glorious Vindication",     -- Level 85
-            "Glorious Exoneration",     -- Level 90
-            "Glorious Exculpation",     -- Level 95
-            "Glorious Expurgation",     -- Level 100
-            "Brilliant Vindication",    -- Level 105
-            "Brilliant Exoneration",    -- Level 110
-            "Brilliant Exculpation",    -- Level 115
-            "Brilliant Acquittal",      -- Level 120
-            "Brilliant Denouncement",   -- Level 125
+            "Glorious Vindication",   -- Level 85
+            "Glorious Exoneration",   -- Level 90
+            "Glorious Exculpation",   -- Level 95
+            "Glorious Expurgation",   -- Level 100
+            "Brilliant Vindication",  -- Level 105
+            "Brilliant Exoneration",  -- Level 110
+            "Brilliant Exculpation",  -- Level 115
+            "Brilliant Acquittal",    -- Level 120
+            "Brilliant Denouncement", -- Level 125
         },
         ["TempHP"] = {
             "Steely Stance",
