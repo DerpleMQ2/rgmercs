@@ -123,10 +123,14 @@ local function RGMercsGUI()
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
         ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, RGMercConfig:GetSettings().ScrollBarRounding)
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, RGMercConfig:GetSettings().FrameEdgeRounding)
-        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
+        if not RGMercConfig.Globals.Minimized then
+            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
+        else
+            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI, bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar))
+        end
         ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
 
-        if shouldDrawGUI then
+        if shouldDrawGUI and not RGMercConfig.Globals.Minimized then
             local pressed
             ImGui.Image(derpImg:GetTextureID(), ImVec2(60, 60))
             ImGui.SameLine()
@@ -138,7 +142,10 @@ local function RGMercsGUI()
             if ImGui.SmallButton('Create Custom Config') then
                 RGMercModules:ExecModule("Class", "WriteCustomConfig")
             end
-
+            ImGui.SameLine()
+            if ImGui.SmallButton('Minimize') then
+                RGMercConfig.Globals.Minimized = true
+            end
             if not RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
             else
@@ -263,6 +270,22 @@ local function RGMercsGUI()
                     ImGui.Separator()
                 end
             end
+        elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
+            if RGMercConfig.Globals.PauseMain then
+                if ImGui.ImageButton('RGMercsButton',derpImg:GetTextureID(), ImVec2(30, 30),ImVec2(0.0,0.0), ImVec2(1, 1), ImVec4(0,0,0,0),ImVec4(1,0,0,1)) then
+                    RGMercConfig.Globals.Minimized = false
+                end
+                if ImGui.IsItemHovered() then
+                    ImGui.SetTooltip("RGMercs is Paused")
+                end
+            else
+                if ImGui.ImageButton('RGMercsButton',derpImg:GetTextureID(), ImVec2(30, 30)) then
+                    RGMercConfig.Globals.Minimized = false
+                end
+                if ImGui.IsItemHovered() then
+                    ImGui.SetTooltip("RGMercs is Running")
+                end
+            end
         end
 
         ImGui.PopID()
@@ -292,6 +315,17 @@ local function RGInit(...)
 
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
 
+    local args = { ... }
+    -- check mini argument before loading other modules so it minimizes as soon as possible.
+    if args and #args > 0 then
+        RGMercsLogger.log_info("Arguments passed to RGMercs: %s", table.concat(args, ", "))
+        for _, v in ipairs(args) do
+            if v == "mini" then
+                RGMercConfig.Globals.Minimized = true
+                break
+            end
+        end
+    end
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
     RGMercModules:ExecAll("Init")
     RGMercConfig.Globals.SubmodulesLoaded = true
@@ -314,8 +348,13 @@ local function RGInit(...)
     end
 
     -- TODO: Can turn this into an options parser later.
-    if ... then
-        mainAssist = ...
+    if args and #args > 0 then
+        for _, v in ipairs(args) do
+            if v ~= "mini" then
+                mainAssist = v
+                break
+            end
+        end
     end
 
     if (not mainAssist or mainAssist == "") and mq.TLO.Group.Members() > 0 then

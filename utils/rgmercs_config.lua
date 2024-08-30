@@ -30,6 +30,7 @@ Config.Globals.CurLoadedClass        = mq.TLO.Me.Class.ShortName()
 Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
 Config.Globals.CastResult            = 0
 Config.Globals.BuildType             = mq.TLO.MacroQuest.BuildName()
+Config.Globals.Minimized            = false
 
 -- Constants
 Config.Constants                     = {}
