@@ -7,8 +7,8 @@ local _ClassConfig = {
     ['ModeChecks']    = {
         CanMez     = function() return true end,
         CanCharm   = function() return true end,
-        IsCharming  = function() return RGMercUtils.GetSetting('CharmOn') end,
-        IsMezzing  = function() return true end,        
+        IsCharming = function() return RGMercUtils.GetSetting('CharmOn') end,
+        IsMezzing  = function() return true end,
         -- IsCharming = function() return RGMercUtils.IsModeActive("Charm") end,
     },
     ['Modes']         = {
@@ -953,7 +953,7 @@ local _ClassConfig = {
 
                     if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {

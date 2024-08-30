@@ -423,8 +423,16 @@ local function Main()
             --RGMercConfig.Globals.LastFaceTime = os.clock()
             RGMercUtils.DoCmd("/squelch /face")
         end
+
+        if RGMercUtils.GetSetting('DoMed') == 3 then
+            RGMercUtils.AutoMed()
+        end
     else
         curState = "Downtime"
+
+        if RGMercUtils.GetSetting('DoMed') == 2 then
+            RGMercUtils.AutoMed()
+        end
     end
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
@@ -467,7 +475,7 @@ local function Main()
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
             RGMercConfig.Globals.LastPetCmd = os.clock()
-            if ((RGMercUtils.GetSetting('DoPet') or RGMercUtils.GetSetting('CharmOn') ) and mq.TLO.Pet.ID() ~= 0) and (RGMercUtils.GetTargetPctHPs(RGMercUtils.GetAutoTarget()) <= RGMercUtils.GetSetting('PetEngagePct')) then
+            if ((RGMercUtils.GetSetting('DoPet') or RGMercUtils.GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (RGMercUtils.GetTargetPctHPs(RGMercUtils.GetAutoTarget()) <= RGMercUtils.GetSetting('PetEngagePct')) then
                 RGMercUtils.PetAttack(RGMercConfig.Globals.AutoTargetID, true)
             end
         end
@@ -503,10 +511,6 @@ local function Main()
 
     if RGMercUtils.GetSetting('DoModRod') then
         RGMercUtils.ClickModRod()
-    end
-
-    if RGMercUtils.GetSetting('DoMed') >= 2 then
-        RGMercUtils.AutoMed()
     end
 
     if RGMercUtils.ShouldKillTargetReset() then
