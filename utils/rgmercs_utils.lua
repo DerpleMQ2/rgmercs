@@ -124,15 +124,17 @@ end
 
 ---@param defaults table
 ---@param settings table
----@return table
+---@return table, boolean
 function RGMercUtils.ResolveDefaults(defaults, settings)
     -- Setup Defaults
+    local changed = false
     for k, v in pairs(defaults) do
         if settings[k] == nil then settings[k] = v.Default end
 
         if type(settings[k]) ~= type(v.Default) then
             RGMercsLogger.log_info("\ayData type of setting [\am%s\ay] has been deprecated -- resetting to default.", k)
             settings[k] = v.Default
+            changed = true
         end
     end
 
@@ -141,10 +143,11 @@ function RGMercUtils.ResolveDefaults(defaults, settings)
         if not defaults[k] then
             settings[k] = nil
             RGMercsLogger.log_info("\aySetting [\am%s\ay] has been deprecated -- removing from your config.", k)
+            changed = true
         end
     end
 
-    return settings
+    return settings, changed
 end
 
 ---@param msg string

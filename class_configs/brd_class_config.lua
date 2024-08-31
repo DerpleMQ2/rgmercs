@@ -646,7 +646,23 @@ local _ClassConfig = {
             "Coalition of Sticks and Stones",
         },
         ['CharmSong'] = {
-            "Call of the Banshee",        -- 65
+            "Voice of Suja", -- 125
+            "Voice of the Diabo",
+            "Omiyad's Demand",
+            "Voice of Zburator",
+            "Desirae's Demand",
+            "Voice of Jembel",
+            "Dawnbreeze's Demand",
+            "Voice of Silisia",
+            "Silisia's Demand",
+            "Voice of Motlak",
+            "Voice of Kolain",
+            "Voice of Sionachie",
+            "Voice of the Mindshear",
+            "Yowl of the Bloodmoon",
+            "Beckon of the Tuffein",
+            "Voice of the Vampire",
+            "Call of the Banshee", -- 65
             "Solon's Bewitching Bravura", --39
             "Solon's Song of the Sirens", --27
         },
