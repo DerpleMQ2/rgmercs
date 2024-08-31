@@ -1016,6 +1016,7 @@ function Module:FindTarget()
                             -- check cons.
                             local conLevel = RGMercConfig.Constants.ConColorsNameToId[spawn.ConColor()]
                             if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
+                                RGMercsLogger.log_debug("\atPULL::FindTarget \ar -> Con Mismatch!")
                                 doInsert = false
                                 RGMercsLogger.log_debug("\atPULL::FindTarget\ay  - Ignoring mob '%s' due to con color. Min = %d, Max = %d, Mob = %d (%s)", spawn.CleanName(),
                                     self.settings.PullMinCon,
@@ -1026,11 +1027,13 @@ function Module:FindTarget()
                         if self:HaveList("PullAllowList") then
                             RGMercsLogger.log_debug("\atPULL::FindTarget \ayHave Allow List to Check!")
                             if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
+                                RGMercsLogger.log_debug("\atPULL::FindTarget \ar -> Not Found in Allow List!")
                                 doInsert = false
                             end
                         elseif self:HaveList("PullDenyList") then
                             RGMercsLogger.log_debug("\atPULL::FindTarget \ayHave Deny List to Check!")
                             if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
+                                RGMercsLogger.log_debug("\atPULL::FindTarget \ar -> Found in Deny List!")
                                 doInsert = false
                             end
                         else
