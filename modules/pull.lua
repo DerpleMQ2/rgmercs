@@ -229,7 +229,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("Pull Combat Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_debug("Pull Combat Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
@@ -312,7 +312,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_info("Pull Module Loaded.")
+    RGMercsLogger.log_debug("Pull Module Loaded.")
     self:LoadSettings()
     self.ModuleLoaded = true
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
@@ -1692,7 +1692,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Pull Combat Module Unloaded.")
+    RGMercsLogger.log_debug("Pull Combat Module Unloaded.")
 end
 
 return Module

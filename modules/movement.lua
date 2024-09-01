@@ -130,7 +130,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("Chase Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_debug("Chase Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
@@ -164,7 +164,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_info("Chase Module Loaded.")
+    RGMercsLogger.log_debug("Chase Module Loaded.")
     if RGMercConfig.Globals.BuildType == 'Emu' then
         self.DefaultConfig['MaintainCampfire'] = {
             DisplayName = "Maintain Campfire",
@@ -709,7 +709,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Chase Module Unloaded.")
+    RGMercsLogger.log_debug("Chase Module Unloaded.")
 end
 
 return Module
