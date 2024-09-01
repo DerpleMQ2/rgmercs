@@ -166,9 +166,16 @@ end
 function Module:Init()
     RGMercsLogger.log_info("Chase Module Loaded.")
     if RGMercConfig.Globals.BuildType == 'Emu' then
-        self.DefaultConfig['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp",
-        Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;", Type = "Combo",
-        ComboOptions = Module.Constants.CampfireTypes, Default = 1, Min = 1, Max = #Module.Constants.CampfireTypes, }
+        self.DefaultConfig['MaintainCampfire'] = {
+            DisplayName = "Maintain Campfire",
+            Category = "Camp",
+            Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;",
+            Type = "Combo",
+            ComboOptions = Module.Constants.CampfireTypes,
+            Default = 1,
+            Min = 1,
+            Max = #Module.Constants.CampfireTypes,
+        }
     end
     self:LoadSettings()
     self.ModuleLoaded = true
@@ -648,7 +655,7 @@ function Module:GiveTime(combat_state)
 
                     mq.delay("3s", function() return mq.TLO.Navigation.Active() end)
 
-                    if not Nav.Active() and chaseSpawn.Distance() > self.settings.ChaseDistance then
+                    if not Nav.Active() and (chaseSpawn.Distance() or 0) > self.settings.ChaseDistance then
                         RGMercsLogger.log_verbose("\awNOTICE:\ax Nav might have failed.")
                         --self:RunCmd("/squelch /moveto id %d uw mdist %d", chaseSpawn.ID(), self.settings.ChaseDistance)
                     end

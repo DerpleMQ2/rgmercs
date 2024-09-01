@@ -113,7 +113,7 @@ end
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
 
-    local corpseSearch = "pccorpse %s radius 60"
+    local corpseSearch = "pccorpse %s's radius 60"
     if RGMercUtils.GetSetting('DoDrag') then
         local myCorpse = mq.TLO.Spawn(string.format(corpseSearch, mq.TLO.Me.DisplayName()))
 
