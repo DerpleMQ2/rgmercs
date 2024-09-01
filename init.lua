@@ -488,7 +488,8 @@ local function Main()
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
-    if RGMercConfig.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() then
+    if (RGMercConfig.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() or
+        RGMercConfig.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName()) then
         RGMercConfig:LoadSettings()
         RGMercModules:ExecAll("LoadSettings")
     end
