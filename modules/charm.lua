@@ -16,16 +16,16 @@ Module.TempSettings.CharmTracker     = {}
 
 Module.DefaultConfig               = {
 	-- [ CHARM ] --
-	['CharmOn']            = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", },
-	['DireCharm']            = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
-	['CharmStartCount']    = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
-	['CharmRadius']        = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
-	['CharmZRadius']       = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", },
-	['AutoLevelRangeCharm']   = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", },
-	['CharmStopHPs']       = { DisplayName = "Charm Stop HPs", Category = "Charm Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to charm", },
-	['CharmMinLevel']      = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
-	['CharmMaxLevel']      = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
+	['CharmOn']            	 = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", },
+	['CharmStartCount']      = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
+	['CharmRadius']          = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
+	['CharmZRadius']         = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", },
+	['AutoLevelRangeCharm']  = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", },
+	['CharmStopHPs']         = { DisplayName = "Charm Stop HPs", Category = "Charm Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to charm", },
+	['CharmMinLevel']        = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
+	['CharmMaxLevel']        = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
 	['DireCharmMaxLvl']      = { DisplayName = "DireCharm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
+	['DireCharm']            = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
 }
 
 Module.DefaultCategories           = Set.new({})
@@ -70,7 +70,9 @@ function Module:LoadSettings()
 	end
 
 	-- Setup Defaults
-	self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+	local needSave = false
+	self.settings, needSave = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+	if needSave then self:SaveSettings(false) end
 end
 
 function Module:GetSettings()
