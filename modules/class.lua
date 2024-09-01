@@ -614,6 +614,8 @@ function Module:RunCureRotation()
         { type = "Curse",      check = "Me.Cursed.ID", },
         { type = "Corruption", check = "Me.Corrupted.ID", }, }
 
+    -- Me.TotalCounters does not work on emu we need to check everything.
+
     for i = 1, dannetPeers do
         ---@diagnostic disable-next-line: redundant-parameter
         local peer = mq.TLO.DanNet.Peers(i)()
@@ -622,7 +624,7 @@ function Module:RunCureRotation()
                 RGMercsLogger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
                 local effectCount = DanNet.observe(peer, "Me.TotalCounters", 1000) or "null"
                 RGMercsLogger.log_verbose("\ay[Cures] %s :: Effect Count: %s", peer, effectCount)
-                if effectCount:lower() ~= "null" and effectCount ~= "0" then
+                if RGMercUtils.OnEMU() or (effectCount:lower() ~= "null" and effectCount ~= "0") then
                     for _, data in ipairs(checks) do
                         local effectId = DanNet.observe(peer, data.check, 1000) or "null"
                         RGMercsLogger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
@@ -640,7 +642,7 @@ function Module:RunCureRotation()
                 end
             end
         else
-            RGMercsLogger.log_verbose("\ao[Cures] %s is in \arNOT\ao range", peer)
+            RGMercsLogger.log_verbose("\ao[Cures] %d::%s is in \arNOT\ao range", i, peer or "Unknown")
         end
     end
 end

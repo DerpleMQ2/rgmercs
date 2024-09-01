@@ -3583,7 +3583,7 @@ function RGMercUtils.ReagentCheck(spell)
         return false
     end
 
-    if (mq.TLO.MacroQuest.BuildName():lower() or "") ~= "emu" then
+    if not RGMercUtils.OnEMU() then
         if spell.NoExpendReagentID(1)() > 0 and mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() == 0 then
             RGMercsLogger.log_verbose("Missing NoExpendReagent: (%d)", spell.NoExpendReagentID(1)())
             return false
@@ -3591,6 +3591,11 @@ function RGMercUtils.ReagentCheck(spell)
     end
 
     return true
+end
+
+---@return boolean
+function RGMercUtils.OnEMU()
+    return (mq.TLO.MacroQuest.BuildName():lower() or "") == "emu"
 end
 
 ---@param song MQSpell|buff|fun():string|nil
