@@ -207,7 +207,6 @@ Config.DefaultConfig = {
     ['WardsPlease']          = { DisplayName = "Enable Wards", Category = "Wards", Tooltip = "Enable Ward Type Spells", Default = true, ConfigType = "Normal", },
 
     -- [ BUFF ] --
-    ['DoTwist']              = { DisplayName = "Enable Bard Twisting", Category = "Buffs", Tooltip = "Use MQ2Twist", Default = true, ConfigType = "Advanced", },
     ['DoBuffs']              = { DisplayName = "Do Buffs", Category = "Buffs", Tooltip = "Do Non-Class Specific Buffs.", Default = true, ConfigType = "Advanced", },
     ['BuffWaitMoveTimer']    = { DisplayName = "Buff Wait Timer", Category = "Buffs", Tooltip = "Seconds to wait after stoping movement before doing buffs.", Default = 5, Min = 0, Max = 60, ConfigType = "Advanced", },
 
@@ -218,11 +217,12 @@ Config.DefaultConfig = {
     ['GroupHealPoint']       = { DisplayName = "Group Heal Point", Category = "Heals", Tooltip = "Set to 0-100 for health point for Group Heal", Default = 85, Min = 1, Max = 100, ConfigType = "Advanced", },
     ['PetHealPoint']         = { DisplayName = "Pet Heal Point", Category = "Heals", Tooltip = "Set to 0-100 for health point for Pet Heal", Default = 85, Min = 1, Max = 100, ConfigType = "Advanced", },
     ['GroupInjureCnt']       = { DisplayName = "Group Injured Count", Category = "Heals", Tooltip = "Number of group members to be injured before using a group heal spell.", Default = 3, Min = 1, Max = 5, ConfigType = "Advanced", },
-    ['DoPetHeals']           = { DisplayName = "Do Pet Heals", Category = "Heals", Tooltip = "Heal Pets?", Default = false, ConfigType = "Advanced", },
+    ['DoPetHeals']           = { DisplayName = "Do Pet Heals", Category = "Heals", Tooltip = "Heal pets in your group", Default = false, ConfigType = "Advanced", },
     ['MaxHealPoint']         = { DisplayName = "Max Heal Point", Category = "Heals", Tooltip = "The point at which you stop healing.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
-    ['LightHealPoint']       = { DisplayName = "Light Heal Point", Category = "Heals", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
-    ['CompHealPoint']        = { DisplayName = "Comp Heal Point", Category = "Heals", Tooltip = "Use Spells", Default = 65, Min = 1, Max = 99, },
-    ['RemedyHealPoint']      = { DisplayName = "Remedy Heal Point", Category = "Heals", Tooltip = "Use Spells", Default = 80, Min = 1, Max = 99, },
+    ['LightHealPoint']       = { DisplayName = "Light Heal Point", Category = "Heals", Tooltip = "Set to 0-100 for health point for Light Heal", Default = 65, Min = 1, Max = 99, },
+    ['CompHealPoint']        = { DisplayName = "Comp Heal Point", Category = "Heals", Tooltip = "Set to 0-100 for health point for Complete Healing", Default = 65, Min = 1, Max = 99, },
+    ['RemedyHealPoint']      = { DisplayName = "Remedy Heal Point", Category = "Heals", Tooltip = "Set to 0-100 for health point for Remedy", Default = 80, Min = 1, Max = 99, },
+    ['CureInterval']         = { DisplayName = "Cure Check Interval", Category = "Heals", Tooltip = "Perform check to see if cures are needed every X seconds. ***WARNING: RESOURCE INTENSIVE*** Default: 5", Default = 5, Min = 1, Max = 30, ConfigType = "Advanced", },
 
     -- [ REZ ] --
     ['RetryRezDelay']        = { DisplayName = "Retry Rez Delay", Category = "Rez", Tooltip = "Time in seconds of how often to try to rez a corpse.", Default = 6, Min = 1, Max = 60, ConfigType = "Advanced", },
@@ -230,7 +230,7 @@ Config.DefaultConfig = {
     ['BuffRezables']         = { DisplayName = "Buff Rezables", Category = "Rez", Tooltip = "If this PC has a corpse near us buff them even though they are likely to get rezed.", Default = false, ConfigType = "Advanced", },
 
     -- [ FELLOWSHIP ] --
-    ['DoFellow']             = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = true, ConfigType = "Advanced", },
+    ['DoFellow']             = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = false, ConfigType = "Advanced", },
 
     -- [ TARGETING ] --
     ['FollowMarkTarget']     = { DisplayName = "Follow Mark Target", Category = "Targeting", Tooltip = "Auto target MA target Marks.", Default = false, ConfigType = "Advanced", },

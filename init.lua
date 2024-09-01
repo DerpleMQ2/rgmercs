@@ -326,7 +326,7 @@ local function RGInit(...)
         "MQ2Nav",
         "MQ2DanNet", })
 
-    unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
+    unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", "MQ2Twist", })
 
     local args = { ..., }
     -- check mini argument before loading other modules so it minimizes as soon as possible.
@@ -343,11 +343,6 @@ local function RGInit(...)
     RGMercModules:ExecAll("Init")
     RGMercConfig.Globals.SubmodulesLoaded = true
     RGMercConfig:UpdateCommandHandlers()
-
-    if not RGMercUtils.GetSetting('DoTwist') then
-        local unloaded = RGMercUtils.UnCheckPlugins({ "MQ2Twist", })
-        if #unloaded == 1 then table.insert(unloadedPlugins, unloaded[1]) end
-    end
 
     local mainAssist = mq.TLO.Target.CleanName() or ""
 
@@ -393,8 +388,8 @@ local function RGInit(...)
         RGMercUtils.DoCmd("/macro end")
     end
 
-    RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host If it exists! (/%s pause on)",
-        mq.TLO.Me.Class.ShortName())
+    -- RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
+    --     mq.TLO.Me.Class.ShortName())
     RGMercUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
 
     if RGMercUtils.CanUseAA("Companion's Discipline") then
@@ -608,7 +603,7 @@ local script_actor = RGMercUtils.Actors.register(function(message)
     if msg.from == RGMercConfig.Globals.CurLoadedChar then return end
     if msg.script ~= RGMercUtils.ScriptName then return end
 
-    RGMercsLogger.log_info("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", msg.from,
+    RGMercsLogger.log_verbose("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", msg.from,
         msg.module,
         msg.event)
 

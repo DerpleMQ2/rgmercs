@@ -871,7 +871,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
-                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+                    RGMercUtils.DoBuffCheck()
             end,
         },
         {
@@ -880,7 +880,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and
                     (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
-                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+                    RGMercUtils.DoBuffCheck()
             end,
         },
         {
@@ -890,7 +890,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
-                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+                    RGMercUtils.DoBuffCheck()
             end,
         },
         {
@@ -910,7 +910,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
                     (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
-                    RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+                    RGMercUtils.DoBuffCheck()
             end,
         },
         {
