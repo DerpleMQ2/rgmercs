@@ -3075,14 +3075,7 @@ end
 
 -- cleaned up message handlers for announcements
 function RGMercUtils.HandleMezAnnounce(msg)
-    if RGMercUtils.GetSetting('MezAnnounceGroup') and RGMercUtils.GetSetting('MezAnnounce') then
-        local cleanMsg = msg:gsub("\a.", "")
-        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-        RGMercUtils.PrintGroupMessage(msg)
-    elseif RGMercUtils.GetSetting('MezAnnounceGroup') then
-        local cleanMsg = msg:gsub("\a.", "")
-        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-    elseif RGMercUtils.GetSetting('MezAnnounce') then
+    if RGMercUtils.GetSetting('MezAnnounce') then
         RGMercUtils.PrintGroupMessage(msg)
     else
         RGMercsLogger.log_debug(msg)
@@ -3090,14 +3083,7 @@ function RGMercUtils.HandleMezAnnounce(msg)
 end
 
 function RGMercUtils.HandleCharmAnnounce(msg)
-    if RGMercUtils.GetSetting('CharmAnnounceGroup') and RGMercUtils.GetSetting('CharmAnnounce') then
-        local cleanMsg = msg:gsub("\a.", "")
-        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-        RGMercUtils.PrintGroupMessage(msg)
-    elseif RGMercUtils.GetSetting('CharmAnnounceGroup') then
-        local cleanMsg = msg:gsub("\a.", "")
-        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-    elseif RGMercUtils.GetSetting('CharmAnnounce') then
+    if RGMercUtils.GetSetting('CharmAnnounce') then
         RGMercUtils.PrintGroupMessage(msg)
     else
         RGMercsLogger.log_debug(msg)
