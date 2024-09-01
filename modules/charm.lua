@@ -4,31 +4,31 @@ local RGMercUtils = require("utils.rgmercs_utils")
 local Set         = require("mq.Set")
 require('utils.rgmercs_datatypes')
 
-local Module                       = { _version = '0.1a', _name = "Charm", _author = 'Grimmier', }
-Module.__index                     = Module
+local Module                     = { _version = '0.1a', _name = "Charm", _author = 'Grimmier', }
+Module.__index                   = Module
 
-Module.ModuleLoaded                = false
-Module.CombatState                 = "None"
+Module.ModuleLoaded              = false
+Module.CombatState               = "None"
 
-Module.TempSettings                = {}
-Module.TempSettings.CharmImmune      = {}
-Module.TempSettings.CharmTracker     = {}
+Module.TempSettings              = {}
+Module.TempSettings.CharmImmune  = {}
+Module.TempSettings.CharmTracker = {}
 
-Module.DefaultConfig               = {
+Module.DefaultConfig             = {
 	-- [ CHARM ] --
-	['CharmOn']            	 = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", },
-	['CharmStartCount']      = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
-	['CharmRadius']          = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
-	['CharmZRadius']         = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", },
-	['AutoLevelRangeCharm']  = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", },
-	['CharmStopHPs']         = { DisplayName = "Charm Stop HPs", Category = "Charm Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to charm", },
-	['CharmMinLevel']        = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
-	['CharmMaxLevel']        = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
-	['DireCharmMaxLvl']      = { DisplayName = "DireCharm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
-	['DireCharm']            = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
+	['CharmOn']             = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", },
+	['CharmStartCount']     = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
+	['CharmRadius']         = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
+	['CharmZRadius']        = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", },
+	['AutoLevelRangeCharm'] = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", },
+	['CharmStopHPs']        = { DisplayName = "Charm Stop HPs", Category = "Charm Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to charm", },
+	['CharmMinLevel']       = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
+	['CharmMaxLevel']       = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
+	['DireCharmMaxLvl']     = { DisplayName = "DireCharm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
+	['DireCharm']           = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
 }
 
-Module.DefaultCategories           = Set.new({})
+Module.DefaultCategories         = Set.new({})
 for _, v in pairs(Module.DefaultConfig) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
@@ -50,7 +50,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-	RGMercsLogger.log_info("\ar%s\ao Charm Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass,
+	RGMercsLogger.log_debug("\ar%s\ao Charm Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass,
 		RGMercConfig.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 
@@ -93,14 +93,14 @@ function Module.New()
 end
 
 function Module:Init()
-	RGMercsLogger.log_info("\agInitializing Charm Module...")
+	RGMercsLogger.log_debug("\agInitializing Charm Module...")
 	-- bards don't have DireCharm so hide the settings.
 	if RGMercUtils.MyClassIs("BRD") then
 		self.DefaultConfig['DireCharm'] = nil
 		self.DefaultConfig['DireCharmMaxLvl'] = nil
 	end
 	self:LoadSettings()
-	
+
 	self.ModuleLoaded = true
 
 	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
@@ -221,36 +221,36 @@ function Module:CharmNow(charmId, useAA)
 
 	local charmSpell = self:GetCharmSpell()
 
-		if not charmSpell or not charmSpell() then return end
-		local dCharm = not RGMercUtils.MyClassIs("BRD") and RGMercUtils.GetSetting("DireCharm") or false
-		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm')() and (mq.TLO.Spawn(charmId).Level() or 999) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
-			RGMercsLogger.log_debug("Performing DIRE CHARM --> %d", charmId)
-			RGMercUtils.HandleCharmAnnounce(string.format("Performing DIRE CHARM --> %d", charmId))
-			RGMercUtils.UseAA("Dire Charm", charmId)
+	if not charmSpell or not charmSpell() then return end
+	local dCharm = not RGMercUtils.MyClassIs("BRD") and RGMercUtils.GetSetting("DireCharm") or false
+	if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
+		RGMercsLogger.log_debug("Performing DIRE CHARM --> %d", charmId)
+		RGMercUtils.HandleCharmAnnounce(string.format("Performing DIRE CHARM --> %d", charmId))
+		RGMercUtils.UseAA("Dire Charm", charmId)
+	else
+		if RGMercUtils.MyClassIs("brd") then
+			RGMercsLogger.log_debug("Performing Bard CHARM --> %d", charmId)
+			-- TODO SongNow CharmSpell
+			RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
 		else
-			if RGMercUtils.MyClassIs("brd") then
-				RGMercsLogger.log_debug("Performing Bard CHARM --> %d", charmId)
-				-- TODO SongNow CharmSpell
-				RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
-			else
-				-- This may not work for Bards but will work for DRU/NEC/ENCs
-				RGMercUtils.UseSpell(charmSpell.RankName(), charmId, false)
-				RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
-			end
+			-- This may not work for Bards but will work for DRU/NEC/ENCs
+			RGMercUtils.UseSpell(charmSpell.RankName(), charmId, false)
+			RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
 		end
+	end
 
-		mq.doevents()
+	mq.doevents()
 
-		if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or mq.TLO.Pet.ID() > 0 then
-			RGMercUtils.HandleCharmAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s \aw : \ar %d",
-				mq.TLO.Spawn(charmId).CleanName(), charmId))
-		else
-			RGMercUtils.HandleCharmAnnounce(string.format("\ar CHARM Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
-				RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(charmId).CleanName(),
-				charmId))
-		end
+	if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or mq.TLO.Pet.ID() > 0 then
+		RGMercUtils.HandleCharmAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s \aw : \ar %d",
+			mq.TLO.Spawn(charmId).CleanName(), charmId))
+	else
+		RGMercUtils.HandleCharmAnnounce(string.format("\ar CHARM Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
+			RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(charmId).CleanName(),
+			charmId))
+	end
 
-		mq.doevents()
+	mq.doevents()
 
 	RGMercUtils.SetTarget(currentTargetID)
 end
@@ -294,14 +294,14 @@ function Module:IsValidCharmTarget(mobId)
 		if spawn.Body.Name() ~= "Animal" then
 			RGMercsLogger.log_debug(
 				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.", spawn.ID(),
-				spawn.CleanName(),spawn.Level())
+				spawn.CleanName(), spawn.Level())
 			return false
 		end
 	elseif RGMercUtils.MyClassIs('NEC') then
 		if spawn.Body.Name() ~= "Undead" then
 			RGMercsLogger.log_debug(
 				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.", spawn.ID(),
-				spawn.CleanName(),spawn.Level())
+				spawn.CleanName(), spawn.Level())
 			return false
 		end
 	end
@@ -453,12 +453,12 @@ end
 function Module:DoCharm()
 	local charmSpell = self:GetCharmSpell()
 	self:UpdateTimings()
-	
+
 	if RGMercUtils.GetXTHaterCount() >= self.settings.CharmStartCount then
 		self:UpdateCharmList()
 	end
 
-	if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or RGMercUtils.GetSetting("DireCharm"))  and
+	if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or RGMercUtils.GetSetting("DireCharm")) and
 		RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 		self:ProcessCharmList()
 	else
@@ -524,7 +524,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-	RGMercsLogger.log_info("Charm Module Unloaded.")
+	RGMercsLogger.log_debug("Charm Module Unloaded.")
 end
 
 mq.bind("/rgupcharm", function()

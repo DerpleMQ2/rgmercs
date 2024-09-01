@@ -30,7 +30,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("Drag Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_debug("Drag Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
@@ -71,7 +71,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_info("Drag Module Loaded.")
+    RGMercsLogger.log_debug("Drag Module Loaded.")
     self:LoadSettings()
 
     self.ModuleLoaded = true
@@ -179,7 +179,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Drag Module Unloaded.")
+    RGMercsLogger.log_debug("Drag Module Unloaded.")
 end
 
 return Module

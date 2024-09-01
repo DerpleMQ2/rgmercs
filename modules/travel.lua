@@ -57,7 +57,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("Travel Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    RGMercsLogger.log_debug("Travel Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
@@ -116,7 +116,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_info("Travel Module Loaded.")
+    RGMercsLogger.log_debug("Travel Module Loaded.")
 
     local className = mq.TLO.Me.Class.ShortName():lower()
     self:LoadSettings()
@@ -302,13 +302,13 @@ end
 ---@return boolean
 function Module:HandleBind(cmd, ...)
     local params = ...
-    local handled = false
+    local handled = falses
     -- /rglua cmd handler
     return handled
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Travel Module Unloaded.")
+    RGMercsLogger.log_debug("Travel Module Unloaded.")
 end
 
 return Module

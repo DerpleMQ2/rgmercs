@@ -17,20 +17,20 @@ Module.TempSettings.MezTracker     = {}
 
 Module.DefaultConfig               = {
     -- [ MEZ ] --
-    ['MezAECount']       = { DisplayName = "Mez AE Count", Category = "Mez", Tooltip = "Mez if you have more than [X] on xtarget", Default = 3, Min = 1, Max = 20, },
-    ['MezOn']            = { DisplayName = "Mez On", Category = "Mez", Default = true, Tooltip = "Set to use mez spells.", },
-    ['UseSingleTgtMez']  = { DisplayName = "Use Single Tgt Mez", Category = "Mez", Default = true, Tooltip = "Set to enable use of single target mez spells/songs. Default: 1.", },
+    ['MezAECount']      = { DisplayName = "Mez AE Count", Category = "Mez", Tooltip = "Mez if you have more than [X] on xtarget", Default = 3, Min = 1, Max = 20, },
+    ['MezOn']           = { DisplayName = "Mez On", Category = "Mez", Default = true, Tooltip = "Set to use mez spells.", },
+    ['UseSingleTgtMez'] = { DisplayName = "Use Single Tgt Mez", Category = "Mez", Default = true, Tooltip = "Set to enable use of single target mez spells/songs. Default: 1.", },
     -- ['MezAnnounce']      = { DisplayName = "Mez Announce", Category = "Announcements", Default = true, Tooltip = "Set to announce mez casts.", ConfigType = "Normal",  },
     -- ['MezAnnounceGroup'] = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group.",  ConfigType = "Normal", },
-    ['MezStartCount']    = { DisplayName = "Mez Start Count", Category = "Mez", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Mez spells. ( Default 2 )", },
-    ['MaxMezCount']      = { DisplayName = "Max Mez Count", Category = "Mez", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", },
-    ['MezRadius']        = { DisplayName = "Mez Radius", Category = "Mez Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Mezing, An area twice this size is monitored for aggro mobs", },
-    ['MezZRadius']       = { DisplayName = "Mez ZRadius", Category = "Mez Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start mezzing. An area twice this size is monitored for aggro mobs. If you're enchanter is not mezzing on hills -- increase this value.", },
-    ['AutoLevelRange']   = { DisplayName = "Auto Level Range", Category = "Mez Target", Default = true, Tooltip = "Set to enable automatic mez level detection based on spells.", },
-    ['MezMinLevel']      = { DisplayName = "Mez Min Level", Category = "Mez Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Mez - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
-    ['MezMaxLevel']      = { DisplayName = "Mez Max Level", Category = "Mez Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Mez - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
-    ['MezStopHPs']       = { DisplayName = "Mez Stop HPs", Category = "Mez Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to mez", },
-    ['UseAEAAMez']       = { DisplayName = "Use AE AAMez", Category = "Mez", Default = false, Tooltip = "Toggle 0/1 to use Area Effect AA Mez (Default: 0).", },
+    ['MezStartCount']   = { DisplayName = "Mez Start Count", Category = "Mez", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Mez spells. ( Default 2 )", },
+    ['MaxMezCount']     = { DisplayName = "Max Mez Count", Category = "Mez", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", },
+    ['MezRadius']       = { DisplayName = "Mez Radius", Category = "Mez Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Mezing, An area twice this size is monitored for aggro mobs", },
+    ['MezZRadius']      = { DisplayName = "Mez ZRadius", Category = "Mez Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start mezzing. An area twice this size is monitored for aggro mobs. If you're enchanter is not mezzing on hills -- increase this value.", },
+    ['AutoLevelRange']  = { DisplayName = "Auto Level Range", Category = "Mez Target", Default = true, Tooltip = "Set to enable automatic mez level detection based on spells.", },
+    ['MezMinLevel']     = { DisplayName = "Mez Min Level", Category = "Mez Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Mez - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
+    ['MezMaxLevel']     = { DisplayName = "Mez Max Level", Category = "Mez Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Mez - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
+    ['MezStopHPs']      = { DisplayName = "Mez Stop HPs", Category = "Mez Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to mez", },
+    ['UseAEAAMez']      = { DisplayName = "Use AE AAMez", Category = "Mez", Default = false, Tooltip = "Toggle 0/1 to use Area Effect AA Mez (Default: 0).", },
 }
 
 Module.DefaultCategories           = Set.new({})
@@ -55,7 +55,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_info("\ar%s\ao Mez Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass,
+    RGMercsLogger.log_debug("\ar%s\ao Mez Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass,
         RGMercConfig.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
@@ -96,7 +96,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_info("\agInitializing Mez Module...")
+    RGMercsLogger.log_debug("\agInitializing Mez Module...")
     self:LoadSettings()
 
     self.ModuleLoaded = true
@@ -665,7 +665,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_info("Mez Module Unloaded.")
+    RGMercsLogger.log_debug("Mez Module Unloaded.")
 end
 
 mq.bind("/rgupmez", function()
