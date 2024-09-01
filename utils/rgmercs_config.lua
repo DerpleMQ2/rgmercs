@@ -31,7 +31,6 @@ Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
 Config.Globals.CastResult            = 0
 Config.Globals.BuildType             = mq.TLO.MacroQuest.BuildName()
 Config.Globals.Minimized             = false
-Config.Globals.EscapeMinimizes       = false
 
 -- Constants
 Config.Constants                     = {}
@@ -285,7 +284,6 @@ end
 
 function Config:SaveSettings(doBroadcast)
     mq.pickle(self:GetConfigFileName(), self.settings)
-    self.Globals.EscapeMinimizes = RGMercUtils.GetSetting('EscapeMinimizes')
     RGMercsLogger.set_log_level(RGMercUtils.GetSetting('LogLevel'))
     RGMercsLogger.set_log_to_file(RGMercUtils.GetSetting('LogToFile'))
 
@@ -324,7 +322,7 @@ function Config:LoadSettings()
     end
 
     self.settings = RGMercUtils.ResolveDefaults(Config.DefaultConfig, self.settings)
-    self.Globals.EscapeMinimizes = RGMercUtils.GetSetting('EscapeMinimizes')
+
     if needSave then
         self:SaveSettings(false)
     end

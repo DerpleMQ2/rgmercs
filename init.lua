@@ -126,7 +126,8 @@ local function RGMercsGUI()
         if not RGMercConfig.Globals.Minimized then
             openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
         else
-            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI, bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar))
+            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI,
+                bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar))
         end
         ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
 
@@ -272,14 +273,14 @@ local function RGMercsGUI()
             end
         elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
             if RGMercConfig.Globals.PauseMain then
-                if ImGui.ImageButton('RGMercsButton',derpImg:GetTextureID(), ImVec2(30, 30),ImVec2(0.0,0.0), ImVec2(1, 1), ImVec4(0,0,0,0),ImVec4(1,0,0,1)) then
+                if ImGui.ImageButton('RGMercsButton', derpImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
                     RGMercConfig.Globals.Minimized = false
                 end
                 if ImGui.IsItemHovered() then
                     ImGui.SetTooltip("RGMercs is Paused")
                 end
             else
-                if ImGui.ImageButton('RGMercsButton',derpImg:GetTextureID(), ImVec2(30, 30)) then
+                if ImGui.ImageButton('RGMercsButton', derpImg:GetTextureID(), ImVec2(30, 30)) then
                     RGMercConfig.Globals.Minimized = false
                 end
                 if ImGui.IsItemHovered() then
@@ -298,7 +299,7 @@ local function RGMercsGUI()
         ImGui.PopID()
         ImGui.PopStyleVar(3)
         if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
-            if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercConfig.Globals.EscapeMinimizes then
+            if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercUtils.GetSetting("EscapeMinimizes") then
                 RGMercConfig.Globals.Minimized = true
             end
         end
@@ -327,7 +328,7 @@ local function RGInit(...)
 
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", })
 
-    local args = { ... }
+    local args = { ..., }
     -- check mini argument before loading other modules so it minimizes as soon as possible.
     if args and #args > 0 then
         RGMercsLogger.log_info("Arguments passed to RGMercs: %s", table.concat(args, ", "))
@@ -489,7 +490,7 @@ local function Main()
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
     if (RGMercConfig.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() or
-        RGMercConfig.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName()) then
+            RGMercConfig.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName()) then
         RGMercConfig:LoadSettings()
         RGMercModules:ExecAll("LoadSettings")
     end
