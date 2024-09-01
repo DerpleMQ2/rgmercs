@@ -603,7 +603,7 @@ function Module:RunHealRotation()
 end
 
 function Module:RunCureRotation()
-    if (os.clock() - self.TempSettings.CureCheckTimer) < RGMercUtils.GetSettings('CureInterval') then return end
+    if (os.clock() - self.TempSettings.CureCheckTimer) < RGMercUtils.GetSetting('CureInterval') then return end
 
     self.TempSettings.CureCheckTimer = os.clock()
 
