@@ -564,11 +564,11 @@ function RGMercUtils.GetBestSpell(spellList, alreadyResolvedMap)
                             selectedSpell = spell
                         end
                     end
-                else
-                    RGMercUtils.PrintGroupMessage(string.format(
-                        "%s \aw [%s] \ax \ar ! MISSING SPELL ! \ax -- \ag %s \ax -- \aw LVL: %d \ax",
-                        mq.TLO.Me.CleanName(), spellName,
-                        spell.RankName.Name(), spell.Level()))
+                    -- else         --temporarily removed, extreme spam, can possibly readd with Highest Only support so did not refactor
+                    --     RGMercUtils.PrintGroupMessage(string.format(
+                    --         "%s \aw [%s] \ax \ar ! MISSING SPELL ! \ax -- \ag %s \ax -- \aw LVL: %d \ax",
+                    --         mq.TLO.Me.CleanName(), spellName,
+                    --         spell.RankName.Name(), spell.Level()))
                 end
             end
         end -- end if spell nil check
@@ -2450,7 +2450,7 @@ end
 function RGMercUtils.DoBuffCheck()
     if not RGMercUtils.GetSetting('DoBuffs') then return false end
 
-    if mq.TLO.Me.Invis() then return false end
+    if mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BuffWaitMoveTimer') > RGMercConfig:GetTimeSinceLastMove() then return false end
 
     if RGMercUtils.GetXTHaterCount() > 0 or RGMercConfig.Globals.AutoTargetID > 0 then return false end
 

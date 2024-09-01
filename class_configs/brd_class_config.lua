@@ -662,9 +662,9 @@ local _ClassConfig = {
             "Yowl of the Bloodmoon",
             "Beckon of the Tuffein",
             "Voice of the Vampire",
-            "Call of the Banshee", -- 65
-            "Solon's Bewitching Bravura", --39
-            "Solon's Song of the Sirens", --27
+            "Call of the Banshee",        -- 65
+            "Solon's Bewitching Bravura", -- 39
+            "Solon's Song of the Sirens", -- 27
         },
         ['ReflexStrike'] = {
             -- Bard ReflexStrike - Restores mana to group
@@ -1026,7 +1026,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ReflexStrike,
                 cond = function(self, discSpell)
                     local pct = RGMercUtils.GetSetting('GroupManaPct')
-                    return RGMercUtils.NPCDiscReady(discSpell) and (mq.TLO.Group.LowMana(pct)() or -1) > RGMercUtils.GetSetting('GroupManaCt')
+                    return RGMercUtils.NPCDiscReady(discSpell) and (mq.TLO.Group.LowMana(pct)() or -1) >= RGMercUtils.GetSetting('GroupManaCt')
                 end,
             },
             {
@@ -1182,7 +1182,7 @@ local _ClassConfig = {
                     if RGMercUtils.GetSetting('RegenSong') ~= 2 then return false end
                     local pct = RGMercUtils.GetSetting('GroupManaPct')
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell) and
-                        ((RGMercUtils.GetSetting('UseRegen') == 1 and (mq.TLO.Group.LowMana(pct)() or 999) > RGMercUtils.GetSetting('GroupManaCt'))
+                        ((RGMercUtils.GetSetting('UseRegen') == 1 and (mq.TLO.Group.LowMana(pct)() or 999) >= RGMercUtils.GetSetting('GroupManaCt'))
                             or (RGMercUtils.GetSetting('UseRegen') > 1 and self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseRegen")))
                 end,
             },

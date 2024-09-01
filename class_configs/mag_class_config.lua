@@ -891,16 +891,14 @@ _ClassConfig      = {
                 return groupIds
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
-                    RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
             end,
         },
         {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+                return combat_state == "Downtime"
             end,
         },
         {
@@ -947,6 +945,28 @@ _ClassConfig      = {
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
+        {
+            name = 'Summon ModRods',
+            timer = 120, --this will only be checked once every 2 minutes
+            state = 1,
+            steps = 2,
+            targetId = function(self)
+                local groupIds = { mq.TLO.Me.ID(), }
+                local count = mq.TLO.Group.Members()
+                for i = 1, count do
+                    table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                end
+                return groupIds
+            end,
+            cond = function(self, combat_state)
+                if not RGMercUtils.GetSetting('SummonModRods') then return false end
+                local downtime = combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
+                local pct = RGMercUtils.GetSetting('GroupManaPct')
+                local combat = combat_state == "Combat" and RGMercUtils.GetSetting('CombatModRod') and (mq.TLO.Group.LowMana(pct)() or -1) >= RGMercUtils.GetSetting('GroupManaCt') and
+                    not RGMercUtils.Feigning()
+                return downtime or combat
             end,
         },
     },
@@ -1643,50 +1663,6 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "ManaRodSummon",
-                type = "Spell",
-                cond = function(self, spell)
-                    local modRodSpell = self.ResolvedActionMap['ManaRodSummon']
-                    if not modRodSpell or not modRodSpell() then return false end
-                    return RGMercUtils.GetSetting('SummonModRods') and (mq.TLO.Me.AltAbility("Summon Modulation Shard").ID() or 0) == 0 and
-                        mq.TLO.FindItemCount(modRodSpell.RankName.Base(1)() or "")() == 0 and
-                        (mq.TLO.Cursor.ID() or 0) == 0
-                end,
-                post_activate = function(self, spell, success)
-                    if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "group")
-                    end
-                end,
-            },
-            {
-                name = "Summon Modulation Shard",
-                type = "AA",
-                cond = function(self, aaName)
-                    local modRodSpell = mq.TLO.Spell(aaName)
-                    if not modRodSpell or not modRodSpell() then return false end
-                    return RGMercUtils.GetSetting('SummonModRods') and
-                        mq.TLO.FindItemCount(modRodSpell.RankName.Base(1)() or "")() == 0 and
-                        (mq.TLO.Cursor.ID() or 0) == 0 and RGMercUtils.AAReady(aaName)
-                end,
-                post_activate = function(self, aaName, success)
-                    if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, aaName, "group")
-                    end
-                end,
-            },
-            {
-                name = "SelfManaRodSummon",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0 and (mq.TLO.Cursor.ID() or 0) == 0
-                end,
-                post_activate = function(self, spell, success)
-                    if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
-                    end
-                end,
-            },
-            {
                 name = "GatherMana",
                 type = "Spell",
                 cond = function(self, spell)
@@ -1808,8 +1784,52 @@ _ClassConfig      = {
                     return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and RGMercUtils.IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
                 end,
             },
-
-
+        },
+        ['Summon ModRods'] = {
+            {
+                name = "Summon Modulation Shard",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not RGMercUtils.GetSetting('SummonModRods') or not RGMercUtils.CanUseAA(aaName) then return false end
+                    local modRodItem = mq.TLO.Spell(aaName).RankName.Base(1)()
+                    return modRodItem and RGMercUtils.AAReady(aaName) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
+                        (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+                post_activate = function(self, aaName, success)
+                    if success then
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, aaName, "group")
+                    end
+                end,
+            },
+            {
+                name = "ManaRodSummon",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if RGMercUtils.CanUseAA("Summon Modulation Shard") or not RGMercUtils.GetSetting('SummonModRods') then return false end
+                    local modRodItem = spell.RankName.Base(1)()
+                    return modRodItem and RGMercUtils.PCSpellReady(spell) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
+                        (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+                post_activate = function(self, spell, success)
+                    if success then
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "group")
+                    end
+                end,
+            },
+            {
+                name = "SelfManaRodSummon",
+                type = "Spell",
+                cond = function(self, spell, target, combat_state)
+                    if target.ID() ~= mq.TLO.Me.ID() then return false end
+                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0 and (mq.TLO.Cursor.ID() or 0) == 0 and
+                        not (combat_state == "Combat" and mq.TLO.Me.PctMana() > RGMercUtils.GetSetting('GroupManaPct'))
+                end,
+                post_activate = function(self, spell, success)
+                    if success then
+                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                    end
+                end,
+            },
         },
     },
     ['Spells']            = {
@@ -1919,7 +1939,7 @@ _ClassConfig      = {
         ['DoPetHeirlooms'] = { DisplayName = "Do Pet Heirlooms", Category = "Pet", Tooltip = "Summon Heirlooms for Pets", Default = true, },
         ['PetHealPct']     = { DisplayName = "Pet Heal %", Category = "Pet", Tooltip = "Heal pet at [X]% HPs", Default = 80, Min = 1, Max = 99, },
         ['SelfModRod']     = { DisplayName = "Self Mod Rod Item", Category = "Mana", Tooltip = "Click the modrod clicky you want to use here", Type = "ClickyItem", Default = "", },
-        ['SummonModRods']  = { DisplayName = "Summon Mod Rods", Category = "Mana", Tooltip = "Summon Mod Rods", Default = true, },
+        ['SummonModRods']  = { DisplayName = "Summon Mod Rods", Category = "Mana", Index = 1, Tooltip = "Summon Mod Rods", Default = true, },
         ['GatherManaPct']  = { DisplayName = "Gather Mana %", Category = "Mana", Tooltip = "When to use Gather Mana", Default = 70, Min = 1, Max = 99, },
         ['DoForce']        = { DisplayName = "Do Force", Category = "Spells & Abilities", Tooltip = "Use Force of Elements AA", Default = true, },
         ['DoMagicNuke']    = { DisplayName = "Do Magic Nuke", Category = "Spells & Abilities", Tooltip = "Use Magic nukes instead of Fire", Default = false, },
@@ -1928,6 +1948,9 @@ _ClassConfig      = {
         ['AIGroupDelay']   = { DisplayName = "Autoinv Delay (Group)", Category = "Utilities", Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.", Default = 150, Min = 1, Max = 500, },
         ['DoMalo']         = { DisplayName = "Cast Malo", Category = "Debuffs", Tooltip = "Do Malo Spells/AAs", Default = true, },
         ['DoAEMalo']       = { DisplayName = "Cast AE Malo", Category = "Debuffs", Tooltip = "Do AE Malo Spells/AAs", Default = false, },
+        ['CombatModRod']   = { DisplayName = "Combat Mod Rods", Category = "Mana", Index = 2, Tooltip = "Summon Mod Rods in combat if the criteria below are met.", Default = true, ConfigType = "Advanced", },
+        ['GroupManaPct']   = { DisplayName = "Combat ModRod %", Category = "Mana", Index = 3, Tooltip = "Mana% to begin summoning Mod Rods in combat.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['GroupManaCt']    = { DisplayName = "Combat ModRod Count", Category = "Mana", Index = 4, Tooltip = "The number of party members (including yourself) that need to be under the above mana percentage.", Default = 3, Min = 1, Max = 6, ConfigType = "Advanced", },
     },
 }
 

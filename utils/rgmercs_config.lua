@@ -207,7 +207,6 @@ Config.DefaultConfig = {
     ['WardsPlease']          = { DisplayName = "Enable Wards", Category = "Wards", Tooltip = "Enable Ward Type Spells", Default = true, ConfigType = "Normal", },
 
     -- [ BUFF ] --
-    ['DoTwist']              = { DisplayName = "Enable Bard Twisting", Category = "Buffs", Tooltip = "Use MQ2Twist", Default = true, ConfigType = "Advanced", },
     ['DoBuffs']              = { DisplayName = "Do Buffs", Category = "Buffs", Tooltip = "Do Non-Class Specific Buffs.", Default = true, ConfigType = "Advanced", },
     ['BuffWaitMoveTimer']    = { DisplayName = "Buff Wait Timer", Category = "Buffs", Tooltip = "Seconds to wait after stoping movement before doing buffs.", Default = 5, Min = 0, Max = 60, ConfigType = "Advanced", },
 

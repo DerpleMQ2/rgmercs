@@ -665,7 +665,6 @@ local _ClassConfig = {
             "Legacy of Spike",
             -- Group Damage Shield -- Combined all single and group dammage shields.
             "Legacy of Bloodspikes",
-            "Duskthorn",
             "Legacy of Icebriars",
             "Icebriar Bulwark",
             "Legacy of Daggerspikes",
@@ -876,8 +875,7 @@ local _ClassConfig = {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck() and RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
             end,
         },
         {
@@ -895,8 +893,7 @@ local _ClassConfig = {
                 return groupIds
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and
-                    RGMercConfig:GetTimeSinceLastMove() > RGMercUtils.GetSetting('BuffWaitMoveTimer')
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
             end,
         },
         {
