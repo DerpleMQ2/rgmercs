@@ -261,7 +261,7 @@ Config.DefaultConfig = {
     -- [ ANNOUNCEMENTS ] --
     ['AnnounceTarget']       = { DisplayName = "Announce Target", Category = "Announcements", Tooltip = "Announces Target over DanNet in kissassist format, incase you are running a mixed set on your group.Config", Default = false, ConfigType = "Advanced", },
     ['MezAnnounce']          = { DisplayName = "Mez Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts.", ConfigType = "Normal", },
-    ['MezAnnounceGroup']     = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group.", ConfigType = "Normal", },
+    ['MezAnnounceGroup']     = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group DO NOT USE WITH OPEN GROUPS.", ConfigType = "Advanced", },
     ['CharmAnnounce']        = { DisplayName = "Charm Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce Charm casts.", ConfigType = "Advanced", },
     ['CharmAnnounceGroup']   = { DisplayName = "Charm Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce Charm casts In group.", ConfigType = "Advanced", },
 
@@ -298,8 +298,14 @@ function Config:LoadSettings()
     self.Globals.CurServer      = mq.TLO.EverQuest.Server():gsub(" ", "")
     if self.Globals.BuildType == 'Emu' then
         self.DefaultConfig['DoMercenary'] = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = false, ConfigType = "Normal", }
-        self.DefaultConfig['DoFellow'] = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = false, ConfigType =
-        "Advanced", }
+        self.DefaultConfig['DoFellow'] = {
+            DisplayName = "Enable Fellowship Insignia",
+            Category = "Fellowship",
+            Tooltip = "Use fellowship insignia automatically.",
+            Default = false,
+            ConfigType =
+            "Advanced",
+        }
     end
     RGMercsLogger.log_info("\ayLoading Main Settings for %s!", self.Globals.CurLoadedChar)
 
