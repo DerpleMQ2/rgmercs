@@ -897,6 +897,13 @@ local _ClassConfig = {
         ['Debuff'] = {},
         ['Emergency'] = {
             {
+                name = "Shield Flash",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('FlashHP')
+                end,
+            },
+            {
                 name = mq.TLO.Me.Inventory("Chest").Name(),
                 type = "Item",
                 active_cond = function(self)
@@ -1033,7 +1040,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Blade,
                 cond = function(self)
                     return RGMercUtils.GetTargetID() > 0 and RGMercUtils.GetTargetPctHPs() > 5 and
-                        RGMercUtils.GetTargetDistance() < 35 and ((mq.TLO.Me.Inventory("mainhand").Type() or ""):find("2H"))
+                        RGMercUtils.GetTargetDistance() < 35
                 end,
             },
             {
