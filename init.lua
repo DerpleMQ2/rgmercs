@@ -290,6 +290,11 @@ local function RGMercsGUI()
 
         ImGui.PopID()
         ImGui.PopStyleVar(3)
+        if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
+            if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercConfig.Globals.EscapeMinimizes then
+                RGMercConfig.Globals.Minimized = true
+            end
+        end
         if themeColorPop > 0 then
             ImGui.PopStyleColor(themeColorPop)
         end
