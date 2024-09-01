@@ -376,8 +376,8 @@ local function RGInit(...)
         RGMercUtils.DoCmd("/macro end")
     end
 
-    RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host If it exists! (/%s pause on)",
-        mq.TLO.Me.Class.ShortName())
+    -- RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
+    --     mq.TLO.Me.Class.ShortName())
     RGMercUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
 
     if RGMercUtils.CanUseAA("Companion's Discipline") then
