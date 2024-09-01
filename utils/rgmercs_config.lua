@@ -31,6 +31,7 @@ Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
 Config.Globals.CastResult            = 0
 Config.Globals.BuildType             = mq.TLO.MacroQuest.BuildName()
 Config.Globals.Minimized             = false
+Config.Globals.EscapeMinimizes       = false
 
 -- Constants
 Config.Constants                     = {}
@@ -257,6 +258,7 @@ Config.DefaultConfig = {
     ['FrameEdgeRounding']    = { DisplayName = "Frame Edge Rounding", Category = "UI", Tooltip = "Frame Edge Rounding for the RGMercs UI", Default = 6, Min = 0, Max = 50, },
     ['ScrollBarRounding']    = { DisplayName = "Scroll Bar Rounding", Category = "UI", Tooltip = "Frame Edge Rounding for the RGMercs UI", Default = 10, Min = 0, Max = 50, },
     ['ShowAdvancedOpts']     = { DisplayName = "Show Advanced Options", Category = "UI", Tooltip = "Show Advanced Options", Type = "Custom", Default = false, ConfigType = "Advanced", },
+    ['EscapeMinimizes']      = { DisplayName = "Minimize on Escape", Category = "UI", Tooltip = "Minimizes the window if focused and Escape is pressed", Default = false, ConfigType = "Normal", },
 
     -- [ ANNOUNCEMENTS ] --
     ['AnnounceTarget']       = { DisplayName = "Announce Target", Category = "Announcements", Tooltip = "Announces Target over DanNet in kissassist format, incase you are running a mixed set on your group.Config", Default = false, ConfigType = "Advanced", },
@@ -283,7 +285,7 @@ end
 
 function Config:SaveSettings(doBroadcast)
     mq.pickle(self:GetConfigFileName(), self.settings)
-
+    self.Globals.EscapeMinimizes = RGMercUtils.GetSetting('EscapeMinimizes')
     RGMercsLogger.set_log_level(RGMercUtils.GetSetting('LogLevel'))
     RGMercsLogger.set_log_to_file(RGMercUtils.GetSetting('LogToFile'))
 
@@ -322,7 +324,7 @@ function Config:LoadSettings()
     end
 
     self.settings = RGMercUtils.ResolveDefaults(Config.DefaultConfig, self.settings)
-
+    self.Globals.EscapeMinimizes = RGMercUtils.GetSetting('EscapeMinimizes')
     if needSave then
         self:SaveSettings(false)
     end

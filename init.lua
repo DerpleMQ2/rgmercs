@@ -286,10 +286,22 @@ local function RGMercsGUI()
                     ImGui.SetTooltip("RGMercs is Running")
                 end
             end
+            if ImGui.BeginPopupContextWindow() then
+                local pauseLabel = RGMercConfig.Globals.PauseMain and "Resume" or "Pause"
+                if ImGui.MenuItem(pauseLabel) then
+                    RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
+                end
+                ImGui.EndPopup()
+            end
         end
 
         ImGui.PopID()
         ImGui.PopStyleVar(3)
+        if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
+            if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercConfig.Globals.EscapeMinimizes then
+                RGMercConfig.Globals.Minimized = true
+            end
+        end
         if themeColorPop > 0 then
             ImGui.PopStyleColor(themeColorPop)
         end
@@ -476,7 +488,8 @@ local function Main()
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
-    if RGMercConfig.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() then
+    if (RGMercConfig.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() or
+        RGMercConfig.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName()) then
         RGMercConfig:LoadSettings()
         RGMercModules:ExecAll("LoadSettings")
     end
