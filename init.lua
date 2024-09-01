@@ -286,6 +286,13 @@ local function RGMercsGUI()
                     ImGui.SetTooltip("RGMercs is Running")
                 end
             end
+            if ImGui.BeginPopupContextWindow() then
+                local pauseLabel = RGMercConfig.Globals.PauseMain and "Resume" or "Pause"
+                if ImGui.MenuItem(pauseLabel) then
+                    RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
+                end
+                ImGui.EndPopup()
+            end
         end
 
         ImGui.PopID()
