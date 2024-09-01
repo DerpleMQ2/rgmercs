@@ -230,7 +230,7 @@ Config.DefaultConfig = {
     ['BuffRezables']         = { DisplayName = "Buff Rezables", Category = "Rez", Tooltip = "If this PC has a corpse near us buff them even though they are likely to get rezed.", Default = false, ConfigType = "Advanced", },
 
     -- [ FELLOWSHIP ] --
-    ['DoFellow']             = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = true, ConfigType = "Advanced", },
+    ['DoFellow']             = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = false, ConfigType = "Advanced", },
 
     -- [ TARGETING ] --
     ['FollowMarkTarget']     = { DisplayName = "Follow Mark Target", Category = "Targeting", Tooltip = "Auto target MA target Marks.", Default = false, ConfigType = "Advanced", },
