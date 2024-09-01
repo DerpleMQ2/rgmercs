@@ -897,6 +897,13 @@ local _ClassConfig = {
         ['Debuff'] = {},
         ['Emergency'] = {
             {
+                name = "Shield Flash",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('FlashHP')
+                end,
+            },
+            {
                 name = mq.TLO.Me.Inventory("Chest").Name(),
                 type = "Item",
                 active_cond = function(self)
