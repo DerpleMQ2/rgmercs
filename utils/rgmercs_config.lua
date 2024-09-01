@@ -7,7 +7,7 @@ local Config                         = {
     _subVersion = "2023 Laurion\'s Song!",
     _name =
     "RGMercs Lua Edition",
-    _author = 'Derple, Morisato, Greyn',
+    _author = 'Derple, Morisato, Greyn, Algar, Grimmier',
 }
 Config.__index                       = Config
 Config.settings                      = {}
@@ -30,7 +30,7 @@ Config.Globals.CurLoadedClass        = mq.TLO.Me.Class.ShortName()
 Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
 Config.Globals.CastResult            = 0
 Config.Globals.BuildType             = mq.TLO.MacroQuest.BuildName()
-Config.Globals.Minimized            = false
+Config.Globals.Minimized             = false
 
 -- Constants
 Config.Constants                     = {}
@@ -262,8 +262,8 @@ Config.DefaultConfig = {
     ['AnnounceTarget']       = { DisplayName = "Announce Target", Category = "Announcements", Tooltip = "Announces Target over DanNet in kissassist format, incase you are running a mixed set on your group.Config", Default = false, ConfigType = "Advanced", },
     ['MezAnnounce']          = { DisplayName = "Mez Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts.", ConfigType = "Normal", },
     ['MezAnnounceGroup']     = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group.", ConfigType = "Normal", },
-    ['CharmAnnounce']          = { DisplayName = "Charm Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce Charm casts.", ConfigType = "Advanced", },
-    ['CharmAnnounceGroup']     = { DisplayName = "Charm Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce Charm casts In group.", ConfigType = "Advanced", },
+    ['CharmAnnounce']        = { DisplayName = "Charm Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce Charm casts.", ConfigType = "Advanced", },
+    ['CharmAnnounceGroup']   = { DisplayName = "Charm Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce Charm casts In group.", ConfigType = "Advanced", },
 
 }
 
@@ -297,8 +297,9 @@ function Config:LoadSettings()
     self.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
     self.Globals.CurServer      = mq.TLO.EverQuest.Server():gsub(" ", "")
     if self.Globals.BuildType == 'Emu' then
-        self.DefaultConfig['DoMercenary']= { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = false, ConfigType = "Normal", }
-        self.DefaultConfig['DoFellow'] = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = false, ConfigType = "Advanced", }
+        self.DefaultConfig['DoMercenary'] = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = false, ConfigType = "Normal", }
+        self.DefaultConfig['DoFellow'] = { DisplayName = "Enable Fellowship Insignia", Category = "Fellowship", Tooltip = "Use fellowship insignia automatically.", Default = false, ConfigType =
+        "Advanced", }
     end
     RGMercsLogger.log_info("\ayLoading Main Settings for %s!", self.Globals.CurLoadedChar)
 
