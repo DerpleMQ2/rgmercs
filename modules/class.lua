@@ -464,9 +464,11 @@ function Module:SelfCheckAndRez()
     local rezCount = mq.TLO.SpawnCount(rezSearch)()
 
     for i = 1, rezCount do
+        RGMercsLogger.log_debug("\atSelfCheckAndRez(): Looking for corpse #%d", i)
         local rezSpawn = mq.TLO.NearestSpawn(i, rezSearch)
 
         if rezSpawn() then
+            RGMercsLogger.log_debug("\atSelfCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
             if self.ClassConfig.HelperFunctions and self.ClassConfig.HelperFunctions.DoRez then
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
                     RGMercUtils.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
@@ -481,12 +483,14 @@ function Module:IGCheckAndRez()
     local rezCount = mq.TLO.SpawnCount(self.Constants.RezSearchGroup)()
 
     for i = 1, rezCount do
+        RGMercsLogger.log_debug("\atIGCheckAndRez(): Looking for corpse #%d", i)
         local rezSpawn = mq.TLO.NearestSpawn(i, self.Constants.RezSearchGroup)
 
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
+                RGMercsLogger.log_debug("\atIGCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
-                    RGMercsLogger.log_debug("Attempting to Res: %s", rezSpawn.CleanName())
+                    RGMercsLogger.log_debug("\atIGCheckAndRez(): Attempting to Res: %s", rezSpawn.CleanName())
                     RGMercUtils.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end

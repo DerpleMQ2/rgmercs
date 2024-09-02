@@ -270,6 +270,14 @@ local _ClassConfig = {
             "Remove Greater Curse",
             "Eradicate Curse",
         },
+        -- Some of these probably only work on EMU servers.
+        ['RezSpell'] =
+        {
+            'Incarnate Anew',
+            'Resuscitate',
+            'Revive',
+            'Reanimation',
+        },
         ["RecklessHeal1"] = {
             "Reckless Reinvigoration",
             "Reckless Resurgence",
@@ -670,12 +678,16 @@ local _ClassConfig = {
     },
     ['HelperFunctions']   = {
         DoRez = function(self, corpseId)
-            if not RGMercUtils.PCSpellReady(mq.TLO.Spell("Incarnate Anew")) and
+            RGMercsLogger.log_debug("DoRez(): Checking for a valid rez ability.")
+            local rezSpell = RGMercUtils.GetResolvedActionMapItem('RezSpell')
+            if (not RGMercUtils.PCSpellReady(rezSpell)) and
                 not mq.TLO.FindItem("Staff of Forbidden Rites")() and
                 not RGMercUtils.CanUseAA("Rejuvenation of Spirit") and
                 not RGMercUtils.CanUseAA("Call of the Wild") then
                 return false
             end
+
+            RGMercsLogger.log_debug("DoRez(): Found for a valid rez ability.")
 
             RGMercUtils.SetTarget(corpseId)
 
@@ -690,6 +702,7 @@ local _ClassConfig = {
             local targetClass = target.Class.ShortName()
 
             if RGMercUtils.GetXTHaterCount() > 0 and (targetClass == "dru" or targetClass == "clr" or RGMercUtils.GetSetting('DoBattleRez')) then
+                RGMercsLogger.log_debug("DoRez(): Doing Battle Rez!")
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
                     return RGMercUtils.UseItem("Staff of Forbidden Rites", corpseId)
                 end
@@ -698,13 +711,18 @@ local _ClassConfig = {
                     return RGMercUtils.UseAA("Call of the Wild", corpseId)
                 end
             elseif RGMercUtils.GetXTHaterCount() == 0 then
+                RGMercsLogger.log_debug("DoRez(): Doing out of combat Rez!")
                 if RGMercUtils.CanUseAA("Rejuvenation of Spirit") then
+                    RGMercsLogger.log_debug("DoRez(): Using AA Rez!")
                     return RGMercUtils.UseAA("Rejuvenation of Spirit", corpseId)
                 end
 
-                if RGMercUtils.PCSpellReady(mq.TLO.Spell("Incarnate Anew")) then
-                    return RGMercUtils.UseSpell("Incarnate Anew", corpseId, true, true)
+                if RGMercUtils.PCSpellReady(rezSpell) then
+                    RGMercsLogger.log_debug("DoRez(): Using Spell Res: %s", rezSpell.RankName.Name())
+                    return RGMercUtils.UseSpell(rezSpell.RankName.Name(), corpseId, true, true)
                 end
+
+                RGMercsLogger.log_debug("DoRez(): Failed out of combat Rez!")
             end
 
             return false
