@@ -964,7 +964,7 @@ local _ClassConfig = {
 
                     if not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
