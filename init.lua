@@ -105,6 +105,8 @@ local function RGMercsGUI()
         return
     end
 
+    ImGui.SetNextWindowSize(ImVec2(500, 600), ImGuiCond.FirstUseEver)
+
     if openGUI and Alive() then
         if theme ~= nil then
             for _, t in pairs(theme) do
