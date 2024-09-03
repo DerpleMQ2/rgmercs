@@ -1257,11 +1257,18 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
             RGMercsLogger.log_verbose("\agUseSpell(): Done Waiting on Global Cooldown After Casting: %s", spellName)
         end
 
+        RGMercConfig.Globals.LastUsedSpell = spellName
         return true
     end
 
     RGMercsLogger.log_verbose("\arCasting Failed: Invalid Spell Name")
     return false
+end
+
+--- gets the last used spell name
+---@return string
+function RGMercUtils.GetLastUsedSpell()
+    return RGMercConfig.Globals.LastUsedSpell
 end
 
 ---@param caller self               # caller object to pass back into condition checks
@@ -2694,8 +2701,9 @@ function RGMercUtils.EngageTarget(autoTargetId)
 
                     if not mq.TLO.Me.Combat() then
                         RGMercsLogger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", RGMercUtils.GetTargetCleanName())
-                        if RGMercUtils.IAmMA() and RGMercUtils.GetSetting('AnnounceTarget') then
-                            RGMercUtils.PrintGroupMessage('TANKING-> %s <- ID:%d', RGMercUtils.GetTargetCleanName(), autoTargetId)
+                        if RGMercUtils.IAmMA() then
+                            RGMercUtils.HandleAnnounce(string.format('TANKING -> %s <-', RGMercUtils.GetTargetCleanName()), RGMercUtils.GetSetting('AnnounceTargetGroup'),
+                                RGMercUtils.GetSetting('AnnounceTarget'))
                         end
                         RGMercUtils.DoCmd("/attack on")
                     end
@@ -3109,34 +3117,20 @@ function RGMercUtils.FindTarget(validateFn)
 end
 
 -- cleaned up message handlers for announcements
-function RGMercUtils.HandleMezAnnounce(msg)
-    if RGMercUtils.GetSetting('MezAnnounceGroup') and RGMercUtils.GetSetting('MezAnnounce') then
+---@param msg string
+---@param sendGroup boolean
+---@param sendDan boolean
+function RGMercUtils.HandleAnnounce(msg, sendGroup, sendDan)
+    if sendGroup then
         local cleanMsg = msg:gsub("\a.", "")
         RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-        RGMercUtils.PrintGroupMessage(msg)
-    elseif RGMercUtils.GetSetting('MezAnnounceGroup') then
-        local cleanMsg = msg:gsub("\a.", "")
-        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-    elseif RGMercUtils.GetSetting('MezAnnounce') then
-        RGMercUtils.PrintGroupMessage(msg)
-    else
-        RGMercsLogger.log_debug(msg)
     end
-end
 
-function RGMercUtils.HandleCharmAnnounce(msg)
-    if RGMercUtils.GetSetting('CharmAnnounceGroup') and RGMercUtils.GetSetting('CharmAnnounce') then
-        local cleanMsg = msg:gsub("\a.", "")
-        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
+    if sendDan then
         RGMercUtils.PrintGroupMessage(msg)
-    elseif RGMercUtils.GetSetting('CharmAnnounceGroup') then
-        local cleanMsg = msg:gsub("\a.", "")
-        RGMercUtils.DoCmd("/gsay %s", cleanMsg)
-    elseif RGMercUtils.GetSetting('CharmAnnounce') then
-        RGMercUtils.PrintGroupMessage(msg)
-    else
-        RGMercsLogger.log_debug(msg)
     end
+
+    RGMercsLogger.log_debug(msg)
 end
 
 ---@param printDebug boolean?

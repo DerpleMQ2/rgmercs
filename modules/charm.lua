@@ -186,7 +186,8 @@ end
 
 function Module:HandleCharmBroke(mobName, breakerName)
 	RGMercsLogger.log_debug("%s broke charm on ==> %s", breakerName, mobName)
-	RGMercUtils.HandleCharmAnnounce(string.format("\ar CHARM Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName))
+	RGMercUtils.HandleAnnounce(string.format("\ar CHARM Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName),
+		RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
 end
 
 function Module:AddImmuneTarget(mobId, mobData)
@@ -224,8 +225,8 @@ function Module:CharmNow(charmId, useAA)
 	if not charmSpell or not charmSpell() then return end
 	local dCharm = not RGMercUtils.MyClassIs("BRD") and RGMercUtils.GetSetting("DireCharm") or false
 	if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
-		RGMercsLogger.log_debug("Performing DIRE CHARM --> %d", charmId)
-		RGMercUtils.HandleCharmAnnounce(string.format("Performing DIRE CHARM --> %d", charmId))
+		RGMercUtils.HandleAnnounce(string.format("Performing DIRE CHARM --> %d", mq.TLO.Spawn(charmId).CleanName() or "Unknown"), RGMercUtils.GetSetting('CharmAnnounceGroup'),
+			RGMercUtils.GetSetting('CharmAnnounce'))
 		RGMercUtils.UseAA("Dire Charm", charmId)
 	else
 		if RGMercUtils.MyClassIs("brd") then
@@ -242,12 +243,12 @@ function Module:CharmNow(charmId, useAA)
 	mq.doevents()
 
 	if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or mq.TLO.Pet.ID() > 0 then
-		RGMercUtils.HandleCharmAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s \aw : \ar %d",
-			mq.TLO.Spawn(charmId).CleanName(), charmId))
+		RGMercUtils.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
+			mq.TLO.Spawn(charmId).CleanName(), charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
 	else
-		RGMercUtils.HandleCharmAnnounce(string.format("\ar CHARM Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
+		RGMercUtils.HandleAnnounce(string.format("\ar CHARM Failed: %s \ag -> \ay %s \ag <-",
 			RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(charmId).CleanName(),
-			charmId))
+			charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
 	end
 
 	mq.doevents()

@@ -31,6 +31,7 @@ Config.Globals.CurServer             = mq.TLO.EverQuest.Server():gsub(" ", "")
 Config.Globals.CastResult            = 0
 Config.Globals.BuildType             = mq.TLO.MacroQuest.BuildName()
 Config.Globals.Minimized             = false
+Config.Globals.LastUsedSpell         = "None"
 
 -- Constants
 Config.Constants                     = {}
@@ -264,10 +265,15 @@ Config.DefaultConfig = {
 
     -- [ ANNOUNCEMENTS ] --
     ['AnnounceTarget']       = { DisplayName = "Announce Target", Category = "Announcements", Tooltip = "Announces Target over DanNet in kissassist format, incase you are running a mixed set on your group.Config", Default = false, ConfigType = "Advanced", },
+    ['AnnounceTargetGroup']  = { DisplayName = "Announce Target to Group", Category = "Announcements", Tooltip = "Announces Target over /gsay", Default = false, ConfigType = "Advanced", },
     ['MezAnnounce']          = { DisplayName = "Mez Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts.", ConfigType = "Normal", },
-    ['MezAnnounceGroup']     = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group DO NOT USE WITH OPEN GROUPS.", ConfigType = "Advanced", },
+    ['MezAnnounceGroup']     = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group.", ConfigType = "Advanced", },
     ['CharmAnnounce']        = { DisplayName = "Charm Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce Charm casts.", ConfigType = "Advanced", },
     ['CharmAnnounceGroup']   = { DisplayName = "Charm Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce Charm casts In group.", ConfigType = "Advanced", },
+    ['HealAnnounce']         = { DisplayName = "Heal Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce Heal casts.", ConfigType = "Advanced", },
+    ['HealAnnounceGroup']    = { DisplayName = "Heal Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce Heal casts In group.", ConfigType = "Advanced", },
+    ['CureAnnounce']         = { DisplayName = "Cure Announce", Category = "Announcements", Default = false, Tooltip = "Set to announce Cure casts.", ConfigType = "Advanced", },
+    ['CureAnnounceGroup']    = { DisplayName = "Cure Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce Cure casts In group.", ConfigType = "Advanced", },
 
 }
 

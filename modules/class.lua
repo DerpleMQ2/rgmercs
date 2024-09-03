@@ -574,6 +574,9 @@ function Module:HealById(id)
                 RGMercsLogger.log_verbose(
                     "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \agSuccessful\aw!", id,
                     rotation.name)
+                RGMercUtils.HandleAnnounce(string.format('Healed %s :: %s', healTarget.CleanName() or "Target", RGMercUtils.GetLastUsedSpell()),
+                    RGMercUtils.GetSetting('HealAnnounceGroup'),
+                    RGMercUtils.GetSetting('HealAnnounce'))
                 break
             else
                 RGMercsLogger.log_verbose(
@@ -649,6 +652,10 @@ function Module:RunCureRotation()
                             if cureTarget and cureTarget() then
                                 -- Cure it!
                                 if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
+                                    RGMercUtils.HandleAnnounce(
+                                        string.format('Attempting to cure %s of %s', cureTarget.CleanName() or "Target", data.type),
+                                        RGMercUtils.GetSetting('CureAnnounceGroup'),
+                                        RGMercUtils.GetSetting('CureAnnounce'))
                                     RGMercUtils.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, cureTarget.ID())
                                 end
                             end

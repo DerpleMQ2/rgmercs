@@ -181,7 +181,8 @@ end
 
 function Module:HandleMezBroke(mobName, breakerName)
     RGMercsLogger.log_debug("%s broke mez on ==> %s", breakerName, mobName)
-    RGMercUtils.HandleMezAnnounce(string.format("\ar MEZ Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName))
+    RGMercUtils.HandleAnnounce(string.format("\ar MEZ Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName), RGMercUtils.GetSetting('MezAnnounceGroup'),
+        RGMercUtils.GetSetting('MezAnnounce'))
 end
 
 function Module:AddImmuneTarget(mobId, mobData)
@@ -237,14 +238,17 @@ function Module:MezNow(mezId, useAE, useAA)
             RGMercUtils.DoCmd("/face fast")
             -- Delay to wait till face finishes
             mq.delay(5)
-            RGMercUtils.HandleMezAnnounce(string.format("\aw I AM \ar AE AA MEZZING \ag Beam of Slumber"))
+            RGMercUtils.HandleAnnounce(string.format("\aw I AM \ar AE AA MEZZING \ag Beam of Slumber"), RGMercUtils.GetSetting('MezAnnounceGroup'),
+                RGMercUtils.GetSetting('MezAnnounce'))
             RGMercUtils.UseAA("Beam of Slumber", mezId)
-            RGMercUtils.HandleMezAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"))
+            RGMercUtils.HandleAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"), RGMercUtils.GetSetting('MezAnnounceGroup'),
+                RGMercUtils.GetSetting('MezAnnounce'))
             -- reset timers
         elseif RGMercUtils.NPCSpellReady(aeMezSpell.RankName.Name(), mezId, false) then
             -- If we're here we're not doing AA-based AE Mezzing. We're either using our bard song or
             -- ENCH/NEC Spell
-            RGMercUtils.HandleMezAnnounce(string.format("\aw I AM \ar AE SPELL MEZZING \ag %s", aeMezSpell.RankName()))
+            RGMercUtils.HandleAnnounce(string.format("\aw I AM \ar AE SPELL MEZZING \ag %s", aeMezSpell.RankName()), RGMercUtils.GetSetting('MezAnnounceGroup'),
+                RGMercUtils.GetSetting('MezAnnounce'))
             -- Added this If to avoid rewriting SpellNow to be bard friendly.
             -- we can just invoke The bard SongNow which already accounts for all the weird bard stuff
             -- Setting the recast time for the bard ae song after cast.
@@ -256,7 +260,8 @@ function Module:MezNow(mezId, useAE, useAA)
             else
                 RGMercUtils.UseSpell(aeMezSpell.RankName(), mezId, false)
             end
-            RGMercUtils.HandleMezAnnounce(string.format("\aw I JUST CAST \ar AE SPELL MEZ \ag %s", aeMezSpell.RankName()))
+            RGMercUtils.HandleAnnounce(string.format("\aw I JUST CAST \ar AE SPELL MEZ \ag %s", aeMezSpell.RankName()), RGMercUtils.GetSetting('MezAnnounceGroup'),
+                RGMercUtils.GetSetting('MezAnnounce'))
         end
 
         -- In case they're mez immune
@@ -268,20 +273,20 @@ function Module:MezNow(mezId, useAE, useAA)
             -- Bard AA Mez is Dirge of the Sleepwalker
             -- Only bards have single target AA Mez
             -- Cast and Return
-            RGMercUtils.HandleMezAnnounce("\aw I AM USING \ar BRD AA MEZ \ag Dirge of the Sleepwalker")
+            RGMercUtils.HandleAnnounce("\aw I AM USING \ar BRD AA MEZ \ag Dirge of the Sleepwalker", RGMercUtils.GetSetting('MezAnnounceGroup'),
+                RGMercUtils.GetSetting('MezAnnounce'))
             RGMercUtils.UseAA("Dirge of the Sleepwalker", mezId)
-            RGMercUtils.HandleMezAnnounce("\aw I JUST CAST \ar BRD AA MEZ \ag Dirge of the Sleepwalker")
+            RGMercUtils.HandleAnnounce("\aw I JUST CAST \ar BRD AA MEZ \ag Dirge of the Sleepwalker", RGMercUtils.GetSetting('MezAnnounceGroup'),
+                RGMercUtils.GetSetting('MezAnnounce'))
 
             mq.doevents()
 
             if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
-                RGMercUtils.HandleMezAnnounce(string.format("\ar JUST MEZZED \aw -> \ag %s \aw on \ay %s \aw : \ar %d",
-                    "Dirge of the Sleepwalker",
-                    mq.TLO.Spawn(mezId).CleanName(), mezId))
+                RGMercUtils.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s <- Using: \at%s",
+                    mq.TLO.Spawn(mezId).CleanName(), "Dirge of the Sleepwalker"), RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
             else
-                RGMercUtils.HandleMezAnnounce(string.format("\ar MEZ Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
-                    RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(mezId).CleanName(),
-                    mezId))
+                RGMercUtils.HandleAnnounce(string.format("\ar MEZ Failed: \ag -> \ay %s \ag <-", mq.TLO.Spawn(mezId).CleanName()), RGMercUtils.GetSetting('MezAnnounceGroup'),
+                    RGMercUtils.GetSetting('MezAnnounce'))
             end
 
             mq.doevents()
@@ -303,13 +308,12 @@ function Module:MezNow(mezId, useAE, useAA)
         mq.doevents()
 
         if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS then
-            RGMercUtils.HandleMezAnnounce(string.format("\ar JUST MEZZED \aw -> \ag %s \aw on \ay %s \aw : \ar %d",
-                mezSpell.RankName(),
-                mq.TLO.Spawn(mezId).CleanName(), mezId))
+            RGMercUtils.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s \aw <- Using: \at%s",
+                    mq.TLO.Spawn(mezId).CleanName(), mezSpell.RankName()), RGMercUtils.GetSetting('MezAnnounceGroup'),
+                RGMercUtils.GetSetting('MezAnnounce'))
         else
-            RGMercUtils.HandleMezAnnounce(string.format("\ar MEZ Failed: %s \ag -> \ay %s \ag <- \ar ID:%d",
-                RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(mezId).CleanName(),
-                mezId))
+            RGMercUtils.HandleAnnounce(string.format("\ar MEZ Failed \ag -> \ay %s \ag <-", mq.TLO.Spawn(mezId).CleanName()), RGMercUtils.GetSetting('MezAnnounceGroup'),
+                RGMercUtils.GetSetting('MezAnnounce'))
         end
 
         mq.doevents()
