@@ -246,8 +246,8 @@ function Module:CharmNow(charmId, useAA)
 		RGMercUtils.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
 			mq.TLO.Spawn(charmId).CleanName(), charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
 	else
-		RGMercUtils.HandleAnnounce(string.format("\ar CHARM Failed: %s \ag -> \ay %s \ag <-",
-			RGMercUtils.GetLastCastResultName(), mq.TLO.Spawn(charmId).CleanName(),
+		RGMercUtils.HandleAnnounce(string.format("\ar CHARM Failed: \ag -> \ay %s \ag <-",
+			mq.TLO.Spawn(charmId).CleanName(),
 			charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
 	end
 
