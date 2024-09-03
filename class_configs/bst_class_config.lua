@@ -2,7 +2,7 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version              = "1.0",
+    _version              = "1.1",
     _author               = "Derple, Algar",
     ['Modes']             = {
         'DPS',
@@ -746,14 +746,6 @@ return {
             return RGMercUtils.SongActiveByName("Bestial Alignment") or (disc and disc() and RGMercUtils.SongActiveByName(disc.Name()))
                 or RGMercUtils.BuffActiveByName("Ferociousness")
         end,
-        DotSpellCheck = function(spell) --Check dot stacking, stop dotting when a dynamic HP threshold is met(Named vs Trash)
-            if not spell or not spell() then return false end
-            local named = RGMercUtils.IsNamed(mq.TLO.Target)
-            local targethp = RGMercUtils.GetTargetPctHPs()
-
-            return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
-                ((named and (RGMercUtils.GetSetting('NamedStopDOT') < targethp)) or (not named and RGMercUtils.GetSetting('HPStopDOT') < targethp))
-        end,
     },
     ['Rotations']         = {
         ['Burn'] = {
@@ -968,8 +960,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoDot') then return false end
-                    return self.ClassConfig.HelperFunctions.DotSpellCheck(spell) and (mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDot') or RGMercUtils.BurnCheck()) and
-                        RGMercUtils.NPCSpellReady(spell)
+                    return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
             {
@@ -977,8 +968,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoDot') then return false end
-                    return self.ClassConfig.HelperFunctions.DotSpellCheck(spell) and (mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDot') or RGMercUtils.BurnCheck()) and
-                        RGMercUtils.NPCSpellReady(spell)
+                    return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
             {
@@ -986,8 +976,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoDot') then return false end
-                    return self.ClassConfig.HelperFunctions.DotSpellCheck(spell) and (mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDot') or RGMercUtils.BurnCheck()) and
-                        RGMercUtils.NPCSpellReady(spell)
+                    return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
             {
@@ -1480,9 +1469,8 @@ return {
         ['ParaPct']        = { DisplayName = "Paragon %", Category = "Mana Mgmt.", Index = 2, Tooltip = "Minimum mana % before we use Paragon of Spirit.", Default = 80, Min = 1, Max = 99, ConfigType = "Advanced", },
         ['FParaPct']       = { DisplayName = "F.Paragon %", Category = "Mana Mgmt.", Index = 3, Tooltip = "Minimum mana % before we use Focused Paragon.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
         ['DowntimeFP']     = { DisplayName = "Downtime F.Paragon", Category = "Mana Mgmt.", Index = 4, Tooltip = "Use Focused Paragon outside of Combat.", Default = false, ConfigType = "Advanced", },
-        ['ManaToDot']      = { DisplayName = "Min Mana to Dot", Category = "Mana Mgmt.", Index = 5, Tooltip = "The minimum Mana % to use DoTs outside of burns.", Default = 40, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['HPStopDOT']      = { DisplayName = "Stop Dots (Trash):", Category = "Mana Mgmt.", Index = 6, Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['NamedStopDOT']   = { DisplayName = "Stop Dots (Named):", Category = "Mana Mgmt.", Index = 76, Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 25, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['HPStopDOT']      = { DisplayName = "Stop Dots (Trash):", Category = "Mana Mgmt.", Index = 5, Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['NamedStopDOT']   = { DisplayName = "Stop Dots (Named):", Category = "Mana Mgmt.", Index = 6, Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 25, Min = 1, Max = 100, ConfigType = "Advanced", },
         --Pets
         ['DoTankPet']      = { DisplayName = "Do Tank Pet", Category = "Pet Mgmt.", Index = 1, Tooltip = "Use abilities designed for your pet to tank.", Default = false, },
         ['DoPetHeals']     = { DisplayName = "Do Pet Heals", Category = "Pet Mgmt.", Index = 2, Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.", Default = true, RequiresLoadoutChange = true, },

@@ -1009,7 +1009,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("Heal")
                         and RGMercUtils.GetSetting('DoFire')
-                        and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                        and RGMercUtils.DotSpellCheck(spell) and
                         RGMercUtils.GetSetting('DoDot') and
                         mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() >= 1
                 end,
@@ -1020,7 +1020,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("Heal")
                         and not RGMercUtils.GetSetting('DoFire')
-                        and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                        and RGMercUtils.DotSpellCheck(spell) and
                         RGMercUtils.GetSetting('DoDot')
                 end,
             },
@@ -1053,7 +1053,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("Mana") or (RGMercUtils.IsModeActive("Heal")
-                            and RGMercUtils.GetSetting('DoFire')) and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)
+                            and RGMercUtils.GetSetting('DoFire')) and RGMercUtils.DotSpellCheck(spell)
                         and RGMercUtils.GetSetting('DoDot')
                 end,
             },
@@ -1062,7 +1062,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("Mana")
-                        and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                        and RGMercUtils.DotSpellCheck(spell) and
                         RGMercUtils.GetSetting('DoDot')
                 end,
             },
@@ -1098,7 +1098,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("Mana")
-                        and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                        and RGMercUtils.DotSpellCheck(spell) and
                         RGMercUtils.GetSetting('DoDot') and
                         RGMercUtils.GetTargetLevel() >= mq.TLO.Me.Level()
                 end,
@@ -1108,7 +1108,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.IsModeActive("Mana")
-                        and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                        and RGMercUtils.DotSpellCheck(spell) and
                         RGMercUtils.GetSetting('DoDot')
                 end,
             },
@@ -1261,7 +1261,7 @@ local _ClassConfig = {
             {
                 name = "RoDebuff",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) end,
             },
             {
                 name = "Blessing of Ro",
@@ -1713,7 +1713,6 @@ local _ClassConfig = {
         ['DoNuke']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
         ['NukePct']      = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 90, Min = 1, Max = 100, },
         ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
-        ['HPStopDOT']    = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
         ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
         ['DoTwinHeal']   = { DisplayName = "Cast Twin Heal Nuke", Category = "Spells and Abilities", Tooltip = "Use Twin Heal Nuke Spells", RequiresLoadoutChange = true, Default = true, },
