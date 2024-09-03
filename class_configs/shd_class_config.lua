@@ -1965,7 +1965,7 @@ local _ClassConfig = {
         ['DoTempHP']         = { DisplayName = "Use HP Buff", Category = "Buffs/Debuffs", Index = 2, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("TempHP") end, Default = true, RequiresLoadoutChange = true, },
         ['DoTorrent']        = { DisplayName = "Use Torrents", Category = "Buffs/Debuffs", Index = 3, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("Torrent") end, RequiresLoadoutChange = true, Default = true, ConfigType = "Advanced", },
         ['DoBuffTap']        = { DisplayName = "Use Buff Tap", Category = "Buffs/Debuffs", Index = 4, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("BuffTap") end, Default = false, RequiresLoadoutChange = true, ConfigType = "Advanced", },
-        ['DoVetAA']          = { DisplayName = "Use Vet AA", Category = "Buff/Debuffs", Index = 5, Tooltip = "Use Veteran AA's in emergencies or during BigBurn.", Default = true, },
+        ['DoVetAA']          = { DisplayName = "Use Vet AA", Category = "Buffs/Debuffs", Index = 5, Tooltip = "Use Veteran AA's in emergencies or during BigBurn.", Default = true, },
 
         --LifeTaps
         ['StartLifeTap']     = { DisplayName = "HP % for LifeTaps", Category = "LifeTaps", Index = 1, Tooltip = "Your HP % before we use Life Taps.", Default = 99, Min = 1, Max = 100, },
