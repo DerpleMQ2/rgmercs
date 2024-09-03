@@ -1520,7 +1520,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.BuffTap,
                 cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoBuffTap') then return false end
-                    return not mq.TLO.Me.Buff(spell.Trigger())() and RGMercUtils.SpellStacksOnMe(spell.Trigger)() and RGMercUtils.NPCSpellReady(spell, target.ID())
+                    return not mq.TLO.Me.Buff(spell.Trigger())() and RGMercUtils.SpellStacksOnMe(spell.Trigger) and RGMercUtils.NPCSpellReady(spell, target.ID())
                 end,
             },
         },
