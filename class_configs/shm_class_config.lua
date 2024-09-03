@@ -1813,8 +1813,6 @@ local _ClassConfig = {
         ['AESlowCount']       = { DisplayName = "AE Slow Count", Category = "Debuffs", Tooltip = "Number of XT Haters before we start AE slowing", Min = 1, Default = 3, Max = 10, },
         ['AEMaloCount']       = { DisplayName = "AE Malo Count", Category = "Debuffs", Tooltip = "Number of XT Haters before we start AE Maloing", Min = 1, Default = 3, Max = 10, },
         ['DoStatBuff']        = { DisplayName = "Do Stat Buff", Category = "Buffs", Tooltip = "Do Stat Buffs for Group", Default = true, },
-        ['HPStopDOT']         = { DisplayName = "Stop Dots (Trash):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['NamedStopDOT']      = { DisplayName = "Stop Dots (Named):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 25, Min = 1, Max = 100, ConfigType = "Advanced", },
         ['DoHealDPS']         = { DisplayName = "Use HealDPS", Category = "Spells and Abilities", Tooltip = "Use HealDPS Rotation", Default = false, },
     },
 }

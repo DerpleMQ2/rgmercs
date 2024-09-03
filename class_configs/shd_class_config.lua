@@ -652,12 +652,11 @@ local _ClassConfig = {
             return res
         end,
         --Handles all AE taunt checks rather than repetetive hardcoded conditions in the UI loop
-        AETauntCheck = function(self)
-            --check to see if we are the tank in the first place just in case something CRAAAAAZY happens
-            if not RGMercUtils.IsTanking() then return false end
-
-            -- check that there are sufficient targets to AE taunt and that it is (optionally) safe to do so
+        AETauntCheck = function(self) --TODO: Needs slight refactor/testing, "mobs" can likely be moved and replace GetXTHaterCount
             local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
+            --Early out if we don't have more than one target closeby and check to see if we are the tank in the first place just in case
+            if not RGMercUtils.IsTanking() or mobs <= 1 then return false end
+            -- check that there are sufficient targets to AE taunt and that it is (optionally) safe to do so
             if (RGMercUtils.GetSetting('SafeAETaunt') and mobs > RGMercUtils.GetXTHaterCount()) or RGMercUtils.GetXTHaterCount() < RGMercUtils.GetSetting('AETauntCnt') then return false end
 
             --check to make sure the above targets need to be tanked
@@ -666,7 +665,7 @@ local _ClassConfig = {
                 local xtSpawn = mq.TLO.Me.XTarget(i)
                 --ensure we only check hostiles, the hostile is in range, that we aren't already tanking it, and that the other xtargets aren't out of range of an AE taunt
                 if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType() or ""):lower() == "auto hater"
-                    and (xtSpawn.Distance() or 999) <= 50 and xtSpawn.PctAggro() < 100 and mobs > 1 then
+                    and (xtSpawn.Distance() or 999) <= 50 and xtSpawn.PctAggro() < 100 then
                     return true
                 end
             end

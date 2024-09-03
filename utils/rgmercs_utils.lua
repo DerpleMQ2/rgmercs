@@ -1746,7 +1746,7 @@ function RGMercUtils.DotSpellCheck(spell)
     local targethp = RGMercUtils.GetTargetPctHPs()
 
     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
-        ((named and (RGMercUtils.GetSetting('NamedStopDOT') < targethp)) or (not named and RGMercUtils.GetSetting('HPStopDOT') < targethp))
+        ((named and (RGMercUtils.GetSetting('NamedStopDOT') < targethp)) or (RGMercUtils.GetSetting('HPStopDOT') < targethp))
 end
 
 ---@param spell MQSpell

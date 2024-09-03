@@ -1732,8 +1732,6 @@ local _ClassConfig = {
         ['DoPoisonArrow']     = { DisplayName = "Use Poison Arrow", Category = "Spells and Abilities", Tooltip = "Enable use of Poison Arrow.", Default = true, },
         ['DoReagentArrow']    = { DisplayName = "Use Reagent Arrow", Category = "Spells and Abilities", Tooltip = "Toggle usage of Spells and Openers that require Reagent arrows.", Default = false, },
         ['DoAgroReducerBuff'] = { DisplayName = "Cast Agro Reducer Buff", Category = "Spells and Abilities", Tooltip = "Use Agro Reduction Buffs.", Default = true, },
-        ['HPStopDOT']         = { DisplayName = "Stop Dots (Trash):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 30, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['NamedStopDOT']      = { DisplayName = "Stop Dots (Named):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 10, Min = 1, Max = 100, ConfigType = "Advanced", },
     },
 }
 

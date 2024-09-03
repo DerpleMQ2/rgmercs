@@ -1361,8 +1361,6 @@ local _ClassConfig = {
         ['StartFDPct']        = { DisplayName = "FD Aggro Pct", Category = "Aggro Management", Tooltip = "Aggro % at which to FD", Default = 90, Min = 1, Max = 99, },
         ['StopFDPct']         = { DisplayName = "Stand Aggro Pct", Category = "Aggro Management", Tooltip = "Aggro % at which to Stand up from FD", Default = 80, Min = 1, Max = 99, },
         ['WakeDeadCorpseCnt'] = { DisplayName = "WtD Corpse Count", Category = "Spells and Abilities", Tooltip = "Number of Corpses before we cast Wake the Dead", Default = 5, Min = 1, Max = 20, },
-        ['HPStopDOT']         = { DisplayName = "Stop Dots (Trash):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 30, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['NamedStopDOT']      = { DisplayName = "Stop Dots (Named):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 10, Min = 1, Max = 100, ConfigType = "Advanced", },
         ['DoLich']            = { DisplayName = "Cast Lich", Category = "Lich", Tooltip = "Enable casting Lich spells.", RequiresLoadoutChange = true, Default = true, },
         ['StopLichHP']        = { DisplayName = "Stop Lich HP", Category = "Lich", Tooltip = "Cancel Lich at HP Pct [x]", RequiresLoadoutChange = false, Default = 25, Min = 1, Max = 99, },
         ['StopLichMana']      = { DisplayName = "Stop Lich Mana", Category = "Lich", Tooltip = "Cancel Lich at Mana Pct [x]", RequiresLoadoutChange = false, Default = 100, Min = 1, Max = 100, },

@@ -1713,8 +1713,6 @@ local _ClassConfig = {
         ['DoNuke']       = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
         ['NukePct']      = { DisplayName = "Cast Spells", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 90, Min = 1, Max = 100, },
         ['DoSnare']      = { DisplayName = "Cast Snares", Category = "Spells and Abilities", Tooltip = "Enable casting Snare spells.", Default = true, },
-        ['HPStopDOT']    = { DisplayName = "Stop Dots (Trash):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['NamedStopDOT'] = { DisplayName = "Stop Dots (Named):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 25, Min = 1, Max = 100, ConfigType = "Advanced", },
         ['DoChestClick'] = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['DoDot']        = { DisplayName = "Cast DOTs", Category = "Spells and Abilities", Tooltip = "Enable casting Damage Over Time spells.", Default = true, },
         ['DoTwinHeal']   = { DisplayName = "Cast Twin Heal Nuke", Category = "Spells and Abilities", Tooltip = "Use Twin Heal Nuke Spells", RequiresLoadoutChange = true, Default = true, },
