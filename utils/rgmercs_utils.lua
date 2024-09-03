@@ -31,6 +31,31 @@ function RGMercUtils.file_exists(path)
     end
 end
 
+--- Copies a file
+---@param from_path string
+---@param to_path string
+---@return boolean
+function RGMercUtils.copy_file(from_path, to_path)
+    if RGMercUtils.file_exists(from_path) then
+        local file = io.open(from_path, "r")
+        if file ~= nil then
+            local content = file:read("*all")
+            file:close()
+            local fileNew = io.open(to_path, "w")
+            if fileNew ~= nil then
+                fileNew:write(content)
+                fileNew:close()
+                return true
+            else
+                RGMercsLogger.log_error("\arFailed to create new file: %s", to_path)
+                return false
+            end
+        end
+    end
+
+    return false
+end
+
 --- Actors to tell all clients that something changed.
 ---@param module string
 ---@param event string

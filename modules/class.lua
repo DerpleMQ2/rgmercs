@@ -70,9 +70,20 @@ Module.CommandHandlers                       = {
 }
 
 local function getConfigFileName()
-    return mq.configDir ..
+    local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
         Module._name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+    local newFile = mq.configDir ..
+        '/rgmercs/PCConfigs/' ..
+        Module._name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. "_" .. RGMercConfig.Globals.CurLoadedClass:lower() .. '.lua'
+
+    if RGMercUtils.file_exists(newFile) then
+        return newFile
+    end
+
+    RGMercUtils.copy_file(oldFile, newFile)
+
+    return newFile
 end
 
 function Module:SaveSettings(doBroadcast)

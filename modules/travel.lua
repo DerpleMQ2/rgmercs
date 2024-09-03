@@ -302,7 +302,7 @@ end
 ---@return boolean
 function Module:HandleBind(cmd, ...)
     local params = ...
-    local handled = falses
+    local handled = false
     -- /rglua cmd handler
     return handled
 end
