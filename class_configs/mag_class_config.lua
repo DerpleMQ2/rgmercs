@@ -1738,7 +1738,8 @@ _ClassConfig      = {
                 name = "PetManaConv",
                 type = "Spell",
                 cond = function(self, spell)
-                    return spell and spell() and not RGMercUtils.BuffActive(mq.TLO.Spell(spell.RankName.AutoCast() or 0)) and mq.TLO.Me.Pet.ID() > 0
+                    return spell and spell() and not RGMercUtils.BuffActive(mq.TLO.Spell(spell.RankName.AutoCast() or 0)) and
+                    not RGMercUtils.BuffActiveByName(mq.TLO.Spell(spell.RankName.AutoCast() or 0).Name() .. " Recourse") and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
