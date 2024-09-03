@@ -70,9 +70,45 @@ Module.CommandHandlers                       = {
 }
 
 local function getConfigFileName()
-    return mq.configDir ..
+
+    local function File_Exists(name)
+        local f = io.open(name, "r")
+        if f ~= nil then
+            io.close(f)
+            return true
+        else
+            return false
+        end
+    end
+
+    local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
         Module._name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+    local newFile = mq.configDir ..
+        '/rgmercs/PCConfigs/' ..
+        Module._name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. "_" .. RGMercConfig.Globals.CurLoadedClass:lower() .. '.lua'
+
+    if File_Exists(newFile) then
+        return newFile
+    end
+
+    if File_Exists(oldFile) then
+        local file = io.open(oldFile, "r")
+        if file ~= nil then
+            local content = file:read("*all")
+            file:close()
+            local fileNew = io.open(newFile, "w")
+            if fileNew ~= nil then
+                fileNew:write(content)
+                fileNew:close()
+            else
+                RGMercsLogger.log_error("\arFailed to create new file: %s", newFile)
+            end
+        end
+    end
+
+    return newFile
+
 end
 
 function Module:SaveSettings(doBroadcast)
