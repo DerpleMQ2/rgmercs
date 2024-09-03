@@ -689,6 +689,15 @@ local _ClassConfig = {
                 return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
             end,
         },
+        { --Summon pet even when buffs are off on emu
+            name = 'Pet Management',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime"
+            end,
+        },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
             name = 'Pet Downtime',
             timer = 60,
@@ -780,15 +789,6 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and mq.TLO.Me.PctHPs() > RGMercUtils.GetSetting('EmergencyLockout')
-            end,
-        },
-        { --DPS Spells, includes recourse/gift maintenance
-            name = 'Pet Management',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return { mq.TLO.Me.ID(), } end,
-            cond = function(self, combat_state)
-                return combat_state == "Downtime"
             end,
         },
     },
@@ -1369,7 +1369,9 @@ local _ClassConfig = {
                 tooltip = Tooltips.Dicho,
                 cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoDicho') then return false end
-                    return RGMercUtils.NPCSpellReady(spell, target.ID()) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartDicho')
+                    local myHP = mq.TLO.Me.PctHPs()
+                    return RGMercUtils.NPCSpellReady(spell, target.ID()) and
+                        (myHP <= RGMercUtils.GetSetting('EmergencyStart') or ((RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and myHP <= RGMercUtils.GetSetting('StartDicho')))
                 end,
             },
             {
@@ -1378,7 +1380,9 @@ local _ClassConfig = {
                 tooltip = Tooltips.DireTap,
                 cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoDireTap') then return false end
-                    return RGMercUtils.NPCSpellReady(spell, target.ID()) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartDireTap')
+                    local myHP = mq.TLO.Me.PctHPs()
+                    return RGMercUtils.NPCSpellReady(spell, target.ID()) and
+                        (myHP <= RGMercUtils.GetSetting('EmergencyStart') or ((RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and myHP <= RGMercUtils.GetSetting('StartDireTap')))
                 end,
             },
             {
@@ -1386,7 +1390,9 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell, target)
-                    return RGMercUtils.NPCSpellReady(spell, target.ID()) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
+                    local myHP = mq.TLO.Me.PctHPs()
+                    return RGMercUtils.NPCSpellReady(spell, target.ID()) and
+                        (myHP <= RGMercUtils.GetSetting('EmergencyStart') or ((RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and myHP <= RGMercUtils.GetSetting('StartLifeTap')))
                 end,
             },
             { --This entry solely for emergencies on SK as a fallback, group has a different entry.
@@ -1402,7 +1408,9 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell, target)
-                    return RGMercUtils.SpellLoaded(spell) and RGMercUtils.NPCSpellReady(spell, target.ID()) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
+                    local myHP = mq.TLO.Me.PctHPs()
+                    return RGMercUtils.NPCSpellReady(spell, target.ID()) and
+                        (myHP <= RGMercUtils.GetSetting('EmergencyStart') or ((RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and myHP <= RGMercUtils.GetSetting('StartLifeTap')))
                 end,
             },
         },
@@ -1512,7 +1520,7 @@ local _ClassConfig = {
                 name = "BiteTap",
                 type = "Spell",
                 tooltip = Tooltips.BiteTap,
-                cond = function(self, spell, target)
+                cond = function(self, spell, target) --no mana check here because this returns half the mana cost to the entire group. can adjust later as needed.
                     return RGMercUtils.NPCSpellReady(spell, target.ID()) and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StartLifeTap')
                 end,
             },

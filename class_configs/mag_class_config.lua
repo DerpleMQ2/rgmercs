@@ -1753,8 +1753,8 @@ _ClassConfig      = {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")() and mq.TLO.FindItem(itemName).TimerReady() == 0 and
-                        mq.TLO.Me.Pet.ID() > 0
+                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")() and mq.TLO.FindItemCount(itemName)() ~= 0 and
+                        mq.TLO.FindItem(itemName).TimerReady() == 0 and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
