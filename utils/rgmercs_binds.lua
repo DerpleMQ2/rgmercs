@@ -59,7 +59,10 @@ Bind.Handlers     = {
             targetId = targetId and tonumber(targetId)
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
             RGMercsLogger.log_debug("\atCasting: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
-            RGMercUtils.UseSpell(spell, targetId, true)
+
+            if not RGMercUtils.UseSpell(spell, targetId, true) then
+                RGMercUtils.UseAA(spell, targetId)
+            end
         end,
     },
     ['setlogfilter'] = {
