@@ -782,6 +782,15 @@ local _ClassConfig = {
                 return combat_state == "Combat" and mq.TLO.Me.PctHPs() > RGMercUtils.GetSetting('EmergencyLockout')
             end,
         },
+        { --DPS Spells, includes recourse/gift maintenance
+            name = 'Pet Management',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime"
+            end,
+        },
     },
     ['Rotations']       = {
         ['Downtime'] = {
@@ -929,16 +938,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "PetSpell",
-                type = "Spell",
-                tooltip = Tooltips.PetSpell,
-                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
-                cond = function(self, spell)
-                    if mq.TLO.Me.Pet.ID() ~= 0 or not RGMercUtils.GetSetting('DoPet') then return false end
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.ReagentCheck(spell)
-                end,
-            },
-            {
                 name = "Scourge Skin",
                 type = "AA",
                 --tooltip = Tooltips.ScourgeSkin,
@@ -946,6 +945,18 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     if not RGMercUtils.IsTanking() then return false end
                     return RGMercUtils.SelfBuffAACheck(aaName)
+                end,
+            },
+        },
+        ['Pet Management'] = {
+            {
+                name = "PetSpell",
+                type = "Spell",
+                tooltip = Tooltips.PetSpell,
+                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
+                cond = function(self, spell)
+                    if mq.TLO.Me.Pet.ID() ~= 0 or not RGMercUtils.GetSetting('DoPet') then return false end
+                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
         },
