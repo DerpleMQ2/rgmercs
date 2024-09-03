@@ -3221,23 +3221,19 @@ function RGMercUtils.FindWorstHurtGroupMember(minHPs)
         local healTarget = mq.TLO.Group.Member(i)
 
         if healTarget and healTarget() and not healTarget.OtherZone() and not healTarget.Offline() then
-            if (healTarget.Class.ShortName() or "none"):lower() ~= "ber" then -- berzerkers have special handing
-                if not healTarget.Dead() and (healTarget.PctHPs() or 101) < worstPct then
-                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                    worstPct = healTarget.PctHPs()
-                    worstId = healTarget.ID()
-                end
+            if not healTarget.Dead() and (healTarget.PctHPs() or 101) < worstPct then
+                RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                worstPct = healTarget.PctHPs()
+                worstId = healTarget.ID()
+            end
 
-                if RGMercUtils.GetSetting('DoPetHeals') then
-                    if (healTarget.Pet.ID() or 0) > 0 and (healTarget.Pet.PctHPs() or 101) < (worstPct or 0) then
-                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
-                            healTarget.Pet.DisplayName())
-                        worstPct = healTarget.Pet.PctHPs()
-                        worstId = healTarget.Pet.ID()
-                    end
+            if RGMercUtils.GetSetting('DoPetHeals') then
+                if (healTarget.Pet.ID() or 0) > 0 and (healTarget.Pet.PctHPs() or 101) < (worstPct or 0) then
+                    RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
+                        healTarget.Pet.DisplayName())
+                    worstPct = healTarget.Pet.PctHPs()
+                    worstId = healTarget.Pet.ID()
                 end
-            else
-                RGMercsLogger.log_verbose("\aySkipping %s because they are a zerker", healTarget.DisplayName())
             end
         end
     end
@@ -3292,23 +3288,19 @@ function RGMercUtils.FindWorstHurtXT(minHPs)
         local healTarget = mq.TLO.Me.XTarget(i)
 
         if healTarget and healTarget() and RGMercUtils.TargetIsType("pc", healTarget) then
-            if healTarget.Class.ShortName():lower() ~= "ber" then -- berzerkers have special handing
-                if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
-                    RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
-                    worstPct = healTarget.PctHPs()
-                    worstId = healTarget.ID()
-                end
+            if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
+                RGMercsLogger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
+                worstPct = healTarget.PctHPs()
+                worstId = healTarget.ID()
+            end
 
-                if RGMercUtils.GetSetting('DoPetHeals') then
-                    if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
-                        RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
-                            healTarget.Pet.DisplayName())
-                        worstPct = healTarget.Pet.PctHPs()
-                        worstId = healTarget.Pet.ID()
-                    end
+            if RGMercUtils.GetSetting('DoPetHeals') then
+                if healTarget.Pet.ID() > 0 and healTarget.Pet.PctHPs() < worstPct then
+                    RGMercsLogger.log_verbose("\aySo far %s's pet %s is the worst off.", healTarget.DisplayName(),
+                        healTarget.Pet.DisplayName())
+                    worstPct = healTarget.Pet.PctHPs()
+                    worstId = healTarget.Pet.ID()
                 end
-            else
-                RGMercsLogger.log_verbose("\aySkipping %s because they are a zerker", healTarget.DisplayName())
             end
         end
     end
