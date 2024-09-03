@@ -1069,7 +1069,8 @@ local _ClassConfig = {
                 tooltip = Tooltips.FireFist,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercUtils.GetSetting('DoFireFist')
+                        and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1727,6 +1728,7 @@ local _ClassConfig = {
         ['DoRegen']           = { DisplayName = "Cast Regen Spells", Category = "Spells and Abilities", Tooltip = "Enable casting of Regen spells.", Default = true, },
         ['DoRunSpeed']        = { DisplayName = "Cast Run Speed Buffs", Category = "Spells and Abilities", Tooltip = "Use Ranger Run Speed Buffs.", Default = true, },
         ['DoMask']            = { DisplayName = "Cast Mask Spell", Category = "Spells and Abilities", Tooltip = "Use Ranger Mask Spell", Default = false, },
+        ['DoFireFist']        = { DisplayName = "Cast FireFist", Category = "Spells and Abilities", Tooltip = "Use Ranger FireFist Line of Spells", Default = true, },
         ['DoAoE']             = { DisplayName = "Use AoEs", Category = "Spells and Abilities", Tooltip = "Enable AoE abilities and spells.", Default = false, },
         ['DoOpener']          = { DisplayName = "Use Openers", Category = "Spells and Abilities", Tooltip = "Use Opening Arrow Shot Silent Shot Line.", Default = true, },
         ['DoPoisonArrow']     = { DisplayName = "Use Poison Arrow", Category = "Spells and Abilities", Tooltip = "Enable use of Poison Arrow.", Default = true, },
