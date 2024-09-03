@@ -926,7 +926,7 @@ local _ClassConfig = {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Charm")
-                    return RGMercUtils.GetSetting('DoCharmClick') and item() and RGMercUtils.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
+                    return RGMercUtils.GetSetting('DoCharmClick') and item() and RGMercUtils.SelfBuffCheck(item.Spell) and item.TimerReady() == 0
                 end,
             },
             {
