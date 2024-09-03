@@ -1042,7 +1042,7 @@ local _ClassConfig = {
                 name = "UltorDot",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                    return RGMercUtils.DotSpellCheck(spell) and
                         RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck()
                 end,
             },
@@ -1187,21 +1187,21 @@ local _ClassConfig = {
                 name = "PandemicDot",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                    return RGMercUtils.DotSpellCheck(spell) and
                         RGMercUtils.DetGOMCheck()
                 end,
             },
             {
                 name = "CurseDoT2",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) end,
             },
             {
                 name = "CurseDoT1",
                 type = "Spell",
                 -- first check is for live second is for TLP
                 cond = function(self, spell)
-                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)) or
+                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(spell)) or
                         (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils.SmallBurn()))
                 end,
             },
@@ -1209,7 +1209,7 @@ local _ClassConfig = {
                 name = "ChaoticDoT",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                    return RGMercUtils.DotSpellCheck(spell) and
                         mq.TLO.Me.PctMana() > 50
                 end,
             },
@@ -1217,38 +1217,38 @@ local _ClassConfig = {
                 name = "PandemicDot",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                    return RGMercUtils.DotSpellCheck(spell) and
                         mq.TLO.Me.PctMana() > 50
                 end,
             },
             {
                 name = "FastPoisonDoT",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) end,
             },
             {
                 name = "SaryrnDot",
                 type = "Spell",
                 -- first check is for live second is for TLP
                 cond = function(self, spell)
-                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell)) or
+                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(spell)) or
                         (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils.SmallBurn()))
                 end,
             },
             {
                 name = "FastDiseaseDoT",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) end,
             },
             {
                 name = "UltorDot",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) end,
             },
             {
                 name = "MaloDot",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) end,
             },
             {
                 name = "PoisonNuke",
@@ -1312,7 +1312,7 @@ local _ClassConfig = {
                 name = "PandemicDot",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                    return RGMercUtils.DotSpellCheck(spell) and
                         mq.TLO.Me.PctMana() > 50
                 end,
             },
@@ -1320,7 +1320,7 @@ local _ClassConfig = {
                 name = "ChaoticDoT",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                    return RGMercUtils.DotSpellCheck(spell) and
                         mq.TLO.Me.PctMana() > 50
                 end,
             },
@@ -1328,7 +1328,7 @@ local _ClassConfig = {
                 name = "CurseDoT2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and
+                    return RGMercUtils.DotSpellCheck(spell) and
                         mq.TLO.Me.PctMana() > 50
                 end,
             },
@@ -1813,7 +1813,8 @@ local _ClassConfig = {
         ['AESlowCount']       = { DisplayName = "AE Slow Count", Category = "Debuffs", Tooltip = "Number of XT Haters before we start AE slowing", Min = 1, Default = 3, Max = 10, },
         ['AEMaloCount']       = { DisplayName = "AE Malo Count", Category = "Debuffs", Tooltip = "Number of XT Haters before we start AE Maloing", Min = 1, Default = 3, Max = 10, },
         ['DoStatBuff']        = { DisplayName = "Do Stat Buff", Category = "Buffs", Tooltip = "Do Stat Buffs for Group", Default = true, },
-        ['HPStopDOT']         = { DisplayName = "HP Stop DOTs", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 30, Min = 1, Max = 100, },
+        ['HPStopDOT']         = { DisplayName = "Stop Dots (Trash):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['NamedStopDOT']      = { DisplayName = "Stop Dots (Named):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 25, Min = 1, Max = 100, ConfigType = "Advanced", },
         ['DoHealDPS']         = { DisplayName = "Use HealDPS", Category = "Spells and Abilities", Tooltip = "Use HealDPS Rotation", Default = false, },
     },
 }

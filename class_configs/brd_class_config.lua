@@ -193,7 +193,7 @@ local function generateSongList()
 end
 
 local _ClassConfig = {
-    _version            = "2.1 beta",
+    _version            = "2.1",
     _author             = "Algar, Derple, Grimmier, Tiddliestix, SonicZentropy",
     ['Modes']           = { --simply determine the priority you gem spells in. Perhaps one day this could be configured to save different loadouts/change options.
         'General',
@@ -786,7 +786,7 @@ local _ClassConfig = {
             if RGMercUtils.GetXTHaterCount() == 0 or RGMercUtils.IAmMA() or mq.TLO.Group.Puller.ID() == mq.TLO.Me.ID() then return false end
             return RGMercUtils.IHaveAggro(100)
         end,
-        DotSongCheck = function(songSpell) --Check dot stacking, stop dotting when HP threshold is reached based on mob type
+        DotSongCheck = function(songSpell) --Check dot stacking, stop dotting when HP threshold is reached based on mob type, can't use utils function because we try to refresh just as the dot is ending
             if not songSpell or not songSpell() then return false end
             local named = RGMercUtils.IsNamed(mq.TLO.Target)
             local targethp = RGMercUtils.GetTargetPctHPs()

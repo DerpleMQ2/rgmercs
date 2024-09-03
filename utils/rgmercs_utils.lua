@@ -636,6 +636,10 @@ function RGMercUtils.ManaCheck()
     return mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
 end
 
+function RGMercUtils.DotManaCheck()
+    return mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDot')
+end
+
 ---@param gem integer
 ---@param spell string
 ---@param waitSpellReady boolean
@@ -1734,12 +1738,15 @@ function RGMercUtils.SetLastCastResult(result)
     RGMercConfig.Globals.CastResult = result
 end
 
----@param hpStopDots number # when to stop dots.
 ---@param spell MQSpell
 ---@return boolean
-function RGMercUtils.DotSpellCheck(hpStopDots, spell)
+function RGMercUtils.DotSpellCheck(spell)
     if not spell or not spell() then return false end
-    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and RGMercUtils.GetTargetPctHPs() > hpStopDots
+    local named = RGMercUtils.IsNamed(mq.TLO.Target)
+    local targethp = RGMercUtils.GetTargetPctHPs()
+
+    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
+        ((named and (RGMercUtils.GetSetting('NamedStopDOT') < targethp)) or (not named and RGMercUtils.GetSetting('HPStopDOT') < targethp))
 end
 
 ---@param spell MQSpell
@@ -4560,6 +4567,17 @@ function RGMercUtils.LoadSpellLoadOut(spellLoadOut)
             RGMercUtils.MemorizeSpell(gem, selectedRank, false, 15000)
         end
     end
+end
+
+function RGMercUtils.BandolierSwap(indexName)
+    if RGMercUtils.GetSetting('UseBandolier') and mq.TLO.Me.Bandolier(indexName).Index() and not mq.TLO.Me.Bandolier(indexName).Active() then
+        RGMercUtils.DoCmd("/bandolier activate %s", indexName)
+        RGMercsLogger.log_debug("BandolierSwap() Swapping to %s. Current Health: %d", indexName, mq.TLO.Me.PctHPs())
+    end
+end
+
+function RGMercUtils.ShieldEquipped()
+    return mq.TLO.InvSlot("Offhand").Item.Type() and mq.TLO.InvSlot("Offhand").Item.Type() == "Shield"
 end
 
 return RGMercUtils

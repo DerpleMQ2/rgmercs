@@ -1385,7 +1385,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.SwarmDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and RGMercUtils.GetSetting('DoDot')
+                    return RGMercUtils.DotSpellCheck(spell) and RGMercUtils.GetSetting('DoDot')
                 end,
             },
             {
@@ -1393,7 +1393,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.ShortSwarmDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(RGMercUtils.GetSetting('HPStopDOT'), spell) and RGMercUtils.GetSetting('DoDot')
+                    return RGMercUtils.DotSpellCheck(spell) and RGMercUtils.GetSetting('DoDot')
                 end,
             },
             {
@@ -1732,7 +1732,8 @@ local _ClassConfig = {
         ['DoPoisonArrow']     = { DisplayName = "Use Poison Arrow", Category = "Spells and Abilities", Tooltip = "Enable use of Poison Arrow.", Default = true, },
         ['DoReagentArrow']    = { DisplayName = "Use Reagent Arrow", Category = "Spells and Abilities", Tooltip = "Toggle usage of Spells and Openers that require Reagent arrows.", Default = false, },
         ['DoAgroReducerBuff'] = { DisplayName = "Cast Agro Reducer Buff", Category = "Spells and Abilities", Tooltip = "Use Agro Reduction Buffs.", Default = true, },
-        ['HPStopDOT']         = { DisplayName = "Mob HP to stop DoTs", Category = "Spells and Abilities", Tooltip = "Enemy %HP to stop casting dots.", Default = 30, Min = 1, Max = 100, },
+        ['HPStopDOT']         = { DisplayName = "Stop Dots (Trash):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 30, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['NamedStopDOT']      = { DisplayName = "Stop Dots (Named):", Category = "Spells and Abilities", Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 10, Min = 1, Max = 100, ConfigType = "Advanced", },
     },
 }
 
