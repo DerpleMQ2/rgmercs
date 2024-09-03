@@ -1511,7 +1511,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Torrent,
                 cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoTorrent') or not spell or not spell() then return false end
-                    return not RGMercUtils.BuffActiveByName((spell.Name() or "N/A") .. " Recourse") and RGMercUtils.NPCSpellReady(spell, target.ID())
+                    return not mq.TLO.Me.Buff(spell.Name() .. " Recourse")() and RGMercUtils.NPCSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1520,8 +1520,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.BuffTap,
                 cond = function(self, spell, target)
                     if not RGMercUtils.GetSetting('DoBuffTap') then return false end
-                    return not RGMercUtils.BuffActive(spell.RankName.Name.Trigger(1)()) and RGMercUtils.SpellStacksOnMe(spell.RankName.Name.Trigger(1)()) and
-                        RGMercUtils.NPCSpellReady(spell, target.ID())
+                    return not mq.TLO.Me.Buff(spell.Trigger())() and RGMercUtils.SpellStacksOnMe(spell.Trigger) and RGMercUtils.NPCSpellReady(spell, target.ID())
                 end,
             },
         },
