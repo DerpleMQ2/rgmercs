@@ -1469,8 +1469,6 @@ return {
         ['ParaPct']        = { DisplayName = "Paragon %", Category = "Mana Mgmt.", Index = 2, Tooltip = "Minimum mana % before we use Paragon of Spirit.", Default = 80, Min = 1, Max = 99, ConfigType = "Advanced", },
         ['FParaPct']       = { DisplayName = "F.Paragon %", Category = "Mana Mgmt.", Index = 3, Tooltip = "Minimum mana % before we use Focused Paragon.", Default = 90, Min = 1, Max = 99, ConfigType = "Advanced", },
         ['DowntimeFP']     = { DisplayName = "Downtime F.Paragon", Category = "Mana Mgmt.", Index = 4, Tooltip = "Use Focused Paragon outside of Combat.", Default = false, ConfigType = "Advanced", },
-        ['HPStopDOT']      = { DisplayName = "Stop Dots (Trash):", Category = "Mana Mgmt.", Index = 5, Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['NamedStopDOT']   = { DisplayName = "Stop Dots (Named):", Category = "Mana Mgmt.", Index = 6, Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.", Default = 25, Min = 1, Max = 100, ConfigType = "Advanced", },
         --Pets
         ['DoTankPet']      = { DisplayName = "Do Tank Pet", Category = "Pet Mgmt.", Index = 1, Tooltip = "Use abilities designed for your pet to tank.", Default = false, },
         ['DoPetHeals']     = { DisplayName = "Do Pet Heals", Category = "Pet Mgmt.", Index = 2, Tooltip = "Mem and cast your Pet Heal (Salve) spell. AA Pet Heals are always used in emergencies.", Default = true, RequiresLoadoutChange = true, },

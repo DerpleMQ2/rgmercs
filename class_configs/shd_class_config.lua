@@ -1510,8 +1510,8 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Torrent,
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoTorrent') then return false end
-                    return not RGMercUtils.BuffActiveByName(spell.Name() .. " Recourse") and RGMercUtils.NPCSpellReady(spell, target.ID())
+                    if not RGMercUtils.GetSetting('DoTorrent') or not spell or not spell() then return false end
+                    return not RGMercUtils.BuffActiveByName((spell.Name() or "N/A") .. " Recourse") and RGMercUtils.NPCSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1978,8 +1978,6 @@ local _ClassConfig = {
         ['DoPoisonDot']      = { DisplayName = "Use Poison Dot", Category = "DoT Spells", Index = 2, function() return RGMercUtils.GetDynamicTooltipForSpell("PoisonDot") end, RequiresLoadoutChange = true, Default = true, },
         ['DoCorruptionDot']  = { DisplayName = "Use Corrupt Dot", Category = "DoT Spells", Index = 3, function() return RGMercUtils.GetDynamicTooltipForSpell("CorruptDot") end, RequiresLoadoutChange = true, Default = true, },
         ['DoDireDot']        = { DisplayName = "Use Dire Dot", Category = "DoT Spells", Index = 4, function() return RGMercUtils.GetDynamicTooltipForSpell("Dicho") end, RequiresLoadoutChange = true, Default = false, },
-        ['HPStopDOT']        = { DisplayName = "HP Stop DoTs", Category = "Spells and Abilities", Index = 5, Tooltip = "Stop casting DOTs when the mob hits [x] HP %.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['NamedStopDOT']     = { DisplayName = "Named HP Stop DOTs", Category = "Spells and Abilities", Index = 6, Tooltip = "Stop casting DOTs when a named mob hits [x] HP %.", Default = 25, Min = 1, Max = 100, ConfigType = "Advanced", },
 
         --Hate Tools
         ['UseVoT']           = { DisplayName = "Use VoT AA", Category = "Hate Tools", Index = 1, Tooltip = "Use Hate Buff AA. Spells currently not used because of low values and long refresh times.", Default = true, ConfigType = "Advanced", },
