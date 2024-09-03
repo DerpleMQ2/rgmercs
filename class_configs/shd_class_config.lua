@@ -689,6 +689,13 @@ local _ClassConfig = {
                 return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
             end,
         },
+        { --Manage Pet
+            name = 'PetManagement',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime" and RGMercUtils.GetSetting("DoPet") and mq.TLO.Me.Pet.ID() == 0
+            end,
+        },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
             name = 'Pet Downtime',
             timer = 60,
@@ -932,10 +939,10 @@ local _ClassConfig = {
                 name = "PetSpell",
                 type = "Spell",
                 tooltip = Tooltips.PetSpell,
-                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
+                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 end,
                 cond = function(self, spell)
                     if mq.TLO.Me.Pet.ID() ~= 0 or not RGMercUtils.GetSetting('DoPet') then return false end
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.ReagentCheck(spell)
+                    return true -- RGMercUtils.PCSpellReady(spell) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
@@ -1552,6 +1559,18 @@ local _ClassConfig = {
                 custom_func = function(self) return RGMercUtils.BandolierSwap("2Hand") end,
             },
         },
+        ['PetManagement'] = {
+            {
+                name = "PetSpell",
+                type = "Spell",
+                tooltip = Tooltips.PetSpell,
+                active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 end,
+                cond = function(self, spell)
+                    if mq.TLO.Me.Pet.ID() ~= 0 or not RGMercUtils.GetSetting('DoPet') then return false end
+                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.ReagentCheck(spell)
+                end,
+            },
+        },
     },
     ['Spells']          = { --I am not trying to find a combination that works when we have 20 options that change based on level, so I've just made a repeating priority list. May adjust this later.
         {
@@ -1768,6 +1787,7 @@ local _ClassConfig = {
                 { name = "BondTap",       cond = function(self) return RGMercUtils.GetSetting('DoBondTap') end, },
                 { name = "PoisonDot",     cond = function(self) return RGMercUtils.GetSetting('DoPoisonDot') end, },
                 { name = "CorruptionDot", cond = function(self) return RGMercUtils.GetSetting('DoCorruptionDot') end, },
+                { name = "PetSpell",       cond = function(self) return RGMercUtils.GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end, },
                 { name = "DireDot",       cond = function(self) return RGMercUtils.GetSetting('DoDireDot') end, },
                 {
                     name = "Torrent",
@@ -1795,6 +1815,7 @@ local _ClassConfig = {
             spells = {
                 { name = "BiteTap", },
                 { name = "BondTap",       cond = function(self) return RGMercUtils.GetSetting('DoBondTap') end, },
+
                 { name = "PoisonDot",     cond = function(self) return RGMercUtils.GetSetting('DoPoisonDot') end, },
                 { name = "CorruptionDot", cond = function(self) return RGMercUtils.GetSetting('DoCorruptionDot') end, },
                 { name = "DireDot",       cond = function(self) return RGMercUtils.GetSetting('DoDireDot') end, },
