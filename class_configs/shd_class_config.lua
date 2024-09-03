@@ -1088,7 +1088,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.AETaunt,
                 cond = function(self, spell)
-                    if not RGMercUtils.GetSetting('AETauntSpell') > 1 then return false end
+                    if RGMercUtils.GetSetting('AETauntSpell') == 1 then return false end
                     return RGMercUtils.PCSpellReady(spell) and self.ClassConfig.HelperFunctions.AETauntCheck(self)
                 end,
             },
@@ -1133,7 +1133,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoTerror') > 1 then return false end
+                    if RGMercUtils.GetSetting('DoTerror') == 1 then return false end
                     ---@diagnostic disable-next-line: undefined-field
                     return RGMercUtils.NPCSpellReady(spell, target.ID()) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
@@ -1143,7 +1143,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoTerror') > 1 then return false end
+                    if RGMercUtils.GetSetting('DoTerror') == 1 then return false end
                     ---@diagnostic disable-next-line: undefined-field
                     return RGMercUtils.SpellLoaded(spell) and RGMercUtils.NPCSpellReady(spell, target.ID()) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
