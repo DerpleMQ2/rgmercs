@@ -58,15 +58,16 @@ for t, _ in pairs(Module.Constants.CampfireNameToKit) do table.insert(Module.Con
 table.sort(Module.Constants.CampfireTypes)
 
 Module.DefaultConfig     = {
-    ['AutoCampRadius']   = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = (RGMercConfig.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60), Min = 10, Max = 300, },
-    ['ChaseOn']          = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false, },
-    ['BreakOnDeath']     = { DisplayName = "Break On Death", Category = "Chase", Tooltip = "Stop chasing when you die.", Default = true, },
-    ['ChaseDistance']    = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100, },
-    ['ChaseTarget']      = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
-    ['ReturnToCamp']     = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
-    ['CampHard']         = { DisplayName = "Camp Hard", Category = "Camp", Tooltip = "Return to Camp Loc Everytime", Default = false, },
-    ['MaintainCampfire'] = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;", Type = "Combo", ComboOptions = Module.Constants.CampfireTypes, Default = 36, Min = 1, Max = #Module.Constants.CampfireTypes, },
-    ['RequireLoS']       = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
+    ['AutoCampRadius']    = { DisplayName = "Auto Camp Radius", Category = "Camp", Tooltip = "Return to camp after you get this far away", Default = (RGMercConfig.Constants.RGMelee:contains(mq.TLO.Me.Class.ShortName()) and 30 or 60), Min = 10, Max = 300, },
+    ['ChaseOn']           = { DisplayName = "Chase On", Category = "Chase", Tooltip = "Chase your Chase Target.", Default = false, },
+    ['BreakOnDeath']      = { DisplayName = "Break On Death", Category = "Chase", Tooltip = "Stop chasing when you die.", Default = true, },
+    ['ChaseDistance']     = { DisplayName = "Chase Distance", Category = "Chase", Tooltip = "How Far your Chase Target can get before you Chase.", Default = 25, Min = 5, Max = 100, },
+    ['ChaseStopDistance'] = { DisplayName = "Chase Stop Distance", Category = "Chase", Tooltip = "How close to get to your chase target before you stop.", Default = 25, Min = 5, Max = 100, },
+    ['ChaseTarget']       = { DisplayName = "Chase Target", Category = "Chase", Tooltip = "Character you are Chasing", Type = "Custom", Default = "", },
+    ['ReturnToCamp']      = { DisplayName = "Return To Camp", Category = "Camp", Tooltip = "Return to Camp After Combat (requires you to /rgl campon)", Default = (not RGMercConfig.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())), },
+    ['CampHard']          = { DisplayName = "Camp Hard", Category = "Camp", Tooltip = "Return to Camp Loc Everytime", Default = false, },
+    ['MaintainCampfire']  = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;", Type = "Combo", ComboOptions = Module.Constants.CampfireTypes, Default = 36, Min = 1, Max = #Module.Constants.CampfireTypes, },
+    ['RequireLoS']        = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
 }
 
 Module.CommandHandlers   = {
@@ -365,6 +366,7 @@ function Module:Render()
 
     if self.settings and self.ModuleLoaded and RGMercConfig.Globals.SubmodulesLoaded then
         ImGui.Text(string.format("Chase Distance: %d", self.settings.ChaseDistance))
+        ImGui.Text(string.format("Chase Stop Distance: %d", self.settings.ChaseStopDistance))
         ImGui.Text(string.format("Chase LOS Required: %s", self.settings.RequireLoS == true and "On" or "Off"))
 
         local pressed
@@ -648,8 +650,8 @@ function Module:GiveTime(combat_state)
         if Nav.MeshLoaded() then
             if not Nav.Active() then
                 if Nav.PathExists("id " .. chaseSpawn.ID())() then
-                    local navCmd = string.format("/squelch /nav id %d log=critical distance %d lineofsight=%s", chaseSpawn.ID(),
-                        self.settings.ChaseDistance, self.settings.RequireLoS and "on" or "off")
+                    local navCmd = string.format("/squelch /nav id %d log=critical dist=%d lineofsight=%s", chaseSpawn.ID(),
+                        self.settings.ChaseStopDistance, self.settings.RequireLoS and "on" or "off")
                     RGMercsLogger.log_verbose("\awNOTICE:\ax Chase Target %s is out of range - navin :: %s", self.settings.ChaseTarget, navCmd)
                     self:RunCmd(navCmd)
 
