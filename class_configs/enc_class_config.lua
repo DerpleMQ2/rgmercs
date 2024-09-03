@@ -974,7 +974,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not target or not target() then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -984,7 +984,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not target or not target() then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -994,7 +994,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not target or not target() then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1026,7 +1026,7 @@ local _ClassConfig = {
                     if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
                     --TODO: Fix this, TargetHasBuff is a bandaid, spamcasting on tank without it even though we are using CheckPCNeedsBuff
                     return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
-                        and not RGMercUtils.TargetHasBuff(spell, target)
+                        and not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1039,7 +1039,7 @@ local _ClassConfig = {
 
                     if not RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.ReagentCheck(spell) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1052,7 +1052,7 @@ local _ClassConfig = {
 
                     if not RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) then return false end
 
-                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName())
+                    return RGMercUtils.CheckPCNeedsBuff(spell, target.ID(), target.CleanName()) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
         },
