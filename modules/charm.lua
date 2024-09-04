@@ -225,7 +225,7 @@ function Module:CharmNow(charmId, useAA)
 	if not charmSpell or not charmSpell() then return end
 	local dCharm = not RGMercUtils.MyClassIs("BRD") and RGMercUtils.GetSetting("DireCharm") or false
 	if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
-		RGMercUtils.HandleAnnounce(string.format("Performing DIRE CHARM --> %d", mq.TLO.Spawn(charmId).CleanName() or "Unknown"), RGMercUtils.GetSetting('CharmAnnounceGroup'),
+		RGMercUtils.HandleAnnounce(string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"), RGMercUtils.GetSetting('CharmAnnounceGroup'),
 			RGMercUtils.GetSetting('CharmAnnounce'))
 		RGMercUtils.UseAA("Dire Charm", charmId)
 	else
