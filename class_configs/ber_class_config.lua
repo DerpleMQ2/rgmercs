@@ -384,7 +384,7 @@ return {
                 type = "CustomFunc",
                 custom_func = function(self)
                     if not RGMercUtils.GetSetting('SummonAxes') then return false end
-                    if mq.TLO.Cursor.ID() ~= 0 then RGMercUtils.DoCmd("/autoinv") end
+                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
                     if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['AutoAxe1'])) then return false end
                     if mq.TLO.FindItemCount(self.ResolvedActionMap['AutoAxe1'].Name())() > RGMercUtils.GetSetting('AutoAxeCount') then return false end
                     if RGMercUtils.GetSetting('AutoAxeCount') == 0 then return false end
@@ -393,7 +393,7 @@ return {
                     if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
 
                     local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['AutoAxe1'], mq.TLO.Me.ID())
-                    RGMercUtils.DoCmd("/autoinv")
+                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
                     return ret
                 end,
             },
@@ -402,7 +402,7 @@ return {
                 type = "CustomFunc",
                 custom_func = function(self)
                     if not RGMercUtils.GetSetting('SummonAxes2') then return false end
-                    if mq.TLO.Cursor.ID() ~= 0 then RGMercUtils.DoCmd("/autoinv") end
+                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
                     if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['AutoAxe2'])) then return false end
                     if mq.TLO.FindItemCount(self.ResolvedActionMap['AutoAxe2'].Name())() > RGMercUtils.GetSetting('AutoAxe2Count') then return false end
                     if RGMercUtils.GetSetting('AutoAxe2Count') == 0 then return false end
@@ -411,7 +411,7 @@ return {
                     if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
 
                     local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['AutoAxe2'], mq.TLO.Me.ID())
-                    RGMercUtils.DoCmd("/autoinv")
+                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
                     return ret
                 end,
             },
@@ -421,7 +421,7 @@ return {
                 custom_func = function(self)
                     if not RGMercUtils.GetSetting('SummonDichoAxes') then return false end
                     if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['DichoAxe'])) then return false end
-                    if mq.TLO.Cursor.ID() ~= 0 then RGMercUtils.DoCmd("/autoinv") end
+                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
                     if mq.TLO.FindItemCount(self.ResolvedActionMap['DichoAxe'].Name())() > RGMercUtils.GetSetting('DichoAxeCount') then return false end
                     if RGMercUtils.GetSetting('DichoAxeCount') == 0 then return false end
                     local spell = mq.TLO.Spell(self.ResolvedActionMap['DichoAxe'].Name())
@@ -429,7 +429,7 @@ return {
                     if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
 
                     local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['DichoAxe'], mq.TLO.Me.ID())
-                    RGMercUtils.DoCmd("/autoinv")
+                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
                     return ret
                 end,
             },
