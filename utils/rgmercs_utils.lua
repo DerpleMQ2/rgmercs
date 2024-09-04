@@ -4432,13 +4432,27 @@ end
 ---@return boolean # any_pressed
 ---@return boolean # requires_new_loadout
 function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, category)
-    local any_pressed = false
-    local new_loadout = false
+    local any_pressed           = false
+    local new_loadout           = false
     ---@type boolean|nil
-    local pressed = false
-    local renderWidth = 300
-    local windowWidth = ImGui.GetWindowWidth()
-    local numCols = math.max(1, math.floor(windowWidth / renderWidth))
+    local pressed               = false
+    local renderWidth           = 300
+    local windowWidth           = ImGui.GetWindowWidth()
+    local numCols               = math.max(1, math.floor(windowWidth / renderWidth))
+
+    local settingToDrawIndicies = {}
+
+    for idx, k in ipairs(settingNames) do
+        if RGMercUtils.GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
+            if defaults[k].Category == category then
+                table.insert(settingToDrawIndicies, idx)
+            end
+        end
+    end
+
+    local settingsCount = #settingToDrawIndicies
+
+    local itemsPerRow = math.ceil(settingsCount / numCols)
 
     if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
@@ -4448,79 +4462,80 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
         end
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
+        ImGui.TableNextRow()
 
-        for _, k in ipairs(settingNames) do
-            if RGMercUtils.GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
-                if defaults[k].Category == category then
-                    if defaults[k].Type == "Combo" then
-                        -- build a combo box.
-                        ImGui.TableNextColumn()
-                        ImGui.Text((defaults[k].DisplayName or "None"))
+        if #settingToDrawIndicies > 0 then
+            for row = 1, itemsPerRow do
+                for _ = 1, numCols do
+                    ImGui.TableNextColumn()
+                    local itemIndex = row + ImGui.TableGetColumnIndex()
+                    if itemIndex <= #settingToDrawIndicies then
+                        printf("%d :: %d", #settingToDrawIndicies, itemIndex)
+                        local k = settingNames[settingToDrawIndicies[itemIndex]]
+                        ImGui.Text(string.format("%s", defaults[k].DisplayName or "None"))
                         RGMercUtils.Tooltip(defaults[k].Tooltip)
                         ImGui.TableNextColumn()
-                        ImGui.PushID("##combo_setting_" .. k)
-                        settings[k], pressed = ImGui.Combo("", settings[k], defaults[k].ComboOptions)
-                        ImGui.PopID()
-                        new_loadout = new_loadout or
-                            ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
-                        any_pressed = any_pressed or (pressed or false)
-                    elseif defaults[k].Type == "ClickyItem" then
-                        -- make a drag and drop target
-                        ImGui.TableNextColumn()
-                        ImGui.Text((defaults[k].DisplayName or "None"))
-                        ImGui.TableNextColumn()
-                        ImGui.PushFont(ImGui.ConsoleFont)
-                        local displayCharCount = 11
-                        local nameLen = settings[k]:len()
-                        local maxStart = (nameLen - displayCharCount) + 1
-                        local startDisp = (os.clock() % maxStart) + 1
 
-                        ImGui.PushID(k .. "__btn")
-                        if ImGui.SmallButton(nameLen > 0 and settings[k]:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
-                            if mq.TLO.Cursor() then
-                                settings[k] = mq.TLO.Cursor.Name()
+                        if defaults[k].Type == "Combo" then
+                            -- build a combo box.
+                            ImGui.PushID("##combo_setting_" .. k)
+                            settings[k], pressed = ImGui.Combo("", settings[k], defaults[k].ComboOptions)
+                            ImGui.PopID()
+                            new_loadout = new_loadout or
+                                ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
+                            any_pressed = any_pressed or (pressed or false)
+                        elseif defaults[k].Type == "ClickyItem" then
+                            -- make a drag and drop target
+                            ImGui.PushFont(ImGui.ConsoleFont)
+                            local displayCharCount = 11
+                            local nameLen = settings[k]:len()
+                            local maxStart = (nameLen - displayCharCount) + 1
+                            local startDisp = (os.clock() % maxStart) + 1
+
+                            ImGui.PushID(k .. "__btn")
+                            if ImGui.SmallButton(nameLen > 0 and settings[k]:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
+                                if mq.TLO.Cursor() then
+                                    settings[k] = mq.TLO.Cursor.Name()
+                                    pressed = true
+                                end
+                            end
+                            ImGui.PopID()
+
+                            ImGui.PopFont()
+                            if nameLen > 0 then
+                                RGMercUtils.Tooltip(settings[k])
+                            end
+
+                            ImGui.SameLine()
+                            ImGui.PushID(k .. "__clear_btn")
+                            if ImGui.SmallButton(ICONS.MD_CLEAR) then
+                                settings[k] = ""
                                 pressed = true
                             end
-                        end
-                        ImGui.PopID()
-
-                        ImGui.PopFont()
-                        if nameLen > 0 then
-                            RGMercUtils.Tooltip(settings[k])
-                        end
-
-                        ImGui.SameLine()
-                        ImGui.PushID(k .. "__clear_btn")
-                        if ImGui.SmallButton(ICONS.MD_CLEAR) then
-                            settings[k] = ""
-                            pressed = true
-                        end
-                        ImGui.PopID()
-                        RGMercUtils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
-                        new_loadout = new_loadout or
-                            ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
-                        any_pressed = any_pressed or (pressed or false)
-                    elseif defaults[k].Type ~= "Custom" then
-                        ImGui.TableNextColumn()
-                        ImGui.Text((defaults[k].DisplayName or "None"))
-                        RGMercUtils.Tooltip(defaults[k].Tooltip)
-                        ImGui.TableNextColumn()
-                        if type(settings[k]) == 'boolean' then
-                            settings[k], pressed = RGMercUtils.RenderOptionToggle(k, "", settings[k])
-                            new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
-                            any_pressed = any_pressed or pressed
-                        elseif type(settings[k]) == 'number' then
-                            settings[k], pressed = RGMercUtils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
-                                defaults[k].Max, defaults[k].Step or 1)
-                            new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
-                            any_pressed = any_pressed or pressed
-                        elseif type(settings[k]) == 'string' then -- display only
-                            settings[k], pressed = ImGui.InputText("##" .. k, settings[k])
-                            any_pressed = any_pressed or pressed
-                            RGMercUtils.Tooltip(settings[k])
+                            ImGui.PopID()
+                            RGMercUtils.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
+                            new_loadout = new_loadout or
+                                ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
+                            any_pressed = any_pressed or (pressed or false)
+                        elseif defaults[k].Type ~= "Custom" then
+                            if type(settings[k]) == 'boolean' then
+                                settings[k], pressed = RGMercUtils.RenderOptionToggle(k, "", settings[k])
+                                new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
+                                any_pressed = any_pressed or pressed
+                            elseif type(settings[k]) == 'number' then
+                                settings[k], pressed = RGMercUtils.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
+                                    defaults[k].Max, defaults[k].Step or 1)
+                                new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
+                                any_pressed = any_pressed or pressed
+                            elseif type(settings[k]) == 'string' then -- display only
+                                settings[k], pressed = ImGui.InputText("##" .. k, settings[k])
+                                any_pressed = any_pressed or pressed
+                                RGMercUtils.Tooltip(settings[k])
+                            end
                         end
                     end
                 end
+                ImGui.TableNextRow()
             end
         end
         ImGui.EndTable()
