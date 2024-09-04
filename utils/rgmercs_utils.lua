@@ -4455,7 +4455,7 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
 
     if ImGui.BeginTable("Options_" .. (category), 2 * numCols, ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
-        for i = 1, numCols do
+        for _ = 1, numCols do
             ImGui.TableSetupColumn('Option', (ImGuiTableColumnFlags.WidthFixed), 150.0)
             ImGui.TableSetupColumn('Set', (ImGuiTableColumnFlags.WidthFixed), 130.0)
         end
@@ -4465,12 +4465,13 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
 
         if #settingToDrawIndicies > 0 then
             for row = 1, itemsPerRow do
-                for _ = 1, numCols do
+                for col = 1, numCols do
                     ImGui.TableNextColumn()
-                    local itemIndex = row + ImGui.TableGetColumnIndex()
+                    local itemIndex = row + ((col - 1) * itemsPerRow)
                     if itemIndex <= #settingToDrawIndicies then
                         local k = settingNames[settingToDrawIndicies[itemIndex]]
                         ImGui.Text(string.format("%s", defaults[k].DisplayName or "None"))
+                        --ImGui.Text(string.format("%s %d %d + %d", defaults[k].DisplayName or "None", itemIndex, row, ImGui.TableGetColumnIndex() + 1))
                         RGMercUtils.Tooltip(defaults[k].Tooltip)
                         ImGui.TableNextColumn()
 
