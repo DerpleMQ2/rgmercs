@@ -1289,6 +1289,14 @@ _ClassConfig      = {
                     return RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
+            {
+                name = "PetManaConv",
+                type = "Spell",
+                cond = function(self, spell)
+                    if not spell or not spell() then return false end
+                    return not mq.TLO.Me.Buff(spell.Name() .. " Recourse")() and RGMercUtils.SpellStacksOnMe(spell)
+                end,
+            },
             --removed temporarily and will be eliminated when autoinventory on individual entries have been widely tested
             -- {
             --     name = "Drop Cursor Items",
@@ -1732,14 +1740,6 @@ _ClassConfig      = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "PetManaConv",
-                type = "Spell",
-                cond = function(self, spell)
-                    if not spell or not spell() then return false end
-                    return not mq.TLO.Me.Buff(spell.Name() .. " Recourse")() and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {

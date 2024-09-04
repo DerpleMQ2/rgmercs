@@ -634,7 +634,7 @@ function RGMercUtils.WaitCastFinish(target, bAllowDead)
         end
 
         if target() and target.ID() ~= RGMercUtils.GetTargetID() then
-            RGMercsLogger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", target.ID(), RGMercUtils.GetTargetID())
+            RGMercsLogger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) is no longer your currentTarget(%d)", target.ID(), RGMercUtils.GetTargetID())
         end
 
         maxWait = maxWait - 10
