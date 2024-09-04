@@ -4470,7 +4470,6 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
                     ImGui.TableNextColumn()
                     local itemIndex = row + ImGui.TableGetColumnIndex()
                     if itemIndex <= #settingToDrawIndicies then
-                        printf("%d :: %d", #settingToDrawIndicies, itemIndex)
                         local k = settingNames[settingToDrawIndicies[itemIndex]]
                         ImGui.Text(string.format("%s", defaults[k].DisplayName or "None"))
                         RGMercUtils.Tooltip(defaults[k].Tooltip)
