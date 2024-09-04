@@ -202,7 +202,7 @@ Config.DefaultConfig = {
     ['CastReadyDelayFact']   = { DisplayName = "Cast Ready Delay Factor", Category = "Combat", Tooltip = "Wait Ping * [n] ms before saying we are ready to cast.", Default = 0, Min = 0, Max = 10, ConfigType = "Advanced", },
 
     -- [ Debuffs] --
-    ['DebuffMinCon']         = { DisplayName = "Debuff Min Con", Category = "Debuffs", Tooltip = "Min Con to use debuffs on", Default = 4, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
+    ['DebuffMinCon']         = { DisplayName = "Debuff Min Con", Category = "Debuffs", Tooltip = "Min Con to use debuffs on", Default = 4, Min = 1, Max = #Config.Constants.ConColors, Type = "Combo", ComboOptions = Config.Constants.ConColors, },
     ['DebuffNamedAlways']    = { DisplayName = "Always Debuff Named", Category = "Debuffs", Tooltip = "Debuff named regardless of con color", Default = true, },
 
     -- [ Tanking ] --
