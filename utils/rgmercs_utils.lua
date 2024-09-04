@@ -4444,7 +4444,7 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
 
     for idx, k in ipairs(settingNames) do
         if RGMercUtils.GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
-            if defaults[k].Category == category then
+            if defaults[k].Category == category and (defaults[k].Type or "none"):lower() ~= "custom" then
                 table.insert(settingToDrawIndicies, idx)
             end
         end
