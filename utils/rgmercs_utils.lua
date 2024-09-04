@@ -924,26 +924,6 @@ function RGMercUtils.UseItem(itemName, targetId)
     return true
 end
 
----@param spell MQSpell
----@param targetId number
----@param targetName string
-function RGMercUtils.CheckPCNeedsBuff(spell, targetId, targetName)
-    if not spell or not spell() then return false end
-    if targetId == mq.TLO.Me.ID() then
-        return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() == nil
-    elseif mq.TLO.DanNet(targetName)() == nil then
-        -- Target.
-        RGMercUtils.SetTarget(targetId)
-        mq.delay("2s", function() return mq.TLO.Target.BuffsPopulated() end)
-        return mq.TLO.Target.FindBuff("id " .. tostring(spell.ID()))() == nil
-    else
-        -- DanNet
-        local ret = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spell.ID()), 1000)
-
-        return (ret == "NULL") or not ret
-    end
-end
-
 ---@param abilityName string
 function RGMercUtils.UseAbility(abilityName)
     local me = mq.TLO.Me
@@ -1846,6 +1826,69 @@ function RGMercUtils.PeerHasBuff(spell, peerName)
     end
 
     RGMercsLogger.log_verbose("PeerHasBuff() Failed to find spell: %s on %s", spell.Name(), peerName)
+    return false
+end
+
+---@param spell MQSpell
+---@param target MQSpawn
+---@return boolean
+function RGMercUtils.GroupBuffCheck(spell, target)
+    if not spell or not spell() then return false end
+    if not target or not target() then return false end
+
+    local targetName = target.CleanName() or "None"
+
+    if mq.TLO.DanNet(targetName)() ~= nil then
+        local spellName = spell.RankName.Name()
+        local spellID = spell.RankName.ID()
+        local spellResult = DanNet.observe(targetName, string.format("Me.FindBuff[id %d]", spellID), 1000)
+        RGMercsLogger.log_verbose("\ayGroupBuffCheck() Querying via DanNet for %s(ID:%d) on %s", spellName, spellID, targetName)
+        --RGMercsLogger.log_verbose("AlgarInclude.GroupBuffCheckNeedsBuff() DanNet result for %s: %s", spellName, spellResult)
+        if spellResult == spellName then
+            RGMercsLogger.log_verbose("\atGroupBuffCheck() DanNet detects that %s(ID:%d) is already present on %s, ending.", spellName, spellID, targetName)
+            return false
+        elseif spellResult == "NULL" then
+            RGMercsLogger.log_verbose("\atGroupBuffCheck() DanNet detects %s(ID:%d) is missing on %s, let's check for triggers.", spellName, spellID, targetName)
+            local numEffects = spell.NumEffects()
+            local triggerCt = 0
+            for i = 1, numEffects do
+                local triggerSpell = spell.RankName.Trigger(i)
+                if triggerSpell and triggerSpell() then
+                    local triggerRankResult = DanNet.observe(targetName, string.format("Me.FindBuff[id %d]", triggerSpell.ID()), 1000)
+                    --RGMercsLogger.log_verbose("GroupBuffCheck() DanNet result for trigger %d of %d (%s, %s): %s", i, numEffects, triggerSpell.Name(), triggerSpell.ID(), triggerRankResult)
+                    if triggerRankResult == "NULL" then
+                        RGMercsLogger.log_verbose("\ayGroupBuffCheck() DanNet found a missing trigger for %s(ID:%d) on %s, let's check stacking.", triggerSpell.Name(),
+                            triggerSpell.ID(), targetName)
+                        local triggerStackResult = DanNet.observe(targetName, string.format("Spell[%s].Stacks", triggerSpell.Name()), 1000)
+                        --RGMercsLogger.log_verbose("GroupBuffCheck() DanNet result for stacking check of %s (ID:%d) on %s : %s", triggerSpell.Name(), triggerSpell.ID(), targetName, triggerStackResult)
+                        if triggerStackResult == "TRUE" then
+                            RGMercsLogger.log_verbose("\ayGroupBuffCheck() %s (ID:%d) seems to stack on %s, let's do it!", triggerSpell.Name(), triggerSpell.ID(), targetName)
+                            return true
+                        end
+                        RGMercsLogger.log_verbose("\ayGroupBuffCheck() %s(ID:%d) does not stack on %s, moving on.", triggerSpell.Name(), triggerSpell.ID(), targetName)
+                    end
+                    triggerCt = triggerCt + 1
+                else
+                    RGMercsLogger.log_verbose("\ayGroupBuffCheck() DanNet found no triggers for %s(ID:%d), let's check stacking.", spellName, spellID)
+                end
+            end
+            if triggerCt >= numEffects then
+                RGMercsLogger.log_verbose("\arGroupBuffCheck() DanNet found %d of %d existing triggers for %s(ID:%d) on %s, ending.", triggerCt, numEffects, spellName, spellID,
+                    targetName)
+                return false
+            end
+            local stackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", spellName), 1000)
+            --RGMercsLogger.log_verbose("GroupBuffCheck() DanNet result for stacking check of %s (ID:%d) on %s : %s", spellName, spellID, targetName, stackResult)
+            if stackResult == "TRUE" then
+                RGMercsLogger.log_verbose("\agGroupBuffCheck() %s (ID:%d) seems to stack on %s, let's do it!", spellName, spellID, targetName)
+                return true
+            end
+            RGMercsLogger.log_verbose("GroupBuffCheck() %s(ID:%d) does not stack on %s, moving on.", spellName, spellID, targetName)
+        end
+    else
+        return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
+    end
+
     return false
 end
 
