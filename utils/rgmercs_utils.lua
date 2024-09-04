@@ -1774,7 +1774,7 @@ end
 function RGMercUtils.DanNetFindBuff(id, peerName)
     local buffSearch = string.format("Me.FindBuff[id %d].ID", id)
     RGMercsLogger.log_verbose("DanNetFindBuff(%d, %s) : %s", id, peerName, buffSearch)
-    return (DanNet.observe(peerName, buffSearch, 1000) or "null"):lower() ~= "null"
+    return (DanNet.query(peerName, buffSearch, 1000) or "null"):lower() ~= "null"
 end
 
 ---@param spell MQSpell
@@ -1841,7 +1841,7 @@ function RGMercUtils.GroupBuffCheck(spell, target)
     if mq.TLO.DanNet(targetName)() ~= nil then
         local spellName = spell.RankName.Name()
         local spellID = spell.RankName.ID()
-        local spellResult = DanNet.observe(targetName, string.format("Me.FindBuff[id %d]", spellID), 1000)
+        local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spellID), 1000)
         RGMercsLogger.log_verbose("\ayGroupBuffCheck() Querying via DanNet for %s(ID:%d) on %s", spellName, spellID, targetName)
         --RGMercsLogger.log_verbose("AlgarInclude.GroupBuffCheckNeedsBuff() DanNet result for %s: %s", spellName, spellResult)
         if spellResult == spellName then
@@ -1854,12 +1854,12 @@ function RGMercUtils.GroupBuffCheck(spell, target)
             for i = 1, numEffects do
                 local triggerSpell = spell.RankName.Trigger(i)
                 if triggerSpell and triggerSpell() then
-                    local triggerRankResult = DanNet.observe(targetName, string.format("Me.FindBuff[id %d]", triggerSpell.ID()), 1000)
+                    local triggerRankResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", triggerSpell.ID()), 1000)
                     --RGMercsLogger.log_verbose("GroupBuffCheck() DanNet result for trigger %d of %d (%s, %s): %s", i, numEffects, triggerSpell.Name(), triggerSpell.ID(), triggerRankResult)
                     if triggerRankResult == "NULL" then
                         RGMercsLogger.log_verbose("\ayGroupBuffCheck() DanNet found a missing trigger for %s(ID:%d) on %s, let's check stacking.", triggerSpell.Name(),
                             triggerSpell.ID(), targetName)
-                        local triggerStackResult = DanNet.observe(targetName, string.format("Spell[%s].Stacks", triggerSpell.Name()), 1000)
+                        local triggerStackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", triggerSpell.Name()), 1000)
                         --RGMercsLogger.log_verbose("GroupBuffCheck() DanNet result for stacking check of %s (ID:%d) on %s : %s", triggerSpell.Name(), triggerSpell.ID(), targetName, triggerStackResult)
                         if triggerStackResult == "TRUE" then
                             RGMercsLogger.log_verbose("\ayGroupBuffCheck() %s (ID:%d) seems to stack on %s, let's do it!", triggerSpell.Name(), triggerSpell.ID(), targetName)
@@ -2324,7 +2324,7 @@ function RGMercUtils.GetMainAssistPctHPs()
         return groupMember.PctHPs() or 0
     end
 
-    local ret = tonumber(DanNet.observe(RGMercConfig.Globals.MainAssist, "Me.PctHPs", 1000))
+    local ret = tonumber(DanNet.query(RGMercConfig.Globals.MainAssist, "Me.PctHPs", 1000))
 
     if ret and type(ret) == 'number' then return ret end
 
@@ -3114,7 +3114,7 @@ function RGMercUtils.FindTarget(validateFn)
             local assistTarget = nil
 
             if peer:len() then
-                local queryResult = DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
+                local queryResult = DanNet.query(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
                 assistTarget = mq.TLO.Spawn(queryResult)
                 if queryResult then
                     RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s (%s)",
@@ -3482,7 +3482,7 @@ function RGMercUtils.FindTargetCheck()
 
     -- our MA out of group has a valid target for us.
     if RGMercUtils.GetSetting('AssistOutside') then
-        local queryResult = DanNet.observe(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
+        local queryResult = DanNet.query(RGMercConfig.Globals.MainAssist, "Target.ID", 0)
 
         local assistTarget = mq.TLO.Spawn(queryResult)
         if queryResult then
