@@ -3941,7 +3941,6 @@ function RGMercUtils.NavEnabledLoc(loc)
     if loc ~= "0,0,0" then
         if navLoc and ImGui.IsMouseDoubleClicked(0) then
             RGMercUtils.DoCmd('/nav locYXZ %s', loc)
-            printf('\ayNavigating to \ag%s', loc)
         end
 
         RGMercUtils.Tooltip("Double click to Nav")
