@@ -1416,7 +1416,7 @@ function RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, tar
         end
     end
 
-    RGMercsLogger.log_verbose("\ay   :: Testing Condition for entry(%s) type(%s) cond(s, %s, %s) ==> \ao%s",
+    RGMercsLogger.log_verbose("\ay   :: Testing Condition for entry(%s) type(%s) cond(%s, %s) ==> \ao%s",
         entry.name, entry.type, condArg or "None", condTarg.CleanName() or "None", RGMercUtils.BoolToColorString(pass))
 
     entry.lastRun = { pass = pass, active = active, }
@@ -1943,7 +1943,7 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
         end
     end
 
-    RGMercsLogger.log_verbose("TargetHasBuff() Failed to find spell: %d on %s", spell.Name(), target.DisplayName())
+    RGMercsLogger.log_verbose("TargetHasBuff() Failed to find spell: %s on %s", spell.Name(), target.DisplayName())
     return false
 end
 

@@ -640,11 +640,11 @@ function Module:RunCureRotation()
         if peer and peer:len() > 0 then
             if mq.TLO.SpawnCount(string.format("pc =%s radius 150", peer))() == 1 then
                 RGMercsLogger.log_verbose("\ag[Cures] %s is in range - checking for curables", peer)
-                local effectCount = DanNet.observe(peer, "Me.TotalCounters", 1000) or "null"
+                local effectCount = DanNet.query(peer, "Me.TotalCounters", 1000) or "null"
                 RGMercsLogger.log_verbose("\ay[Cures] %s :: Effect Count: %s", peer, effectCount)
                 if RGMercUtils.OnEMU() or (effectCount:lower() ~= "null" and effectCount ~= "0") then
                     for _, data in ipairs(checks) do
-                        local effectId = DanNet.observe(peer, data.check, 1000) or "null"
+                        local effectId = DanNet.query(peer, data.check, 1000) or "null"
                         RGMercsLogger.log_verbose("\ay[Cures] %s :: %s [%s] => %s", peer, data.check, data.type, effectId)
 
                         if effectId:lower() ~= "null" and effectId ~= "0" then
