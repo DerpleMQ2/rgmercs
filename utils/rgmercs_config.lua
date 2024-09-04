@@ -201,6 +201,10 @@ Config.DefaultConfig = {
     ['FaceTarget']           = { DisplayName = "Face Target in Combat", Category = "Combat", Tooltip = "Periodically /face your target while in combat.", Default = true, ConfigType = "Advanced", },
     ['CastReadyDelayFact']   = { DisplayName = "Cast Ready Delay Factor", Category = "Combat", Tooltip = "Wait Ping * [n] ms before saying we are ready to cast.", Default = 0, Min = 0, Max = 10, ConfigType = "Advanced", },
 
+    -- [ Debuffs] --
+    ['DebuffMinCon']         = { DisplayName = "Debuff Min Con", Category = "Debuffs", Tooltip = "Min Con to use debuffs on", Default = 4, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
+    ['DebuffNamedAlways']    = { DisplayName = "Always Debuff Named", Category = "Debuffs", Tooltip = "Debuff named regardless of con color", Default = true, },
+
     -- [ Tanking ] --
     ['MovebackWhenTank']     = { DisplayName = "Moveback as Tank", Category = "Tanking", Tooltip = "Adds 'moveback' to stick command when tanking. Helpful to keep mobs from getting behind you.", Default = false, ConfigType = "Advanced", },
     ['MovebackWhenBehind']   = { DisplayName = "Moveback if Mob Behind", Category = "Tanking", Tooltip = "Causes you to move back if we detect an XTarget is behind you when tanking.", Default = true, ConfigType = "Advanced", },

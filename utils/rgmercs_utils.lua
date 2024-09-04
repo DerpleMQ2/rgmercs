@@ -2533,6 +2533,12 @@ function RGMercUtils.DebuffSong(songSpell)
 end
 
 ---@return boolean
+function RGMercUtils.DebuffConCheck()
+    local conLevel = (RGMercConfig.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
+    return conLevel >= RGMercUtils.GetSetting('DebuffMinCon') or (RGMercUtils.IsNamed(mq.TLO.Target) and RGMercUtils.GetSetting('DebuffNamedAlways'))
+end
+
+---@return boolean
 function RGMercUtils.DoBuffCheck()
     if not RGMercUtils.GetSetting('DoBuffs') then return false end
 
