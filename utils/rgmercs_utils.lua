@@ -1871,6 +1871,8 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
         RGMercUtils.SetTarget(target.ID())
     end
 
+    RGMercsLogger.log_verbose("TargetHasBuff(): Target Buffs Populated: %s", RGMercUtils.BoolToColorString(target.BuffsPopulated()))
+
     local numEffects = spell.NumEffects()
 
     local ret = (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
