@@ -926,7 +926,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = mq.TLO.Me.Inventory("Charm").Name(),
+                name_func = function() return mq.TLO.Me.Inventory("Charm").Name() or "None" end,
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Charm")
