@@ -694,7 +694,7 @@ return {
             end,
         },
         {
-            name = 'AoE DPS',
+            name = 'AoE Rain DPS',
             state = 1,
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
