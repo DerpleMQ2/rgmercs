@@ -4552,11 +4552,12 @@ end
 ---@param settings table
 ---@param defaults table
 ---@param categories table
----@param hideControls? boolean
+---@param showMainOptions? boolean
+---@---@param hideControls? boolean
 ---@return table: settings
 ---@return boolean: any_pressed
 ---@return boolean: requires_new_loadout
-function RGMercUtils.RenderSettings(settings, defaults, categories, hideControls)
+function RGMercUtils.RenderSettings(settings, defaults, categories, hideControls, showMainOptions)
     local any_pressed = false
     local new_loadout = false
 
@@ -4567,6 +4568,17 @@ function RGMercUtils.RenderSettings(settings, defaults, categories, hideControls
 
     if not hideControls then
         local changed = false
+
+        if showMainOptions then
+            RGMercConfig:GetSettings().ShowAllOptionsMain, changed = RGMercUtils.RenderOptionToggle("show_main_all_tog",
+                "Show All Module Options", RGMercConfig:GetSettings().ShowAllOptionsMain)
+            if changed then
+                RGMercConfig:SaveSettings(true)
+            end
+            ImGui.SameLine()
+        end
+
+        changed = false
         RGMercConfig:GetSettings().ShowAdvancedOpts, changed = RGMercUtils.RenderOptionToggle("show_adv_tog",
             "Show Advanced Options", RGMercConfig:GetSettings().ShowAdvancedOpts)
         if changed then

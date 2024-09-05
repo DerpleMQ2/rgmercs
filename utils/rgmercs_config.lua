@@ -262,6 +262,7 @@ Config.DefaultConfig = {
 
     -- [ UI ] --
     ['BgOpacity']            = { DisplayName = "Background Opacity", Category = "UI", Tooltip = "Opacity for the RGMercs UI", Default = 100, Min = 20, Max = 100, },
+    ['ShowAllOptionsMain']   = { DisplayName = "Show All Options on Main", Category = "UI", Tooltip = "Show all options on the main panel", Default = true, },
     ['FrameEdgeRounding']    = { DisplayName = "Frame Edge Rounding", Category = "UI", Tooltip = "Frame Edge Rounding for the RGMercs UI", Default = 6, Min = 0, Max = 50, },
     ['ScrollBarRounding']    = { DisplayName = "Scroll Bar Rounding", Category = "UI", Tooltip = "Frame Edge Rounding for the RGMercs UI", Default = 10, Min = 0, Max = 50, },
     ['ShowAdvancedOpts']     = { DisplayName = "Show Advanced Options", Category = "UI", Tooltip = "Show Advanced Options", Type = "Custom", Default = false, ConfigType = "Advanced", },
