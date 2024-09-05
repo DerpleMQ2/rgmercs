@@ -3724,6 +3724,10 @@ function RGMercUtils.AuraActiveByName(auraName)
     if not auraName then return false end
     local auraOne = string.find(mq.TLO.Me.Aura(1)() or "", auraName) ~= nil
     local auraTwo = string.find(mq.TLO.Me.Aura(2)() or "", auraName) ~= nil
+    local stripName = string.gsub(auraName, "'", "")
+
+    auraOne = auraOne or string.find(mq.TLO.Me.Aura(1)() or "", stripName) ~= nil
+    auraTwo = auraTwo or string.find(mq.TLO.Me.Aura(2)() or "", stripName) ~= nil
 
     return auraOne or auraTwo
 end
