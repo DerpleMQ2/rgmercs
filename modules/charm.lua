@@ -16,7 +16,7 @@ Module.TempSettings.CharmTracker = {}
 
 Module.DefaultConfig             = {
 	-- [ CHARM ] --
-	['CharmOn']             = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", },
+	['CharmOn']             = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", RequiresLoadoutChange = true, },
 	['CharmStartCount']     = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
 	['CharmRadius']         = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
 	['CharmZRadius']        = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", },
