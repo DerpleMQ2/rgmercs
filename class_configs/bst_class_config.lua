@@ -673,6 +673,13 @@ return {
             end,
         },
         {
+            name = 'Pet Management',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime"
+            end,
+        },
+        {
             name = 'Emergency',
             state = 1,
             steps = 1,
@@ -1186,7 +1193,7 @@ return {
                 end,
             },
         },
-        ['Downtime'] = {
+        ['Pet Management'] = {
             {
                 name = "PetSpell",
                 type = "Spell",
@@ -1194,6 +1201,8 @@ return {
                     return mq.TLO.Me.Pet.ID() == 0
                 end,
             },
+        },
+        ['Downtime'] = {
             {
                 name = "Consumption of Spirit",
                 type = "AA",

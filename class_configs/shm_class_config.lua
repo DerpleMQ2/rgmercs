@@ -892,6 +892,15 @@ local _ClassConfig = {
                     RGMercUtils.DoBuffCheck()
             end,
         },
+        { --Summon pet even when buffs are off on emu
+            name = 'Pet Management',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime"
+            end,
+        },
         {
             name = 'Pet Downtime',
             targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
@@ -1333,13 +1342,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Downtime'] = {
-            {
-                name = "Group Shrink",
-                type = "AA",
-                active_cond = function(self, _) return mq.TLO.Me.Height() < 2 end,
-                cond = function(self, _) return RGMercUtils.GetSetting('DoGroupShrink') and mq.TLO.Me.Height() > 2.2 end,
-            },
+        ['Pet Management'] = {
             {
                 name = "PetSpell",
                 type = "Spell",
@@ -1352,6 +1355,14 @@ local _ClassConfig = {
                             pet.Class.Name(), pet.CleanName(), spell.RankName())
                     end
                 end,
+            },
+        },
+        ['Downtime'] = {
+            {
+                name = "Group Shrink",
+                type = "AA",
+                active_cond = function(self, _) return mq.TLO.Me.Height() < 2 end,
+                cond = function(self, _) return RGMercUtils.GetSetting('DoGroupShrink') and mq.TLO.Me.Height() > 2.2 end,
             },
             {
                 name = "Cannibalization",

@@ -711,6 +711,13 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Pet Management',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime"
+            end,
+        },
+        {
             name = 'Pet Downtime',
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
@@ -1150,6 +1157,8 @@ local _ClassConfig = {
             --    active_cond = function(self, spell) return RGMercUtils.SongActiveByName(spell.RankName()) end,
             --    cond = function(self, spell) return not RGMercUtils.SongActiveByName(spell.RankName()) end,
             --},
+        },
+        ['Pet Management'] = {
             {
                 name = "PetSpellWar",
                 type = "Spell",

@@ -635,6 +635,15 @@ return {
                     RGMercUtils.DoBuffCheck()
             end,
         },
+        { --Summon pet even when buffs are off on emu
+            name = 'Pet Management',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Downtime"
+            end,
+        },
         {
             name = 'Burn',
             state = 1,
@@ -705,6 +714,21 @@ return {
         },
     },
     ['Rotations']     = {
+        ['Pet Management'] = {
+            {
+                name = "PetSpell",
+                type = "Spell",
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
+                cond = function(self, _) return RGMercUtils.GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
+                post_activate = function(self, spell)
+                    local pet = mq.TLO.Me.Pet
+                    if pet.ID() > 0 then
+                        RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
+                            pet.Class.Name(), pet.CleanName(), spell.RankName())
+                    end
+                end,
+            },
+        },
         ['Burn'] = {
             {
                 name = "Arcane Whisper",
