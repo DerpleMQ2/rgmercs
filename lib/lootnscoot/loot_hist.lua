@@ -78,14 +78,14 @@ local themeFile = mq.configDir .. '/MyThemeZ.lua'
 local configFile = mq.configDir .. '/MyUI_Configs.lua'
 local ZoomLvl = 1.0
 local showReport = false
-local ThemeName = 'Default'
+local ThemeName = 'None'
 local gIcon = Icons.MD_SETTINGS
 local globalNewIcon = Icons.FA_GLOBE
 local globeIcon = Icons.FA_GLOBE
 local changed = false
 local txtBuffer = {}
 local defaults = {
-	LoadTheme = 'Default',
+	LoadTheme = 'None',
 	Scale = 1.0,
 	Zoom = false,
 	txtAutoScroll = true,
@@ -149,15 +149,18 @@ function guiLoot.ReportLoot()
 	if guiLoot.recordData then
 		showReport = true
 		guiLoot.console:AppendText("\ay[Looted]\at[Loot Report]")
-		for looter, lootData in pairs(lootTable) do
-			guiLoot.console:AppendText("\at[%s] \ax: ", looter)
-			for item, data in pairs(lootData) do
+		-- for looter, lootData in pairs(lootTable) do
+			-- guiLoot.console:AppendText("\at[%s] \ax: ", looter)
+			for item, data in pairs(lootTable) do
 				local itemName = item
+				local looter = data['Who']
 				local itemLink = data["Link"]
 				local itemCount = data["Count"]
-				guiLoot.console:AppendText("\ao\t%s \ax: \ax(%d)", itemLink, itemCount)
+				-- guiLoot.console:AppendText("\at[%s] \ax: ", looter)
+				guiLoot.console:AppendText("\ao%s \ax: \ax(%d)", itemLink, itemCount)
+				guiLoot.console:AppendText("\at\t[%s] \ax: ", looter)
 			end
-		end
+		-- end
 	else
 		guiLoot.recordData = true
 		guiLoot.console:AppendText("\ay[Looted]\ag[Recording Data Enabled]\ax Check back later for Data.")
@@ -172,6 +175,14 @@ local function File_Exists(name)
 	if f~=nil then io.close(f) return true else return false end
 end
 
+local function getSortedKeys(t)
+	local keys = {}
+	for k in pairs(t) do
+		table.insert(keys, k)
+	end
+	table.sort(keys)
+	return keys
+end
 
 ---comment Writes settings from the settings table passed to the setting file (full path required)
 -- Uses mq.pickle to serialize the table and write to file
@@ -181,14 +192,14 @@ local function writeSettings(file, settings)
 	mq.pickle(file, settings)
 end
 
--- local function loadTheme()
--- 	if File_Exists(themeFile) then
--- 		theme = dofile(themeFile)
--- 		else
--- 		theme = require('themes')
--- 	end
--- 	ThemeName = theme.LoadTheme or 'notheme'
--- end
+local function loadTheme()
+	if File_Exists(themeFile) then
+		theme = dofile(themeFile)
+		else
+		theme = require('themes')
+	end
+	ThemeName = theme.LoadTheme or 'notheme'
+end
 
 local function loadSettings()
 	local temp = {}
@@ -206,7 +217,7 @@ local function loadSettings()
 		temp = settings[script]
 	end
     
-	-- loadTheme()
+	loadTheme()
     
 	if settings[script].locked == nil then
 		settings[script].locked = false
@@ -244,48 +255,49 @@ local function loadSettings()
     
 	temp = settings[script]
 end
--- ---comment
--- ---@param themeName string -- name of the theme to load form table
--- ---@return integer, integer -- returns the new counter values 
--- local function DrawTheme(themeName)
--- 	local StyleCounter = 0
--- 	local ColorCounter = 0
--- 	for tID, tData in pairs(theme.Theme) do
--- 		if tData.Name == themeName then
--- 			for pID, cData in pairs(theme.Theme[tID].Color) do
--- 				ImGui.PushStyleColor(pID, ImVec4(cData.Color[1], cData.Color[2], cData.Color[3], cData.Color[4]))
--- 				ColorCounter = ColorCounter + 1
--- 			end
--- 			if tData['Style'] ~= nil then
--- 				if next(tData['Style']) ~= nil then
+---comment
+---@param themeName string -- name of the theme to load form table
+---@return integer, integer -- returns the new counter values 
+local function DrawTheme(themeName)
+	local StyleCounter = 0
+	local ColorCounter = 0
+	if themeName == nil or themeName == 'None' or themeName == 'Default' then return 0, 0 end
+	for tID, tData in pairs(theme.Theme) do
+		if tData.Name == themeName then
+			for pID, cData in pairs(theme.Theme[tID].Color) do
+				ImGui.PushStyleColor(pID, ImVec4(cData.Color[1], cData.Color[2], cData.Color[3], cData.Color[4]))
+				ColorCounter = ColorCounter + 1
+			end
+			if tData['Style'] ~= nil then
+				if next(tData['Style']) ~= nil then
                     
--- 					for sID, sData in pairs (theme.Theme[tID].Style) do
--- 						if sData.Size ~= nil then
--- 							ImGui.PushStyleVar(sID, sData.Size)
--- 							StyleCounter = StyleCounter + 1
--- 							elseif sData.X ~= nil then
--- 							ImGui.PushStyleVar(sID, sData.X, sData.Y)
--- 							StyleCounter = StyleCounter + 1
--- 						end
--- 					end
--- 				end
--- 			end
--- 		end
--- 	end
--- 	return ColorCounter, StyleCounter
--- end
+					for sID, sData in pairs (theme.Theme[tID].Style) do
+						if sData.Size ~= nil then
+							ImGui.PushStyleVar(sID, sData.Size)
+							StyleCounter = StyleCounter + 1
+							elseif sData.X ~= nil then
+							ImGui.PushStyleVar(sID, sData.X, sData.Y)
+							StyleCounter = StyleCounter + 1
+						end
+					end
+				end
+			end
+		end
+	end
+	return ColorCounter, StyleCounter
+end
 
 function guiLoot.GUI()
 	if not guiLoot.openGUI then return end
 	local windowName = 'Looted Items##'..mq.TLO.Me.DisplayName()
 	ImGui.SetNextWindowSize(260, 300, ImGuiCond.FirstUseEver)
 	--imgui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(1, 0));
-	-- ColorCount, StyleCount = DrawTheme(ThemeName)
+	ColorCount, StyleCount = DrawTheme(ThemeName)
 	if guiLoot.imported then windowName = 'Looted Items Local##Imported_'..mq.TLO.Me.DisplayName() end
 	guiLoot.openGUI, show = ImGui.Begin(windowName, nil, guiLoot.winFlags)
 	if not show then
-		-- if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
-		-- if StyleCount > 0 then ImGui.PopStyleVar(StyleCount) end
+		if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
+		if StyleCount > 0 then ImGui.PopStyleVar(StyleCount) end
 		imgui.End()
 		--imgui.PopStyleVar()
 		-- guiLoot.shouldDrawGUI = false
@@ -447,8 +459,8 @@ function guiLoot.GUI()
 		ImGui.EndTable()
 			
 		ImGui.EndChild()
-		-- if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
-		-- if StyleCount > 0 then ImGui.PopStyleVar(StyleCount)  end
+		if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
+		if StyleCount > 0 then ImGui.PopStyleVar(StyleCount)  end
 		ImGui.SetWindowFontScale(1)
 		ImGui.End()
 		else
@@ -469,8 +481,8 @@ function guiLoot.GUI()
 
 		guiLoot.console:Render(ImVec2(contentSizeX,0))
 		-- imgui.PopStyleVar(1)
-		-- if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
-		-- if StyleCount > 0 then ImGui.PopStyleVar(StyleCount)  end
+		if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
+		if StyleCount > 0 then ImGui.PopStyleVar(StyleCount)  end
 		ImGui.SetWindowFontScale(1)
 		ImGui.End()
 	end
@@ -528,7 +540,7 @@ end
 local function lootedReport_GUI()
 --- Report Window
 	if not showReport then return end
-	-- ColorCountRep, StyleCountRep = DrawTheme(ThemeName)
+	ColorCountRep, StyleCountRep = DrawTheme(ThemeName)
 	ImGui.SetNextWindowSize(300,200, ImGuiCond.Appearing)
 	if changed and mq.TLO.Plugin('mq2dannet').IsLoaded() and guiLoot.caller == 'lootnscoot' then
 		mq.cmd('/dgae /lootutils reload')
@@ -536,15 +548,15 @@ local function lootedReport_GUI()
 	end
 	local openRepGUI, showRepGUI = ImGui.Begin("Loot Report##"..script, showReport, bit32.bor( ImGuiWindowFlags.NoCollapse))
 	if not showRepGUI then
-		-- if ColorCountRep > 0 then ImGui.PopStyleColor(ColorCountRep) end
-		-- if StyleCountRep > 0 then ImGui.PopStyleVar(StyleCountRep) end
+		if ColorCountRep > 0 then ImGui.PopStyleColor(ColorCountRep) end
+		if StyleCountRep > 0 then ImGui.PopStyleVar(StyleCountRep) end
 		ImGui.SetWindowFontScale(1)
 		ImGui.End()
 		return showRepGUI
 	end
 	if not openRepGUI then
-		-- if ColorCountRep > 0 then ImGui.PopStyleColor(ColorCountRep) end
-		-- if StyleCountRep > 0 then ImGui.PopStyleVar(StyleCountRep) end
+		if ColorCountRep > 0 then ImGui.PopStyleColor(ColorCountRep) end
+		if StyleCountRep > 0 then ImGui.PopStyleVar(StyleCountRep) end
 		ImGui.SetWindowFontScale(1)
 		ImGui.End()
 		showReport = false
@@ -555,12 +567,14 @@ local function lootedReport_GUI()
 		local sizeX, sizeY = ImGui.GetContentRegionAvail()
 		ImGui.BeginTable('##LootReport', 4, bit32.bor(ImGuiTableFlags.Borders,ImGuiTableFlags.ScrollY,ImGuiTableFlags.Resizable, ImGuiTableFlags.RowBg), ImVec2(sizeX, sizeY-10))
 		ImGui.TableSetupScrollFreeze(0, 1)
-		ImGui.TableSetupColumn("Looter", ImGuiTableColumnFlags.None, 100)
+		
 		ImGui.TableSetupColumn("Item", ImGuiTableColumnFlags.None,200)
+		ImGui.TableSetupColumn("Looter(s)", ImGuiTableColumnFlags.None, 100)
 		ImGui.TableSetupColumn("Count", ImGuiTableColumnFlags.NoResize, 50)
 		ImGui.TableSetupColumn("Tagged", ImGuiTableColumnFlags.NoResize, 75)
 		ImGui.TableHeadersRow()
 		if ImGui.BeginPopupContextItem() then
+			ImGui.SetWindowFontScale(ZoomLvl)
 			ImGui.SeparatorText("Tags:")
 			ImGui.TextColored(0.523, 0.797, 0.944, 1.000,globeIcon)
 			ImGui.SameLine()
@@ -588,10 +602,16 @@ local function lootedReport_GUI()
 			ImGui.Text("Unknown")
 			ImGui.EndPopup()
 		end
+		ImGui.SetWindowFontScale(ZoomLvl)
 		local row = 1
-		for looter, lootData in pairs(lootTable) do
-			for item, data in pairs(lootData) do
-				local itemName = item
+		-- for looter, lootData in pairs(lootTable) do
+
+			local sortedKeys = getSortedKeys(lootTable)
+			for _, key in ipairs(sortedKeys) do
+				local data = lootTable[key]
+				local item = key
+				local looter = data['Who']
+				local itemName = key
 				local itemLink = data["Link"]
 				local itemCount = data["Count"]
 				local itemEval = data["Eval"] or 'Unknown'
@@ -608,9 +628,8 @@ local function lootedReport_GUI()
 				ImGui.PushID(rowID)  
 			
 				ImGui.TableNextRow()
+
 				ImGui.TableSetColumnIndex(0)
-				ImGui.Text(looter)
-				ImGui.TableSetColumnIndex(1)
 				-- ImGui.BeginGroup()
 				if string.find(itemName, "*") then
 					itemName = string.gsub(itemName, "*", "")
@@ -621,6 +640,7 @@ local function lootedReport_GUI()
 				-- lootnscoot context menu for changing item evaluation rule
 				if guiLoot.imported and mq.TLO.Lua.Script(guiLoot.caller).Status.Equal('RUNNING')() then
 					if ImGui.BeginPopupContextItem(rowID) then
+						ImGui.SetWindowFontScale(ZoomLvl)
 						if string.find(item, "*") then
 							itemName = string.gsub(item, "*", '') 
 						end
@@ -628,30 +648,31 @@ local function lootedReport_GUI()
 						ImGui.Separator()
 						ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1, 1, 0, 0.75))
 						if ImGui.BeginMenu('Normal Item Settings##'..rowID) then
+							ImGui.SetWindowFontScale(ZoomLvl)
 							local tmpName = string.gsub(itemName, "*", "")
 							if ImGui.Selectable('Keep##'..rowID) then
 								mq.cmdf('/lootutils keep "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Keep'
+								lootTable[item]["NewEval"] = 'Keep'
 								changed = true
 							end
 							if ImGui.Selectable('Quest##'..rowID) then
 								mq.cmdf('/lootutils quest "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Quest'
+								lootTable[item]["NewEval"] = 'Quest'
 								changed = true
 							end
 							if ImGui.Selectable('Sell##'..rowID) then
 								mq.cmdf('/lootutils sell "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Sell'
+								lootTable[item]["NewEval"] = 'Sell'
 								changed = true
 							end
 							if ImGui.Selectable('Tribute##'..rowID) then
 								mq.cmdf('/lootutils tribute "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Tribute'
+								lootTable[item]["NewEval"] = 'Tribute'
 								changed = true
 							end
 							if ImGui.Selectable('Destroy##'..rowID) then
 								mq.cmdf('/lootutils destroy "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Destroy'
+								lootTable[item]["NewEval"] = 'Destroy'
 								changed = true
 							end
 							ImGui.EndMenu()
@@ -659,48 +680,55 @@ local function lootedReport_GUI()
 						ImGui.PopStyleColor()
 						ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(0.523, 0.797, 0.944, 1.000))
 						if ImGui.BeginMenu('Global Item Settings##'..rowID) then
+							ImGui.SetWindowFontScale(ZoomLvl)
 							local tmpName = string.gsub(itemName, "*", "")
 							if ImGui.Selectable('Global Keep##'..rowID) then
 								mq.cmdf('/lootutils globalitem keep "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Global Keep'
+								lootTable[item]["NewEval"] = 'Global Keep'
 								changed = true
 							end
 							if ImGui.Selectable('Global Quest##'..rowID) then
 								mq.cmdf('/lootutils globalitem quest "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Global Quest'
+								lootTable[item]["NewEval"] = 'Global Quest'
 								changed = true
 							end
 							if ImGui.Selectable('Global Sell##'..rowID) then
 								mq.cmdf('/lootutils globalitem sell "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Global Sell'
+								lootTable[item]["NewEval"] = 'Global Sell'
 								changed = true
 							end
 							if ImGui.Selectable('Global Tribute##'..rowID) then
 								mq.cmdf('/lootutils globalitem tribute "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Global Tribute'
+								lootTable[item]["NewEval"] = 'Global Tribute'
 								changed = true
 							end
 							if ImGui.Selectable('Global Destroy##'..rowID) then
 								mq.cmdf('/lootutils globalitem destroy "%s"', tmpName)
-								lootTable[looter][item]["NewEval"] = 'Global Destroy'
+								lootTable[item]["NewEval"] = 'Global Destroy'
 								changed = true
 							end
 							ImGui.EndMenu()
 						end
 						ImGui.PopStyleColor()
+						ImGui.SetWindowFontScale(1)
 						ImGui.EndPopup()
 					end
 				else
 					if ImGui.IsItemHovered() then
 						ImGui.BeginTooltip()
+						ImGui.SetWindowFontScale(ZoomLvl)
 						ImGui.Text("Left Click to open item link")
 						ImGui.EndTooltip()
 					end
 				end
+				
+				ImGui.TableSetColumnIndex(1)
+				ImGui.Text(looter)
 				ImGui.TableSetColumnIndex(2)
 				ImGui.Text("\t%d", itemCount)
 				if ImGui.IsItemHovered() then
 					ImGui.BeginTooltip()
+					ImGui.SetWindowFontScale(ZoomLvl)
 					if string.find(itemEval, 'Unknown') then
 						ImGui.Text("%s Looted: %d",looter, itemCount)
 					else
@@ -714,6 +742,7 @@ local function lootedReport_GUI()
 					ImGui.TextColored(0.898, 0.777, 0.000, 1.000,Icons.MD_STAR)
 					if ImGui.IsItemHovered() then
 						ImGui.BeginTooltip()
+						ImGui.SetWindowFontScale(ZoomLvl)
 						ImGui.TextColored(0.6, 0.6, 0.6, 1,"Old Rule: %s",itemEval)
 						ImGui.TextColored(1.000, 0.914, 0.200, 1.000,"New Rule: %s", itemNewEval)
 						ImGui.EndTooltip()
@@ -723,6 +752,7 @@ local function lootedReport_GUI()
 						ImGui.TextColored(0.523, 0.797, 0.944, 1.000,globalNewIcon)
 						if ImGui.IsItemHovered() then
 							ImGui.BeginTooltip()
+							ImGui.SetWindowFontScale(ZoomLvl)
 							ImGui.Text("Global Rule")
 							ImGui.EndTooltip()
 						end
@@ -735,6 +765,7 @@ local function lootedReport_GUI()
 						ImGui.TextColored(0.523, 0.797, 0.944, 1.000,globeIcon)
 						if ImGui.IsItemHovered() then
 							ImGui.BeginTooltip()
+							ImGui.SetWindowFontScale(ZoomLvl)
 							ImGui.Text("Global Item")
 							ImGui.EndTooltip()
 						end
@@ -742,17 +773,18 @@ local function lootedReport_GUI()
 					end
 					evalRule(itemEval)
 				end
+				ImGui.SetWindowFontScale(1)
 				-- ImGui.Text(data['Eval'])
-				
+			
 				ImGui.PopID() 
 				row = row + 1
 			end
-		end
+		-- end
 	
 		ImGui.EndTable()
 		
-		-- if ColorCountRep > 0 then ImGui.PopStyleColor(ColorCountRep) end
-		-- if StyleCountRep > 0 then ImGui.PopStyleVar(StyleCountRep) end
+		if ColorCountRep > 0 then ImGui.PopStyleColor(ColorCountRep) end
+		if StyleCountRep > 0 then ImGui.PopStyleVar(StyleCountRep) end
 		ImGui.SetWindowFontScale(1)
 		ImGui.End()
 	end
@@ -760,41 +792,41 @@ end
 
 local function lootedConf_GUI(open)
 	if not openConfigGUI then return end
-	-- ColorCountConf = 0
-	-- StyleCountConf = 0
-	-- ColorCountConf, StyleCountConf = DrawTheme(ThemeName)
+	ColorCountConf = 0
+	StyleCountConf = 0
+	ColorCountConf, StyleCountConf = DrawTheme(ThemeName)
 	open, openConfigGUI = ImGui.Begin("Looted Conf##"..script, open, bit32.bor(ImGuiWindowFlags.None, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoCollapse))
 	ImGui.SetWindowFontScale(ZoomLvl)
 	if not openConfigGUI then
 		openConfigGUI = false
 		open = false
-		-- if StyleCountConf > 0 then ImGui.PopStyleVar(StyleCountConf) end
-		-- if ColorCountConf > 0 then ImGui.PopStyleColor(ColorCountConf) end
+		if StyleCountConf > 0 then ImGui.PopStyleVar(StyleCountConf) end
+		if ColorCountConf > 0 then ImGui.PopStyleColor(ColorCountConf) end
 		ImGui.SetWindowFontScale(1)
 		ImGui.End()
 		return open
 	end
-	-- ImGui.SameLine()
-	-- ImGui.SeparatorText('Theme')
-	-- ImGui.Text("Cur Theme: %s", ThemeName)
-	-- -- Combo Box Load Theme
+	ImGui.SameLine()
+	ImGui.SeparatorText('Theme')
+	ImGui.Text("Cur Theme: %s", ThemeName)
+	-- Combo Box Load Theme
     
-	-- if ImGui.BeginCombo("Load Theme##"..script, ThemeName) then
-	-- 	ImGui.SetWindowFontScale(ZoomLvl)
-	-- 	for k, data in pairs(theme.Theme) do
-	-- 		local isSelected = data.Name == ThemeName
-	-- 		if ImGui.Selectable(data.Name, isSelected) then
-	-- 			theme.LoadTheme = data.Name
-	-- 			ThemeName = theme.LoadTheme
-	-- 			settings[script].LoadTheme = ThemeName
-	-- 		end
-	-- 	end
-	-- 	ImGui.EndCombo()
-	-- end
+	if ImGui.BeginCombo("Load Theme##"..script, ThemeName) then
+		ImGui.SetWindowFontScale(ZoomLvl)
+		for k, data in pairs(theme.Theme) do
+			local isSelected = data.Name == ThemeName
+			if ImGui.Selectable(data.Name, isSelected) then
+				theme.LoadTheme = data.Name
+				ThemeName = theme.LoadTheme
+				settings[script].LoadTheme = ThemeName
+			end
+		end
+		ImGui.EndCombo()
+	end
     
-	-- if ImGui.Button('Reload Theme File') then
-	-- 	loadTheme()
-	-- end
+	if ImGui.Button('Reload Theme File') then
+		loadTheme()
+	end
 	--------------------- Sliders ----------------------
 	ImGui.SeparatorText('Scaling')
 	-- Slider for adjusting zoom level
@@ -817,23 +849,27 @@ local function lootedConf_GUI(open)
         
 		writeSettings(configFile,settings)
 	end
-	-- if StyleCountConf > 0 then ImGui.PopStyleVar(StyleCountConf) end
-	-- if ColorCountConf > 0 then ImGui.PopStyleColor(ColorCountConf) end
+	if StyleCountConf > 0 then ImGui.PopStyleVar(StyleCountConf) end
+	if ColorCountConf > 0 then ImGui.PopStyleColor(ColorCountConf) end
 	ImGui.SetWindowFontScale(1)
 	ImGui.End()
     
 end
 
 local function addRule(who, what ,link, eval)
-	if not lootTable[who] then
-		lootTable[who] = {}
+	if lootTable[what] == nil then
+		lootTable[what] = {}
+		lootTable[what] = {Count = 0, Who = who, Link = link, Eval = eval or 'Unknown'}
 	end
-	if not lootTable[who][what] then
-		lootTable[who][what] = {Count = 0}
+	local looters = lootTable[what]['Who']
+	if not string.find(looters, who) then
+		lootTable[what]['Who'] = looters .. ', ' .. who
 	end
-	lootTable[who][what]["Link"] = link
-	lootTable[who][what]["Eval"] = eval or 'Unknown'
-	lootTable[who][what]["Count"] = (lootTable[who][what]["Count"] or 0) + 1
+	lootTable[what]["Link"] = link
+	lootTable[what]["Eval"] = eval or 'Unknown'
+	lootTable[what]["Count"] = (lootTable[what]["Count"] or 0) + 1
+	
+
 end
 
 ---comment -- Checks for the last ID number in the table passed. returns the NextID
@@ -861,7 +897,14 @@ function guiLoot.RegisterActor()
 			if guiLoot.hideNames then
 				if who ~= mq.TLO.Me() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = mq.TLO.Me.Class.ShortName() end
 			end
-
+			if guiLoot.recordData and item.Action == 'Looted' then
+				addRule(who, what, link, eval)
+			end
+			if guiLoot.recordData and item.Action == 'Destroyed' then
+				what = what ..'*'
+				link = link ..' *Destroyed*'
+				addRule(who, what, link, eval)
+			end
 			local text = string.format('\ao[%s] \at%s \ax%s %s (%s)', lootEntry.LootedAt, who, item.Action, link, lootEntry.ID)
 			if item.Action == 'Destroyed' then
 				text = string.format('\ao[%s] \at%s \ar%s \ax%s \ax(%s)', lootEntry.LootedAt, who, string.upper(item.Action), link, lootEntry.ID)
@@ -889,14 +932,6 @@ function guiLoot.RegisterActor()
 				end
 			end
 			-- do we want to record loot data?
-			if guiLoot.recordData and item.Action == 'Looted' then
-				addRule(who, what, link, eval)
-			end
-			if guiLoot.recordData and item.Action == 'Destroyed' then
-				what = what ..'*'
-				link = link ..' *Destroyed*'
-				addRule(who, what, link, eval)
-			end
 		end
 	end)
 end
