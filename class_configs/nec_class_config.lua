@@ -1150,13 +1150,6 @@ local _ClassConfig = {
                 active_cond = function(self, aaName) return RGMercUtils.SongActiveByName(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
                 cond = function(self, aaName) return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('DeathBloomPercent') end,
             },
-            -- Leaving this out because it mems every 60s and thats wonky.
-            --{
-            --    name = "BestowBuff",
-            --    type = "Spell",
-            --    active_cond = function(self, spell) return RGMercUtils.SongActiveByName(spell.RankName()) end,
-            --    cond = function(self, spell) return not RGMercUtils.SongActiveByName(spell.RankName()) end,
-            --},
         },
         ['Pet Management'] = {
             {
