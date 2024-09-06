@@ -869,7 +869,7 @@ local _ClassConfig = {
                 name = "PetSpell",
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 end,
-                cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell) end,
+                cond = function(self, spell) return mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell) and not RGMercUtils.GetSetting('DoCharm') end,
             },
             {
                 name = "SelfHPBuff",
