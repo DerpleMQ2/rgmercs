@@ -177,6 +177,7 @@ Config.DefaultConfig = {
 
     -- [ COMBAT ] --
     ['SafeTargeting']        = { DisplayName = "Use Safe Targeting", Category = "Combat", Tooltip = "Do not target mobs that are fighting others.", Default = true, ConfigType = "Advanced", },
+    ['OnlyScanXT']           = { DisplayName = "Only Scan XTargets", Category = "Combat", Tooltip = "When MA looks for a target use only XTargets instead of doing an area scan, area scan can cause aggro to unintensional mobs use wih caution.", Default = true, ConfigType = "Advanced", },
     ['AssistOutside']        = { DisplayName = "Assist Outside of Group", Category = "Combat", Tooltip = "Allow assisting characters outside of your group.", Default = false, ConfigType = "Advanced", },
     ['AssistRange']          = { DisplayName = "Assist Range", Category = "Combat", Tooltip = "Distance to the target before you engage.", Default = Config.Constants.RGCasters:contains(Config.Globals.CurLoadedClass) and 90 or 45, Min = 0, Max = 200, ConfigType = "Advanced", },
     ['MAScanZRange']         = { DisplayName = "Main Assist Scan ZRange", Category = "Combat", Tooltip = "Distance in Z direction to look for targets.", Default = 45, Min = 15, Max = 200, ConfigType = "Advanced", },
