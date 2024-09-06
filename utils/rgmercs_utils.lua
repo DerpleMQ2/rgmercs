@@ -192,8 +192,8 @@ function RGMercUtils.SetTarget(targetId)
     RGMercsLogger.log_debug("Setting Target: %d", targetId)
     if RGMercUtils.GetSetting('DoAutoTarget') then
         if RGMercUtils.GetTargetID() ~= targetId then
-            RGMercUtils.DoCmd("/target id %d", targetId)
-            mq.delay(10)
+            mq.TLO.Spawn(targetId).DoTarget()
+            mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
         end
     end
 end
@@ -2986,52 +2986,54 @@ function RGMercUtils.MATargetScan(radius, zradius)
         end
     end
 
-    RGMercsLogger.log_verbose("We apparently didn't find anything on xtargets, doing a search for mezzed targets")
+    if not RGMercUtils.GetSetting('OnlyScanXT') then
+        RGMercsLogger.log_verbose("We apparently didn't find anything on xtargets, doing a search for mezzed targets")
 
-    -- We didn't find anything to kill yet so spawn search
-    if killId == 0 then
-        RGMercsLogger.log_verbose("Falling back on Spawn Searching")
-        local aggroMobCount = mq.TLO.SpawnCount(aggroSearch)()
-        local aggroMobPetCount = mq.TLO.SpawnCount(aggroSearchPet)()
-        RGMercsLogger.log_verbose("NPC Target Scan: %s ===> %d", aggroSearch, aggroMobCount)
-        RGMercsLogger.log_verbose("NPCPET Target Scan: %s ===> %d", aggroSearchPet, aggroMobPetCount)
+        -- We didn't find anything to kill yet so spawn search
+        if killId == 0 then
+            RGMercsLogger.log_verbose("Falling back on Spawn Searching")
+            local aggroMobCount = mq.TLO.SpawnCount(aggroSearch)()
+            local aggroMobPetCount = mq.TLO.SpawnCount(aggroSearchPet)()
+            RGMercsLogger.log_verbose("NPC Target Scan: %s ===> %d", aggroSearch, aggroMobCount)
+            RGMercsLogger.log_verbose("NPCPET Target Scan: %s ===> %d", aggroSearchPet, aggroMobPetCount)
 
-        for i = 1, aggroMobCount do
-            local spawn = mq.TLO.NearestSpawn(i, aggroSearch)
+            for i = 1, aggroMobCount do
+                local spawn = mq.TLO.NearestSpawn(i, aggroSearch)
 
-            if spawn() then
-                -- If the spawn is already in combat with someone else, we should skip them.
+                if spawn() and (spawn.CleanName() or "None"):find("Guard") == nil then
+                    -- If the spawn is already in combat with someone else, we should skip them.
+                    if not RGMercUtils.GetSetting('SafeTargeting') or not RGMercUtils.IsSpawnFightingStranger(spawn, radius) then
+                        -- If a name has pulled in we target the name first and return. Named always
+                        -- take priority. Note: More mobs as of ToL are "named" even though they really aren't.
+
+                        if RGMercUtils.IsNamed(spawn) then
+                            RGMercsLogger.log_verbose("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
+                            return spawn.ID()
+                        end
+
+                        -- Unmezzables
+                        if (spawn.Body.Name() or "none"):lower() == "Giant" then
+                            return spawn.ID()
+                        end
+
+                        -- Lowest HP
+                        if spawn.PctHPs() < lowestHP then
+                            lowestHP = spawn.PctHPs()
+                            killId = spawn.ID()
+                        end
+                    end
+                end
+            end
+
+            for i = 1, aggroMobPetCount do
+                local spawn = mq.TLO.NearestSpawn(i, aggroSearchPet)
+
                 if not RGMercUtils.GetSetting('SafeTargeting') or not RGMercUtils.IsSpawnFightingStranger(spawn, radius) then
-                    -- If a name has pulled in we target the name first and return. Named always
-                    -- take priority. Note: More mobs as of ToL are "named" even though they really aren't.
-
-                    if RGMercUtils.IsNamed(spawn) then
-                        RGMercsLogger.log_verbose("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
-                        return spawn.ID()
-                    end
-
-                    -- Unmezzables
-                    if (spawn.Body.Name() or "none"):lower() == "Giant" then
-                        return spawn.ID()
-                    end
-
                     -- Lowest HP
                     if spawn.PctHPs() < lowestHP then
                         lowestHP = spawn.PctHPs()
                         killId = spawn.ID()
                     end
-                end
-            end
-        end
-
-        for i = 1, aggroMobPetCount do
-            local spawn = mq.TLO.NearestSpawn(i, aggroSearchPet)
-
-            if not RGMercUtils.GetSetting('SafeTargeting') or not RGMercUtils.IsSpawnFightingStranger(spawn, radius) then
-                -- Lowest HP
-                if spawn.PctHPs() < lowestHP then
-                    lowestHP = spawn.PctHPs()
-                    killId = spawn.ID()
                 end
             end
         end
