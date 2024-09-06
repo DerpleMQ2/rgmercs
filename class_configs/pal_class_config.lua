@@ -1440,6 +1440,18 @@ return {
     },
     ['PullAbilities']     = {
         {
+            id = 'Challengetaunt',
+            Type = "Spell",
+            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('Challengetaunt').RankName.Name() or "" end,
+            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('Challengetaunt').RankName.Name() or "" end,
+            AbilityRange = 200,
+            cond = function(self)
+                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('Challengetaunt')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
             id = 'StunTimer4',
             Type = "Spell",
             DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer4')() or "" end,
