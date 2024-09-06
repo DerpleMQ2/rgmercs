@@ -1,0 +1,29 @@
+1.7.1
+- Add LootNoDropNew option to toggle automatically looting newly seen no drop items
+- LootNoDrop must also be on, which controls looting no drop items which already have been seen before
+
+1.7.0
+- actor messaging for items looted/left/destroyed sent to loot history ui
+
+1.6.0
+- misc fixes/cleanup - grimmier
+
+1.5.0
+- quest item looting support - grimmier
+- tribute item support - grimmier
+- various cleanup, reporting changes, destroy item changes - grimmier
+- loot history ui, see https://github.com/grimmier378/looted - grimmier
+
+1.4.0
+- ???
+
+1.3.0
+- ???
+
+1.2.0
+- Split settings into a separate config file - grimmier
+- Track wasLooting state when bags get filled and looting stops - grimmier
+- Handle looting no drop items - grimmier
+
+1.0.0
+- Initial release
