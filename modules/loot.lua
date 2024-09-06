@@ -18,13 +18,83 @@ Module.TempSettings      = {}
 
 Module.DefaultConfig     = {
 	['DoLoot'] = { DisplayName = "Use Loot N Scoot", Category = "Loot N Scoot", Tooltip = "Use Loot N Scoot", Default = true, },
+	['AutoLoot'] = { DisplayName = "Auto Loot during downtime", Category = "Loot N Scoot", Tooltip = "Auto Loot", Default = true, },
 }
+
+Module.CommandHandlers   = {
+	sell = {
+		usage = "/rgl sell",
+		about = "Use lootnscoot to sell stuff to your Target.",
+		handler = function(self, _)
+			self:DoSell()
+		end,
+	},
+	loot = {
+		usage = "/rgl loot",
+		about = "Loot the Mobs around you.",
+		handler = function(self, _)
+			self:LootMobs()
+		end,
+	},
+	buy = {
+		usage = "/rgl buy",
+		about = "Restock Buy Items from your Target.",
+		handler = function(self, _)
+			self:DoBuy()
+		end,
+	},
+	tribute = {
+		usage = "/rgl tribute",
+		about = "Tribute gear to targeted Tribute Master.",
+		handler = function(self, _)
+			self:DoTribute()
+		end,
+	},
+	bank = {
+		usage = "/rgl bank",
+		about = "Stash stuff in the bank",
+		handler = function(self, _)
+			self:DoBank()
+		end,
+	},
+	setitem = {
+		usage = "/rgl setitem <setting>",
+		about = "Set an the Item on your Cursor's loot setting (sell, keep, destroy, ignore, quest, tribute, bank).",
+		handler = function(self, params)
+			self:SetItem(params)
+		end,
+	},
+	cleanbags = {
+		usage = "/rgl cleanbags",
+		about = "Destroy the Trash marked as Destroy in your Bags.",
+		handler = function(self, _)
+			self:DoCleanup()
+		end,
+	},
+	lootui = {
+		usage = "/rgl lootui",
+		about = "Toggle the LootnScoot console UI.",
+		handler = function(self, _)
+			self:ShowLootUI()
+		end,
+	},
+	reportloot = {
+		usage = "/rgl reportloot",
+		about = "Open the LootnScoot Loot History Table.",
+		handler = function(self, _)
+			self:ReportLoot()
+		end,
+	},
+}
+
 Module.DefaultCategories = Set.new({})
 for _, v in pairs(Module.DefaultConfig) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
 	end
 end
+
+
 
 local function getConfigFileName()
 	local server = mq.TLO.EverQuest.Server()
@@ -102,10 +172,64 @@ function Module:Render()
 	end
 end
 
+function Module:DoSell()
+	if LootnScoot ~= nil then
+		LootnScoot.processItems('Sell')
+	end
+end
+
+function Module:LootMobs()
+	if LootnScoot ~= nil then
+		LootnScoot.lootMobs()
+	end
+end
+
+function Module:DoBuy()
+	if LootnScoot ~= nil then
+		LootnScoot.processItems('Buy')
+	end
+end
+
+function Module:DoBank()
+	if LootnScoot ~= nil then
+		LootnScoot.processItems('Bank')
+	end
+end
+
+function Module:DoTribute()
+	if LootnScoot ~= nil then
+		LootnScoot.processItems('Tribute')
+	end
+end
+
+function Module:SetItem(params)
+	if LootnScoot ~= nil then
+		LootnScoot.commandHandler(params)
+	end
+end
+
+function Module:CleanUp()
+	if LootnScoot ~= nil then
+		LootnScoot.processItems('Cleanup')
+	end
+end
+
+function Module:ReportLoot()
+	if LootnScoot ~= nil then
+		LootnScoot.guiLoot.ReportLoot()
+	end
+end
+
+function Module:ShowLootUI()
+	if LootnScoot ~= nil then
+		LootnScoot.guiLoot.openGUI = not LootnScoot.guiLoot.openGUI
+	end
+end
+
 function Module:GiveTime(combat_state)
 	-- Main Module logic goes here.
 	if self.CombatState ~= combat_state and combat_state == "Downtime" then
-		if LootnScoot ~= nil and self.settings.DoLoot then
+		if LootnScoot ~= nil and self.settings.DoLoot and self.settings.AutoLoot then
 			LootnScoot.lootMobs()
 		end
 	end
@@ -128,7 +252,7 @@ function Module:DoGetState()
 end
 
 function Module:GetCommandHandlers()
-	return { module = self._name, CommandHandlers = {}, }
+	return { module = self._name, CommandHandlers = self.CommandHandlers, }
 end
 
 ---@param cmd string
@@ -137,7 +261,12 @@ end
 function Module:HandleBind(cmd, ...)
 	local params = ...
 	local handled = false
-	-- /rglua cmd handler
+
+	if self.CommandHandlers[cmd:lower()] ~= nil then
+		self.CommandHandlers[cmd:lower()].handler(self, params)
+		handled = true
+	end
+
 	return handled
 end
 

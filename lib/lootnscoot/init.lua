@@ -437,7 +437,7 @@ end
 
 -- BINDS
 
-local function commandHandler(...)
+function loot.commandHandler(...)
     local args = { ..., }
     if #args == 1 then
         if args[1] == 'sellstuff' and not loot.Terminate then
@@ -515,7 +515,7 @@ local function commandHandler(...)
 end
 
 local function setupBinds()
-    mq.bind('/lootutils', commandHandler)
+    mq.bind('/lootutils', loot.commandHandler)
 end
 
 -- LOOTING
