@@ -40,14 +40,14 @@ end
 
 function ClassLoader.writeCustomConfig(class)
     -- Define file paths
-    local base_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua",mq.luaDir, class:lower())
+    local base_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.luaDir, class:lower())
     local custom_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
     local backup_config_file = string.format("%s/rgmercs/class_configs/BACKUP/%s_class_config_%s.lua", mq.configDir, class:lower(), os.date("%Y%m%d_%H%M%S"))
 
     -- Backup the custom config file if one exists
     local fileCustom = io.open(custom_config_file, "r")
     if fileCustom then
-        mq.pickle(backup_config_file,{}) -- build the path so we don't get an error
+        mq.pickle(backup_config_file, {}) -- build the path so we don't get an error
         local content = fileCustom:read("*all")
         fileCustom:close()
 
@@ -75,7 +75,7 @@ function ClassLoader.writeCustomConfig(class)
     local updated_content = content:gsub("(_author%s*=%s*[%S%s]-\n)", "%1    FullConfig = true,\n")
 
     -- Write the updated content to the custom config file
-    mq.pickle(backup_config_file,{}) -- incase the path isn't made yet
+    mq.pickle(custom_config_file, {}) -- incase the path isn't made yet
     local custom_file, err = io.open(custom_config_file, "w")
     if not custom_file then
         RGMercsLogger.log_error("Failed to Write Custom Core Class Config: %s Error:", custom_config_file)
