@@ -297,6 +297,7 @@ function guiLoot.GUI()
 	ImGui.SetNextWindowSize(260, 300, ImGuiCond.FirstUseEver)
 	--imgui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(1, 0));
 	ColorCount, StyleCount = DrawTheme(ThemeName)
+	local show
 	if guiLoot.imported then windowName = 'Looted Items Local##Imported_' .. mq.TLO.Me.DisplayName() end
 	guiLoot.openGUI, show = ImGui.Begin(windowName, nil, guiLoot.winFlags)
 	if not show then
@@ -427,6 +428,7 @@ function guiLoot.GUI()
 			if ImGui.Selectable("##selectable" .. line, false, ImGuiSelectableFlags.None) then end
 			ImGui.SameLine()
 			ImGui.TextWrapped(data.Text)
+			---@diagnostic disable-next-line: param-type-mismatch
 			if ImGui.IsItemHovered() and ImGui.IsKeyDown(ImGuiMod.Ctrl) and ImGui.IsKeyDown(ImGuiKey.C) then
 				ImGui.LogToClipboard()
 				ImGui.LogText(data.Text)
@@ -641,7 +643,7 @@ local function lootedReport_GUI()
 				mq.cmdf('/executelink %s', itemLink)
 			end
 			-- lootnscoot context menu for changing item evaluation rule
-			if guiLoot.imported and mq.TLO.Lua.Script(guiLoot.caller).Status.Equal('RUNNING')() then
+			if guiLoot.imported and (mq.TLO.Lua.Script(guiLoot.caller).Status() or ""):lower() == "running" then
 				if ImGui.BeginPopupContextItem(rowID) then
 					ImGui.SetWindowFontScale(ZoomLvl)
 					if string.find(item, "*") then
@@ -941,9 +943,11 @@ function guiLoot.EventLoot(line, who, what)
 	if guiLoot.console ~= nil then
 		link = mq.TLO.FindItem(what).ItemLink('CLICKABLE')() or what
 		if guiLoot.linkdb and guiLoot.showLinks then
+			---@diagnostic disable-next-line: undefined-field
 			link = mq.TLO.LinkDB(string.format("=%s", what))() or link
 		elseif not guiLoot.linkdb and guiLoot.showLinks then
 			guiLoot.loadLDB()
+			---@diagnostic disable-next-line: undefined-field
 			link = mq.TLO.LinkDB(string.format("=%s", what))() or link
 		end
 		if guiLoot.hideNames then
