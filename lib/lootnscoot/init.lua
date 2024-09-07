@@ -514,7 +514,7 @@ function loot.commandHandler(...)
     end
 end
 
-local function setupBinds()
+function loot.setupBinds()
     mq.bind('/lootutils', loot.commandHandler)
 end
 
@@ -773,7 +773,7 @@ local function openVendor()
     return mq.TLO.Merchant.ItemsReceived()
 end
 
-local function sellToVendor(itemToSell, bag, slot)
+function loot.SellToVendor(itemToSell, bag, slot)
     if NEVER_SELL[itemToSell] then return end
     if mq.TLO.Window('MerchantWnd').Open() then
         loot.logger.Info('Selling ' .. itemToSell)
@@ -796,7 +796,7 @@ end
 
 -- BUYING
 
-local function RestockItems()
+function loot.RestockItems()
     local rowNum = 0
     for itemName, qty in pairs(BuyItems) do
         rowNum = mq.TLO.Window("MerchantWnd/MW_ItemList").List(itemName, 2)() or 0
@@ -846,7 +846,7 @@ function eventTribute(line, itemName)
     end
 end
 
-local function tributeToVendor(itemToTrib, bag, slot)
+function loot.TributeToVendor(itemToTrib, bag, slot)
     if NEVER_SELL[itemToTrib.Name()] then return end
     if mq.TLO.Window('TributeMasterWnd').Open() then
         loot.logger.Info('Tributeing ' .. itemToTrib.Name())
@@ -868,7 +868,7 @@ end
 
 -- CLEANUP
 
-local function destroyItem(itemToDestroy, bag, slot)
+function loot.DestroyItem(itemToDestroy, bag, slot)
     if NEVER_SELL[itemToDestroy.Name()] then return end
     loot.logger.Info('!!Destroying!! ' .. itemToDestroy.Name())
     mq.cmdf('/shift /itemnotify in pack%s %s leftmouseup', bag, slot)
@@ -973,7 +973,7 @@ function loot.processItems(action)
                 if sellPrice == 0 then
                     loot.logger.Warn(string.format('Item \ay%s\ax is set to Sell but has no sell value!', item.Name()))
                 else
-                    sellToVendor(item.Name(), bag, slot)
+                    loot.SellToVendor(item.Name(), bag, slot)
                     totalPlat = totalPlat + sellPrice
                     mq.delay(1)
                 end
@@ -987,10 +987,10 @@ function loot.processItems(action)
                 -- tributes requires the bags to be open
                 mq.delay(1000, AreBagsOpen)
                 mq.delay(1)
-                tributeToVendor(item, bag, slot)
+                loot.TributeToVendor(item, bag, slot)
                 mq.delay(1)
             elseif action == 'Destroy' then
-                destroyItem(item, bag, slot)
+                loot.DestroyItem(item, bag, slot)
                 mq.delay(1)
             elseif action == 'Bank' then
                 if not mq.TLO.Window('BigBankWnd').Open() then
@@ -1029,14 +1029,14 @@ function loot.processItems(action)
         end
     end
     if action == 'Sell' and loot.AutoRestock then
-        RestockItems()
+        loot.RestockItems()
     end
     if action == 'Buy' then
         if not mq.TLO.Window('MerchantWnd').Open() then
             if not goToVendor() then return end
             if not openVendor() then return end
         end
-        RestockItems()
+        loot.RestockItems()
     end
 
     if flag then
@@ -1089,7 +1089,7 @@ end
 
 --
 
-local function guiExport()
+function loot.guiExport()
     -- Define a new menu element function
     local function customMenu()
         if ImGui.BeginMenu('Loot N Scoot') then
@@ -1233,9 +1233,9 @@ local function init(args)
     end
     CheckBags()
     setupEvents()
-    setupBinds()
+    loot.setupBinds()
     processArgs(args)
-    guiExport()
+    loot.guiExport()
 end
 
 init({ ..., })
@@ -1248,6 +1248,7 @@ if imported then
     end
     return loot
 end
+
 while not loot.Terminate do
     if mq.TLO.Window('CharacterListWnd').Open() then loot.Terminate = true end -- exit sctipt if at char select.
     if loot.DoLoot then loot.lootMobs() end
@@ -1265,24 +1266,4 @@ while not loot.Terminate do
     end
     mq.doevents()
     mq.delay(1000)
-end
-if imported then
-    while 1 == 1 do
-        if mq.TLO.Window('CharacterListWnd').Open() then loot.Terminate = true end -- exit sctipt if at char select.
-        if loot.DoLoot then loot.lootMobs() end
-        if doSell then
-            loot.processItems('Sell')
-            doSell = false
-        end
-        if doBuy then
-            loot.processItems('Buy')
-            doBuy = false
-        end
-        if doTribute then
-            loot.processItems('Tribute')
-            doTribute = false
-        end
-        mq.doevents()
-        mq.delay(1000)
-    end
 end

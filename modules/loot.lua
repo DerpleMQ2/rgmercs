@@ -6,7 +6,7 @@ local Set         = require("mq.Set")
 local LootnScoot  = require('lib.lootnscoot')
 
 
-local Module             = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier', }
+local Module             = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier, Aquietone (lootnscoot lua)', }
 Module.__index           = Module
 Module.settings          = {}
 Module.DefaultCategories = {}
@@ -17,8 +17,8 @@ Module.CombatState       = "None"
 Module.TempSettings      = {}
 
 Module.DefaultConfig     = {
-	['DoLoot'] = { DisplayName = "Use Loot N Scoot", Category = "Loot N Scoot", Tooltip = "Use Loot N Scoot", Default = true, },
-	['AutoLoot'] = { DisplayName = "Auto Loot during downtime", Category = "Loot N Scoot", Tooltip = "Auto Loot", Default = true, },
+	['DoLoot'] = { DisplayName = "DoLoot", Category = "Loot N Scoot", Tooltip = "Enables Loot N Scoot for Looting", Default = true, },
+	['AutoLoot'] = { DisplayName = "Auto Loot", Category = "Loot N Scoot", Tooltip = "Auto Loot During Downtime.", Default = true, },
 }
 
 Module.CommandHandlers   = {
@@ -59,9 +59,16 @@ Module.CommandHandlers   = {
 	},
 	setitem = {
 		usage = "/rgl setitem <setting>",
-		about = "Set an the Item on your Cursor's loot setting (sell, keep, destroy, ignore, quest, tribute, bank).",
+		about = "Set the Item on your Cursor's Normal loot setting (sell, keep, destroy, ignore, quest, tribute, bank).",
 		handler = function(self, params)
 			self:SetItem(params)
+		end,
+	},
+	setglobalitem = {
+		usage = "/rgl setglobalitem <setting>",
+		about = "Set the Item on your Cursor's GlobalItem loot setting (sell, keep, destroy, ignore, quest, tribute, bank).",
+		handler = function(self, params)
+			self:SetGlobalItem(params)
 		end,
 	},
 	cleanbags = {
@@ -94,13 +101,12 @@ for _, v in pairs(Module.DefaultConfig) do
 	end
 end
 
-
-
 local function getConfigFileName()
 	local server = mq.TLO.EverQuest.Server()
 	server = server:gsub(" ", "")
 	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar ..
+		"_" .. RGMercConfig.Globals.CurLoadedClass .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -112,12 +118,12 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:LoadSettings()
-	RGMercsLogger.log_debug("Basic EMU Loot Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+	RGMercsLogger.log_debug("\ay[LOOT]: \atLootnScoot EMU, Loot Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
-		RGMercsLogger.log_error("\ay[Basic]: Unable to load global settings file(%s), creating a new one!",
+		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load global settings file(%s), creating a new one!",
 			settings_pickle_path)
 		self.settings.MyCheckbox = false
 		self:SaveSettings(false)
@@ -150,7 +156,7 @@ end
 
 function Module:Init()
 	local path = mq.luaDir
-	RGMercsLogger.log_debug("Loot for EMU module Loaded.")
+	RGMercsLogger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	self:LoadSettings()
 	if not self.settings.DoLoot then LootnScoot = nil end
 
@@ -203,6 +209,12 @@ function Module:DoTribute()
 end
 
 function Module:SetItem(params)
+	if LootnScoot ~= nil then
+		LootnScoot.commandHandler(params)
+	end
+end
+
+function Module:SetGlobalItem(params)
 	if LootnScoot ~= nil then
 		LootnScoot.commandHandler(params)
 	end
@@ -271,7 +283,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-	RGMercsLogger.log_debug("EMU Loot Module Unloaded.")
+	RGMercsLogger.log_debug("\ay[LOOT]: \axEMU Loot Module Unloaded.")
 end
 
 return Module
