@@ -365,6 +365,17 @@ mq.event('ImmuneMez', "Your target cannot be mesmerized#*#", function()
     RGMercModules:ExecModule("Mez", "AddImmuneTarget", mq.TLO.Target.ID(), { id = mq.TLO.Target.ID(), name = mq.TLO.Target.CleanName(), })
 end)
 
+mq.event('ImmuneCharm', "Your target cannot be charmed#*#", function()
+    RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_IMMUNE)
+    RGMercModules:ExecModule("Charm", "AddImmuneTarget", mq.TLO.Target.ID(), { id = mq.TLO.Target.ID(), name = mq.TLO.Target.CleanName(), })
+end)
+
+mq.event('LvlHighCharm', "Your target is too high of a level for your charm spell.#*#", function()
+    RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_IMMUNE)
+    RGMercsLogger.log_debug("\awNOTICE:\ax Target is to \aoHigh Level\ax to Charm with this spell!")
+    RGMercModules:ExecModule("Charm", "CharmLvlToHigh", mq.TLO.Target.Level())
+    RGMercModules:ExecModule("Charm", "AddImmuneTarget", mq.TLO.Target.ID(), { id = mq.TLO.Target.ID(), name = mq.TLO.Target.CleanName(), })
+end)
 -- [ END CAST RESULT HANDLERS ] --
 
 -- [ MEZ HANDLERS ] --
