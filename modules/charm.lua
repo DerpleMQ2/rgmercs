@@ -26,6 +26,7 @@ Module.DefaultConfig             = {
 	['CharmMaxLevel']       = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
 	['DireCharmMaxLvl']     = { DisplayName = "DireCharm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
 	['DireCharm']           = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
+	['PreferCharm']         = { DisplayName = "Prefer Charmed Pet", Category = "Charm Pet", Default = false, Tooltip = "Prefer to use a charmed pet over a summoned pet.", },
 }
 
 Module.DefaultCategories         = Set.new({})
@@ -194,6 +195,16 @@ function Module:AddImmuneTarget(mobId, mobData)
 	if self.TempSettings.CharmImmune[mobId] ~= nil then return end
 
 	self.TempSettings.CharmImmune[mobId] = mobData
+end
+
+function Module:CharmLvlToHigh(mobLvl)
+	if RGMercUtils.GetSetting("DireCharm") and RGMercUtils.GetSetting("AutoLevelRangeCharm") then
+		self.settings.DireCharmMaxLvl = mobLvl - 1
+
+		RGMercsLogger.log_debug("\awNOTICE:\ax \aoTarget LVL to High,\ayLowering Max Level for Dire Charm!")
+		return true
+	end
+	return false
 end
 
 function Module:IsCharmImmune(mobId)
@@ -490,6 +501,8 @@ function Module:GiveTime(combat_state)
 	end
 
 	self.CombatState = combat_state
+
+
 
 	self:DoCharm()
 end
