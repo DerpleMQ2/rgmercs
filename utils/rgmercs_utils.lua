@@ -1083,7 +1083,10 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
             end
 
             retryCount = retryCount - 1
-        until RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or retryCount < 0
+        until RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or
+            RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_TAKEHOLD or
+            RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_RECOVER or
+            retryCount < 0
 
         -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
         mq.delay(500, function() return me.Casting.ID() == nil end)
