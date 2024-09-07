@@ -1316,6 +1316,10 @@ local _ClassConfig = {
             {
                 name = "BardDPSAura",
                 type = "Song",
+                pre_activate = function(self, songSpell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if not RGMercUtils.AuraActiveByName(songSpell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                end,
                 cond = function(self, songSpell)
                     return not RGMercUtils.AuraActiveByName(songSpell.BaseName()) and RGMercUtils.GetSetting('UseAura') == 1
                 end,
@@ -1323,6 +1327,10 @@ local _ClassConfig = {
             {
                 name = "BardRegenAura",
                 type = "Song",
+                pre_activate = function(self, songSpell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if not RGMercUtils.AuraActiveByName(songSpell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                end,
                 cond = function(self, songSpell)
                     return not RGMercUtils.AuraActiveByName(songSpell.BaseName()) and RGMercUtils.GetSetting('UseAura') == 2
                 end,
