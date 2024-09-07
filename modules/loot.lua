@@ -3,7 +3,7 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 local Set         = require("mq.Set")
 
-local LootnScoot  = require('lib.lootnscoot')
+local LootnScoot  = require('lib.lootnscoot.loot_lib')
 
 
 local Module             = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier, Aquietone (lootnscoot lua)', }

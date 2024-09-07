@@ -41,7 +41,7 @@ function Module.load()
             Drag         = require("modules.drag").New(),
             Mez          = require("modules.mez").New(),
             Charm        = require("modules.charm").New(),
-            Loot         = require("modules.loot").New(),
+            Loot         = RGMercConfig.Globals.BuildType == "Emu" and require("modules.loot").New() or nil,
             --Exp          = require("modules.experience").New(),
             Perf         = require("modules.performance").New(),
             Contributors = require("modules.contributors").New(),
