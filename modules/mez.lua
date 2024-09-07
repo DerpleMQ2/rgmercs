@@ -204,7 +204,7 @@ function Module:GetMezSpell()
     if RGMercUtils.MyClassIs("BRD") then
         return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSong")
     end
-    if RGMercUtils.MyClassIs("ENC") and RGMercUtils.GetSetting('UseTwinCastMez') then
+    if RGMercUtils.MyClassIs("ENC") and RGMercUtils.GetSetting('DoTwincastMez') then
         return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "TwinCastMez")
     end
     return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "MezSpell")
