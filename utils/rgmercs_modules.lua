@@ -1,21 +1,23 @@
-local Module   = { _version = '0.1a', _author = 'Derple', }
-Module.__index = Module
+local Module       = { _version = '0.1a', _author = 'Derple', }
+Module.__index     = Module
+
+local module_order = {
+    "Class",
+    "Movement",
+    "Pull",
+    "Drag",
+    "Charm",
+    "Mez",
+    "Travel",
+    --"Exp",
+    "Perf",
+    --"Loot",
+    "Contributors",
+}
 
 ---@return any
 function Module.load()
-    local newModule = setmetatable({
-        modules = {
-            Movement     = require("modules.movement").New(),
-            Travel       = require("modules.travel").New(),
-            Class        = require("modules.class").New(),
-            Pull         = require("modules.pull").New(),
-            Drag         = require("modules.drag").New(),
-            Mez          = require("modules.mez").New(),
-            Charm          = require("modules.charm").New(),
-            --Exp          = require("modules.experience").New(),
-            Perf         = require("modules.performance").New(),
-            Contributors = require("modules.contributors").New(),
-        },
+    if RGMercConfig.Globals.BuildType == "Emu" then
         module_order = {
             "Class",
             "Movement",
@@ -26,8 +28,26 @@ function Module.load()
             "Travel",
             --"Exp",
             "Perf",
+            "Loot",
             "Contributors",
+        }
+    end
+    local newModule = setmetatable({
+        modules = {
+            Movement     = require("modules.movement").New(),
+            Travel       = require("modules.travel").New(),
+            Class        = require("modules.class").New(),
+            Pull         = require("modules.pull").New(),
+            Drag         = require("modules.drag").New(),
+            Mez          = require("modules.mez").New(),
+            Charm        = require("modules.charm").New(),
+            Loot         = RGMercConfig.Globals.BuildType == "Emu" and require("modules.loot").New() or nil,
+            --Exp          = require("modules.experience").New(),
+            Perf         = require("modules.performance").New(),
+            Contributors = require("modules.contributors").New(),
         },
+        module_order = module_order,
+
     }, Module)
 
     return newModule
