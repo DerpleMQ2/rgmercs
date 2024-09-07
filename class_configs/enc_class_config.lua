@@ -1010,7 +1010,8 @@ local _ClassConfig = {
                     local aura = string.sub(spell.Name(), 1, 8)
                     if not RGMercUtils.AuraActiveByName(aura) then ----This is complex because the aura could be in slot 1 or 2 depending on level and aa status
                         local rmv = RGMercUtils.CanUseAA('Auroria Mastery') and 2 or 1
-                        mq.TLO.Me.Aura(rmv).Remove()               --I have to remove by slot because I can't map the "old" aura to remove it by name
+                        ---@diagnostic disable-next-line: undefined-field
+                        mq.TLO.Me.Aura(rmv).Remove() --I have to remove by slot because I can't map the "old" aura to remove it by name
                     end
                 end,
                 cond = function(self, spell)
