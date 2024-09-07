@@ -200,7 +200,7 @@ end
 function Module:CharmLvlToHigh(mobLvl)
 	if RGMercUtils.GetSetting("DireCharm") and RGMercUtils.GetSetting("AutoLevelRangeCharm") then
 		self.settings.DireCharmMaxLvl = mobLvl - 1
-
+		self:SaveSettings(false)
 		RGMercsLogger.log_debug("\awNOTICE:\ax \aoTarget LVL to High,\ayLowering Max Level for Dire Charm!")
 		return true
 	end
