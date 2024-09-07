@@ -75,7 +75,7 @@ Module.CommandHandlers   = {
 		usage = "/rgl cleanbags",
 		about = "Destroy the Trash marked as Destroy in your Bags.",
 		handler = function(self, _)
-			self:DoCleanup()
+			self:CleanUp()
 		end,
 	},
 	lootui = {
