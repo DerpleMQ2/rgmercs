@@ -4578,8 +4578,8 @@ end
 ---@param settings table
 ---@param defaults table
 ---@param categories table
+---@param hideControls? boolean
 ---@param showMainOptions? boolean
----@---@param hideControls? boolean
 ---@return table: settings
 ---@return boolean: any_pressed
 ---@return boolean: requires_new_loadout

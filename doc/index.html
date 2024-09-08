@@ -24,7 +24,7 @@
 
 <div id="navigation">
 <br/>
-<h1>ldoc</h1>
+<h1>RGMercs</h1>
 
 
 
@@ -47,18 +47,18 @@
 
 <h1>Module <code>rgmercs_utils</code></h1>
 <p>RGMerc Utils Functions.</p>
-<p>
-
-</p>
+<p></p>
 
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.file_exists">RGMercUtils.file_exists (path)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.copy_file">RGMercUtils.copy_file (from_path, to_path)</a></td>
+	<td class="summary">Copies a file</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BroadcastUpdate">RGMercUtils.BroadcastUpdate (module, event, data)</a></td>
@@ -66,201 +66,135 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTableSize">RGMercUtils.GetTableSize (t)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.TableContains">RGMercUtils.TableContains (t, value)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.FormatTime">RGMercUtils.FormatTime (time, formatString)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.PrintGroupMessage">RGMercUtils.PrintGroupMessage (msg, ...)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ResolveDefaults">RGMercUtils.ResolveDefaults (defaults, settings)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.PopUp">RGMercUtils.PopUp (msg, ...)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SetTarget">RGMercUtils.SetTarget (targetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.CheckPlugins">RGMercUtils.CheckPlugins (t)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.UnCheckPlugins">RGMercUtils.UnCheckPlugins (t)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.CanUseAA">RGMercUtils.CanUseAA (aaName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.CanAlliance">RGMercUtils.CanAlliance ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.AAReady">RGMercUtils.AAReady (aaName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.AbilityReady">RGMercUtils.AbilityReady (abilityName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.AARank">RGMercUtils.AARank (aaName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsDisc">RGMercUtils.IsDisc (name)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.PCSpellReady">RGMercUtils.PCSpellReady (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.PCDiscReady">RGMercUtils.PCDiscReady (discSpell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.NPCDiscReady">RGMercUtils.NPCDiscReady (discSpell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.PCAAReady">RGMercUtils.PCAAReady (aaName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.NPCSpellReady">RGMercUtils.NPCSpellReady (spellName, targetId, healingSpell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.NPCAAReady">RGMercUtils.NPCAAReady (aaName, targetId, healingSpell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetBestItem">RGMercUtils.GetBestItem (t)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.FindMissingSpells">RGMercUtils.FindMissingSpells (varName, spellList, alreadyMissingSpells, highestOnly)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetBestSpell">RGMercUtils.GetBestSpell (spellList, alreadyResolvedMap)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.WaitCastFinish">RGMercUtils.WaitCastFinish (target, bAllowDead)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ManaCheck">RGMercUtils.ManaCheck ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MemorizeSpell">RGMercUtils.MemorizeSpell (gem, spell, waitSpellReady, maxWait)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.CastReady">RGMercUtils.CastReady (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.WaitCastReady">RGMercUtils.WaitCastReady (spell, maxWait)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.UseAA">RGMercUtils.UseAA (aaName, targetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.UseItem">RGMercUtils.UseItem (itemName, targetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.UseAbility">RGMercUtils.UseAbility (abilityName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.UseDisc">RGMercUtils.UseDisc (discSpell, targetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.UseSong">RGMercUtils.UseSong (songName, targetId, bAllowMem, retryCount)</a></td>
@@ -268,63 +202,47 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.UseSpell">RGMercUtils.UseSpell (spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown, retryCount)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.GetLastUsedSpell">RGMercUtils.GetLastUsedSpell ()</a></td>
+	<td class="summary">gets the last used spell name</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ExecEntry">RGMercUtils.ExecEntry (caller, entry, targetId, resolvedActionMap, bAllowMem)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SafeCallFunc">RGMercUtils.SafeCallFunc (logInfo, fn, ...)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.TestConditionForEntry">RGMercUtils.TestConditionForEntry (caller, resolvedActionMap, entry, targetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.RunRotation">RGMercUtils.RunRotation (caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation, fnRotationCond)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SelfBuffPetCheck">RGMercUtils.SelfBuffPetCheck (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SelfBuffCheck">RGMercUtils.SelfBuffCheck (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.PadString">RGMercUtils.PadString (string, len, padFront, padChar)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BoolToString">RGMercUtils.BoolToString (b)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BoolToColorString">RGMercUtils.BoolToColorString (b)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetSetting">RGMercUtils.GetSetting (setting, failOk)</a></td>
@@ -332,15 +250,11 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MakeValidSetting">RGMercUtils.MakeValidSetting (module, setting, value)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MakeValidSettingName">RGMercUtils.MakeValidSettingName (setting)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SetSetting">RGMercUtils.SetSetting (setting, value)</a></td>
@@ -348,363 +262,275 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SelfBuffAACheck">RGMercUtils.SelfBuffAACheck (aaName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetLastCastResultName">RGMercUtils.GetLastCastResultName ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetLastCastResultId">RGMercUtils.GetLastCastResultId ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SetLastCastResult">RGMercUtils.SetLastCastResult (result)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#RGMercUtils.DotSpellCheck">RGMercUtils.DotSpellCheck (hpStopDots, spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#RGMercUtils.DotSpellCheck">RGMercUtils.DotSpellCheck (spell)</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DetSpellCheck">RGMercUtils.DetSpellCheck (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.DanNetFindBuff">RGMercUtils.DanNetFindBuff (id, peerName)</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.PeerHasBuff">RGMercUtils.PeerHasBuff (spell, peerName)</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.GroupBuffCheck">RGMercUtils.GroupBuffCheck (spell, target)</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.TargetHasBuff">RGMercUtils.TargetHasBuff (spell, buffTarget)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SpellStacksOnTarget">RGMercUtils.SpellStacksOnTarget (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SpellStacksOnMe">RGMercUtils.SpellStacksOnMe (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.TargetHasBuffByName">RGMercUtils.TargetHasBuffByName (buffName, buffTarget)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.TargetBodyIs">RGMercUtils.TargetBodyIs (target, type)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.TargetClassIs">RGMercUtils.TargetClassIs (classTable, target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetLevel">RGMercUtils.GetTargetLevel (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetDistance">RGMercUtils.GetTargetDistance (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetDistanceZ">RGMercUtils.GetTargetDistanceZ (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetMaxRangeTo">RGMercUtils.GetTargetMaxRangeTo (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetPctHPs">RGMercUtils.GetTargetPctHPs (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetDead">RGMercUtils.GetTargetDead (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetName">RGMercUtils.GetTargetName (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetCleanName">RGMercUtils.GetTargetCleanName (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetID">RGMercUtils.GetTargetID (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetAggroPct">RGMercUtils.GetTargetAggroPct ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetType">RGMercUtils.GetTargetType (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.TargetIsType">RGMercUtils.TargetIsType (type, target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetAggressive">RGMercUtils.GetTargetAggressive (target)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetTargetSlowedPct">RGMercUtils.GetTargetSlowedPct ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetGroupMainAssistID">RGMercUtils.GetGroupMainAssistID ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetGroupMainAssistName">RGMercUtils.GetGroupMainAssistName ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsModeActive">RGMercUtils.IsModeActive (mode)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsTanking">RGMercUtils.IsTanking ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsHealing">RGMercUtils.IsHealing ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsCuring">RGMercUtils.IsCuring ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsMezzing">RGMercUtils.IsMezzing ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.IsCharming">RGMercUtils.IsCharming ()</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.CanMez">RGMercUtils.CanMez ()</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.CanCharm">RGMercUtils.CanCharm ()</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BurnCheck">RGMercUtils.BurnCheck ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SmallBurn">RGMercUtils.SmallBurn ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MedBurn">RGMercUtils.MedBurn ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BigBurn">RGMercUtils.BigBurn ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DoStick">RGMercUtils.DoStick (targetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.NavAroundCircle">RGMercUtils.NavAroundCircle (target, radius)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.NavInCombat">RGMercUtils.NavInCombat (targetId, distance, bDontStick)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ShouldShrink">RGMercUtils.ShouldShrink ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.ShouldShrinkPet">RGMercUtils.ShouldShrinkPet ()</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ShouldMount">RGMercUtils.ShouldMount ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ShouldDismount">RGMercUtils.ShouldDismount ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ShouldKillTargetReset">RGMercUtils.ShouldKillTargetReset ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SongMemed">RGMercUtils.SongMemed (songSpell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BuffSong">RGMercUtils.BuffSong (songSpell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DebuffSong">RGMercUtils.DebuffSong (songSpell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.DebuffConCheck">RGMercUtils.DebuffConCheck ()</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DoBuffCheck">RGMercUtils.DoBuffCheck ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ShouldPriorityFollow">RGMercUtils.ShouldPriorityFollow ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.UseOrigin">RGMercUtils.UseOrigin ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetDistance">RGMercUtils.GetDistance (x1, y1, x2, y2)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetDistanceSquared">RGMercUtils.GetDistanceSquared (x1, y1, x2, y2)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DoCamp">RGMercUtils.DoCamp ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.AutoCampCheck">RGMercUtils.AutoCampCheck (tempConfig)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.CombatCampCheck">RGMercUtils.CombatCampCheck (tempConfig)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.EngageTarget">RGMercUtils.EngageTarget (autoTargetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MercEngage">RGMercUtils.MercEngage ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.HaveExpansion">RGMercUtils.HaveExpansion (name)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MyClassIs">RGMercUtils.MyClassIs (class)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsNamed">RGMercUtils.IsNamed (spawn)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsSafeName">RGMercUtils.IsSafeName (t, name)</a></td>
@@ -712,21 +538,15 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsSpawnFightingStranger">RGMercUtils.IsSpawnFightingStranger (spawn, radius)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DoCombatActions">RGMercUtils.DoCombatActions ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MATargetScan">RGMercUtils.MATargetScan (radius, zradius)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.FindTarget">RGMercUtils.FindTarget (validateFn)</a></td>
@@ -734,249 +554,185 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetXTHaterIDs">RGMercUtils.GetXTHaterIDs (printDebug)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetXTHaterCount">RGMercUtils.GetXTHaterCount (printDebug)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DiffXTHaterIDs">RGMercUtils.DiffXTHaterIDs (t, printDebug)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IsSpawnXHater">RGMercUtils.IsSpawnXHater (spawnId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IAmMA">RGMercUtils.IAmMA ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.Feigning">RGMercUtils.Feigning ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.GetHighestAggroPct">RGMercUtils.GetHighestAggroPct ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.IHaveAggro">RGMercUtils.IHaveAggro (pct)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.FindTargetCheck">RGMercUtils.FindTargetCheck ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.OkToEngagePreValidateId">RGMercUtils.OkToEngagePreValidateId (targetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.OkToEngage">RGMercUtils.OkToEngage (autoTargetId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.ReagentCheck">RGMercUtils.ReagentCheck (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.OnEMU">RGMercUtils.OnEMU ()</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SongActive">RGMercUtils.SongActive (song)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SongActiveByName">RGMercUtils.SongActiveByName (songName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BuffActive">RGMercUtils.BuffActive (spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BuffActiveByName">RGMercUtils.BuffActiveByName (buffName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.BuffActiveByID">RGMercUtils.BuffActiveByID (buffId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.AuraActiveByName">RGMercUtils.AuraActiveByName (auraName)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DetGOMCheck">RGMercUtils.DetGOMCheck ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DetGambitCheck">RGMercUtils.DetGambitCheck ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.FacingTarget">RGMercUtils.FacingTarget ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DetAACheck">RGMercUtils.DetAACheck (aaId)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.FindAllMissingSpells">RGMercUtils.FindAllMissingSpells (abilitySets, highestOnly)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.SetLoadOut">RGMercUtils.SetLoadOut (caller, spellGemList, itemSets, abilitySets)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.NavEnabledLoc">RGMercUtils.NavEnabledLoc (loc)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.Tooltip">RGMercUtils.Tooltip (desc)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.AddOA">RGMercUtils.AddOA (name)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercUtils.DeleteOAByName">RGMercUtils.DeleteOAByName (name)</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MoveOAUp">RGMercUtils.MoveOAUp (id)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.MoveOADown">RGMercUtils.MoveOADown (id)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.DrawInspectableSpellIcon">RGMercUtils.DrawInspectableSpellIcon (iconID, spell)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.RenderLoadoutTable">RGMercUtils.RenderLoadoutTable (loadoutTable)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.RenderRotationTable">RGMercUtils.RenderRotationTable (name, rotationTable, resolvedActionMap, rotationState, showFailed)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.RenderOptionToggle">RGMercUtils.RenderOptionToggle (id, text, on)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.RenderProgressBar">RGMercUtils.RenderProgressBar (pct, width, height)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.RenderOptionNumber">RGMercUtils.RenderOptionNumber (id, text, cur, min, max, step)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.RenderSettingsTable">RGMercUtils.RenderSettingsTable (settings, settingNames, defaults, category)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 </table>
 <h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#RGMercConfig.Globals.AutoTargetID">RGMercConfig.Globals.AutoTargetID</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#peer">peer</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#peer">peer</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercConfig.Globals.AutoTargetID">RGMercConfig.Globals.AutoTargetID</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RGMercConfig.Globals.AutoTargetID">RGMercConfig.Globals.AutoTargetID</a></td>
+	<td class="summary"></td>
 	</tr>
 </table>
 <h2><a href="#Class_boolean">Class boolean </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#RGMercUtils.RenderSettings">RGMercUtils.RenderSettings (settings, defaults, categories, hideControls)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#RGMercUtils.RenderSettings">RGMercUtils.RenderSettings (settings, defaults, categories, hideControls, showMainOptions)</a></td>
+	<td class="summary"></td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#RGMercUtils.LoadSpellLoadOut">RGMercUtils.LoadSpellLoadOut (spellLoadOut)</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary"></td>
 	</tr>
 </table>
 
@@ -995,11 +751,37 @@
 
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         string
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.copy_file"></a>
+    <strong>RGMercUtils.copy_file (from_path, to_path)</strong>
+    </dt>
+    <dd>
+    Copies a file
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">path</span>
+        <li><span class="parameter">from_path</span>
+         string
+        </li>
+        <li><span class="parameter">to_path</span>
          string
         </li>
     </ul>
@@ -1048,8 +830,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">t</span>
@@ -1072,8 +852,6 @@
     <strong>RGMercUtils.TableContains (t, value)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1105,8 +883,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">time</span>
@@ -1135,8 +911,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">msg</span>
@@ -1160,8 +934,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">defaults</span>
@@ -1175,7 +947,7 @@
     <h3>Returns:</h3>
     <ol>
 
-        table
+        table, boolean
     </ol>
 
 
@@ -1187,8 +959,6 @@
     <strong>RGMercUtils.PopUp (msg, ...)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1215,8 +985,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">targetId</span>
@@ -1237,8 +1005,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">t</span>
@@ -1256,8 +1022,6 @@
     <strong>RGMercUtils.UnCheckPlugins (t)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1283,8 +1047,6 @@
     <strong>RGMercUtils.CanUseAA (aaName)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1314,8 +1076,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -1331,8 +1091,6 @@
     <strong>RGMercUtils.AAReady (aaName)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1361,8 +1119,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">abilityName</span>
@@ -1385,8 +1141,6 @@
     <strong>RGMercUtils.AARank (aaName)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1415,8 +1169,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">name</span>
@@ -1439,8 +1191,6 @@
     <strong>RGMercUtils.PCSpellReady (spell)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1469,8 +1219,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">discSpell</span>
@@ -1493,8 +1241,6 @@
     <strong>RGMercUtils.NPCDiscReady (discSpell)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1523,8 +1269,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">aaName</span>
@@ -1550,18 +1294,16 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spellName</span>
          string
         </li>
         <li><span class="parameter">targetId</span>
-         number
+         number?
         </li>
         <li><span class="parameter">healingSpell</span>
-         boolean
+         boolean?
         </li>
     </ul>
 
@@ -1580,8 +1322,6 @@
     <strong>RGMercUtils.NPCAAReady (aaName, targetId, healingSpell)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1616,8 +1356,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">t</span>
@@ -1640,8 +1378,6 @@
     <strong>RGMercUtils.FindMissingSpells (varName, spellList, alreadyMissingSpells, highestOnly)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1679,8 +1415,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spellList</span>
@@ -1709,8 +1443,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
@@ -1735,8 +1467,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -1752,8 +1482,6 @@
     <strong>RGMercUtils.MemorizeSpell (gem, spell, waitSpellReady, maxWait)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1786,8 +1514,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spell</span>
@@ -1805,8 +1531,6 @@
     <strong>RGMercUtils.WaitCastReady (spell, maxWait)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1833,22 +1557,20 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">aaName</span>
-         string
+         string @ AA Ability Name
         </li>
         <li><span class="parameter">targetId</span>
-         integer
+         integer @ Target ID
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        boolean
+        boolean @ Success
     </ol>
 
 
@@ -1860,8 +1582,6 @@
     <strong>RGMercUtils.UseItem (itemName, targetId)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1884,15 +1604,12 @@
 
 
 
-
 </dd>
     <dt>
     <a name = "RGMercUtils.UseAbility"></a>
     <strong>RGMercUtils.UseAbility (abilityName)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1913,8 +1630,6 @@
     <strong>RGMercUtils.UseDisc (discSpell, targetId)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -1980,8 +1695,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spellName</span>
@@ -2015,12 +1728,29 @@
 
 </dd>
     <dt>
+    <a name = "RGMercUtils.GetLastUsedSpell"></a>
+    <strong>RGMercUtils.GetLastUsedSpell ()</strong>
+    </dt>
+    <dd>
+    gets the last used spell name
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        string
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "RGMercUtils.ExecEntry"></a>
     <strong>RGMercUtils.ExecEntry (caller, entry, targetId, resolvedActionMap, bAllowMem)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2061,8 +1791,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">logInfo</span>
@@ -2091,8 +1819,6 @@
     <strong>RGMercUtils.TestConditionForEntry (caller, resolvedActionMap, entry, targetId)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2127,8 +1853,6 @@
     <strong>RGMercUtils.RunRotation (caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation, fnRotationCond)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2181,8 +1905,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spell</span>
@@ -2208,8 +1930,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spell</span>
@@ -2232,8 +1952,6 @@
     <strong>RGMercUtils.PadString (string, len, padFront, padChar)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2266,8 +1984,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">b</span>
@@ -2290,8 +2006,6 @@
     <strong>RGMercUtils.BoolToColorString (b)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2348,8 +2062,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">module</span>
@@ -2378,8 +2090,6 @@
     <strong>RGMercUtils.MakeValidSettingName (setting)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2431,8 +2141,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">aaName</span>
@@ -2459,8 +2167,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -2476,8 +2182,6 @@
     <strong>RGMercUtils.GetLastCastResultId ()</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2500,8 +2204,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">result</span>
@@ -2516,19 +2218,14 @@
 </dd>
     <dt>
     <a name = "RGMercUtils.DotSpellCheck"></a>
-    <strong>RGMercUtils.DotSpellCheck (hpStopDots, spell)</strong>
+    <strong>RGMercUtils.DotSpellCheck (spell)</strong>
     </dt>
     <dd>
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">hpStopDots</span>
-         number # when to stop dots.
-        </li>
         <li><span class="parameter">spell</span>
          MQSpell
         </li>
@@ -2552,8 +2249,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spell</span>
@@ -2572,12 +2267,94 @@
 
 </dd>
     <dt>
-    <a name = "RGMercUtils.TargetHasBuff"></a>
-    <strong>RGMercUtils.TargetHasBuff (spell, buffTarget)</strong>
+    <a name = "RGMercUtils.DanNetFindBuff"></a>
+    <strong>RGMercUtils.DanNetFindBuff (id, peerName)</strong>
     </dt>
     <dd>
 
 
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">id</span>
+         integer
+        </li>
+        <li><span class="parameter">peerName</span>
+         string
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.PeerHasBuff"></a>
+    <strong>RGMercUtils.PeerHasBuff (spell, peerName)</strong>
+    </dt>
+    <dd>
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">spell</span>
+         MQSpell
+        </li>
+        <li><span class="parameter">peerName</span>
+         string
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean|nil
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.GroupBuffCheck"></a>
+    <strong>RGMercUtils.GroupBuffCheck (spell, target)</strong>
+    </dt>
+    <dd>
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">spell</span>
+         MQSpell
+        </li>
+        <li><span class="parameter">target</span>
+         MQSpawn
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.TargetHasBuff"></a>
+    <strong>RGMercUtils.TargetHasBuff (spell, buffTarget)</strong>
+    </dt>
+    <dd>
 
 
 
@@ -2609,8 +2386,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spell</span>
@@ -2636,8 +2411,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spell</span>
@@ -2660,8 +2433,6 @@
     <strong>RGMercUtils.TargetHasBuffByName (buffName, buffTarget)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2693,8 +2464,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
@@ -2720,8 +2489,6 @@
     <strong>RGMercUtils.TargetClassIs (classTable, target)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2753,8 +2520,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
@@ -2777,8 +2542,6 @@
     <strong>RGMercUtils.GetTargetDistance (target)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2807,8 +2570,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
@@ -2831,8 +2592,6 @@
     <strong>RGMercUtils.GetTargetMaxRangeTo (target)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2861,8 +2620,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
@@ -2885,8 +2642,6 @@
     <strong>RGMercUtils.GetTargetDead (target)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2915,8 +2670,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
@@ -2942,8 +2695,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
@@ -2966,8 +2717,6 @@
     <strong>RGMercUtils.GetTargetID (target)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -2997,8 +2746,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3014,8 +2761,6 @@
     <strong>RGMercUtils.GetTargetType (target)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3041,8 +2786,6 @@
     <strong>RGMercUtils.TargetIsType (type, target)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3074,8 +2817,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
@@ -3102,8 +2843,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3119,8 +2858,6 @@
     <strong>RGMercUtils.GetGroupMainAssistID ()</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3144,8 +2881,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3161,8 +2896,6 @@
     <strong>RGMercUtils.IsModeActive (mode)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3192,8 +2925,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3209,8 +2940,6 @@
     <strong>RGMercUtils.IsHealing ()</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3234,8 +2963,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3253,6 +2980,61 @@
     <dd>
 
 
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.IsCharming"></a>
+    <strong>RGMercUtils.IsCharming ()</strong>
+    </dt>
+    <dd>
+
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.CanMez"></a>
+    <strong>RGMercUtils.CanMez ()</strong>
+    </dt>
+    <dd>
+
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.CanCharm"></a>
+    <strong>RGMercUtils.CanCharm ()</strong>
+    </dt>
+    <dd>
 
 
 
@@ -3276,8 +3058,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3293,8 +3073,6 @@
     <strong>RGMercUtils.SmallBurn ()</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3318,8 +3096,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3335,8 +3111,6 @@
     <strong>RGMercUtils.BigBurn ()</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3359,8 +3133,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">targetId</span>
@@ -3378,8 +3150,6 @@
     <strong>RGMercUtils.NavAroundCircle (target, radius)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3411,8 +3181,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">targetId</span>
@@ -3440,6 +3208,23 @@
 
 
 
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.ShouldShrinkPet"></a>
+    <strong>RGMercUtils.ShouldShrinkPet ()</strong>
+    </dt>
+    <dd>
+
+
 
 
     <h3>Returns:</h3>
@@ -3457,8 +3242,6 @@
     <strong>RGMercUtils.ShouldMount ()</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3482,8 +3265,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3503,8 +3284,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3520,8 +3299,6 @@
     <strong>RGMercUtils.SongMemed (songSpell)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3550,8 +3327,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">songSpell</span>
@@ -3577,8 +3352,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">songSpell</span>
@@ -3597,12 +3370,29 @@
 
 </dd>
     <dt>
-    <a name = "RGMercUtils.DoBuffCheck"></a>
-    <strong>RGMercUtils.DoBuffCheck ()</strong>
+    <a name = "RGMercUtils.DebuffConCheck"></a>
+    <strong>RGMercUtils.DebuffConCheck ()</strong>
     </dt>
     <dd>
 
 
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.DoBuffCheck"></a>
+    <strong>RGMercUtils.DoBuffCheck ()</strong>
+    </dt>
+    <dd>
 
 
 
@@ -3626,8 +3416,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3647,8 +3435,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3664,8 +3450,6 @@
     <strong>RGMercUtils.GetDistance (x1, y1, x2, y2)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3700,8 +3484,6 @@
     <strong>RGMercUtils.GetDistanceSquared (x1, y1, x2, y2)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3740,8 +3522,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3757,8 +3537,6 @@
     <strong>RGMercUtils.AutoCampCheck (tempConfig)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3782,8 +3560,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">tempConfig</span>
@@ -3801,8 +3577,6 @@
     <strong>RGMercUtils.EngageTarget (autoTargetId)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3827,8 +3601,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -3844,8 +3616,6 @@
     <strong>RGMercUtils.HaveExpansion (name)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3874,8 +3644,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">class</span>
@@ -3898,8 +3666,6 @@
     <strong>RGMercUtils.IsNamed (spawn)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -3956,8 +3722,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spawn</span>
@@ -3987,8 +3751,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -4004,8 +3766,6 @@
     <strong>RGMercUtils.MATargetScan (radius, zradius)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4057,8 +3817,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">printDebug</span>
@@ -4084,8 +3842,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">printDebug</span>
@@ -4108,8 +3864,6 @@
     <strong>RGMercUtils.DiffXTHaterIDs (t, printDebug)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4141,8 +3895,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spawnId</span>
@@ -4169,8 +3921,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -4186,8 +3936,6 @@
     <strong>RGMercUtils.Feigning ()</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4211,8 +3959,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -4228,8 +3974,6 @@
     <strong>RGMercUtils.IHaveAggro (pct)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4259,8 +4003,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -4276,8 +4018,6 @@
     <strong>RGMercUtils.OkToEngagePreValidateId (targetId)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4306,8 +4046,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">autoTargetId</span>
@@ -4333,8 +4071,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">spell</span>
@@ -4353,12 +4089,29 @@
 
 </dd>
     <dt>
-    <a name = "RGMercUtils.SongActive"></a>
-    <strong>RGMercUtils.SongActive (song)</strong>
+    <a name = "RGMercUtils.OnEMU"></a>
+    <strong>RGMercUtils.OnEMU ()</strong>
     </dt>
     <dd>
 
 
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.SongActive"></a>
+    <strong>RGMercUtils.SongActive (song)</strong>
+    </dt>
+    <dd>
 
 
 
@@ -4387,8 +4140,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">songName</span>
@@ -4411,8 +4162,6 @@
     <strong>RGMercUtils.BuffActive (spell)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4441,8 +4190,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">buffName</span>
@@ -4468,8 +4215,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">buffId</span>
@@ -4492,8 +4237,6 @@
     <strong>RGMercUtils.AuraActiveByName (auraName)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4523,8 +4266,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -4540,8 +4281,6 @@
     <strong>RGMercUtils.DetGambitCheck ()</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4565,8 +4304,6 @@
 
 
 
-
-
     <h3>Returns:</h3>
     <ol>
 
@@ -4582,8 +4319,6 @@
     <strong>RGMercUtils.DetAACheck (aaId)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4612,8 +4347,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">abilitySets</span>
@@ -4639,8 +4372,6 @@
     <strong>RGMercUtils.SetLoadOut (caller, spellGemList, itemSets, abilitySets)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4673,8 +4404,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">loc</span>
@@ -4692,8 +4421,6 @@
     <strong>RGMercUtils.Tooltip (desc)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4717,6 +4444,24 @@
 
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         string
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercUtils.DeleteOAByName"></a>
+    <strong>RGMercUtils.DeleteOAByName (name)</strong>
+    </dt>
+    <dd>
+
 
 
     <h3>Parameters:</h3>
@@ -4736,8 +4481,6 @@
     <strong>RGMercUtils.MoveOAUp (id)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4761,8 +4504,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">id</span>
@@ -4780,8 +4521,6 @@
     <strong>RGMercUtils.DrawInspectableSpellIcon (iconID, spell)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4808,8 +4547,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">loadoutTable</span>
@@ -4827,8 +4564,6 @@
     <strong>RGMercUtils.RenderRotationTable (name, rotationTable, resolvedActionMap, rotationState, showFailed)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4869,8 +4604,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">id</span>
@@ -4904,8 +4637,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">pct</span>
@@ -4929,8 +4660,6 @@
     <strong>RGMercUtils.RenderOptionNumber (id, text, cur, min, max, step)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -4976,8 +4705,6 @@
 
 
 
-
-
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">settings</span>
@@ -5001,7 +4728,7 @@
         <li>
         boolean # any_pressed</li>
         <li>
-        boolean # requires<em>new</em>loadout</li>
+        boolean # requires_new_loadout</li>
     </ol>
 
 
@@ -5013,12 +4740,24 @@
 
     <dl class="function">
     <dt>
-    <a name = "RGMercConfig.Globals.AutoTargetID"></a>
-    <strong>RGMercConfig.Globals.AutoTargetID</strong>
+    <a name = "peer"></a>
+    <strong>peer</strong>
     </dt>
     <dd>
 
 
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "peer"></a>
+    <strong>peer</strong>
+    </dt>
+    <dd>
 
 
 
@@ -5035,6 +4774,18 @@
     <dd>
 
 
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RGMercConfig.Globals.AutoTargetID"></a>
+    <strong>RGMercConfig.Globals.AutoTargetID</strong>
+    </dt>
+    <dd>
 
 
 
@@ -5050,11 +4801,9 @@
     <dl class="function">
     <dt>
     <a name = "RGMercUtils.RenderSettings"></a>
-    <strong>RGMercUtils.RenderSettings (settings, defaults, categories, hideControls)</strong>
+    <strong>RGMercUtils.RenderSettings (settings, defaults, categories, hideControls, showMainOptions)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -5072,6 +4821,9 @@
         <li><span class="parameter">hideControls</span>
         ? boolean
         </li>
+        <li><span class="parameter">showMainOptions</span>
+        ? boolean
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -5081,7 +4833,7 @@
         <li>
         boolean: any_pressed</li>
         <li>
-        boolean: requires<em>new</em>loadout</li>
+        boolean: requires_new_loadout</li>
     </ol>
 
 
@@ -5093,8 +4845,6 @@
     <strong>RGMercUtils.LoadSpellLoadOut (spellLoadOut)</strong>
     </dt>
     <dd>
-
-
 
 
 
@@ -5117,7 +4867,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/ldoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2024-08-22 08:38:41 </i>
+<i style="float:right;">Last updated 2024-09-08 04:54:23 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
