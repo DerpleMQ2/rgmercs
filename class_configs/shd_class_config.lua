@@ -902,7 +902,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.TempHP,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    if not RGMercUtils.GetSetting('DoTempHP') then return false end
+                    if not RGMercUtils.GetSetting('DoTempHP') or (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) > 0 then return false end
                     return RGMercUtils.PCSpellReady(spell) and RGMercUtils.SpellStacksOnMe(spell) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
                 end,
             },
