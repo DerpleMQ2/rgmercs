@@ -675,6 +675,11 @@ function Module:AddMobToList(list, mobName)
     self.settings[list][mq.TLO.Zone.ShortName()] = self.settings[list][mq.TLO.Zone.ShortName()] or {}
     table.insert(self.settings[list][mq.TLO.Zone.ShortName()], mobName)
     self:SaveSettings(false)
+
+    -- if we are pulling start over.
+    if RGMercUtils.GetSetting('DoPull') then
+        RGMercUtils.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
+    end
 end
 
 ---@param list string
@@ -683,6 +688,11 @@ function Module:DeleteMobFromList(list, idx)
     self.settings[list][mq.TLO.Zone.ShortName()] = self.settings[list][mq.TLO.Zone.ShortName()] or {}
     self.settings[list][mq.TLO.Zone.ShortName()][idx] = nil
     self:SaveSettings(false)
+
+    -- if we are pulling start over.
+    if RGMercUtils.GetSetting('DoPull') then
+        RGMercUtils.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
+    end
 end
 
 function Module:IncrementWpId()
