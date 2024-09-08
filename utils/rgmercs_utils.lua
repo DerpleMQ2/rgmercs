@@ -3060,7 +3060,8 @@ function RGMercUtils.FindTarget(validateFn)
     if RGMercConfig.Globals.AutoTargetID ~= 0 then
         local autoSpawn = mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID))
         if not autoSpawn or not autoSpawn() or RGMercUtils.TargetIsType("corpse", autoSpawn) then
-            RGMercsLogger.log_debug("\ayFindTarget() : Clearing Target because it is a corpse or no longer valid.")
+            RGMercsLogger.log_debug("\ayFindTarget() : Clearing Target (%d/%s) because it is a corpse or no longer valid.", RGMercConfig.Globals.AutoTargetID,
+                autoSpawn and (autoSpawn.CleanName() or "Unknown") or "None")
             RGMercUtils.ClearTarget()
         end
     end

@@ -690,9 +690,9 @@ end
 function loot.lootMobs(limit)
     CheckBags()
     if areFull then return end
-    RGMercsLogger.log_debug('Enter lootMobs')
+    RGMercsLogger.log_verbose('lootMobs(): Enter lootMobs')
     local deadCount = mq.TLO.SpawnCount(spawnSearch:format('npccorpse', loot.CorpseRadius))()
-    RGMercsLogger.log_debug('There are %s corpses in range.', deadCount)
+    RGMercsLogger.log_verbose('lootMobs(): here are %s corpses in range.', deadCount)
     local mobsNearby = mq.TLO.SpawnCount(spawnSearch:format('xtarhater', loot.MobsTooClose))()
     -- options for combat looting or looting disabled
     if deadCount == 0 or ((mobsNearby > 0 or mq.TLO.Me.Combat()) and not loot.CombatLooting) then return false end
@@ -703,26 +703,28 @@ function loot.lootMobs(limit)
         -- why is there a deity check?
     end
     local didLoot = false
-    RGMercsLogger.log_debug('Trying to loot %d corpses.', #corpseList)
-    for i = 1, #corpseList do
-        local corpse = corpseList[i]
-        local corpseID = corpse.ID()
-        if corpseID and corpseID > 0 and not corpseLocked(corpseID) and (mq.TLO.Navigation.PathLength('spawn id ' .. tostring(corpseID))() or 100) < 60 then
-            RGMercsLogger.log_debug('Moving to corpse ID=' .. tostring(corpseID))
-            navToID(corpseID)
-            corpse.DoTarget()
-            lootCorpse(corpseID)
-            didLoot = true
-            mq.doevents('InventoryFull')
+    if #corpseList > 0 then
+        RGMercsLogger.log_debug('lootMobs(): Trying to loot %d corpses.', #corpseList)
+        for i = 1, #corpseList do
+            local corpse = corpseList[i]
+            local corpseID = corpse.ID()
+            if corpseID and corpseID > 0 and not corpseLocked(corpseID) and (mq.TLO.Navigation.PathLength('spawn id ' .. tostring(corpseID))() or 100) < 60 then
+                RGMercsLogger.log_debug('lootMobs(): Moving to corpse ID=' .. tostring(corpseID))
+                navToID(corpseID)
+                corpse.DoTarget()
+                lootCorpse(corpseID)
+                didLoot = true
+                mq.doevents('InventoryFull')
+            end
         end
+        RGMercsLogger.log_debug('lootMobs(): Done with corpse list.')
     end
-    RGMercsLogger.log_debug('Done with corpse list.')
     return didLoot
 end
 
 -- SELLING
 
-function eventSell(line, itemName)
+function eventSell(_, itemName)
     if NEVER_SELL[itemName] then return end
     local firstLetter = itemName:sub(1, 1):upper()
     if lootData[firstLetter] and lootData[firstLetter][itemName] == 'Sell' then return end
