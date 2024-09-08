@@ -28,6 +28,32 @@ Bind.Handlers     = {
             RGMercConfig:HandleBind(config, value)
         end,
     },
+    ['addoa'] = {
+        usage = "/rgl addoa <Name>",
+        about = "Adds <Name> to your Outside Assist List, if no name is given, Target name is used",
+        handler = function(name)
+            if not name then name = mq.TLO.Target.CleanName() end
+            if not name then
+                RGMercsLogger.log_error("/rgl addoa - no name given and no valid target exists!")
+                return
+            end
+            RGMercsLogger.log_info("Adding %s to your Outside Assist list!", name)
+            RGMercUtils.AddOA(name)
+        end,
+    },
+    ['deloa'] = {
+        usage = "/rgl deloa <Name>",
+        about = "Deletes <Name> from your Outside Assist List, if no name is given, Target name is used",
+        handler = function(name)
+            if not name then name = mq.TLO.Target.CleanName() end
+            if not name then
+                RGMercsLogger.log_error("/rgl deloa - no name given and no valid target exists!")
+                return
+            end
+            RGMercsLogger.log_info("Adding %s to your Outside Assist list!", name)
+            RGMercUtils.DeleteOAByName(name)
+        end,
+    },
     ['backoff'] = {
         usage = "/rgl backoff <on|off>",
         about = "Toggles or sets backoff flag",

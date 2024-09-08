@@ -3980,8 +3980,24 @@ end
 
 ---@param name string
 function RGMercUtils.AddOA(name)
+    for idx, cur_name in ipairs(RGMercUtils.GetSetting('OutsideAssistList') or {}) do
+        if cur_name == name then
+            return
+        end
+    end
+
     table.insert(RGMercUtils.GetSetting('OutsideAssistList'), name)
     RGMercConfig:SaveSettings(false)
+end
+
+---@param name string
+function RGMercUtils.DeleteOAByName(name)
+    for idx, cur_name in ipairs(RGMercUtils.GetSetting('OutsideAssistList') or {}) do
+        if cur_name == name then
+            RGMercUtils.DeleteOA(idx)
+            return
+        end
+    end
 end
 
 function RGMercUtils.DeleteOA(idx)
