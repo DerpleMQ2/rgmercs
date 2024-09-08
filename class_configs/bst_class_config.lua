@@ -2,7 +2,7 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version              = "1.1",
+    _version              = "1.2",
     _author               = "Derple, Algar",
     ['Modes']             = {
         'DPS',
@@ -364,7 +364,7 @@ return {
             "Comrade's Unity",
         },
         ['UnityBuff'] = {
-            -- Unity Mana/Hp/End Regen + Atk/HP Buff*
+            -- --Combined ManaRegenBuff and AtkHPBuff
             "Spiritual Unity",
             "Stormblood's Unity",
             "Feralist's Unity",
@@ -1126,70 +1126,69 @@ return {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercUtils.GetSetting('DoRunSpeed') and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
-                end,
-            },
-            {
-                name = "ManaRegenBuff",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
+                    if not RGMercUtils.GetSetting('DoRunSpeed') then return false end
+                    return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoAvatar') then return false end
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
+                    if not RGMercUtils.GetSetting('DoAvatar') or not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+                    return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "AtkBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
                     -- Make sure this is gemmed due to long refresh, and only use the single target versions on classes that need it.
                     if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2")) and (not RGMercUtils.CastReady(spell.RankName)
                             or not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName())) then
                         return false
                     end
-                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercUtils.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "UnityBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    local triggerone = self.ResolvedActionMap['AtkHPBuff'].Level() or 999
+                    local triggertwo = self.ResolvedActionMap['ManaRegenBuff'].Level() or 999
+                    if (spell.Level() or 0) < (triggerone or triggertwo) then return false end
+                    return RGMercUtils.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "ManaRegenBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "AtkHPBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
                     -- Only use the single target versions on classes that need it
                     if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
                         and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then
                         return false
                     end
-                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "FocusSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
                     -- Only use the single target versions on classes that need it
                     if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
                         and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then
                         return false
                     end
-                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
         },
@@ -1266,7 +1265,7 @@ return {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell) and RGMercUtils.GetSetting('DoAvatar')
+                    return RGMercUtils.GetSetting('DoAvatar') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1322,7 +1321,7 @@ return {
                 name = "PetSpellGuard",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell) and RGMercUtils.GetSetting('DoSpellGuard')
+                    return RGMercUtils.GetSetting('DoSpellGuard') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1330,7 +1329,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     if RGMercUtils.GetSetting('DoFeralgia') then return false end
-                    return not RGMercUtils.SongActiveByName(spell.RankName())
+                    return not RGMercUtils.SongActive(spell)
                 end,
             },
             {
