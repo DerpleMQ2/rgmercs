@@ -996,7 +996,7 @@ local _ClassConfig = {
                 end,
                 cond = function(self, discSpell)
                     return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EmergencyLockout') and not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.PCDiscReady(discSpell) and
-                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 999999) < 234000
+                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000
                 end,
             },
             {
