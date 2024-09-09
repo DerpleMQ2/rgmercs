@@ -218,6 +218,7 @@ end
 function Module:SetItem(params)
 	if LootnScoot ~= nil then
 		LootnScoot.commandHandler(params)
+		RGMercUtils.DoCmd("/autoinv")
 	end
 end
 
