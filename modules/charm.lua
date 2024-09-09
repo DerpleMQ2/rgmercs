@@ -162,11 +162,12 @@ function Module:Render()
 		ImGui.Separator()
 		-- Immune targets
 		if ImGui.CollapsingHeader("Invalid Charm Targets") then
-			if ImGui.BeginTable("Immune", 3, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
+			if ImGui.BeginTable("Immune", 4, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Hideable)) then
 				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
 				ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 250.0)
 				ImGui.TableSetupColumn('Body', (ImGuiTableColumnFlags.WidthFixed), 90.0)
+				ImGui.TableSetupColumn('Reason', (ImGuiTableColumnFlags.WidthFixed), 90.0)
 				ImGui.PopStyleColor()
 				ImGui.TableHeadersRow()
 				for id, data in pairs(self.TempSettings.CharmImmune) do
@@ -176,6 +177,8 @@ function Module:Render()
 					ImGui.Text(string.format("%s", data.name))
 					ImGui.TableNextColumn()
 					ImGui.Text(string.format("%s", data.body))
+					ImGui.TableNextColumn()
+					ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", data.reason)
 				end
 				ImGui.EndTable()
 			end
@@ -198,7 +201,8 @@ function Module:AddImmuneTarget(mobId, mobData)
 end
 
 function Module:CharmLvlToHigh(mobLvl)
-	if RGMercUtils.GetSetting("DireCharm") and RGMercUtils.GetSetting("AutoLevelRangeCharm") then
+	if RGMercUtils.MyClassIs("BRD") then return false end
+	if RGMercUtils.GetSetting("DireCharm", true) and RGMercUtils.GetSetting("AutoLevelRangeCharm") then
 		self.settings.DireCharmMaxLvl = mobLvl - 1
 		self:SaveSettings(false)
 		RGMercsLogger.log_debug("\awNOTICE:\ax \aoTarget LVL to High,\ayLowering Max Level for Dire Charm!")
@@ -234,21 +238,21 @@ function Module:CharmNow(charmId, useAA)
 	local charmSpell = self:GetCharmSpell()
 
 	if not charmSpell or not charmSpell() then return end
-	local dCharm = RGMercUtils.GetSetting("DireCharm", true) == true
-	if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
-		RGMercUtils.HandleAnnounce(string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"), RGMercUtils.GetSetting('CharmAnnounceGroup'),
-			RGMercUtils.GetSetting('CharmAnnounce'))
-		RGMercUtils.UseAA("Dire Charm", charmId)
-	else
-		if RGMercUtils.MyClassIs("brd") then
-			RGMercsLogger.log_debug("Performing Bard CHARM --> %d", charmId)
-			-- TODO SongNow CharmSpell
-			RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
+	if not RGMercUtils.MyClassIs("BRD") then
+		local dCharm = RGMercUtils.GetSetting("DireCharm", true) == true
+		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
+			RGMercUtils.HandleAnnounce(string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"), RGMercUtils.GetSetting('CharmAnnounceGroup'),
+				RGMercUtils.GetSetting('CharmAnnounce'))
+			RGMercUtils.UseAA("Dire Charm", charmId)
 		else
 			-- This may not work for Bards but will work for DRU/NEC/ENCs
 			RGMercUtils.UseSpell(charmSpell.RankName(), charmId, false)
 			RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
 		end
+	else
+		RGMercsLogger.log_debug("Performing Bard CHARM --> %d", charmId)
+		-- TODO SongNow CharmSpell
+		RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
 	end
 
 	mq.doevents()
@@ -469,14 +473,24 @@ function Module:DoCharm()
 	if RGMercUtils.GetXTHaterCount() >= self.settings.CharmStartCount then
 		self:UpdateCharmList()
 	end
-
-	if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or (RGMercUtils.GetSetting("DireCharm", true) == true)) and
-		RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
-		self:ProcessCharmList()
+	if not RGMercUtils.MyClassIs("BRD") then
+		if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or (RGMercUtils.GetSetting("DireCharm", true) == true)) and
+			RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
+			self:ProcessCharmList()
+		else
+			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)", charmSpell and charmSpell() or "None",
+				charmSpell and charmSpell() and RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
+				RGMercUtils.GetTableSize(self.TempSettings.CharmTracker))
+		end
 	else
-		RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)", charmSpell and charmSpell() or "None",
-			charmSpell and charmSpell() and RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
-			RGMercUtils.GetTableSize(self.TempSettings.CharmTracker))
+		if (charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) and
+			RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
+			self:ProcessCharmList()
+		else
+			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)", charmSpell and charmSpell() or "None",
+				charmSpell and charmSpell() and RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
+				RGMercUtils.GetTableSize(self.TempSettings.CharmTracker))
+		end
 	end
 end
 
