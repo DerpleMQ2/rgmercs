@@ -92,6 +92,13 @@ Module.CommandHandlers   = {
 			self:ReportLoot()
 		end,
 	},
+	lootreload = {
+		usage = "/rgl lootreload",
+		about = "Reloads your loot settings.",
+		handler = function(self, _)
+			self:LootReload()
+		end,
+	},
 }
 
 Module.DefaultCategories = Set.new({})
@@ -235,6 +242,12 @@ end
 function Module:ShowLootUI()
 	if LootnScoot ~= nil then
 		LootnScoot.guiLoot.openGUI = not LootnScoot.guiLoot.openGUI
+	end
+end
+
+function Module:LootReload()
+	if LootnScoot ~= nil then
+		LootnScoot.commandHandler('reload')
 	end
 end
 
