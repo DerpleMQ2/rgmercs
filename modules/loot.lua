@@ -218,13 +218,22 @@ end
 function Module:SetItem(params)
 	if LootnScoot ~= nil then
 		LootnScoot.commandHandler(params)
-		RGMercUtils.DoCmd("/autoinv")
+		if params == "destroy" then
+			RGMercUtils.DoCmd("/destroy")
+		else
+			RGMercUtils.DoCmd("/autoinv")
+		end
 	end
 end
 
 function Module:SetGlobalItem(params)
 	if LootnScoot ~= nil then
 		LootnScoot.commandHandler(params)
+		if params == "destroy" then
+			RGMercUtils.DoCmd("/destroy")
+		else
+			RGMercUtils.DoCmd("/autoinv")
+		end
 	end
 end
 
