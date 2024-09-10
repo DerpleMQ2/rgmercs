@@ -1205,6 +1205,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ThoughtLeech,
                 cond = function(self, aaName, target)
+                    if RGMercUtils.GetSetting('DoThoughtLeech') == 1 then return false end
                     return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.MedBurn()
                 end,
             },
@@ -1452,6 +1453,15 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Thought Leech",
+                type = "AA",
+                tooltip = Tooltips.ThoughtLeech,
+                cond = function(self, aaName, target)
+                    if RGMercUtils.GetSetting('DoThoughtLeech') == 2 then return false end
+                    return mq.TLO.Me.PctMana() < 10 and RGMercUtils.NPCAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1984,12 +1994,13 @@ local _ClassConfig = {
         ['DoBuffTap']        = { DisplayName = "Use Buff Tap", Category = "Buffs/Debuffs", Index = 4, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("BuffTap") end, Default = false, RequiresLoadoutChange = true, ConfigType = "Advanced", },
         ['DoVetAA']          = { DisplayName = "Use Vet AA", Category = "Buffs/Debuffs", Index = 5, Tooltip = "Use Veteran AA's in emergencies or during BigBurn.", Default = true, },
 
-        --LifeTaps
-        ['StartLifeTap']     = { DisplayName = "HP % for LifeTaps", Category = "LifeTaps", Index = 1, Tooltip = "Your HP % before we use Life Taps.", Default = 99, Min = 1, Max = 100, },
-        ['DoDireTap']        = { DisplayName = "Cast Dire Taps", Category = "LifeTaps", Index = 2, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("DireTap") end, RequiresLoadoutChange = true, Default = true, ConfigType = "Advanced", },
-        ['StartDireTap']     = { DisplayName = "HP % for Dire", Category = "LifeTaps", Index = 3, Tooltip = "Your HP % before we use Dire taps.", Default = 85, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['DoDicho']          = { DisplayName = "Cast Dicho Taps", Category = "LifeTaps", Index = 4, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("Dicho") end, RequiresLoadoutChange = true, Default = true, ConfigType = "Advanced", },
-        ['StartDicho']       = { DisplayName = "HP % for Dicho", Category = "LifeTaps", Index = 5, Tooltip = "Your HP % before we use Dicho taps.", Default = 70, Min = 1, Max = 100, ConfigType = "Advanced", },
+        --Taps
+        ['StartLifeTap']     = { DisplayName = "HP % for LifeTaps", Category = "Taps", Index = 1, Tooltip = "Your HP % before we use Life Taps.", Default = 99, Min = 1, Max = 100, },
+        ['DoDireTap']        = { DisplayName = "Cast Dire Taps", Category = "Taps", Index = 2, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("DireTap") end, RequiresLoadoutChange = true, Default = true, ConfigType = "Advanced", },
+        ['StartDireTap']     = { DisplayName = "HP % for Dire", Category = "Taps", Index = 3, Tooltip = "Your HP % before we use Dire taps.", Default = 85, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['DoDicho']          = { DisplayName = "Cast Dicho Taps", Category = "Taps", Index = 4, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("Dicho") end, RequiresLoadoutChange = true, Default = true, ConfigType = "Advanced", },
+        ['StartDicho']       = { DisplayName = "HP % for Dicho", Category = "Taps", Index = 5, Tooltip = "Your HP % before we use Dicho taps.", Default = 70, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['DoThoughtLeech']   = { DisplayName = "Thought Leech Use:", Category = "Taps", Index = 6, Tooltip = "When to use Thought Leech", Type = "Combo", ComboOptions = { 'On critically low mana', 'As DD during burns', 'For Mana or DD', }, Default = 3, Min = 1, Max = 3, ConfigType = "Advanced", },
 
         --DoTs
         ['DoBondTap']        = { DisplayName = "Use Bond Dot", Category = "DoT Spells", Index = 1, function() return RGMercUtils.GetDynamicTooltipForSpell("BondTap") end, RequiresLoadoutChange = true, Default = true, },
