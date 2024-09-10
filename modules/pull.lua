@@ -1202,6 +1202,7 @@ function Module:GetPullStateTargetInfo()
 end
 
 function Module:GiveTime(combat_state)
+    RGMercsLogger.log_verbose("PULL:GiveTime() - Enter")
     self:SetValidPullAbilities()
     self:FixPullerMerc()
     if RGMercUtils.GetSetting('DoPull') then
@@ -1222,6 +1223,7 @@ function Module:GiveTime(combat_state)
         RGMercUtils.DoCmd("/mapfilter pullradius off")
     end
 
+    RGMercsLogger.log_verbose("PULL:GiveTime() - DoPull: %s", RGMercUtils.BoolToColorString(RGMercUtils.GetSetting('DoPull')))
     if not RGMercUtils.GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
     if RGMercUtils.GetSetting('DoPull') and self:IsPullMode("Hunt") and (self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) then
@@ -1246,6 +1248,9 @@ function Module:GiveTime(combat_state)
     end
 
     local shouldPull, reason = self:ShouldPull(campData)
+
+    RGMercsLogger.log_verbose("PULL:GiveTime() - ShouldPull: %s", RGMercUtils.BoolToColorString(shouldPull))
+
     if not shouldPull then
         if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
             -- go back to camp.
@@ -1261,6 +1266,8 @@ function Module:GiveTime(combat_state)
         return
     end
 
+    RGMercsLogger.log_verbose("PULL:GiveTime() - Last Pull: %d < %d ", os.clock() - self.TempSettings.LastPull, self.settings.PullDelay)
+
     if (os.clock() - self.TempSettings.LastPull) < self.settings.PullDelay then return end
 
     -- GROUPWATCH and NAVINTERRUPT are the two states we can't reset. In the future it may be best to
@@ -1274,12 +1281,14 @@ function Module:GiveTime(combat_state)
     if self.settings.GroupWatch == 2 then
         local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
         if not groupReady then
+            RGMercsLogger.log_verbose("PULL:GiveTime() - GroupWatch Failed")
             self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
             return
         end
     elseif self.settings.GroupWatch == 3 then
         local groupReady, groupReason = self:CheckGroupForPull(nil, self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
         if not groupReady then
+            RGMercsLogger.log_verbose("PULL:GiveTime() - GroupWatch2 Failed")
             self:SetPullState(PullStates.PULL_GROUPWATCH_WAIT, groupReason)
             return
         end
