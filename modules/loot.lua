@@ -457,7 +457,7 @@ function Module:Render()
 				ImGui.EndTabItem()
 			end
 
-			--Normal Items
+			-- Normal Items
 			if ImGui.BeginTabItem("Normal Items##LootModule") then
 				if self.TempSettings.NormalItems == nil then
 					self.TempSettings.NormalItems = {}
@@ -465,27 +465,29 @@ function Module:Render()
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
 				if ImGui.Button("Save Changes##NormalItems") then
+					-- Apply updates to NormalItemsTable
 					for k, v in pairs(self.TempSettings.UpdatedNormalItems) do
 						self.NormalItemsTable[k] = v
 					end
+					-- Remove deleted items
 					for k in pairs(self.TempSettings.DeletedNormalKeys) do
 						self.NormalItemsTable[k] = nil
 					end
 					self.TempSettings.NeedSave = true
 				end
 
-				if ImGui.BeginTable("Normal Items", col, ImGuiTableFlags.Borders) then
+				if ImGui.BeginTable("NormalItems", col, ImGuiTableFlags.Borders) then
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
-						ImGui.TableSetupColumn("Qty")
+						ImGui.TableSetupColumn("Setting")
 					end
 					ImGui.TableHeadersRow()
 
 					local numDisplayColumns = col / 2
 
 					if self.NormalItemsTable ~= nil and self.TempSettings.SortedNormalItemKeys ~= nil then
-						local updatedItems = {}
-						local deletedKeys = {}
+						self.TempSettings.UpdatedNormalItems = {} -- Temporary storage for updated items
+						self.TempSettings.DeletedNormalKeys = {} -- Temporary storage for deleted keys
 
 						local numItems = #self.TempSettings.SortedNormalItemKeys
 						local numRows = math.ceil(numItems / numDisplayColumns)
@@ -500,35 +502,23 @@ function Module:Render()
 									self.TempSettings.NormalItems[k] = self.TempSettings.NormalItems[k] or { Key = k, Value = v, }
 
 									ImGui.TableNextColumn()
+									ImGui.SetNextItemWidth(140)
 									local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.NormalItems[k].Key)
 
 									ImGui.TableNextColumn()
 									local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.NormalItems[k].Value)
 
 									if newKey ~= k or newKey == "" then
-										updatedItems[newKey] = newValue
-										deletedKeys[k] = true
-										self.TempSettings.NeedSave = true
+										self.TempSettings.UpdatedNormalItems[newKey] = newValue
+										self.TempSettings.DeletedNormalKeys[k] = true
 									else
-										updatedItems[k] = newValue
-									end
-
-									if newValue ~= v then
-										self.TempSettings.NeedSave = true
+										self.TempSettings.UpdatedNormalItems[k] = newValue
 									end
 
 									self.TempSettings.NormalItems[k].Key = newKey
 									self.TempSettings.NormalItems[k].Value = newValue
 								end
 							end
-						end
-
-						for k, v in pairs(updatedItems) do
-							self.NormalItemsTable[k] = v
-						end
-
-						for k in pairs(deletedKeys) do
-							self.NormalItemsTable[k] = nil
 						end
 					end
 
