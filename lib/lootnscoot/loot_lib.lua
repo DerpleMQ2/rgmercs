@@ -332,26 +332,6 @@ function loot.loadSettings()
     shouldLootActions.Destroy = loot.Settings.DoDestroy
     shouldLootActions.Tribute = loot.Settings.TributeKeep
 
-    -- -- Item Tables
-    -- local iniBuyItems = mq.TLO.Ini.File(loot.Settings.SettingsFile).Section('BuyItems')
-    -- if iniBuyItems ~= nil then
-    --     local buyKeyCount = iniBuyItems.Key.Count()
-    --     for i = 1, buyKeyCount do
-    --         local key = iniBuyItems.Key.KeyAtIndex(i)()
-    --         local value = iniBuyItems.Key(key).Value()
-    --         loot.BuyItems[key] = value
-    --     end
-    -- end
-
-    -- local globalItemsTmp = mq.TLO.Ini.File(loot.Settings.LootFile).Section('GlobalItems')
-    -- if globalItemsTmp ~= nil then
-    --     local globalKeyCount = globalItemsTmp.Key.Count()
-    --     for i = 1, globalKeyCount do
-    --         local key = globalItemsTmp.Key.KeyAtIndex(i)()
-    --         local value = globalItemsTmp.Key(key).Value()
-    --         loot.GlobalItems[key] = value
-    --     end
-    -- end
     loot.GlobalItems = loot.load(loot.Settings.LootFile, 'GlobalItems')
     loot.BuyItems = loot.load(loot.Settings.SettingsFile, 'BuyItems')
     loot.NormalItems = loot.load(loot.Settings.LootFile, 'items')
@@ -394,6 +374,9 @@ function loot.addRule(itemName, section, rule)
     lootData[section][itemName] = rule
     mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, section, itemName, rule)
     loot.NormalItems[itemName] = rule
+    if section == 'GlobalItems' then
+        loot.GlobalItems[itemName] = rule
+    end
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
