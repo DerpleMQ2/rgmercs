@@ -175,7 +175,11 @@ function Module:SaveSettings(doBroadcast)
 	end
 end
 
-function Module:ModifyLootSettings()
+function Module:ModifyLootSettings(saved)
+	if saved == nil then saved = false end
+	if LootnScoot.Settings ~= nil then
+		self.settings = LootnScoot.Settings
+	end
 	if LootnScoot.GlobalItems ~= nil then
 		self.GlobalItemsTable = LootnScoot.GlobalItems
 	end
@@ -185,7 +189,7 @@ function Module:ModifyLootSettings()
 	if LootnScoot.NormalItems ~= nil then
 		self.NormalItemsTable = LootnScoot.NormalItems
 	end
-	self:SaveSettings(false)
+	if not saved then self:SaveSettings(false) end
 end
 
 function Module:LoadSettings()
@@ -324,9 +328,7 @@ function Module:Render()
 				end
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
-				-- Display Save Changes button
 				if ImGui.Button("Save Changes##BuyItems") then
-					-- Apply updates to BuyItemsTable
 					for k, v in pairs(self.TempSettings.UpdatedBuyItems) do
 						self.BuyItemsTable[k] = v
 					end
@@ -347,8 +349,8 @@ function Module:Render()
 					local numDisplayColumns = col / 2
 
 					if self.BuyItemsTable ~= nil and self.TempSettings.SortedBuyItemKeys ~= nil then
-						self.TempSettings.UpdatedBuyItems = {} -- Temporary storage for updated items
-						self.TempSettings.DeletedBuyKeys = {} -- Temporary storage for deleted keys
+						self.TempSettings.UpdatedBuyItems = {}
+						self.TempSettings.DeletedBuyKeys = {}
 
 						local numItems = #self.TempSettings.SortedBuyItemKeys
 						local numRows = math.ceil(numItems / numDisplayColumns)
@@ -396,11 +398,10 @@ function Module:Render()
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
 				if ImGui.Button("Save Changes##GlobalItems") then
-					-- Apply updates to GlobalItemsTable
 					for k, v in pairs(self.TempSettings.UpdatedGlobalItems) do
 						self.GlobalItemsTable[k] = v
 					end
-					-- Remove deleted items
+
 					for k in pairs(self.TempSettings.DeletedGlobalKeys) do
 						self.GlobalItemsTable[k] = nil
 					end
@@ -417,8 +418,8 @@ function Module:Render()
 					local numDisplayColumns = col / 2
 
 					if self.GlobalItemsTable ~= nil and self.TempSettings.SortedGlobalItemKeys ~= nil then
-						self.TempSettings.UpdatedGlobalItems = {} -- Temporary storage for updated items
-						self.TempSettings.DeletedGlobalKeys = {} -- Temporary storage for deleted keys
+						self.TempSettings.UpdatedGlobalItems = {}
+						self.TempSettings.DeletedGlobalKeys = {}
 
 						local numItems = #self.TempSettings.SortedGlobalItemKeys
 						local numRows = math.ceil(numItems / numDisplayColumns)
@@ -467,11 +468,10 @@ function Module:Render()
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
 				if ImGui.Button("Save Changes##NormalItems") then
-					-- Apply updates to NormalItemsTable
 					for k, v in pairs(self.TempSettings.UpdatedNormalItems) do
 						self.NormalItemsTable[k] = v
 					end
-					-- Remove deleted items
+
 					for k in pairs(self.TempSettings.DeletedNormalKeys) do
 						self.NormalItemsTable[k] = nil
 					end
@@ -488,8 +488,8 @@ function Module:Render()
 					local numDisplayColumns = col / 2
 
 					if self.NormalItemsTable ~= nil and self.TempSettings.SortedNormalItemKeys ~= nil then
-						self.TempSettings.UpdatedNormalItems = {} -- Temporary storage for updated items
-						self.TempSettings.DeletedNormalKeys = {} -- Temporary storage for deleted keys
+						self.TempSettings.UpdatedNormalItems = {}
+						self.TempSettings.DeletedNormalKeys = {}
 
 						local numItems = #self.TempSettings.SortedNormalItemKeys
 						local numRows = math.ceil(numItems / numDisplayColumns)

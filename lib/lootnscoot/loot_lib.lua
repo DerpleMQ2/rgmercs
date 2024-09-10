@@ -593,7 +593,7 @@ function loot.commandHandler(...)
             RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s|%s\ax", args[3], validActions[args[2]], args[4])
         end
     end
-    loot.loadSettings()
+    loot.writeSettings()
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
@@ -1183,41 +1183,41 @@ function loot.guiExport()
             -- Add menu items here
             if ImGui.BeginMenu('Toggles') then
                 -- Add menu items here
-                _, loot.DoLoot = ImGui.MenuItem("DoLoot", nil, loot.Settings.DoLoot)
+                _, loot.Settings.DoLoot = ImGui.MenuItem("DoLoot", nil, loot.Settings.DoLoot)
                 if _ then loot.writeSettings() end
-                _, loot.GlobalLootOn = ImGui.MenuItem("GlobalLootOn", nil, loot.Settings.GlobalLootOn)
+                _, loot.Settings.GlobalLootOn = ImGui.MenuItem("GlobalLootOn", nil, loot.Settings.GlobalLootOn)
                 if _ then loot.writeSettings() end
-                _, loot.CombatLooting = ImGui.MenuItem("CombatLooting", nil, loot.Settings.CombatLooting)
+                _, loot.Settings.CombatLooting = ImGui.MenuItem("CombatLooting", nil, loot.Settings.CombatLooting)
                 if _ then loot.writeSettings() end
-                _, loot.LootNoDrop = ImGui.MenuItem("LootNoDrop", nil, loot.Settings.LootNoDrop)
+                _, loot.Settings.LootNoDrop = ImGui.MenuItem("LootNoDrop", nil, loot.Settings.LootNoDrop)
                 if _ then loot.writeSettings() end
-                _, loot.LootNoDropNew = ImGui.MenuItem("LootNoDropNew", nil, loot.Settings.LootNoDropNew)
+                _, loot.Settings.LootNoDropNew = ImGui.MenuItem("LootNoDropNew", nil, loot.Settings.LootNoDropNew)
                 if _ then loot.writeSettings() end
-                _, loot.LootForage = ImGui.MenuItem("LootForage", nil, loot.Settings.LootForage)
+                _, loot.Settings.LootForage = ImGui.MenuItem("LootForage", nil, loot.Settings.LootForage)
                 if _ then loot.writeSettings() end
-                _, loot.LootQuest = ImGui.MenuItem("LootQuest", nil, loot.Settings.LootQuest)
+                _, loot.Settings.LootQuest = ImGui.MenuItem("LootQuest", nil, loot.Settings.LootQuest)
                 if _ then loot.writeSettings() end
-                _, loot.TributeKeep = ImGui.MenuItem("TributeKeep", nil, loot.Settings.TributeKeep)
+                _, loot.Settings.TributeKeep = ImGui.MenuItem("TributeKeep", nil, loot.Settings.TributeKeep)
                 if _ then loot.writeSettings() end
-                _, loot.BankTradeskills = ImGui.MenuItem("BankTradeskills", nil, loot.Settings.BankTradeskills)
+                _, loot.Settings.BankTradeskills = ImGui.MenuItem("BankTradeskills", nil, loot.Settings.BankTradeskills)
                 if _ then loot.writeSettings() end
-                _, loot.StackableOnly = ImGui.MenuItem("StackableOnly", nil, loot.Settings.StackableOnly)
-                if _ then loot.writeSettings() end
-                ImGui.Separator()
-                _, loot.AlwaysEval = ImGui.MenuItem("AlwaysEval", nil, loot.Settings.AlwaysEval)
-                if _ then loot.writeSettings() end
-                _, loot.AddNewSales = ImGui.MenuItem("AddNewSales", nil, loot.Settings.AddNewSales)
-                if _ then loot.writeSettings() end
-                _, loot.AddNewTributes = ImGui.MenuItem("AddNewTributes", nil, loot.Settings.AddNewTributes)
-                if _ then loot.writeSettings() end
-                _, loot.AutoTag = ImGui.MenuItem("AutoTagSell", nil, loot.Settings.AutoTag)
-                if _ then loot.writeSettings() end
-                _, loot.AutoRestock = ImGui.MenuItem("AutoRestock", nil, loot.Settings.AutoRestock)
+                _, loot.Settings.StackableOnly = ImGui.MenuItem("StackableOnly", nil, loot.Settings.StackableOnly)
                 if _ then loot.writeSettings() end
                 ImGui.Separator()
-                _, loot.DoDestroy = ImGui.MenuItem("DoDestroy", nil, loot.Settings.DoDestroy)
+                _, loot.Settings.AlwaysEval = ImGui.MenuItem("AlwaysEval", nil, loot.Settings.AlwaysEval)
                 if _ then loot.writeSettings() end
-                _, loot.AlwaysDestroy = ImGui.MenuItem("AlwaysDestroy", nil, loot.Settings.AlwaysDestroy)
+                _, loot.Settings.AddNewSales = ImGui.MenuItem("AddNewSales", nil, loot.Settings.AddNewSales)
+                if _ then loot.writeSettings() end
+                _, loot.Settings.AddNewTributes = ImGui.MenuItem("AddNewTributes", nil, loot.Settings.AddNewTributes)
+                if _ then loot.writeSettings() end
+                _, loot.Settings.AutoTag = ImGui.MenuItem("AutoTagSell", nil, loot.Settings.AutoTag)
+                if _ then loot.writeSettings() end
+                _, loot.Settings.AutoRestock = ImGui.MenuItem("AutoRestock", nil, loot.Settings.AutoRestock)
+                if _ then loot.writeSettings() end
+                ImGui.Separator()
+                _, loot.Settings.DoDestroy = ImGui.MenuItem("DoDestroy", nil, loot.Settings.DoDestroy)
+                if _ then loot.writeSettings() end
+                _, loot.Settings.AlwaysDestroy = ImGui.MenuItem("AlwaysDestroy", nil, loot.Settings.AlwaysDestroy)
                 if _ then loot.writeSettings() end
 
                 ImGui.EndMenu()
@@ -1278,11 +1278,6 @@ function loot.guiExport()
                 mq.cmd('/rgl lootreload')
             end
 
-            ImGui.Separator()
-
-            if ImGui.MenuItem('Exit LNS') then
-                loot.Settings.Terminate = true
-            end
 
             ImGui.EndMenu()
         end
