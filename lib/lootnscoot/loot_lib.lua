@@ -224,7 +224,9 @@ local sectionsLetter = {
 --- Returns a table containing all the data from the INI file.
 --@param fileName The name of the INI file to parse. [string]
 --@return The table containing all data from the INI file. [table]
-function loot.load(fileName)
+function loot.load(fileName, sec)
+    if sec == nil then sec = "items" end
+    -- this came from Knightly's LIP.lua
     assert(type(fileName) == 'string', 'Parameter "fileName" must be a string.');
     local file = assert(io.open(fileName, 'r'), 'Error loading file : ' .. fileName);
     local data = {};
@@ -255,10 +257,13 @@ function loot.load(fileName)
                 count = count + 1
                 param = string.format("Spawn%d", count)
             end
-            if section ~= "Settings" and section ~= "GlobalItems" then
+            if sec == "items" then
+                if section ~= "Settings" and section ~= "GlobalItems" then
+                    data[param] = value;
+                end
+            elseif section == sec then
                 data[param] = value;
             end
-            -- data[param] = value;
         end
     end
     file:close();
@@ -327,28 +332,29 @@ function loot.loadSettings()
     shouldLootActions.Destroy = loot.Settings.DoDestroy
     shouldLootActions.Tribute = loot.Settings.TributeKeep
 
-    -- Item Tables
-    local iniBuyItems = mq.TLO.Ini.File(loot.Settings.SettingsFile).Section('BuyItems')
-    if iniBuyItems ~= nil then
-        local buyKeyCount = iniBuyItems.Key.Count()
-        for i = 1, buyKeyCount do
-            local key = iniBuyItems.Key.KeyAtIndex(i)()
-            local value = iniBuyItems.Key(key).Value()
-            loot.BuyItems[key] = value
-        end
-    end
+    -- -- Item Tables
+    -- local iniBuyItems = mq.TLO.Ini.File(loot.Settings.SettingsFile).Section('BuyItems')
+    -- if iniBuyItems ~= nil then
+    --     local buyKeyCount = iniBuyItems.Key.Count()
+    --     for i = 1, buyKeyCount do
+    --         local key = iniBuyItems.Key.KeyAtIndex(i)()
+    --         local value = iniBuyItems.Key(key).Value()
+    --         loot.BuyItems[key] = value
+    --     end
+    -- end
 
-    local globalItemsTmp = mq.TLO.Ini.File(loot.Settings.LootFile).Section('GlobalItems')
-    if globalItemsTmp ~= nil then
-        local globalKeyCount = globalItemsTmp.Key.Count()
-        for i = 1, globalKeyCount do
-            local key = globalItemsTmp.Key.KeyAtIndex(i)()
-            local value = globalItemsTmp.Key(key).Value()
-            loot.GlobalItems[key] = value
-        end
-    end
-
-    loot.NormalItems = loot.load(loot.Settings.LootFile)
+    -- local globalItemsTmp = mq.TLO.Ini.File(loot.Settings.LootFile).Section('GlobalItems')
+    -- if globalItemsTmp ~= nil then
+    --     local globalKeyCount = globalItemsTmp.Key.Count()
+    --     for i = 1, globalKeyCount do
+    --         local key = globalItemsTmp.Key.KeyAtIndex(i)()
+    --         local value = globalItemsTmp.Key(key).Value()
+    --         loot.GlobalItems[key] = value
+    --     end
+    -- end
+    loot.GlobalItems = loot.load(loot.Settings.LootFile, 'GlobalItems')
+    loot.BuyItems = loot.load(loot.Settings.SettingsFile, 'BuyItems')
+    loot.NormalItems = loot.load(loot.Settings.LootFile, 'items')
 end
 
 function loot.checkCursor()
