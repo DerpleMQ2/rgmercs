@@ -3,7 +3,7 @@ local mq              = require('mq')
 local RGMercUtils     = require("utils.rgmercs_utils")
 
 local actions         = {}
-local logDir = mq.TLO.MacroQuest.Path("Logs")()
+local logDir          = mq.TLO.MacroQuest.Path("Logs")()
 local logFileOpened   = nil
 local logLeaderStart  = '\ar[\ax\agRGMercs'
 local logLeaderEnd    = '\ar]\ax\aw >>>'
@@ -109,8 +109,11 @@ local function log(logLevel, output, ...)
 		local consoleText = string.format('[%s] %s', logLevels[logLevel].header, output)
 		RGMercsConsole:AppendText(consoleText)
 	end
-
-	printf('%s\aw:%s \aw<\at%s\aw> \aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, now, callerTracer, logLeaderEnd, output)
+	if mq.TLO.MyChatTlo then
+		mq.TLO.MyChatTlo("RGMercs_" .. logLevel, string.format('[%s] %s', logLevels[logLevel].header, output))
+	else
+		printf('%s\aw:%s \aw<\at%s\aw> \aw(%s\aw)%s \ax%s', logLeaderStart, logLevels[logLevel].header, now, callerTracer, logLeaderEnd, output)
+	end
 end
 
 function actions.GenerateShortcuts()
