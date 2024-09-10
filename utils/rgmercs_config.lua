@@ -337,9 +337,12 @@ function Config:LoadSettings()
         self.settings = config()
     end
 
-    self.settings = RGMercUtils.ResolveDefaults(Config.DefaultConfig, self.settings)
+    local settingsChanged = false
 
-    if needSave then
+    -- Setup Defaults
+    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(Config.DefaultConfig, self.settings)
+
+    if needSave or settingsChanged then
         self:SaveSettings(false)
     end
 

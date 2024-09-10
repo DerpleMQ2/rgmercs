@@ -136,9 +136,15 @@ function Module:LoadSettings()
             .CurLoadedClass)
         return
     end
+    
+    local settingsChanged = false
 
     -- Setup Defaults
-    self.settings = RGMercUtils.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
+    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
+
+    if settingsChanged then
+        self:SaveSettings(false)
+    end
 
     self:RescanLoadout()
 end

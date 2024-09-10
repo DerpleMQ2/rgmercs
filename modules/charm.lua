@@ -70,10 +70,13 @@ function Module:LoadSettings()
 		return
 	end
 
-	-- Setup Defaults
-	local needSave = false
-	self.settings, needSave = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
-	if needSave then self:SaveSettings(false) end
+    local settingsChanged = false
+    -- Setup Defaults
+    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+
+    if settingsChanged then
+        self:SaveSettings(false)
+    end
 end
 
 function Module:GetSettings()
