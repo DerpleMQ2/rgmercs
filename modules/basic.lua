@@ -37,8 +37,13 @@ function Module:LoadSettings()
         self.settings = config()
     end
 
+    local settingsChanged = false
     -- Setup Defaults
-    self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+
+    if settingsChanged then
+        self:SaveSettings(false)
+    end
 end
 
 function Module:GetSettings()
