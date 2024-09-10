@@ -201,6 +201,7 @@ Config.DefaultConfig = {
     ['WaitOnGlobalCooldown'] = { DisplayName = "Wait on Global Cooldown", Category = "Combat", Tooltip = "Wait on Global Cooldown before trying to cast more spells (Should NOT be used by classes that have Weave rotations!)", Default = false, ConfigType = "Advanced", },
     ['FaceTarget']           = { DisplayName = "Face Target in Combat", Category = "Combat", Tooltip = "Periodically /face your target while in combat.", Default = true, ConfigType = "Advanced", },
     ['CastReadyDelayFact']   = { DisplayName = "Cast Ready Delay Factor", Category = "Combat", Tooltip = "Wait Ping * [n] ms before saying we are ready to cast.", Default = 0, Min = 0, Max = 10, ConfigType = "Advanced", },
+    ['SongClipDelayFact']    = { DisplayName = "Song Clip Delay Factor", Category = "Combat", Tooltip = "Wait Ping * [n] ms to allow songs to take effect before singing the next.", Default = 2, Min = 1, Max = 10, ConfigType = "Advanced", },
 
     -- [ Debuffs] --
     ['DebuffMinCon']         = { DisplayName = "Debuff Min Con", Category = "Debuffs", Tooltip = "Min Con to use debuffs on", Default = 4, Min = 1, Max = #Config.Constants.ConColors, Type = "Combo", ComboOptions = Config.Constants.ConColors, },

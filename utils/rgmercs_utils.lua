@@ -611,9 +611,8 @@ end
 
 ---@param target MQSpawn
 ---@param bAllowDead boolean
-function RGMercUtils.WaitCastFinish(target, bAllowDead)
-    local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime.TotalSeconds() or 0) + ((mq.TLO.EverQuest.Ping() * 2 / 100) + 1)) *
-        1000
+function RGMercUtils.WaitCastFinish(target, bAllowDead) --I am not vested in the math below, I simply converted the existing entry from sec to ms
+    local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime() or 0) + ((mq.TLO.EverQuest.Ping() * 20) + 1000))
     local maxWait = maxWaitOrig
 
     while mq.TLO.Me.Casting() do
@@ -796,13 +795,14 @@ function RGMercUtils.UseAA(aaName, targetId)
 
     local cmd = string.format("/alt act %d", aaAbility.ID())
 
-    RGMercsLogger.log_debug("\ayUseAA():Activating AA: '%s' [t: %d]", cmd, aaAbility.Spell.MyCastTime.TotalSeconds())
+    RGMercsLogger.log_debug("\ayUseAA():Activating AA: '%s' [t: %dms]", cmd, aaAbility.Spell.MyCastTime())
     RGMercUtils.DoCmd(cmd)
 
     mq.delay(5)
 
-    if aaAbility.Spell.MyCastTime.TotalSeconds() > 0 then
-        mq.delay(string.format("%ds", aaAbility.Spell.MyCastTime.TotalSeconds()))
+    if aaAbility.Spell.MyCastTime() > 0 then                  --Not having the fudge additional delay was causing the same clipping up until around + 3-400ms for me.
+        local totaldelay = aaAbility.Spell.MyCastTime() + 600 --Magic Number for now until we can do more solid testing and solicit feedback (this may also be rewritten anyways)
+        mq.delay(string.format("%dms", totaldelay))
     end
 
     if oldTargetId > 0 then
@@ -1089,7 +1089,8 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
             retryCount < 0
 
         -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
-        mq.delay(500, function() return me.Casting.ID() == nil end)
+        local clipDelay = mq.TLO.EverQuest.Ping() * RGMercUtils.GetSetting('SongClipDelayFact')
+        mq.delay(clipDelay)
 
         RGMercUtils.DoCmd("/stopsong")
 
