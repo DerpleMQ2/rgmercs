@@ -162,6 +162,7 @@ local loot = {
         RecordData = false,                        -- Enables recording data to report later.
         AutoTag = false,                           -- Automatically tag items to sell if they meet the MinSellPrice
         AutoRestock = false,                       -- Automatically restock items from the BuyItems list when selling
+        AlwaysCoin = true,                         -- Loot Coin from corpses even when bags are full.
         Terminate = true,
     },
 }
@@ -436,10 +437,10 @@ function loot.setupEvents()
     mq.event("CantLoot", "#*#may not loot this corpse#*#", loot.eventCantLoot)
     mq.event("NoSlot", "#*#There are no open slots for the held item in your inventory#*#", loot.eventNoSlot)
     mq.event("Sell", "#*#You receive#*# for the #1#(s)#*#", loot.eventSell)
-    if loot.Settings.LootForage then
-        mq.event("ForageExtras", "Your forage mastery has enabled you to find something else!", loot.eventForage)
-        mq.event("Forage", "You have scrounged up #*#", loot.eventForage)
-    end
+    -- if loot.Settings.LootForage then
+    mq.event("ForageExtras", "Your forage mastery has enabled you to find something else!", loot.eventForage)
+    mq.event("Forage", "You have scrounged up #*#", loot.eventForage)
+    -- end
     mq.event("Novalue", "#*#give you absolutely nothing for the #1#.#*#", loot.eventNovalue)
     mq.event("Tribute", "#*#We graciously accept your #1# as tribute, thank you!#*#", loot.eventTribute)
 end
@@ -599,7 +600,7 @@ function loot.lootItem(index, doWhat, button, qKeep, allItems)
         table.insert(allItems, { Name = itemName, Action = 'Looted', Link = itemLink, Eval = eval, })
     end
     loot.CheckBags()
-    if areFull then loot.report('My bags are full, I can\'t loot anymore! Turning OFF Looting until we sell.') end
+    if areFull then loot.report('My bags are full, I can\'t loot anymore! Turning OFF Looting Items until we sell.') end
 end
 
 function loot.lootCorpse(corpseID)
@@ -609,6 +610,10 @@ function loot.lootCorpse(corpseID)
         mq.cmd('/loot')
         mq.delay(1000, function() return mq.TLO.Window('LootWnd').Open() end)
         if mq.TLO.Window('LootWnd').Open() then break end
+    end
+    if areFull then
+        mq.TLO.Window('LootWnd').DoClose()
+        return
     end
     mq.doevents('CantLoot')
     mq.delay(3000, function() return cantLootID > 0 or mq.TLO.Window('LootWnd').Open() end)
@@ -713,7 +718,7 @@ end
 
 function loot.lootMobs(limit)
     loot.CheckBags()
-    if areFull then return end
+    if areFull and not loot.Settings.AlwqaysCoin then return end
     RGMercsLogger.log_verbose('lootMobs(): Enter lootMobs')
     local deadCount = mq.TLO.SpawnCount(spawnSearch:format('npccorpse', loot.Settings.CorpseRadius))()
     RGMercsLogger.log_verbose('lootMobs(): here are %s corpses in range.', deadCount)
@@ -738,7 +743,6 @@ function loot.lootMobs(limit)
                 corpse.DoTarget()
                 loot.lootCorpse(corpseID)
                 didLoot = true
-                mq.doevents('InventoryFull')
             end
         end
         RGMercsLogger.log_debug('lootMobs(): Done with corpse list.')
@@ -939,6 +943,7 @@ end
 -- FORAGING
 
 function loot.eventForage()
+    if not loot.Settings.LootForage then return end
     RGMercsLogger.log_debug('Enter eventForage')
     -- allow time for item to be on cursor incase message is faster or something?
     mq.delay(1000, function() return mq.TLO.Cursor() end)
