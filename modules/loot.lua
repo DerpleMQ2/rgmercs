@@ -336,7 +336,7 @@ function Module:Render()
 					end
 					self.TempSettings.NeedSave = true
 				end
-
+				self.TempSettings.SearchBuyItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchBuyItems) or nil
 				if ImGui.BeginTable("Buy Items", col, ImGuiTableFlags.Borders) then
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
@@ -359,24 +359,25 @@ function Module:Render()
 								local k = self.TempSettings.SortedBuyItemKeys[index]
 								if k then
 									local v = self.BuyItemsTable[k]
+									if (self.TempSettings.SearchBuyItems == nil or self.TempSettings.SearchBuyItems == "") or k:lower():find(self.TempSettings.SearchBuyItems:lower()) then
+										self.TempSettings.BuyItems[k] = self.TempSettings.BuyItems[k] or { Key = k, Value = v, }
 
-									self.TempSettings.BuyItems[k] = self.TempSettings.BuyItems[k] or { Key = k, Value = v, }
+										ImGui.TableNextColumn()
+										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.BuyItems[k].Key)
 
-									ImGui.TableNextColumn()
-									local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.BuyItems[k].Key)
+										ImGui.TableNextColumn()
+										local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.BuyItems[k].Value)
 
-									ImGui.TableNextColumn()
-									local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.BuyItems[k].Value)
+										if newKey ~= k or newKey == "" then
+											self.TempSettings.UpdatedBuyItems[newKey] = newValue
+											self.TempSettings.DeletedBuyKeys[k] = true
+										else
+											self.TempSettings.UpdatedBuyItems[k] = newValue
+										end
 
-									if newKey ~= k or newKey == "" then
-										self.TempSettings.UpdatedBuyItems[newKey] = newValue
-										self.TempSettings.DeletedBuyKeys[k] = true
-									else
-										self.TempSettings.UpdatedBuyItems[k] = newValue
+										self.TempSettings.BuyItems[k].Key = newKey
+										self.TempSettings.BuyItems[k].Value = newValue
 									end
-
-									self.TempSettings.BuyItems[k].Key = newKey
-									self.TempSettings.BuyItems[k].Value = newValue
 								end
 							end
 						end
@@ -405,7 +406,7 @@ function Module:Render()
 					end
 					self.TempSettings.NeedSave = true
 				end
-
+				self.TempSettings.SearchGlobalItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchGlobalItems) or nil
 				if ImGui.BeginTable("GlobalItems", col, ImGuiTableFlags.Borders) then
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
@@ -428,25 +429,26 @@ function Module:Render()
 								local k = self.TempSettings.SortedGlobalItemKeys[index]
 								if k then
 									local v = self.GlobalItemsTable[k]
+									if (self.TempSettings.SearchGlobalItems == nil or self.TempSettings.SearchGlobalItems == "") or k:lower():find(self.TempSettings.SearchGlobalItems:lower()) then
+										self.TempSettings.GlobalItems[k] = self.TempSettings.GlobalItems[k] or { Key = k, Value = v, }
 
-									self.TempSettings.GlobalItems[k] = self.TempSettings.GlobalItems[k] or { Key = k, Value = v, }
+										ImGui.TableNextColumn()
+										ImGui.SetNextItemWidth(140)
+										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.GlobalItems[k].Key)
 
-									ImGui.TableNextColumn()
-									ImGui.SetNextItemWidth(140)
-									local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.GlobalItems[k].Key)
+										ImGui.TableNextColumn()
+										local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.GlobalItems[k].Value)
 
-									ImGui.TableNextColumn()
-									local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.GlobalItems[k].Value)
+										if newKey ~= k or newKey == "" then
+											self.TempSettings.UpdatedGlobalItems[newKey] = newValue
+											self.TempSettings.DeletedGlobalKeys[k] = true
+										else
+											self.TempSettings.UpdatedGlobalItems[k] = newValue
+										end
 
-									if newKey ~= k or newKey == "" then
-										self.TempSettings.UpdatedGlobalItems[newKey] = newValue
-										self.TempSettings.DeletedGlobalKeys[k] = true
-									else
-										self.TempSettings.UpdatedGlobalItems[k] = newValue
+										self.TempSettings.GlobalItems[k].Key = newKey
+										self.TempSettings.GlobalItems[k].Value = newValue
 									end
-
-									self.TempSettings.GlobalItems[k].Key = newKey
-									self.TempSettings.GlobalItems[k].Value = newValue
 								end
 							end
 						end
@@ -475,7 +477,7 @@ function Module:Render()
 					end
 					self.TempSettings.NeedSave = true
 				end
-
+				self.TempSettings.SearchItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchItems) or nil
 				if ImGui.BeginTable("NormalItems", col, ImGuiTableFlags.Borders) then
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
@@ -498,25 +500,26 @@ function Module:Render()
 								local k = self.TempSettings.SortedNormalItemKeys[index]
 								if k then
 									local v = self.NormalItemsTable[k]
+									if (self.TempSettings.SearchItems == nil or self.TempSettings.SearchItems == "") or k:lower():find(self.TempSettings.SearchItems:lower()) then
+										self.TempSettings.NormalItems[k] = self.TempSettings.NormalItems[k] or { Key = k, Value = v, }
 
-									self.TempSettings.NormalItems[k] = self.TempSettings.NormalItems[k] or { Key = k, Value = v, }
+										ImGui.TableNextColumn()
+										ImGui.SetNextItemWidth(140)
+										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.NormalItems[k].Key)
 
-									ImGui.TableNextColumn()
-									ImGui.SetNextItemWidth(140)
-									local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.NormalItems[k].Key)
+										ImGui.TableNextColumn()
+										local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.NormalItems[k].Value)
 
-									ImGui.TableNextColumn()
-									local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.NormalItems[k].Value)
+										if newKey ~= k or newKey == "" then
+											self.TempSettings.UpdatedNormalItems[newKey] = newValue
+											self.TempSettings.DeletedNormalKeys[k] = true
+										else
+											self.TempSettings.UpdatedNormalItems[k] = newValue
+										end
 
-									if newKey ~= k or newKey == "" then
-										self.TempSettings.UpdatedNormalItems[newKey] = newValue
-										self.TempSettings.DeletedNormalKeys[k] = true
-									else
-										self.TempSettings.UpdatedNormalItems[k] = newValue
+										self.TempSettings.NormalItems[k].Key = newKey
+										self.TempSettings.NormalItems[k].Value = newValue
 									end
-
-									self.TempSettings.NormalItems[k].Key = newKey
-									self.TempSettings.NormalItems[k].Value = newValue
 								end
 							end
 						end
