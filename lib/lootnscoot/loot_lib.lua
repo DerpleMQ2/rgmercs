@@ -187,11 +187,83 @@ local NEVER_SELL = { ['Diamond Coin'] = true, ['Celestial Crest'] = true, ['Gold
 local tmpCmd = loot.GroupChannel or 'dgae'
 loot.BuyItems = {}
 loot.GlobalItems = {}
+loot.NormalItems = {}
+local sectionsLetter = {
+    ['A'] = 'A',
+    ['B'] = 'B',
+    ['C'] = 'C',
+    ['D'] = 'D',
+    ['E'] = 'E',
+    ['F'] = 'F',
+    ['G'] = 'G',
+    ['H'] = 'H',
+    ['I'] = 'I',
+    ['J'] = 'J',
+    ['K'] = 'K',
+    ['L'] = 'L',
+    ['M'] = 'M',
+    ['N'] = 'N',
+    ['O'] = 'O',
+    ['P'] = 'P',
+    ['Q'] = 'Q',
+    ['R'] = 'R',
+    ['S'] = 'S',
+    ['T'] = 'T',
+    ['U'] = 'U',
+    ['V'] = 'V',
+    ['W'] = 'W',
+    ['X'] = 'X',
+    ['Y'] = 'Y',
+    ['Z'] = 'Z',
+}
 -- FORWARD DECLARATIONS
 
 -- local loot.eventForage, loot.eventSell, loot.eventCantLoot, loot.eventTribute, loot.eventNoSlot
 
 -- UTILITIES
+--- Returns a table containing all the data from the INI file.
+--@param fileName The name of the INI file to parse. [string]
+--@return The table containing all data from the INI file. [table]
+function loot.load(fileName)
+    assert(type(fileName) == 'string', 'Parameter "fileName" must be a string.');
+    local file = assert(io.open(fileName, 'r'), 'Error loading file : ' .. fileName);
+    local data = {};
+    local section;
+    local count = 0
+    for line in file:lines() do
+        local tempSection = line:match('^%[([^%[%]]+)%]$');
+        if (tempSection) then
+            -- print(tempSection)
+            section = tonumber(tempSection) and tonumber(tempSection) or tempSection;
+            -- data[section] = data[section] or {};
+            count = 0
+        end
+        local param, value = line:match("^([%w|_'.%s-]+)=%s-(.+)$");
+
+        if (param and value ~= nil) then
+            if (tonumber(value)) then
+                value = tonumber(value);
+            elseif (value == 'true') then
+                value = true;
+            elseif (value == 'false') then
+                value = false;
+            end
+            if (tonumber(param)) then
+                param = tonumber(param);
+            end
+            if string.find(tostring(param), 'Spawn') then
+                count = count + 1
+                param = string.format("Spawn%d", count)
+            end
+            if section ~= "Settings" and section ~= "GlobalItems" then
+                data[param] = value;
+            end
+            -- data[param] = value;
+        end
+    end
+    file:close();
+    return data;
+end
 
 function loot.writeSettings()
     for option, value in pairs(loot.Settings) do
@@ -254,12 +326,16 @@ function loot.loadSettings()
     end
     shouldLootActions.Destroy = loot.Settings.DoDestroy
     shouldLootActions.Tribute = loot.Settings.TributeKeep
+
+    -- Item Tables
     local iniBuyItems = mq.TLO.Ini.File(loot.Settings.SettingsFile).Section('BuyItems')
-    local buyKeyCount = iniBuyItems.Key.Count()
-    for i = 1, buyKeyCount do
-        local key = iniBuyItems.Key.KeyAtIndex(i)()
-        local value = iniBuyItems.Key(key).Value()
-        loot.BuyItems[key] = value
+    if iniBuyItems ~= nil then
+        local buyKeyCount = iniBuyItems.Key.Count()
+        for i = 1, buyKeyCount do
+            local key = iniBuyItems.Key.KeyAtIndex(i)()
+            local value = iniBuyItems.Key(key).Value()
+            loot.BuyItems[key] = value
+        end
     end
 
     local globalItemsTmp = mq.TLO.Ini.File(loot.Settings.LootFile).Section('GlobalItems')
@@ -271,6 +347,8 @@ function loot.loadSettings()
             loot.GlobalItems[key] = value
         end
     end
+
+    loot.NormalItems = loot.load(loot.Settings.LootFile)
 end
 
 function loot.checkCursor()
@@ -309,11 +387,12 @@ function loot.addRule(itemName, section, rule)
     end
     lootData[section][itemName] = rule
     mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, section, itemName, rule)
+    loot.NormalItems[itemName] = rule
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.lookupIniLootRule(section, key)
-    return mq.TLO.Ini.File(loot.Settings.LootFile).Section(section).Key(key).Value()
+    return loot.NormalItems[key] or 'NULL'
 end
 
 -- moved this function up so we can report Quest Items.

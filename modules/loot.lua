@@ -17,6 +17,7 @@ Module.CombatState       = "None"
 Module.TempSettings      = {}
 Module.BuyItemsTable     = {}
 Module.GlobalItemsTable  = {}
+Module.NormalItemsTable  = {}
 
 Module.DefaultConfig     = {
 	['DoLoot']          = { DisplayName = "DoLoot", Category = "Loot N Scoot", Tooltip = "Enables Loot Settings for Looting", Default = true, },
@@ -167,6 +168,7 @@ function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 	mq.pickle(getLootItemsConfigFileName('buy'), self.BuyItemsTable)
 	mq.pickle(getLootItemsConfigFileName('global'), self.GlobalItemsTable)
+	mq.pickle(getLootItemsConfigFileName('normal'), self.NormalItemsTable)
 	self:SortItemTables()
 	if doBroadcast == true then
 		RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
@@ -175,14 +177,13 @@ end
 
 function Module:ModifyLootSettings()
 	if LootnScoot.GlobalItems ~= nil then
-		for k, v in pairs(LootnScoot.GlobalItems) do
-			self.GlobalItemsTable[k] = v
-		end
+		self.GlobalItemsTable = LootnScoot.GlobalItems
 	end
 	if LootnScoot.BuyItems ~= nil then
-		for k, v in pairs(LootnScoot.BuyItems) do
-			self.BuyItemsTable[k] = v
-		end
+		self.BuyItemsTable = LootnScoot.BuyItems
+	end
+	if LootnScoot.NormalItems ~= nil then
+		self.NormalItemsTable = LootnScoot.NormalItems
 	end
 	self:SaveSettings(false)
 end
@@ -205,21 +206,20 @@ function Module:LoadSettings()
 	self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
 
 	if LootnScoot.GlobalItems ~= nil then
-		for k, v in pairs(LootnScoot.GlobalItems) do
-			self.GlobalItemsTable[k] = v
-		end
+		self.GlobalItemsTable = LootnScoot.GlobalItems
 	end
 	if LootnScoot.BuyItems ~= nil then
-		for k, v in pairs(LootnScoot.BuyItems) do
-			self.BuyItemsTable[k] = v
-		end
+		self.BuyItemsTable = LootnScoot.BuyItems
+	end
+	if LootnScoot.NormalItems ~= nil then
+		self.NormalItemsTable = LootnScoot.NormalItems
 	end
 
 	-- lootnscoot tables
 	local buyItems_pickle_path = getLootItemsConfigFileName('buy')
 	local buyItemsLoad, err = loadfile(buyItems_pickle_path)
 	if err or not buyItemsLoad then
-		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load buy items file(%s), creating a new one!",
+		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load BUY ITEMS file(%s), creating a new one!",
 			buyItems_pickle_path)
 		self:SaveSettings(false)
 	else
@@ -229,22 +229,28 @@ function Module:LoadSettings()
 	local globalItems_pickle_path = getLootItemsConfigFileName('global')
 	local globalItemsLoad, err = loadfile(globalItems_pickle_path)
 	if err or not globalItemsLoad then
-		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load global items file(%s), creating a new one!",
+		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load GLOBAL ITEMS file(%s), creating a new one!",
 			globalItems_pickle_path)
 		self:SaveSettings(false)
 	else
 		self.GlobalItemsTable = globalItemsLoad()
 	end
 
+	local normalItems_pickle_path = getLootItemsConfigFileName('normal')
+	local normalItemsLoad, err = loadfile(normalItems_pickle_path)
+	if err or not normalItemsLoad then
+		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load NORMAL ITEMS file(%s), creating a new one!",
+			normalItems_pickle_path)
+		self:SaveSettings(false)
+	else
+		self.NormalItemsTable = normalItemsLoad()
+	end
+
 	--pass settings to lootnscoot lib
 	LootnScoot.Settings = self.settings
-
-	for k, v in pairs(self.BuyItemsTable) do
-		LootnScoot.BuyItems[k] = v
-	end
-	for k, v in pairs(self.GlobalItemsTable) do
-		LootnScoot.GlobalItems[k] = v
-	end
+	LootnScoot.BuyItems = self.BuyItemsTable
+	LootnScoot.GlobalItems = self.GlobalItemsTable
+	LootnScoot.NormalItems = self.NormalItemsTable
 
 	self:SortItemTables()
 end
@@ -261,6 +267,12 @@ function Module:SortItemTables()
 		table.insert(self.TempSettings.SortedBuyItemKeys, k)
 	end
 	table.sort(self.TempSettings.SortedBuyItemKeys, function(a, b) return a < b end)
+
+	self.TempSettings.SortedNormalItemKeys = {}
+	for k in pairs(self.NormalItemsTable) do
+		table.insert(self.TempSettings.SortedNormalItemKeys, k)
+	end
+	table.sort(self.TempSettings.SortedNormalItemKeys, function(a, b) return a < b end)
 end
 
 function Module:GetSettings()
@@ -285,8 +297,6 @@ function Module:Init()
 	RGMercsLogger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	self:LoadSettings()
 	if not self.settings.DoLoot then LootnScoot = nil end
-
-
 	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
@@ -304,12 +314,11 @@ function Module:Render()
 	end
 	if ImGui.CollapsingHeader("Items Tables") then
 		if ImGui.BeginTabBar("Items") then
-			-- Determine the number of columns based on available space
 			local col = math.max(2, math.floor(ImGui.GetContentRegionAvail() / 150))
 			col = col + (col % 2)
 
 			-- Buy Items
-			if ImGui.BeginTabItem("Buy Items") then
+			if ImGui.BeginTabItem("Buy Items##LootModule") then
 				if self.TempSettings.BuyItems == nil then
 					self.TempSettings.BuyItems = {}
 				end
@@ -379,13 +388,12 @@ function Module:Render()
 			end
 
 			-- Global Items
-			if ImGui.BeginTabItem("Global Items") then
+			if ImGui.BeginTabItem("Global Items##LootModule") then
 				if self.TempSettings.GlobalItems == nil then
 					self.TempSettings.GlobalItems = {}
 				end
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
-				-- Display Save Changes button
 				if ImGui.Button("Save Changes##GlobalItems") then
 					-- Apply updates to GlobalItemsTable
 					for k, v in pairs(self.TempSettings.UpdatedGlobalItems) do
@@ -449,76 +457,86 @@ function Module:Render()
 				ImGui.EndTabItem()
 			end
 
+			--Normal Items
+			if ImGui.BeginTabItem("Normal Items##LootModule") then
+				if self.TempSettings.NormalItems == nil then
+					self.TempSettings.NormalItems = {}
+				end
+				ImGui.Text("Delete the Item Name to remove it from the table")
 
-			-- All Items
-			-- if ImGui.BeginTabItem("All Items") then
-			-- 	if self.TempSettings.BuyItems == nil then
-			-- 		self.TempSettings.BuyItems = {}
-			-- 	end
-			-- 	ImGui.Text("Delete the Item Name to remove it from the table")
+				if ImGui.Button("Save Changes##NormalItems") then
+					for k, v in pairs(self.TempSettings.UpdatedNormalItems) do
+						self.NormalItemsTable[k] = v
+					end
+					for k in pairs(self.TempSettings.DeletedNormalKeys) do
+						self.NormalItemsTable[k] = nil
+					end
+					self.TempSettings.NeedSave = true
+				end
 
-			-- 	if ImGui.BeginTable("Buy Items", col, ImGuiTableFlags.Borders) then
-			-- 		for i = 1, col / 2 do
-			-- 			ImGui.TableSetupColumn("Item")
-			-- 			ImGui.TableSetupColumn("Qty")
-			-- 		end
-			-- 		ImGui.TableHeadersRow()
+				if ImGui.BeginTable("Normal Items", col, ImGuiTableFlags.Borders) then
+					for i = 1, col / 2 do
+						ImGui.TableSetupColumn("Item")
+						ImGui.TableSetupColumn("Qty")
+					end
+					ImGui.TableHeadersRow()
 
-			-- 		local numDisplayColumns = col / 2
+					local numDisplayColumns = col / 2
 
-			-- 		if self.BuyItemsTable ~= nil and self.TempSettings.SortedBuyItemKeys ~= nil then
-			-- 			local updatedItems = {}
-			-- 			local deletedKeys = {}
+					if self.NormalItemsTable ~= nil and self.TempSettings.SortedNormalItemKeys ~= nil then
+						local updatedItems = {}
+						local deletedKeys = {}
 
-			-- 			local numItems = #self.TempSettings.SortedBuyItemKeys
-			-- 			local numRows = math.ceil(numItems / numDisplayColumns)
+						local numItems = #self.TempSettings.SortedNormalItemKeys
+						local numRows = math.ceil(numItems / numDisplayColumns)
 
-			-- 			for row = 1, numRows do
-			-- 				for column = 0, numDisplayColumns - 1 do
-			-- 					local index = row + column * numRows
-			-- 					local k = self.TempSettings.SortedBuyItemKeys[index]
-			-- 					if k then
-			-- 						local v = self.BuyItemsTable[k]
+						for row = 1, numRows do
+							for column = 0, numDisplayColumns - 1 do
+								local index = row + column * numRows
+								local k = self.TempSettings.SortedNormalItemKeys[index]
+								if k then
+									local v = self.NormalItemsTable[k]
 
-			-- 						self.TempSettings.BuyItems[k] = self.TempSettings.BuyItems[k] or { Key = k, Value = v, }
+									self.TempSettings.NormalItems[k] = self.TempSettings.NormalItems[k] or { Key = k, Value = v, }
 
-			-- 						ImGui.TableNextColumn()
-			-- 						local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.BuyItems[k].Key)
+									ImGui.TableNextColumn()
+									local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.NormalItems[k].Key)
 
-			-- 						ImGui.TableNextColumn()
-			-- 						local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.BuyItems[k].Value)
+									ImGui.TableNextColumn()
+									local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.NormalItems[k].Value)
 
-			-- 						if newKey ~= k or newKey == "" then
-			-- 							updatedItems[newKey] = newValue
-			-- 							deletedKeys[k] = true
-			-- 							self.TempSettings.NeedSave = true
-			-- 						else
-			-- 							updatedItems[k] = newValue
-			-- 						end
+									if newKey ~= k or newKey == "" then
+										updatedItems[newKey] = newValue
+										deletedKeys[k] = true
+										self.TempSettings.NeedSave = true
+									else
+										updatedItems[k] = newValue
+									end
 
-			-- 						if newValue ~= v then
-			-- 							self.TempSettings.NeedSave = true
-			-- 						end
+									if newValue ~= v then
+										self.TempSettings.NeedSave = true
+									end
 
-			-- 						self.TempSettings.BuyItems[k].Key = newKey
-			-- 						self.TempSettings.BuyItems[k].Value = newValue
-			-- 					end
-			-- 				end
-			-- 			end
+									self.TempSettings.NormalItems[k].Key = newKey
+									self.TempSettings.NormalItems[k].Value = newValue
+								end
+							end
+						end
 
-			-- 			for k, v in pairs(updatedItems) do
-			-- 				self.BuyItemsTable[k] = v
-			-- 			end
+						for k, v in pairs(updatedItems) do
+							self.NormalItemsTable[k] = v
+						end
 
-			-- 			for k in pairs(deletedKeys) do
-			-- 				self.BuyItemsTable[k] = nil
-			-- 			end
-			-- 		end
+						for k in pairs(deletedKeys) do
+							self.NormalItemsTable[k] = nil
+						end
+					end
 
-			-- 		ImGui.EndTable()
-			-- 	end
-			-- 	ImGui.EndTabItem()
-			-- end
+					ImGui.EndTable()
+				end
+				ImGui.EndTabItem()
+			end
+
 			ImGui.EndTabBar()
 		end
 	end
@@ -607,10 +625,12 @@ function Module:GiveTime(combat_state)
 		self.TempSettings.NeedSave = false
 		LootnScoot.Settings = {}
 		LootnScoot.BuyItems = {}
+		LootnScoot.NormalItems = {}
 		LootnScoot.GlobalItems = {}
 		LootnScoot.Settings = self.settings
 		LootnScoot.BuyItems = self.BuyItemsTable
 		LootnScoot.GlobalItems = self.GlobalItemsTable
+		LootnScoot.NormalItems = self.NormalItemsTable
 		LootnScoot.writeSettings()
 		self:SortItemTables()
 	end
