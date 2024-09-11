@@ -21,7 +21,6 @@ Module.NormalItemsTable  = {}
 
 Module.DefaultConfig     = {
 	['DoLoot']          = { DisplayName = "DoLoot", Category = "Loot N Scoot", Tooltip = "Enables Loot Settings for Looting", Default = true, },
-	['AutoLoot']        = { DisplayName = "Auto Loot", Category = "Loot N Scoot", Tooltip = "Auto Loot During Downtime.", Default = true, },
 
 	--- Looted Settings
 	['LootFile']        = { DisplayName = 'Loot File', Category = 'Loot Settings', Tooltip = "Where your loot.ini file lives", Default = LootnScoot.Settings.LootFile, },
@@ -450,28 +449,30 @@ function Module:Render()
 				ImGui.SeparatorText("Add New Item##GlobalItems")
 				if ImGui.BeginTable("AddItem##GlobalItems", 3, ImGuiTableFlags.Borders) then
 					ImGui.TableSetupColumn("Item")
-					ImGui.TableSetupColumn("Qty")
+					ImGui.TableSetupColumn("Value")
 					ImGui.TableSetupColumn("Add")
 					ImGui.TableHeadersRow()
 					ImGui.TableNextColumn()
 
 					ImGui.SetNextItemWidth(150)
-					self.TempSettings.NewGlobalItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewGlobalItem) or nil
+					self.TempSettings.NewGlobalItem = ImGui.InputText("New Item##GlobalItems", self.TempSettings.NewGlobalItem) or nil
 
 					ImGui.TableNextColumn()
 					ImGui.SetNextItemWidth(120)
 
-					self.TempSettings.NewGlobalQty = ImGui.InputInt("New Qty##BuyItems", self.TempSettings.NewGlobalQty, 1, 10) or nil
-					if self.TempSettings.NewGlobalQty > 1000 then self.TempSettings.NewGlobalQty = 1000 end
+					self.TempSettings.NewGlobalValue = ImGui.InputTextWithHint("New Value##GlobalItems", "Quest, Keep, Sell, Tribute, Bank, Ignore, Destroy",
+						self.TempSettings.NewGlobalValue) or nil
 
 					ImGui.TableNextColumn()
 
-					if ImGui.Button("Add Item##BuyItems") then
-						self.BuyItemsTable[self.TempSettings.NewGlobalItem] = self.TempSettings.NewGlobalQty
-						LootnScoot.setBuyItem(self.TempSettings.NewBuyItem, self.TempSettings.NewGlobalQty)
-						self.TempSettings.NeedSave = true
-						self.TempSettings.NewGlobalItem = ""
-						self.TempSettings.NewGlobalQty = 1
+					if ImGui.Button("Add Item##GlobalItems") then
+						if self.TempSettings.NewGlobalValue ~= "" and self.TempSettings.NewGlobalValue ~= "" then
+							self.GlobalItemsTable[self.TempSettings.NewGlobalItem] = self.TempSettings.NewGlobalValue
+							LootnScoot.setGlobalItem(self.TempSettings.NewBuyItem, self.TempSettings.NewGlobalValue)
+							self.TempSettings.NeedSave = true
+							self.TempSettings.NewGlobalItem = ""
+							self.TempSettings.NewGlobalValue = ""
+						end
 					end
 					ImGui.EndTable()
 				end
@@ -685,12 +686,11 @@ function Module:GiveTime(combat_state)
 	if self.TempSettings.NeedSave then
 		self:SaveSettings(false)
 		self.TempSettings.NeedSave = false
-		LootnScoot.writeSettings()
 		self:SortItemTables()
 	end
 	-- Main Module logic goes here.
 	if self.CombatState ~= combat_state and combat_state == "Downtime" then
-		if LootnScoot ~= nil and self.settings.DoLoot and self.settings.AutoLoot then
+		if LootnScoot ~= nil and self.settings.DoLoot and self.settings.DoLoot then
 			LootnScoot.lootMobs()
 		end
 	end
