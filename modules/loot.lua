@@ -163,6 +163,7 @@ local function getLootItemsConfigFileName(type)
 end
 
 function Module:SaveSettings(doBroadcast)
+	if not LootnScoot then return end
 	mq.pickle(getConfigFileName(), self.settings)
 	mq.pickle(getLootItemsConfigFileName('buy'), self.BuyItemsTable)
 	mq.pickle(getLootItemsConfigFileName('global'), self.GlobalItemsTable)
@@ -178,6 +179,7 @@ function Module:SaveSettings(doBroadcast)
 end
 
 function Module:ModifyLootSettings()
+	if not LootnScoot then return end
 	if LootnScoot.Settings ~= nil then
 		self.settings = LootnScoot.Settings
 	end
@@ -194,6 +196,7 @@ function Module:ModifyLootSettings()
 end
 
 function Module:LoadSettings()
+	if not LootnScoot then return end
 	RGMercsLogger.log_debug("\ay[LOOT]: \atLootnScoot EMU, Loot Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 
@@ -320,7 +323,7 @@ function Module:Init()
 end
 
 function Module:ShouldRender()
-	return RGMercConfig.Globals.BuildType == "Emu"
+	return RGMercUtils.OnEMU()
 end
 
 function Module:Render()
@@ -693,6 +696,7 @@ function Module:LootReload()
 end
 
 function Module:GiveTime(combat_state)
+	if not LootnScoot then return end
 	if self.TempSettings.NeedSave then
 		self:SaveSettings(false)
 		self.TempSettings.NeedSave = false
