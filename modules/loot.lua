@@ -12,7 +12,6 @@ Module.settings          = {}
 Module.DefaultCategories = {}
 
 Module.ModuleLoaded      = false
-Module.CombatState       = "None"
 
 Module.TempSettings      = {}
 Module.BuyItemsTable     = {}
@@ -21,7 +20,6 @@ Module.NormalItemsTable  = {}
 
 Module.DefaultConfig     = {
 	['DoLoot']          = { DisplayName = "DoLoot", Category = "Loot N Scoot", Tooltip = "Enables Loot Settings for Looting", Default = true, },
-	['AutoLoot']        = { DisplayName = "Auto Loot", Category = "Loot N Scoot", Tooltip = "Auto Loot During Downtime.", Default = true, },
 
 	--- Looted Settings
 	['LootFile']        = { DisplayName = 'Loot File', Category = 'Loot Settings', Tooltip = "Where your loot.ini file lives", Default = LootnScoot.Settings.LootFile, },
@@ -303,10 +301,15 @@ function Module.New()
 end
 
 function Module:Init()
-	local path = mq.luaDir
-	RGMercsLogger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
+	self.TempSettings.NeedSave = LootnScoot.init()
+
 	self:LoadSettings()
-	if not self.settings.DoLoot then LootnScoot = nil end
+	if not self.settings.DoLoot or not RGMercUtils.OnEMU() then
+		LootnScoot = nil
+	else
+		RGMercsLogger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
+	end
+
 	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
@@ -689,8 +692,8 @@ function Module:GiveTime(combat_state)
 		self:SortItemTables()
 	end
 	-- Main Module logic goes here.
-	if self.CombatState ~= combat_state and combat_state == "Downtime" then
-		if LootnScoot ~= nil and self.settings.DoLoot and self.settings.AutoLoot then
+	if RGMercUtils.GetXTHaterCount() == 0 or RGMercUtils.GetSetting('CombatLooting') then
+		if LootnScoot ~= nil and self.settings.DoLoot then
 			LootnScoot.lootMobs()
 		end
 	end

@@ -257,16 +257,17 @@ function loot.load(fileName, sec)
                 count = count + 1
                 param = string.format("Spawn%d", count)
             end
-            if sec == "items" then
+            if sec == "items" and param ~= nil then
                 if section ~= "Settings" and section ~= "GlobalItems" then
                     data[param] = value;
                 end
-            elseif section == sec then
+            elseif section == sec and param ~= nil then
                 data[param] = value;
             end
         end
     end
     file:close();
+    RGMercsLogger.log_debug("Loot::load()")
     return data;
 end
 
@@ -289,6 +290,7 @@ function loot.writeSettings()
             loot.GlobalItems[option] = value
         end
     end
+    RGMercsLogger.log_debug("Loot::writeSettings()")
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
@@ -323,7 +325,8 @@ function loot.loadSettings()
     loot.GlobalItems = loot.load(loot.Settings.LootFile, 'GlobalItems')
     loot.BuyItems = loot.load(loot.Settings.SettingsFile, 'BuyItems')
     loot.NormalItems = loot.load(loot.Settings.LootFile, 'items')
-    if needSave then loot.writeSettings() end
+
+    return needSave
 end
 
 function loot.checkCursor()
@@ -515,7 +518,10 @@ function loot.commandHandler(...)
             doBuy = true
         elseif args[1] == 'reload' then
             lootData = {}
-            loot.loadSettings()
+            local needSave = loot.loadSettings()
+            if needSave then
+                loot.writeSettings()
+            end
             if loot.guiLoot ~= nil then
                 loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors,
                     'lootnscoot')
@@ -1278,18 +1284,20 @@ end
 
 function loot.init()
     local iniFile = mq.TLO.Ini.File(SettingsFile)
+    local needsSave = false
     if not (iniFile.Exists() and iniFile.Section('Settings').Exists()) then
-        loot.writeSettings()
+        needsSave = true
     else
-        loot.loadSettings()
+        needsSave = loot.loadSettings()
     end
     loot.CheckBags()
     loot.setupEvents()
     loot.setupBinds()
     loot.guiExport()
-end
 
-loot.init()
+    RGMercsLogger.log_debug("Loot::init() SaveRequired: %s", needsSave and "TRUE" or "FALSE")
+    return needsSave
+end
 
 if loot.guiLoot ~= nil then
     loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot')
