@@ -308,7 +308,14 @@ function loot.split(input, sep)
 end
 
 function loot.loadSettings()
-    loot.Settings = loot.load(SettingsFile, 'Settings')
+    local tmpSettings = loot.load(SettingsFile, 'Settings')
+    local needSave = false
+    for k, v in pairs(loot.Settings) do
+        if tmpSettings[k] == nil then
+            tmpSettings[k] = loot.Settings[k]
+            needSave = true
+        end
+    end
     tmpCmd = loot.Settings.GroupChannel or 'dgae'
     if tmpCmd == string.find(tmpCmd, 'dg') then
         tmpCmd = '/' .. tmpCmd
@@ -317,10 +324,10 @@ function loot.loadSettings()
     end
     shouldLootActions.Destroy = loot.Settings.DoDestroy
     shouldLootActions.Tribute = loot.Settings.TributeKeep
-
     loot.GlobalItems = loot.load(loot.Settings.LootFile, 'GlobalItems')
     loot.BuyItems = loot.load(loot.Settings.SettingsFile, 'BuyItems')
     loot.NormalItems = loot.load(loot.Settings.LootFile, 'items')
+    if needSave then loot.writeSettings() end
 end
 
 function loot.checkCursor()
