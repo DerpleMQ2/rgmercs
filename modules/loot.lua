@@ -230,6 +230,7 @@ function Module:LoadSettings()
 			buyItems_pickle_path)
 		self:SaveSettings(false)
 	else
+		self.BuyItemsTable = {}
 		self.BuyItemsTable = buyItemsLoad()
 	end
 
@@ -240,6 +241,7 @@ function Module:LoadSettings()
 			globalItems_pickle_path)
 		self:SaveSettings(false)
 	else
+		self.GlobalItemsTable = {}
 		self.GlobalItemsTable = globalItemsLoad()
 	end
 
@@ -250,6 +252,7 @@ function Module:LoadSettings()
 			normalItems_pickle_path)
 		self:SaveSettings(false)
 	else
+		self.NormalItemsTable = {}
 		self.NormalItemsTable = normalItemsLoad()
 	end
 
@@ -333,7 +336,9 @@ function Module:Render()
 
 				if ImGui.Button("Save Changes##BuyItems") then
 					for k, v in pairs(self.TempSettings.UpdatedBuyItems) do
-						self.BuyItemsTable[k] = v
+						if k ~= "" then
+							self.BuyItemsTable[k] = v
+						end
 					end
 					-- Remove deleted items
 					for k in pairs(self.TempSettings.DeletedBuyKeys) do
@@ -342,6 +347,35 @@ function Module:Render()
 					self.TempSettings.NeedSave = true
 				end
 				self.TempSettings.SearchBuyItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchBuyItems) or nil
+				ImGui.SeparatorText("Add New Item")
+				if ImGui.BeginTable("AddItem", 3, ImGuiTableFlags.Borders) then
+					ImGui.TableSetupColumn("Item")
+					ImGui.TableSetupColumn("Qty")
+					ImGui.TableSetupColumn("Add")
+					ImGui.TableHeadersRow()
+					ImGui.TableNextColumn()
+
+					ImGui.SetNextItemWidth(150)
+					self.TempSettings.NewBuyItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewBuyItem) or nil
+
+					ImGui.TableNextColumn()
+					ImGui.SetNextItemWidth(80)
+
+					self.TempSettings.NewBuyQty = ImGui.InputInt("New Qty##BuyItems", self.TempSettings.NewBuyQty, 1, 10) or nil
+					if self.TempSettings.NewBuyQty > 1000 then self.TempSettings.NewBuyQty = 1000 end
+
+					ImGui.TableNextColumn()
+
+					if ImGui.Button("Add Item##BuyItems") then
+						self.BuyItemsTable[self.TempSettings.NewBuyItem] = self.TempSettings.NewBuyQty
+						LootnScoot.setBuyItem(self.TempSettings.NewBuyItem, self.TempSettings.NewBuyQty)
+						self.TempSettings.NeedSave = true
+						self.TempSettings.NewBuyItem = ""
+						self.TempSettings.NewBuyQty = 1
+					end
+					ImGui.EndTable()
+				end
+				ImGui.SeparatorText("Buy Items Table")
 				if ImGui.BeginTable("Buy Items", col, ImGuiTableFlags.Borders) then
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
@@ -402,7 +436,9 @@ function Module:Render()
 
 				if ImGui.Button("Save Changes##GlobalItems") then
 					for k, v in pairs(self.TempSettings.UpdatedGlobalItems) do
-						self.GlobalItemsTable[k] = v
+						if k ~= "" then
+							self.GlobalItemsTable[k] = v
+						end
 					end
 
 					for k in pairs(self.TempSettings.DeletedGlobalKeys) do
@@ -411,6 +447,35 @@ function Module:Render()
 					self.TempSettings.NeedSave = true
 				end
 				self.TempSettings.SearchGlobalItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchGlobalItems) or nil
+				ImGui.SeparatorText("Add New Item##GlobalItems")
+				if ImGui.BeginTable("AddItem##GlobalItems", 3, ImGuiTableFlags.Borders) then
+					ImGui.TableSetupColumn("Item")
+					ImGui.TableSetupColumn("Qty")
+					ImGui.TableSetupColumn("Add")
+					ImGui.TableHeadersRow()
+					ImGui.TableNextColumn()
+
+					ImGui.SetNextItemWidth(150)
+					self.TempSettings.NewGlobalItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewGlobalItem) or nil
+
+					ImGui.TableNextColumn()
+					ImGui.SetNextItemWidth(80)
+
+					self.TempSettings.NewGlobalQty = ImGui.InputInt("New Qty##BuyItems", self.TempSettings.NewGlobalQty, 1, 10) or nil
+					if self.TempSettings.NewGlobalQty > 1000 then self.TempSettings.NewGlobalQty = 1000 end
+
+					ImGui.TableNextColumn()
+
+					if ImGui.Button("Add Item##BuyItems") then
+						self.BuyItemsTable[self.TempSettings.NewGlobalItem] = self.TempSettings.NewGlobalQty
+						LootnScoot.setBuyItem(self.TempSettings.NewBuyItem, self.TempSettings.NewGlobalQty)
+						self.TempSettings.NeedSave = true
+						self.TempSettings.NewGlobalItem = ""
+						self.TempSettings.NewGlobalQty = 1
+					end
+					ImGui.EndTable()
+				end
+				ImGui.SeparatorText("Global Items Table")
 				if ImGui.BeginTable("GlobalItems", col, ImGuiTableFlags.Borders) then
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
@@ -460,6 +525,7 @@ function Module:Render()
 
 					ImGui.EndTable()
 				end
+
 				ImGui.EndTabItem()
 			end
 
@@ -619,14 +685,6 @@ function Module:GiveTime(combat_state)
 	if self.TempSettings.NeedSave then
 		self:SaveSettings(false)
 		self.TempSettings.NeedSave = false
-		LootnScoot.Settings = {}
-		LootnScoot.BuyItems = {}
-		LootnScoot.NormalItems = {}
-		LootnScoot.GlobalItems = {}
-		LootnScoot.Settings = self.settings
-		LootnScoot.BuyItems = self.BuyItemsTable
-		LootnScoot.GlobalItems = self.GlobalItemsTable
-		LootnScoot.NormalItems = self.NormalItemsTable
 		LootnScoot.writeSettings()
 		self:SortItemTables()
 	end

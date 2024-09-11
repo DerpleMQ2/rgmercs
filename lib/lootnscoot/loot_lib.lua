@@ -274,25 +274,21 @@ function loot.writeSettings()
     for option, value in pairs(loot.Settings) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
-            mq.cmdf('/ini "%s" "%s" "%s" "%s"', SettingsFile, 'Settings', option, value)
+            loot.Settings[option] = value
         end
     end
     for option, value in pairs(loot.BuyItems) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
-            mq.cmdf('/ini "%s" "%s" "%s" "%s"', SettingsFile, 'BuyItems', option, value)
+            loot.BuyItems[option] = value
         end
     end
     for option, value in pairs(loot.GlobalItems) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
-            mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, 'GlobalItems', option, value)
+            loot.GlobalItems[option] = value
         end
     end
-    loot.Settings = loot.load(SettingsFile, 'Settings')
-    loot.GlobalItems = loot.load(loot.Settings.LootFile, 'GlobalItems')
-    loot.BuyItems = loot.load(loot.Settings.SettingsFile, 'BuyItems')
-    loot.NormalItems = loot.load(loot.Settings.LootFile, 'items')
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
@@ -365,7 +361,6 @@ function loot.addRule(itemName, section, rule)
         lootData[section] = {}
     end
     lootData[section][itemName] = rule
-    mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, section, itemName, rule)
     loot.NormalItems[itemName] = rule
     if section == 'GlobalItems' then
         loot.GlobalItems[itemName] = rule
@@ -507,6 +502,9 @@ function loot.setupEvents()
 end
 
 -- BINDS
+function loot.setBuyItem(item, qty)
+    loot.BuyItems[item] = qty
+end
 
 function loot.commandHandler(...)
     local args = { ..., }
@@ -557,10 +555,10 @@ function loot.commandHandler(...)
             loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor():sub(1, 1), 'Quest|' .. args[2])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayQuest|%s\ax", mq.TLO.Cursor(), args[2])
         elseif args[1] == 'buy' and mq.TLO.Cursor() then
-            mq.cmdf('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, mq.TLO.Cursor(), args[2])
+            loot.BuyItems[mq.TLO.Cursor()] = args[2]
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", mq.TLO.Cursor(), args[2])
         elseif args[1] == 'globalitem' and validActions[args[2]] and mq.TLO.Cursor() then
-            loot.addRule(mq.TLO.Cursor(), 'GlobalItems', validActions[args[2]])
+            loot.GlobalItems[mq.TLO.Cursor()] = validActions[args[2]]
             RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", mq.TLO.Cursor(), validActions[args[2]])
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
             loot.addRule(args[2], args[2]:sub(1, 1), validActions[args[1]])
@@ -574,7 +572,7 @@ function loot.commandHandler(...)
             loot.addRule(args[3], 'GlobalItems', validActions[args[2]])
             RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", args[3], validActions[args[2]])
         elseif args[1] == 'buy' then
-            mq.cmdf('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, args[2], args[3])
+            loot.BuyItems[args[2]] = args[3]
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", args[2], args[3])
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
             loot.addRule(args[2], args[2]:sub(1, 1), validActions[args[1]] .. '|' .. args[3])
@@ -825,7 +823,7 @@ function loot.eventSell(_, itemName)
         RGMercsLogger.log_info(string.format('Setting %s to Sell', itemName))
         if not lootData[firstLetter] then lootData[firstLetter] = {} end
         lootData[firstLetter][itemName] = 'Sell'
-        mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, firstLetter, itemName, 'Sell')
+        loot.NormalItems[itemName] = 'Sell'
     end
 end
 
@@ -922,7 +920,7 @@ function loot.eventTribute(line, itemName)
         RGMercsLogger.log_info(string.format('Setting %s to Tribute', itemName))
         if not lootData[firstLetter] then lootData[firstLetter] = {} end
         lootData[firstLetter][itemName] = 'Tribute'
-        mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, firstLetter, itemName, 'Tribute')
+        loot.NormalItems[itemName] = 'Tribute'
     end
 end
 
