@@ -68,6 +68,9 @@ Module.DefaultConfig     = {
     ['CampHard']          = { DisplayName = "Camp Hard", Category = "Camp", Tooltip = "Return to Camp Loc Everytime", Default = false, },
     ['MaintainCampfire']  = { DisplayName = "Maintain Campfire", Category = "Camp", Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;", Type = "Combo", ComboOptions = Module.Constants.CampfireTypes, Default = 36, Min = 1, Max = #Module.Constants.CampfireTypes, },
     ['RequireLoS']        = { DisplayName = "Require LOS", Category = "Chase", Tooltip = "Require LOS when using /nav", Default = RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()), },
+    ['PriorityFollow']    = { DisplayName = "Prioritize Follow", Category = "Chase", Tooltip = "If enabled you will follow more aggresively at the cost of rotations.", Default = false, ConfigType = "Advanced", },
+    ['DoFellow']          = { DisplayName = "Enable Fellowship Insignia", Category = "Camp", Tooltip = "Use fellowship insignia automatically.", Default = false, ConfigType = "Advanced", },
+    ['RunMovePaused']     = { DisplayName = "Run Movement on Pause", Category = "Chase", Tooltip = "Runs the Movement/Chase module even if the Main loop is paused", Default = false, ConfigType = "Advanced", },
 }
 
 Module.CommandHandlers   = {

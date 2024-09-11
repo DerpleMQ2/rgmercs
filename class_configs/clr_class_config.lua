@@ -1348,6 +1348,8 @@ local _ClassConfig = {
         ['DoCure']          = { DisplayName = "Cast Cure SPells", Category = "Spells and Abilities", Tooltip = "Use Cure Spells", Default = true, },
         ['DoProm']          = { DisplayName = "Cast Promised Heal Spells", Category = "Spells and Abilities", Tooltip = "Use Prom Spells", Default = true, },
         ['DoClutchHeal']    = { DisplayName = "Do Clutch Heal", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
+        ['CompHealPoint']   = { DisplayName = "Comp Heal Point", Category = "Spells and Abilities", Tooltip = "Min PctHPs to use Complete Healing.", Default = 65, Min = 1, Max = 99, },
+        ['RemedyHealPoint'] = { DisplayName = "Remedy Heal Point", Category = "Spells and Abilities", Tooltip = "Min PctHPs to use Remedy Heals.", Default = 80, Min = 1, Max = 99, },
         ['DoAutoWard']      = { DisplayName = "Do Auto Ward", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
         ['ClutchHealPoint'] = { DisplayName = "Clutch Heal Point", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = 34, Min = 1, Max = 99, },
         ['DoNuke']          = { DisplayName = "Do Nuke", Category = "Spells and Abilities", Tooltip = "Use Spells", Default = true, },
