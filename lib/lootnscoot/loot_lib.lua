@@ -289,6 +289,10 @@ function loot.writeSettings()
             mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, 'GlobalItems', option, value)
         end
     end
+    loot.Settings = loot.load(SettingsFile, 'Settings')
+    loot.GlobalItems = loot.load(loot.Settings.LootFile, 'GlobalItems')
+    loot.BuyItems = loot.load(loot.Settings.SettingsFile, 'BuyItems')
+    loot.NormalItems = loot.load(loot.Settings.LootFile, 'items')
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
@@ -304,25 +308,7 @@ function loot.split(input, sep)
 end
 
 function loot.loadSettings()
-    local iniSettings = mq.TLO.Ini.File(SettingsFile).Section('Settings')
-    local keyCount = iniSettings.Key.Count()
-    for i = 1, keyCount do
-        local key = iniSettings.Key.KeyAtIndex(i)()
-        local value = iniSettings.Key(key).Value()
-        if key == 'Version' then
-            loot.Settings[key] = tostring(value)
-        elseif value == 'true' or value == 'false' then
-            loot.Settings[key] = value == 'true' and true or false
-        elseif tonumber(value) then
-            loot.Settings[key] = tonumber(value)
-        else
-            loot.Settings[key] = value
-        end
-    end
-    if tonumber(loot.Settings.Version) < tonumber(version) then
-        loot.Settings.Version = tostring(version)
-        loot.writeSettings()
-    end
+    loot.Settings = loot.load(SettingsFile, 'Settings')
     tmpCmd = loot.Settings.GroupChannel or 'dgae'
     if tmpCmd == string.find(tmpCmd, 'dg') then
         tmpCmd = '/' .. tmpCmd
@@ -594,7 +580,6 @@ function loot.commandHandler(...)
         end
     end
     loot.writeSettings()
-    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.setupBinds()

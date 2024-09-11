@@ -173,10 +173,13 @@ function Module:SaveSettings(doBroadcast)
 	if doBroadcast == true then
 		RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
 	end
+	LootnScoot.Settings = self.settings
+	LootnScoot.BuyItems = self.BuyItemsTable
+	LootnScoot.GlobalItems = self.GlobalItemsTable
+	LootnScoot.NormalItems = self.NormalItemsTable
 end
 
-function Module:ModifyLootSettings(saved)
-	if saved == nil then saved = false end
+function Module:ModifyLootSettings()
 	if LootnScoot.Settings ~= nil then
 		self.settings = LootnScoot.Settings
 	end
@@ -189,7 +192,7 @@ function Module:ModifyLootSettings(saved)
 	if LootnScoot.NormalItems ~= nil then
 		self.NormalItemsTable = LootnScoot.NormalItems
 	end
-	if not saved then self:SaveSettings(false) end
+	self:SaveSettings(false)
 end
 
 function Module:LoadSettings()
