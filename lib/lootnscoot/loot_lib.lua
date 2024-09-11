@@ -275,18 +275,21 @@ function loot.writeSettings()
     for option, value in pairs(loot.Settings) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
+            mq.cmdf('/ini "%s" "%s" "%s" "%s"', SettingsFile, 'Settings', option, value)
             loot.Settings[option] = value
         end
     end
     for option, value in pairs(loot.BuyItems) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
+            mq.cmdf('/ini "%s" "%s" "%s" "%s"', SettingsFile, 'BuyItems', option, value)
             loot.BuyItems[option] = value
         end
     end
     for option, value in pairs(loot.GlobalItems) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
+            mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, 'GlobalItems', option, value)
             loot.GlobalItems[option] = value
         end
     end
@@ -368,6 +371,7 @@ function loot.addRule(itemName, section, rule)
     if section == 'GlobalItems' then
         loot.GlobalItems[itemName] = rule
     end
+    mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, section, itemName, rule)
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
@@ -507,6 +511,12 @@ end
 -- BINDS
 function loot.setBuyItem(item, qty)
     loot.BuyItems[item] = qty
+    mq.cmdf('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, item, qty)
+end
+
+function loot.setGlobalItem(item, val)
+    loot.GlobalItems[item] = val
+    mq.cmdf('/ini "%s" "GlobalItems" "%s" "%s"', loot.Settings.LootFile, item, val)
 end
 
 function loot.commandHandler(...)
@@ -562,9 +572,11 @@ function loot.commandHandler(...)
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayQuest|%s\ax", mq.TLO.Cursor(), args[2])
         elseif args[1] == 'buy' and mq.TLO.Cursor() then
             loot.BuyItems[mq.TLO.Cursor()] = args[2]
+            mq.cmdf('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, mq.TLO.Cursor(), args[2])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", mq.TLO.Cursor(), args[2])
         elseif args[1] == 'globalitem' and validActions[args[2]] and mq.TLO.Cursor() then
             loot.GlobalItems[mq.TLO.Cursor()] = validActions[args[2]]
+            loot.addRule(mq.TLO.Cursor(), 'GlobalItems', validActions[args[2]])
             RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", mq.TLO.Cursor(), validActions[args[2]])
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
             loot.addRule(args[2], args[2]:sub(1, 1), validActions[args[1]])
@@ -579,6 +591,7 @@ function loot.commandHandler(...)
             RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", args[3], validActions[args[2]])
         elseif args[1] == 'buy' then
             loot.BuyItems[args[2]] = args[3]
+            mq.cmdf('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, args[2], args[3])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", args[2], args[3])
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
             loot.addRule(args[2], args[2]:sub(1, 1), validActions[args[1]] .. '|' .. args[3])
@@ -828,8 +841,10 @@ function loot.eventSell(_, itemName)
     if loot.Settings.AddNewSales then
         RGMercsLogger.log_info(string.format('Setting %s to Sell', itemName))
         if not lootData[firstLetter] then lootData[firstLetter] = {} end
+        mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, firstLetter, itemName, 'Sell')
         lootData[firstLetter][itemName] = 'Sell'
         loot.NormalItems[itemName] = 'Sell'
+        RGMercModules:ExecModule("Loot", "ModifyLootSettings")
     end
 end
 
@@ -925,8 +940,10 @@ function loot.eventTribute(line, itemName)
     if loot.Settings.AddNewTributes then
         RGMercsLogger.log_info(string.format('Setting %s to Tribute', itemName))
         if not lootData[firstLetter] then lootData[firstLetter] = {} end
+        mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, firstLetter, itemName, 'Tribute')
         lootData[firstLetter][itemName] = 'Tribute'
         loot.NormalItems[itemName] = 'Tribute'
+        RGMercModules:ExecModule("Loot", "ModifyLootSettings")
     end
 end
 
@@ -972,7 +989,9 @@ function loot.markTradeSkillAsBank()
             if bagSlot.ID() then
                 if bagSlot.Tradeskills() then
                     local itemToMark = bagSlot.Name()
+                    loot.NormalItems[itemToMark] = 'Bank'
                     loot.addRule(itemToMark, itemToMark:sub(1, 1), 'Bank')
+                    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
                 end
             end
         end
@@ -986,7 +1005,9 @@ function loot.markTradeSkillAsBank()
                 local item = bagSlot.Item(j)
                 if item.ID() and item.Tradeskills() then
                     local itemToMark = bagSlot.Item(j).Name()
+                    loot.NormalItems[itemToMark] = 'Bank'
                     loot.addRule(itemToMark, itemToMark:sub(1, 1), 'Bank')
+                    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
                 end
             end
         end
