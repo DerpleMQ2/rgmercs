@@ -359,7 +359,7 @@ function Module:Render()
 					self.TempSettings.NewBuyItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewBuyItem) or nil
 
 					ImGui.TableNextColumn()
-					ImGui.SetNextItemWidth(80)
+					ImGui.SetNextItemWidth(120)
 
 					self.TempSettings.NewBuyQty = ImGui.InputInt("New Qty##BuyItems", self.TempSettings.NewBuyQty, 1, 10) or nil
 					if self.TempSettings.NewBuyQty > 1000 then self.TempSettings.NewBuyQty = 1000 end
@@ -459,7 +459,7 @@ function Module:Render()
 					self.TempSettings.NewGlobalItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewGlobalItem) or nil
 
 					ImGui.TableNextColumn()
-					ImGui.SetNextItemWidth(80)
+					ImGui.SetNextItemWidth(120)
 
 					self.TempSettings.NewGlobalQty = ImGui.InputInt("New Qty##BuyItems", self.TempSettings.NewGlobalQty, 1, 10) or nil
 					if self.TempSettings.NewGlobalQty > 1000 then self.TempSettings.NewGlobalQty = 1000 end
