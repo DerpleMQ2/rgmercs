@@ -207,8 +207,14 @@ function Module:LoadSettings()
 		self.settings = config()
 	end
 
+	local needsSave = false
 	-- Setup Defaults
-	self.settings = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+	self.settings, needsSave = RGMercUtils.ResolveDefaults(Module.DefaultConfig, self.settings)
+
+	RGMercsLogger.log_debug("Settings Changes = %s", RGMercUtils.BoolToColorString(needsSave))
+	if needsSave then
+		self:SaveSettings(false)
+	end
 
 	if LootnScoot.GlobalItems ~= nil then
 		self.GlobalItemsTable = LootnScoot.GlobalItems

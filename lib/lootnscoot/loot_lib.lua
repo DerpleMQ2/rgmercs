@@ -163,7 +163,6 @@ local loot = {
         AutoTag = false,                           -- Automatically tag items to sell if they meet the MinSellPrice
         AutoRestock = false,                       -- Automatically restock items from the BuyItems list when selling
         AlwaysCoin = true,                         -- Loot Coin from corpses even when bags are full.
-        Terminate = true,
     },
 }
 loot.guiLoot = require('lib.lootnscoot.loot_hist')
@@ -522,9 +521,9 @@ end
 function loot.commandHandler(...)
     local args = { ..., }
     if #args == 1 then
-        if args[1] == 'sellstuff' and not loot.Settings.Terminate then
+        if args[1] == 'sellstuff' then
             doSell = true
-        elseif args[1] == 'restock' and not loot.Settings.Terminate then
+        elseif args[1] == 'restock' then
             doBuy = true
         elseif args[1] == 'reload' then
             lootData = {}
@@ -536,7 +535,6 @@ function loot.commandHandler(...)
                 loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors,
                     'lootnscoot')
             end
-            loot.Settings.Terminate = false
             RGMercsLogger.log_info("\ayReloaded Settings \axAnd \atLoot Files")
         elseif args[1] == 'bank' then
             loot.processItems('Bank')
