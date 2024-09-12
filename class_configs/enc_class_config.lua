@@ -1003,11 +1003,11 @@ local _ClassConfig = {
                 name = "SpellProcAura",
                 type = "Spell",
                 active_cond = function(self, spell)
-                    local aura = string.sub(spell.Name(), 1, 8)
+                    local aura = string.sub(spell.Name() or "", 1, 8)
                     return RGMercUtils.AuraActiveByName(aura)
                 end,
                 pre_activate = function(self, spell)               --remove the old aura if we leveled up, otherwise we will be spammed because of no focus.
-                    local aura = string.sub(spell.Name(), 1, 8)
+                    local aura = string.sub(spell.Name() or "", 1, 8)
                     if not RGMercUtils.AuraActiveByName(aura) then ----This is complex because the aura could be in slot 1 or 2 depending on level and aa status
                         local rmv = RGMercUtils.CanUseAA('Auroria Mastery') and 2 or 1
                         ---@diagnostic disable-next-line: undefined-field
@@ -1015,7 +1015,7 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, spell)
-                    local aura = string.sub(spell.Name(), 1, 8)
+                    local aura = string.sub(spell.Name() or "", 1, 8)
                     return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(aura) and not RGMercUtils.GetSetting('DoLearners')
                 end,
             },
