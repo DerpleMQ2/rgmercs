@@ -290,18 +290,18 @@ end
 
 function loot.loadSettings()
     -- SQL setup
+    printf(tostring(RGMercUtils.file_exists(ItemsDB)))
     if not RGMercUtils.file_exists(ItemsDB) then
         -- Create the database and its table if it doesn't exist
         RGMercsLogger.log_warn("Loot Rules Database not found, creating it now.")
         local db = sqlite3.open(ItemsDB)
         db:exec([[
-            CREATE TABLE IF NOT EXISTS "Global_Rules" (
+                CREATE TABLE IF NOT EXISTS Global_Rules (
                 "item_name" TEXT NOT NULL UNIQUE,
                 "item_rule" TEXT NOT NULL,
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT
             );
-
-            CREATE TABLE IF NOT EXISTS "Normal_Rules" (
+                CREATE TABLE IF NOT EXISTS Normal_Rules (
                 "item_name" TEXT NOT NULL UNIQUE,
                 "item_rule" TEXT NOT NULL,
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT
@@ -318,7 +318,7 @@ function loot.loadSettings()
             if not stmt then
                 printf("Failed to prepare statement: %s", err)
                 db:close()
-                return
+                break
             end
             stmt:bind_values(k, v)
             stmt:step()
@@ -329,7 +329,7 @@ function loot.loadSettings()
             if not stmt then
                 printf("Failed to prepare statement: %s", err)
                 db:close()
-                return
+                break
             end
             stmt:bind_values(k, v)
             stmt:step()
