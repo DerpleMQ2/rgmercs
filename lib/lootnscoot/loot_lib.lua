@@ -330,11 +330,13 @@ function loot.loadSettings()
                 CREATE TABLE IF NOT EXISTS Global_Rules (
                 "item_name" TEXT NOT NULL UNIQUE,
                 "item_rule" TEXT NOT NULL,
+                "item_classes" TEXT,
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT
             );
                 CREATE TABLE IF NOT EXISTS Normal_Rules (
                 "item_name" TEXT NOT NULL UNIQUE,
                 "item_rule" TEXT NOT NULL,
+                "item_classes" TEXT,
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT
             );
         ]])
