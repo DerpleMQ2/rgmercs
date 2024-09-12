@@ -114,10 +114,9 @@ local mq           = require 'mq'
 
 local eqServer     = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 -- Check for looted module, if found use that. else fall back on our copy, which may be outdated.
-local eqChar       = mq.TLO.Me.Name()
+
 local RGMercUtils  = require("utils.rgmercs_utils")
-local actors       = require('actors')
-local SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. eqChar .. '.ini'
+local SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. RGMercConfig.Globals.CurLoadedChar .. '.ini'
 local LootFile     = mq.configDir .. '/Loot.ini'
 local version      = 1.9
 local imported     = true
@@ -126,7 +125,7 @@ local loot         = {
     Settings = {
         Version = '"' .. tostring(version) .. '"',
         LootFile = mq.configDir .. '/Loot.ini',
-        SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. eqChar .. '.ini',
+        SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. RGMercConfig.Globals.CurLoadedChar .. '.ini',
         GlobalLootOn = true,                       -- Enable Global Loot Items. not implimented yet
         CombatLooting = false,                     -- Enables looting during combat. Not recommended on the MT
         CorpseRadius = 100,                        -- Radius to activly loot corpses
@@ -297,7 +296,7 @@ function loot.UpdateDB()
     for k, v in pairs(loot.NormalItems) do
         local stmt, err = db:prepare("INSERT OR REPLACE INTO Normal_Rules (item_name, item_rule) VALUES (?, ?)")
         if not stmt then
-            printf("Failed to prepare statement: %s", err)
+            RGMercsLogger.log_warn("Failed to prepare statement: %s", err)
             db:close()
             break
         end
@@ -308,7 +307,7 @@ function loot.UpdateDB()
     for k, v in pairs(loot.GlobalItems) do
         local stmt, err = db:prepare("INSERT OR REPLACE INTO Global_Rules (item_name, item_rule) VALUES (?, ?)")
         if not stmt then
-            printf("Failed to prepare statement: %s", err)
+            RGMercsLogger.log_warn("Failed to prepare statement: %s", err)
             db:close()
             break
         end
@@ -321,7 +320,6 @@ end
 
 function loot.loadSettings()
     -- SQL setup
-    printf(tostring(RGMercUtils.file_exists(ItemsDB)))
     if not RGMercUtils.file_exists(ItemsDB) then
         -- Create the database and its table if it doesn't exist
         RGMercsLogger.log_warn("Loot Rules Database not found, creating it now.")
@@ -411,14 +409,14 @@ end
 function loot.modifyItem(item, action, tableName)
     local db = sqlite3.open(ItemsDB)
     if not db then
-        printf("Failed to open database.")
+        RGMercsLogger.log_warn("Failed to open database.")
         return
     end
 
     if action == 'delete' then
         local stmt, err = db:prepare("DELETE FROM " .. tableName .. " WHERE item_name = ?")
         if not stmt then
-            printf("Failed to prepare statement: %s", err)
+            RGMercsLogger.log_warn("Failed to prepare statement: %s", err)
             db:close()
             return
         end
@@ -434,7 +432,7 @@ function loot.modifyItem(item, action, tableName)
 
         local stmt, err = db:prepare(sql)
         if not stmt then
-            printf("Failed to prepare statement: %s\nSQL: %s", err, sql)
+            RGMercsLogger.log_warn("Failed to prepare statement: %s\nSQL: %s", err, sql)
             db:close()
             return
         end
@@ -890,9 +888,9 @@ function loot.lootCorpse(corpseID)
         end
         if #allItems > 0 then
             -- send to self and others running lootnscoot
-            lootActor:send({ mailbox = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = eqChar, })
+            lootActor:send({ mailbox = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = RGMercConfig.Globals.CurLoadedChar, })
             -- send to standalone looted gui
-            lootActor:send({ mailbox = 'looted', script = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = eqChar, })
+            lootActor:send({ mailbox = 'looted', script = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = RGMercConfig.Globals.CurLoadedChar, })
         end
     end
     if mq.TLO.Cursor() then loot.checkCursor() end
