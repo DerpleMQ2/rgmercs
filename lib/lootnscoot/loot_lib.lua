@@ -295,18 +295,12 @@ function loot.UpdateDB()
     local db = sqlite3.open(ItemsDB)
     for k, v in pairs(loot.NormalItems) do
         local stmt, err = db:prepare("INSERT INTO Normal_Rules (item_name, item_rule) VALUES (?, ?)")
-        if not stmt then
-            RGMercsLogger.log_warn("Item Exists Skipping: %s", err)
-        end
         stmt:bind_values(k, v)
         stmt:step()
         stmt:finalize()
     end
     for k, v in pairs(loot.GlobalItems) do
         local stmt, err = db:prepare("INSERT INTO Global_Rules (item_name, item_rule) VALUES (?, ?)")
-        if not stmt then
-            RGMercsLogger.log_warn("Item Exists Skipping: %s", err)
-        end
         stmt:bind_values(k, v)
         stmt:step()
         stmt:finalize()
