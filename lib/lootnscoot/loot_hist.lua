@@ -65,26 +65,26 @@
 	end
 
 ]]
-local mq = require('mq')
-local imgui = require('ImGui')
-local actor = require('actors')
-local Icons = require('mq.ICONS')
-local theme, settings = {}, {}
-local script = 'Looted'
+local mq                                                     = require('mq')
+local imgui                                                  = require('ImGui')
+local RGMercUtils                                            = require("utils.rgmercs_utils")
+local Icons                                                  = require('mq.ICONS')
+local theme, settings                                        = {}, {}
+local script                                                 = 'Looted'
 local ColorCount, ColorCountConf, StyleCount, StyleCountConf = 0, 0, 0, 0
-local ColorCountRep, StyleCountRep = 0, 0
-local openConfigGUI, locked, zoom = false, false, false
-local themeFile = mq.configDir .. '/MyThemeZ.lua'
-local configFile = mq.configDir .. '/MyUI_Configs.lua'
-local ZoomLvl = 1.0
-local showReport = false
-local ThemeName = 'None'
-local gIcon = Icons.MD_SETTINGS
-local globalNewIcon = Icons.FA_GLOBE
-local globeIcon = Icons.FA_GLOBE
-local changed = false
-local txtBuffer = {}
-local defaults = {
+local ColorCountRep, StyleCountRep                           = 0, 0
+local openConfigGUI, locked, zoom                            = false, false, false
+local themeFile                                              = mq.configDir .. '/MyThemeZ.lua'
+local configFile                                             = mq.configDir .. '/MyUI_Configs.lua'
+local ZoomLvl                                                = 1.0
+local showReport                                             = false
+local ThemeName                                              = 'None'
+local gIcon                                                  = Icons.MD_SETTINGS
+local globalNewIcon                                          = Icons.FA_GLOBE
+local globeIcon                                              = Icons.FA_GLOBE
+local changed                                                = false
+local txtBuffer                                              = {}
+local defaults                                               = {
 	LoadTheme = 'None',
 	Scale = 1.0,
 	Zoom = false,
@@ -93,7 +93,7 @@ local defaults = {
 	lastScrollPos = 0,
 }
 
-local guiLoot = {
+local guiLoot                                                = {
 	SHOW = false,
 	openGUI = false,
 	shouldDrawGUI = false,
@@ -112,7 +112,7 @@ local guiLoot = {
 	winFlags = bit32.bor(ImGuiWindowFlags.MenuBar),
 }
 
-local lootTable = {}
+local lootTable                                              = {}
 
 ---@param names boolean
 ---@param links boolean
@@ -149,34 +149,17 @@ function guiLoot.ReportLoot()
 	if guiLoot.recordData then
 		showReport = true
 		guiLoot.console:AppendText("\ay[Looted]\at[Loot Report]")
-		-- for looter, lootData in pairs(lootTable) do
-		-- guiLoot.console:AppendText("\at[%s] \ax: ", looter)
 		for item, data in pairs(lootTable) do
 			local itemName = item
 			local looter = data['Who']
 			local itemLink = data["Link"]
 			local itemCount = data["Count"]
-			-- guiLoot.console:AppendText("\at[%s] \ax: ", looter)
 			guiLoot.console:AppendText("\ao%s \ax: \ax(%d)", itemLink, itemCount)
 			guiLoot.console:AppendText("\at\t[%s] \ax: ", looter)
 		end
-		-- end
 	else
 		guiLoot.recordData = true
 		guiLoot.console:AppendText("\ay[Looted]\ag[Recording Data Enabled]\ax Check back later for Data.")
-	end
-end
-
----comment Check to see if the file we want to work on exists.
----@param name string -- Full Path to file
----@return boolean -- returns true if the file exists and false otherwise
-local function File_Exists(name)
-	local f = io.open(name, "r")
-	if f ~= nil then
-		io.close(f)
-		return true
-	else
-		return false
 	end
 end
 
@@ -189,16 +172,8 @@ local function getSortedKeys(t)
 	return keys
 end
 
----comment Writes settings from the settings table passed to the setting file (full path required)
--- Uses mq.pickle to serialize the table and write to file
----@param file string -- File Name and path
----@param settings table -- Table of settings to write
-local function writeSettings(file, settings)
-	mq.pickle(file, settings)
-end
-
 local function loadTheme()
-	if File_Exists(themeFile) then
+	if RGMercUtils.file_exists(themeFile) then
 		theme = dofile(themeFile)
 	else
 		theme = require('lib.lootnscoot.themes')
@@ -208,7 +183,7 @@ end
 
 local function loadSettings()
 	local temp = {}
-	if not File_Exists(configFile) then
+	if not RGMercUtils.file_exists(configFile) then
 		mq.pickle(configFile, defaults)
 		loadSettings()
 	else
@@ -256,7 +231,7 @@ local function loadSettings()
 	ZoomLvl = settings[script].Scale
 	ThemeName = settings[script].LoadTheme
 
-	writeSettings(configFile, settings)
+	mq.pickle(configFile, settings)
 
 	temp = settings[script]
 end
@@ -293,11 +268,11 @@ end
 
 function guiLoot.GUI()
 	if guiLoot.openGUI then
-		local windowName = 'Looted Items##' .. mq.TLO.Me.DisplayName()
+		local windowName = 'Looted Items##' .. RGMercConfig.Globals.CurLoadedChar
 		ImGui.SetNextWindowSize(260, 300, ImGuiCond.FirstUseEver)
 		--imgui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(1, 0));
 		ColorCount, StyleCount = DrawTheme(ThemeName)
-		if guiLoot.imported then windowName = 'Looted Items Local##Imported_' .. mq.TLO.Me.DisplayName() end
+		if guiLoot.imported then windowName = 'Looted Items Local##Imported_' .. RGMercConfig.Globals.CurLoadedChar end
 		local openGui, show = ImGui.Begin(windowName, true, guiLoot.winFlags)
 		if not openGui then
 			guiLoot.openGUI = false
@@ -841,7 +816,7 @@ function guiLoot.lootedConf_GUI()
 			settings[script].Scale = ZoomLvl
 			settings[script].LoadTheme = ThemeName
 
-			writeSettings(configFile, settings)
+			mq.pickle(configFile, settings)
 		end
 	end
 
@@ -880,7 +855,7 @@ local function getNextID(table)
 end
 
 function guiLoot.RegisterActor()
-	guiLoot.actor = actor.register('looted', function(message)
+	guiLoot.actor = RGMercUtils.Actors.register('looted', function(message)
 		local lootEntry = message()
 		for _, item in ipairs(lootEntry.Items) do
 			local link = item.Link
@@ -888,7 +863,7 @@ function guiLoot.RegisterActor()
 			local eval = item.Eval
 			local who = lootEntry.LootedBy
 			if guiLoot.hideNames then
-				if who ~= mq.TLO.Me() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = mq.TLO.Me.Class.ShortName() end
+				if who ~= mq.TLO.Me() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = RGMercConfig.Globals.CurLoadedClass end
 			end
 			if guiLoot.recordData and item.Action == 'Looted' then
 				addRule(who, what, link, eval)
@@ -942,7 +917,7 @@ function guiLoot.EventLoot(line, who, what)
 			link = mq.TLO.LinkDB(string.format("=%s", what))() or link
 		end
 		if guiLoot.hideNames then
-			if who ~= 'You' then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = mq.TLO.Me.Class.ShortName() end
+			if who ~= 'You' then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = RGMercConfig.Globals.CurLoadedClass end
 		end
 		local text = string.format('\ao[%s] \at%s \axLooted %s', mq.TLO.Time(), who, link)
 		guiLoot.console:AppendText(text)
@@ -971,11 +946,11 @@ function guiLoot.EventLoot(line, who, what)
 	end
 end
 
-function guiLoot.init(actors, imported, caller)
+function guiLoot.init(use_actors, imported, caller)
 	guiLoot.imported = imported
-	guiLoot.UseActors = actors
+	guiLoot.UseActors = use_actors
 	guiLoot.caller = caller
-	if not actors then
+	if not use_actors then
 		guiLoot.linkdb = mq.TLO.Plugin('mq2linkdb').IsLoaded()
 	else
 		guiLoot.linkdb = false
