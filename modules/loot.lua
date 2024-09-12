@@ -166,16 +166,12 @@ function Module:SaveSettings(doBroadcast)
 	if not LootnScoot then return end
 	mq.pickle(getConfigFileName(), self.settings)
 	mq.pickle(getLootItemsConfigFileName('buy'), self.BuyItemsTable)
-	mq.pickle(getLootItemsConfigFileName('global'), self.GlobalItemsTable)
-	mq.pickle(getLootItemsConfigFileName('normal'), self.NormalItemsTable)
 	self:SortItemTables()
 	if doBroadcast == true then
 		RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
 	end
 	LootnScoot.Settings = self.settings
 	LootnScoot.BuyItems = self.BuyItemsTable
-	LootnScoot.GlobalItems = self.GlobalItemsTable
-	LootnScoot.NormalItems = self.NormalItemsTable
 end
 
 function Module:ModifyLootSettings()
@@ -241,33 +237,9 @@ function Module:LoadSettings()
 		self.BuyItemsTable = buyItemsLoad()
 	end
 
-	local globalItems_pickle_path = getLootItemsConfigFileName('global')
-	local globalItemsLoad, err = loadfile(globalItems_pickle_path)
-	if err or not globalItemsLoad then
-		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load GLOBAL ITEMS file(%s), creating a new one!",
-			globalItems_pickle_path)
-		self:SaveSettings(false)
-	else
-		self.GlobalItemsTable = {}
-		self.GlobalItemsTable = globalItemsLoad()
-	end
-
-	local normalItems_pickle_path = getLootItemsConfigFileName('normal')
-	local normalItemsLoad, err = loadfile(normalItems_pickle_path)
-	if err or not normalItemsLoad then
-		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load NORMAL ITEMS file(%s), creating a new one!",
-			normalItems_pickle_path)
-		self:SaveSettings(false)
-	else
-		self.NormalItemsTable = {}
-		self.NormalItemsTable = normalItemsLoad()
-	end
-
 	--pass settings to lootnscoot lib
 	LootnScoot.Settings = self.settings
 	LootnScoot.BuyItems = self.BuyItemsTable
-	LootnScoot.GlobalItems = self.GlobalItemsTable
-	LootnScoot.NormalItems = self.NormalItemsTable
 
 	self:SortItemTables()
 end
@@ -352,10 +324,14 @@ function Module:Render()
 							self.BuyItemsTable[k] = v
 						end
 					end
-					-- Remove deleted items
+
 					for k in pairs(self.TempSettings.DeletedBuyKeys) do
 						self.BuyItemsTable[k] = nil
 					end
+
+					self.TempSettings.UpdatedBuyItems = {}
+					self.TempSettings.DeletedBuyKeys = {}
+
 					self.TempSettings.NeedSave = true
 				end
 				self.TempSettings.SearchBuyItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchBuyItems) or nil
@@ -419,11 +395,15 @@ function Module:Render()
 										ImGui.TableNextColumn()
 										local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.BuyItems[k].Value)
 
-										if newKey ~= k or newKey == "" then
+										if newValue ~= v and newKey == k then
+											if newValue == "" then newValue = "NULL" end
 											self.TempSettings.UpdatedBuyItems[newKey] = newValue
+										elseif newKey ~= "" and newKey ~= k then
 											self.TempSettings.DeletedBuyKeys[k] = true
-										else
-											self.TempSettings.UpdatedBuyItems[k] = newValue
+											if newValue == "" then newValue = "NULL" end
+											self.TempSettings.UpdatedBuyItems[newKey] = newValue
+										elseif newKey ~= k and newKey == "" then
+											self.TempSettings.DeletedBuyKeys[k] = true
 										end
 
 										self.TempSettings.BuyItems[k].Key = newKey
@@ -450,13 +430,18 @@ function Module:Render()
 					for k, v in pairs(self.TempSettings.UpdatedGlobalItems) do
 						if k ~= "" then
 							self.GlobalItemsTable[k] = v
+							LootnScoot.setGlobalItem(k, v)
 						end
 					end
 
 					for k in pairs(self.TempSettings.DeletedGlobalKeys) do
 						self.GlobalItemsTable[k] = nil
+						LootnScoot.setGlobalItem(k, 'delete')
 					end
-					self.TempSettings.NeedSave = true
+					self.TempSettings.UpdatedGlobalItems = {}
+					self.TempSettings.DeletedGlobalKeys = {}
+
+					self:SortItemTables()
 				end
 				self.TempSettings.SearchGlobalItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchGlobalItems) or nil
 				ImGui.SeparatorText("Add New Item##GlobalItems")
@@ -481,8 +466,7 @@ function Module:Render()
 					if ImGui.Button("Add Item##GlobalItems") then
 						if self.TempSettings.NewGlobalValue ~= "" and self.TempSettings.NewGlobalValue ~= "" then
 							self.GlobalItemsTable[self.TempSettings.NewGlobalItem] = self.TempSettings.NewGlobalValue
-							LootnScoot.setGlobalItem(self.TempSettings.NewBuyItem, self.TempSettings.NewGlobalValue)
-							self.TempSettings.NeedSave = true
+							LootnScoot.setGlobalItem(self.TempSettings.NewGlobalItem, self.TempSettings.NewGlobalValue)
 							self.TempSettings.NewGlobalItem = ""
 							self.TempSettings.NewGlobalValue = ""
 						end
@@ -522,11 +506,15 @@ function Module:Render()
 										ImGui.TableNextColumn()
 										local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.GlobalItems[k].Value)
 
-										if newKey ~= k or newKey == "" then
+										if newValue ~= v and newKey == k then
+											if newValue == "" then newValue = "NULL" end
 											self.TempSettings.UpdatedGlobalItems[newKey] = newValue
+										elseif newKey ~= "" and newKey ~= k then
 											self.TempSettings.DeletedGlobalKeys[k] = true
-										else
-											self.TempSettings.UpdatedGlobalItems[k] = newValue
+											if newValue == "" then newValue = "NULL" end
+											self.TempSettings.UpdatedGlobalItems[newKey] = newValue
+										elseif newKey ~= k and newKey == "" then
+											self.TempSettings.DeletedGlobalKeys[k] = true
 										end
 
 										self.TempSettings.GlobalItems[k].Key = newKey
@@ -553,14 +541,20 @@ function Module:Render()
 				if ImGui.Button("Save Changes##NormalItems") then
 					for k, v in pairs(self.TempSettings.UpdatedNormalItems) do
 						self.NormalItemsTable[k] = v
+						LootnScoot.setNormalItem(k, v)
 					end
+					self.TempSettings.UpdatedNormalItems = {}
 
 					for k in pairs(self.TempSettings.DeletedNormalKeys) do
 						self.NormalItemsTable[k] = nil
+						LootnScoot.setNormalItem(k, 'delete')
 					end
-					self.TempSettings.NeedSave = true
+					self.TempSettings.DeletedNormalKeys = {}
+					self:SortItemTables()
 				end
+
 				self.TempSettings.SearchItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchItems) or nil
+
 				if ImGui.BeginTable("NormalItems", col, ImGuiTableFlags.Borders) then
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
@@ -593,11 +587,15 @@ function Module:Render()
 										ImGui.TableNextColumn()
 										local newValue = ImGui.InputText("##Value" .. k, self.TempSettings.NormalItems[k].Value)
 
-										if newKey ~= k or newKey == "" then
+										if newValue ~= v and newKey == k then
+											if newValue == "" then newValue = "NULL" end
 											self.TempSettings.UpdatedNormalItems[newKey] = newValue
+										elseif newKey ~= "" and newKey ~= k then
 											self.TempSettings.DeletedNormalKeys[k] = true
-										else
-											self.TempSettings.UpdatedNormalItems[k] = newValue
+											if newValue == "" then newValue = "NULL" end
+											self.TempSettings.UpdatedNormalItems[newKey] = newValue
+										elseif newKey ~= k and newKey == "" then
+											self.TempSettings.DeletedNormalKeys[k] = true
 										end
 
 										self.TempSettings.NormalItems[k].Key = newKey

@@ -110,17 +110,18 @@ There is also no flag for combat looting. It will only loot if no mobs are withi
 
 ]]
 
-local mq = require 'mq'
+local mq           = require 'mq'
 
-local eqServer = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
+local eqServer     = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 -- Check for looted module, if found use that. else fall back on our copy, which may be outdated.
-local eqChar = mq.TLO.Me.Name()
-local actors = require('actors')
+local eqChar       = mq.TLO.Me.Name()
+local RGMercUtils  = require("utils.rgmercs_utils")
+local actors       = require('actors')
 local SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. eqChar .. '.ini'
-local version = 1.9
-local imported = true
+local version      = 1.9
+local imported     = true
 -- Public default settings, also read in from Loot.ini [Settings] section
-local loot = {
+local loot         = {
     Settings = {
         Version = '"' .. tostring(version) .. '"',
         LootFile = mq.configDir .. '/Loot.ini',
@@ -165,7 +166,13 @@ local loot = {
         AlwaysCoin = true,                         -- Loot Coin from corpses even when bags are full.
     },
 }
-loot.guiLoot = require('lib.lootnscoot.loot_hist')
+
+-- SQL information
+local PackageMan   = require('mq/PackageMan')
+local sqlite3      = PackageMan.Require('lsqlite3')
+local ItemsDB      = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
+
+loot.guiLoot       = require('lib.lootnscoot.loot_hist')
 if loot.guiLoot ~= nil then
     loot.UseActors = true
     loot.guiLoot.GetSettings(loot.HideNames, loot.LookupLinks, loot.RecordData, true, loot.UseActors, 'lootnscoot')
@@ -187,34 +194,7 @@ local tmpCmd = loot.GroupChannel or 'dgae'
 loot.BuyItems = {}
 loot.GlobalItems = {}
 loot.NormalItems = {}
-local sectionsLetter = {
-    ['A'] = 'A',
-    ['B'] = 'B',
-    ['C'] = 'C',
-    ['D'] = 'D',
-    ['E'] = 'E',
-    ['F'] = 'F',
-    ['G'] = 'G',
-    ['H'] = 'H',
-    ['I'] = 'I',
-    ['J'] = 'J',
-    ['K'] = 'K',
-    ['L'] = 'L',
-    ['M'] = 'M',
-    ['N'] = 'N',
-    ['O'] = 'O',
-    ['P'] = 'P',
-    ['Q'] = 'Q',
-    ['R'] = 'R',
-    ['S'] = 'S',
-    ['T'] = 'T',
-    ['U'] = 'U',
-    ['V'] = 'V',
-    ['W'] = 'W',
-    ['X'] = 'X',
-    ['Y'] = 'Y',
-    ['Z'] = 'Z',
-}
+
 -- FORWARD DECLARATIONS
 
 -- local loot.eventForage, loot.eventSell, loot.eventCantLoot, loot.eventTribute, loot.eventNoSlot
@@ -289,6 +269,7 @@ function loot.writeSettings()
         local valueType = type(value)
         if saveOptionTypes[valueType] then
             mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, 'GlobalItems', option, value)
+            loot.modifyItem(option, value, 'Global_Rules')
             loot.GlobalItems[option] = value
         end
     end
@@ -308,6 +289,69 @@ function loot.split(input, sep)
 end
 
 function loot.loadSettings()
+    -- SQL setup
+    if not RGMercUtils.file_exists(ItemsDB) then
+        -- Create the database and its table if it doesn't exist
+        RGMercsLogger.log_warn("Loot Rules Database not found, creating it now.")
+        local db = sqlite3.open(ItemsDB)
+        db:exec([[
+            CREATE TABLE IF NOT EXISTS "Global_Rules" (
+                "item_name" TEXT NOT NULL UNIQUE,
+                "item_rule" TEXT NOT NULL,
+                "id" INTEGER PRIMARY KEY AUTOINCREMENT
+            );
+
+            CREATE TABLE IF NOT EXISTS "Normal_Rules" (
+                "item_name" TEXT NOT NULL UNIQUE,
+                "item_rule" TEXT NOT NULL,
+                "id" INTEGER PRIMARY KEY AUTOINCREMENT
+            );
+        ]])
+        db:close()
+
+        loot.NormalItems = loot.load(loot.Settings.LootFile, 'items')
+        loot.GlobalItems = loot.load(loot.Settings.LootFile, 'GlobalItems')
+
+        db = sqlite3.open(ItemsDB)
+        for k, v in pairs(loot.NormalItems) do
+            local stmt, err = db:prepare("INSERT OR REPLACE INTO Normal_Rules (item_name, item_rule) VALUES (?, ?)")
+            if not stmt then
+                printf("Failed to prepare statement: %s", err)
+                db:close()
+                return
+            end
+            stmt:bind_values(k, v)
+            stmt:step()
+            stmt:finalize()
+        end
+        for k, v in pairs(loot.GlobalItems) do
+            local stmt, err = db:prepare("INSERT OR REPLACE INTO Global_Rules (item_name, item_rule) VALUES (?, ?)")
+            if not stmt then
+                printf("Failed to prepare statement: %s", err)
+                db:close()
+                return
+            end
+            stmt:bind_values(k, v)
+            stmt:step()
+            stmt:finalize()
+        end
+        db:close()
+    else
+        RGMercsLogger.log_info("Loot Rules Database found, loading it now.")
+        local db = sqlite3.open(ItemsDB)
+        local stmt = db:prepare("SELECT * FROM Global_Rules")
+        for row in stmt:nrows() do
+            loot.GlobalItems[row.item_name] = row.item_rule
+        end
+        stmt:finalize()
+        stmt = db:prepare("SELECT * FROM Normal_Rules")
+        for row in stmt:nrows() do
+            loot.NormalItems[row.item_name] = row.item_rule
+        end
+        stmt:finalize()
+        db:close()
+    end
+
     local tmpSettings = loot.load(SettingsFile, 'Settings')
     local needSave = false
     for k, v in pairs(loot.Settings) do
@@ -324,9 +368,7 @@ function loot.loadSettings()
     end
     shouldLootActions.Destroy = loot.Settings.DoDestroy
     shouldLootActions.Tribute = loot.Settings.TributeKeep
-    loot.GlobalItems = loot.load(loot.Settings.LootFile, 'GlobalItems')
     loot.BuyItems = loot.load(loot.Settings.SettingsFile, 'BuyItems')
-    loot.NormalItems = loot.load(loot.Settings.LootFile, 'items')
 
     return needSave
 end
@@ -361,6 +403,46 @@ function loot.navToID(spawnID)
     end
 end
 
+function loot.modifyItem(item, action, tableName)
+    printf("Item: %s Action: %s Table: %s", item, action, tableName)
+
+    local db = sqlite3.open(ItemsDB)
+    if not db then
+        printf("Failed to open database.")
+        return
+    end
+
+    if action == 'delete' then
+        local stmt, err = db:prepare("DELETE FROM " .. tableName .. " WHERE item_name = ?")
+        if not stmt then
+            printf("Failed to prepare statement: %s", err)
+            db:close()
+            return
+        end
+        stmt:bind_values(item)
+        stmt:step()
+        stmt:finalize()
+    else
+        -- Use INSERT OR REPLACE to handle conflicts by replacing existing rows
+        local sql = string.format([[
+            INSERT OR REPLACE INTO %s (item_name, item_rule)
+            VALUES (?, ?)
+        ]], tableName)
+
+        local stmt, err = db:prepare(sql)
+        if not stmt then
+            printf("Failed to prepare statement: %s\nSQL: %s", err, sql)
+            db:close()
+            return
+        end
+        stmt:bind_values(item, action)
+        stmt:step()
+        stmt:finalize()
+    end
+
+    db:close()
+end
+
 function loot.addRule(itemName, section, rule)
     if not lootData[section] then
         lootData[section] = {}
@@ -369,7 +451,11 @@ function loot.addRule(itemName, section, rule)
     loot.NormalItems[itemName] = rule
     if section == 'GlobalItems' then
         loot.GlobalItems[itemName] = rule
+        loot.modifyItem(itemName, rule, 'Global_Rules')
+    else
+        loot.modifyItem(itemName, rule, 'Normal_Rules')
     end
+
     mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, section, itemName, rule)
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
@@ -514,8 +600,14 @@ function loot.setBuyItem(item, qty)
 end
 
 function loot.setGlobalItem(item, val)
-    loot.GlobalItems[item] = val
-    mq.cmdf('/ini "%s" "GlobalItems" "%s" "%s"', loot.Settings.LootFile, item, val)
+    loot.GlobalItems[item] = val ~= 'delete' or nil
+    printf("Passing Item: %s Action: %s", item, val)
+    loot.modifyItem(item, val, 'Global_Rules')
+end
+
+function loot.setNormalItem(item, val)
+    loot.NormalItems[item] = val ~= 'delete' or nil
+    loot.modifyItem(item, val, 'Normal_Rules')
 end
 
 function loot.commandHandler(...)
@@ -840,6 +932,7 @@ function loot.eventSell(_, itemName)
         RGMercsLogger.log_info(string.format('Setting %s to Sell', itemName))
         if not lootData[firstLetter] then lootData[firstLetter] = {} end
         mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, firstLetter, itemName, 'Sell')
+        loot.modifyItem(itemName, 'Sell', 'Normal_Rules')
         lootData[firstLetter][itemName] = 'Sell'
         loot.NormalItems[itemName] = 'Sell'
         RGMercModules:ExecModule("Loot", "ModifyLootSettings")
@@ -939,6 +1032,8 @@ function loot.eventTribute(line, itemName)
         RGMercsLogger.log_info(string.format('Setting %s to Tribute', itemName))
         if not lootData[firstLetter] then lootData[firstLetter] = {} end
         mq.cmdf('/ini "%s" "%s" "%s" "%s"', loot.Settings.LootFile, firstLetter, itemName, 'Tribute')
+
+        loot.modifyItem(itemName, 'Tribute', 'Normal_Rules')
         lootData[firstLetter][itemName] = 'Tribute'
         loot.NormalItems[itemName] = 'Tribute'
         RGMercModules:ExecModule("Loot", "ModifyLootSettings")
