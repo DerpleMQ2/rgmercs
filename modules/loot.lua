@@ -325,7 +325,7 @@ function Module:Render()
 				end
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
-				if ImGui.Button("Save Changes##BuyItems") then
+				if ImGui.SmallButton("Save Changes##BuyItems") then
 					for k, v in pairs(self.TempSettings.UpdatedBuyItems) do
 						if k ~= "" then
 							self.BuyItemsTable[k] = v
@@ -341,6 +341,30 @@ function Module:Render()
 
 					self.TempSettings.NeedSave = true
 				end
+
+				ImGui.SameLine()
+
+				if ImGui.SmallButton("Reload Loot") then
+					self:LootReload()
+				end
+				if ImGui.IsItemHovered() then
+					ImGui.BeginTooltip()
+					ImGui.Text("Reloads working Tables from the Database.")
+					ImGui.EndTooltip()
+				end
+				ImGui.SameLine()
+
+				if ImGui.SmallButton("Update Loot") then
+					self:LootUpdate()
+				end
+				if ImGui.IsItemHovered() then
+					ImGui.BeginTooltip()
+					ImGui.Text("Imports the ini file into the table.")
+					ImGui.TextColored(ImVec4(0.8, 0.1, 0.1, 1), "ONLY Run on ONE Character")
+					ImGui.Text("Use Reload on the Other Characters After.")
+					ImGui.EndTooltip()
+				end
+
 				self.TempSettings.SearchBuyItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchBuyItems) or nil
 				ImGui.SeparatorText("Add New Item")
 				if ImGui.BeginTable("AddItem", 3, ImGuiTableFlags.Borders) then
@@ -433,7 +457,7 @@ function Module:Render()
 				end
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
-				if ImGui.Button("Save Changes##GlobalItems") then
+				if ImGui.SmallButton("Save Changes##GlobalItems") then
 					for k, v in pairs(self.TempSettings.UpdatedGlobalItems) do
 						if k ~= "" then
 							self.GlobalItemsTable[k] = v
@@ -450,6 +474,30 @@ function Module:Render()
 
 					self:SortItemTables()
 				end
+
+				ImGui.SameLine()
+
+				if ImGui.SmallButton("Reload Loot") then
+					self:LootReload()
+				end
+				if ImGui.IsItemHovered() then
+					ImGui.BeginTooltip()
+					ImGui.Text("Reloads working Tables from the Database.")
+					ImGui.EndTooltip()
+				end
+				ImGui.SameLine()
+
+				if ImGui.SmallButton("Update Loot") then
+					self:LootUpdate()
+				end
+				if ImGui.IsItemHovered() then
+					ImGui.BeginTooltip()
+					ImGui.Text("Imports the ini file into the table.")
+					ImGui.TextColored(ImVec4(0.8, 0.1, 0.1, 1), "ONLY Run on ONE Character")
+					ImGui.Text("Use Reload on the Other Characters After.")
+					ImGui.EndTooltip()
+				end
+
 				self.TempSettings.SearchGlobalItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchGlobalItems) or nil
 				ImGui.SeparatorText("Add New Item##GlobalItems")
 				if ImGui.BeginTable("AddItem##GlobalItems", 3, ImGuiTableFlags.Borders) then
@@ -545,7 +593,7 @@ function Module:Render()
 				end
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
-				if ImGui.Button("Save Changes##NormalItems") then
+				if ImGui.SmallButton("Save Changes##NormalItems") then
 					for k, v in pairs(self.TempSettings.UpdatedNormalItems) do
 						self.NormalItemsTable[k] = v
 						LootnScoot.setNormalItem(k, v)
@@ -558,6 +606,29 @@ function Module:Render()
 					end
 					self.TempSettings.DeletedNormalKeys = {}
 					self:SortItemTables()
+				end
+
+				ImGui.SameLine()
+
+				if ImGui.SmallButton("Reload Loot") then
+					self:LootReload()
+				end
+				if ImGui.IsItemHovered() then
+					ImGui.BeginTooltip()
+					ImGui.Text("Reloads working Tables from the Database.")
+					ImGui.EndTooltip()
+				end
+				ImGui.SameLine()
+
+				if ImGui.SmallButton("Update Loot") then
+					self:LootUpdate()
+				end
+				if ImGui.IsItemHovered() then
+					ImGui.BeginTooltip()
+					ImGui.Text("Imports the ini file into the table.")
+					ImGui.TextColored(ImVec4(0.8, 0.1, 0.1, 1), "ONLY Run on ONE Character")
+					ImGui.Text("Use Reload on the Other Characters After.")
+					ImGui.EndTooltip()
 				end
 
 				self.TempSettings.SearchItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchItems) or nil

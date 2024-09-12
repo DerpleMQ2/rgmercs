@@ -319,6 +319,8 @@ function loot.UpdateDB()
 end
 
 function loot.loadSettings()
+    loot.NormalItems = {}
+    loot.GlobalItems = {}
     -- SQL setup
     if not RGMercUtils.file_exists(ItemsDB) then
         -- Create the database and its table if it doesn't exist
@@ -669,7 +671,7 @@ function loot.commandHandler(...)
             loot.guiLoot.hideNames = not loot.guiLoot.hideNames
         elseif args[1] == 'config' then
             local confReport = string.format("\ayLoot N Scoot Settings\ax")
-            for key, value in pairs(loot) do
+            for key, value in pairs(loot.Settings) do
                 if type(value) ~= "function" and type(value) ~= "table" then
                     confReport = confReport .. string.format("\n\at%s\ax = \ag%s\ax", key, tostring(value))
                 end
