@@ -365,7 +365,7 @@ function loot.loadSettings()
     end
     shouldLootActions.Destroy = loot.Settings.DoDestroy
     shouldLootActions.Tribute = loot.Settings.TributeKeep
-    loot.BuyItems = loot.load(loot.Settings.SettingsFile, 'BuyItems')
+    loot.BuyItems = loot.load(SettingsFile, 'BuyItems')
 
     return needSave
 end
