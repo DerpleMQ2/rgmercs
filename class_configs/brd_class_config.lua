@@ -1395,7 +1395,7 @@ local _ClassConfig = {
             AbilityName = 'Sonic Disturbance',
             AbilityRange = 250,
             cond = function(self)
-                return mq.TLO.Me.AltAbility('Sonic Disturbance')
+                return mq.TLO.Me.AltAbility('Sonic Disturbance')() ~= nil
             end,
         },
         {
@@ -1405,7 +1405,7 @@ local _ClassConfig = {
             AbilityName = 'Boastful Bellow',
             AbilityRange = 250,
             cond = function(self)
-                return mq.TLO.Me.AltAbility('Boastful Bellow')
+                return mq.TLO.Me.AltAbility('Boastful Bellow')() ~= nil
             end,
         },
     },
