@@ -596,7 +596,7 @@ end
 
 -- EVENTS
 
-local lootActor = actors.register('lootnscoot', function(message) end)
+local lootActor = RGMercUtils.Actors.register('lootnscoot', function(message) end)
 
 local itemNoValue = nil
 function loot.eventNovalue(line, item)
