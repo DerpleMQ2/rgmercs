@@ -137,6 +137,13 @@ Module.CommandHandlers   = {
 			self:LootReload()
 		end,
 	},
+	lootupdate = {
+		usage = "/rgl lootupdate",
+		about = "Updates LootRules DB from INI. Incase you were running in standalone mode prior to running RGMercs Lua.",
+		handler = function(self, _)
+			self:LootUpdate()
+		end,
+	},
 }
 
 Module.DefaultCategories = Set.new({})
@@ -689,6 +696,13 @@ end
 function Module:LootReload()
 	if LootnScoot ~= nil then
 		LootnScoot.commandHandler('reload')
+		self:LoadSettings()
+	end
+end
+
+function Module:LootUpdate()
+	if LootnScoot ~= nil then
+		LootnScoot.commandHandler('update')
 		self:LoadSettings()
 	end
 end
