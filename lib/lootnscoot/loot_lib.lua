@@ -404,8 +404,6 @@ function loot.navToID(spawnID)
 end
 
 function loot.modifyItem(item, action, tableName)
-    printf("Item: %s Action: %s Table: %s", item, action, tableName)
-
     local db = sqlite3.open(ItemsDB)
     if not db then
         printf("Failed to open database.")
@@ -601,7 +599,6 @@ end
 
 function loot.setGlobalItem(item, val)
     loot.GlobalItems[item] = val ~= 'delete' or nil
-    printf("Passing Item: %s Action: %s", item, val)
     loot.modifyItem(item, val, 'Global_Rules')
 end
 
