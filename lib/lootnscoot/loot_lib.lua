@@ -458,8 +458,29 @@ function loot.addRule(itemName, section, rule)
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
-function loot.lookupIniLootRule(section, key)
-    return loot.NormalItems[key] or 'NULL'
+function loot.lookupLootRule(section, key)
+    if key == nil then return 'NULL' end
+    local db = sqlite3.open(ItemsDB)
+    local sql = "SELECT item_rule FROM Normal_Rules WHERE item_name = ?"
+    local stmt = db:prepare(sql)
+
+    if not stmt then
+        db:close()
+        return 'NULL'
+    end
+
+    stmt:bind_values(key)
+    local stepResult = stmt:step()
+
+    local rule = 'NULL'
+    if stepResult == sqlite3.ROW then
+        local row = stmt:get_named_values()
+        rule = row.item_rule or 'NULL'
+    end
+
+    stmt:finalize()
+    db:close()
+    return rule
 end
 
 -- moved this function up so we can report Quest Items.
@@ -509,7 +530,7 @@ function loot.getRule(item)
     local newRule = false
 
     lootData[firstLetter] = lootData[firstLetter] or {}
-    lootData[firstLetter][itemName] = lootData[firstLetter][itemName] or loot.lookupIniLootRule(firstLetter, itemName)
+    lootData[firstLetter][itemName] = lootData[firstLetter][itemName] or loot.lookupLootRule(firstLetter, itemName)
 
     -- Re-Evaluate the settings if AlwaysEval is on. Items that do not meet the Characters settings are reset to NUll and re-evaluated as if they were new items.
     if loot.Settings.AlwaysEval then
@@ -731,7 +752,7 @@ function loot.lootItem(index, doWhat, button, qKeep, allItems)
     local corpseItemID = corpseItem.ID()
     local itemName = corpseItem.Name()
     local itemLink = corpseItem.ItemLink('CLICKABLE')()
-    local globalItem = (loot.Settings.GlobalLootOn and loot.lookupIniLootRule('GlobalItems', itemName) ~= "NULL") and true or false
+    local globalItem = (loot.Settings.GlobalLootOn and loot.lookupLootRule('GlobalItems', itemName) ~= "NULL") and true or false
 
     mq.cmdf('/nomodkey /shift /itemnotify loot%s %s', index, button)
     -- Looting of no drop items is currently disabled with no flag to enable anyways
@@ -920,7 +941,7 @@ function loot.eventSell(_, itemName)
     if NEVER_SELL[itemName] then return end
     local firstLetter = itemName:sub(1, 1):upper()
     if lootData[firstLetter] and lootData[firstLetter][itemName] == 'Sell' then return end
-    if loot.lookupIniLootRule(firstLetter, itemName) == 'Sell' then
+    if loot.lookupLootRule(firstLetter, itemName) == 'Sell' then
         lootData[firstLetter] = lootData[firstLetter] or {}
         lootData[firstLetter][itemName] = 'Sell'
         return
@@ -1020,7 +1041,7 @@ end
 function loot.eventTribute(line, itemName)
     local firstLetter = itemName:sub(1, 1):upper()
     if lootData[firstLetter] and lootData[firstLetter][itemName] == 'Tribute' then return end
-    if loot.lookupIniLootRule(firstLetter, itemName) == 'Tribute' then
+    if loot.lookupLootRule(firstLetter, itemName) == 'Tribute' then
         lootData[firstLetter] = lootData[firstLetter] or {}
         lootData[firstLetter][itemName] = 'Tribute'
         return
