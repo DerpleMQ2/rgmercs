@@ -3389,7 +3389,7 @@ end
 function RGMercUtils.AddXTByName(slot, name)
     local spawnToAdd = mq.TLO.Spawn(name)
     if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
-        RGMercUtils.DoCmd("/xtarget set %d %s", slot, name)
+        RGMercUtils.DoCmd("/xtarget set %d \"%s\"", slot, name)
     end
 end
 
