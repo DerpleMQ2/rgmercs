@@ -855,7 +855,7 @@ local function getNextID(table)
 end
 
 function guiLoot.RegisterActor()
-	guiLoot.actor = RGMercUtils.Actor.register('looted', function(message)
+	guiLoot.actor = RGMercUtils.Actors.register('looted', function(message)
 		local lootEntry = message()
 		for _, item in ipairs(lootEntry.Items) do
 			local link = item.Link
