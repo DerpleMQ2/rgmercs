@@ -507,7 +507,7 @@ local function Main()
         -- This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID
         RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
     end
-
+    printf("\ar***************************")
     if RGMercUtils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
         RGMercUtils.EngageTarget(RGMercConfig.Globals.AutoTargetID)
     else
@@ -516,7 +516,7 @@ local function Main()
             RGMercUtils.ClearTarget()
         end
     end
-
+    printf("\ar-----------------------------")
     -- Handles state for when we're in combat
     if RGMercUtils.DoCombatActions() then
         -- IsHealing or IsMezzing should re-determine their target as this point because they may

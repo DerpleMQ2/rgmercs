@@ -1053,6 +1053,10 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
         retryCount = retryCount or 0
 
         repeat
+            if RGMercUtils.OnEMU() then
+                -- EMU doesn't seem to tell us we begin singing.
+                RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_SUCCESS)
+            end
             RGMercUtils.DoCmd("/cast \"%s\"", songName)
 
             mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
@@ -1476,8 +1480,12 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
             lastStepIdx = idx
             if entry.cond then
                 local pass = RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
+                RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: TestConditionsForEntry() => %s", start_step, steps,
+                    idx, RGMercUtils.BoolToColorString(pass))
                 if pass == true then
                     local res = RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
+                    RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: ExecEntry() => %s", start_step, steps,
+                        idx, RGMercUtils.BoolToColorString(res))
                     if res == true then
                         anySuccess = true
                         stepsThisTime = stepsThisTime + 1
@@ -2743,7 +2751,7 @@ function RGMercUtils.EngageTarget(autoTargetId)
 
             if (RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('AutoAssistAt') or RGMercUtils.IAmMA()) and not RGMercUtils.GetTargetDead(target) then
                 if RGMercUtils.GetTargetDistance(target) > RGMercUtils.GetTargetMaxRangeTo(target) then
-                    RGMercsLogger.log_debug("Target is too far! %d>%d attempting to nav to it.", target.Distance(),
+                    RGMercsLogger.log_debug("EngageTarget(): Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
 
                     local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
@@ -2751,24 +2759,27 @@ function RGMercUtils.EngageTarget(autoTargetId)
                         classConfig.HelperFunctions.PreEngage(target)
                     end
 
-
                     RGMercUtils.NavInCombat(autoTargetId, RGMercUtils.GetTargetMaxRangeTo(target), false)
                 else
+                    RGMercsLogger.log_debug("EngageTarget(): Target is in range moving to combat")
                     if mq.TLO.Navigation.Active() then
                         RGMercUtils.DoCmd("/nav stop log=off")
                     end
                     if mq.TLO.Stick.Status():lower() == "off" then
                         RGMercUtils.DoStick(autoTargetId)
                     end
+                end
 
-                    if not mq.TLO.Me.Combat() then
-                        RGMercsLogger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", RGMercUtils.GetTargetCleanName())
-                        if RGMercUtils.IAmMA() then
-                            RGMercUtils.HandleAnnounce(string.format('TANKING -> %s <-', RGMercUtils.GetTargetCleanName()), RGMercUtils.GetSetting('AnnounceTargetGroup'),
-                                RGMercUtils.GetSetting('AnnounceTarget'))
-                        end
-                        RGMercUtils.DoCmd("/attack on")
+                if not mq.TLO.Me.Combat() then
+                    RGMercsLogger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", RGMercUtils.GetTargetCleanName())
+                    if RGMercUtils.IAmMA() then
+                        RGMercUtils.HandleAnnounce(string.format('TANKING -> %s <-', RGMercUtils.GetTargetCleanName()), RGMercUtils.GetSetting('AnnounceTargetGroup'),
+                            RGMercUtils.GetSetting('AnnounceTarget'))
                     end
+                    RGMercsLogger.log_debug("EngageTarget(): Attacking target!")
+                    RGMercUtils.DoCmd("/attack on")
+                else
+                    RGMercsLogger.log_verbose("EngageTarget(): Target already engaged not re-engaging.")
                 end
             else
                 RGMercsLogger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.",
@@ -3576,9 +3587,7 @@ end
 ---@param autoTargetId integer
 ---@return boolean
 function RGMercUtils.OkToEngage(autoTargetId)
-    local config = RGMercConfig:GetSettings()
-
-    if not config.DoAutoEngage then return false end
+    if not RGMercUtils.GetSetting('DoAutoEngage') then return false end
     local target = mq.TLO.Target
     local assistId = RGMercUtils.GetMainAssistId()
 
@@ -3614,14 +3623,14 @@ function RGMercUtils.OkToEngage(autoTargetId)
     end
 
     if not RGMercConfig.Globals.BackOffFlag then --RGMercUtils.GetXTHaterCount() > 0 and not RGMercConfig.Globals.BackOffFlag then
-        local distanceCheck = RGMercUtils.GetTargetDistance() < config.AssistRange
-        local assistCheck = (RGMercUtils.GetTargetPctHPs() <= config.AutoAssistAt or RGMercUtils.IsTanking() or RGMercUtils.IAmMA())
+        local distanceCheck = RGMercUtils.GetTargetDistance() < RGMercUtils.GetSetting('AssistRange')
+        local assistCheck = (RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('AutoAssistAt') or RGMercUtils.IsTanking() or RGMercUtils.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
                 RGMercsLogger.log_verbose(
                     "\ag  OkayToEngage(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
                     RGMercUtils.GetTargetCleanName(),
-                    RGMercUtils.GetTargetDistance(), config.AssistRange, RGMercUtils.GetTargetPctHPs(), config.AutoAssistAt, assistId,
+                    RGMercUtils.GetTargetDistance(), RGMercUtils.GetSetting('AssistRange'), RGMercUtils.GetTargetPctHPs(), RGMercUtils.GetSetting('AutoAssistAt'), assistId,
                     mq.TLO.Me.ID())
             end
             return true
