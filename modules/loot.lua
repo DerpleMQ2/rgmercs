@@ -137,9 +137,10 @@ Module.CommandHandlers   = {
 			self:LootReload()
 		end,
 	},
-	lootupdate = {
-		usage = "/rgl lootupdate",
-		about = "Updates LootRules DB from INI. Incase you were running in standalone mode prior to running RGMercs Lua.",
+	lootimport = {
+		usage = "/rgl lootimport",
+		about =
+		"Imports from INI to LootRules DB. Incase you were running in standalone mode prior to running RGMercs Lua. This may cause a some lag. Only Run on ONE Character to populate / update the DB.",
 		handler = function(self, _)
 			self:LootUpdate()
 		end,
@@ -177,6 +178,8 @@ function Module:SaveSettings(doBroadcast)
 	if doBroadcast == true then
 		RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
 	end
+	LootnScoot.BuyItems = {}
+	LootnScoot.Settings = {}
 	LootnScoot.Settings = self.settings
 	LootnScoot.BuyItems = self.BuyItemsTable
 end
@@ -245,6 +248,8 @@ function Module:LoadSettings()
 	end
 
 	--pass settings to lootnscoot lib
+	LootnScoot.Settings = {}
+	LootnScoot.BuyItems = {}
 	LootnScoot.Settings = self.settings
 	LootnScoot.BuyItems = self.BuyItemsTable
 
@@ -315,6 +320,15 @@ function Module:Render()
 		self:SaveSettings(false)
 	end
 	if ImGui.CollapsingHeader("Items Tables") then
+		if ImGui.Button("Reload Loot") then
+			self:LootReload()
+		end
+		if ImGui.IsItemHovered() then
+			ImGui.BeginTooltip()
+			ImGui.Text("Reloads working Tables from the Database.")
+			ImGui.EndTooltip()
+		end
+
 		if ImGui.BeginTabBar("Items") then
 			local col = math.max(2, math.floor(ImGui.GetContentRegionAvail() / 150))
 			col = col + (col % 2)
@@ -343,29 +357,6 @@ function Module:Render()
 					self.TempSettings.NeedSave = true
 				end
 
-				ImGui.SameLine()
-
-				if ImGui.SmallButton("Reload Loot") then
-					self:LootReload()
-				end
-				if ImGui.IsItemHovered() then
-					ImGui.BeginTooltip()
-					ImGui.Text("Reloads working Tables from the Database.")
-					ImGui.EndTooltip()
-				end
-				ImGui.SameLine()
-
-				if ImGui.SmallButton("Update Loot") then
-					self:LootUpdate()
-				end
-				if ImGui.IsItemHovered() then
-					ImGui.BeginTooltip()
-					ImGui.Text("Imports the ini file into the table.")
-					ImGui.TextColored(ImVec4(0.8, 0.1, 0.1, 1), "ONLY Run on ONE Character")
-					ImGui.Text("Use Reload on the Other Characters After.")
-					ImGui.EndTooltip()
-				end
-
 				self.TempSettings.SearchBuyItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchBuyItems) or nil
 				ImGui.SeparatorText("Add New Item")
 				if ImGui.BeginTable("AddItem", 3, ImGuiTableFlags.Borders) then
@@ -376,12 +367,12 @@ function Module:Render()
 					ImGui.TableNextColumn()
 
 					ImGui.SetNextItemWidth(150)
-					self.TempSettings.NewBuyItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewBuyItem) or nil
+					self.TempSettings.NewBuyItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewBuyItem)
 
 					ImGui.TableNextColumn()
 					ImGui.SetNextItemWidth(120)
 
-					self.TempSettings.NewBuyQty = ImGui.InputInt("New Qty##BuyItems", self.TempSettings.NewBuyQty, 1, 10) or nil
+					self.TempSettings.NewBuyQty = ImGui.InputInt("New Qty##BuyItems", (self.TempSettings.NewBuyQty or 1), 1, 50)
 					if self.TempSettings.NewBuyQty > 1000 then self.TempSettings.NewBuyQty = 1000 end
 
 					ImGui.TableNextColumn()
@@ -474,29 +465,6 @@ function Module:Render()
 					self.TempSettings.DeletedGlobalKeys = {}
 
 					self:SortItemTables()
-				end
-
-				ImGui.SameLine()
-
-				if ImGui.SmallButton("Reload Loot") then
-					self:LootReload()
-				end
-				if ImGui.IsItemHovered() then
-					ImGui.BeginTooltip()
-					ImGui.Text("Reloads working Tables from the Database.")
-					ImGui.EndTooltip()
-				end
-				ImGui.SameLine()
-
-				if ImGui.SmallButton("Update Loot") then
-					self:LootUpdate()
-				end
-				if ImGui.IsItemHovered() then
-					ImGui.BeginTooltip()
-					ImGui.Text("Imports the ini file into the table.")
-					ImGui.TextColored(ImVec4(0.8, 0.1, 0.1, 1), "ONLY Run on ONE Character")
-					ImGui.Text("Use Reload on the Other Characters After.")
-					ImGui.EndTooltip()
 				end
 
 				self.TempSettings.SearchGlobalItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchGlobalItems) or nil
@@ -607,29 +575,6 @@ function Module:Render()
 					end
 					self.TempSettings.DeletedNormalKeys = {}
 					self:SortItemTables()
-				end
-
-				ImGui.SameLine()
-
-				if ImGui.SmallButton("Reload Loot") then
-					self:LootReload()
-				end
-				if ImGui.IsItemHovered() then
-					ImGui.BeginTooltip()
-					ImGui.Text("Reloads working Tables from the Database.")
-					ImGui.EndTooltip()
-				end
-				ImGui.SameLine()
-
-				if ImGui.SmallButton("Update Loot") then
-					self:LootUpdate()
-				end
-				if ImGui.IsItemHovered() then
-					ImGui.BeginTooltip()
-					ImGui.Text("Imports the ini file into the table.")
-					ImGui.TextColored(ImVec4(0.8, 0.1, 0.1, 1), "ONLY Run on ONE Character")
-					ImGui.Text("Use Reload on the Other Characters After.")
-					ImGui.EndTooltip()
 				end
 
 				self.TempSettings.SearchItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchItems) or nil

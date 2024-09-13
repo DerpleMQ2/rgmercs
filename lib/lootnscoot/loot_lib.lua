@@ -178,7 +178,7 @@ end
 
 -- Internal settings
 local lootData, cantLootList = {}, {}
-local doSell, doBuy, doTribute, areFull = false, false, false, false
+local areFull = false
 local cantLootID = 0
 -- Constants
 local spawnSearch = '%s radius %d zradius 50'
@@ -311,10 +311,14 @@ function loot.loadSettings()
     loot.GlobalItems = {}
     -- SQL setup
     if not RGMercUtils.file_exists(ItemsDB) then
-        -- Create the database and its table if it doesn't exist
-        RGMercsLogger.log_warn("Loot Rules Database not found, creating it now.")
-        local db = SQLite3.open(ItemsDB)
-        db:exec([[
+        RGMercsLogger.log_warn("\ayLoot Rules Database \arNOT found\ax, \atCreating it now\ax. Please run \at/rgl lootimport\ax to Import your \atloot.ini \axfile.")
+        RGMercsLogger.log_warn("\arOnly run this one One Character\ax. use \at/rgl lootreload\ax to update the data on the other characters.")
+    else
+        RGMercsLogger.log_info("Loot Rules Database found, loading it now.")
+    end
+    -- Create the database and its table if it doesn't exist
+    local db = SQLite3.open(ItemsDB)
+    db:exec([[
                 CREATE TABLE IF NOT EXISTS Global_Rules (
                 "item_name" TEXT NOT NULL UNIQUE,
                 "item_rule" TEXT NOT NULL,
@@ -328,24 +332,20 @@ function loot.loadSettings()
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT
             );
         ]])
-        db:close()
+    db:close()
 
-        loot.UpdateDB()
-    else
-        RGMercsLogger.log_info("Loot Rules Database found, loading it now.")
-        local db = SQLite3.open(ItemsDB)
-        local stmt = db:prepare("SELECT * FROM Global_Rules")
-        for row in stmt:nrows() do
-            loot.GlobalItems[row.item_name] = row.item_rule
-        end
-        stmt:finalize()
-        stmt = db:prepare("SELECT * FROM Normal_Rules")
-        for row in stmt:nrows() do
-            loot.NormalItems[row.item_name] = row.item_rule
-        end
-        stmt:finalize()
-        db:close()
+    local db = SQLite3.open(ItemsDB)
+    local stmt = db:prepare("SELECT * FROM Global_Rules")
+    for row in stmt:nrows() do
+        loot.GlobalItems[row.item_name] = row.item_rule
     end
+    stmt:finalize()
+    stmt = db:prepare("SELECT * FROM Normal_Rules")
+    for row in stmt:nrows() do
+        loot.NormalItems[row.item_name] = row.item_rule
+    end
+    stmt:finalize()
+    db:close()
 
     local tmpSettings = loot.load(SettingsFile, 'Settings')
     local needSave = false
@@ -521,7 +521,8 @@ function loot.getRule(item)
     local stackSize = item.StackSize()
     local countHave = mq.TLO.FindItemCount(string.format("%s", itemName))() + mq.TLO.FindItemBankCount(string.format("%s", itemName))()
     local qKeep = '0'
-    local globalItem = loot.BuyItems[itemName] ~= nil and 'Keep' or loot.GlobalItems[itemName] ~= nil and loot.GlobalItems[itemName] or 'NULL'
+    local globalItem = loot.GlobalItems[itemName] ~= nil and loot.GlobalItems[itemName] or 'NULL'
+    globalItem = loot.BuyItems[itemName] ~= nil and 'Keep' or globalItem
     local newRule = false
 
     lootData[firstLetter] = lootData[firstLetter] or {}
@@ -581,6 +582,7 @@ function loot.getRule(item)
         end
         return qVal, tonumber(qKeep) or 0
     end
+
     if loot.Settings.AlwaysDestroy and lootData[firstLetter][itemName] == 'Ignore' then return 'Destroy', 0 end
 
     return lootData[firstLetter][itemName], 0, newRule
@@ -627,9 +629,9 @@ function loot.commandHandler(...)
     local args = { ..., }
     if #args == 1 then
         if args[1] == 'sellstuff' then
-            doSell = true
+            loot.processItems('Sell')
         elseif args[1] == 'restock' then
-            doBuy = true
+            loot.processItems('Buy')
         elseif args[1] == 'reload' then
             lootData = {}
             local needSave = loot.loadSettings()
@@ -668,7 +670,7 @@ function loot.commandHandler(...)
             end
             RGMercsLogger.log_info(confReport)
         elseif args[1] == 'tributestuff' then
-            doTribute = true
+            loot.processItems('Tribute')
         elseif args[1] == 'loot' then
             loot.lootMobs()
         elseif args[1] == 'tsbank' then
@@ -755,7 +757,7 @@ function loot.lootItem(index, doWhat, button, qKeep, allItems)
     local corpseItemID = corpseItem.ID()
     local itemName = corpseItem.Name()
     local itemLink = corpseItem.ItemLink('CLICKABLE')()
-    local globalItem = (loot.Settings.GlobalLootOn and loot.lookupLootRule('GlobalItems', itemName) ~= "NULL") and true or false
+    local globalItem = (loot.Settings.GlobalLootOn and (loot.GlobalItems[itemName] ~= nil or loot.BuyItems[itemName] ~= nil)) and true or false
 
     mq.cmdf('/nomodkey /shift /itemnotify loot%s %s', index, button)
     -- Looting of no drop items is currently disabled with no flag to enable anyways
@@ -793,6 +795,8 @@ end
 
 function loot.lootCorpse(corpseID)
     RGMercsLogger.log_debug('Enter lootCorpse')
+    shouldLootActions.Destroy = loot.Settings.DoDestroy
+    shouldLootActions.Tribute = loot.Settings.TributeKeep
     if mq.TLO.Cursor() then loot.checkCursor() end
     for i = 1, 3 do
         mq.cmd('/loot')
