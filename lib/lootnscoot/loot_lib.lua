@@ -180,7 +180,7 @@ end
 
 -- Internal settings
 local lootData, cantLootList = {}, {}
-local doSell, doBuy, doTribute, areFull = false, false, false, false
+local areFull = false
 local cantLootID = 0
 -- Constants
 local spawnSearch = '%s radius %d zradius 50'
@@ -523,7 +523,8 @@ function loot.getRule(item)
     local stackSize = item.StackSize()
     local countHave = mq.TLO.FindItemCount(string.format("%s", itemName))() + mq.TLO.FindItemBankCount(string.format("%s", itemName))()
     local qKeep = '0'
-    local globalItem = loot.BuyItems[itemName] ~= nil and 'Keep' or loot.GlobalItems[itemName] ~= nil and loot.GlobalItems[itemName] or 'NULL'
+    local globalItem = loot.GlobalItems[itemName] ~= nil and loot.GlobalItems[itemName] or 'NULL'
+    globalItem = loot.BuyItems[itemName] ~= nil and 'Keep' or globalItem
     local newRule = false
 
     lootData[firstLetter] = lootData[firstLetter] or {}
@@ -583,6 +584,7 @@ function loot.getRule(item)
         end
         return qVal, tonumber(qKeep) or 0
     end
+
     if loot.Settings.AlwaysDestroy and lootData[firstLetter][itemName] == 'Ignore' then return 'Destroy', 0 end
 
     return lootData[firstLetter][itemName], 0, newRule
@@ -629,9 +631,9 @@ function loot.commandHandler(...)
     local args = { ..., }
     if #args == 1 then
         if args[1] == 'sellstuff' then
-            doSell = true
+            loot.processItems('Sell')
         elseif args[1] == 'restock' then
-            doBuy = true
+            loot.processItems('Buy')
         elseif args[1] == 'reload' then
             lootData = {}
             local needSave = loot.loadSettings()
@@ -670,7 +672,7 @@ function loot.commandHandler(...)
             end
             RGMercsLogger.log_info(confReport)
         elseif args[1] == 'tributestuff' then
-            doTribute = true
+            loot.processItems('Tribute')
         elseif args[1] == 'loot' then
             loot.lootMobs()
         elseif args[1] == 'tsbank' then
@@ -757,7 +759,7 @@ function loot.lootItem(index, doWhat, button, qKeep, allItems)
     local corpseItemID = corpseItem.ID()
     local itemName = corpseItem.Name()
     local itemLink = corpseItem.ItemLink('CLICKABLE')()
-    local globalItem = (loot.Settings.GlobalLootOn and loot.lookupLootRule('GlobalItems', itemName) ~= "NULL") and true or false
+    local globalItem = (loot.Settings.GlobalLootOn and (loot.GlobalItems[itemName] ~= nil or loot.BuyItems[itemName] ~= nil)) and true or false
 
     mq.cmdf('/nomodkey /shift /itemnotify loot%s %s', index, button)
     -- Looting of no drop items is currently disabled with no flag to enable anyways
@@ -795,6 +797,8 @@ end
 
 function loot.lootCorpse(corpseID)
     RGMercsLogger.log_debug('Enter lootCorpse')
+    shouldLootActions.Destroy = loot.Settings.DoDestroy
+    shouldLootActions.Tribute = loot.Settings.TributeKeep
     if mq.TLO.Cursor() then loot.checkCursor() end
     for i = 1, 3 do
         mq.cmd('/loot')

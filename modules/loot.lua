@@ -177,6 +177,8 @@ function Module:SaveSettings(doBroadcast)
 	if doBroadcast == true then
 		RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
 	end
+	LootnScoot.BuyItems = {}
+	LootnScoot.Settings = {}
 	LootnScoot.Settings = self.settings
 	LootnScoot.BuyItems = self.BuyItemsTable
 end
@@ -245,6 +247,8 @@ function Module:LoadSettings()
 	end
 
 	--pass settings to lootnscoot lib
+	LootnScoot.Settings = {}
+	LootnScoot.BuyItems = {}
 	LootnScoot.Settings = self.settings
 	LootnScoot.BuyItems = self.BuyItemsTable
 
@@ -375,12 +379,12 @@ function Module:Render()
 					ImGui.TableNextColumn()
 
 					ImGui.SetNextItemWidth(150)
-					self.TempSettings.NewBuyItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewBuyItem) or nil
+					self.TempSettings.NewBuyItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewBuyItem)
 
 					ImGui.TableNextColumn()
 					ImGui.SetNextItemWidth(120)
 
-					self.TempSettings.NewBuyQty = ImGui.InputInt("New Qty##BuyItems", self.TempSettings.NewBuyQty, 1, 10) or nil
+					self.TempSettings.NewBuyQty = ImGui.InputInt("New Qty##BuyItems", (self.TempSettings.NewBuyQty or 1), 1, 50)
 					if self.TempSettings.NewBuyQty > 1000 then self.TempSettings.NewBuyQty = 1000 end
 
 					ImGui.TableNextColumn()
