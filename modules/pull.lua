@@ -142,6 +142,7 @@ Module.DefaultConfig                   = {
     ['PullRadius']         = { DisplayName = "Pull Radius", Category = "Pull Distance", Tooltip = "Distnace to pull", Default = 350, Min = 1, Max = 10000, },
     ['PullZRadius']        = { DisplayName = "Pull Z Radius", Category = "Pull Distance", Tooltip = "Distnace to pull on Z axis", Default = 90, Min = 1, Max = 350, },
     ['PullRadiusFarm']     = { DisplayName = "Pull Radius Farm", Category = "Pull Distance", Tooltip = "Distnace to pull in Farm mode", Default = 90, Min = 1, Max = 10000, },
+    ['HuntFromPlayer']     = { DisplayName = "Hunt from Player", Category = "Pull Distance", Tooltip = "Off means that we always scan from the hunt starting position, On means that we scan from your current player location", Default = false, },
     ['PullRadiusHunt']     = { DisplayName = "Pull Radius Hunt", Category = "Pull Distance", Tooltip = "Distnace to pull in Hunt mode from your starting position", Default = 500, Min = 1, Max = 10000, },
     ['PullMinCon']         = { DisplayName = "Pull Min Con", Category = "Pull Targets", Tooltip = "Min Con Mobs to consider pulling", Default = 2, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
     ['PullMaxCon']         = { DisplayName = "Pull Max Con", Category = "Pull Targets", Tooltip = "Max Con Mobs to consider pulling", Default = 5, Min = 1, Max = #RGMercConfig.Constants.ConColors, Type = "Combo", ComboOptions = RGMercConfig.Constants.ConColors, },
@@ -1232,7 +1233,7 @@ function Module:GiveTime(combat_state)
     RGMercsLogger.log_verbose("PULL:GiveTime() - DoPull: %s", RGMercUtils.BoolToColorString(RGMercUtils.GetSetting('DoPull')))
     if not RGMercUtils.GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
-    if RGMercUtils.GetSetting('DoPull') and self:IsPullMode("Hunt") and (self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) then
+    if RGMercUtils.GetSetting('DoPull') and self:IsPullMode("Hunt") and ((self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) or RGMercUtils.GetSetting('HuntFromPlayer')) then
         self.TempSettings.HuntX = mq.TLO.Me.X()
         self.TempSettings.HuntY = mq.TLO.Me.Y()
         self.TempSettings.HuntZ = mq.TLO.Me.Z()
