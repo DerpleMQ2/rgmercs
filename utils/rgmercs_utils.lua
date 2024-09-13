@@ -3678,7 +3678,7 @@ end
 
 ---@return boolean
 function RGMercUtils.OnEMU()
-    return (mq.TLO.MacroQuest.BuildName():lower() or "") == "emu"
+    return (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu"
 end
 
 ---@param song MQSpell|buff|fun():string|nil
