@@ -313,10 +313,14 @@ function loot.loadSettings()
     loot.GlobalItems = {}
     -- SQL setup
     if not RGMercUtils.file_exists(ItemsDB) then
-        -- Create the database and its table if it doesn't exist
-        RGMercsLogger.log_warn("Loot Rules Database not found, creating it now.")
-        local db = sqlite3.open(ItemsDB)
-        db:exec([[
+        RGMercsLogger.log_warn("\ayLoot Rules Database \arNOT found\ax, \atCreating it now\ax. Please run \at/rgl lootimport\ax to Import your \atloot.ini \axfile.")
+        RGMercsLogger.log_warn("\arOnly run this one One Character\ax. use \at/rgl lootreload\ax to update the data on the other characters.")
+    else
+        RGMercsLogger.log_info("Loot Rules Database found, loading it now.")
+    end
+    -- Create the database and its table if it doesn't exist
+    local db = sqlite3.open(ItemsDB)
+    db:exec([[
                 CREATE TABLE IF NOT EXISTS Global_Rules (
                 "item_name" TEXT NOT NULL UNIQUE,
                 "item_rule" TEXT NOT NULL,
@@ -330,24 +334,20 @@ function loot.loadSettings()
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT
             );
         ]])
-        db:close()
+    db:close()
 
-        loot.UpdateDB()
-    else
-        RGMercsLogger.log_info("Loot Rules Database found, loading it now.")
-        local db = sqlite3.open(ItemsDB)
-        local stmt = db:prepare("SELECT * FROM Global_Rules")
-        for row in stmt:nrows() do
-            loot.GlobalItems[row.item_name] = row.item_rule
-        end
-        stmt:finalize()
-        stmt = db:prepare("SELECT * FROM Normal_Rules")
-        for row in stmt:nrows() do
-            loot.NormalItems[row.item_name] = row.item_rule
-        end
-        stmt:finalize()
-        db:close()
+    local db = sqlite3.open(ItemsDB)
+    local stmt = db:prepare("SELECT * FROM Global_Rules")
+    for row in stmt:nrows() do
+        loot.GlobalItems[row.item_name] = row.item_rule
     end
+    stmt:finalize()
+    stmt = db:prepare("SELECT * FROM Normal_Rules")
+    for row in stmt:nrows() do
+        loot.NormalItems[row.item_name] = row.item_rule
+    end
+    stmt:finalize()
+    db:close()
 
     local tmpSettings = loot.load(SettingsFile, 'Settings')
     local needSave = false
