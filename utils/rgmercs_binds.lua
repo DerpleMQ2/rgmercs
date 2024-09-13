@@ -72,7 +72,12 @@ Bind.Handlers     = {
     ['qsay'] = {
         usage = "/rgl qsay <text>",
         about = "All RGMercs will target your target and say your <text>",
-        handler = function(text)
+        handler = function(...)
+            local allText = { ..., }
+            local text
+            for _, t in ipairs(allText) do
+                text = (text and text .. " " or "") .. t
+            end
             RGMercUtils.DoCmd("/squelch /dggaexecute /target id %d", RGMercUtils.GetTargetID())
             mq.delay(5)
             RGMercUtils.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)

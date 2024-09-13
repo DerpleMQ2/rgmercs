@@ -292,7 +292,8 @@ function Module:Init()
 	self.TempSettings.NeedSave = LootnScoot.init()
 
 	self:LoadSettings()
-	if not self.settings.DoLoot or not RGMercUtils.OnEMU() then
+	if not RGMercUtils.OnEMU() then
+		RGMercsLogger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s", mq.TLO.MacroQuest.BuildName())
 		LootnScoot = nil
 	else
 		RGMercsLogger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
@@ -707,6 +708,7 @@ function Module:LootMobs()
 end
 
 function Module:DoBuy()
+	printf("BUY %s", LootnScoot or "NONE")
 	if LootnScoot ~= nil then
 		LootnScoot.processItems('Buy')
 	end
@@ -780,6 +782,8 @@ end
 
 function Module:GiveTime(combat_state)
 	if not LootnScoot then return end
+	if not RGMercUtils.GetSetting('DoLoot') then return end
+
 	if self.TempSettings.NeedSave then
 		self:SaveSettings(false)
 		self.TempSettings.NeedSave = false

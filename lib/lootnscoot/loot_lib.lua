@@ -1009,7 +1009,9 @@ end
 
 function loot.RestockItems()
     local rowNum = 0
+    printf("Restock")
     for itemName, qty in pairs(loot.BuyItems) do
+        printf(itemName)
         rowNum = mq.TLO.Window("MerchantWnd/MW_ItemList").List(itemName, 2)() or 0
         mq.delay(20)
         local tmpQty = qty - mq.TLO.FindItemCount(itemName)()
