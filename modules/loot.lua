@@ -788,7 +788,7 @@ function Module:GiveTime(combat_state)
 	-- Main Module logic goes here.
 	if RGMercUtils.GetXTHaterCount() == 0 or RGMercUtils.GetSetting('CombatLooting') then
 		if LootnScoot ~= nil and self.settings.DoLoot then
-			LootnScoot.lootMobs()
+			LootnScoot.lootMobs(1)
 		end
 	end
 end
