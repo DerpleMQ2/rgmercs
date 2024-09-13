@@ -690,20 +690,18 @@ local _ClassConfig = {
             end,
         },
         { --Summon pet even when buffs are off on emu
-            name = 'Pet Management',
-            state = 1,
-            steps = 1,
+            name = 'PetSummon',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime"
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.DoPetCheck()
             end,
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
-            name = 'Pet Downtime',
+            name = 'PetBuff',
             timer = 60,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.DoBuffCheck()
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.DoPetCheck()
             end,
         },
         { --Actions that establish or maintain hatred
@@ -948,7 +946,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Pet Management'] = {
+        ['PetSummon'] = {
             {
                 name = "PetSpell",
                 type = "Spell",
