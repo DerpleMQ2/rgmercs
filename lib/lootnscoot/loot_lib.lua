@@ -168,8 +168,6 @@ local loot         = {
 }
 
 -- SQL information
-local PackageMan   = require('mq/PackageMan')
-local sqlite3      = PackageMan.Require('lsqlite3')
 local ItemsDB      = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
 
 loot.guiLoot       = require('lib.lootnscoot.loot_hist')
@@ -292,7 +290,7 @@ function loot.UpdateDB()
     loot.NormalItems = loot.load(LootFile, 'items')
     loot.GlobalItems = loot.load(LootFile, 'GlobalItems')
 
-    local db = sqlite3.open(ItemsDB)
+    local db = SQLite3.open(ItemsDB)
     for k, v in pairs(loot.NormalItems) do
         local stmt, err = db:prepare("INSERT INTO Normal_Rules (item_name, item_rule) VALUES (?, ?)")
         stmt:bind_values(k, v)
@@ -315,7 +313,7 @@ function loot.loadSettings()
     if not RGMercUtils.file_exists(ItemsDB) then
         -- Create the database and its table if it doesn't exist
         RGMercsLogger.log_warn("Loot Rules Database not found, creating it now.")
-        local db = sqlite3.open(ItemsDB)
+        local db = SQLite3.open(ItemsDB)
         db:exec([[
                 CREATE TABLE IF NOT EXISTS Global_Rules (
                 "item_name" TEXT NOT NULL UNIQUE,
@@ -335,7 +333,7 @@ function loot.loadSettings()
         loot.UpdateDB()
     else
         RGMercsLogger.log_info("Loot Rules Database found, loading it now.")
-        local db = sqlite3.open(ItemsDB)
+        local db = SQLite3.open(ItemsDB)
         local stmt = db:prepare("SELECT * FROM Global_Rules")
         for row in stmt:nrows() do
             loot.GlobalItems[row.item_name] = row.item_rule
@@ -401,7 +399,7 @@ function loot.navToID(spawnID)
 end
 
 function loot.modifyItem(item, action, tableName)
-    local db = sqlite3.open(ItemsDB)
+    local db = SQLite3.open(ItemsDB)
     if not db then
         RGMercsLogger.log_warn("Failed to open database.")
         return
@@ -457,7 +455,7 @@ end
 
 function loot.lookupLootRule(section, key)
     if key == nil then return 'NULL' end
-    local db = sqlite3.open(ItemsDB)
+    local db = SQLite3.open(ItemsDB)
     local sql = "SELECT item_rule FROM Normal_Rules WHERE item_name = ?"
     local stmt = db:prepare(sql)
 
@@ -470,7 +468,7 @@ function loot.lookupLootRule(section, key)
     local stepResult = stmt:step()
 
     local rule = 'NULL'
-    if stepResult == sqlite3.ROW then
+    if stepResult == SQLite3.ROW then
         local row = stmt:get_named_values()
         rule = row.item_rule or 'NULL'
     end

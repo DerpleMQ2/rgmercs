@@ -1,12 +1,15 @@
-local mq        = require('mq')
-local ImGui     = require('ImGui')
-local GitCommit = require('extras.version')
-DanNet          = require('lib.dannet.helpers')
+local mq         = require('mq')
+local ImGui      = require('ImGui')
+local GitCommit  = require('extras.version')
+DanNet           = require('lib.dannet.helpers')
 
-RGMercsBinds    = require('utils.rgmercs_binds')
-RGMercsEvents   = require('utils.rgmercs_events')
-RGMercsLogger   = require("utils.rgmercs_logger")
-RGMercConfig    = require('utils.rgmercs_config')
+local PackageMan = require('mq/PackageMan')
+SQLite3          = PackageMan.Require('lsqlite3')
+
+RGMercsBinds     = require('utils.rgmercs_binds')
+RGMercsEvents    = require('utils.rgmercs_events')
+RGMercsLogger    = require("utils.rgmercs_logger")
+RGMercConfig     = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
 
 RGMercsConsole = nil
