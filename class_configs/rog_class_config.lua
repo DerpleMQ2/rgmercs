@@ -248,6 +248,15 @@ return {
                 return combat_state == "Combat"
             end,
         },
+        {
+            name = 'DPS Buffs',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
+            end,
+        },
     },
     ['Rotations']       = {
         ['Burn'] = {
@@ -340,6 +349,15 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return not mq.TLO.Me.ActiveDisc.ID()
+                end,
+            },
+        },
+        ['DPS Buffs'] = {
+            {
+                name = "Envenomed Blades",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and not RGMercUtils.BuffActiveByName(aaName)
                 end,
             },
         },

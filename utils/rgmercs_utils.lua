@@ -929,6 +929,24 @@ function RGMercUtils.UseItem(itemName, targetId)
     return true
 end
 
+---comment
+---@param slot string
+---@param item string
+function RGMercUtils.SwapItemToSlot(slot, item)
+    RGMercsLogger.log_verbose("\aySwapping item %s to %s", item, slot)
+
+    local swapItem = mq.TLO.FindItem(item)
+    if not swapItem or not swapItem() then return end
+
+    RGMercsLogger.log_verbose("\ag Found Item! Swapping item %s to %s", item, slot)
+
+    RGMercUtils.DoCmd("/itemnotify \"%s\" leftmouseup", item)
+    mq.delay(100, function() return mq.TLO.Cursor.Name() == item end)
+    RGMercUtils.DoCmd("/itemnotify %s leftmouseup", slot)
+    mq.delay(100, function() return mq.TLO.Cursor.Name() ~= item end)
+    RGMercUtils.DoCmd("/autoinv")
+end
+
 ---@param abilityName string
 function RGMercUtils.UseAbility(abilityName)
     local me = mq.TLO.Me
@@ -1048,7 +1066,12 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
         RGMercUtils.ActionPrep()
 
         RGMercsLogger.log_verbose("\ag %s \ar =>> \ay %s \ar <<=", songName, targetSpawn.CleanName() or "None")
-        -- TODO Swap Instruments
+
+        -- Swap Instruments
+        local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
+        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.SwapInst then
+            classConfig.HelperFunctions.SwapInst(spell.Skill())
+        end
 
         retryCount = retryCount or 0
 
@@ -1102,6 +1125,10 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
         mq.delay(clipDelay)
 
         RGMercUtils.DoCmd("/stopsong")
+
+        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.SwapInst then
+            classConfig.HelperFunctions.SwapInst("Weapon")
+        end
 
         return RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS
     end

@@ -755,6 +755,24 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
+        SwapInst = function(type)
+            if not RGMercUtils.GetSetting('SwapInstruments') then return end
+            RGMercsLogger.log_verbose("\ayBard SwapInst(): Swapping to Instrument Type: %s", type)
+            if type == "Percussion Instruments" then
+                RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('PercInst'))
+                return
+            elseif type == "Wind Instruments" then
+                RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('WindInst'))
+                return
+            elseif type == "Brass Instruments" then
+                RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('BrassInst'))
+                return
+            elseif type == "Stringed Instruments" then
+                RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('StringedInst'))
+                return
+            end
+            RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('Offhand'))
+        end,
         CheckSongStateUse = function(self, config)     --determine whether a song should be song by comparing combat state to settings
             local usestate = RGMercUtils.GetSetting(config)
             if RGMercUtils.GetXTHaterCount() == 0 then --I have tried this with combat_state nand XTHater, and both have their ups and downs. Keep an eye on this.
@@ -1410,60 +1428,67 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig']   = {
-        ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
+        ['Mode']            = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 4, },
         --Mana/Endurance Sustainment
-        ['SelfManaPct']    = { DisplayName = "Self Min Mana %", Category = "Mana/End Sustain", Index = 1, Tooltip = "Minimum Mana% to use Insult and Alliance outside of burns.", Default = 20, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['SelfEndPct']     = { DisplayName = "Self Min End%", Category = "Mana/End Sustain", Index = 2, Tooltip = "Minimum End% to use Bellow or Dicho outside of burns.", Default = 20, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['GroupManaPct']   = { DisplayName = "Group Mana %", Category = "Mana/End Sustain", Index = 3, Tooltip = "Mana% to begin managing group mana by using Crescendoes and Reflexive Strikes. If configured, also governs when Regen Song will be sung.", Default = 80, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['GroupManaCt']    = { DisplayName = "Group Mana Count", Category = "Mana/End Sustain", Index = 4, Tooltip = "The number of party members (including yourself) that need to be under the above mana percentage.", Default = 2, Min = 1, Max = 6, ConfigType = "Advanced", },
+        ['SelfManaPct']     = { DisplayName = "Self Min Mana %", Category = "Mana/End Sustain", Index = 1, Tooltip = "Minimum Mana% to use Insult and Alliance outside of burns.", Default = 20, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['SelfEndPct']      = { DisplayName = "Self Min End%", Category = "Mana/End Sustain", Index = 2, Tooltip = "Minimum End% to use Bellow or Dicho outside of burns.", Default = 20, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['GroupManaPct']    = { DisplayName = "Group Mana %", Category = "Mana/End Sustain", Index = 3, Tooltip = "Mana% to begin managing group mana by using Crescendoes and Reflexive Strikes. If configured, also governs when Regen Song will be sung.", Default = 80, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['GroupManaCt']     = { DisplayName = "Group Mana Count", Category = "Mana/End Sustain", Index = 4, Tooltip = "The number of party members (including yourself) that need to be under the above mana percentage.", Default = 2, Min = 1, Max = 6, ConfigType = "Advanced", },
         --Debuffs
-        ['DoSTSlow']       = { DisplayName = "Use Slow (ST)", Category = "Debuffs", Index = 1, Tooltip = Tooltips.SlowSong, RequiresLoadoutChange = true, Default = false, },
-        ['DoAESlow']       = { DisplayName = "Use Slow (AE)", Category = "Debuffs", Index = 2, Tooltip = Tooltips.AESlowSong, RequiresLoadoutChange = true, Default = false, },
-        ['DoDispel']       = { DisplayName = "Use Dispel", Category = "Debuffs", Index = 3, Tooltip = Tooltips.DispelSong, RequiresLoadoutChange = true, Default = false, },
+        ['DoSTSlow']        = { DisplayName = "Use Slow (ST)", Category = "Debuffs", Index = 1, Tooltip = Tooltips.SlowSong, RequiresLoadoutChange = true, Default = false, },
+        ['DoAESlow']        = { DisplayName = "Use Slow (AE)", Category = "Debuffs", Index = 2, Tooltip = Tooltips.AESlowSong, RequiresLoadoutChange = true, Default = false, },
+        ['DoDispel']        = { DisplayName = "Use Dispel", Category = "Debuffs", Index = 3, Tooltip = Tooltips.DispelSong, RequiresLoadoutChange = true, Default = false, },
         --Regen/Healing
-        ['RegenSong']      = { DisplayName = "Regen Song Choice:", Category = "Regen/Healing", Index = 1, Tooltip = "Select the Regen Song to be used, if any. Always used out of combat if selected. Use in-combat is determined by sustain settings.", RequiresLoadoutChange = true, Type = "Combo", ComboOptions = { 'None', 'Group', 'Area', }, Default = 2, Min = 1, Max = 3, },
-        ['UseRegen']       = { DisplayName = "Regen Song Use:", Category = "Regen/Healing", Index = 2, Tooltip = "When to use the Regen Song selected above.", Type = "Combo", ComboOptions = { 'Under Group Mana % (Advanced Options Setting)', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 3, Min = 1, Max = 4, },
-        ['UseCrescendo']   = { DisplayName = "Crescendo Delayed Heal", Category = "Regen/Healing", Index = 3, Tooltip = Tooltips.CrescendoSong, RequiresLoadoutChange = true, Default = true, },
-        ['UseCure']        = { DisplayName = "Cure Ailments", Category = "Regen/Healing", Index = 4, Tooltip = Tooltips.CureSong, RequiresLoadoutChange = true, Default = false, },
+        ['RegenSong']       = { DisplayName = "Regen Song Choice:", Category = "Regen/Healing", Index = 1, Tooltip = "Select the Regen Song to be used, if any. Always used out of combat if selected. Use in-combat is determined by sustain settings.", RequiresLoadoutChange = true, Type = "Combo", ComboOptions = { 'None', 'Group', 'Area', }, Default = 2, Min = 1, Max = 3, },
+        ['UseRegen']        = { DisplayName = "Regen Song Use:", Category = "Regen/Healing", Index = 2, Tooltip = "When to use the Regen Song selected above.", Type = "Combo", ComboOptions = { 'Under Group Mana % (Advanced Options Setting)', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 3, Min = 1, Max = 4, },
+        ['UseCrescendo']    = { DisplayName = "Crescendo Delayed Heal", Category = "Regen/Healing", Index = 3, Tooltip = Tooltips.CrescendoSong, RequiresLoadoutChange = true, Default = true, },
+        ['UseCure']         = { DisplayName = "Cure Ailments", Category = "Regen/Healing", Index = 4, Tooltip = Tooltips.CureSong, RequiresLoadoutChange = true, Default = false, },
         --DPS - Self
-        ['UseBellow']      = { DisplayName = "Use Bellow:", Category = "DPS - Self", Index = 1, Tooltip = "Use Boastful Bellow", Type = "Combo", ComboOptions = { 'Never', 'Burns Only', 'All Combat', }, Default = 3, Min = 1, Max = 3, ConfigType = "Advanced", },
-        ['UseInsult']      = { DisplayName = "Insults to Use:", Category = "DPS - Self", Index = 2, Tooltip = Tooltips.InsultSong, Type = "Combo", ComboOptions = { 'None', 'Current Tier', 'Current + Old Tier', }, Default = 3, Min = 1, Max = 3, RequiresLoadoutChange = true, },
-        ['UseFireDots']    = { DisplayName = "Use Fire Dots", Category = "DPS - Self", Index = 3, Tooltip = Tooltips.FireDotSong, RequiresLoadoutChange = true, Default = false, },
-        ['UseIceDots']     = { DisplayName = "Use Ice Dots", Category = "DPS - Self", Index = 4, Tooltip = Tooltips.IceDotSong, RequiresLoadoutChange = true, Default = false, },
-        ['UsePoisonDots']  = { DisplayName = "Use Poison Dots", Category = "DPS - Self", Index = 5, Tooltip = Tooltips.PoisonDotSong, RequiresLoadoutChange = true, Default = false, },
-        ['UseDiseaseDots'] = { DisplayName = "Use Disease Dots", Category = "DPS - Self", Index = 6, Tooltip = Tooltips.DiseaseDotSong, RequiresLoadoutChange = true, Default = false, },
-        ['UseJonthan']     = { DisplayName = "Use Jonthan", Category = "DPS - Self", Index = 7, Tooltip = Tooltips.Jonthan, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
+        ['UseBellow']       = { DisplayName = "Use Bellow:", Category = "DPS - Self", Index = 1, Tooltip = "Use Boastful Bellow", Type = "Combo", ComboOptions = { 'Never', 'Burns Only', 'All Combat', }, Default = 3, Min = 1, Max = 3, ConfigType = "Advanced", },
+        ['UseInsult']       = { DisplayName = "Insults to Use:", Category = "DPS - Self", Index = 2, Tooltip = Tooltips.InsultSong, Type = "Combo", ComboOptions = { 'None', 'Current Tier', 'Current + Old Tier', }, Default = 3, Min = 1, Max = 3, RequiresLoadoutChange = true, },
+        ['UseFireDots']     = { DisplayName = "Use Fire Dots", Category = "DPS - Self", Index = 3, Tooltip = Tooltips.FireDotSong, RequiresLoadoutChange = true, Default = false, },
+        ['UseIceDots']      = { DisplayName = "Use Ice Dots", Category = "DPS - Self", Index = 4, Tooltip = Tooltips.IceDotSong, RequiresLoadoutChange = true, Default = false, },
+        ['UsePoisonDots']   = { DisplayName = "Use Poison Dots", Category = "DPS - Self", Index = 5, Tooltip = Tooltips.PoisonDotSong, RequiresLoadoutChange = true, Default = false, },
+        ['UseDiseaseDots']  = { DisplayName = "Use Disease Dots", Category = "DPS - Self", Index = 6, Tooltip = Tooltips.DiseaseDotSong, RequiresLoadoutChange = true, Default = false, },
+        ['UseJonthan']      = { DisplayName = "Use Jonthan", Category = "DPS - Self", Index = 7, Tooltip = Tooltips.Jonthan, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
         --DPS - Group
-        ['UseFierceEye']   = { DisplayName = "Fierce Eye Use:", Category = "DPS - Group", Index = 7, Tooltip = "When to use the Fierce Eye AA.", Type = "Combo", ComboOptions = { 'Never', 'Burns Only', 'All Combat', }, Default = 3, Min = 1, Max = 3, ConfigType = "Advanced", },
-        ['UseArcane']      = { DisplayName = "Use Arcane Line", Category = "DPS - Group", Index = 1, Tooltip = Tooltips.ArcaneSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 3, Min = 1, Max = 4, RequiresLoadoutChange = true, },
-        ['UseDicho']       = { DisplayName = "Psalm (Dicho) Use:", Category = "DPS - Group", Index = 3, Tooltip = Tooltips.DichoSong, Type = "Combo", ComboOptions = { 'Never', 'During QuickTime', 'All Combat', }, Default = 3, Min = 1, Max = 3, RequiresLoadoutChange = true, ConfigType = "Advanced", },
-        ['UseSuffering']   = { DisplayName = "Use Suffering Line", Category = "DPS - Group", Index = 2, Tooltip = Tooltips.SufferingSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 4, Min = 1, Max = 4, RequiresLoadoutChange = true, },
-        ['UseFireBuff']    = { DisplayName = "Use Fire Spell Buff", Category = "DPS - Group", Index = 4, Tooltip = Tooltips.FireBuffSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
-        ['UseColdBuff']    = { DisplayName = "Use Cold Spell Buff", Category = "DPS - Group", Index = 5, Tooltip = Tooltips.ColdBuffSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
-        ['UseDotBuff']     = { DisplayName = "Use Fire/Magic DoT Buff", Category = "DPS - Group", Index = 6, Tooltip = Tooltips.DotBuffSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
-        ['UseAlliance']    = { DisplayName = "Use Alliance", Category = "DPS - Group", Index = 8, Tooltip = Tooltips.AllianceSong, RequiresLoadoutChange = true, Default = false, ConfigType = "Advanced", },
+        ['UseFierceEye']    = { DisplayName = "Fierce Eye Use:", Category = "DPS - Group", Index = 7, Tooltip = "When to use the Fierce Eye AA.", Type = "Combo", ComboOptions = { 'Never', 'Burns Only', 'All Combat', }, Default = 3, Min = 1, Max = 3, ConfigType = "Advanced", },
+        ['UseArcane']       = { DisplayName = "Use Arcane Line", Category = "DPS - Group", Index = 1, Tooltip = Tooltips.ArcaneSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 3, Min = 1, Max = 4, RequiresLoadoutChange = true, },
+        ['UseDicho']        = { DisplayName = "Psalm (Dicho) Use:", Category = "DPS - Group", Index = 3, Tooltip = Tooltips.DichoSong, Type = "Combo", ComboOptions = { 'Never', 'During QuickTime', 'All Combat', }, Default = 3, Min = 1, Max = 3, RequiresLoadoutChange = true, ConfigType = "Advanced", },
+        ['UseSuffering']    = { DisplayName = "Use Suffering Line", Category = "DPS - Group", Index = 2, Tooltip = Tooltips.SufferingSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 4, Min = 1, Max = 4, RequiresLoadoutChange = true, },
+        ['UseFireBuff']     = { DisplayName = "Use Fire Spell Buff", Category = "DPS - Group", Index = 4, Tooltip = Tooltips.FireBuffSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
+        ['UseColdBuff']     = { DisplayName = "Use Cold Spell Buff", Category = "DPS - Group", Index = 5, Tooltip = Tooltips.ColdBuffSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
+        ['UseDotBuff']      = { DisplayName = "Use Fire/Magic DoT Buff", Category = "DPS - Group", Index = 6, Tooltip = Tooltips.DotBuffSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
+        ['UseAlliance']     = { DisplayName = "Use Alliance", Category = "DPS - Group", Index = 8, Tooltip = Tooltips.AllianceSong, RequiresLoadoutChange = true, Default = false, ConfigType = "Advanced", },
         --Why is this optional? I can't think of a situation that it should be false, keeping it here until I find out.Maybe a stacking thing?
         --['UseFuneralDirge']		= { DisplayName = "Funeral Dirge (Burn)", Category = "DPS - Group", Index = 2, Tooltip = "Use Funeral Dirge during Burns", Default = true, },
         --Buffs and Defenses
-        ['UseAura']        = { DisplayName = "Use Bard Aura", Category = "Buffs and Defenses", Index = 1, Tooltip = "Select the Aura to be used, if any.", Type = "Combo", ComboOptions = { 'DPS Aura', 'Regen', 'None', }, RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
-        ['UseAmp']         = { DisplayName = "Use Amp", Category = "Buffs and Defenses", Index = 2, Tooltip = Tooltips.AmpSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, },
-        ['UseSpiteful']    = { DisplayName = "Use Spiteful", Category = "Buffs and Defenses", Index = 3, Tooltip = Tooltips.SpitefulSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, },
-        ['UseSpry']        = { DisplayName = "Use Spry", Category = "Buffs and Defenses", Index = 4, Tooltip = Tooltips.SprySonataSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, },
-        ['UseResist']      = { DisplayName = "Use DS/Resist Psalm", Category = "Buffs and Defenses", Index = 5, Tooltip = Tooltips.ResistSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, },
-        ['UseReckless']    = { DisplayName = "Use Reckless", Category = "Buffs and Defenses", Index = 6, Tooltip = Tooltips.RecklessSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 4, Min = 1, Max = 4, RequiresLoadoutChange = true, },
-        ['UseAccelerando'] = { DisplayName = "Use Accelerando", Category = "Buffs and Defenses", Index = 7, Tooltip = Tooltips.AccelerandoSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
+        ['UseAura']         = { DisplayName = "Use Bard Aura", Category = "Buffs and Defenses", Index = 1, Tooltip = "Select the Aura to be used, if any.", Type = "Combo", ComboOptions = { 'DPS Aura', 'Regen', 'None', }, RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
+        ['UseAmp']          = { DisplayName = "Use Amp", Category = "Buffs and Defenses", Index = 2, Tooltip = Tooltips.AmpSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, },
+        ['UseSpiteful']     = { DisplayName = "Use Spiteful", Category = "Buffs and Defenses", Index = 3, Tooltip = Tooltips.SpitefulSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, },
+        ['UseSpry']         = { DisplayName = "Use Spry", Category = "Buffs and Defenses", Index = 4, Tooltip = Tooltips.SprySonataSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, },
+        ['UseResist']       = { DisplayName = "Use DS/Resist Psalm", Category = "Buffs and Defenses", Index = 5, Tooltip = Tooltips.ResistSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, },
+        ['UseReckless']     = { DisplayName = "Use Reckless", Category = "Buffs and Defenses", Index = 6, Tooltip = Tooltips.RecklessSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 4, Min = 1, Max = 4, RequiresLoadoutChange = true, },
+        ['UseAccelerando']  = { DisplayName = "Use Accelerando", Category = "Buffs and Defenses", Index = 7, Tooltip = Tooltips.AccelerandoSong, Type = "Combo", ComboOptions = { 'Never', 'In-Combat Only', 'Always', 'Out-of-Combat Only', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
         --Utility/Items/Misc
-        ['UseEpic']        = { DisplayName = "Epic Use:", Category = "Utility/Items/Misc", Index = 1, Tooltip = "Use Epic 1-Never 2-Burns 3-Always", Type = "Combo", ComboOptions = { 'Never', 'Burns Only', 'All Combat', }, Default = 3, Min = 1, Max = 3, ConfigType = "Advanced", },
-        ['DoChestClick']   = { DisplayName = "Chest Click", Category = "Utility/Items/Misc", Index = 2, Tooltip = "Click your equipped chest item.", Default = true, ConfigType = "Advanced", },
-        ['UseSoBItems']    = { DisplayName = "Symph. of Battle", Category = "Utility/Items/Misc", Index = 3, Tooltip = "Click your Symphony of Battle items.", Default = false, ConfigType = "Advanced", },
-        ['UseDreadstone']  = { DisplayName = "Dreadstone", Category = "Utility/Items/Misc", Index = 4, Tooltip = "Use your Dreadstone when able.", Default = false, ConfigType = "Advanced", },
-        ['UseRunBuff']     = { DisplayName = "Runspeed Buff:", Category = "Utility/Items/Misc", Index = 5, Tooltip = "Select Runspeed Buff to use. NOTE: This setting may need user adjustment during the early level range!", Type = "Combo", ComboOptions = { 'AA', 'Song (Long Duration Only)', 'Song (Fastest Available)', 'Off', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
-        ['UseEndBreath']   = { DisplayName = "Use Enduring Breath", Category = "Utility/Items/Misc", Index = 6, Tooltip = Tooltips.EndBreathSong, Default = false, ConfigType = "Advanced", },
-        ['DoVetAA']        = { DisplayName = "Use Vet AA", Category = "Utility/Items/Misc", Index = 7, Tooltip = "Use Veteran AA's in emergencies or during BigBurn", Default = true, ConfigType = "Advanced", },
-        ['EmergencyStart'] = { DisplayName = "Emergency HP%", Category = "Utility/Items/Misc", Index = 8, Tooltip = "Your HP % before we begin to use emergency mitigation abilities.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
-        ['UseFading']      = { DisplayName = "Use Combat Escape", Category = "Utility/Items/Misc", Index = 9, Tooltip = "Use Fading Memories when you have aggro and you aren't the Main Assist.", Default = true, ConfigType = "Advanced", },
-        ['RefreshDT']      = { DisplayName = "Downtime Threshold", Category = "Utility/Items/Misc", Index = 10, Tooltip = "The duration threshold for refreshing a buff song outside of combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.", Default = 12, Min = 0, Max = 30, ConfigType = "Advanced", },
-        ['RefreshCombat']  = { DisplayName = "Combat Threshold", Category = "Utility/Items/Misc", Index = 11, Tooltip = "The duration threshold for refreshing a buff song in combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.", Default = 6, Min = 0, Max = 30, ConfigType = "Advanced", },
+        ['UseEpic']         = { DisplayName = "Epic Use:", Category = "Utility/Items/Misc", Index = 1, Tooltip = "Use Epic 1-Never 2-Burns 3-Always", Type = "Combo", ComboOptions = { 'Never', 'Burns Only', 'All Combat', }, Default = 3, Min = 1, Max = 3, ConfigType = "Advanced", },
+        ['DoChestClick']    = { DisplayName = "Chest Click", Category = "Utility/Items/Misc", Index = 2, Tooltip = "Click your equipped chest item.", Default = true, ConfigType = "Advanced", },
+        ['UseSoBItems']     = { DisplayName = "Symph. of Battle", Category = "Utility/Items/Misc", Index = 3, Tooltip = "Click your Symphony of Battle items.", Default = false, ConfigType = "Advanced", },
+        ['UseDreadstone']   = { DisplayName = "Dreadstone", Category = "Utility/Items/Misc", Index = 4, Tooltip = "Use your Dreadstone when able.", Default = false, ConfigType = "Advanced", },
+        ['UseRunBuff']      = { DisplayName = "Runspeed Buff:", Category = "Utility/Items/Misc", Index = 5, Tooltip = "Select Runspeed Buff to use. NOTE: This setting may need user adjustment during the early level range!", Type = "Combo", ComboOptions = { 'AA', 'Song (Long Duration Only)', 'Song (Fastest Available)', 'Off', }, Default = 1, Min = 1, Max = 4, RequiresLoadoutChange = true, ConfigType = "Advanced", },
+        ['UseEndBreath']    = { DisplayName = "Use Enduring Breath", Category = "Utility/Items/Misc", Index = 6, Tooltip = Tooltips.EndBreathSong, Default = false, ConfigType = "Advanced", },
+        ['DoVetAA']         = { DisplayName = "Use Vet AA", Category = "Utility/Items/Misc", Index = 7, Tooltip = "Use Veteran AA's in emergencies or during BigBurn", Default = true, ConfigType = "Advanced", },
+        ['EmergencyStart']  = { DisplayName = "Emergency HP%", Category = "Utility/Items/Misc", Index = 8, Tooltip = "Your HP % before we begin to use emergency mitigation abilities.", Default = 50, Min = 1, Max = 100, ConfigType = "Advanced", },
+        ['UseFading']       = { DisplayName = "Use Combat Escape", Category = "Utility/Items/Misc", Index = 9, Tooltip = "Use Fading Memories when you have aggro and you aren't the Main Assist.", Default = true, ConfigType = "Advanced", },
+        ['RefreshDT']       = { DisplayName = "Downtime Threshold", Category = "Utility/Items/Misc", Index = 10, Tooltip = "The duration threshold for refreshing a buff song outside of combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.", Default = 12, Min = 0, Max = 30, ConfigType = "Advanced", },
+        ['RefreshCombat']   = { DisplayName = "Combat Threshold", Category = "Utility/Items/Misc", Index = 11, Tooltip = "The duration threshold for refreshing a buff song in combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.", Default = 6, Min = 0, Max = 30, ConfigType = "Advanced", },
+        --Instruments--
+        ['SwapInstruments'] = { DisplayName = "Auto Swap Instruments", Index = 1, Category = "Instruments", Tooltip = "Auto swap instruments for songs", Default = false, },
+        ['BrassInst']       = { DisplayName = "Brass Instrument", Index = 3, Category = "Instruments", Tooltip = "Brass Instrument to Swap in as needed.", Type = "ClickyItem", Default = "", },
+        ['WindInst']        = { DisplayName = "Wind Instrument", Index = 4, Category = "Instruments", Tooltip = "Wind Instrument to Swap in as needed.", Type = "ClickyItem", Default = "", },
+        ['PercInst']        = { DisplayName = "Percussion Instrument", Index = 5, Category = "Instruments", Tooltip = "Percussion Instrument to Swap in as needed.", Type = "ClickyItem", Default = "", },
+        ['StringedInst']    = { DisplayName = "Stringed Instrument", Index = 6, Category = "Instruments", Tooltip = "Stringed Instrument to Swap in as needed.", Type = "ClickyItem", Default = "", },
+        ['Offhand']         = { DisplayName = "Offhand", Index = 2, Category = "Instruments", Tooltip = "Item to swap in when no instrument is available or needed.", Type = "ClickyItem", Default = "", },
     },
     ['Spells']          = { getSpellCallback = generateSongList, },
 }
