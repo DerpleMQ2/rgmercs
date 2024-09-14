@@ -1296,16 +1296,6 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "PetAura",
-                type = "Spell",
-                active_cond = function(self, spell)
-                    return RGMercUtils.AuraActiveByName(spell.BaseName()) ~= nil
-                end,
-                cond = function(self, spell)
-                    return not RGMercUtils.AuraActiveByName(spell.BaseName())
-                end,
-            },
-            {
                 name = "PetIceFlame",
                 type = "Spell",
                 active_cond = function(self, spell)
@@ -1731,6 +1721,16 @@ _ClassConfig      = {
                 type = "AA",
                 cond = function(self, aaName)
                     return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
+                name = "PetAura",
+                type = "Spell",
+                active_cond = function(self, spell)
+                    return RGMercUtils.AuraActiveByName(spell.BaseName()) ~= nil
+                end,
+                cond = function(self, spell)
+                    return not RGMercUtils.AuraActiveByName(spell.BaseName())
                 end,
             },
             {
