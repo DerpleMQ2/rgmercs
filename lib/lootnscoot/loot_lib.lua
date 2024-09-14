@@ -448,6 +448,7 @@ function loot.addRule(itemName, section, rule)
     else
         loot.modifyItem(itemName, rule, 'Normal_Rules')
     end
+    loot.lootActor:send({ mailbox = 'lootnscoot', }, { who = RGMercConfig.Globals.CurLoadedChar, action = 'addrule', item = itemName, rule = rule, section = section, })
 
     mq.cmdf('/ini "%s" "%s" "%s" "%s"', LootFile, section, itemName, rule)
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
@@ -589,8 +590,47 @@ function loot.getRule(item)
 end
 
 -- EVENTS
-
-local lootActor = RGMercUtils.Actors.register('lootnscoot', function(message) end)
+function loot.RegisterActors()
+    loot.lootActor = RGMercUtils.Actors.register('lootnscoot', function(message)
+        local lootMessage = message()
+        local who = lootMessage.who
+        local action = lootMessage.action
+        if action == 'lootreload' then
+            loot.commandHandler('reload')
+        end
+        if who == RGMercConfig.Globals.CurLoadedChar then return end
+        if action == 'addrule' then
+            local item = lootMessage.item
+            local rule = lootMessage.rule
+            local section = lootMessage.section
+            if section == 'GlobalItems' then
+                loot.GlobalItems[item] = rule
+            else
+                loot.NormalItems[item] = rule
+            end
+            RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+        elseif action == 'deleteitem' then
+            local item = lootMessage.item
+            local section = lootMessage.section
+            if section == 'GlobalItems' then
+                loot.GlobalItems[item] = nil
+            else
+                loot.NormalItems[item] = nil
+            end
+            RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+        elseif action == 'modifyitem' then
+            local item = lootMessage.item
+            local rule = lootMessage.rule
+            local section = lootMessage.section
+            if section == 'GlobalItems' then
+                loot.GlobalItems[item] = rule
+            else
+                loot.NormalItems[item] = rule
+            end
+            RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+        end
+    end)
+end
 
 local itemNoValue = nil
 function loot.eventNovalue(line, item)
@@ -613,16 +653,19 @@ end
 function loot.setBuyItem(item, qty)
     loot.BuyItems[item] = qty
     mq.cmdf('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, item, qty)
+    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.setGlobalItem(item, val)
-    loot.GlobalItems[item] = val ~= 'delete' or nil
+    loot.GlobalItems[item] = val ~= 'delete' and val or nil
     loot.modifyItem(item, val, 'Global_Rules')
+    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.setNormalItem(item, val)
-    loot.NormalItems[item] = val ~= 'delete' or nil
+    loot.NormalItems[item] = val ~= 'delete' and val or nil
     loot.modifyItem(item, val, 'Normal_Rules')
+    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.commandHandler(...)
@@ -884,9 +927,10 @@ function loot.lootCorpse(corpseID)
         end
         if #allItems > 0 then
             -- send to self and others running lootnscoot
-            lootActor:send({ mailbox = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = RGMercConfig.Globals.CurLoadedChar, })
+            loot.lootActor:send({ mailbox = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = RGMercConfig.Globals.CurLoadedChar, })
             -- send to standalone looted gui
-            lootActor:send({ mailbox = 'looted', script = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = RGMercConfig.Globals.CurLoadedChar, })
+            loot.lootActor:send({ mailbox = 'looted', script = 'looted', },
+                { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = RGMercConfig.Globals.CurLoadedChar, })
         end
     end
     if mq.TLO.Cursor() then loot.checkCursor() end
@@ -960,6 +1004,8 @@ function loot.eventSell(_, itemName)
         loot.modifyItem(itemName, 'Sell', 'Normal_Rules')
         lootData[firstLetter][itemName] = 'Sell'
         loot.NormalItems[itemName] = 'Sell'
+        loot.lootActor:send({ mailbox = 'lootnscoot', },
+            { who = RGMercConfig.Globals.CurLoadedChar, action = 'modifyitem', item = itemName, rule = 'Sell', section = "NormalItems", })
         RGMercModules:ExecModule("Loot", "ModifyLootSettings")
     end
 end
@@ -1063,6 +1109,8 @@ function loot.eventTribute(line, itemName)
         loot.modifyItem(itemName, 'Tribute', 'Normal_Rules')
         lootData[firstLetter][itemName] = 'Tribute'
         loot.NormalItems[itemName] = 'Tribute'
+        loot.lootActor:send({ mailbox = 'lootnscoot', },
+            { who = RGMercConfig.Globals.CurLoadedChar, action = 'modifyitem', item = itemName, rule = 'Tribute', section = "NormalItems", })
         RGMercModules:ExecModule("Loot", "ModifyLootSettings")
     end
 end
@@ -1431,6 +1479,7 @@ function loot.init()
     else
         needsSave = loot.loadSettings()
     end
+    loot.RegisterActors()
     loot.CheckBags()
     loot.setupEvents()
     loot.setupBinds()
