@@ -938,13 +938,19 @@ function RGMercUtils.SwapItemToSlot(slot, item)
     local swapItem = mq.TLO.FindItem(item)
     if not swapItem or not swapItem() then return end
 
+    if mq.TLO.InvSlot(slot).Item.Name() == swapItem.Name() then return end
+
     RGMercsLogger.log_verbose("\ag Found Item! Swapping item %s to %s", item, slot)
 
     RGMercUtils.DoCmd("/itemnotify \"%s\" leftmouseup", item)
     mq.delay(100, function() return mq.TLO.Cursor.Name() == item end)
     RGMercUtils.DoCmd("/itemnotify %s leftmouseup", slot)
     mq.delay(100, function() return mq.TLO.Cursor.Name() ~= item end)
-    RGMercUtils.DoCmd("/autoinv")
+
+    while mq.TLO.Cursor.ID() do
+        mq.delay(1)
+        RGMercUtils.DoCmd("/autoinv")
+    end
 end
 
 ---@param abilityName string
