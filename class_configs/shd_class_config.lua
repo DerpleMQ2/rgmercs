@@ -958,7 +958,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Pet Downtime'] = {
+        ['PetBuff'] = {
             {
                 name = "PetHaste",
                 type = "Spell",
