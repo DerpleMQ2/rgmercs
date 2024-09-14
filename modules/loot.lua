@@ -320,15 +320,6 @@ function Module:Render()
 		self:SaveSettings(false)
 	end
 	if ImGui.CollapsingHeader("Items Tables") then
-		if ImGui.Button("Reload Loot") then
-			self:LootReload()
-		end
-		if ImGui.IsItemHovered() then
-			ImGui.BeginTooltip()
-			ImGui.Text("Reloads working Tables from the Database.")
-			ImGui.EndTooltip()
-		end
-
 		if ImGui.BeginTabBar("Items") then
 			local col = math.max(2, math.floor(ImGui.GetContentRegionAvail() / 150))
 			col = col + (col % 2)
@@ -454,12 +445,16 @@ function Module:Render()
 						if k ~= "" then
 							self.GlobalItemsTable[k] = v
 							LootnScoot.setGlobalItem(k, v)
+							LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
+								{ who = RGMercConfig.Globals.CurLoadedChar, action = 'modifyitem', section = "GlobalItems", item = k, rule = v, })
 						end
 					end
 
 					for k in pairs(self.TempSettings.DeletedGlobalKeys) do
 						self.GlobalItemsTable[k] = nil
 						LootnScoot.setGlobalItem(k, 'delete')
+						LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
+							{ who = RGMercConfig.Globals.CurLoadedChar, section = "GlobalItems", action = 'deleteitem', item = k, })
 					end
 					self.TempSettings.UpdatedGlobalItems = {}
 					self.TempSettings.DeletedGlobalKeys = {}
@@ -491,6 +486,15 @@ function Module:Render()
 						if self.TempSettings.NewGlobalValue ~= "" and self.TempSettings.NewGlobalValue ~= "" then
 							self.GlobalItemsTable[self.TempSettings.NewGlobalItem] = self.TempSettings.NewGlobalValue
 							LootnScoot.setGlobalItem(self.TempSettings.NewGlobalItem, self.TempSettings.NewGlobalValue)
+							LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
+								{
+									who = RGMercConfig.Globals.CurLoadedChar,
+									action = 'addrule',
+									section = "GlobalItems",
+									item = self.TempSettings.NewGlobalItem,
+									rule = self.TempSettings.NewGlobalValue,
+								})
+
 							self.TempSettings.NewGlobalItem = ""
 							self.TempSettings.NewGlobalValue = ""
 						end
@@ -566,12 +570,16 @@ function Module:Render()
 					for k, v in pairs(self.TempSettings.UpdatedNormalItems) do
 						self.NormalItemsTable[k] = v
 						LootnScoot.setNormalItem(k, v)
+						LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
+							{ who = RGMercConfig.Globals.CurLoadedChar, action = 'modifyitem', section = "NormalItems", item = k, rule = v, })
 					end
 					self.TempSettings.UpdatedNormalItems = {}
 
 					for k in pairs(self.TempSettings.DeletedNormalKeys) do
 						self.NormalItemsTable[k] = nil
 						LootnScoot.setNormalItem(k, 'delete')
+						LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
+							{ who = RGMercConfig.Globals.CurLoadedChar, action = 'deleteitem', section = "NormalItems", item = k, })
 					end
 					self.TempSettings.DeletedNormalKeys = {}
 					self:SortItemTables()
@@ -713,7 +721,8 @@ end
 
 function Module:LootReload()
 	if LootnScoot ~= nil then
-		LootnScoot.commandHandler('reload')
+		-- LootnScoot.commandHandler('reload')
+		LootnScoot.lootActor:send({ mailbox = 'lootnscoot', }, { who = RGMercConfig.Globals.CurLoadedChar, action = 'lootreload', })
 		self:LoadSettings()
 	end
 end
