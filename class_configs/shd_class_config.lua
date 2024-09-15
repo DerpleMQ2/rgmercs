@@ -1281,7 +1281,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.MeleeMit,
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.IsTanking()
+                    return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.IsTanking() and not (discSpell.Level() < 108 and mq.TLO.Me.ActiveDisc.ID())
                 end,
             },
             {
