@@ -203,69 +203,6 @@ return {
             "Cry Havoc",
             "Cry Carnage",
         },
-        ['AutoAxe1'] = {
-            "Corroded Axe",
-            "Blunt Axe",
-            "Steel Axe",
-            "Bearded Axe",
-            "Mithril Axe",
-            "Balanced War Axe",
-            "Bonesplicer Axe",
-            "Fleshtear Axe",
-            "Cold Steel Cleaving Axe",
-            "Mithril Bloodaxe",
-            "Rage Axe",
-            "Bloodseeker's Axe",
-            "Battlerage Axe",
-            "Deathfury Axe",
-            "Tainted Axe of Hatred",
-            "Axe of The Destroyer",
-            "Axe of The Annihilator",
-            "Axe of The Decimator",
-            "Axe of The Eradicator",
-            "Axe of The Savage",
-            "Axe of the Sunderer",
-            "Axe of The Brute",
-            "Axe of The Demolisher",
-            "Axe of The Mangler",
-            "Axe of The Vindicator",
-            "Axe of the Conqueror",
-            "Axe of the Eviscerator",
-        },
-        ['AutoAxe2'] = {
-            "Corroded Axe",
-            "Blunt Axe",
-            "Steel Axe",
-            "Bearded Axe",
-            "Mithril Axe",
-            "Balanced War Axe",
-            "Bonesplicer Axe",
-            "Fleshtear Axe",
-            "Cold Steel Cleaving Axe",
-            "Mithril Bloodaxe",
-            "Rage Axe",
-            "Bloodseeker's Axe",
-            "Battlerage Axe",
-            "Deathfury Axe",
-            "Tainted Axe of Hatred",
-            "Axe of The Destroyer",
-            "Axe of The Annihilator",
-            "Axe of The Decimator",
-            "Axe of The Eradicator",
-            "Axe of The Savage",
-            "Axe of the Sunderer",
-            "Axe of The Brute",
-            "Axe of The Demolisher",
-            "Axe of The Mangler",
-            "Axe of The Vindicator",
-            "Axe of the Conqueror",
-            "Axe of the Eviscerator",
-        },
-        ['DichoAxe'] = {
-            "Axe of The Demolisher",
-            "Axe of The Mangler",
-            "Axe of the Conqueror",
-        },
         ['Tendon'] = {
             "Tendon Slice",
             "Tendon Shred",
@@ -377,60 +314,99 @@ return {
             end,
         },
     },
+
     ['Rotations']       = {
         ['Downtime'] = {
             {
-                name = "SummonAxes",
+                name = "Summon Axes",
                 type = "CustomFunc",
                 custom_func = function(self)
                     if not RGMercUtils.GetSetting('SummonAxes') then return false end
-                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
-                    if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['AutoAxe1'])) then return false end
-                    if mq.TLO.FindItemCount(self.ResolvedActionMap['AutoAxe1'].Name())() > RGMercUtils.GetSetting('AutoAxeCount') then return false end
-                    if RGMercUtils.GetSetting('AutoAxeCount') == 0 then return false end
-                    local spell = mq.TLO.Spell(self.ResolvedActionMap['AutoAxe1'].Name())
-                    if not spell or not spell() then return false end
-                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
 
-                    local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['AutoAxe1'], mq.TLO.Me.ID())
-                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
-                    return ret
-                end,
-            },
-            {
-                name = "SummonAxes2",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    if not RGMercUtils.GetSetting('SummonAxes2') then return false end
-                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
-                    if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['AutoAxe2'])) then return false end
-                    if mq.TLO.FindItemCount(self.ResolvedActionMap['AutoAxe2'].Name())() > RGMercUtils.GetSetting('AutoAxe2Count') then return false end
-                    if RGMercUtils.GetSetting('AutoAxe2Count') == 0 then return false end
-                    local spell = mq.TLO.Spell(self.ResolvedActionMap['AutoAxe2'].Name())
-                    if not spell or not spell() then return false end
-                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
+                    local AxeSkills = {
+                        "Corroded Axe",
+                        "Blunt Axe",
+                        "Steel Axe",
+                        "Bearded Axe",
+                        "Mithril Axe",
+                        "Balanced War Axe",
+                        "Bonesplicer Axe",
+                        "Fleshtear Axe",
+                        "Cold Steel Cleaving Axe",
+                        "Mithril Bloodaxe",
+                        "Rage Axe",
+                        "Bloodseeker's Axe",
+                        "Battlerage Axe",
+                        "Deathfury Axe",
+                        "Tainted Axe of Hatred",
+                        "Axe of The Destroyer",
+                        "Axe of The Annihilator",
+                        "Axe of The Decimator",
+                        "Axe of The Eradicator",
+                        "Axe of The Savage",
+                        "Axe of the Sunderer",
+                        "Axe of The Brute",
+                        "Axe of The Demolisher",
+                        "Axe of The Mangler",
+                        "Axe of The Vindicator",
+                        "Axe of the Conqueror",
+                        "Axe of the Eviscerator",
+                        "Axe of The Demolisher",
+                        "Axe of The Mangler",
+                        "Axe of the Conqueror",
+                    }
 
-                    local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['AutoAxe2'], mq.TLO.Me.ID())
-                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
-                    return ret
-                end,
-            },
-            {
-                name = "SummonDichoAxe",
-                type = "CustomFunc",
-                custom_func = function(self)
-                    if not RGMercUtils.GetSetting('SummonDichoAxes') then return false end
-                    if not RGMercUtils.PCDiscReady((self.ResolvedActionMap['DichoAxe'])) then return false end
-                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
-                    if mq.TLO.FindItemCount(self.ResolvedActionMap['DichoAxe'].Name())() > RGMercUtils.GetSetting('DichoAxeCount') then return false end
-                    if RGMercUtils.GetSetting('DichoAxeCount') == 0 then return false end
-                    local spell = mq.TLO.Spell(self.ResolvedActionMap['DichoAxe'].Name())
-                    if not spell or not spell() then return false end
-                    if mq.TLO.FindItemCount(spell.ReagentID(1)())() == 0 then return false end
+                    if not self.TempSettings.CachedAxeMap then
+                        RGMercsLogger.log_debug("\atCaching Axe Skill to Item Mapping...")
+                        self.TempSettings.CachedAxeMap = {}
+                        for _, axeSkill in ipairs(AxeSkills) do
+                            local itemID = RGMercUtils.GetSummonedItemIDFromSpell(mq.TLO.Spell(axeSkill))
+                            if itemID > 0 then
+                                RGMercsLogger.log_debug("\ayCached: \at%s\aw summons \am%d", axeSkill, itemID)
+                                self.TempSettings.CachedAxeMap[itemID] = axeSkill
+                            end
+                        end
+                    end
 
-                    local ret = RGMercUtils.UseDisc(self.ResolvedActionMap['DichoAxe'], mq.TLO.Me.ID())
-                    if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
-                    return ret
+                    local abilitiesThatNeedAxes = {
+                        { name = 'Dvolley',   count_name = 'AutoAxeCount', },
+                        { name = 'Daxethrow', count_name = 'AutoAxeCount', },
+                        { name = 'Daxeof',    count_name = 'AutoAxeCount', },
+                        { name = 'DichoAxe',  count_name = 'DichoAxeCount', },
+                    }
+
+                    local summonNeededItem = function(summonSkill, itemId, count)
+                        while mq.TLO.FindItemCount(itemId)() < count do
+                            RGMercsLogger.log_debug("\ayWe need more %d because we dont have %d - using %s", itemId, count, summonSkill)
+                            self.ClassConfig.HelperFunctions.SummonAxe(mq.TLO.Spell(summonSkill))
+                        end
+                    end
+
+                    for _, ability in ipairs(abilitiesThatNeedAxes) do
+                        local spell = self:GetResolvedActionMapItem(ability.name)
+                        if spell and spell() then
+                            for i = 1, 4 do
+                                local requiredItemID = spell.ReagentID(i)()
+                                if requiredItemID > 0 and mq.TLO.FindItemCount(requiredItemID)() == 0 then
+                                    local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
+                                    if summonSkill then
+                                        RGMercsLogger.log_verbose("\ayReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
+                                        summonNeededItem(summonSkill, requiredItemID, RGMercUtils.GetSetting(ability.count_name))
+                                    end
+                                end
+                            end
+                            for i = 1, 4 do
+                                local requiredItemID = spell.NoExpendReagentID(i)()
+                                if requiredItemID > 0 then
+                                    local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
+                                    if summonSkill then
+                                        RGMercsLogger.log_verbose("\ayNoExpendReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
+                                        summonNeededItem(summonSkill, requiredItemID, RGMercUtils.GetSetting(ability.count_name))
+                                    end
+                                end
+                            end
+                        end
+                    end
                 end,
             },
             {
@@ -606,9 +582,7 @@ return {
                 name = "Dvolley",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Spell(discSpell).NoExpendReagentID(1)() == -1 or
-                        (mq.TLO.FindItemCount(mq.TLO.Spell(discSpell).NoExpendReagentID(1)())() or 0) > 0 and
-                        RGMercUtils.PCDiscReady(discSpell)
+                    return RGMercUtils.PCDiscReady(discSpell)
                 end,
             },
             {
@@ -651,6 +625,13 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return RGMercUtils.PCDiscReady(discSpell)
+                end,
+            },
+            {
+                name = "Decapitation",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and not RGMercUtils.SongActive(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
@@ -783,6 +764,26 @@ return {
         },
     },
     ['HelperFunctions'] = {
+        SummonAxe = function(axeDisc)
+            if not axeDisc or not axeDisc() then return false end
+            RGMercsLogger.log_verbose("\aySummonAxe(): Checking if %s is ready.", axeDisc.Name())
+            if not RGMercUtils.PCDiscReady(axeDisc) then return false end
+            RGMercsLogger.log_verbose("\aySummonAxe(): Checking AutoAxeAcount")
+            if RGMercUtils.GetSetting('AutoAxeCount') == 0 then return false end
+            if mq.TLO.FindItemCount(axeDisc)() > RGMercUtils.GetSetting('AutoAxeCount') then return false end
+
+            RGMercsLogger.log_verbose("\aySummonAxe(): Checking For Reagents")
+            if mq.TLO.FindItemCount(axeDisc.ReagentID(1)())() == 0 then return false end
+
+            if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
+            local ret = RGMercUtils.UseDisc(axeDisc, mq.TLO.Me.ID())
+            RGMercsLogger.log_verbose("\aySummonAxe(): Waiting for Summon to Finish")
+            RGMercUtils.WaitCastFinish(mq.TLO.Me, false)
+            RGMercsLogger.log_verbose("\agSummonAxe(): Done!")
+            mq.delay(500, function() return mq.TLO.Cursor.ID() ~= nil end)
+            while mq.TLO.Cursor.ID() ~= nil do RGMercUtils.DoCmd("/autoinv") end
+            return ret
+        end,
         PreEngage = function(target)
             local openerAbility = RGMercUtils.GetResolvedActionMapItem('CheapShot')
 
@@ -807,10 +808,8 @@ return {
         ['DoIntimidate']    = { DisplayName = "Do Intimidate", Category = "Abilities", Tooltip = "Enable using Intimidate", Default = true, },
         ['DoAoe']           = { DisplayName = "Do AoE", Category = "Abilities", Tooltip = "Enable using AoE Abilities", Default = true, },
         ['SummonAxes']      = { DisplayName = "Summon Axes", Category = "Abilities", Tooltip = "Enable Summon Axes", Default = true, },
-        ['AutoAxeCount']    = { DisplayName = "Auto 1st Axe Count", Category = "Abilities", Tooltip = "Enable [X] Primary Summon Axes", Default = 300, Min = 100, Max = 600, },
-        ['AutoAxe2Count']   = { DisplayName = "Auto 2nd Axe Count", Category = "Abilities", Tooltip = "Enable [X] Secondary Summon Axes", Default = 300, Min = 100, Max = 600, },
-        ['DichoAxeCount']   = { DisplayName = "Auto Dicho Axe Count", Category = "Abilities", Tooltip = "Enable [X] Dico Summon Axes", Default = 300, Min = 100, Max = 600, },
-        ['SummonAxes2']     = { DisplayName = "Summon Axes 2", Category = "Abilities", Tooltip = "Enable Summon Axes 2", Default = true, },
+        ['AutoAxeCount']    = { DisplayName = "Auto Axe Count", Category = "Abilities", Tooltip = "Summon more Primary Axes when you hit [x] left.", Default = 100, Min = 0, Max = 600, },
+        ['DichoAxeCount']   = { DisplayName = "Auto Dicho Axe Count", Category = "Abilities", Tooltip = "Summon more Dicho Axes when you hit [x] left.", Default = 100, Min = 0, Max = 600, },
         ['SummonDichoAxes'] = { DisplayName = "Summon Dicho Axes", Category = "Abilities", Tooltip = "Enable Summon Dicho Axes", Default = true, },
     },
 }

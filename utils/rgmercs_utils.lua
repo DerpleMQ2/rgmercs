@@ -347,8 +347,7 @@ function RGMercUtils.PCDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
     RGMercsLogger.log_super_verbose("PCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
         RGMercUtils.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
-    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
-        mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
+    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
 
 ---@param discSpell MQSpell
@@ -929,6 +928,21 @@ function RGMercUtils.UseItem(itemName, targetId)
     return true
 end
 
+---@param spell MQSpell
+---@return integer
+function RGMercUtils.GetSummonedItemIDFromSpell(spell)
+    if not spell or not spell() then return 0 end
+
+    for i = 1, spell.NumEffects() do
+        -- 32 means SPA_CREATE_ITEM
+        if spell.Attrib(i)() == 32 then
+            return tonumber(spell.Base(i)()) or 0
+        end
+    end
+
+    return 0
+end
+
 ---comment
 ---@param slot string
 ---@param item string
@@ -991,7 +1005,7 @@ function RGMercUtils.UseDisc(discSpell, targetId)
 
             RGMercUtils.DoCmd("/squelch /doability \"%s\"", discSpell.RankName.Name())
 
-            mq.delay(discSpell.MyCastTime() / 100 or 100,
+            mq.delay(discSpell.MyCastTime() or 1000,
                 function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting.ID()) end)
 
             -- Is this even needed?
@@ -2682,7 +2696,14 @@ function RGMercUtils.AutoCampCheck(tempConfig)
     if tempConfig.CampZoneId ~= mq.TLO.Zone.ID() then return end
 
     -- let pulling module handle camp decisions while it is enabled.
-    if RGMercUtils.GetSetting('DoPull') then return end
+    if RGMercUtils.GetSetting('DoPull') then
+        local pullState = RGMercModules:ExecModule("Pull", "GetPullState")
+
+        -- if we are idle or in groupwatch waiting its possible we wandered out of camp to loot and need to come back.
+        if pullState > 2 then
+            return
+        end
+    end
 
     local me = mq.TLO.Me
 

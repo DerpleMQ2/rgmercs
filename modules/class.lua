@@ -136,7 +136,7 @@ function Module:LoadSettings()
             .CurLoadedClass)
         return
     end
-    
+
     local settingsChanged = false
 
     -- Setup Defaults
@@ -233,6 +233,8 @@ function Module:SetCombatMode(mode)
 end
 
 function Module:OnCombatModeChanged()
+    -- set dynamic names.
+    self:SetDynamicNames()
 end
 
 function Module:ShouldRender()
