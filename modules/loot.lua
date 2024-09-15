@@ -378,7 +378,8 @@ function Module:Render()
 					ImGui.EndTable()
 				end
 				ImGui.SeparatorText("Buy Items Table")
-				if ImGui.BeginTable("Buy Items", col, ImGuiTableFlags.Borders) then
+				if ImGui.BeginTable("Buy Items", col, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY), ImVec2(0.0, 0.0)) then
+					ImGui.TableSetupScrollFreeze(col, 1)
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
 						ImGui.TableSetupColumn("Qty")
@@ -502,7 +503,8 @@ function Module:Render()
 					ImGui.EndTable()
 				end
 				ImGui.SeparatorText("Global Items Table")
-				if ImGui.BeginTable("GlobalItems", col, ImGuiTableFlags.Borders) then
+				if ImGui.BeginTable("GlobalItems", col, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY), ImVec2(0.0, 0.0)) then
+					ImGui.TableSetupScrollFreeze(col, 1)
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
 						ImGui.TableSetupColumn("Setting")
@@ -587,7 +589,8 @@ function Module:Render()
 
 				self.TempSettings.SearchItems = ImGui.InputText("Search Items##NormalItems", self.TempSettings.SearchItems) or nil
 
-				if ImGui.BeginTable("NormalItems", col, ImGuiTableFlags.Borders) then
+				if ImGui.BeginTable("NormalItems", col, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY), ImVec2(0.0, 0.0)) then
+					ImGui.TableSetupScrollFreeze(col, 1)
 					for i = 1, col / 2 do
 						ImGui.TableSetupColumn("Item")
 						ImGui.TableSetupColumn("Setting")

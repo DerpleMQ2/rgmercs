@@ -291,17 +291,6 @@ function Config:LoadSettings()
     self.Globals.CurLoadedChar  = mq.TLO.Me.DisplayName()
     self.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
     self.Globals.CurServer      = mq.TLO.EverQuest.Server():gsub(" ", "")
-    if self.Globals.BuildType == 'Emu' then
-        self.DefaultConfig['DoMercenary'] = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = false, ConfigType = "Normal", }
-        self.DefaultConfig['DoFellow'] = {
-            DisplayName = "Enable Fellowship Insignia",
-            Category = "Fellowship",
-            Tooltip = "Use fellowship insignia automatically.",
-            Default = false,
-            ConfigType =
-            "Advanced",
-        }
-    end
     RGMercsLogger.log_info(
         "\ayLoading Main Settings for %s!",
         self.Globals.CurLoadedChar)
