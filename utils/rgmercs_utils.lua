@@ -2618,6 +2618,20 @@ function RGMercUtils.DoBuffCheck()
     return true
 end
 
+function RGMercUtils.DoPetCheck()
+    if not RGMercUtils.GetSetting('DoPet') then return false end
+
+    if mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BuffWaitMoveTimer') > RGMercConfig:GetTimeSinceLastMove() then return false end
+
+    if RGMercUtils.GetXTHaterCount() > 0 or RGMercConfig.Globals.AutoTargetID > 0 then return false end
+
+    if mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active() then return false end
+
+    if RGMercConfig.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
+
+    return true
+end
+
 ---@return boolean
 function RGMercUtils.ShouldPriorityFollow()
     if RGMercUtils.GetSetting('PriorityFollow') and RGMercUtils.GetSetting('ChaseOn') then

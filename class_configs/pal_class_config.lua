@@ -975,7 +975,7 @@ return {
                 name = "meleemit",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return RGMercUtils.PCDiscReady(discSpell) and not (discSpell.Level() < 108 and mq.TLO.Me.ActiveDisc.ID())
                 end,
             },
             {
