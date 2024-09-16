@@ -698,9 +698,10 @@ return {
                     RGMercUtils.FindWorstHurtManaXT(RGMercUtils.GetSetting('FParaPct')), }
             end,
             cond = function(self, combat_state)
-                return (combat_state == "Combat" or RGMercUtils.GetSetting('DowntimeFP')) and RGMercUtils.GetSetting('DoParagon') and
-                    not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell) and
-                    not RGMercUtils.Feigning()
+                if not RGMercUtils.GetSetting('DoParagon') then return false end
+                local downtime = combat_state == "Downtime" and RGMercUtils.GetSetting('DowntimeFP') and RGMercUtils.DoBuffCheck()
+                local combat = combat_state == "Combat" and not RGMercUtils.Feigning()
+                return (downtime or combat) and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
             end,
         },
         {

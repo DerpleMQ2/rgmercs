@@ -1307,7 +1307,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Carapace,
                 cond = function(self, discSpell)
                     return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.IsTanking() and
-                        (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 30 zradius 50")() >= RGMercUtils.GetSetting('DiscCount')) and
+                        (RGMercUtils.IsNamed(mq.TLO.Target) or (RGMercUtils.GetXTHaterCount() and mq.TLO.SpawnCount("NPC radius 30 zradius 50")()) >= RGMercUtils.GetSetting('DiscCount')) and
                         not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.Level() > 87 --shares timer with mantle before 88
                 end,
             },
@@ -1317,7 +1317,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Mantle,
                 cond = function(self, discSpell)
                     return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.IsTanking() and
-                        (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 30 zradius 50")() >= RGMercUtils.GetSetting('DiscCount')) and
+                        (RGMercUtils.IsNamed(mq.TLO.Target) or (RGMercUtils.GetXTHaterCount() and mq.TLO.SpawnCount("NPC radius 30 zradius 50")()) >= RGMercUtils.GetSetting('DiscCount')) and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -1327,7 +1327,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Guardian,
                 cond = function(self, discSpell)
                     return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.IsTanking() and
-                        (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 30 zradius 50")() > RGMercUtils.GetSetting('DiscCount')) and
+                        (RGMercUtils.IsNamed(mq.TLO.Target) or (RGMercUtils.GetXTHaterCount() and mq.TLO.SpawnCount("NPC radius 30 zradius 50")()) >= RGMercUtils.GetSetting('DiscCount')) and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -1337,7 +1337,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.UnholyAura,
                 cond = function(self, discSpell)
                     return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.IsTanking() and
-                        (RGMercUtils.IsNamed(mq.TLO.Target) or mq.TLO.SpawnCount("NPC radius 30 zradius 50")() >= RGMercUtils.GetSetting('DiscCount')) and
+                        (RGMercUtils.IsNamed(mq.TLO.Target) or (RGMercUtils.GetXTHaterCount() and mq.TLO.SpawnCount("NPC radius 30 zradius 50")()) >= RGMercUtils.GetSetting('DiscCount')) and
                         not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -1912,7 +1912,7 @@ local _ClassConfig = {
                     end,
                 },
                 { name = "BuffTap",  cond = function(self) return RGMercUtils.GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return RGMercUtils.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "HealBurn", cond = function(self) return RGMercUtils.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
