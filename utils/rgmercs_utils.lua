@@ -2548,7 +2548,7 @@ function RGMercUtils.ClickModRod()
 
     for _, itemName in ipairs(RGMercConfig.Constants.ModRods) do
         while mq.TLO.Cursor.Name() == itemName do
-            mq.cmd("/squelch /autoinv")
+            RGMercUtils.DoCmd("/squelch /autoinv")
             mq.delay(10)
         end
 

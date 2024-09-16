@@ -53,7 +53,7 @@ local Tooltips      = {
 
 local function generateSongList()
     if mq.TLO.Plugin('MQ2Medley').IsLoaded() then
-        mq.cmd("/plugin medley unload")
+        RGMercUtils.DoCmd("/plugin medley unload")
     end
     RGMercsLogger.log_info(
         "Bard Gem List being calculated. *** PLEASE NOTE: Click-happy behavior when selecting songs in the configuration may lead to low uptime or songs not being gemmed at all! YOU HAVE BEEN WARNED. ***")

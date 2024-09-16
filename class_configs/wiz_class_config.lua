@@ -607,21 +607,21 @@ return {
                     end
 
                     -- Cast the spell. Will report if need to memorize or don't have the spell
-                    mq.cmd('/if (${Cast.Ready[exodus]}) /cast "exodus" alt')
-                    mq.cmdf('/timed 1 /if (${Me.Book["%s"]}>0) /cast "%s"', portName, portName)
-                    mq.cmdf('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
+                    RGMercUtils.DoCmd('/if (${Cast.Ready[exodus]}) /cast "exodus" alt')
+                    RGMercUtils.DoCmd('/timed 1 /if (${Me.Book["%s"]}>0) /cast "%s"', portName, portName)
+                    RGMercUtils.DoCmd('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
 
                     -- Have to memorize
-                    mq.cmdf('/timed 5 /if (${Cast.Status.Equal[CM]}) /timed 5 /dgt all Memorizing "%s"! Ready in 1.5 seconds', portName)
-                    mq.cmdf('/timed 50 /if (${Cast.Timing}>6000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
-                    mq.cmdf('/timed 90 /if (${Cast.Timing}>4000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
+                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Status.Equal[CM]}) /timed 5 /dgt all Memorizing "%s"! Ready in 1.5 seconds', portName)
+                    RGMercUtils.DoCmd('/timed 50 /if (${Cast.Timing}>6000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
+                    RGMercUtils.DoCmd('/timed 90 /if (${Cast.Timing}>4000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
 
                     -- Already memorized
-                    mq.cmdf('/timed 5 /if (${Cast.Timing}>8000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
-                    mq.cmdf('/timed 40 /if (${Cast.Timing}>5000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
+                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Timing}>8000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
+                    RGMercUtils.DoCmd('/timed 40 /if (${Cast.Timing}>5000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
 
                     -- Out of mana
-                    mq.cmdf('/timed 5 /if (${Cast.Status.Equal[CAST_OUTOFMANA]}) /dgt all Out of mana! Can\'t Evac!')
+                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Status.Equal[CAST_OUTOFMANA]}) /dgt all Out of mana! Can\'t Evac!')
                 end
         }
     },]]
