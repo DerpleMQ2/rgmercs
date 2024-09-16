@@ -56,7 +56,6 @@ Module.DefaultConfig     = {
 	['AutoTag']         = { DisplayName = "Auto Tag", Default = LootnScoot.Settings.AutoTag, Category = "Loot Settings", Tooltip = "Automatically tag items to sell if they meet the MinSellPrice", },
 	['AutoRestock']     = { DisplayName = "Auto Restock", Default = LootnScoot.Settings.AutoRestock, Category = "Loot Settings", Tooltip = "Automatically restock items from the BuyItems list when selling", },
 	['LookupLinks']     = { DisplayName = "Lookup Links", Default = LootnScoot.Settings.LookupLinks, Category = "Loot Settings", Tooltip = "Enables Looking up Links for items not on that character. *recommend only running on one charcter that is monitoring.", },
-	['AlwaysCoin']      = { DisplayName = "Always Loot Coin", Default = LootnScoot.Settings.AlwaysCoin, Category = "Loot Settings", Tooltip = "Always Loot Coin even when bags are FULL!", },
 }
 
 Module.CommandHandlers   = {

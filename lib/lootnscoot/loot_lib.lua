@@ -163,7 +163,6 @@ local loot         = {
         RecordData = false,                        -- Enables recording data to report later.
         AutoTag = false,                           -- Automatically tag items to sell if they meet the MinSellPrice
         AutoRestock = false,                       -- Automatically restock items from the BuyItems list when selling
-        AlwaysCoin = true,                         -- Loot Coin from corpses even when bags are full.
     },
 }
 
@@ -950,8 +949,6 @@ function loot.corpseLocked(corpseID)
 end
 
 function loot.lootMobs(limit)
-    loot.CheckBags()
-    if areFull and not loot.Settings.AlwqaysCoin then return end
     RGMercsLogger.log_verbose('lootMobs(): Enter lootMobs')
     local deadCount = mq.TLO.SpawnCount(spawnSearch:format('npccorpse', loot.Settings.CorpseRadius))()
     RGMercsLogger.log_verbose('lootMobs(): here are %s corpses in range.', deadCount)
