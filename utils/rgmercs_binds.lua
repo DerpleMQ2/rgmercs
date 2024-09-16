@@ -28,6 +28,28 @@ Bind.Handlers     = {
             RGMercConfig:HandleBind(config, value)
         end,
     },
+    ['forcecombat'] = {
+        usage = "/rgl forcecombat",
+        about = "Will force combat to be enabled on your XTarget[1]. If you have no XTarget[1] it will use your current target.",
+        handler = function()
+            RGMercUtils.ForceCombat = not RGMercUtils.ForceCombat
+            RGMercsLogger.log_info("\awForced Combat: %s", RGMercUtils.BoolToColorString(RGMercUtils.ForceCombat))
+
+            if RGMercUtils.ForceCombat then
+                if mq.TLO.Target.ID() == 0 or (mq.TLO.Target.Type() or "none"):lower() ~= "npc" then
+                    RGMercsLogger.log_info("\awForced Combat: Requires a target - Disabling...")
+                    RGMercUtils.ForceCombat = false
+                    return
+                end
+                RGMercUtils.DoCmd("/xtarget set 1 currenttarget")
+                mq.delay("5s", function() return mq.TLO.Me.XTarget(1).ID() == mq.TLO.Target.ID() end)
+                RGMercsLogger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
+            else
+                RGMercUtils.ResetXTSlot(1)
+                RGMercUtils.DoCmd("/attack off")
+            end
+        end,
+    },
     ['addoa'] = {
         usage = "/rgl addoa <Name>",
         about = "Adds <Name> to your Outside Assist List, if no name is given, Target name is used",

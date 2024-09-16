@@ -12,6 +12,7 @@ RGMercUtils.ScriptName         = "RGMercs"
 RGMercUtils.LastZoneID         = 0
 RGMercUtils.LastDoStick        = 0
 RGMercUtils.NamedList          = {}
+RGMercUtils.ForceCombat        = false
 RGMercUtils.ShowDownNamed      = false
 RGMercUtils.ShowAdvancedConfig = false
 RGMercUtils.Memorizing         = false
@@ -3017,7 +3018,7 @@ function RGMercUtils.MATargetScan(radius, zradius)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or RGMercUtils.ForceCombat) then
             if not RGMercUtils.GetSetting('SafeTargeting') or not RGMercUtils.IsSpawnFightingStranger(xtSpawn, radius) then
                 RGMercsLogger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(),
                     xtSpawn.Distance())
@@ -3271,7 +3272,7 @@ function RGMercUtils.GetXTHaterIDs(printDebug)
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.ID() > 0 and (xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") then
+        if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or RGMercUtils.ForceCombat) then
             if printDebug then
                 RGMercsLogger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
             end
@@ -3458,6 +3459,17 @@ function RGMercUtils.AddXTByName(slot, name)
     end
 end
 
+function RGMercUtils.AddXTByID(slot, id)
+    local spawnToAdd = mq.TLO.Spawn(id)
+    if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
+        RGMercUtils.DoCmd("/xtarget set %d \"%s\"", slot, spawnToAdd.CleanName())
+    end
+end
+
+function RGMercUtils.ResetXTSlot(slot)
+    RGMercUtils.DoCmd("/xtarget set %d autohater", slot)
+end
+
 function RGMercUtils.SetControlToon()
     RGMercsLogger.log_verbose("Checking for best Control Toon")
     if RGMercUtils.GetSetting('AssistOutside') then
@@ -3524,7 +3536,7 @@ function RGMercUtils.GetHighestAggroPct()
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or RGMercUtils.ForceCombat) then
             if xtSpawn.PctAggro() > highestPct then highestPct = xtSpawn.PctAggro() end
         end
     end
@@ -3545,7 +3557,7 @@ function RGMercUtils.IHaveAggro(pct)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and xtSpawn.TargetType():lower() == "auto hater" then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or RGMercUtils.ForceCombat) then
             if xtSpawn.PctAggro() >= pct then return true end
         end
     end

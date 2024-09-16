@@ -60,6 +60,10 @@ local function GetTheme()
 end
 
 local function RenderTarget()
+    if mq.TLO.Group() and not mq.TLO.Group.MainAssist() then
+        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
+            string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
+    end
     ImGui.Text("Auto Target: ")
     ImGui.SameLine()
     if RGMercConfig.Globals.AutoTargetID == 0 then
@@ -351,9 +355,9 @@ local function RGInit(...)
     RGMercConfig.Globals.SubmodulesLoaded = true
     RGMercConfig:UpdateCommandHandlers()
 
-    local mainAssist = mq.TLO.Target.CleanName() or ""
+    local mainAssist = mq.TLO.Me.CleanName()
 
-    if mainAssist:len() == 0 and mq.TLO.Group() then
+    if mq.TLO.Group() and mq.TLO.Group.MainAssist() then
         mainAssist = mq.TLO.Group.MainAssist() or ""
     end
 
@@ -374,10 +378,6 @@ local function RGInit(...)
 
     if (not mainAssist or mainAssist == "") and mq.TLO.Group.Members() > 0 then
         mainAssist = mq.TLO.Group.MainAssist.DisplayName()
-    end
-
-    if not mainAssist or mainAssist == "" then
-        mainAssist = mq.TLO.Me.CleanName()
     end
 
     RGMercUtils.DoCmd("/squelch /rez accept on")
