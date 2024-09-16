@@ -2246,21 +2246,6 @@ function RGMercUtils.BurnCheck()
     return autoBurn or alwaysBurn
 end
 
----@return boolean
-function RGMercUtils.SmallBurn()
-    return RGMercUtils.GetSetting('BurnSize') >= 1
-end
-
----@return boolean
-function RGMercUtils.MedBurn()
-    return RGMercUtils.GetSetting('BurnSize') >= 2
-end
-
----@return boolean
-function RGMercUtils.BigBurn()
-    return RGMercUtils.GetSetting('BurnSize') >= 3
-end
-
 ---@param targetId integer
 function RGMercUtils.DoStick(targetId)
     if os.clock() - RGMercUtils.LastDoStick < 4 then
@@ -4602,7 +4587,7 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
                         local k = settingNames[settingToDrawIndicies[itemIndex]]
                         ImGui.Text(string.format("%s", defaults[k].DisplayName or "None"))
                         --ImGui.Text(string.format("%s %d %d + %d", defaults[k].DisplayName or "None", itemIndex, row, ImGui.TableGetColumnIndex() + 1))
-                        RGMercUtils.Tooltip(string.format("%s\n\n[Default: %s]", defaults[k].Tooltip, tostring(defaults[k].Default)))
+                        RGMercUtils.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]", defaults[k].Tooltip, k, tostring(defaults[k].Default)))
                         ImGui.TableNextColumn()
 
                         if defaults[k].Type == "Combo" then

@@ -232,7 +232,6 @@ Config.DefaultConfig = {
     ['InstantRelease']       = { DisplayName = "Instant Release", Category = "Heal/Rez", Index = 14, Tooltip = "Instantly release when you die.", Default = false, ConfigType = "Advanced", },
 
     -- [ BURNS ] --
-    ['BurnSize']             = { DisplayName = "Burn Size", Category = "Burns", Index = 6, Tooltip = "How hard you will burn. 0=Off, 1=Small, 2=Medium, 3=Large. (Please note that this is based off of what burnsize (if any) an ability is assigned in a class config.)", Default = 1, Min = 0, Max = 3, ConfigType = "Advanced", },
     ['BurnAuto']             = { DisplayName = "Auto Burn", Category = "Burns", Index = 1, Tooltip = "Automatically burn when the conditions below are met.", Default = false, ConfigType = "Normal", },
     ['BurnAlways']           = { DisplayName = "Auto Burn Always", Category = "Burns", Index = 2, Tooltip = "Burn on any/every target.", Default = false, ConfigType = "Advanced", },
     ['BurnMobCount']         = { DisplayName = "Auto Burn Mob Count", Category = "Burns", Index = 4, Tooltip = "Number of haters before we start burning.", Default = 3, Min = 1, Max = 10, ConfigType = "Advanced", },

@@ -1013,7 +1013,7 @@ local _ClassConfig = {
                 name = "Ancestral Aid",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.MedBurn()
+                    return true
                 end,
             },
             {
@@ -1034,7 +1034,7 @@ local _ClassConfig = {
                 name = "Spirit Call",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SmallBurn()
+                    return true
                 end,
             },
             {
@@ -1049,7 +1049,36 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.DotSpellCheck(spell) and
-                        RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck()
+                        RGMercUtils.ManaCheck()
+                end,
+            },
+            {
+                name = "CurseDoT1",
+                type = "Spell",
+                -- first check is for live second is for TLP
+                cond = function(self, spell)
+                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(spell)) or
+                        (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck())
+                end,
+            },
+            {
+                name = "SaryrnDot",
+                type = "Spell",
+                -- first check is for live second is for TLP
+                cond = function(self, spell)
+                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(spell)) or
+                        (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck())
+                end,
+            },
+            {
+                name = "FrostNuke",
+                type = "Spell",
+                -- first check is for live second is for TLP
+                cond = function(self, spell)
+                    if mq.TLO.Me.Level() > 65 then
+                        return true
+                    end
+                    return RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoNuke')
                 end,
             },
         },
@@ -1203,15 +1232,6 @@ local _ClassConfig = {
                 cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) end,
             },
             {
-                name = "CurseDoT1",
-                type = "Spell",
-                -- first check is for live second is for TLP
-                cond = function(self, spell)
-                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(spell)) or
-                        (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils.SmallBurn()))
-                end,
-            },
-            {
                 name = "ChaoticDoT",
                 type = "Spell",
                 cond = function(self, spell)
@@ -1231,15 +1251,6 @@ local _ClassConfig = {
                 name = "FastPoisonDoT",
                 type = "Spell",
                 cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) end,
-            },
-            {
-                name = "SaryrnDot",
-                type = "Spell",
-                -- first check is for live second is for TLP
-                cond = function(self, spell)
-                    return (mq.TLO.Me.Level() > 65 and RGMercUtils.DotSpellCheck(spell)) or
-                        (mq.TLO.Me.Level() <= 65 and RGMercUtils.ManaCheck() and (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils.SmallBurn()))
-                end,
             },
             {
                 name = "FastDiseaseDoT",
@@ -1264,25 +1275,13 @@ local _ClassConfig = {
                 name = "FastPoisonNuke",
                 type = "Spell",
             },
-            {
-                name = "FrostNuke",
-                type = "Spell",
-                -- first check is for live second is for TLP
-                cond = function(self, spell)
-                    if mq.TLO.Me.Level() > 65 then
-                        return true
-                    end
-                    return RGMercUtils.GetSetting('BurnAuto') or
-                        RGMercUtils.SmallBurn() and RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoNuke')
-                end,
-            },
         },
         ['HealBurn'] = {
             {
                 name = "Ancestral Aid",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.MedBurn()
+                    return true
                 end,
             },
             {
@@ -1303,7 +1302,7 @@ local _ClassConfig = {
                 name = "Spirit Call",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SmallBurn()
+                    return true
                 end,
             },
 

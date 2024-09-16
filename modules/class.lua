@@ -777,10 +777,6 @@ function Module:GiveTime(combat_state)
                 RGMercUtils.FormatTime(r.timer - (os.clock() - self.TempSettings.RotationTimers[r.name])))
         end
     end
-
-    if self.CombatState == "Downtime" then
-        if not RGMercUtils.GetSetting('BurnAuto') then RGMercConfig:GetSettings().BurnSize = 0 end
-    end
 end
 
 function Module:OnDeath()

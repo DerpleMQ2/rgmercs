@@ -304,37 +304,35 @@ return {
                 name = "Frenzied",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and
-                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
+                    return not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
                 end,
             },
             {
                 name = "Twisted",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID() and
-                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
+                    return not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
                 end,
             },
             {
                 name = "AimDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Executioner",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Executioner2",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (RGMercUtils.GetSetting('BurnAuto') or RGMercUtils:BigBurn()) and not mq.TLO.Me.ActiveDisc.ID()
+                    return mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {

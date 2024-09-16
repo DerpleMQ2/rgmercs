@@ -1069,14 +1069,14 @@ local _ClassConfig = {
                 name = "Celestial Hammer",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.MedBurn()
+                    return true
                 end,
             },
             {
                 name = "Flurry of Life",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SmallBurn()
+                    return true
                 end,
             },
             {

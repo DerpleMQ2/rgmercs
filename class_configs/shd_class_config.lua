@@ -1171,7 +1171,7 @@ local _ClassConfig = {
                 name = "Visage of Death",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.MedBurn()
+                    return RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1179,7 +1179,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.Crimson,
                 cond = function(self, discSpell)
-                    return RGMercUtils.NPCDiscReady(discSpell) and RGMercUtils.MedBurn()
+                    return RGMercUtils.NPCDiscReady(discSpell)
                 end,
             },
             {
@@ -1187,7 +1187,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not RGMercUtils.GetSetting('DoVetAA') then return false end
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.BigBurn()
+                    return RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1195,7 +1195,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.HarmTouch,
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.MedBurn()
+                    return RGMercUtils.NPCAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1204,7 +1204,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ThoughtLeech,
                 cond = function(self, aaName, target)
                     if RGMercUtils.GetSetting('DoThoughtLeech') == 1 then return false end
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.MedBurn()
+                    return RGMercUtils.NPCAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1212,7 +1212,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.SpireoftheReavers,
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.SmallBurn()
+                    return RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -1220,7 +1220,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ChatteringBones,
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.SmallBurn()
+                    return RGMercUtils.NPCAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1228,7 +1228,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.Tvyls,
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.SmallBurn()
+                    return RGMercUtils.NPCAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1990,7 +1990,7 @@ local _ClassConfig = {
         ['DoTempHP']         = { DisplayName = "Use HP Buff", Category = "Buffs/Debuffs", Index = 2, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("TempHP") end, Default = true, RequiresLoadoutChange = true, },
         ['DoTorrent']        = { DisplayName = "Use Torrents", Category = "Buffs/Debuffs", Index = 3, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("Torrent") end, RequiresLoadoutChange = true, Default = true, ConfigType = "Advanced", },
         ['DoBuffTap']        = { DisplayName = "Use Buff Tap", Category = "Buffs/Debuffs", Index = 4, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("BuffTap") end, Default = false, RequiresLoadoutChange = true, ConfigType = "Advanced", },
-        ['DoVetAA']          = { DisplayName = "Use Vet AA", Category = "Buffs/Debuffs", Index = 5, Tooltip = "Use Veteran AA's in emergencies or during BigBurn.", Default = true, },
+        ['DoVetAA']          = { DisplayName = "Use Vet AA", Category = "Buffs/Debuffs", Index = 5, Tooltip = "Use Veteran AA's in emergencies or during Burn.", Default = true, },
 
         --Taps
         ['StartLifeTap']     = { DisplayName = "HP % for LifeTaps", Category = "Taps", Index = 1, Tooltip = "Your HP % before we use Life Taps.", Default = 99, Min = 1, Max = 100, },
