@@ -1187,13 +1187,13 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         local spell = mq.TLO.Spell(spellName)
 
         if not spell() then
-            RGMercsLogger.log_error("\arCasting Failed: Somehow I tried to cast a spell That doesn't exist: %s",
+            RGMercsLogger.log_error("\ayUseSpell(): \arCasting Failed: Somehow I tried to cast a spell That doesn't exist: %s",
                 spellName)
             return false
         end
         -- Check we actually have the spell -- Me.Book always needs to use RankName
         if not me.Book(spellName)() then
-            RGMercsLogger.log_error("\arCasting Failed: Somehow I tried to cast a spell I didn't know: %s", spellName)
+            RGMercsLogger.log_error("\ayUseSpell(): \arCasting Failed: Somehow I tried to cast a spell I didn't know: %s", spellName)
             return false
         end
 
@@ -1209,7 +1209,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
             if targetLevel <= 65 and spellLevel > 95 then levelCheckPass = false end
 
             if not levelCheckPass then
-                RGMercsLogger.log_error("\arCasting %s failed level check with target=%d and spell=%d", spellName,
+                RGMercsLogger.log_error("\ayUseSpell(): \arCasting %s failed level check with target=%d and spell=%d", spellName,
                     targetLevel, spellLevel)
                 return false
             end
@@ -1217,46 +1217,46 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
 
         -- Check for Reagents
         if not RGMercUtils.ReagentCheck(spell) then
-            RGMercsLogger.log_debug("\arCasting Failed: I tried to cast a spell %s I don't have Reagents for.",
+            RGMercsLogger.log_debug("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have Reagents for.",
                 spellName)
             return false
         end
 
         -- Check for enough mana -- just in case something has changed by this point...
         if me.CurrentMana() < spell.Mana() then
-            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s I don't have mana for it.",
+            RGMercsLogger.log_verbose("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have mana for it.",
                 spellName)
             return false
         end
 
         -- If we're combat casting we need to both have the same swimming status
         if targetId == 0 or (targetSpawn() and targetSpawn.FeetWet() ~= me.FeetWet()) then
-            RGMercsLogger.log_debug("\arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.",
+            RGMercsLogger.log_debug("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.",
                 spellName, targetId)
             return false
         end
 
         if not bAllowDead and targetSpawn() and targetSpawn.Dead() then
-            RGMercsLogger.log_verbose("\arCasting Failed: I tried to cast a spell %s but my target (%d) is dead.",
+            RGMercsLogger.log_verbose("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s but my target (%d) is dead.",
                 spellName, targetId)
             return false
         end
 
         if (RGMercUtils.GetXTHaterCount() > 0 or not bAllowMem) and (not RGMercUtils.CastReady(spellName) or not mq.TLO.Me.Gem(spellName)()) then
-            RGMercsLogger.log_debug("\ayI tried to cast %s but it was not ready and we are in combat - moving on.",
+            RGMercsLogger.log_debug("\ayUseSpell(): \ayI tried to cast %s but it was not ready and we are in combat - moving on.",
                 spellName)
             return false
         end
 
         local spellRequiredMem = false
         if not me.Gem(spellName)() then
-            RGMercsLogger.log_debug("\ay%s is not memorized - meming!", spellName)
+            RGMercsLogger.log_debug("\ayUseSpell(): \ay%s is not memorized - meming!", spellName)
             RGMercUtils.MemorizeSpell(RGMercUtils.UseGem, spellName, true, 25000)
             spellRequiredMem = true
         end
 
         if not me.Gem(spellName)() then
-            RGMercsLogger.log_debug("\arFailed to memorized %s - moving on...", spellName)
+            RGMercsLogger.log_debug("\ayUseSpell(): \arFailed to memorized %s - moving on...", spellName)
             return false
         end
 
@@ -1264,15 +1264,17 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
 
         RGMercUtils.WaitGlobalCoolDown()
 
-        -- wait another little bit.
-        --mq.delay(500)
-
         RGMercUtils.ActionPrep()
 
         retryCount = retryCount or 5
 
         if targetId > 0 then
             RGMercUtils.SetTarget(targetId)
+        end
+
+        if not RGMercUtils.SpellStacksOnTarget(spell) then
+            RGMercsLogger.log_debug("\ayUseSpell(): \arStacking checked failed - Someone tell Derple or Algar to add a Stacking Check to the condition of '%s'!", spellName)
+            return false
         end
 
         local cmd = string.format("/cast \"%s\"", spellName)
