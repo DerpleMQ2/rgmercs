@@ -953,9 +953,18 @@ function loot.lootMobs(limit)
     local deadCount = mq.TLO.SpawnCount(spawnSearch:format('npccorpse', loot.Settings.CorpseRadius))()
     RGMercsLogger.log_verbose('\awlootMobs(): \ayThere are %s corpses in range.', deadCount)
     local mobsNearby = RGMercUtils.GetXTHaterCount()
+    local corpseList = {}
+
+    -- check for own corpse
+    local myCorpseCount = mq.TLO.SpawnCount(spawnSearch:format("pccorpse %s radius %d zradius 100", loot.Settings.CorpseRadius))()
+    for i = 1, (limit or myCorpseCount) do
+        local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', loot.Settings.CorpseRadius))
+        table.insert(corpseList, corpse)
+    end
+
     -- options for combat looting or looting disabled
     if deadCount == 0 or ((mobsNearby > 0 or mq.TLO.Me.Combat()) and not loot.Settings.CombatLooting) then return false end
-    local corpseList = {}
+
     for i = 1, (limit or deadCount) do
         local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', loot.Settings.CorpseRadius))
         table.insert(corpseList, corpse)
@@ -968,6 +977,12 @@ function loot.lootMobs(limit)
             local corpse = corpseList[i]
             local corpseID = corpse.ID()
             if corpseID and corpseID > 0 and not loot.corpseLocked(corpseID) and (mq.TLO.Navigation.PathLength('spawn id ' .. tostring(corpseID))() or 100) < 60 then
+                -- try to pull our corpse closer if possible.
+                if corpse.DisplayName() == mq.TLO.Me.DisplayName() then
+                    RGMercUtils.DoCmd("/corpse")
+                    mq.delay(10)
+                end
+
                 RGMercsLogger.log_debug('\awlootMobs(): \atMoving to corpse ID=' .. tostring(corpseID))
                 loot.navToID(corpseID)
 

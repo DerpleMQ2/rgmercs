@@ -13,6 +13,7 @@ RGMercUtils.LastZoneID         = 0
 RGMercUtils.LastDoStick        = 0
 RGMercUtils.NamedList          = {}
 RGMercUtils.ForceCombat        = false
+RGMercUtils.ForceNamed         = false
 RGMercUtils.ShowDownNamed      = false
 RGMercUtils.ShowAdvancedConfig = false
 RGMercUtils.Memorizing         = false
@@ -2926,7 +2927,7 @@ function RGMercUtils.IsNamed(spawn)
         return mq.TLO.SpawnMaster.HasSpawn(spawn.ID())()
     end
 
-    return false
+    return RGMercUtils.ForceNamed
 end
 
 --- Replaces IsPCSafe

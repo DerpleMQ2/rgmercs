@@ -46,8 +46,17 @@ Bind.Handlers     = {
                 RGMercsLogger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
             else
                 RGMercUtils.ResetXTSlot(1)
+                RGMercUtils.ForceNamed = false
                 RGMercUtils.DoCmd("/attack off")
             end
+        end,
+    },
+    ['forcenamed'] = {
+        usage = "/rgl forcenamed",
+        about = "Will force the current target to be considered a name mainly for testing purposes.",
+        handler = function()
+            RGMercUtils.ForceNamed = not RGMercUtils.ForceNamed
+            RGMercsLogger.log_info("\awForced Named: %s", RGMercUtils.BoolToColorString(RGMercUtils.ForceNamed))
         end,
     },
     ['addoa'] = {
