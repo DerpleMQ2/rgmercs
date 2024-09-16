@@ -242,8 +242,19 @@ function Module:LoadSettings()
 			buyItems_pickle_path)
 		self:SaveSettings(false)
 	else
-		self.BuyItemsTable = {}
-		self.BuyItemsTable = buyItemsLoad()
+		self.TempSettings.BuyItemsTableLoad = buyItemsLoad()
+		--- make sure the saved table isn't empty
+		for k, v in pairs(self.TempSettings.BuyItemsTableLoad) do
+			if k == nil then
+				self.BuyItemsTable = LootnScoot.BuyItems
+				self:SaveSettings(false)
+				break
+			else
+				self.BuyItemsTable = {}
+				self.BuyItemsTable = buyItemsLoad()
+				break
+			end
+		end
 	end
 
 	--pass settings to lootnscoot lib
@@ -663,7 +674,6 @@ function Module:LootMobs()
 end
 
 function Module:DoBuy()
-	printf("BUY %s", LootnScoot or "NONE")
 	if LootnScoot ~= nil then
 		LootnScoot.processItems('Buy')
 	end
