@@ -846,10 +846,7 @@ function loot.lootCorpse(corpseID)
         mq.delay(1000, function() return mq.TLO.Window('LootWnd').Open() end)
         if mq.TLO.Window('LootWnd').Open() then break end
     end
-    if areFull then
-        mq.TLO.Window('LootWnd').DoClose()
-        return
-    end
+
     mq.doevents('CantLoot')
     mq.delay(3000, function() return cantLootID > 0 or mq.TLO.Window('LootWnd').Open() end)
     if not mq.TLO.Window('LootWnd').Open() then
@@ -1059,9 +1056,7 @@ end
 
 function loot.RestockItems()
     local rowNum = 0
-    printf("Restock")
     for itemName, qty in pairs(loot.BuyItems) do
-        printf(itemName)
         rowNum = mq.TLO.Window("MerchantWnd/MW_ItemList").List(itemName, 2)() or 0
         mq.delay(20)
         local tmpQty = qty - mq.TLO.FindItemCount(itemName)()
@@ -1128,9 +1123,13 @@ function loot.TributeToVendor(itemToTrib, bag, slot)
                 mq.TLO.Window('TributeMasterWnd').Child('TMW_DonateButton').Enabled()
         end)
 
-        mq.TLO.Window('TributeMasterWnd').Child('TMW_DonateButton').LeftMouseUp()
+        mq.TLO.Window('TributeMasterWnd/TMW_DonateButton').LeftMouseUp()
         mq.delay(1)
-        mq.delay(5000, function() return not mq.TLO.Window('TributeMasterWnd').Child('TMW_DonateButton').Enabled() end)
+        mq.delay(5000, function() return not mq.TLO.Window('TributeMasterWnd/TMW_DonateButton').Enabled() end)
+        if mq.TLO.Window("QuantityWnd").Open() then
+            mq.TLO.Window("QuantityWnd/QTYW_Accept_Button").LeftMouseUp()
+            mq.delay(5000, function() return not mq.TLO.Window("QuantityWnd").Open() end)
+        end
         mq.delay(1000) -- This delay is necessary because there is seemingly a delay between donating and selecting the next item.
     end
 end
