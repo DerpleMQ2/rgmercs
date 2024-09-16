@@ -959,7 +959,7 @@ function loot.lootMobs(limit)
     -- options for combat looting or looting disabled
     if deadCount == 0 or ((mobsNearby > 0 or mq.TLO.Me.Combat()) and not loot.Settings.CombatLooting) then return false end
     local corpseList = {}
-    for i = 1, math.max(deadCount, limit or 0) do
+    for i = 1, (limit or deadCount) do
         local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', loot.Settings.CorpseRadius))
         table.insert(corpseList, corpse)
         -- why is there a deity check?
