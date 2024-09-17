@@ -1,6 +1,7 @@
 -- Sample FAQ Class Module
 local mq                 = require('mq')
 local RGMercUtils        = require("utils.rgmercs_utils")
+local Set                = require("mq.Set")
 
 local Module             = { _version = '0.1a', _name = "FAQ", _author = 'Grimmier', }
 Module.__index           = Module
@@ -9,7 +10,7 @@ Module.DefaultConfig     = {}
 Module.DefaultCategories = {}
 Module.FAQ               = {}
 Module.TempSettings      = {}
-
+Module.DefaultCategories = Set.new({})
 local function getConfigFileName()
 	local server = mq.TLO.EverQuest.Server()
 	server = server:gsub(" ", "")
