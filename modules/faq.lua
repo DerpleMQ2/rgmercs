@@ -121,8 +121,7 @@ function Module:Render()
 							ImGui.TableNextColumn()
 							ImGui.Text(data.usage)
 							ImGui.TableNextColumn()
-							ImGui.PushTextWrapPos((ImGui.GetWindowContentRegionWidth() - 15) or 15)
-							ImGui.Text(data.about)
+							ImGui.TextWrapped(data.about)
 						end
 					end
 				end
