@@ -123,6 +123,7 @@ function Module:Render()
 							ImGui.Text(data.usage)
 							ImGui.TableNextColumn()
 							ImGui.TextWrapped(data.about)
+							ImGui.Spacing()
 						end
 					end
 				end
@@ -139,6 +140,7 @@ function Module:Render()
 								ImGui.Text(data.usage)
 								ImGui.TableNextColumn()
 								ImGui.TextWrapped(data.about)
+								ImGui.Spacing()
 							end
 						end
 					end
@@ -167,6 +169,7 @@ function Module:Render()
 									ImGui.TextWrapped(data.Question)
 									ImGui.TableNextColumn()
 									ImGui.TextWrapped(data.Answer)
+									ImGui.Spacing()
 								end
 							end
 						end
@@ -196,6 +199,7 @@ function Module:Render()
 									ImGui.TextWrapped(data.Question)
 									ImGui.TableNextColumn()
 									ImGui.TextWrapped(data.Answer)
+									ImGui.Spacing()
 								end
 							end
 						end
