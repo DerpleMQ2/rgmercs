@@ -204,9 +204,8 @@ function Module:Render()
 				ImGui.EndTable()
 			end
 		end
-
-		ImGui.EndChild()
 	end
+	ImGui.EndChild()
 end
 
 function Module:GiveTime(combat_state)
