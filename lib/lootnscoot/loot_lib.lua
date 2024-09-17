@@ -956,20 +956,22 @@ function loot.lootMobs(limit)
     local corpseList = {}
 
     -- check for own corpse
-    local myCorpseCount = mq.TLO.SpawnCount(spawnSearch:format("pccorpse %s radius %d zradius 100", loot.Settings.CorpseRadius))()
+    local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius %d zradius 100", mq.TLO.Me.CleanName(), loot.Settings.CorpseRadius))()
+    RGMercsLogger.log_debug('\awlootMobs(): \ayMy Corpse Count: %d', myCorpseCount)
     for i = 1, (limit or myCorpseCount) do
-        local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', loot.Settings.CorpseRadius))
+        local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse %s radius %d zradius 100", i, mq.TLO.Me.CleanName(), loot.Settings.CorpseRadius))
+        RGMercsLogger.log_debug('\awlootMobs(): \ayMy Corpse ID: %d', corpse.ID())
         table.insert(corpseList, corpse)
     end
 
     -- options for combat looting or looting disabled
-    if deadCount == 0 or ((mobsNearby > 0 or mq.TLO.Me.Combat()) and not loot.Settings.CombatLooting) then return false end
+    if (deadCount + myCorpseCount) == 0 or ((mobsNearby > 0 or mq.TLO.Me.Combat()) and not loot.Settings.CombatLooting) then return false end
 
     for i = 1, (limit or deadCount) do
         local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', loot.Settings.CorpseRadius))
         table.insert(corpseList, corpse)
-        -- why is there a deity check?
     end
+
     local didLoot = false
     if #corpseList > 0 then
         RGMercsLogger.log_debug('\awlootMobs(): \ayTrying to loot %d corpses.', #corpseList)
@@ -979,6 +981,7 @@ function loot.lootMobs(limit)
             if corpseID and corpseID > 0 and not loot.corpseLocked(corpseID) and (mq.TLO.Navigation.PathLength('spawn id ' .. tostring(corpseID))() or 100) < 60 then
                 -- try to pull our corpse closer if possible.
                 if corpse.DisplayName() == mq.TLO.Me.DisplayName() then
+                    RGMercsLogger.log_debug('\awlootMobs(): \ayPulilng my Corpse ID: %d', corpse.ID())
                     RGMercUtils.DoCmd("/corpse")
                     mq.delay(10)
                 end

@@ -109,7 +109,7 @@ function Module:Render()
 		if ImGui.CollapsingHeader("FAQ Commands") then
 			if ImGui.BeginTable("##CommandHelper", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
 				ImGui.TableSetupColumn("Command", ImGuiTableColumnFlags.WidthFixed, 100)
-				ImGui.TableSetupColumn("Usage", ImGuiTableColumnFlags.WidthFixed, 400)
+				ImGui.TableSetupColumn("Usage", ImGuiTableColumnFlags.WidthFixed, 200)
 				ImGui.TableSetupColumn("Description", ImGuiTableColumnFlags.WidthStretch)
 				ImGui.TableSetupScrollFreeze(0, 1)
 				ImGui.TableHeadersRow()
@@ -150,7 +150,7 @@ function Module:Render()
 			local questions = RGMercModules:ExecAll("GetFAQ")
 			if ImGui.BeginTable("FAQ", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
 				ImGui.TableSetupColumn("SettingName", ImGuiTableColumnFlags.WidthFixed, 100)
-				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 400)
+				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 200)
 				ImGui.TableSetupColumn("Answer", ImGuiTableColumnFlags.WidthStretch)
 				ImGui.TableSetupScrollFreeze(0, 1)
 				ImGui.TableHeadersRow()
