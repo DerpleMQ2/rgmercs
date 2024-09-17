@@ -96,8 +96,8 @@ function Module:Render()
 			ImGui.TableHeadersRow()
 			for c, d in pairs(RGMercsBinds.Handlers) do
 				if c ~= "help" then
-					if (Module.TempSettings.Search ~= "" and (string.find(d.usage:lower(), Module.TempSettings.Search) or
-							string.find(d.about:lower(), Module.TempSettings.Search or string.find(c:lower(), Module.TempSettings.Search)))) or Module.TempSettings.Search == "" then
+					if (Module.TempSettings.Search ~= "" and (string.find(d.usage:lower(), Module.TempSettings.Search:lower()) or
+							string.find(d.about:lower(), Module.TempSettings.Search:lower() or string.find(c:lower(), Module.TempSettings.Search:lower())))) or Module.TempSettings.Search:lower() == "" then
 						ImGui.TableNextColumn()
 						ImGui.Text(c)
 						ImGui.TableNextColumn()
@@ -114,8 +114,8 @@ function Module:Render()
 			for _, info in pairs(moduleCommands) do
 				if info.CommandHandlers then
 					for c, d in pairs(info.CommandHandlers or {}) do
-						if (Module.TempSettings.Search ~= "" and (string.find(d.usage:lower(), Module.TempSettings.Search) or
-								string.find(d.about:lower(), Module.TempSettings.Search or string.find(c:lower(), Module.TempSettings.Search)))) or Module.TempSettings.Search == "" then
+						if (Module.TempSettings.Search ~= "" and (string.find(d.usage:lower(), Module.TempSettings.Search:lower()) or
+								string.find(d.about:lower(), Module.TempSettings.Search:lower() or string.find(c:lower(), Module.TempSettings.Search:lower())))) or Module.TempSettings.Search:lower() == "" then
 							ImGui.TableNextRow()
 							ImGui.TableNextColumn()
 							ImGui.Text(c)
@@ -143,8 +143,8 @@ function Module:Render()
 				for _, info in pairs(questions or {}) do
 					if info.FAQ then
 						for c, d in pairs(info.FAQ or {}) do
-							if (Module.TempSettings.Search ~= "" and (string.find(d.settingName:lower(), Module.TempSettings.Search) or
-									string.find(d.Question:lower(), Module.TempSettings.Search or string.find(d.Answer:lower(), Module.TempSettings.Search)))) or Module.TempSettings.Search == "" then
+							if (Module.TempSettings.Search ~= "" and (string.find(d.settingName:lower(), Module.TempSettings.Search:lower()) or
+									string.find(d.Question:lower(), Module.TempSettings.Search:lower() or string.find(d.Answer:lower(), Module.TempSettings.Search:lower())))) or Module.TempSettings.Search:lower() == "" then
 								ImGui.TableNextRow()
 								ImGui.TableNextColumn()
 								ImGui.Text(d.settingName)
