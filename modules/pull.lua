@@ -1240,7 +1240,7 @@ function Module:GiveTime(combat_state)
         self.TempSettings.HuntX = mq.TLO.Me.X()
         self.TempSettings.HuntY = mq.TLO.Me.Y()
         self.TempSettings.HuntZ = mq.TLO.Me.Z()
-        RGMercUtils.DoCmd("/mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadiusHunt'))
+        RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadiusHunt'))
     end
 
     if not mq.TLO.Navigation.MeshLoaded() then
