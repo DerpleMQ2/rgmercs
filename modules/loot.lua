@@ -18,6 +18,7 @@ Module.BuyItemsTable     = {}
 Module.GlobalItemsTable  = {}
 Module.NormalItemsTable  = {}
 Module.FAQ               = {}
+Module.ClassFAQ          = {}
 
 Module.DefaultConfig     = {
 	['DoLoot']          = { DisplayName = "DoLoot", Category = "Loot N Scoot", Tooltip = "Enables Loot Settings for Looting", Default = true, FAQ = "Why are my goobers not looting?", Answer = "You most likely have DoLoot turned off.", },
@@ -786,7 +787,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-	return { module = self._name, FAQ = self.FAQ, }
+	return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+	return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

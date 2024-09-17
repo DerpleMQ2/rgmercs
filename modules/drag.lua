@@ -7,6 +7,7 @@ local Module             = { _version = '0.1a', _name = "Drag", _author = 'Derpl
 Module.__index           = Module
 Module.settings          = {}
 Module.FAQ               = {}
+Module.ClassFAQ          = {}
 
 Module.DefaultConfig     = {
     ['DoDrag']       = { DisplayName = "Drag Corpses", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = false, },
@@ -178,7 +179,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

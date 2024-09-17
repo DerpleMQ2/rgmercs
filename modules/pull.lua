@@ -23,6 +23,7 @@ Module.TempSettings.HuntZ                = 0
 Module.TempSettings.MyPaths              = {}
 Module.TempSettings.SelectedPath         = "None"
 Module.FAQ                               = {}
+Module.ClassFAQ                          = {}
 
 local PullStates                         = {
     ['PULL_IDLE']               = 1,
@@ -1705,7 +1706,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

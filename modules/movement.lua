@@ -12,6 +12,7 @@ Module.TempSettings.CampZoneId     = 0
 Module.TempSettings.Go2GGH         = 0
 Module.TempSettings.LastCmd        = ""
 Module.FAQ                         = {}
+Module.ClassFAQ                    = {}
 
 Module.Constants                   = {}
 Module.Constants.GGHZones          = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
@@ -717,7 +718,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

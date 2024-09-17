@@ -18,6 +18,7 @@ Module.CurrentRotation                       = { name = "None", state = 0, }
 Module.ClassConfig                           = nil
 Module.DefaultCategories                     = nil
 Module.FAQ                                   = {}
+Module.ClassFAQ                              = {}
 
 Module.Constants                             = {}
 Module.Constants.RezSearchGroup              = "pccorpse group radius 100 zradius 50"
@@ -107,7 +108,7 @@ function Module:LoadSettings()
         if v.Type ~= "Custom" then
             self.DefaultCategories:add(v.Category)
         end
-        self.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
+        self.ClassFAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
     end
 
     self.TempSettings.RotationStates = {}
@@ -856,7 +857,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

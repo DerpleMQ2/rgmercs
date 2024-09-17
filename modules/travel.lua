@@ -15,6 +15,7 @@ Module.TempSettings.PorterList     = {}
 Module.TempSettings.FilteredList   = {}
 Module.TempSettings.FilterText     = ""
 Module.FAQ                         = {}
+Module.ClassFAQ                    = {}
 
 local travelColors                 = {}
 travelColors["Group v2"]           = {}
@@ -305,7 +306,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

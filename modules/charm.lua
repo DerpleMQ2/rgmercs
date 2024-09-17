@@ -14,6 +14,8 @@ Module.TempSettings              = {}
 Module.TempSettings.CharmImmune  = {}
 Module.TempSettings.CharmTracker = {}
 Module.FAQ                       = {}
+Module.ClassFAQ                  = {}
+
 Module.DefaultConfig             = {
 	-- [ CHARM ] --
 	['CharmOn']             = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", RequiresLoadoutChange = true, FAQ = "How do I make my [Bard, Enchanter, Druid, Necro] Charm pets?", Answer = "Bards, Enchanters, Druids, and Necros all have the option to Enable CharmOn so they can Charm a pet.", },
@@ -555,7 +557,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-	return { module = self._name, FAQ = self.FAQ, }
+	return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+	return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

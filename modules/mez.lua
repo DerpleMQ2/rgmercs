@@ -15,6 +15,7 @@ Module.TempSettings.BardAEMezTimer = 0
 Module.TempSettings.MezImmune      = {}
 Module.TempSettings.MezTracker     = {}
 Module.FAQ                         = {}
+Module.ClassFAQ                    = {}
 
 Module.DefaultConfig               = {
     -- [ MEZ ] --
@@ -669,7 +670,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string
