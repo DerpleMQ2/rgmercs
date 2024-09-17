@@ -686,7 +686,7 @@ local _ClassConfig = {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
+                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
             end,
         },
         { --Summon pet even when buffs are off on emu

@@ -889,7 +889,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
                     (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')) and
-                    RGMercUtils.DoBuffCheck()
+                    RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
             end,
         },
         { --Summon pet even when buffs are off on emu
@@ -921,15 +921,7 @@ local _ClassConfig = {
             name = 'GroupBuff',
             timer = 60, -- only run every 60 seconds top.
             targetId = function(self)
-                local groupIds = { mq.TLO.Me.ID(), }
-                local count = mq.TLO.Group.Members()
-                for i = 1, count do
-                    local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
-                    if RGMercUtils.GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
-                        table.insert(groupIds, mq.TLO.Group.Member(i).ID())
-                    end
-                end
-                return groupIds
+                return RGMercUtils.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and

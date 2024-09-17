@@ -2246,6 +2246,23 @@ function RGMercUtils.BurnCheck()
     return autoBurn or alwaysBurn
 end
 
+function RGMercUtils.AmIBuffable()
+    local myCorpseCount = RGMercUtils.GetSetting('BuffRezables') and 0 or mq.TLO.SpawnCount(string.format('pccorpse %s radius 100 zradius 50', mq.TLO.Me.CleanName()))()
+    return myCorpseCount == 0
+end
+
+function RGMercUtils.GetBuffableGroupIDs()
+    local groupIds = RGMercUtils.AmIBuffable() and { mq.TLO.Me.ID(), } or {}
+    local count = mq.TLO.Group.Members()
+    for i = 1, count do
+        local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+        if RGMercUtils.GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
+            table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+        end
+    end
+    return groupIds
+end
+
 ---@param targetId integer
 function RGMercUtils.DoStick(targetId)
     if os.clock() - RGMercUtils.LastDoStick < 4 then
