@@ -113,11 +113,11 @@ Module.CommandHandlers   = {
 }
 
 Module.DefaultCategories = Set.new({})
-for _, v in pairs(Module.DefaultConfig or {}) do
+for k, v in pairs(Module.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
     end
-    Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
+    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
 end
 
 local function getConfigFileName()

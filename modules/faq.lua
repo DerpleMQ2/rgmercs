@@ -40,11 +40,11 @@ function Module:LoadSettings()
 		self.settings = config()
 	end
 
-	for _, v in pairs(Module.DefaultConfig or {}) do
+	for k, v in pairs(Module.DefaultConfig or {}) do
 		if v.Type ~= "Custom" then
 			Module.DefaultCategories:add(v.Category)
 		end
-		Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
+		Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
 	end
 
 	local settingsChanged = false
@@ -84,82 +84,98 @@ function Module:ShouldRender()
 	return true
 end
 
+function Module:MatchSearch(...)
+	local allText = { ..., }
+	for _, t in ipairs(allText) do
+		if self.TempSettings.Search == "" or (t or ""):lower():find(self.TempSettings.Search) then
+			return true
+		end
+	end
+	return false
+end
+
 function Module:Render()
 	ImGui.Text("FAQ Module")
-	Module.TempSettings.Search, _ = ImGui.InputText("Search", Module.TempSettings.Search or "")
+	if not RGMercConfig.Globals.SubmodulesLoaded then
+		return
+	end
 
-	if ImGui.CollapsingHeader("FAQ Commands") then
-		if ImGui.BeginTable("CommandHelp", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY, ImGuiTableFlags.Resizable), ImVec2(0.0, 0.0)) then
-			ImGui.TableSetupColumn("Command")
-			ImGui.TableSetupColumn("Usage")
-			ImGui.TableSetupColumn("Description")
-			ImGui.TableSetupScrollFreeze(0, 1)
-			ImGui.TableHeadersRow()
-			for c, d in pairs(RGMercsBinds.Handlers) do
-				if c ~= "help" then
-					if (Module.TempSettings.Search ~= "" and (string.find(d.usage:lower(), Module.TempSettings.Search:lower()) or
-							string.find(d.about:lower(), Module.TempSettings.Search:lower() or string.find(c:lower(), Module.TempSettings.Search:lower())))) or Module.TempSettings.Search:lower() == "" then
-						ImGui.TableNextColumn()
-						ImGui.Text(c)
-						ImGui.TableNextColumn()
-						ImGui.Text(d.usage)
-						ImGui.TableNextColumn()
-						ImGui.PushTextWrapPos((ImGui.GetWindowContentRegionWidth() - 15) or 15)
-						ImGui.Text(d.about)
-					end
-				end
-			end
+	ImGui.Text("Search")
+	ImGui.SameLine()
+	self.TempSettings.Search, _ = ImGui.InputText("##Search", self.TempSettings.Search or "")
 
-			local moduleCommands = RGMercModules:ExecAll("GetCommandHandlers")
-
-			for _, info in pairs(moduleCommands) do
-				if info.CommandHandlers then
-					for c, d in pairs(info.CommandHandlers or {}) do
-						if (Module.TempSettings.Search ~= "" and (string.find(d.usage:lower(), Module.TempSettings.Search:lower()) or
-								string.find(d.about:lower(), Module.TempSettings.Search:lower() or string.find(c:lower(), Module.TempSettings.Search:lower())))) or Module.TempSettings.Search:lower() == "" then
-							ImGui.TableNextRow()
+	ImGui.SetNextWindowSizeConstraints(0, 0, ImGui.GetWindowWidth(), 600)
+	if ImGui.BeginChild("##FAQCommandContainer", ImVec2(0, 0), ImGuiChildFlags.Border, ImGuiWindowFlags.AlwaysAutoResize) then
+		if ImGui.CollapsingHeader("FAQ Commands") then
+			if ImGui.BeginTable("##CommandHelper", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
+				ImGui.TableSetupColumn("Command", ImGuiTableColumnFlags.WidthFixed, 100)
+				ImGui.TableSetupColumn("Usage", ImGuiTableColumnFlags.WidthFixed, 400)
+				ImGui.TableSetupColumn("Description", ImGuiTableColumnFlags.WidthStretch)
+				ImGui.TableSetupScrollFreeze(0, 1)
+				ImGui.TableHeadersRow()
+				for cmd, data in pairs(RGMercsBinds.Handlers) do
+					if cmd ~= "help" then
+						if self:MatchSearch(data.usage, data.about, cmd) then
 							ImGui.TableNextColumn()
-							ImGui.Text(c)
+							ImGui.Text(cmd)
 							ImGui.TableNextColumn()
-							ImGui.Text(d.usage)
+							ImGui.Text(data.usage)
 							ImGui.TableNextColumn()
-							ImGui.TextWrapped(d.about)
+							ImGui.PushTextWrapPos((ImGui.GetWindowContentRegionWidth() - 15) or 15)
+							ImGui.Text(data.about)
 						end
 					end
 				end
-			end
-			ImGui.EndTable()
-		end
-	end
 
-	if ImGui.CollapsingHeader("FAQ Questions") then
-		local questions = RGMercModules:ExecAll("GetFAQ")
-		if ImGui.BeginTable("FAQ", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY, ImGuiTableFlags.Resizable), ImVec2(0.0, 0.0)) then
-			ImGui.TableSetupColumn("SettingName")
-			ImGui.TableSetupColumn("Question")
-			ImGui.TableSetupColumn("Answer")
-			ImGui.TableSetupScrollFreeze(0, 1)
-			ImGui.TableHeadersRow()
-			if questions ~= nil then
-				for _, info in pairs(questions or {}) do
-					if info.FAQ then
-						for c, d in pairs(info.FAQ or {}) do
-							if (Module.TempSettings.Search ~= "" and (string.find(d.settingName:lower(), Module.TempSettings.Search:lower()) or
-									string.find(d.Question:lower(), Module.TempSettings.Search:lower() or string.find(d.Answer:lower(), Module.TempSettings.Search:lower())))) or Module.TempSettings.Search:lower() == "" then
-								ImGui.TableNextRow()
+				local moduleCommands = RGMercModules:ExecAll("GetCommandHandlers")
+
+				for module, info in pairs(moduleCommands) do
+					if info.CommandHandlers then
+						for cmd, data in pairs(info.CommandHandlers or {}) do
+							if self:MatchSearch(data.usage, data.about, cmd, module) then
 								ImGui.TableNextColumn()
-								ImGui.Text(d.settingName)
+								ImGui.Text(cmd)
 								ImGui.TableNextColumn()
-								ImGui.TextWrapped(d.Question)
+								ImGui.Text(data.usage)
 								ImGui.TableNextColumn()
-								ImGui.TextWrapped(d.Answer)
+								ImGui.TextWrapped(data.about)
 							end
 						end
 					end
 				end
+				ImGui.EndTable()
 			end
-			ImGui.EndTable()
 		end
+
+		if ImGui.CollapsingHeader("FAQ Questions") then
+			local questions = RGMercModules:ExecAll("GetFAQ")
+			if ImGui.BeginTable("FAQ", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
+				ImGui.TableSetupColumn("SettingName", ImGuiTableColumnFlags.WidthFixed, 100)
+				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 400)
+				ImGui.TableSetupColumn("Answer", ImGuiTableColumnFlags.WidthStretch)
+				ImGui.TableSetupScrollFreeze(0, 1)
+				ImGui.TableHeadersRow()
+				if questions ~= nil then
+					for module, info in pairs(questions or {}) do
+						if info.FAQ then
+							for _, data in pairs(info.FAQ or {}) do
+								if self:MatchSearch(data.Question, data.Answer, data.settingName, module) then
+									ImGui.TableNextRow()
+									ImGui.TableNextColumn()
+									ImGui.Text(data.settingName)
+									ImGui.TableNextColumn()
+									ImGui.TextWrapped(data.Question)
+									ImGui.TableNextColumn()
+									ImGui.TextWrapped(data.Answer)
+								end
+							end
+						end
+					end
+				end
+				ImGui.EndTable()
+			end
+		end
+		ImGui.EndChild()
 	end
 end
 
