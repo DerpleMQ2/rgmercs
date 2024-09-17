@@ -115,9 +115,7 @@ function Module:Render()
 						ImGui.TableNextColumn()
 						ImGui.Text(d.usage)
 						ImGui.TableNextColumn()
-						ImGui.PushTextWrapPos((ImGui.GetWindowContentRegionWidth() - 20) or 20)
-						ImGui.Text(d.about)
-						ImGui.PopTextWrapPos()
+						ImGui.TextWrapped(d.about)
 					end
 				end
 			end
@@ -141,11 +139,9 @@ function Module:Render()
 							ImGui.TableNextColumn()
 							ImGui.Text(d.settingName)
 							ImGui.TableNextColumn()
-							ImGui.Text(d.Question)
+							ImGui.TextWrapped(d.Question)
 							ImGui.TableNextColumn()
-							ImGui.PushTextWrapPos((ImGui.GetWindowContentRegionWidth() - 20) or 20)
-							ImGui.Text(d.Answer)
-							ImGui.PopTextWrapPos()
+							ImGui.TextWrapped(d.Answer)
 						end
 					end
 				end
