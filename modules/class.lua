@@ -104,6 +104,12 @@ function Module:LoadSettings()
     self.ClassConfig = RGMercsClassLoader.load(RGMercConfig.Globals.CurLoadedClass)
 
     Module.DefaultCategories = Set.new({})
+    for _, v in pairs(self.ClassConfig.DefaultConfig or {}) do
+        if v.Type ~= "Custom" then
+            Module.DefaultCategories:add(v.Category)
+        end
+        Module.ClassFAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
+    end
     for k, v in pairs(Module.DefaultConfig or {}) do
         if v.Type ~= "Custom" then
             Module.DefaultCategories:add(v.Category)
@@ -141,10 +147,6 @@ function Module:LoadSettings()
     end
 
     local settingsChanged = false
-
-    for k, v in pairs(self.ClassConfig.DefaultConfig or {}) do
-        Module.ClassFAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
-    end
 
     -- Setup Defaults
     self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
