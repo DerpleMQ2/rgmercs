@@ -18,21 +18,143 @@ Module.ClassFAQ                  = {}
 
 Module.DefaultConfig             = {
 	-- [ CHARM ] --
-	['CharmOn']             = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", RequiresLoadoutChange = true, FAQ = "How do I make my [Bard, Enchanter, Druid, Necro] Charm pets?", Answer = "Bards, Enchanters, Druids, and Necros all have the option to Enable CharmOn so they can Charm a pet.", },
-	['CharmStartCount']     = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", FAQ = "My Charmer doesn't Charm, why?", Answer = "Make sure your CharmStartCount setting is at an appropriate level. This setting is the minimum mobs on Xtarget before we start Trying to Charm.", },
-	['CharmRadius']         = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", FAQ = "Why won't I Charm pets?", Answer = "Your CharmRadius may be set to low. Increase this to charm mobs farther away from you.", },
-	['CharmZRadius']        = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", FAQ = "Why won't I Charm pets?", Answer = "Your CharmZRadius may be set to low. Increase this to charm mobs farther above / below you.", },
-	['AutoLevelRangeCharm'] = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", FAQ = "I don't know what lvl my charm spell maxes at?", Answer = "Enable AutoLevelRangeCharm to have the max level set for you based on the currently selected spell.", },
-	['CharmStopHPs']        = { DisplayName = "Charm Stop HPs", Category = "Charm Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to charm", FAQ = "Why are all of my Charm Pets nearly Dead?", Answer = "Raise the CharmStopHPs setting so you won't try to charm a mob below that health Percentage.", },
-	['CharmMinLevel']       = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", FAQ = "Why do I keep charming Grey Con mobs?", Answer = "Adjust the CharmMinLevel to an appropriate level so you don't try to charm spawns lower level than you want.", },
-	['CharmMaxLevel']       = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", FAQ = "Why won't I Charm pets?", Answer = "Your CharmMaxLevel may be set to High. Set this to the Max Lecel your charm spell can handle. You can also enable AutoLevelRangeCharm and have it do this for you.", },
-	['DireCharmMaxLvl']     = { DisplayName = "DireCharm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", FAQ = "Why can't I land a Dire Charm?", Answer = "Your DireCharmMaxLvl may be set to High. Adjust approptiatly or Enable AutoLevelRangeCharm and set the value really High to have this automatically adjust down to find the appropriate level for you.", },
-	['DireCharm']           = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", FAQ = "How do I use Dire Charm AA?", Answer = "Enable DireCharm setting and we will attempt to use DireCharm based upon the other settings", },
-	['PreferCharm']         = { DisplayName = "Prefer Charmed Pet", Category = "Charm Pet", Default = false, Tooltip = "Prefer to use a charmed pet over a summoned pet.", FAQ = "I want to only use Charm Pets and ignore summoning my own, can I do that?", Answer = "The setting is currently there but not implimented yet PreferCharm. If you have DoCharm enabled you shouldn't try to summon a pet.", },
+	['CharmOn']             = {
+		DisplayName           = "Charm On",
+		Category              = "Charm Pet",
+		Default               = false,
+		Tooltip               = "Set to use charm spells.",
+		RequiresLoadoutChange = true,
+		FAQ                   = "How do I make my [Bard, Enchanter, Druid, Necro] Charm pets?",
+		Answer                =
+		"Bards, Enchanters, Druids, and Necros all have the option to Enable [CharmOn] so they can Charm a pet.",
+	},
+	['CharmStartCount']     = {
+		DisplayName = "Charm Start Count",
+		Category    = "Charm Pet",
+		Default     = 2,
+		Min         = 1,
+		Max         = 20,
+		Tooltip     = "Sets # of mobs needed to start using Charm spells. ( Default 2 )",
+		FAQ         = "My Charmer doesn't Charm, why?",
+		Answer      =
+		"Make sure your [CharmStartCount] setting is at an appropriate level.\n\nThis setting is the minimum mobs on Xtarget before we start Trying to Charm.",
+	},
+	['CharmRadius']         = {
+		DisplayName = "Charm Radius",
+		Category    = "Charm Range",
+		Default     = 100,
+		Min         = 1,
+		Max         = 200,
+		Tooltip     = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs",
+		FAQ         = "Why won't I Charm pets?",
+		Answer      = "Your [CharmRadius] may be set to low.\nIncrease this to charm mobs farther away from you.",
+	},
+	['CharmZRadius']        = {
+		DisplayName = "Charm ZRadius",
+		Category    = "Charm Range",
+		Default     = 15,
+		Min         = 1,
+		Max         = 200,
+		Tooltip     =
+		"Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.",
+		FAQ         = "Why won't I Charm pets?",
+		Answer      = "Your [CharmZRadius] may be set to low.\n\nIncrease this to charm mobs farther above / below you.",
+	},
+	['AutoLevelRangeCharm'] = {
+		DisplayName = "Auto Level Range",
+		Category    = "Charm Target",
+		Default     = true,
+		Tooltip     = "Set to enable automatic charm level detection based on spells.",
+		FAQ         = "I don't know what lvl my charm spell maxes at?",
+		Answer      =
+		"Enable [AutoLevelRangeCharm] to have the max level set for you based on the currently selected spell.",
+	},
+	['CharmStopHPs']        = {
+		DisplayName = "Charm Stop HPs",
+		Category    = "Charm Target",
+		Default     = 80,
+		Min         = 1,
+		Max         = 100,
+		Tooltip     = "Mob HP% to stop trying to charm",
+		FAQ         = "Why are all of my Charm Pets nearly Dead?",
+		Answer      = "Raise the [CharmStopHPs] setting so you won't try to charm a mob below that health Percentage.",
+	},
+	['CharmMinLevel']       = {
+		DisplayName = "Charm Min Level",
+		Category    = "Charm Target",
+		Default     = 0,
+		Min         = 1,
+		Max         = 200,
+		Tooltip     =
+		"Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored.\n\nNOTE: [AutoLevelRange] must be OFF!",
+		FAQ         = "Why do I keep charming Grey Con mobs?",
+		Answer      =
+		"Adjust the [CharmMinLevel] to an appropriate level so you don't try to charm spawns lower level than you want.",
+	},
+	['CharmMaxLevel']       = {
+		DisplayName = "Charm Max Level",
+		Category    = "Charm Target",
+		Default     = 0,
+		Min         = 1,
+		Max         = 200,
+		Tooltip     =
+		"Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored.\n\nNOTE: [AutoLevelRange] must be OFF!",
+		FAQ         = "Why won't I Charm pets?",
+		Answer      =
+		"Your [CharmMaxLevel] may be set to High.\n\nSet this to the Max Level your charm spell can handle.\n\nYou can also enable [AutoLevelRangeCharm] and have it do this for you.",
+	},
+	['DireCharmMaxLvl']     = {
+		DisplayName = "DireCharm Max Level",
+		Category    = "Charm Target",
+		Default     = 0,
+		Min         = 1,
+		Max         = 200,
+		Tooltip     =
+		"Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored.\n\nNOTE: [AutoLevelRange] must be OFF!",
+		FAQ         = "Why can't I land a Dire Charm?",
+		Answer      =
+			"Your [DireCharmMaxLvl] may be set to High.\n\nAdjust approptiatly or Enable [AutoLevelRangeCharm] and set the value really High, " ..
+			"to have this automatically adjust down to find the appropriate level for you.",
+	},
+	['DireCharm']           = {
+		DisplayName = "Dire Charm",
+		Category    = "Charm Pet",
+		Default     = false,
+		Tooltip     = "Use DireCharm AA",
+		FAQ         = "How do I use Dire Charm AA?",
+		Answer      = "Enable [DireCharm] setting and we will attempt to use [DireCharm] based upon the other settings.",
+	},
+	['PreferCharm']         = {
+		DisplayName = "Prefer Charmed Pet",
+		Category    = "Charm Pet",
+		Default     = false,
+		Tooltip     = "Prefer to use a charmed pet over a summoned pet.",
+		FAQ         = "I want to only use Charm Pets and ignore summoning my own, can I do that?",
+		Answer      =
+		"The setting is currently there but not implimented yet [PreferCharm].\n\nIf you have [DoCharm] enabled you shouldn't try to summon a pet.",
+	},
 }
 
 Module.FAQ                       = {
-	[1] = { Question = 'Why does my Charmer Not Charm ANYTHING?', Answer = 'Make sure you have CharmOn enabled, and Double check that your are in the Right lvl range between CharmMinLevel and CharmMaxLevel or you can enable AutoLevelRangeCharm so it will configure the MaxLevel for you.', Settings_Used = 'CharmOn, AutoLevelRangeCharm, CharmMinLevel, CharmMaxLevel', },
+	[1] = {
+		Question      = 'Why does my Charmer Not Charm ANYTHING?',
+		Answer        =
+			"Make sure you have [CharmOn] enabled.\nAlso Double check that your are in the Right lvl range between [CharmMinLevel] and [CharmMaxLevel].\n\n" ..
+			"Alternately  you can enable [AutoLevelRangeCharm] so it will configure the MaxLevel for you.",
+		Settings_Used = 'CharmOn, AutoLevelRangeCharm, CharmMinLevel, CharmMaxLevel',
+	},
+	[2] = {
+		Question      = "Can I specify a pet to always recharm?",
+		Answer        =
+			"Not currently, but we can add this feature if it's needed.\n\nCurrently we will attempt to recharm if the spawn is still within our thresholds for health and number of spawns in came.\n" ..
+			"You can also try setting [CharmStartCount] to 1 or 0 and see if that helps.",
+		Settings_Used = "CharmOn, CharmStartCount",
+	},
+	[3] = {
+		Question      = "Why is my Charmed Pet not engaging in combat?",
+		Answer        = "You will want to turn on [DoPet] in your Main Config Options section, under the Pet/Merc tab.",
+		Settings_Used = "DoPet",
+	},
 }
 
 Module.DefaultCategories         = Set.new({})
@@ -209,7 +331,8 @@ end
 
 function Module:HandleCharmBroke(mobName, breakerName)
 	RGMercsLogger.log_debug("%s broke charm on ==> %s", breakerName, mobName)
-	RGMercUtils.HandleAnnounce(string.format("\ar CHARM Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName),
+	RGMercUtils.HandleAnnounce(
+		string.format("\ar CHARM Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName),
 		RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
 end
 
@@ -260,7 +383,9 @@ function Module:CharmNow(charmId, useAA)
 	if not RGMercUtils.MyClassIs("BRD") then
 		local dCharm = RGMercUtils.GetSetting("DireCharm", true) == true
 		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
-			RGMercUtils.HandleAnnounce(string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"), RGMercUtils.GetSetting('CharmAnnounceGroup'),
+			RGMercUtils.HandleAnnounce(
+				string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"),
+				RGMercUtils.GetSetting('CharmAnnounceGroup'),
 				RGMercUtils.GetSetting('CharmAnnounce'))
 			RGMercUtils.UseAA("Dire Charm", charmId)
 		else
@@ -278,7 +403,8 @@ function Module:CharmNow(charmId, useAA)
 
 	if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or mq.TLO.Pet.ID() > 0 then
 		RGMercUtils.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
-			mq.TLO.Spawn(charmId).CleanName(), charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
+				mq.TLO.Spawn(charmId).CleanName(), charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'),
+			RGMercUtils.GetSetting('CharmAnnounce'))
 	else
 		RGMercUtils.HandleAnnounce(string.format("\ar CHARM Failed: \ag -> \ay %s \ag <-",
 			mq.TLO.Spawn(charmId).CleanName(),
@@ -319,7 +445,8 @@ function Module:IsValidCharmTarget(mobId)
 
 	-- Is the mob ID in our charm immune list? If so, skip.
 	if self:IsCharmImmune(mobId) then
-		RGMercsLogger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d as it is in our immune list.",
+		RGMercsLogger.log_debug(
+			"\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d as it is in our immune list.",
 			spawn.ID(), spawn.CleanName(), spawn.Level())
 		return false
 	end
@@ -328,14 +455,16 @@ function Module:IsValidCharmTarget(mobId)
 	if RGMercUtils.MyClassIs('DRU') then
 		if spawn.Body.Name() ~= "Animal" then
 			RGMercsLogger.log_debug(
-				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.", spawn.ID(),
+				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.",
+				spawn.ID(),
 				spawn.CleanName(), spawn.Level())
 			return false
 		end
 	elseif RGMercUtils.MyClassIs('NEC') then
 		if spawn.Body.Name() ~= "Undead" then
 			RGMercsLogger.log_debug(
-				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.", spawn.ID(),
+				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.",
+				spawn.ID(),
 				spawn.CleanName(), spawn.Level())
 			return false
 		end
@@ -497,8 +626,10 @@ function Module:DoCharm()
 			RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 			self:ProcessCharmList()
 		else
-			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)", charmSpell and charmSpell() or "None",
-				charmSpell and charmSpell() and RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
+			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
+				charmSpell and charmSpell() or "None",
+				charmSpell and charmSpell() and
+				RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
 				RGMercUtils.GetTableSize(self.TempSettings.CharmTracker))
 		end
 	else
@@ -506,8 +637,10 @@ function Module:DoCharm()
 			RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 			self:ProcessCharmList()
 		else
-			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)", charmSpell and charmSpell() or "None",
-				charmSpell and charmSpell() and RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
+			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
+				charmSpell and charmSpell() or "None",
+				charmSpell and charmSpell() and
+				RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
 				RGMercUtils.GetTableSize(self.TempSettings.CharmTracker))
 		end
 	end
