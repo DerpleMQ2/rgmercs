@@ -19,6 +19,8 @@ Module.XPPerSecond        = 0
 Module.XPToNextLevel      = 0
 Module.SecondsToLevel     = 0
 Module.TimeToLevel        = "<Unknown>"
+Module.FAQ                = {}
+Module.ClassFAQ           = {}
 
 Module.TrackXP            = {
     PlayerLevel = mq.TLO.Me.Level(),
@@ -396,7 +398,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

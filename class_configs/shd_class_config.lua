@@ -1986,7 +1986,7 @@ local _ClassConfig = {
         ['Mode']             = { DisplayName = "Mode", Category = "Mode", Tooltip = "Select the active Combat Mode for this PC.", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
 
         --Buffs and Debuffs
-        ['DoSnare']          = { DisplayName = "Use Snares", Category = "Buffs/Debuffs", Index = 1, Tooltip = "Use Snare(Snare Dot used until AA is available).", Default = false, RequiresLoadoutChange = true, },
+        ['DoSnare']          = { DisplayName = "Use Snares", Category = "Buffs/Debuffs", Index = 1, Tooltip = "Use Snare(Snare Dot used until AA is available).", Default = false, RequiresLoadoutChange = true, FAQ = "Why is my Shadow Knight Not snaring?", Answer = "Make sure you have DoSnare enabled in your class settings.", },
         ['DoTempHP']         = { DisplayName = "Use HP Buff", Category = "Buffs/Debuffs", Index = 2, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("TempHP") end, Default = true, RequiresLoadoutChange = true, },
         ['DoTorrent']        = { DisplayName = "Use Torrents", Category = "Buffs/Debuffs", Index = 3, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("Torrent") end, RequiresLoadoutChange = true, Default = true, ConfigType = "Advanced", },
         ['DoBuffTap']        = { DisplayName = "Use Buff Tap", Category = "Buffs/Debuffs", Index = 4, Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("BuffTap") end, Default = false, RequiresLoadoutChange = true, ConfigType = "Advanced", },

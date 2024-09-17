@@ -8,6 +8,7 @@ Module.settings          = {}
 Module.DefaultConfig     = {}
 Module.DefaultCategories = {}
 Module.FAQ               = {}
+Module.ClassFAQ          = {}
 
 for k, v in pairs(Module.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
@@ -116,7 +117,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

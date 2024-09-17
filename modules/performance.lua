@@ -19,6 +19,7 @@ Module.FrameTimingData    = {}
 Module.MaxFrameTime       = 0
 Module.LastExtentsCheck   = os.clock()
 Module.FAQ                = {}
+Module.ClassFAQ           = {}
 
 Module.DefaultConfig      = {
     ['SecondsToStore']       = { DisplayName = "Seconds to Store", Category = "Monitoring", Tooltip = "The number of Seconds to keep in history.", Type = "Custom", Default = 30, Min = 10, Max = 120, Step = 5, },
@@ -205,7 +206,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string

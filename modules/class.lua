@@ -18,6 +18,7 @@ Module.CurrentRotation                       = { name = "None", state = 0, }
 Module.ClassConfig                           = nil
 Module.DefaultCategories                     = nil
 Module.FAQ                                   = {}
+Module.ClassFAQ                              = {}
 
 Module.Constants                             = {}
 Module.Constants.RezSearchGroup              = "pccorpse group radius 100 zradius 50"
@@ -140,6 +141,10 @@ function Module:LoadSettings()
     end
 
     local settingsChanged = false
+
+    for k, v in pairs(self.ClassConfig.DefaultConfig or {}) do
+        Module.ClassFAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
+    end
 
     -- Setup Defaults
     self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
@@ -856,7 +861,11 @@ function Module:GetCommandHandlers()
 end
 
 function Module:GetFAQ()
-    return { module = self._name, FAQ = self.FAQ, }
+    return { module = self._name, FAQ = self.FAQ or {}, }
+end
+
+function Module:GetClassFAQ()
+    return { module = self._name, FAQ = self.ClassFAQ or {}, }
 end
 
 ---@param cmd string
