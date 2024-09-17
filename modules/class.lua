@@ -108,7 +108,7 @@ function Module:LoadSettings()
         if v.Type ~= "Custom" then
             self.DefaultCategories:add(v.Category)
         end
-        self.ClassFAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
+        self.ClassFAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
     end
 
     self.TempSettings.RotationStates = {}

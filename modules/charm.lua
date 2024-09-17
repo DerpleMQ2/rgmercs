@@ -31,12 +31,16 @@ Module.DefaultConfig             = {
 	['PreferCharm']         = { DisplayName = "Prefer Charmed Pet", Category = "Charm Pet", Default = false, Tooltip = "Prefer to use a charmed pet over a summoned pet.", FAQ = "I want to only use Charm Pets and ignore summoning my own, can I do that?", Answer = "The setting is currently there but not implimented yet PreferCharm. If you have DoCharm enabled you shouldn't try to summon a pet.", },
 }
 
+Module.FAQ                       = {
+	[1] = { Question = 'Why does my Charmer Not Charm ANYTHING?', Answer = 'Make sure you have CharmOn enabled, and Double check that your are in the Right lvl range between CharmMinLevel and CharmMaxLevel or you can enable AutoLevelRangeCharm so it will configure the MaxLevel for you.', Settings_Used = 'CharmOn, AutoLevelRangeCharm, CharmMinLevel, CharmMaxLevel', },
+}
+
 Module.DefaultCategories         = Set.new({})
 for k, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
 	end
-	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
+	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 end
 
 local function getConfigFileName()

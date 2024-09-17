@@ -50,7 +50,7 @@ function Module:LoadSettings()
         if v.Type ~= "Custom" then
             Module.DefaultCategories:add(v.Category)
         end
-        Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
+        Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
     end
 
     local settingsChanged = false

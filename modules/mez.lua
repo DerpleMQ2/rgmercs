@@ -40,7 +40,7 @@ for k, v in pairs(Module.DefaultConfig) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
     end
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
+    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 end
 
 local function getConfigFileName()

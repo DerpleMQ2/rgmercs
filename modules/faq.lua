@@ -45,7 +45,7 @@ function Module:LoadSettings()
 		if v.Type ~= "Custom" then
 			Module.DefaultCategories:add(v.Category)
 		end
-		Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = k, }
+		Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 	end
 
 	local settingsChanged = false
@@ -159,10 +159,10 @@ function Module:Render()
 					for module, info in pairs(questions or {}) do
 						if info.FAQ then
 							for _, data in pairs(info.FAQ or {}) do
-								if self:MatchSearch(data.Question, data.Answer, data.settingName, module) then
+								if self:MatchSearch(data.Question, data.Answer, data.Settings_Used, module) then
 									ImGui.TableNextRow()
 									ImGui.TableNextColumn()
-									ImGui.Text(data.settingName)
+									ImGui.Text(data.Settings_Used)
 									ImGui.TableNextColumn()
 									ImGui.TextWrapped(data.Question)
 									ImGui.TableNextColumn()
@@ -188,10 +188,10 @@ function Module:Render()
 					for module, info in pairs(classFaq or {}) do
 						if info.FAQ then
 							for _, data in pairs(info.FAQ or {}) do
-								if self:MatchSearch(data.Question, data.Answer, data.settingName, module) then
+								if self:MatchSearch(data.Question, data.Answer, data.Settings_Used, module) then
 									ImGui.TableNextRow()
 									ImGui.TableNextColumn()
-									ImGui.Text(data.settingName)
+									ImGui.Text(data.Settings_Used)
 									ImGui.TableNextColumn()
 									ImGui.TextWrapped(data.Question)
 									ImGui.TableNextColumn()
@@ -204,6 +204,7 @@ function Module:Render()
 				ImGui.EndTable()
 			end
 		end
+
 		ImGui.EndChild()
 	end
 end
