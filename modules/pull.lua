@@ -22,6 +22,7 @@ Module.TempSettings.HuntY                = 0
 Module.TempSettings.HuntZ                = 0
 Module.TempSettings.MyPaths              = {}
 Module.TempSettings.SelectedPath         = "None"
+Module.FAQ                               = {}
 
 local PullStates                         = {
     ['PULL_IDLE']               = 1,
@@ -164,10 +165,11 @@ Module.DefaultConfig                   = {
 }
 
 Module.DefaultCategories               = Set.new({})
-for _, v in pairs(Module.DefaultConfig) do
+for _, v in pairs(Module.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
     end
+    Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
 end
 
 Module.CommandHandlers = {
@@ -1700,6 +1702,10 @@ end
 
 function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = self.CommandHandlers, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

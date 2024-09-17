@@ -18,6 +18,7 @@ Module.SettingsLoaded     = false
 Module.FrameTimingData    = {}
 Module.MaxFrameTime       = 0
 Module.LastExtentsCheck   = os.clock()
+Module.FAQ                = {}
 
 Module.DefaultConfig      = {
     ['SecondsToStore']       = { DisplayName = "Seconds to Store", Category = "Monitoring", Tooltip = "The number of Seconds to keep in history.", Type = "Custom", Default = 30, Min = 10, Max = 120, Step = 5, },
@@ -26,10 +27,11 @@ Module.DefaultConfig      = {
 }
 
 Module.DefaultCategories  = Set.new({})
-for _, v in pairs(Module.DefaultConfig) do
+for _, v in pairs(Module.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
     end
+    Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
 end
 
 local function getConfigFileName()
@@ -200,6 +202,10 @@ end
 
 function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = {}, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

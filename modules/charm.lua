@@ -13,27 +13,28 @@ Module.CombatState               = "None"
 Module.TempSettings              = {}
 Module.TempSettings.CharmImmune  = {}
 Module.TempSettings.CharmTracker = {}
-
+Module.FAQ                       = {}
 Module.DefaultConfig             = {
 	-- [ CHARM ] --
-	['CharmOn']             = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", RequiresLoadoutChange = true, },
-	['CharmStartCount']     = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", },
-	['CharmRadius']         = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", },
-	['CharmZRadius']        = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", },
-	['AutoLevelRangeCharm'] = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", },
-	['CharmStopHPs']        = { DisplayName = "Charm Stop HPs", Category = "Charm Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to charm", },
-	['CharmMinLevel']       = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
-	['CharmMaxLevel']       = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
-	['DireCharmMaxLvl']     = { DisplayName = "DireCharm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", },
-	['DireCharm']           = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", },
-	['PreferCharm']         = { DisplayName = "Prefer Charmed Pet", Category = "Charm Pet", Default = false, Tooltip = "Prefer to use a charmed pet over a summoned pet.", },
+	['CharmOn']             = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", RequiresLoadoutChange = true, FAQ = "How do I make my [Bard, Enchanter, Druid, Necro] Charm pets?", Answer = "Bards, Enchanters, Druids, and Necros all have the option to Enable CharmOn so they can Charm a pet.", },
+	['CharmStartCount']     = { DisplayName = "Charm Start Count", Category = "Charm Pet", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Charm spells. ( Default 2 )", FAQ = "My Charmer doesn't Charm, why?", Answer = "Make sure your CharmStartCount setting is at an appropriate level. This setting is the minimum mobs on Xtarget before we start Trying to Charm.", },
+	['CharmRadius']         = { DisplayName = "Charm Radius", Category = "Charm Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Charming, An area twice this size is monitored for aggro mobs", FAQ = "Why won't I Charm pets?", Answer = "Your CharmRadius may be set to low. Increase this to charm mobs farther away from you.", },
+	['CharmZRadius']        = { DisplayName = "Charm ZRadius", Category = "Charm Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start charming. An area twice this size is monitored for aggro mobs. If you're enchanter is not charming on hills -- increase this value.", FAQ = "Why won't I Charm pets?", Answer = "Your CharmZRadius may be set to low. Increase this to charm mobs farther above / below you.", },
+	['AutoLevelRangeCharm'] = { DisplayName = "Auto Level Range", Category = "Charm Target", Default = true, Tooltip = "Set to enable automatic charm level detection based on spells.", FAQ = "I don't know what lvl my charm spell maxes at?", Answer = "Enable AutoLevelRangeCharm to have the max level set for you based on the currently selected spell.", },
+	['CharmStopHPs']        = { DisplayName = "Charm Stop HPs", Category = "Charm Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to charm", FAQ = "Why are all of my Charm Pets nearly Dead?", Answer = "Raise the CharmStopHPs setting so you won't try to charm a mob below that health Percentage.", },
+	['CharmMinLevel']       = { DisplayName = "Charm Min Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Charm - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", FAQ = "Why do I keep charming Grey Con mobs?", Answer = "Adjust the CharmMinLevel to an appropriate level so you don't try to charm spawns lower level than you want.", },
+	['CharmMaxLevel']       = { DisplayName = "Charm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Charm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", FAQ = "Why won't I Charm pets?", Answer = "Your CharmMaxLevel may be set to High. Set this to the Max Lecel your charm spell can handle. You can also enable AutoLevelRangeCharm and have it do this for you.", },
+	['DireCharmMaxLvl']     = { DisplayName = "DireCharm Max Level", Category = "Charm Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to DireCharm - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", FAQ = "Why can't I land a Dire Charm?", Answer = "Your DireCharmMaxLvl may be set to High. Adjust approptiatly or Enable AutoLevelRangeCharm and set the value really High to have this automatically adjust down to find the appropriate level for you.", },
+	['DireCharm']           = { DisplayName = "Dire Charm", Category = "Charm Pet", Default = false, Tooltip = "Use DireCharm AA", FAQ = "How do I use Dire Charm AA?", Answer = "Enable DireCharm setting and we will attempt to use DireCharm based upon the other settings", },
+	['PreferCharm']         = { DisplayName = "Prefer Charmed Pet", Category = "Charm Pet", Default = false, Tooltip = "Prefer to use a charmed pet over a summoned pet.", FAQ = "I want to only use Charm Pets and ignore summoning my own, can I do that?", Answer = "The setting is currently there but not implimented yet PreferCharm. If you have DoCharm enabled you shouldn't try to summon a pet.", },
 }
 
 Module.DefaultCategories         = Set.new({})
-for _, v in pairs(Module.DefaultConfig) do
+for _, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
 	end
+	Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
 end
 
 local function getConfigFileName()
@@ -70,14 +71,23 @@ function Module:LoadSettings()
 		return
 	end
 
-    local settingsChanged = false
-    -- Setup Defaults
-    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+	local settingsChanged = false
+	-- Setup Defaults
+	self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
 
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
+	if settingsChanged then
+		self:SaveSettings(false)
+	end
 end
+
+local function testing()
+	if RGMercUtils.GetSetting('IsCharming') then
+		if RGMercUtils.GetSetting('CharmOn') and RGMercUtils.GetSetting('PreferCharm') then
+			return false
+		end
+	end
+end
+
 
 function Module:GetSettings()
 	return self.settings
@@ -542,6 +552,10 @@ end
 
 function Module:GetCommandHandlers()
 	return { module = self._name, CommandHandlers = {}, }
+end
+
+function Module:GetFAQ()
+	return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

@@ -14,6 +14,7 @@ Module.TempSettings.SelectedPorter = 1
 Module.TempSettings.PorterList     = {}
 Module.TempSettings.FilteredList   = {}
 Module.TempSettings.FilterText     = ""
+Module.FAQ                         = {}
 
 local travelColors                 = {}
 travelColors["Group v2"]           = {}
@@ -68,6 +69,12 @@ function Module:LoadSettings()
         self:SaveSettings(false)
     else
         self.settings = config()
+    end
+    for _, v in pairs(Module.DefaultConfig or {}) do
+        if v.Type ~= "Custom" then
+            Module.DefaultCategories:add(v.Category)
+        end
+        Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
     end
 end
 
@@ -295,6 +302,10 @@ end
 
 function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = {}, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

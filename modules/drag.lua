@@ -6,6 +6,8 @@ local Set                = require("mq.Set")
 local Module             = { _version = '0.1a', _name = "Drag", _author = 'Derple', }
 Module.__index           = Module
 Module.settings          = {}
+Module.FAQ               = {}
+
 Module.DefaultConfig     = {
     ['DoDrag']       = { DisplayName = "Drag Corpses", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = false, },
     ['DoSearchDrag'] = { DisplayName = "Use Spawn Search Dragging", Category = "Drag", Tooltip = "Use Search to find drag targets", Default = false, },
@@ -43,10 +45,11 @@ function Module:LoadSettings()
     end
 
     Module.DefaultCategories = Set.new({})
-    for _, v in pairs(self.DefaultConfig or {}) do
+    for _, v in pairs(Module.DefaultConfig or {}) do
         if v.Type ~= "Custom" then
             Module.DefaultCategories:add(v.Category)
         end
+        Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
     end
 
     local settingsChanged = false
@@ -172,6 +175,10 @@ end
 
 function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = {}, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string
