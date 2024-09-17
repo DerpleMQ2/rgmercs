@@ -205,34 +205,6 @@ function Module:Render()
 			end
 		end
 
-		if ImGui.CollapsingHeader("FAQ Class Config") then
-			local classFaq = RGMercModules:ExecAll("GetClassFAQ")
-			if ImGui.BeginTable("FAQClass", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
-				ImGui.TableSetupColumn("SettingName", ImGuiTableColumnFlags.WidthFixed, 100)
-				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 200)
-				ImGui.TableSetupColumn("Answer", ImGuiTableColumnFlags.WidthStretch)
-				ImGui.TableSetupScrollFreeze(0, 1)
-				ImGui.TableHeadersRow()
-				if classFaq ~= nil then
-					for module, info in pairs(classFaq or {}) do
-						if info.FAQ then
-							for _, data in pairs(info.FAQ or {}) do
-								if self:MatchSearch(data.Question, data.Answer, data.settingName, module) then
-									ImGui.TableNextRow()
-									ImGui.TableNextColumn()
-									ImGui.Text(data.settingName)
-									ImGui.TableNextColumn()
-									ImGui.TextWrapped(data.Question)
-									ImGui.TableNextColumn()
-									ImGui.TextWrapped(data.Answer)
-								end
-							end
-						end
-					end
-				end
-				ImGui.EndTable()
-			end
-		end
 		ImGui.EndChild()
 	end
 end
