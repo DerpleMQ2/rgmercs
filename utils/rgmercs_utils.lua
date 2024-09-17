@@ -1273,10 +1273,10 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
             RGMercUtils.SetTarget(targetId)
         end
 
-        if not RGMercUtils.SpellStacksOnTarget(spell) then
-            RGMercsLogger.log_debug("\ayUseSpell(): \arStacking checked failed - Someone tell Derple or Algar to add a Stacking Check to the condition of '%s'!", spellName)
-            return false
-        end
+        --if not RGMercUtils.SpellStacksOnTarget(spell) then
+        --    RGMercsLogger.log_debug("\ayUseSpell(): \arStacking checked failed - Someone tell Derple or Algar to add a Stacking Check to the condition of '%s'!", spellName)
+        --    return false
+        --end
 
         local cmd = string.format("/cast \"%s\"", spellName)
         RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_RESULT_NONE)
