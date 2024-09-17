@@ -1954,6 +1954,7 @@ function RGMercUtils.GroupBuffCheck(spell, target)
             RGMercsLogger.log_verbose("GroupBuffCheck() %s(ID:%d) does not stack on %s, moving on.", spellName, spellID, targetName)
         end
     else
+        RGMercUtils.SetTarget(target.ID())
         return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
     end
 
