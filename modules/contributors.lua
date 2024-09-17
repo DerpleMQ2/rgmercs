@@ -11,6 +11,7 @@ Module.DefaultCategories = Set.new({})
 Module.Contributors      = require("extras.contributors")
 Module.ColorWheel        = {}
 Module.ColorWheelTimer   = {}
+Module.FAQ               = {}
 
 function Module:SaveSettings(doBroadcast)
 end
@@ -110,6 +111,10 @@ end
 
 function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = {}, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

@@ -13,7 +13,7 @@ Module.CombatState               = "None"
 Module.TempSettings              = {}
 Module.TempSettings.CharmImmune  = {}
 Module.TempSettings.CharmTracker = {}
-
+Module.FAQ                       = {}
 Module.DefaultConfig             = {
 	-- [ CHARM ] --
 	['CharmOn']             = { DisplayName = "Charm On", Category = "Charm Pet", Default = false, Tooltip = "Set to use charm spells.", RequiresLoadoutChange = true, },
@@ -30,10 +30,11 @@ Module.DefaultConfig             = {
 }
 
 Module.DefaultCategories         = Set.new({})
-for _, v in pairs(Module.DefaultConfig) do
+for _, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
 	end
+	Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
 end
 
 local function getConfigFileName()
@@ -70,14 +71,23 @@ function Module:LoadSettings()
 		return
 	end
 
-    local settingsChanged = false
-    -- Setup Defaults
-    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+	local settingsChanged = false
+	-- Setup Defaults
+	self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
 
-    if settingsChanged then
-        self:SaveSettings(false)
-    end
+	if settingsChanged then
+		self:SaveSettings(false)
+	end
 end
+
+local function testing()
+	if RGMercUtils.GetSetting('IsCharming') then
+		if RGMercUtils.GetSetting('CharmOn') and RGMercUtils.GetSetting('PreferCharm') then
+			return false
+		end
+	end
+end
+
 
 function Module:GetSettings()
 	return self.settings
@@ -542,6 +552,10 @@ end
 
 function Module:GetCommandHandlers()
 	return { module = self._name, CommandHandlers = {}, }
+end
+
+function Module:GetFAQ()
+	return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

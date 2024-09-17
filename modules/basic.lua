@@ -7,6 +7,14 @@ Module.__index           = Module
 Module.settings          = {}
 Module.DefaultConfig     = {}
 Module.DefaultCategories = {}
+Module.FAQ               = {}
+
+for _, v in pairs(Module.DefaultConfig or {}) do
+    if v.Type ~= "Custom" then
+        Module.DefaultCategories:add(v.Category)
+    end
+    Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
+end
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -105,6 +113,10 @@ end
 
 function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = {}, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

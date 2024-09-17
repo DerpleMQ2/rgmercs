@@ -11,6 +11,7 @@ Module.TempSettings                = {}
 Module.TempSettings.CampZoneId     = 0
 Module.TempSettings.Go2GGH         = 0
 Module.TempSettings.LastCmd        = ""
+Module.FAQ                         = {}
 
 Module.Constants                   = {}
 Module.Constants.GGHZones          = Set.new({ "poknowledge", "potranquility", "stratos", "guildlobby", "moors", "crescent", "guildhalllrg_int", "guildhall", })
@@ -112,10 +113,11 @@ Module.CommandHandlers   = {
 }
 
 Module.DefaultCategories = Set.new({})
-for _, v in pairs(Module.DefaultConfig) do
+for _, v in pairs(Module.DefaultConfig or {}) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
     end
+    Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
 end
 
 local function getConfigFileName()
@@ -712,6 +714,10 @@ end
 
 function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = self.CommandHandlers, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

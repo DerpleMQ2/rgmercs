@@ -17,6 +17,7 @@ Module.TempSettings      = {}
 Module.BuyItemsTable     = {}
 Module.GlobalItemsTable  = {}
 Module.NormalItemsTable  = {}
+Module.FAQ               = {}
 
 Module.DefaultConfig     = {
 	['DoLoot']          = { DisplayName = "DoLoot", Category = "Loot N Scoot", Tooltip = "Enables Loot Settings for Looting", Default = true, },
@@ -147,10 +148,11 @@ Module.CommandHandlers   = {
 }
 
 Module.DefaultCategories = Set.new({})
-for _, v in pairs(Module.DefaultConfig) do
+for _, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
 	end
+	Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
 end
 
 local function getConfigFileName()
@@ -781,6 +783,10 @@ end
 
 function Module:GetCommandHandlers()
 	return { module = self._name, CommandHandlers = self.CommandHandlers, }
+end
+
+function Module:GetFAQ()
+	return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

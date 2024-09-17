@@ -13,6 +13,7 @@ local module_order = {
     "Perf",
     --"Loot",
     "Contributors",
+    "FAQ",
 }
 
 ---@return any
@@ -26,10 +27,11 @@ function Module.load()
             "Charm",
             "Mez",
             "Travel",
-            --"Exp",
+            --'Exp',
             "Perf",
             "Loot",
             "Contributors",
+            "FAQ",
         }
     end
     local newModule = setmetatable({
@@ -45,6 +47,7 @@ function Module.load()
             --Exp          = require("modules.experience").New(),
             Perf         = require("modules.performance").New(),
             Contributors = require("modules.contributors").New(),
+            FAQ          = require("modules.faq").New(),
         },
         module_order = module_order,
 

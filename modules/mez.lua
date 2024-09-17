@@ -14,23 +14,24 @@ Module.TempSettings                = {}
 Module.TempSettings.BardAEMezTimer = 0
 Module.TempSettings.MezImmune      = {}
 Module.TempSettings.MezTracker     = {}
+Module.FAQ                         = {}
 
 Module.DefaultConfig               = {
     -- [ MEZ ] --
-    ['MezAECount']      = { DisplayName = "Mez AE Count", Category = "Mez", Tooltip = "Mez if you have more than [X] on xtarget", Default = 3, Min = 1, Max = 20, },
-    ['MezOn']           = { DisplayName = "Mez On", Category = "Mez", Default = true, Tooltip = "Set to use mez spells.", },
-    ['UseSingleTgtMez'] = { DisplayName = "Use Single Tgt Mez", Category = "Mez", Default = true, Tooltip = "Set to enable use of single target mez spells/songs. Default: 1.", },
+    ['MezAECount']      = { DisplayName = "Mez AE Count", Category = "Mez", Tooltip = "Mez if you have more than [X] on xtarget", FAQ = "How do I set my AE mes limits?", Answer = "Set your Mez AE Count Setting to the minimum number of Mobs on Xtarget before using AE Mez.", Default = 3, Min = 1, Max = 20, },
+    ['MezOn']           = { DisplayName = "Mez On", Category = "Mez", Default = true, Tooltip = "Set to use mez spells.", FAQ = "How do I turn on Mez?", Answer = "Toggle Mez On to the on position.", },
+    ['UseSingleTgtMez'] = { DisplayName = "Use Single Tgt Mez", Category = "Mez", Default = true, Tooltip = "Set to enable use of single target mez spells/songs. Default: 1.", FAQ = "none", Answer = "none", },
     -- ['MezAnnounce']      = { DisplayName = "Mez Announce", Category = "Announcements", Default = true, Tooltip = "Set to announce mez casts.", ConfigType = "Normal",  },
     -- ['MezAnnounceGroup'] = { DisplayName = "Mez Announce to Group", Category = "Announcements", Default = false, Tooltip = "Set to announce mez casts In group.",  ConfigType = "Normal", },
-    ['MezStartCount']   = { DisplayName = "Mez Start Count", Category = "Mez", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Mez spells. ( Default 2 )", },
-    ['MaxMezCount']     = { DisplayName = "Max Mez Count", Category = "Mez", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", },
-    ['MezRadius']       = { DisplayName = "Mez Radius", Category = "Mez Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Mezing, An area twice this size is monitored for aggro mobs", },
-    ['MezZRadius']      = { DisplayName = "Mez ZRadius", Category = "Mez Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start mezzing. An area twice this size is monitored for aggro mobs. If you're enchanter is not mezzing on hills -- increase this value.", },
-    ['AutoLevelRange']  = { DisplayName = "Auto Level Range", Category = "Mez Target", Default = true, Tooltip = "Set to enable automatic mez level detection based on spells.", },
-    ['MezMinLevel']     = { DisplayName = "Mez Min Level", Category = "Mez Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Mez - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
-    ['MezMaxLevel']     = { DisplayName = "Mez Max Level", Category = "Mez Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Mez - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", },
-    ['MezStopHPs']      = { DisplayName = "Mez Stop HPs", Category = "Mez Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to mez", },
-    ['UseAEAAMez']      = { DisplayName = "Use AE AAMez", Category = "Mez", Default = false, Tooltip = "Toggle 0/1 to use Area Effect AA Mez (Default: 0).", },
+    ['MezStartCount']   = { DisplayName = "Mez Start Count", Category = "Mez", Default = 2, Min = 1, Max = 20, Tooltip = "Sets # of mobs needed to start using Mez spells. ( Default 2 )", FAQ = "none", Answer = "none", },
+    ['MaxMezCount']     = { DisplayName = "Max Mez Count", Category = "Mez", Default = 13, Min = 1, Max = 20, Tooltip = "Maximum # of mobs to CC ( Default is 13 )", FAQ = "none", Answer = "none", },
+    ['MezRadius']       = { DisplayName = "Mez Radius", Category = "Mez Range", Default = 100, Min = 1, Max = 200, Tooltip = "Radius for mobs to be in to start Mezing, An area twice this size is monitored for aggro mobs", FAQ = "none", Answer = "none", },
+    ['MezZRadius']      = { DisplayName = "Mez ZRadius", Category = "Mez Range", Default = 15, Min = 1, Max = 200, Tooltip = "Height radius (z-value) for mobs to be in to start mezzing. An area twice this size is monitored for aggro mobs. If you're enchanter is not mezzing on hills -- increase this value.", FAQ = "none", Answer = "none", },
+    ['AutoLevelRange']  = { DisplayName = "Auto Level Range", Category = "Mez Target", Default = true, Tooltip = "Set to enable automatic mez level detection based on spells.", FAQ = "none", Answer = "none", },
+    ['MezMinLevel']     = { DisplayName = "Mez Min Level", Category = "Mez Target", Default = 0, Min = 1, Max = 200, Tooltip = "Minimum Level a mob must be to Mez - Below this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", FAQ = "none", Answer = "none", },
+    ['MezMaxLevel']     = { DisplayName = "Mez Max Level", Category = "Mez Target", Default = 0, Min = 1, Max = 200, Tooltip = "Maximum Level a mob must be to Mez - Above this lvl are ignored. 0 means no mobs ignored. NOTE: AutoLevelRange must be OFF!", ConfigType = "Advanced", FAQ = "none", Answer = "none", },
+    ['MezStopHPs']      = { DisplayName = "Mez Stop HPs", Category = "Mez Target", Default = 80, Min = 1, Max = 100, Tooltip = "Mob HP% to stop trying to mez", FAQ = "none", Answer = "none", },
+    ['UseAEAAMez']      = { DisplayName = "Use AE AAMez", Category = "Mez", Default = false, Tooltip = "Toggle 0/1 to use Area Effect AA Mez (Default: 0).", FAQ = "none", Answer = "none", },
 }
 
 Module.DefaultCategories           = Set.new({})
@@ -38,6 +39,7 @@ for _, v in pairs(Module.DefaultConfig) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
     end
+    Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
 end
 
 local function getConfigFileName()
@@ -664,6 +666,10 @@ end
 
 function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = {}, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

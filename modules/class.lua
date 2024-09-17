@@ -17,6 +17,7 @@ Module.CombatState                           = "None"
 Module.CurrentRotation                       = { name = "None", state = 0, }
 Module.ClassConfig                           = nil
 Module.DefaultCategories                     = nil
+Module.FAQ                                   = {}
 
 Module.Constants                             = {}
 Module.Constants.RezSearchGroup              = "pccorpse group radius 100 zradius 50"
@@ -102,10 +103,11 @@ function Module:LoadSettings()
     self.ClassConfig = RGMercsClassLoader.load(RGMercConfig.Globals.CurLoadedClass)
 
     Module.DefaultCategories = Set.new({})
-    for _, v in pairs(self.ClassConfig.DefaultConfig or {}) do
+    for _, v in pairs(Module.DefaultConfig or {}) do
         if v.Type ~= "Custom" then
             Module.DefaultCategories:add(v.Category)
         end
+        Module.FAQ[_] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', settingName = _, }
     end
 
     self.TempSettings.RotationStates = {}
@@ -851,6 +853,10 @@ function Module:GetCommandHandlers()
     end
 
     return { module = self._name, CommandHandlers = cmdHandlers, }
+end
+
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
 end
 
 ---@param cmd string

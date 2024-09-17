@@ -395,6 +395,10 @@ function Module:GetCommandHandlers()
     return { module = self._name, CommandHandlers = {}, }
 end
 
+function Module:GetFAQ()
+    return { module = self._name, FAQ = self.FAQ, }
+end
+
 ---@param cmd string
 ---@param ... string
 ---@return boolean
