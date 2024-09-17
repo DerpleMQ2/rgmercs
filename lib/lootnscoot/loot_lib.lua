@@ -957,7 +957,6 @@ function loot.lootMobs(limit)
 
     -- check for own corpse
     local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius %d zradius 100", mq.TLO.Me.CleanName(), loot.Settings.CorpseRadius))()
-    RGMercsLogger.log_debug('\awlootMobs(): \ayMy Corpse Count: %d', myCorpseCount)
     for i = 1, (limit or myCorpseCount) do
         local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse %s radius %d zradius 100", i, mq.TLO.Me.CleanName(), loot.Settings.CorpseRadius))
         RGMercsLogger.log_debug('\awlootMobs(): \ayMy Corpse ID: %d', corpse.ID())
