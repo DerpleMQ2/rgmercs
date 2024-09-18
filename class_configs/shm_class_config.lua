@@ -789,6 +789,13 @@ local _ClassConfig = {
         },
         ["GroupHealPoint"] = {
             {
+                name = "Call of the Ancients",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return true
+                end,
+            },
+            {
                 name = "RecourseHeal",
                 type = "Spell",
             },
