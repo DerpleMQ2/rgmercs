@@ -2266,6 +2266,17 @@ function RGMercUtils.GetBuffableGroupIDs()
             table.insert(groupIds, mq.TLO.Group.Member(i).ID())
         end
     end
+
+    -- check OA list
+    for _, n in ipairs(RGMercUtils.GetSetting('OutsideAssistList')) do
+        -- dont double up OAs who are in our group
+        if not mq.TLO.Group.Member(n)() then
+            local oaSpawn = mq.TLO.Spawn(("pc =%s"):format(n))
+            if oaSpawn and oaSpawn() and oaSpawn.Distance() <= 90 then
+                table.insert(groupIds, oaSpawn.ID())
+            end
+        end
+    end
     return groupIds
 end
 
