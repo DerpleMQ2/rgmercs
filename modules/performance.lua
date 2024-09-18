@@ -22,9 +22,34 @@ Module.FAQ                = {}
 Module.ClassFAQ           = {}
 
 Module.DefaultConfig      = {
-    ['SecondsToStore']       = { DisplayName = "Seconds to Store", Category = "Monitoring", Tooltip = "The number of Seconds to keep in history.", Type = "Custom", Default = 30, Min = 10, Max = 120, Step = 5, },
-    ['EnablePerfMonitoring'] = { DisplayName = "Enable Performance Monitoring", Category = "Monitoring", Tooltip = "Might cause some lag so only use if you want it", Default = false, },
-    ['PlotFillLines']        = { DisplayName = "Enable Fill Lines", Category = "Graph", Tooltip = "Fill in the Plot Lines", Default = true, },
+    ['SecondsToStore']       = {
+        DisplayName = "Seconds to Store",
+        Category = "Monitoring",
+        Tooltip = "The number of Seconds to keep in history.",
+        Type = "Custom",
+        Default = 30,
+        Min = 10,
+        Max = 120,
+        Step = 5,
+        FAQ = "I want to see a longer span of time, can I adjust this?",
+        Answer = "Yes, you can adjust the number of [SecondsToStore] in the history with this setting.",
+    },
+    ['EnablePerfMonitoring'] = {
+        DisplayName = "Enable Performance Monitoring",
+        Category    = "Monitoring",
+        Tooltip     = "Might cause some lag so only use if you want it",
+        Default     = false,
+        FAQ         = "I want to see how long my modules are taking to run, how do I do that?",
+        Answer      = "Enable [EnablePerfMonitoring] and you will see the performance of your modules in the Performance Monitor.",
+    },
+    ['PlotFillLines']        = {
+        DisplayName = "Enable Fill Lines",
+        Category = "Graph",
+        Tooltip = "Fill in the Plot Lines",
+        Default = true,
+        FAQ = "Can I toggle between Lines and Bars?",
+        Answer = "Yes, Sort of. You can enable [PlotFillLines] and the graph will fill under the lines.",
+    },
 }
 
 Module.DefaultCategories  = Set.new({})

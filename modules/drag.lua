@@ -10,10 +10,39 @@ Module.FAQ               = {}
 Module.ClassFAQ          = {}
 
 Module.DefaultConfig     = {
-    ['DoDrag']       = { DisplayName = "Drag Corpses", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = false, },
-    ['DoSearchDrag'] = { DisplayName = "Use Spawn Search Dragging", Category = "Drag", Tooltip = "Use Search to find drag targets", Default = false, },
-    ['SearchDrag']   = { DisplayName = "Spawn Search", Category = "Drag", Tooltip = "Enable Dragging Corpses with you", Default = "pccorpse group radius 60", },
-    ['DoDanNetDrag'] = { DisplayName = "Use DanNet Dragging", Category = "Drag", Tooltip = "Use DanNet to find drag targets", Default = false, },
+    ['DoDrag']       = {
+        DisplayName = "Drag Corpses",
+        Category = "Drag",
+        Tooltip = "Enable Dragging Corpses with you",
+        Default = false,
+        FAQ = "How do I make a character drag group member corpses to me?",
+        Answer = "Enable [DoDrag] and you will drag corpses to you.",
+    },
+    ['DoSearchDrag'] = {
+        DisplayName = "Use Spawn Search Dragging",
+        Category = "Drag",
+        Tooltip = "Use Search to find drag targets",
+        Default = false,
+        FAQ = "I want to Find Corpses to Drag, how do I do that?",
+        Answer = "Enable [DoSearchDrag] and you will Search for Party Member Corpses in your [SearchDrag] Radius and if found grab them.",
+    },
+    ['SearchDrag']   = {
+        DisplayName = "Spawn Search",
+        Category = "Drag",
+        Tooltip = "Enable Dragging Corpses with you",
+        Default = "pccorpse group radius 60",
+        FAQ = "Can I adjust the range of the Search? What about finding other corpses not in my group?",
+        Answer = "With [DoDrag] and [DoSearchDrag] enabled you can adjust the search radius with [SearchDrag]." ..
+            " You can also remove group from the string to find other player corpses.",
+    },
+    ['DoDanNetDrag'] = {
+        DisplayName = "Use DanNet Dragging",
+        Category = "Drag",
+        Tooltip = "Use DanNet to find drag targets",
+        Default = false,
+        FAQ = "My Guys are not dragging corpses with me, what do I do?",
+        Answer = "Make sure if you are using DanNet that you have [DoDanNetDrag] enabled as well as [DoDrag].",
+    },
 }
 Module.DefaultCategories = {}
 
