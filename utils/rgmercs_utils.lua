@@ -1836,12 +1836,20 @@ function RGMercUtils.DetSpellCheck(spell)
     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
 end
 
----@param id integer
 ---@param peerName string
+---@param IDs table <integer> IDs
 ---@return boolean
-function RGMercUtils.DanNetFindBuff(id, peerName)
-    local buffSearch = string.format("Me.FindBuff[id %d].ID", id)
-    RGMercsLogger.log_verbose("DanNetFindBuff(%d, %s) : %s", id, peerName, buffSearch)
+function RGMercUtils.DanNetFindBuff(peerName, IDs)
+    local text = ""
+    for _, id in ipairs(IDs) do
+        if text ~= "" then
+            text = text .. " or "
+        end
+        text = text .. "ID " .. tostring(id)
+    end
+
+    local buffSearch = string.format("Me.FindBuff[%s].ID", text)
+    RGMercsLogger.log_verbose("DanNetFindBuff(%s, %s) : %s", text, peerName, buffSearch)
     return (DanNet.query(peerName, buffSearch, 1000) or "null"):lower() ~= "null"
 end
 
@@ -1870,28 +1878,27 @@ function RGMercUtils.PeerHasBuff(spell, peerName)
     if not spell or not spell() then return false end
 
     local numEffects = spell.NumEffects()
+    local effectsToCheck = { spell.ID(), spell.RankName.ID(), }
 
-    local ret = RGMercUtils.DanNetFindBuff(spell.ID(), peerName)
-    RGMercsLogger.log_verbose("PeerHasBuff() Searching for spell(%s) ID: %d on %s :: %s", spell.Name(), spell.ID(), peerName, RGMercUtils.BoolToColorString(ret))
-    if ret then return true end
-
-    ret = RGMercUtils.DanNetFindBuff(spell.RankName.ID(), peerName)
-    RGMercsLogger.log_verbose("PeerHasBuff() Searching for rank spell(%s) ID: %d on %s :: %s", spell.RankName.Name(), spell.RankName.ID(), peerName,
-        RGMercUtils.BoolToColorString(ret))
-    if ret then return true end
+    -- lots of items like the SK epic fire the same effect 11+ times and we keep checking so this is
+    -- meant to cache things we've already checked to reduce expensive calls to peer checks.
+    local checkedEffects = {}
 
     for i = 1, numEffects do
         local triggerSpell = spell.Trigger(i)
-        if triggerSpell and triggerSpell() then
-            ret = RGMercUtils.DanNetFindBuff(triggerSpell.ID(), peerName)
-            RGMercsLogger.log_verbose("PeerHasBuff() Searching for trigger spell ID: %d on %s :: %s", triggerSpell.ID(), peerName, RGMercUtils.BoolToColorString(ret))
-            if ret then return true end
+        if triggerSpell and triggerSpell() and not checkedEffects[triggerSpell.ID()] then
+            table.insert(effectsToCheck, triggerSpell.ID())
+            if triggerSpell.ID() ~= triggerSpell.RankName.ID() then
+                table.insert(effectsToCheck, triggerSpell.RankName.ID())
+            end
 
-            ret = RGMercUtils.DanNetFindBuff(triggerSpell.RankName.ID(), peerName)
-            RGMercsLogger.log_verbose("PeerHasBuff() Searching for trigger rank spell ID: %d on %s :: %s", triggerSpell.ID(), peerName, RGMercUtils.BoolToColorString(ret))
-            if ret then return true end
+            checkedEffects[triggerSpell.ID()] = true
         end
     end
+
+    local ret = RGMercUtils.DanNetFindBuff(peerName, effectsToCheck)
+    RGMercsLogger.log_verbose("PeerHasBuff() Searching for trigger rank spell ID Count: %d on %s :: %s", #effectsToCheck, peerName, RGMercUtils.BoolToColorString(ret))
+    if ret then return true end
 
     RGMercsLogger.log_verbose("PeerHasBuff() Failed to find spell: %s on %s", spell.Name(), peerName)
     return false
@@ -1975,9 +1982,11 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
     if not spell or not spell() then return false end
     if not target or not target() then return false end
 
-    local peerCheck = RGMercUtils.PeerHasBuff(spell, target.CleanName())
-
-    if peerCheck ~= nil then return peerCheck end
+    -- If target is me then don't eat the cost of checking against DanNet.
+    if mq.TLO.Me.ID() ~= target.ID() then
+        local peerCheck = RGMercUtils.PeerHasBuff(spell, target.CleanName())
+        if peerCheck ~= nil then return peerCheck end
+    end
 
     if mq.TLO.Me.ID() ~= target.ID() then
         RGMercUtils.SetTarget(target.ID())

@@ -88,16 +88,16 @@ Bind.Handlers     = {
     ['backoff'] = {
         usage = "/rgl backoff <on|off>",
         about = "Toggles or sets backoff flag",
-        handler = function(config, value)
-            if value ~= nil then
+        handler = function(value)
+            if value == nil then
                 RGMercConfig.Globals.BackOffFlag = not RGMercConfig.Globals.BackOffFlag
-            elseif value:lower() == "on" then
+            elseif value:lower() == "on" or value == "1" then
                 RGMercConfig.Globals.BackOffFlag = true
             else
                 RGMercConfig.Globals.BackOffFlag = false
             end
 
-            RGMercsLogger.log_info("\ayBackoff \awset to: ", RGMercUtils.BoolToColorString(RGMercUtils.Globals.BackOffFlag))
+            RGMercsLogger.log_info("\ayBackoff \awset to: %s", RGMercUtils.BoolToColorString(RGMercConfig.Globals.BackOffFlag))
         end,
     },
     ['qsay'] = {

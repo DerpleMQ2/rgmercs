@@ -130,6 +130,10 @@ end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
+    printf("MOVEMENTSAVED")
+
+    RGMercUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
+    RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))
 
     if doBroadcast == true then
         RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
@@ -253,8 +257,8 @@ function Module:CampOn()
     self.TempSettings.AutoCampY  = mq.TLO.Me.Y()
     self.TempSettings.AutoCampZ  = mq.TLO.Me.Z()
     self.TempSettings.CampZoneId = mq.TLO.Zone.ID()
-    RGMercUtils.DoCmd("/mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
-    RGMercUtils.DoCmd("/mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))
+    RGMercUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
+    RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))
     RGMercsLogger.log_info("\ayCamping On: (X: \at%d\ay ; Y: \at%d\ay)", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY)
 end
 
@@ -271,8 +275,8 @@ end
 function Module:CampOff()
     self.settings.ReturnToCamp = false
     self:SaveSettings(false)
-    RGMercUtils.DoCmd("/mapfilter campradius off")
-    RGMercUtils.DoCmd("/mapfilter pullradius off")
+    RGMercUtils.DoCmd("/squelch /mapfilter campradius off")
+    RGMercUtils.DoCmd("/squelch /mapfilter pullradius off")
 end
 
 function Module:DestoryCampfire()
