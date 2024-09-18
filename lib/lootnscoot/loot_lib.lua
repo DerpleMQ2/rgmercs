@@ -862,6 +862,8 @@ function loot.lootCorpse(corpseID)
     if mq.TLO.Window('LootWnd').Open() and items > 0 then
         if mq.TLO.Corpse.DisplayName() == mq.TLO.Me.DisplayName() then
             RGMercUtils.DoCmd('/lootall')
+            -- dont return control to other functions until we are done looting.
+            mq.delay("45s", function() return not mq.TLO.Window('LootWnd').Open() end)
             return
         end -- if its our own corpse just loot it.
         local noDropItems = {}

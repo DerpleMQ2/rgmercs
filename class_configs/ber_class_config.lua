@@ -376,9 +376,12 @@ return {
                     }
 
                     local summonNeededItem = function(summonSkill, itemId, count)
+                        local maxLoops = 10
                         while mq.TLO.FindItemCount(itemId)() < count do
                             RGMercsLogger.log_debug("\ayWe need more %d because we dont have %d - using %s", itemId, count, summonSkill)
                             self.ClassConfig.HelperFunctions.SummonAxe(mq.TLO.Spell(summonSkill))
+                            maxLoops = maxLoops - 1
+                            if maxLoops <= 0 then return end
                         end
                     end
 
