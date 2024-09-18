@@ -966,9 +966,12 @@ function loot.lootMobs(limit)
     -- options for combat looting or looting disabled
     if (deadCount + myCorpseCount) == 0 or ((mobsNearby > 0 or mq.TLO.Me.Combat()) and not loot.Settings.CombatLooting) then return false end
 
-    for i = 1, (limit or deadCount) do
-        local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', loot.Settings.CorpseRadius))
-        table.insert(corpseList, corpse)
+    -- only loot mobs if I have no corspses near.
+    if myCorpseCount == 0 then
+        for i = 1, (limit or deadCount) do
+            local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', loot.Settings.CorpseRadius))
+            table.insert(corpseList, corpse)
+        end
     end
 
     local didLoot = false
