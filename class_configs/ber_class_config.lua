@@ -553,6 +553,20 @@ return {
                         not RGMercUtils.PCDiscReady(self.ResolvedActionMap['ResolveDisc'])
                 end,
             },
+            {
+                name = "War Cry of the Braxi",
+                type = "Disc",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.SpellStacksOnMe(mq.TLO.Spell(aaName))
+                end,
+            },
+            {
+                name = "HHEBuff",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return not RGMercUtils.AAReady("War Cry of the Braxi") and (not mq.TLO.Me.ActiveDisc.ID()) and RGMercUtils.SpellStacksOnMe(discSpell)
+                end,
+            },
         },
         ['DPS'] = {
             {
