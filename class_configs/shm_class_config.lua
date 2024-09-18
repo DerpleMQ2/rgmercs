@@ -967,6 +967,8 @@ local _ClassConfig = {
         },
         {
             name = 'Combat Buffs',
+            -- only check every 30 seconds.
+            timer = 30,
             state = 1,
             steps = 1,
             targetId = function(self) return { RGMercUtils.GetMainAssistId(), } or {} end,
