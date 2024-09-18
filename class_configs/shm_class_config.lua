@@ -966,6 +966,15 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Combat Buffs',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return { RGMercUtils.GetMainAssistId(), } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not RGMercUtils.Feigning()
+            end,
+        },
+        {
             name = 'HealBurn',
             state = 1,
             steps = 1,
@@ -1169,16 +1178,20 @@ local _ClassConfig = {
                 cond = function(self, spell) return mq.TLO.Me.Gem(spell.RankName.Name())() and RGMercUtils.GetSetting('DoSlow') and RGMercUtils.DetSpellCheck(spell) end,
             },
         },
+        ['Combat Buffs'] = {
+            {
+                name = "MeleeProcBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return not RGMercUtils.TargetHasBuff(spell, target)
+                end,
+            },
+        },
         ['DPS'] = {
             {
                 name = "AESpiritualHeal",
                 type = "Spell",
                 cond = function(self) return RGMercUtils.IsHealing() and RGMercUtils.SongActiveByName("Healing Twincast") and RGMercUtils.GetSetting('CastAESpirituals') end,
-            },
-            {
-                name = "MeleeProcBuff",
-                type = "Spell",
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
             },
             {
                 name = "Cannibalization",

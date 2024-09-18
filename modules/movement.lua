@@ -130,7 +130,6 @@ end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
-    printf("MOVEMENTSAVED")
 
     RGMercUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
     RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))

@@ -1860,18 +1860,10 @@ function RGMercUtils.PeerHasBuff(spell, peerName)
     peerName = (peerName or ""):lower()
     local peerFound = false
 
-    local dannetPeers = mq.TLO.DanNet.PeerCount()
-    for i = 1, dannetPeers do
-        ---@diagnostic disable-next-line: redundant-parameter
-        local peer = mq.TLO.DanNet.Peers(i)()
-        if peer == peerName then
-            peerFound = true
-            break
-        end
-    end
+    local peerFound = (mq.TLO.DanNet.Peers() or ""):lower():find(peerName:lower() .. "|") ~= nil
 
     if not peerFound then
-        RGMercsLogger.log_verbose("PeerHasBuff() Peer '%s' not found falling back.", peerName)
+        RGMercsLogger.log_verbose("\ayPeerHasBuff() \ayPeer '%s' not found falling back.", peerName)
         return nil
     end
 
@@ -1897,11 +1889,9 @@ function RGMercUtils.PeerHasBuff(spell, peerName)
     end
 
     local ret = RGMercUtils.DanNetFindBuff(peerName, effectsToCheck)
-    RGMercsLogger.log_verbose("PeerHasBuff() Searching for trigger rank spell ID Count: %d on %s :: %s", #effectsToCheck, peerName, RGMercUtils.BoolToColorString(ret))
-    if ret then return true end
-
-    RGMercsLogger.log_verbose("PeerHasBuff() Failed to find spell: %s on %s", spell.Name(), peerName)
-    return false
+    RGMercsLogger.log_verbose("\ayPeerHasBuff() \atSearching for trigger rank spell ID Count: %d on %s :: %s", #effectsToCheck, peerName, RGMercUtils.BoolToColorString(ret))
+    RGMercsLogger.log_verbose("\ayPeerHasBuff() \awFinding spell: %s on %s :: %s", spell.Name(), peerName, RGMercUtils.BoolToColorString(ret))
+    return ret
 end
 
 ---@param spell MQSpell
@@ -1979,8 +1969,14 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
         target = mq.TLO.Me.ID() == buffTarget.ID() and mq.TLO.Me or buffTarget
     end
 
-    if not spell or not spell() then return false end
-    if not target or not target() then return false end
+    if not spell or not spell() then
+        RGMercsLogger.log_verbose("TargetHasBuff(): spell is invalid!")
+        return false
+    end
+    if not target or not target() then
+        RGMercsLogger.log_verbose("TargetHasBuff(): target is invalid!")
+        return false
+    end
 
     -- If target is me then don't eat the cost of checking against DanNet.
     if mq.TLO.Me.ID() ~= target.ID() then
