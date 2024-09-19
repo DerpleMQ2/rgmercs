@@ -1146,8 +1146,10 @@ return {
                 name = "UnityBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    local triggerone = self.ResolvedActionMap['AtkHPBuff'].Level() or 999
-                    local triggertwo = self.ResolvedActionMap['ManaRegenBuff'].Level() or 999
+                    local atkHPBuff = self:GetResolvedActionMapItem('AtkHPBuff')
+                    local manaRegenBuff = self.GetResolvedActionMapItem('ManaRegenBuff')
+                    local triggerone = atkHPBuff and atkHPBuff.Level() or 999
+                    local triggertwo = manaRegenBuff and manaRegenBuff.Level() or 999
                     if (spell.Level() or 0) < (triggerone or triggertwo) then return false end
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
