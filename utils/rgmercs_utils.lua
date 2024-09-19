@@ -3228,7 +3228,7 @@ function RGMercUtils.FindTarget(validateFn)
                     local autoTarget = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
                     RGMercsLogger.log_verbose(
                         "Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
-                        autoTarget.CleanName() or "None", RGMercConfig.AutoTargetID or 0,
+                        autoTarget.CleanName() or "None", RGMercConfig.Globals.AutoTargetID or 0,
                         target() and target.CleanName() or "None", target() and target.ID() or 0)
                 end
             end
