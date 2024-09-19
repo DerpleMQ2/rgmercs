@@ -2435,13 +2435,13 @@ end
 ---@return boolean
 function RGMercUtils.ShouldShrink()
     return (RGMercUtils.GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2.2 and
-        (RGMercUtils.GetSetting('ShrinkItem'):len() > 0)
+        (RGMercUtils.GetSetting('ShrinkItem'):len() > 0) and RGMercUtils.DoBuffCheck()
 end
 
 ---@return boolean
 function RGMercUtils.ShouldShrinkPet()
     return (RGMercUtils.GetSetting('DoShrinkPet') and true or false) and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() > 1.8 and
-        (RGMercUtils.GetSetting('ShrinkPetItem'):len() > 0)
+        (RGMercUtils.GetSetting('ShrinkPetItem'):len() > 0) and RGMercUtils.DoPetCheck()
 end
 
 ---@return boolean
