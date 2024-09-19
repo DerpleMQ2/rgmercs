@@ -539,7 +539,6 @@ function loot.getRule(item)
         if (oldDecision == 'Sell' and stackable) and (sellPrice * stackSize >= loot.Settings.StackPlatValue) then resetDecision = oldDecision end
         -- if banking tradeskills settings changed re-evaluate
         if oldDecision == 'Bank' and tradeskill and loot.Settings.BankTradeskills then resetDecision = oldDecision end
-
         lootData[firstLetter][itemName] = resetDecision -- pass value on to next check. Items marked 'NULL' will be treated as new and evaluated properly.
     end
     if lootData[firstLetter][itemName] == 'NULL' then
@@ -896,7 +895,7 @@ function loot.lootCorpse(corpseID)
                         loot.lootItem(i, itemRule, 'leftmouseup', qKeep, allItems)
                     end
                 elseif corpseItem.NoDrop() then
-                    if loot.LootNoDrop then
+                    if loot.Settings.LootNoDrop then
                         if not newRule or (newRule and loot.Settings.LootNoDropNew) then
                             loot.lootItem(i, itemRule, 'leftmouseup', qKeep, allItems)
                         end
