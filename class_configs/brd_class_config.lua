@@ -910,6 +910,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Song of Stone",
+                type = "AA",
+                cond = function(self, aaName)
+                    return RGMercUtils.AAReady(aaName)
+                end,
+            },
+            {
                 name = "Thousand Blades",
                 type = "Disc",
                 cond = function(self, discSpell)
