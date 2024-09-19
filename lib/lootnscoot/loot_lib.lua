@@ -304,14 +304,14 @@ function loot.UpdateDB()
 
         count = count + 1
         if count % batchSize == 0 then
-            print("Inserted " .. count .. " NormalItems so far...")
+            RGMercsLogger.log_debug("Inserted " .. count .. " NormalItems so far...")
             db:exec("COMMIT")
             db:exec("BEGIN TRANSACTION")
         end
     end
 
     db:exec("COMMIT")
-    print("Inserted all " .. count .. " NormalItems.")
+    RGMercsLogger.log_debug("Inserted all " .. count .. " NormalItems.")
 
     -- Reset counter for GlobalItems
     count = 0
@@ -327,14 +327,14 @@ function loot.UpdateDB()
 
         count = count + 1
         if count % batchSize == 0 then
-            print("Inserted " .. count .. " GlobalItems so far...")
+            RGMercsLogger.log_debug("Inserted " .. count .. " GlobalItems so far...")
             db:exec("COMMIT")
             db:exec("BEGIN TRANSACTION")
         end
     end
 
     db:exec("COMMIT")
-    print("Inserted all " .. count .. " GlobalItems.")
+    RGMercsLogger.log_debug("Inserted all " .. count .. " GlobalItems.")
     db:close()
 end
 
