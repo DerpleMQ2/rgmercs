@@ -19,6 +19,7 @@ RGMercUtils.ShowAdvancedConfig = false
 RGMercUtils.Memorizing         = false
 RGMercUtils.UseGem             = mq.TLO.Me.NumGems()
 RGMercUtils.ConfigFilter       = ""
+RGMercUtils.SafeTargetCache    = {}
 
 --- Checks to see if a file exists on the local drive.
 ---@param path string
@@ -2987,6 +2988,10 @@ function RGMercUtils.IsSafeName(t, name)
     return false
 end
 
+function RGMercUtils.ClearSafeTargetCache()
+    RGMercUtils.SafeTargetCache = {}
+end
+
 ---@param spawn MQSpawn
 ---@param radius number
 ---@return boolean
@@ -2999,7 +3004,7 @@ function RGMercUtils.IsSpawnFightingStranger(spawn, radius)
         for i = 1, count do
             local cur_spawn = mq.TLO.NearestSpawn(i, string.format("%s radius %d zradius %d", t, radius, radius))
 
-            if cur_spawn() then
+            if cur_spawn() and not RGMercUtils.SafeTargetCache[cur_spawn.ID()] then
                 if (cur_spawn.AssistName() or ""):len() > 0 then
                     RGMercsLogger.log_verbose("My Interest: %s =? Their Interest: %s", spawn.Name(),
                         cur_spawn.AssistName())
@@ -3019,9 +3024,13 @@ function RGMercUtils.IsSpawnFightingStranger(spawn, radius)
                         end
                     end
                 end
+
+                -- this is pretty expensive to calculate so lets cache it.
+                RGMercUtils.SafeTargetCache[cur_spawn.ID()] = true
             end
         end
     end
+
     return false
 end
 

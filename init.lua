@@ -482,6 +482,11 @@ local function Main()
             RGMercUtils.AutoMed()
         end
     else
+        if curState ~= "Downtime" then
+            -- clear the cache during state transition.
+            RGMercUtils.ClearSafeTargetCache()
+        end
+
         curState = "Downtime"
 
         if RGMercUtils.GetSetting('DoMed') == 2 then
