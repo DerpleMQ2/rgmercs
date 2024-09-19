@@ -19,6 +19,16 @@ local function getConfigFileName()
 		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
 end
 
+Module.CommandHandlers = {
+	exportwiki = {
+		usage = "/rgl exportwiki",
+		about = "Export the FAQ to Wiki Files by Module.",
+		handler = function(self, _)
+			self:ExportFAQToWiki()
+		end,
+	},
+}
+
 function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 
@@ -93,6 +103,99 @@ function Module:MatchSearch(...)
 		end
 	end
 	return false
+end
+
+function Module:ExportFAQToWiki()
+	-- Fetch the FAQs for modules, commands, and class configurations
+	local questions = RGMercModules:ExecAll("GetFAQ")
+	local commandFaq = RGMercModules:ExecAll("GetCommandHandlers")
+	local classFaq = RGMercModules:ExecAll("GetClassFAQ")
+
+	if not questions and not commandFaq and not classFaq then
+		print("No FAQ data found.")
+		return
+	end
+
+	-- Create a touch file to ensure the WIKI directory exists
+	mq.pickle(mq.configDir .. "/WIKI/touch.lua", { 'NONE', })
+
+	-- Export Module FAQs
+	if questions then
+		for module, info in pairs(questions) do
+			if info.FAQ then
+				local title = "RGMercs Lua Edition: FAQ - " .. module .. " Module"
+				local fileContent = "[[" .. title .. "]]\n\n"
+				fileContent = fileContent .. "== " .. title .. " ==\n\n"
+
+				for _, data in pairs(info.FAQ) do
+					if data.Question == 'None' then data.Question = data.Settings_Used or 'TODO' end
+					fileContent = fileContent .. "=== " .. (data.Question or 'TODO') .. " ===\n"
+					fileContent = fileContent .. "* Answer:\n  " .. (data.Answer:gsub("\n", " ") or "TODO") .. "\n\n"
+					fileContent = fileContent .. "* Settings Used:\n  " .. (data.Settings_Used or "None") .. "\n\n"
+				end
+
+				local fileName = mq.configDir .. "/WIKI/" .. module .. "_FAQ.txt"
+				local file = io.open(fileName, "w")
+				if file then
+					file:write(fileContent)
+					file:close()
+				else
+					print("Failed to open file for " .. module)
+				end
+			end
+		end
+	end
+
+	if commandFaq then
+		local commandFileContent = "== RGMercs Lua Edition: Commands FAQ ==\n\n"
+		commandFileContent = commandFileContent .. "{| class=\"wikitable\"\n|-\n! Command !! Usage !! Description\n"
+
+		for module, info in pairs(commandFaq) do
+			if info.CommandHandlers then
+				for cmd, data in pairs(info.CommandHandlers) do
+					commandFileContent = commandFileContent .. "|-\n| " .. cmd .. " || " .. (data.usage or "N/A") .. " || " .. (data.about or "N/A") .. "\n"
+				end
+			end
+		end
+
+		commandFileContent = commandFileContent .. "|}\n"
+
+		local commandFileName = mq.configDir .. "/WIKI/Commands_FAQ.txt"
+		local commandFile = io.open(commandFileName, "w")
+		if commandFile then
+			commandFile:write(commandFileContent)
+			commandFile:close()
+		else
+			print("Failed to open file for Commands FAQ")
+		end
+	end
+
+	-- Export Class FAQs
+	if classFaq then
+		for module, info in pairs(classFaq) do
+			if module:lower() == 'class' and info.FAQ then
+				local title = "RGMercs Lua Edition: FAQ - " .. (RGMercConfig.Globals.CurLoadedClass) .. " Class"
+				local fileContent = "[[" .. title .. "]]\n\n"
+				fileContent = fileContent .. "== " .. title .. " ==\n\n"
+
+				for _, data in pairs(info.FAQ) do
+					if data.Question == 'None' then data.Question = data.Settings_Used or 'TODO' end
+					fileContent = fileContent .. "=== " .. (data.Question or 'TODO') .. " ===\n"
+					fileContent = fileContent .. "* Answer:\n  " .. (data.Answer:gsub("\n", " ") or "TODO") .. "\n\n"
+					fileContent = fileContent .. "* Settings Used:\n  " .. (data.Settings_Used or "None") .. "\n\n"
+				end
+
+				local classFileName = mq.configDir .. "/WIKI/" .. RGMercConfig.Globals.CurLoadedClass .. "_Class_FAQ.txt"
+				local classFile = io.open(classFileName, "w")
+				if classFile then
+					classFile:write(fileContent)
+					classFile:close()
+				else
+					print("Failed to open file for " .. RGMercConfig.Globals.CurLoadedClass)
+				end
+			end
+		end
+	end
 end
 
 function Module:Render()
@@ -233,7 +336,7 @@ function Module:DoGetState()
 end
 
 function Module:GetCommandHandlers()
-	return { module = self._name, CommandHandlers = {}, }
+	return { module = self._name, CommandHandlers = self.CommandHandlers, }
 end
 
 function Module:GetFAQ()
@@ -250,7 +353,12 @@ end
 function Module:HandleBind(cmd, ...)
 	local params = ...
 	local handled = false
-	-- /rglua cmd handler
+
+	if self.CommandHandlers[cmd:lower()] ~= nil then
+		self.CommandHandlers[cmd:lower()].handler(self, params)
+		handled = true
+	end
+
 	return handled
 end
 
