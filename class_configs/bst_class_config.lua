@@ -1147,7 +1147,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     local atkHPBuff = self:GetResolvedActionMapItem('AtkHPBuff')
-                    local manaRegenBuff = self.GetResolvedActionMapItem('ManaRegenBuff')
+                    local manaRegenBuff = self:GetResolvedActionMapItem('ManaRegenBuff')
                     local triggerone = atkHPBuff and atkHPBuff.Level() or 999
                     local triggertwo = manaRegenBuff and manaRegenBuff.Level() or 999
                     if (spell.Level() or 0) < (triggerone or triggertwo) then return false end
