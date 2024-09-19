@@ -2657,8 +2657,12 @@ end
 
 ---@return boolean
 function RGMercUtils.ShouldPriorityFollow()
+    local chaseTarget = RGMercUtils.GetSetting('ChaseTarget', true) or "NoOne"
+
+    if chaseTarget == mq.TLO.Me.CleanName() then return false end
+
     if RGMercUtils.GetSetting('PriorityFollow') and RGMercUtils.GetSetting('ChaseOn') then
-        local chaseSpawn = mq.TLO.Spawn("pc =" .. (RGMercUtils.GetSetting('ChaseTarget', true) or "NoOne"))
+        local chaseSpawn = mq.TLO.Spawn("pc =" .. chaseTarget)
 
         if (mq.TLO.Me.Moving() or (chaseSpawn() and (chaseSpawn.Distance() or 0) > RGMercUtils.GetSetting('ChaseDistance'))) then
             return true

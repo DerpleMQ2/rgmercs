@@ -155,11 +155,11 @@ Module.DefaultConfig     = {
     ['PriorityFollow']    = {
         DisplayName = "Prioritize Follow",
         Category = "Chase",
-        Tooltip = "If enabled you will follow more aggresively at the cost of rotations.",
+        Tooltip = "If enabled (and you are not the Chase Target), you will prioritize staying in range of the Chase Target over any other actions.",
         Default = false,
         ConfigType = "Advanced",
         FAQ = "I want to make sure my characters always follow me, we can rebuff when we arrive. How do I do that?",
-        Answer = "Enable [PriorityFollow] and your characters will follow you more aggresively at the cost of rotations.",
+        Answer = "Enable [PriorityFollow] and your characters will prioritize staying in range of the Chase Target over any other actions.",
     },
     ['DoFellow']          = {
         DisplayName = "Enable Fellowship Insignia",

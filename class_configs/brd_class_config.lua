@@ -977,7 +977,7 @@ local _ClassConfig = {
                 name = "MezAESong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseAEAAMez') and RGMercUtils.SongMemed(songSpell) then return false end
+                    if not (RGMercUtils.GetSetting('MezOn') and RGMercUtils.GetSetting('UseAEAAMez') and RGMercUtils.SongMemed(songSpell)) then return false end
                     return RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
                 end,
             },
