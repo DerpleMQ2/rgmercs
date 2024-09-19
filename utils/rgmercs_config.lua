@@ -202,7 +202,7 @@ Config.DefaultConfig = {
     ['MovebackWhenBehind']   = { DisplayName = "Moveback if Mob Behind", Category = "Tank/MA", Index = 2, Tooltip = "Causes you to move back if we detect an XTarget is behind you when tanking.", Default = true, ConfigType = "Advanced", },
     ['MovebackDistance']     = { DisplayName = "Units to Moveback", Category = "Tank/MA", Index = 3, Tooltip = "Default: 20. May require adjustment based on runspeed.", Default = 20, Min = 1, Max = 40, ConfigType = "Advanced", },
     ['ForceKillPet']         = { DisplayName = "Force Kill Pet", Category = "Tank/MA", Index = 4, Tooltip = "Force kill pcpet if on xtarget.", Default = true, ConfigType = "Advanced", },
-    ['OnlyScanXT']           = { DisplayName = "Only Scan XTargets", Category = "Tank/MA", Index = 5, Tooltip = "When MA looks for a target use only XTargets instead of doing an area scan, area scan can cause aggro to unintensional mobs use wih caution.", Default = true, ConfigType = "Advanced", },
+    ['OnlyScanXT']           = { DisplayName = "Only Scan XTargets", Category = "Tank/MA", Index = 5, Tooltip = "When MA looks for a target use only XTargets instead of doing an area scan, area scan can cause aggro to unintentional mobs use wih caution.", Default = true, ConfigType = "Advanced", },
     ['MAScanZRange']         = { DisplayName = "Main Assist Scan ZRange", Category = "Tank/MA", Index = 6, Tooltip = "Distance in Z direction to look for targets.", Default = 45, Min = 15, Max = 200, ConfigType = "Advanced", },
 
     -- [ BUFFS ] --
