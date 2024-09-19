@@ -290,18 +290,51 @@ function loot.UpdateDB()
     loot.GlobalItems = loot.load(LootFile, 'GlobalItems')
 
     local db = SQLite3.open(ItemsDB)
+    local batchSize = 500
+    local count = 0
+
+    db:exec("BEGIN TRANSACTION") -- Start transaction for NormalItems
+
+    -- Insert NormalItems in batches
     for k, v in pairs(loot.NormalItems) do
         local stmt, err = db:prepare("INSERT INTO Normal_Rules (item_name, item_rule) VALUES (?, ?)")
         stmt:bind_values(k, v)
         stmt:step()
         stmt:finalize()
+
+        count = count + 1
+        if count % batchSize == 0 then
+            RGMercsLogger.log_debug("Inserted " .. count .. " NormalItems so far...")
+            db:exec("COMMIT")
+            db:exec("BEGIN TRANSACTION")
+        end
     end
+
+    db:exec("COMMIT")
+    RGMercsLogger.log_debug("Inserted all " .. count .. " NormalItems.")
+
+    -- Reset counter for GlobalItems
+    count = 0
+
+    db:exec("BEGIN TRANSACTION")
+
+    -- Insert GlobalItems in batches
     for k, v in pairs(loot.GlobalItems) do
         local stmt, err = db:prepare("INSERT INTO Global_Rules (item_name, item_rule) VALUES (?, ?)")
         stmt:bind_values(k, v)
         stmt:step()
         stmt:finalize()
+
+        count = count + 1
+        if count % batchSize == 0 then
+            RGMercsLogger.log_debug("Inserted " .. count .. " GlobalItems so far...")
+            db:exec("COMMIT")
+            db:exec("BEGIN TRANSACTION")
+        end
     end
+
+    db:exec("COMMIT")
+    RGMercsLogger.log_debug("Inserted all " .. count .. " GlobalItems.")
     db:close()
 end
 
