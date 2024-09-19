@@ -681,7 +681,12 @@ function Module:Render()
 
 					ImGui.SetNextItemWidth(150)
 					self.TempSettings.NewBuyItem = ImGui.InputText("New Item##BuyItems", self.TempSettings.NewBuyItem)
-
+					if ImGui.IsItemHovered() and mq.TLO.Cursor() ~= nil then
+						if ImGui.IsMouseClicked(0) then
+							self.TempSettings.NewBuyItem = mq.TLO.Cursor()
+							RGMercUtils.DoCmd("/autoinv")
+						end
+					end
 					ImGui.TableNextColumn()
 					ImGui.SetNextItemWidth(120)
 
@@ -814,7 +819,12 @@ function Module:Render()
 					ImGui.SetNextItemWidth(150)
 					self.TempSettings.NewGlobalItem = ImGui.InputText("New Item##GlobalItems",
 						self.TempSettings.NewGlobalItem) or nil
-
+					if ImGui.IsItemHovered() and mq.TLO.Cursor() ~= nil then
+						if ImGui.IsMouseClicked(0) then
+							self.TempSettings.NewGlobalItem = mq.TLO.Cursor()
+							RGMercUtils.DoCmd("/autoinv")
+						end
+					end
 					ImGui.TableNextColumn()
 					ImGui.SetNextItemWidth(120)
 
