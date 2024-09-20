@@ -3167,6 +3167,15 @@ function RGMercUtils.MATargetScan(radius, zradius)
     return killId
 end
 
+function RGMercUtils.SetAutoTargetToGroupOrRaidTarget()
+    if mq.TLO.Raid.Members() > 0 then
+        RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(0) and mq.TLO.Me.RaidAssistTarget(0).ID()) or 0)
+    elseif mq.TLO.Group.Members() > 0 then
+        ---@diagnostic disable-next-line: undefined-field
+        RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
+    end
+end
+
 --- This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID
 ---@param validateFn function? # Function which is run before changing targets to avoid target strobing
 function RGMercUtils.FindTarget(validateFn)
@@ -3254,9 +3263,12 @@ function RGMercUtils.FindTarget(validateFn)
                         assistTarget.CleanName() or "None", queryResult)
                 end
             else
-                local assistSpawn = mq.TLO.Spawn(RGMercUtils.GetGroupMainAssistID())
-                if assistSpawn and assistSpawn() and assistSpawn.Aggressive() and (RGMercUtils.TargetIsType("npc", assistSpawn) or RGMercUtils.TargetIsType("npcpet", assistSpawn)) then
-                    RGMercConfig.Globals.AutoTargetID = RGMercUtils.GetGroupMainAssistID()
+                local assistSpawn = RGMercConfig.Globals.GetMainAssistSpawn()
+                if assistSpawn and assistSpawn() then
+                    RGMercUtils.SetTarget(assistSpawn.ID())
+                    assistTarget = mq.TLO.Me.TargetOfTarget
+                    RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via TargetOfTarget :: %s ",
+                        assistTarget.CleanName() or "None")
                 end
             end
 
@@ -3270,19 +3282,7 @@ function RGMercUtils.FindTarget(validateFn)
                 RGMercUtils.AddXTByName(1, assistTarget.Name())
             end
         else
-            if mq.TLO.Raid.Members() > 0 then
-                RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(0) and mq.TLO.Me.RaidAssistTarget(0).ID()) or 0)
-                if RGMercConfig.Globals.AutoTargetID == 0 then
-                    RGMercConfig.Globals.AutoTargetID = tonumber(mq.TLO.Me.RaidAssistTarget(0).ID()) or 0
-                end
-            elseif mq.TLO.Group.Members() > 0 then
-                ---@diagnostic disable-next-line: undefined-field
-                RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
-                if RGMercConfig.Globals.AutoTargetID == 0 then
-                    ---@diagnostic disable-next-line: undefined-field
-                    RGMercConfig.Globals.AutoTargetID = tonumber(mq.TLO.Me.GroupAssistTarget.ID()) or 0
-                end
-            end
+            RGMercUtils.SetAutoTargetToGroupOrRaidTarget()
         end
     end
 
