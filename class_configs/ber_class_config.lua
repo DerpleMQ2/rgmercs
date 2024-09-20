@@ -2,12 +2,13 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version            = "1.3 Beta",
+    _version            = "1.4",
     -- 1.1 added Dicho to rotation -SCVOne
     -- 1.2 added Bfrenzy  timer 11 -SCVOne
     -- 1.3 seperated DPS into 3 sections to increase freq of attacks -SCVOne
+    -- 1.4 Added toggle for Disconcering Disc, Fixed errors in burn phase with minor refactors --Algar
 
-    _author             = "Derple, SCVOne",
+    _author             = "Derple, SCVOne, Algar",
     ['Modes']           = {
         'DPS',
     },
@@ -436,76 +437,85 @@ return {
                 end,
             },
         },
-        ['Burn'] = {
+        ['Burn'] = { --If this burn rotation is optimal, we may wish to refactor with a helper function, a lot of duplicate code near the end. Fixing broken functionality first. - Algar
             {
                 name = "PrimaryBurnDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and
-                        (not mq.TLO.Me.ActiveDisc.ID() or mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['DiscondDisc'] or "None"))
+                    local discondisc = self:GetResolvedActionMapItem('DisconDisc')
+                    return not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName()
                 end,
             },
             {
                 name = "Savage Spirit",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Juggernaut Surge",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Blood Pact",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Blinding Fury",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Silent Strikes",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Spire of the Juggernaut",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Desperation",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Focused Furious Rampage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Untamed Rage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -519,41 +529,47 @@ return {
                 name = "CleavingDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None") and
-                        RGMercUtils.PCDiscReady(discSpell)
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.PCDiscReady(discSpell) and not mq.TLO.Me.ActiveDisc() and not RGMercUtils.PCDiscReady(burndisc)
                 end,
             },
             {
                 name = "Reckless Abandon",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Vehement Rage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['PrimaryBurnDisc'] or "None")
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "ResolveDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (not mq.TLO.Me.ActiveDisc.ID() or mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['DiscondDisc'] or "None")) and
-                        not RGMercUtils.PCDiscReady(self.ResolvedActionMap['PrimaryBurnDisc']) and
-                        not RGMercUtils.PCDiscReady(self.ResolvedActionMap['CleavingDisc'])
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    local cleavingdisc = self:GetResolvedActionMapItem('CleavingDisc')
+                    local discondisc = self:GetResolvedActionMapItem('DisconDisc')
+                    return RGMercUtils.PCDiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
+                        and not (RGMercUtils.PCDiscReady(burndisc) or RGMercUtils.PCDiscReady(cleavingdisc))
                 end,
             },
             {
                 name = "FlurryDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return (not mq.TLO.Me.ActiveDisc.ID() or mq.TLO.Me.ActiveDisc() == (self.ResolvedActionMap['DiscondDisc'] or "None")) and
-                        not RGMercUtils.PCDiscReady(self.ResolvedActionMap['PrimaryBurnDisc']) and
-                        not RGMercUtils.PCDiscReady(self.ResolvedActionMap['CleavingDisc']) and
-                        not RGMercUtils.PCDiscReady(self.ResolvedActionMap['ResolveDisc'])
+                    local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
+                    local cleavingdisc = self:GetResolvedActionMapItem('CleavingDisc')
+                    local discondisc = self:GetResolvedActionMapItem('DisconDisc')
+                    local resolvedisc = self:GetResolvedActionMapItem('ResolveDisc')
+                    return RGMercUtils.PCDiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
+                        and not (RGMercUtils.PCDiscReady(burndisc) or RGMercUtils.PCDiscReady(cleavingdisc) or RGMercUtils.PCDiscReady(resolvedisc))
                 end,
             },
             {
@@ -696,7 +712,8 @@ return {
                 name = "DisconDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.ActiveDisc() == nil
+                    if not RGMercUtils.GetSetting('DoDisconDisc') then return false end
+                    return RGMercUtils.PCDiscReady(discSpell) and not mq.TLO.Me.ActiveDisc()
                 end,
             },
             {
@@ -828,5 +845,6 @@ return {
         ['AutoAxeCount']    = { DisplayName = "Auto Axe Count", Category = "Abilities", Tooltip = "Summon more Primary Axes when you hit [x] left.", Default = 100, Min = 0, Max = 600, },
         ['DichoAxeCount']   = { DisplayName = "Auto Dicho Axe Count", Category = "Abilities", Tooltip = "Summon more Dicho Axes when you hit [x] left.", Default = 100, Min = 0, Max = 600, },
         ['SummonDichoAxes'] = { DisplayName = "Summon Dicho Axes", Category = "Abilities", Tooltip = "Enable Summon Dicho Axes", Default = true, },
+        ['DoDisconDisc']    = { DisplayName = "Do Discon Disc", Category = "Abilities", Tooltip = "Enable using Disconcerting Discipline", Default = true, },
     },
 }
