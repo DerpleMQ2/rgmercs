@@ -163,6 +163,7 @@ local loot         = {
         RecordData = false,                        -- Enables recording data to report later.
         AutoTag = false,                           -- Automatically tag items to sell if they meet the MinSellPrice
         AutoRestock = false,                       -- Automatically restock items from the BuyItems list when selling
+        LootMyCorpse = false,                      -- Loot your own corpse if its nearby (Does not check for REZ)
     },
 }
 
@@ -893,11 +894,14 @@ function loot.lootCorpse(corpseID)
     local corpseName = mq.TLO.Corpse.Name()
     if mq.TLO.Window('LootWnd').Open() and items > 0 then
         if mq.TLO.Corpse.DisplayName() == mq.TLO.Me.DisplayName() then
-            RGMercUtils.DoCmd('/lootall')
-            -- dont return control to other functions until we are done looting.
-            mq.delay("45s", function() return not mq.TLO.Window('LootWnd').Open() end)
+            if loot.Settings.LootMyCorpse then
+                -- if its our own corpse and we want to loot our corpses then loot it all.
+                RGMercUtils.DoCmd('/lootall')
+                -- dont return control to other functions until we are done looting.
+                mq.delay("45s", function() return not mq.TLO.Window('LootWnd').Open() end)
+            end
             return
-        end -- if its our own corpse just loot it.
+        end
         local noDropItems = {}
         local loreItems = {}
         local allItems = {}
@@ -991,12 +995,15 @@ function loot.lootMobs(limit)
 
     -- check for own corpse
     local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius %d zradius 100", mq.TLO.Me.CleanName(), loot.Settings.CorpseRadius))()
-    for i = 1, (limit or myCorpseCount) do
-        local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse %s radius %d zradius 100", i, mq.TLO.Me.CleanName(), loot.Settings.CorpseRadius))
-        RGMercsLogger.log_debug('\awlootMobs(): \ayMy Corpse ID: %d', corpse.ID())
-        table.insert(corpseList, corpse)
-    end
 
+    if loot.Settings.LootMyCorpse then
+        -- if we want to loot our own corpses then add them to the list and loot them first so we have bags to put items into
+        for i = 1, (limit or myCorpseCount) do
+            local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse %s radius %d zradius 100", i, mq.TLO.Me.CleanName(), loot.Settings.CorpseRadius))
+            RGMercsLogger.log_debug('\awlootMobs(): \ayMy Corpse ID: %d', corpse.ID())
+            table.insert(corpseList, corpse)
+        end
+    end
     -- options for combat looting or looting disabled
     if (deadCount + myCorpseCount) == 0 or ((mobsNearby > 0 or mq.TLO.Me.Combat()) and not loot.Settings.CombatLooting) then return false end
 
@@ -1006,6 +1013,8 @@ function loot.lootMobs(limit)
             local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', loot.Settings.CorpseRadius))
             table.insert(corpseList, corpse)
         end
+    else
+        RGMercsLogger.log_debug('\awlootMobs(): \ayI have my own corpse nearby, not looting other corpses.')
     end
 
     local didLoot = false

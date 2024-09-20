@@ -345,6 +345,16 @@ Module.DefaultConfig     = {
 		FAQ = "How do I enable Links in the reporting?",
 		Answer = "Enabling [LookupLinks] should enable reporting of the links if you are not already using Actors.",
 	},
+	['LootMyCorpse']    = {
+		DisplayName = "Loot My Corpse",
+		Default = LootnScoot.Settings.LootMyCorpse,
+		Category = "Loot Settings",
+		Tooltip =
+		"Loot your own corpse if it's near, does NOT check for REZ..",
+		FAQ = "I keep looting items when naked how can i fix this?",
+		Answer = "Enabling [LootMyCorpse] should enable looting of your own corpse, this will make sure to loot your own corpse FIRST." ..
+			"Before proceeding to the NPC corpses. This will not check for a REZ.",
+	},
 }
 
 Module.FAQ               = {
