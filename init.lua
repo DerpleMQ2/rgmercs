@@ -83,6 +83,11 @@ local function RenderTarget()
         ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
             assistSpawn.ID() or 0, assistSpawn.Level() or 0,
             assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
+        if RGMercUtils.LastBurnCheck then
+            ImGui.SameLine()
+            ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
+                string.format("**BURNING**"))
+        end
         RGMercUtils.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
     end
@@ -485,6 +490,7 @@ local function Main()
         if curState ~= "Downtime" then
             -- clear the cache during state transition.
             RGMercUtils.ClearSafeTargetCache()
+            RGMercUtils.ForceBurnTargetID = 0
         end
 
         curState = "Downtime"

@@ -17,6 +17,9 @@ RGMercUtils.ForceNamed         = false
 RGMercUtils.ShowDownNamed      = false
 RGMercUtils.ShowAdvancedConfig = false
 RGMercUtils.Memorizing         = false
+RGMercUtils.ForceBurnTargetID  = 0
+-- cached for UI display
+RGMercUtils.LastBurnCheck      = false
 RGMercUtils.UseGem             = mq.TLO.Me.NumGems()
 RGMercUtils.ConfigFilter       = ""
 RGMercUtils.SafeTargetCache    = {}
@@ -205,7 +208,6 @@ function RGMercUtils.ClearTarget()
     RGMercsLogger.log_debug("Clearing Target")
     if RGMercUtils.GetSetting('DoAutoTarget') then
         RGMercConfig.Globals.AutoTargetID = 0
-        RGMercConfig.Globals.BurnNow = false
         if mq.TLO.Stick.Status():lower() == "on" then RGMercUtils.DoCmd("/stick off") end
         RGMercUtils.DoCmd("/target clear")
     end
@@ -2249,8 +2251,10 @@ function RGMercUtils.BurnCheck()
     local autoBurn = settings.BurnAuto and
         ((RGMercUtils.GetXTHaterCount() >= settings.BurnMobCount) or (RGMercUtils.IsNamed(mq.TLO.Target) and settings.BurnNamed))
     local alwaysBurn = (settings.BurnAlways and settings.BurnAuto)
+    local forcedBurn = RGMercUtils.ForceBurnTargetID > 0 and RGMercUtils.ForceBurnTargetID == mq.TLO.Target.ID()
 
-    return autoBurn or alwaysBurn
+    RGMercUtils.LastBurnCheck = autoBurn or alwaysBurn or forcedBurn
+    return RGMercUtils.LastBurnCheck
 end
 
 function RGMercUtils.AmIBuffable()
