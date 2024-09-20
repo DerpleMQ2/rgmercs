@@ -63,7 +63,7 @@ Bind.Handlers     = {
         usage = "/rgl burnnow <id?>",
         about = "Will force the target <id> or your current target to trigger all burn checks - resets when combat ends.",
         handler = function(targetId)
-            RGMercUtils.ForceBurnTargetID = targetId or mq.TLO.Target.ID()
+            RGMercUtils.ForceBurnTargetID = tonumber(targetId) or mq.TLO.Target.ID()
             local burnNowSpawn = mq.TLO.Spawn(RGMercUtils.ForceBurnTargetID)
             RGMercsLogger.log_info("\aoForcing Burn Now: \at%s \aw(\am%d\aw)", burnNowSpawn and (burnNowSpawn() and burnNowSpawn.CleanName() or "None") or "None",
                 RGMercUtils.ForceBurnTargetID)
