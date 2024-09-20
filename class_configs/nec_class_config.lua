@@ -1152,18 +1152,12 @@ local _ClassConfig = {
             },
         },
         ['PetSummon'] = { --TODO: Double check these lists to ensure someone leveling doesn't have to change options to keep pets current at lower levels
-            {             --this seems like a really cool idea to get rid of the old pet, but how often do you actually switch pets like this? Do some homework here. --Algar
+            {
                 name = "PetSpellWar",
                 type = "Spell",
-                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == "war" end,
-                pre_activate = function(self, spell)
-                    if mq.TLO.Me.Pet.ID() > 0 then
-                        RGMercUtils.DoCmd("/pet leave")
-                    end
-                end,
+                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == ("war" or "mnk") end,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('PetType') == 1 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "war") and
-                        RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.GetSetting('PetType') == 1 and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell)
                 end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
@@ -1176,14 +1170,8 @@ local _ClassConfig = {
                 name = "PetSpellRog",
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == "rog" end,
-                pre_activate = function(self, spell)
-                    if mq.TLO.Me.Pet.ID() > 0 then
-                        RGMercUtils.DoCmd("/pet leave")
-                    end
-                end,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('PetType') == 2 and (mq.TLO.Me.Pet.ID() == 0 or mq.TLO.Me.Pet.Class.ShortName():lower() ~= "rog") and
-                        RGMercUtils.ReagentCheck(spell)
+                    return RGMercUtils.GetSetting('PetType') == 2 and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell)
                 end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
