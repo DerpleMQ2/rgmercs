@@ -3169,7 +3169,7 @@ end
 
 function RGMercUtils.SetAutoTargetToGroupOrRaidTarget()
     if mq.TLO.Raid.Members() > 0 then
-        RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(0) and mq.TLO.Me.RaidAssistTarget(0).ID()) or 0)
+        RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(1) and mq.TLO.Me.RaidAssistTarget(1).ID()) or 0)
     elseif mq.TLO.Group.Members() > 0 then
         ---@diagnostic disable-next-line: undefined-field
         RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
