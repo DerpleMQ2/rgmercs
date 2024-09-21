@@ -44,7 +44,6 @@ return {
             "Dissident Rage",
             "Composite Rage",
             "Ecliptic Rage",
-
         },
         ['Dfrenzy'] = {
             "Eviscerating Frenzy",
@@ -373,7 +372,7 @@ return {
                         { name = 'Dvolley',   count_name = 'AutoAxeCount', },
                         { name = 'Daxethrow', count_name = 'AutoAxeCount', },
                         { name = 'Daxeof',    count_name = 'AutoAxeCount', },
-                        { name = 'DichoAxe',  count_name = 'DichoAxeCount', },
+                        { name = 'Dicho',     count_name = 'DichoAxeCount', },
                     }
 
                     local summonNeededItem = function(summonSkill, itemId, count)
