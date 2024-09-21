@@ -230,6 +230,10 @@ return {
         },
         ["Aego"] = {
             --- Pally Aegolism
+            "Courage",                       -- Level 8
+            "Center",                        -- Level 20
+            "Daring",                        -- Level 37
+            "Valor",                         -- Level 47
             "Austerity",                     -- Level 55
             "Blessing of Austerity",         -- Level 58 - Group
             "Guidance",                      -- Level 65
@@ -1019,9 +1023,21 @@ return {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and
-                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and
-                        RGMercUtils.GetTargetDistance() < 30
+                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30
+                end,
+            },
+            {
+                name = "Bash",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                end,
+            },
+            {
+                name = "Disarm",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
@@ -1125,6 +1141,20 @@ return {
             },
         },
         ['DPS'] = {
+            {
+                name = "Bash",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                end,
+            },
+            {
+                name = "Disarm",
+                type = "Ability",
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                end,
+            },
             {
                 name = "Marr's Gift",
                 type = "AA",
