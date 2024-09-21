@@ -351,9 +351,6 @@ return {
                         "Axe of The Vindicator",
                         "Axe of the Conqueror",
                         "Axe of the Eviscerator",
-                        "Axe of The Demolisher",
-                        "Axe of The Mangler",
-                        "Axe of the Conqueror",
                     }
 
                     if not self.TempSettings.CachedAxeMap then
