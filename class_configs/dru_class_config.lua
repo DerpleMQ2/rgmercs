@@ -1315,18 +1315,26 @@ local _ClassConfig = {
         },
         ['GroupBuff'] = {
             {
+                name = "Swarm of Fireflies",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return target.ID() == (mq.TLO.Group.MainTank.ID() or 0) and RGMercUtils.AAReady(aaName) and RGMercUtils.GroupBuffCheck(mq.TLO.AltAbility(aaName).Spell, target)
+                end,
+            },
+            {
                 name = "GroupDmgShield",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
+                cond = function(self, spell, target)
+                    return RGMercUtils.GroupBuffCheck(spell, target)
+                end,
             },
             {
                 name = "MoveSpells",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell)
-                    return RGMercUtils.GetSetting("DoRunSpeed") and
-                        RGMercUtils.SelfBuffCheck(spell)
+                cond = function(self, spell, target)
+                    return RGMercUtils.GetSetting("DoRunSpeed") and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1334,9 +1342,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell) and
-                        Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", }):contains((target.Class.ShortName() or ""))
+                    return RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1344,10 +1350,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) and not RGMercUtils.TargetHasBuff(spell)
-                        and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercUtils.TargetClassIs("WAR", target) and RGMercUtils.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
                 end,
             },
             {
@@ -1355,9 +1358,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1365,8 +1366,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
-                    return not RGMercUtils.TargetHasBuff(spell) and target and target and
-                        Set.new({ "SHD", "WAR", }):contains(target.Class.ShortName())
+                    return RGMercUtils.TargetClassIs({ "WAR", "SHD", }, target) and RGMercUtils.GroupBuffCheck(spell, target) --does not stack with PAL innate buff
                 end,
             },
             {
@@ -1374,9 +1374,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1384,8 +1382,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return true end,
                 cond = function(self, aaName, target)
-                    return not RGMercUtils.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell) and
-                        target.ID() == RGMercUtils.GetMainAssistId()
+                    return target.ID() == RGMercUtils.GetMainAssistId() and RGMercUtils.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
         },
