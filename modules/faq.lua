@@ -110,6 +110,8 @@ function Module:ExportFAQToWiki()
 	local questions = RGMercModules:ExecAll("GetFAQ")
 	local commandFaq = RGMercModules:ExecAll("GetCommandHandlers")
 	local classFaq = RGMercModules:ExecAll("GetClassFAQ")
+	local configFaq = {}
+	configFaq.Config = RGMercConfig:GetFAQ()
 
 	if not questions and not commandFaq and not classFaq then
 		print("No FAQ data found.")
@@ -125,6 +127,7 @@ function Module:ExportFAQToWiki()
 			if info.FAQ then
 				local title = "RGMercs Lua Edition: FAQ - " .. module .. " Module"
 				local fileContent = "[[" .. title .. "]]\n\n"
+				fileContent = fileContent .. "__FORCETOC__\n\n"
 				fileContent = fileContent .. "== " .. title .. " ==\n\n"
 
 				for _, data in pairs(info.FAQ) do
@@ -153,7 +156,7 @@ function Module:ExportFAQToWiki()
 		for module, info in pairs(commandFaq) do
 			if info.CommandHandlers then
 				for cmd, data in pairs(info.CommandHandlers) do
-					commandFileContent = commandFileContent .. "|-\n| " .. cmd .. " || " .. (data.usage or "N/A") .. " || " .. (data.about or "N/A") .. "\n"
+					commandFileContent = commandFileContent .. "|-\n| " .. cmd .. " || " .. (data.usage or "TODO") .. " || " .. (data.about or "TODO") .. "\n"
 				end
 			end
 		end
@@ -170,12 +173,35 @@ function Module:ExportFAQToWiki()
 		end
 	end
 
+	-- Export Default Config FAQs
+	if configFaq then
+		local title = "RGMercs Lua Edition: FAQ - Default Configurations"
+		local fileContent = "[[" .. title .. "]]\n\n"
+		fileContent = fileContent .. "__FORCETOC__\n\n"
+		fileContent = fileContent .. "== " .. title .. " ==\n\n"
+		for k, v in pairs(configFaq.Config) do
+			if v.Question == 'None' then v.Question = v.Settings_Used or 'TODO' end
+			fileContent = fileContent .. "=== " .. (v.Question or 'TODO') .. " ===\n"
+			fileContent = fileContent .. "* Answer:\n  " .. (v.Answer:gsub("\n", " ") or "TODO") .. "\n\n"
+			fileContent = fileContent .. "* Settings Used:\n  " .. (v.Settings_Used or "None") .. "\n\n"
+		end
+		local configFileName = mq.configDir .. "/WIKI/Default_Config_FAQ.txt"
+		local configFile = io.open(configFileName, "w")
+		if configFile then
+			configFile:write(fileContent)
+			configFile:close()
+		else
+			print("Failed to open file for Default Configurations")
+		end
+	end
+
 	-- Export Class FAQs
 	if classFaq then
 		for module, info in pairs(classFaq) do
 			if module:lower() == 'class' and info.FAQ then
 				local title = "RGMercs Lua Edition: FAQ - " .. (RGMercConfig.Globals.CurLoadedClass) .. " Class"
 				local fileContent = "[[" .. title .. "]]\n\n"
+				fileContent = fileContent .. "__FORCETOC__\n\n"
 				fileContent = fileContent .. "== " .. title .. " ==\n\n"
 
 				for _, data in pairs(info.FAQ) do
@@ -254,6 +280,8 @@ function Module:Render()
 
 		if ImGui.CollapsingHeader("FAQ Questions") then
 			local questions = RGMercModules:ExecAll("GetFAQ")
+			local configFaq = {}
+
 			if ImGui.BeginTable("FAQ", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
 				ImGui.TableSetupColumn("SettingName", ImGuiTableColumnFlags.WidthFixed, 100)
 				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 200)
@@ -275,6 +303,21 @@ function Module:Render()
 									ImGui.Spacing()
 								end
 							end
+						end
+					end
+				end
+				configFaq.Config = RGMercConfig:GetFAQ()
+				if configFaq ~= nil then
+					for k, v in pairs(configFaq.Config or {}) do
+						if self:MatchSearch(v.Question, v.Answer, v.Settings_Used, "Config") then
+							ImGui.TableNextRow()
+							ImGui.TableNextColumn()
+							ImGui.Text(v.Settings_Used)
+							ImGui.TableNextColumn()
+							ImGui.TextWrapped(v.Question)
+							ImGui.TableNextColumn()
+							ImGui.TextWrapped(v.Answer)
+							ImGui.Spacing()
 						end
 					end
 				end
