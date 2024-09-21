@@ -1028,13 +1028,6 @@ return {
         },
         ['Weaves'] = {
             {
-                name = "Slam",
-                type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
-                end,
-            },
-            {
                 name = "Round Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
