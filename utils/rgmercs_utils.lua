@@ -4638,7 +4638,10 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
                         local k = settingNames[settingToDrawIndicies[itemIndex]]
                         ImGui.Text(string.format("%s", defaults[k].DisplayName or "None"))
                         --ImGui.Text(string.format("%s %d %d + %d", defaults[k].DisplayName or "None", itemIndex, row, ImGui.TableGetColumnIndex() + 1))
-                        RGMercUtils.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]", defaults[k].Tooltip, k, tostring(defaults[k].Default)))
+                        RGMercUtils.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
+                            type(defaults[k].Tooltip) == 'function' and defaults[k].Tooltip() or defaults[k].Tooltip,
+                            k,
+                            tostring(defaults[k].Default)))
                         ImGui.TableNextColumn()
 
                         if defaults[k].Type == "Combo" then
