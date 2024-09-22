@@ -1603,22 +1603,157 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig']   = {
-        ['Mode']             = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this PC. Default: The original RGMercs Config. ModernEra: DPS rotation and spellset aimed at modern live play (~90+)", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 2, },
-        ['DoLearners']       = { DisplayName = "Do Learners", Category = "Buffs", Tooltip = "Set to use the Learner's Aura instead of the Mana Regen Aura.", Default = false, },
-        ['AESlowCount']      = { DisplayName = "Slow Count", Category = "Debuffs", Tooltip = "Number of XT Haters before we start AE slowing", Min = 1, Default = 2, Max = 10, },
-        ['DoTash']           = { DisplayName = "Do Tash", Category = "Debuffs", Tooltip = "Cast Tash Spells", Default = true, },
-        ['DoTwincastDPS']    = { DisplayName = "Do Twincast DPS", Category = "Combat", Tooltip = "(Default Mode Only) Cast TwinCast Mez during DPS rotation", Default = true, },
-        ['DoTwincastMez']    = { DisplayName = "Use Twincast Mez", Category = "Debuffs", Tooltip = "(ModernEra Mode Only) Use TwinCast Mez as your main ST Mez", Default = true, },
-        ['DoDot']            = { DisplayName = "Cast DOTs", Category = "Combat", Tooltip = "Enable casting Damage Over Time spells. (Dots always used for ModernEra Mode)", Default = true, },
-        ['DoSlow']           = { DisplayName = "Cast Slow", Category = "Debuffs", Tooltip = "Enable casting Slow spells.", Default = true, },
-        ['DoCripple']        = { DisplayName = "Cast Cripple", Category = "Debuffs", Tooltip = "Enable casting Cripple spells.", Default = true, },
-        ['DoDicho']          = { DisplayName = "Cast Dicho", Category = "Combat", Tooltip = "Enable casting Dicho spells.(Dicho always used for ModernEra Mode)", Default = true, },
-        ['DoNDTBuff']        = { DisplayName = "Cast NDT", Category = "Buffs", Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).", Default = true, },
-        ['DoGroupAbsorb']    = { DisplayName = "Do Group Absorb", Category = "Buffs", Tooltip = "Enable casting the Group Absorb line with -Hate Proc. If disabled, single target runes will be used.", Default = true, },
-        ['DoGroupDotShield'] = { DisplayName = "Do Group DoT Shield", Category = "Buffs", Tooltip = "Enable casting the Group DoT Shield Line.", Default = true, },
-        ['DoAggroRune']      = { DisplayName = "Do Aggro Rune", Category = "Buffs", Tooltip = "Enable casting the Tank Aggro Rune", Default = true, },
-        ['DoStripBuff']      = { DisplayName = "Do Strip Buffs", Category = "Debuffs", Tooltip = "Enable removing beneficial enemy effects.", Default = true, },
-        ['DoChestClick']     = { DisplayName = "Do Chest Click", Category = "Combat", Tooltip = "Click your equipped chest item during burns.", Default = true, },
+        ['Mode']             = {
+            DisplayName = "Mode",
+            Category = "Combat",
+            Tooltip = "Select the Combat Mode for this PC. Default: The original RGMercs Config. ModernEra: DPS rotation and spellset aimed at modern live play (~90+)",
+            Type = "Custom",
+            RequiresLoadoutChange = true,
+            Default = 1,
+            Min = 1,
+            Max = 2,
+            FAQ = "What are the different Modes about?",
+            Answer = "The Default Mode is the original RGMercs configuration designed for levels 1 - 90.\n" ..
+                "ModernEra Mode is a DPS rotation and spellset aimed at modern live play (~90+).\n" ..
+                "The ModernEra Mode is designed to be used with the ModernEra DPS rotation and spellset. It is recommended to use the ModernEra Mode if you are level 90 or higher.",
+        },
+        ['DoLearners']       = {
+            DisplayName = "Do Learners",
+            Category = "Buffs",
+            Tooltip = "Set to use the Learner's Aura instead of the Mana Regen Aura.",
+            Default = false,
+            FAQ = "How do I use my Learner's Aura?",
+            Answer = "To use your Learner's Aura, set [DoLearners] to true in your PC's configuration.\n" ..
+                "This will cause your PC to use the Learner's Aura instead of the Mana Regen Aura.",
+        },
+        ['AESlowCount']      = {
+            DisplayName = "Slow Count",
+            Category = "Debuffs",
+            Tooltip = "Number of XT Haters before we start AE slowing",
+            Min = 1,
+            Default = 2,
+            Max = 10,
+            FAQ = "Why am I not AE slowing?",
+            Answer = "The [AESlowCount] setting determines the number of XT Haters before we start AE slowing.\n" ..
+                "If you are not AE slowing, you may need to adjust the [AESlowCount] setting.",
+        },
+        ['DoTash']           = {
+            DisplayName = "Do Tash",
+            Category = "Debuffs",
+            Tooltip = "Cast Tash Spells",
+            Default = true,
+            FAQ = "Why am I not Tashing?",
+            Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
+                "If you are not Tashing, you may need to Enable the [DoTash] setting.",
+        },
+        ['DoTwincastDPS']    = {
+            DisplayName = "Do Twincast DPS",
+            Category = "Combat",
+            Tooltip = "(Default Mode Only) Cast TwinCast DPS during DPS rotation",
+            Default = true,
+            FAQ = "I have Twincast AA why am I not using it on my DPS?",
+            Answer = "The [DoTwincastDPS] setting determines whether or not your PC will cast TwinCast DPS during the DPS rotation.\n" ..
+                "If you have the Twincast AA and are not using it, you may need to Enable the [DoTwincastDPS] setting.",
+        },
+        ['DoTwincastMez']    = {
+            DisplayName = "Use Twincast Mez",
+            Category = "Debuffs",
+            Tooltip = "(ModernEra Mode Only) Use TwinCast Mez as your main ST Mez",
+            Default = true,
+            FAQ = "I have Twincast AA why am I not using it on my Mez?",
+            Answer = "The [DoTwincastMez] setting determines whether or not your PC will cast TwinCast Mez as your main ST Mez.\n" ..
+                "If you have the Twincast AA and are not using it, you may need to Enable the [DoTwincastMez] setting.",
+        },
+        ['DoDot']            = {
+            DisplayName = "Cast DOTs",
+            Category = "Combat",
+            Tooltip = "Enable casting Damage Over Time spells. (Dots always used for ModernEra Mode)",
+            Default = true,
+            FAQ = "Why do I not cast any DOTs?",
+            Answer = "The [DoDot] setting determines whether or not your PC will cast Damage Over Time spells.\n" ..
+                "If you are not casting any DOTs, you may need to Enable the [DoDot] setting.",
+        },
+        ['DoSlow']           = {
+            DisplayName = "Cast Slow",
+            Category = "Debuffs",
+            Tooltip = "Enable casting Slow spells.",
+            Default = true,
+            FAQ = "Why am I not Slowing?",
+            Answer = "The [DoSlow] setting determines whether or not your PC will cast Slow spells.\n" ..
+                "If you are not Slowing, you may need to Enable the [DoSlow] setting.",
+        },
+        ['DoCripple']        = {
+            DisplayName = "Cast Cripple",
+            Category = "Debuffs",
+            Tooltip = "Enable casting Cripple spells.",
+            Default = true,
+            FAQ = "Why am I not Crippling?",
+            Answer = "The [DoCripple] setting determines whether or not your PC will cast Cripple spells.\n" ..
+                "If you are not Crippling, you may need to Enable the [DoCripple] setting.",
+        },
+        ['DoDicho']          = {
+            DisplayName = "Cast Dicho",
+            Category = "Combat",
+            Tooltip = "Enable casting Dicho spells.(Dicho always used for ModernEra Mode)",
+            Default = true,
+            FAQ = "Why am I not using Dicho spells?",
+            Answer = "The [DoDicho] setting determines whether or not your PC will cast Dicho spells.\n" ..
+                "If you are not using Dicho spells, you may need to Enable the [DoDicho] setting.",
+        },
+        ['DoNDTBuff']        = {
+            DisplayName = "Cast NDT",
+            Category = "Buffs",
+            Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).",
+            Default = true,
+            FAQ = "Why am I not using NDT?",
+            Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
+                "If you are not using NDT, you may need to Enable the [DoNDTBuff] setting.",
+        },
+        ['DoGroupAbsorb']    = {
+            DisplayName = "Do Group Absorb",
+            Category = "Buffs",
+            Tooltip = "Enable casting the Group Absorb line with -Hate Proc. If disabled, single target runes will be used.",
+            Default = true,
+            FAQ = "Why am I not using Group Absorb?",
+            Answer = "The [DoGroupAbsorb] setting determines whether or not your PC will cast the Group Absorb line with -Hate Proc.\n" ..
+                "If you are not using Group Absorb, you will revert to using single target rune spells instead.",
+        },
+        ['DoGroupDotShield'] = {
+            DisplayName = "Do Group DoT Shield",
+            Category = "Buffs",
+            Tooltip = "Enable casting the Group DoT Shield Line.",
+            Default = true,
+            FAQ = "Why am I not using Group DoT Shield?",
+            Answer = "The [DoGroupDotShield] setting determines whether or not your PC will cast the Group DoT Shield Line.\n" ..
+                "If you are not using Group DoT Shield, you may need to Enable the [DoGroupDotShield] setting.",
+        },
+        ['DoAggroRune']      = {
+            DisplayName = "Do Aggro Rune",
+            Category = "Buffs",
+            Tooltip = "Enable casting the Tank Aggro Rune",
+            Default = true,
+            FAQ = "Why am I not using the Aggro Rune?",
+            Answer = "The [DoAggroRune] setting determines whether or not your PC will cast the Tank Aggro Rune.\n" ..
+                "If you are not using the Aggro Rune, you may need to Enable the [DoAggroRune] setting.",
+        },
+        ['DoStripBuff']      = {
+            DisplayName = "Do Strip Buffs",
+            Category = "Debuffs",
+            Tooltip = "Enable removing beneficial enemy effects.",
+            Default = true,
+            FAQ = "Why am I not stripping buffs?",
+            Answer = "The [DoStripBuff] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
+                "If you are not stripping buffs, you may need to Enable the [DoStripBuff] setting.",
+        },
+        ['DoChestClick']     = {
+            DisplayName = "Do Chest Click",
+            Category = "Combat",
+            Tooltip = "Click your equipped chest item during burns.",
+            Default = true,
+            FAQ = "Why am I not clicking my chest item?",
+            Answer = "The [DoChestClick] setting determines whether or not your PC will click your equipped chest item during burns.\n" ..
+                "If you are not clicking your chest item, you may need to Enable the [DoChestClick] setting.",
+        },
     },
 }
 
