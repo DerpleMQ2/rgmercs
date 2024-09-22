@@ -1,0 +1,86 @@
+<html>
+<head><title>Charm FAQ</title></head>
+<body>
+<h1>RGMercs Lua Edition: FAQ - Charm Module</h1>
+<h2>Questions</h2>
+<ol>
+<li><a href='#q1'>Why do I keep charming Grey Con mobs?</a></li>
+<li><a href='#q2'>How do I make my [Bard, Enchanter, Druid, Necro] Charm pets?</a></li>
+<li><a href='#q3'>I want to only use Charm Pets and ignore summoning my own, can I do that?</a></li>
+<li><a href='#q4'>Why does my Charmer Not Charm ANYTHING?</a></li>
+<li><a href='#q5'>My Charmer doesn't Charm, why?</a></li>
+<li><a href='#q6'>Why can't I land a Dire Charm?</a></li>
+<li><a href='#q7'>Can I specify a pet to always recharm?</a></li>
+<li><a href='#q8'>Why are all of my Charm Pets nearly Dead?</a></li>
+<li><a href='#q9'>I don't know what lvl my charm spell maxes at?</a></li>
+<li><a href='#q10'>Why won't I Charm pets?</a></li>
+<li><a href='#q11'>Why is my Charmed Pet not engaging in combat?</a></li>
+<li><a href='#q12'>How do I use Dire Charm AA?</a></li>
+</ol>
+<h2>Answers</h2>
+<a name='q1'></a>
+<h3>Question: Why do I keep charming Grey Con mobs?</h3>
+<p><strong>Answer:</strong> Adjust the [CharmMinLevel] to an appropriate level so you don't try to charm spawns lower level than you want.</p>
+<p><strong>Settings Used:</strong> CharmMinLevel</p>
+<hr>
+<a name='q2'></a>
+<h3>Question: How do I make my [Bard, Enchanter, Druid, Necro] Charm pets?</h3>
+<p><strong>Answer:</strong> Bards, Enchanters, Druids, and Necros all have the option to Enable [CharmOn] so they can Charm a pet.</p>
+<p><strong>Settings Used:</strong> CharmOn</p>
+<hr>
+<a name='q3'></a>
+<h3>Question: I want to only use Charm Pets and ignore summoning my own, can I do that?</h3>
+<p><strong>Answer:</strong> The setting is currently there but not implimented yet [PreferCharm].  If you have [DoCharm] enabled you shouldn't try to summon a pet.</p>
+<p><strong>Settings Used:</strong> PreferCharm</p>
+<hr>
+<a name='q4'></a>
+<h3>Question: Why does my Charmer Not Charm ANYTHING?</h3>
+<p><strong>Answer:</strong> Make sure you have [CharmOn] enabled. Also Double check that your are in the Right lvl range between [CharmMinLevel] and [CharmMaxLevel].  Alternately  you can enable [AutoLevelRangeCharm] so it will configure the MaxLevel for you.</p>
+<p><strong>Settings Used:</strong> CharmOn, AutoLevelRangeCharm, CharmMinLevel, CharmMaxLevel</p>
+<hr>
+<a name='q5'></a>
+<h3>Question: My Charmer doesn't Charm, why?</h3>
+<p><strong>Answer:</strong> Make sure your [CharmStartCount] setting is at an appropriate level.  This setting is the minimum mobs on Xtarget before we start Trying to Charm.</p>
+<p><strong>Settings Used:</strong> CharmStartCount</p>
+<hr>
+<a name='q6'></a>
+<h3>Question: Why can't I land a Dire Charm?</h3>
+<p><strong>Answer:</strong> Your [DireCharmMaxLvl] may be set to High.  Adjust approptiatly or Enable [AutoLevelRangeCharm] and set the value really High, to have this automatically adjust down to find the appropriate level for you.</p>
+<p><strong>Settings Used:</strong> DireCharmMaxLvl</p>
+<hr>
+<a name='q7'></a>
+<h3>Question: Can I specify a pet to always recharm?</h3>
+<p><strong>Answer:</strong> Not currently, but we can add this feature if it's needed.  Currently we will attempt to recharm if the spawn is still within our thresholds for health and number of spawns in came. You can also try setting [CharmStartCount] to 1 or 0 and see if that helps.</p>
+<p><strong>Settings Used:</strong> CharmOn, CharmStartCount</p>
+<hr>
+<a name='q8'></a>
+<h3>Question: Why are all of my Charm Pets nearly Dead?</h3>
+<p><strong>Answer:</strong> Raise the [CharmStopHPs] setting so you won't try to charm a mob below that health Percentage.</p>
+<p><strong>Settings Used:</strong> CharmStopHPs</p>
+<hr>
+<a name='q9'></a>
+<h3>Question: I don't know what lvl my charm spell maxes at?</h3>
+<p><strong>Answer:</strong> Enable [AutoLevelRangeCharm] to have the max level set for you based on the currently selected spell.</p>
+<p><strong>Settings Used:</strong> AutoLevelRangeCharm</p>
+<hr>
+<a name='q10'></a>
+<h3>Question: Why won't I Charm pets?</h3>
+<p><strong>Answer:</strong> Your [CharmMaxLevel] may be set to High.  Set this to the Max Level your charm spell can handle.  You can also enable [AutoLevelRangeCharm] and have it do this for you.</p>
+<p><strong>Settings Used:</strong> CharmMaxLevel</p>
+<p><strong>Answer:</strong> Your [CharmRadius] may be set to low. Increase this to charm mobs farther away from you.</p>
+<p><strong>Settings Used:</strong> CharmRadius</p>
+<p><strong>Answer:</strong> Your [CharmZRadius] may be set to low.  Increase this to charm mobs farther above / below you.</p>
+<p><strong>Settings Used:</strong> CharmZRadius</p>
+<hr>
+<a name='q11'></a>
+<h3>Question: Why is my Charmed Pet not engaging in combat?</h3>
+<p><strong>Answer:</strong> You will want to turn on [DoPet] in your Main Config Options section, under the Pet/Merc tab.</p>
+<p><strong>Settings Used:</strong> DoPet</p>
+<hr>
+<a name='q12'></a>
+<h3>Question: How do I use Dire Charm AA?</h3>
+<p><strong>Answer:</strong> Enable [DireCharm] setting and we will attempt to use [DireCharm] based upon the other settings.</p>
+<p><strong>Settings Used:</strong> DireCharm</p>
+<hr>
+</body>
+</html>

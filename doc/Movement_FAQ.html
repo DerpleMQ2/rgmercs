@@ -1,0 +1,88 @@
+<html>
+<head><title>Movement FAQ</title></head>
+<body>
+<h1>RGMercs Lua Edition: FAQ - Movement Module</h1>
+<h2>Questions</h2>
+<ol>
+<li><a href='#q1'>How can I adjust when my characters all start following me?</a></li>
+<li><a href='#q2'>I have my Fellowship Insignia and want to use it, how do I do that?</a></li>
+<li><a href='#q3'>I want to keep all of my characters within the same range for the camp, how do I do that?</a></li>
+<li><a href='#q4'>I want to make sure my characters always have a campfire, how do I do that?</a></li>
+<li><a href='#q5'>How do I make my goobers not try and stand on top of me?</a></li>
+<li><a href='#q6'>How do I make my follow my driver?</a></li>
+<li><a href='#q7'>I want to make sure my characters always follow me, even if I pause the main loop. How do I do that?</a></li>
+<li><a href='#q8'>How do I tell my group who to follow?</a></li>
+<li><a href='#q9'>I want to make sure my characters always follow me, we can rebuff when we arrive. How do I do that?</a></li>
+<li><a href='#q10'>I want to make sure my characters always have line of sight to their target, how do I do that?</a></li>
+<li><a href='#q11'>I died and my character started running back to my driver, how do I stop that?</a></li>
+<li><a href='#q12'>How do I make my characters return to camp after combat?</a></li>
+<li><a href='#q13'>I want to make sure my characters always return to camp, and always stay in the same positions within camp. How do I do that?</a></li>
+</ol>
+<h2>Answers</h2>
+<a name='q1'></a>
+<h3>Question: How can I adjust when my characters all start following me?</h3>
+<p><strong>Answer:</strong> Set [ChaseDistance] the distance you want them to start chasing, when you are outside of this range they will start to come your way.</p>
+<p><strong>Settings Used:</strong> ChaseDistance</p>
+<hr>
+<a name='q2'></a>
+<h3>Question: I have my Fellowship Insignia and want to use it, how do I do that?</h3>
+<p><strong>Answer:</strong> Enable [DoFellow] and your characters will use the fellowship insignia automatically.</p>
+<p><strong>Settings Used:</strong> DoFellow</p>
+<hr>
+<a name='q3'></a>
+<h3>Question: I want to keep all of my characters within the same range for the camp, how do I do that?</h3>
+<p><strong>Answer:</strong> Enabling [AutoCampRadius] will make all of your characters return to camp when they are this far away from their camp location.</p>
+<p><strong>Settings Used:</strong> AutoCampRadius</p>
+<hr>
+<a name='q4'></a>
+<h3>Question: I want to make sure my characters always have a campfire, how do I do that?</h3>
+<p><strong>Answer:</strong> Enable [MaintainCampfire] and your characters will always have a campfire.You can select the type of campfire you want to use from the drop down.</p>
+<p><strong>Settings Used:</strong> MaintainCampfire</p>
+<hr>
+<a name='q5'></a>
+<h3>Question: How do I make my goobers not try and stand on top of me?</h3>
+<p><strong>Answer:</strong> Set [ChaseStopDistance] to a higher number stop chasing you further away.</p>
+<p><strong>Settings Used:</strong> ChaseStopDistance</p>
+<hr>
+<a name='q6'></a>
+<h3>Question: How do I make my follow my driver?</h3>
+<p><strong>Answer:</strong> Set the Driver to [ChaseTarget] and Turn on [ChaseOn] and you will follow your Chase Target.</p>
+<p><strong>Settings Used:</strong> ChaseOn</p>
+<hr>
+<a name='q7'></a>
+<h3>Question: I want to make sure my characters always follow me, even if I pause the main loop. How do I do that?</h3>
+<p><strong>Answer:</strong> Enable [RunMovePaused] and your characters will follow you even if the main loop is paused.</p>
+<p><strong>Settings Used:</strong> RunMovePaused</p>
+<hr>
+<a name='q8'></a>
+<h3>Question: How do I tell my group who to follow?</h3>
+<p><strong>Answer:</strong> Set the person to follow as the [ChaseTarget] and Turn on [ChaseOn] and you will follow your Chase Target.</p>
+<p><strong>Settings Used:</strong> ChaseTarget</p>
+<hr>
+<a name='q9'></a>
+<h3>Question: I want to make sure my characters always follow me, we can rebuff when we arrive. How do I do that?</h3>
+<p><strong>Answer:</strong> Enable [PriorityFollow] and your characters will prioritize staying in range of the Chase Target over any other actions.</p>
+<p><strong>Settings Used:</strong> PriorityFollow</p>
+<hr>
+<a name='q10'></a>
+<h3>Question: I want to make sure my characters always have line of sight to their target, how do I do that?</h3>
+<p><strong>Answer:</strong> Enable [RequireLoS] and your characters will try and maintain line of sight to their target when using NAV.</p>
+<p><strong>Settings Used:</strong> RequireLoS</p>
+<hr>
+<a name='q11'></a>
+<h3>Question: I died and my character started running back to my driver, how do I stop that?</h3>
+<p><strong>Answer:</strong> Enable [BreakOnDeath] and your character will stop chasing when you die.</p>
+<p><strong>Settings Used:</strong> BreakOnDeath</p>
+<hr>
+<a name='q12'></a>
+<h3>Question: How do I make my characters return to camp after combat?</h3>
+<p><strong>Answer:</strong> Enable [ReturnToCamp] and your characters will return to camp after combat.</p>
+<p><strong>Settings Used:</strong> ReturnToCamp</p>
+<hr>
+<a name='q13'></a>
+<h3>Question: I want to make sure my characters always return to camp, and always stay in the same positions within camp. How do I do that?</h3>
+<p><strong>Answer:</strong> Enable [CampHard] and your characters will always return to camp after combat and in the same positions (loc) within camp.</p>
+<p><strong>Settings Used:</strong> CampHard</p>
+<hr>
+</body>
+</html>
