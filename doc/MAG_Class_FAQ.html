@@ -1,0 +1,126 @@
+<html>
+<head><title>MAG Class FAQ</title></head>
+<body>
+<h1>RGMercs Lua Edition: FAQ - MAG Class</h1>
+<h2>Questions</h2>
+<ol>
+<li><a href='#q1'>I want to make sure my pet is always armed, how do I do that?</a></li>
+<li><a href='#q2'>I want to use Force of Elements AA in my rotation, how do I do that?</a></li>
+<li><a href='#q3'>Why am I Not summoning Mod Rods?</a></li>
+<li><a href='#q4'>I want to use Magic Nukes instead of Fire Nukes, how do I do that?</a></li>
+<li><a href='#q5'>Can I specify the type of pet I want to use?</a></li>
+<li><a href='#q6'>Why am I not summoning Mod Rods?</a></li>
+<li><a href='#q7'>How do I use my chest clicky?</a></li>
+<li><a href='#q8'>Why do I always have items stuck on the cursor?</a></li>
+<li><a href='#q9'>What is the difference between the modes?</a></li>
+<li><a href='#q10'>Can i summon mod rods in combat?</a></li>
+<li><a href='#q11'>Can I specify the mod rod item I want to use?</a></li>
+<li><a href='#q12'>I want to make sure my pet is always Heirloomed, how do I do that?</a></li>
+<li><a href='#q13'>How do I adjust when to use Gather Mana?</a></li>
+<li><a href='#q14'>I have suspend Minion AA, how do I keep a spare pet suspended?</a></li>
+<li><a href='#q15'>I want to use AE Malo in my rotation, how do I do that?</a></li>
+<li><a href='#q16'>My pet keeps dying, how do I keep it alive?</a></li>
+<li><a href='#q17'>I want to use Malo in my rotation, how do I do that?</a></li>
+<li><a href='#q18'>I want to make sure my pet is always armored, how do I do that?</a></li>
+<li><a href='#q19'>Can I summon mod rods for my group?</a></li>
+</ol>
+<h2>Answers</h2>
+<a name='q1'></a>
+<h3>Question: I want to make sure my pet is always armed, how do I do that?</h3>
+<p><strong>Answer:</strong> You can use the [DoPetWeapons] feature to summon pet weapons.</p>
+<p><strong>Settings Used:</strong> DoPetWeapons</p>
+<hr>
+<a name='q2'></a>
+<h3>Question: I want to use Force of Elements AA in my rotation, how do I do that?</h3>
+<p><strong>Answer:</strong> You can use the [DoForce] feature to use the Force of Elements AA in your rotation.</p>
+<p><strong>Settings Used:</strong> DoForce</p>
+<hr>
+<a name='q3'></a>
+<h3>Question: Why am I Not summoning Mod Rods?</h3>
+<p><strong>Answer:</strong> You can adjust the mana percentage to begin summoning Mod Rods in combat by setting the [GroupManaPct] setting. Also Make sure you have the [CombatModRod] setting enabled if you want to resummon them during combat. Finally make sure you have the [SummonModRods] setting enabled.</p>
+<p><strong>Settings Used:</strong> GroupManaPct</p>
+<hr>
+<a name='q4'></a>
+<h3>Question: I want to use Magic Nukes instead of Fire Nukes, how do I do that?</h3>
+<p><strong>Answer:</strong> You can use the [DoMagicNuke] feature to use Magic Nukes instead of Fire Nukes.</p>
+<p><strong>Settings Used:</strong> DoMagicNuke</p>
+<hr>
+<a name='q5'></a>
+<h3>Question: Can I specify the type of pet I want to use?</h3>
+<p><strong>Answer:</strong> Yes, you can select the type of pet you want to summon using the [PetType] setting.</p>
+<p><strong>Settings Used:</strong> PetType</p>
+<hr>
+<a name='q6'></a>
+<h3>Question: Why am I not summoning Mod Rods?</h3>
+<p><strong>Answer:</strong> You can adjust the number of party members that need to be under the above mana percentage to summon Mod Rods in combat by setting the [GroupManaCt] setting. Also Make sure you have the [CombatModRod] setting enabled if you want to resummon them during combat. Finally make sure you have the [SummonModRods] setting enabled.</p>
+<p><strong>Settings Used:</strong> GroupManaCt</p>
+<hr>
+<a name='q7'></a>
+<h3>Question: How do I use my chest clicky?</h3>
+<p><strong>Answer:</strong> You can use the [DoChestClick] feature to click your chest item.</p>
+<p><strong>Settings Used:</strong> DoChestClick</p>
+<hr>
+<a name='q8'></a>
+<h3>Question: Why do I always have items stuck on the cursor?</h3>
+<p><strong>Answer:</strong> You can adjust the delay before autoinventory by setting the [AISelfDelay] setting. Increase the delay if you notice items left on cursors regularly.</p>
+<p><strong>Settings Used:</strong> AISelfDelay</p>
+<p><strong>Answer:</strong> You can adjust the delay before autoinventory by setting the [AIGroupDelay] setting. Increase the delay if you notice items left on cursors regularly.</p>
+<p><strong>Settings Used:</strong> AIGroupDelay</p>
+<hr>
+<a name='q9'></a>
+<h3>Question: What is the difference between the modes?</h3>
+<p><strong>Answer:</strong> Fire Mode will use Fire Nukes and strive for DPS. PetTank mode will Focus on keeping the Pet alive as the main tank.</p>
+<p><strong>Settings Used:</strong> Mode</p>
+<hr>
+<a name='q10'></a>
+<h3>Question: Can i summon mod rods in combat?</h3>
+<p><strong>Answer:</strong> Yes, you can summon mod rods in combat by setting the [CombatModRod] setting. Otherwise we will only summon them during Downtime.</p>
+<p><strong>Settings Used:</strong> CombatModRod</p>
+<hr>
+<a name='q11'></a>
+<h3>Question: Can I specify the mod rod item I want to use?</h3>
+<p><strong>Answer:</strong> Yes, you can specify the mod rod item you want to use by setting the [SelfModRod] setting.</p>
+<p><strong>Settings Used:</strong> SelfModRod</p>
+<hr>
+<a name='q12'></a>
+<h3>Question: I want to make sure my pet is always Heirloomed, how do I do that?</h3>
+<p><strong>Answer:</strong> You can use the [DoPetHeirlooms] feature to summon pet Heirlooms.</p>
+<p><strong>Settings Used:</strong> DoPetHeirlooms</p>
+<hr>
+<a name='q13'></a>
+<h3>Question: How do I adjust when to use Gather Mana?</h3>
+<p><strong>Answer:</strong> You can adjust when to use Gather Mana by setting the [GatherManaPct] setting.</p>
+<p><strong>Settings Used:</strong> GatherManaPct</p>
+<hr>
+<a name='q14'></a>
+<h3>Question: I have suspend Minion AA, how do I keep a spare pet suspended?</h3>
+<p><strong>Answer:</strong> You can use the [DoPocketPet] feature to keep a spare pet suspended.</p>
+<p><strong>Settings Used:</strong> DoPocketPet</p>
+<hr>
+<a name='q15'></a>
+<h3>Question: I want to use AE Malo in my rotation, how do I do that?</h3>
+<p><strong>Answer:</strong> You can use the [DoAEMalo] feature to use AE Malo in your rotation.</p>
+<p><strong>Settings Used:</strong> DoAEMalo</p>
+<hr>
+<a name='q16'></a>
+<h3>Question: My pet keeps dying, how do I keep it alive?</h3>
+<p><strong>Answer:</strong> You can set the [PetHealPct] to a lower value to heal your pet sooner. Also make sure that [DoPetHeals] is enabled.</p>
+<p><strong>Settings Used:</strong> PetHealPct</p>
+<hr>
+<a name='q17'></a>
+<h3>Question: I want to use Malo in my rotation, how do I do that?</h3>
+<p><strong>Answer:</strong> You can use the [DoMalo] feature to use Malo in your rotation.</p>
+<p><strong>Settings Used:</strong> DoMalo</p>
+<hr>
+<a name='q18'></a>
+<h3>Question: I want to make sure my pet is always armored, how do I do that?</h3>
+<p><strong>Answer:</strong> You can use the [DoPetArmor] feature to summon pet armor.</p>
+<p><strong>Settings Used:</strong> DoPetArmor</p>
+<hr>
+<a name='q19'></a>
+<h3>Question: Can I summon mod rods for my group?</h3>
+<p><strong>Answer:</strong> Yes, you can summon mod rods for your group by setting the [SummonModRods] setting.</p>
+<p><strong>Settings Used:</strong> SummonModRods</p>
+<hr>
+</body>
+</html>

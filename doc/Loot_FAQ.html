@@ -1,0 +1,214 @@
+<html>
+<head><title>Loot FAQ</title></head>
+<body>
+<h1>RGMercs Lua Edition: FAQ - Loot Module</h1>
+<h2>Questions</h2>
+<ol>
+<li><a href='#q1'>How do I enable Links in the reporting?</a></li>
+<li><a href='#q2'>TODO</a></li>
+<li><a href='#q3'>How do I auto loot Foraged items?</a></li>
+<li><a href='#q4'>I want to report to something other than DanNet how can I change this?</a></li>
+<li><a href='#q5'>I want to not sell anything in a certain bag. How can I do that?</a></li>
+<li><a href='#q6'>Why are my goobers not looting?</a></li>
+<li><a href='#q7'>Why are my goobers not Setting items to Tribute?</a></li>
+<li><a href='#q8'>How do I make my Goobers loot NoDrop items?</a></li>
+<li><a href='#q9'>How can I make my Goobers Clean up after themselves?</a></li>
+<li><a href='#q10'>Can I show the loot report by Class?</a></li>
+<li><a href='#q11'>How do I Keep Items to Tribute?</a></li>
+<li><a href='#q12'>I keep looting items when naked how can i fix this?</a></li>
+<li><a href='#q13'>I Can't see what the other Goobers are looting, how do I change that?</a></li>
+<li><a href='#q14'>How do I make my Goobers automatically adjust the loot rules as I level up and things become less important?</a></li>
+<li><a href='#q15'>Why are my goobers not looting stackable items?</a></li>
+<li><a href='#q16'>How do I make my Goobers loot Quest items?</a></li>
+<li><a href='#q17'>Why is my loot Rules table empty?</a></li>
+<li><a href='#q18'>What file is used to create my initial settings?</a></li>
+<li><a href='#q19'>How do I keep my Goobers from running a mile away for a corpse?</a></li>
+<li><a href='#q20'>Why are my goobers Only Looting Stackingable Items?</a></li>
+<li><a href='#q21'>I am lazy and don't want to manually edit anything besides my thresholds. How can I automate setting the Item Rules?</a></li>
+<li><a href='#q22'>I keep forgetting to buy stuff, how can I make sure I have food, drink and reagents?</a></li>
+<li><a href='#q23'>How do I set items to ALWAYS use a rule and never evaluate to something new??</a></li>
+<li><a href='#q24'>How do I make my Goobers delete items and clean their bags?</a></li>
+<li><a href='#q25'>What is the difference between GlobalItem and NormalItem?</a></li>
+<li><a href='#q26'>How do I see what has been looted for the session?</a></li>
+<li><a href='#q27'>I don't want to go through and add each item to be sold or now, how do I automate this?</a></li>
+<li><a href='#q28'>Why are my goobers trying to Loot while fighting?</a></li>
+<li><a href='#q29'>Why is there so much loot spam?</a></li>
+<li><a href='#q30'>Why am I looting all of this tradeskill stuff?</a></li>
+<li><a href='#q31'>I am on a mission and keep leaving behind Quest Items, how can I make sure to loot Quest Items?</a></li>
+<li><a href='#q32'>I don't want to go through and add each item to be Triobuted or now, how do I automate this?</a></li>
+</ol>
+<h2>Answers</h2>
+<a name='q1'></a>
+<h3>Question: How do I enable Links in the reporting?</h3>
+<p><strong>Answer:</strong> Enabling [LookupLinks] should enable reporting of the links if you are not already using Actors.</p>
+<p><strong>Settings Used:</strong> LookupLinks</p>
+<hr>
+<a name='q2'></a>
+<h3>Question: TODO</h3>
+<p><strong>Answer:</strong> You can copy your Loot_Server_Name_CharName_CLASS.lua and rename them for the other characters.  Example: Loot_Project_Lazarus_Grimmier_CLR.lua  We may add an option at a later date to copy settings from one character to another directly.</p>
+<p><strong>Settings Used:</strong> DoLoot</p>
+<hr>
+<a name='q3'></a>
+<h3>Question: How do I auto loot Foraged items?</h3>
+<p><strong>Answer:</strong> You can turn on [LootForage] to loot Foraged items.</p>
+<p><strong>Settings Used:</strong> LootForage</p>
+<hr>
+<a name='q4'></a>
+<h3>Question: I want to report to something other than DanNet how can I change this?</h3>
+<p><strong>Answer:</strong> Silly wabbit EQBC is for kids, but alas the [LootChannel] setting will change which channel you report back on if enabled.</p>
+<p><strong>Settings Used:</strong> LootChannel</p>
+<p><strong>Answer:</strong> Silly wabbit EQBC is for kids, but alas the [GroupChannel] setting will change which channel you report back to your group on if enabled.</p>
+<p><strong>Settings Used:</strong> GroupChannel</p>
+<hr>
+<a name='q5'></a>
+<h3>Question: I want to not sell anything in a certain bag. How can I do that?</h3>
+<p><strong>Answer:</strong>  You can set [ExcludeBag]# to ignore all items in that bag when selling / tributing.</p>
+<p><strong>Settings Used:</strong> ExcludeBag1</p>
+<hr>
+<a name='q6'></a>
+<h3>Question: Why are my goobers not looting?</h3>
+<p><strong>Answer:</strong> You most likely have [DoLoot] turned off.</p>
+<p><strong>Settings Used:</strong> DoLoot</p>
+<p><strong>Answer:</strong> The Items value might be lower than your [MinSellPrice] Setting.</p>
+<p><strong>Settings Used:</strong> MinSellPrice</p>
+<p><strong>Answer:</strong> You could have mobs to close to you, try setting [MobsTooClose] range lower.</p>
+<p><strong>Settings Used:</strong> MobsTooClose</p>
+<p><strong>Answer:</strong> You Might have run out of Free Bag Slots, [SaveBagSlots] setting will set the number of slots you always want to keep empty.</p>
+<p><strong>Settings Used:</strong> SaveBagSlots</p>
+<hr>
+<a name='q7'></a>
+<h3>Question: Why are my goobers not Setting items to Tribute?</h3>
+<p><strong>Answer:</strong> You most likely have one of these: [TributeKeep], or [AddNewTributes] turned off. Otherwise Check your [MinTributeValue] setting.</p>
+<p><strong>Settings Used:</strong> MinTributeValue</p>
+<hr>
+<a name='q8'></a>
+<h3>Question: How do I make my Goobers loot NoDrop items?</h3>
+<p><strong>Answer:</strong> You can turn on [LootNoDrop] to enable looting of NODROP items and also [LootNoDropNew] will loot nodrop items you don't already have in the loot table.</p>
+<p><strong>Settings Used:</strong> LootNoDrop</p>
+<p><strong>Answer:</strong> You can turn on [LootNoDrop] to enable looting of NODROP items and also [LootNoDropNew] will loot nodrop items you don't already have in the loot table.</p>
+<p><strong>Settings Used:</strong> LootNoDropNew</p>
+<hr>
+<a name='q9'></a>
+<h3>Question: How can I make my Goobers Clean up after themselves?</h3>
+<p><strong>Answer:</strong> Enabling [AlwaysDestroy] and [DoDestroy] will make your toons try to destroy any items not deamed worthy of keeping.</p>
+<p><strong>Settings Used:</strong> AlwaysDestroy</p>
+<hr>
+<a name='q10'></a>
+<h3>Question: Can I show the loot report by Class?</h3>
+<p><strong>Answer:</strong> Yes you can set [HideNames] to true and the loot report will show the class shortname instead of the full name.</p>
+<p><strong>Settings Used:</strong> HideNames</p>
+<hr>
+<a name='q11'></a>
+<h3>Question: How do I Keep Items to Tribute?</h3>
+<p><strong>Answer:</strong> You need to turn on [TributeKeep] and set your [MinTributeValue]. If the item sells for less than our [MinSellPrice] and has a tribute value above our [MinTributeValue] we will mark it as Tribute and loot it.</p>
+<p><strong>Settings Used:</strong> TributeKeep</p>
+<hr>
+<a name='q12'></a>
+<h3>Question: I keep looting items when naked how can i fix this?</h3>
+<p><strong>Answer:</strong> Enabling [LootMyCorpse] should enable looting of your own corpse, this will make sure to loot your own corpse FIRST.Before proceeding to the NPC corpses. This will not check for a REZ.</p>
+<p><strong>Settings Used:</strong> LootMyCorpse</p>
+<hr>
+<a name='q13'></a>
+<h3>Question: I Can't see what the other Goobers are looting, how do I change that?</h3>
+<p><strong>Answer:</strong> Enable [ReportLoot] to report to the other characters what is looted.</p>
+<p><strong>Settings Used:</strong> ReportLoot</p>
+<hr>
+<a name='q14'></a>
+<h3>Question: How do I make my Goobers automatically adjust the loot rules as I level up and things become less important?</h3>
+<p><strong>Answer:</strong> You Can turn on [AlwaysEval]. Then anytime you change your thresholds we will re-evaluate based on the new settings instead of the old saved ones.</p>
+<p><strong>Settings Used:</strong> AlwaysEval</p>
+<hr>
+<a name='q15'></a>
+<h3>Question: Why are my goobers not looting stackable items?</h3>
+<p><strong>Answer:</strong> Check your [StackPlatValue] setting, this setting is the total value in Plat for a Full Stack Typically qyt(1000)</p>
+<p><strong>Settings Used:</strong> StackPlatValue</p>
+<hr>
+<a name='q16'></a>
+<h3>Question: How do I make my Goobers loot Quest items?</h3>
+<p><strong>Answer:</strong> If the Item is Marked as Quest or Quest|qty and you have [LootQuest] enabled you will loot Quest items up to their qty max or the default [QuestKeep] setting if not specified. If the Quest Item is NODROP you will also neeed [LootNoDrop] turned on.</p>
+<p><strong>Settings Used:</strong> LootQuest</p>
+<hr>
+<a name='q17'></a>
+<h3>Question: Why is my loot Rules table empty?</h3>
+<p><strong>Answer:</strong> You most likely have your [LootFile] set to the wrong location or it is empty. You could also need to issue /rgl lootimport to import the items.</p>
+<p><strong>Settings Used:</strong> LootFile</p>
+<hr>
+<a name='q18'></a>
+<h3>Question: What file is used to create my initial settings?</h3>
+<p><strong>Answer:</strong> Your Default [SettingsFile] is located at D:\Projects\openvanilla\build\bin\release\Config/LootNScoot_Project_Lazarus_Shortrange.ini</p>
+<p><strong>Settings Used:</strong> SettingsFile</p>
+<hr>
+<a name='q19'></a>
+<h3>Question: How do I keep my Goobers from running a mile away for a corpse?</h3>
+<p><strong>Answer:</strong> Adjust your [CorpseRadius] setting to a shorter range.</p>
+<p><strong>Settings Used:</strong> CorpseRadius</p>
+<hr>
+<a name='q20'></a>
+<h3>Question: Why are my goobers Only Looting Stackingable Items?</h3>
+<p><strong>Answer:</strong> You most likely have [StackableOnly] turned On.</p>
+<p><strong>Settings Used:</strong> StackableOnly</p>
+<hr>
+<a name='q21'></a>
+<h3>Question: I am lazy and don't want to manually edit anything besides my thresholds. How can I automate setting the Item Rules?</h3>
+<p><strong>Answer:</strong> You can enable the [AutoTag] setting, this will set your item rules based on the evaulation. Normally we only record Keep and Ignore unless and let the user pick beyond that. With the exception of [AddNewSales], and [AddNewTribute]</p>
+<p><strong>Settings Used:</strong> AutoTag</p>
+<hr>
+<a name='q22'></a>
+<h3>Question: I keep forgetting to buy stuff, how can I make sure I have food, drink and reagents?</h3>
+<p><strong>Answer:</strong> Set the items you would like to buy all the time in the BuyItems section. You can do this through the GUI.  Then Enable [AutoRestock] and your toons will purchase what they can after selling to the merchant.</p>
+<p><strong>Settings Used:</strong> AutoRestock</p>
+<hr>
+<a name='q23'></a>
+<h3>Question: How do I set items to ALWAYS use a rule and never evaluate to something new??</h3>
+<p><strong>Answer:</strong> Turn on [GlobalLootOn] and Set the item as a GlobalItem with /rgl setglobalitem</p>
+<p><strong>Settings Used:</strong> GlobalLootOn</p>
+<hr>
+<a name='q24'></a>
+<h3>Question: How do I make my Goobers delete items and clean their bags?</h3>
+<p><strong>Answer:</strong> If You enable [DoDestroy], your Toons will destroy any items marked for Destroy in the loot Rules. You can enable [AlwaysDestroy] to make your toons also delete any item marked as IGNORE as well as DESTROY to clean the corpses.</p>
+<p><strong>Settings Used:</strong> DoDestroy</p>
+<hr>
+<a name='q25'></a>
+<h3>Question: What is the difference between GlobalItem and NormalItem?</h3>
+<p><strong>Answer:</strong> GlobalItem is a setting that will always be used for that item. NormalItem is a setting that will be used for that item unless it is set as a GlobalItem. NormalItem settings are evaluated each time if you have [AlwaysEval] turned on, which can change your setting if the item no longer meets the criteria. Setting an items as a GlobalItem will prevent it from being re-evaluated and always use the GlobalItem setting.</p>
+<p><strong>Settings Used:</strong> GlobalLootOn</p>
+<hr>
+<a name='q26'></a>
+<h3>Question: How do I see what has been looted for the session?</h3>
+<p><strong>Answer:</strong> If you enable [RecordData] you can view the report via /rgl reportloot.  This will display a Table of items Looted in this session and allow you can adjust their settings with a right click.</p>
+<p><strong>Settings Used:</strong> RecordData</p>
+<hr>
+<a name='q27'></a>
+<h3>Question: I don't want to go through and add each item to be sold or now, how do I automate this?</h3>
+<p><strong>Answer:</strong> Enable [AddNewSales] and your Goobers will set any item as Sell after seeing you sell one.</p>
+<p><strong>Settings Used:</strong> AddNewSales</p>
+<hr>
+<a name='q28'></a>
+<h3>Question: Why are my goobers trying to Loot while fighting?</h3>
+<p><strong>Answer:</strong> You most likely have [CombatLooting] turned ON</p>
+<p><strong>Settings Used:</strong> CombatLooting</p>
+<hr>
+<a name='q29'></a>
+<h3>Question: Why is there so much loot spam?</h3>
+<p><strong>Answer:</strong> Disable [LootForageSpam] to Disable your local echo when you loot Foraged Items.</p>
+<p><strong>Settings Used:</strong> LootForageSpam</p>
+<p><strong>Answer:</strong> Disable [SpamLootInfo] to Disable your local echo when you loot.</p>
+<p><strong>Settings Used:</strong> SpamLootInfo</p>
+<hr>
+<a name='q30'></a>
+<h3>Question: Why am I looting all of this tradeskill stuff?</h3>
+<p><strong>Answer:</strong> You most likely have [BankTradskills] turned On</p>
+<p><strong>Settings Used:</strong> BankTradeskills</p>
+<hr>
+<a name='q31'></a>
+<h3>Question: I am on a mission and keep leaving behind Quest Items, how can I make sure to loot Quest Items?</h3>
+<p><strong>Answer:</strong>  If you Enable [LootQuest] your toons will loot any items flagged as Quest up to the qty specified or the [QuestKeep] setting.</p>
+<p><strong>Settings Used:</strong> QuestKeep</p>
+<hr>
+<a name='q32'></a>
+<h3>Question: I don't want to go through and add each item to be Triobuted or now, how do I automate this?</h3>
+<p><strong>Answer:</strong> Enable [AddNewTributes] and your Goobers will set any item as Tribute after seeing you Tribute one.</p>
+<p><strong>Settings Used:</strong> AddNewTributes</p>
+<hr>
+</body>
+</html>
