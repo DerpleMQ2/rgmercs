@@ -293,7 +293,7 @@ function Module:Render()
 			end
 		end
 
-		if ImGui.CollapsingHeader("FAQ Questions") then
+		if ImGui.CollapsingHeader("FAQ General") then
 			local questions = RGMercModules:ExecAll("GetFAQ")
 			local configFaq = {}
 
