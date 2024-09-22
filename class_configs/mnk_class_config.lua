@@ -633,8 +633,26 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode']           = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 1, },
-        ['DoIntimidation'] = { DisplayName = "Do Intimidation", Category = "Combat", Tooltip = "Select Use Intimidation", Default = false, },
+        ['Mode']           = {
+            DisplayName = "Mode",
+            Category = "Combat",
+            Tooltip = "Select the Combat Mode for this Toon",
+            Type = "Custom",
+            RequiresLoadoutChange = true,
+            Default = 1,
+            Min = 1,
+            Max = 1,
+            FAQ = "What do the different Modes Do?",
+            Answer = "Currently there is only DPS mode for Monks, More modes may be added in the future.",
+        },
+        ['DoIntimidation'] = {
+            DisplayName = "Do Intimidation",
+            Category = "Combat",
+            Tooltip = "Select Use Intimidation",
+            Default = false,
+            FAQ = "Why am I not using Intimidation?",
+            Answer = "Adjust your [DoIntimidation] setting to true.",
+        },
     },
 }
 
