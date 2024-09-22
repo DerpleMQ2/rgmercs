@@ -226,6 +226,21 @@ end
 
 function Module:Render()
 	ImGui.Text("FAQ Module")
+	ImGui.Spacing()
+	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1, 1, 0, 1))
+	ImGui.Text("Local FAQ Browser Link")
+	ImGui.PopStyleColor()
+	local url = "file:///" .. mq.luaDir .. "/rgmercs/doc/index.html"
+	url = url:gsub("\\", "/")
+	if ImGui.IsItemHovered() then
+		if ImGui.IsMouseClicked(ImGuiMouseButton.Left) then
+			os.execute(('start "" "%s"'):format(url))
+		end
+		ImGui.BeginTooltip()
+		ImGui.Text('%s', url)
+		ImGui.EndTooltip()
+	end
+
 	if not RGMercConfig.Globals.SubmodulesLoaded then
 		return
 	end
