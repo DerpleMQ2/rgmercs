@@ -869,15 +869,15 @@ Config.DefaultConfig = {
         FAQ = "Why am I trying to buff every time we stop moving?",
         Answer = "You can set the [BuffWaitMoveTimer] option to the number of seconds to wait after stopping movement before doing buffs.",
     },
-    ['WardsPlease']          = {
+    ['DoSelfWard']           = {
         DisplayName = "Enable Wards",
         Category = "Buffs",
         Index = 8,
-        Tooltip = "Enable Ward Type Spells",
-        Default = true,
+        Tooltip = "Enable Self Ward Spells",
+        Default = false,
         ConfigType = "Normal",
         FAQ = "Why am I not casting Wards?",
-        Answer = "You can set the [WardsPlease] option to true to enable Ward Type Spells.",
+        Answer = "You can set the [DoSelfWard] option to true to enable Ward Type Spells.",
     },
     ['MountItem']            = {
         DisplayName = "Mount Item",
@@ -932,11 +932,13 @@ Config.DefaultConfig = {
         DisplayName = "Buff Rezables",
         Category = "Buffs",
         Index = 3,
-        Tooltip = "If this PC has a corpse near us buff them even though they are likely to get rezed.",
+        Tooltip =
+        "If a PC has a corpse near us, buff them even though they are likely to get rezed. (Note: If disabled, they may still be receiving group buffs aimed at those without corpses.)",
         Default = false,
         ConfigType = "Advanced",
         FAQ = "Why am I buffing the people before they are rezzed?",
-        Answer = "You can set the [BuffRezables] option to false to skip buffing the people who have corpses nearby.",
+        Answer =
+        "You can set the [BuffRezables] option to false to skip buffing the people who have corpses nearby, but note they may receive group buffs aimed at those without corpses.",
     },
 
     -- [ HEAL/REZ] --
