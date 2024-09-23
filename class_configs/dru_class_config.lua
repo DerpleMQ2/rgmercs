@@ -667,8 +667,8 @@ local _ClassConfig = {
             "Mask of the Shadowcat",
             "Mask of the Wild",
             "Mask of the Forest",
-            "Mask of the Hunter",
             "Mask of the Stalker",
+            "Mask of the Hunter",
         },
         ['HPTypeOneGroup'] = {
             -- Updated to 125
@@ -1399,7 +1399,7 @@ local _ClassConfig = {
                 name = "SelfManaRegen",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and mq.TLO.Zone.Outdoor() end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and not (spell.Name() == "Mask of the Hunter" and mq.TLO.Zone.Indoor()) end,
             },
             {
                 name = "IceAura",
