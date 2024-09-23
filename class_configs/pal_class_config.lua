@@ -230,10 +230,6 @@ return {
         },
         ["Aego"] = {
             --- Pally Aegolism
-            "Courage",                       -- Level 8
-            "Center",                        -- Level 20
-            "Daring",                        -- Level 37
-            "Valor",                         -- Level 47
             "Austerity",                     -- Level 55
             "Blessing of Austerity",         -- Level 58 - Group
             "Guidance",                      -- Level 65
