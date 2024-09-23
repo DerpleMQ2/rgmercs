@@ -31,6 +31,7 @@ local openGUI       = true
 local shouldDrawGUI = true
 local notifyZoning  = true
 local curState      = "Downtime"
+local logFilter     = ""
 
 -- Icon Rendering
 local derpImg       = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
@@ -257,20 +258,41 @@ local function RGMercsGUI()
 
             if RGMercsConsole then
                 local changed
-                RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("Debug Level",
-                    RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
-                    #RGMercConfig.Constants.LogLevels)
+                if ImGui.BeginTable("##debugoptions", 2, ImGuiTableFlags.None) then
+                    ImGui.TableSetupColumn("Opt Name", ImGuiTableColumnFlags.NoResize, 100)
+                    ImGui.TableSetupColumn("Opt Value", ImGuiTableColumnFlags.WidthStretch, ImGui.GetWindowWidth() - 150)
+                    ImGui.TableNextColumn()
+                    RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file",
+                        "", RGMercConfig:GetSettings().LogToFile)
+                    if changed then
+                        RGMercConfig:SaveSettings(false)
+                    end
+                    ImGui.TableNextColumn()
+                    ImGui.Text("Log to File")
+                    ImGui.TableNextColumn()
+                    ImGui.Text("Debug Level")
+                    ImGui.TableNextColumn()
+                    RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("##Debug Level",
+                        RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
+                        #RGMercConfig.Constants.LogLevels)
 
-                if changed then
-                    RGMercConfig:SaveSettings(false)
-                end
+                    if changed then
+                        RGMercConfig:SaveSettings(false)
+                    end
 
-                ImGui.SameLine()
-                RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file",
-                    "Log to File", RGMercConfig:GetSettings().LogToFile)
+                    ImGui.TableNextColumn()
+                    ImGui.Text("Log Filter")
+                    ImGui.TableNextColumn()
+                    logFilter, changed = ImGui.InputText("##logfilter", logFilter)
 
-                if changed then
-                    RGMercConfig:SaveSettings(false)
+                    if changed then
+                        if logFilter:len() == 0 then
+                            RGMercsLogger.clear_log_filter()
+                        else
+                            RGMercsLogger.set_log_filter(logFilter)
+                        end
+                    end
+                    ImGui.EndTable()
                 end
 
                 if ImGui.CollapsingHeader("RGMercs Output", ImGuiTreeNodeFlags.DefaultOpen) then
