@@ -689,7 +689,7 @@ local _ClassConfig = {
         LeechCheck = function(self)
             local LeechEffects = { "Leechcurse Discipline", "Mortal Coil", "Lich Sting Recourse", "Leeching Embrace", "Reaper Strike Recourse", "Leeching Touch", }
             for _, buffName in ipairs(LeechEffects) do
-                if RGMercUtils.BuffActiveByName(buffName) then return false end
+                if mq.TLO.Me.Buff(buffName)() or mq.TLO.Me.Song(buffName)() then return false end
             end
             return true
         end,
@@ -914,7 +914,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.TempHP,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    if not RGMercUtils.GetSetting('DoTempHP') or (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) > 0 then return false end
+                    if not RGMercUtils.GetSetting('DoTempHP') or not RGMercUtils.CastReady(spell.RankName) then return false end
                     return RGMercUtils.PCSpellReady(spell) and RGMercUtils.SpellStacksOnMe(spell) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
                 end,
             },
@@ -1276,7 +1276,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.EncroachingDarkness,
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.DetAACheck(aaName)
+                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
             {
