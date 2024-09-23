@@ -1350,6 +1350,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
+                    if not RGMercUtils.GetSetting('DoTempHP') then return false end
                     return RGMercUtils.TargetClassIs("WAR", target) and RGMercUtils.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
                 end,
             },
@@ -1358,6 +1359,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
+                    if not RGMercUtils.GetSetting('DoHPBuff') then return false end
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1785,6 +1787,23 @@ local _ClassConfig = {
             Default = true,
             FAQ = "I have Twincastig AA, can I use it?",
             Answer = "Yes, you can enable [DoTwinHeal] to use Twin Heal Nuke spells.",
+        },
+        ['DoHPBuff']     = {
+            DisplayName = "Group HP Buff",
+            Category = "Spells and Abilities",
+            Tooltip = "Use your group HP Buff. Disable as desired to prevent conflicts with CLR or PAL buffs.",
+            Default = true,
+            FAQ = "Why am I in a buff war with my Paladin or Druid? We are constantly overwriting each other's buffs.",
+            Answer = "Disable [DoHPBuff] to prevent issues with Aego/Symbol lines overwriting. Alternatively, you can adjust the settings for the other class instead.",
+        },
+        ['DoTempHP']     = {
+            DisplayName = "Temp HP Buff",
+            Category = "Spells and Abilities",
+            Tooltip = "Use Temp HP Buff (Only for WAR, other tanks have their own)",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why isn't my Temp HP Buff being used?",
+            Answer = "You either have [DoTempHP] disabled, or you don't have a Warrior in your group (Other tanks have their own Temp HP Buff).",
         },
     },
 }
