@@ -809,7 +809,7 @@ function RGMercUtils.UseAA(aaName, targetId)
 
     mq.delay(5)
 
-    if aaAbility.Spell.MyCastTime() > 0 then                  --Not having the fudge additional delay was causing the same clipping up until around + 3-400ms for me.
+    if (aaAbility.Spell.MyCastTime() or 0) > 0 then           --Not having the fudge additional delay was causing the same clipping up until around + 3-400ms for me.
         local totaldelay = aaAbility.Spell.MyCastTime() + 600 --Magic Number for now until we can do more solid testing and solicit feedback (this may also be rewritten anyways)
         mq.delay(string.format("%dms", totaldelay))
     end
