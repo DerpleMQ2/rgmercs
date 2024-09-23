@@ -700,7 +700,7 @@ return {
                     if not RGMercUtils.PCAAReady("Braxi's Howl") then return false end
                     local ret = false
                     ret = ret or RGMercUtils.UseAA("Braxi's Howl", RGMercConfig.Globals.AutoTargetID)
-                    ret = ret or RGMercUtils.UseDisc(self.ResolvedActionMap['Discho'], RGMercConfig.Globals.AutoTargetID)
+                    ret = ret or RGMercUtils.UseDisc(self.ResolvedActionMap['Dicho'], RGMercConfig.Globals.AutoTargetID)
 
                     return ret
                 end,
