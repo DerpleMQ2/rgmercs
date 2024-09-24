@@ -689,7 +689,8 @@ local _ClassConfig = {
                 type = "Item",
                 active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
+                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
+                        mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
                 end,
             },
         },
@@ -709,12 +710,12 @@ local _ClassConfig = {
             Answer = "Tank Mode is for when you are the main tank. DPS Mode is for when you are not the main tank and want to focus on damage.",
         },
         ['SummonArrows'] = {
-            DisplayName = "Summon Arrows",
+            DisplayName = "Use Huntsman's Quiver",
             Category = "Equipment",
-            Tooltip = "Enable Summon Arrows",
-            Default = true,
+            Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
+            Default = false,
             FAQ = "How do I summon arrows?",
-            Answer = "Enable [SummonArrows] in the settings and you will summon arrows when you are low.",
+            Answer = "If you are at least level 90, keep a Huntsman's Ethereal Quiver in your inventory and enable its use in the options.",
         },
         ['DoAEAgro']     = {
             DisplayName = "Do AE Agro",

@@ -1318,9 +1318,10 @@ return {
             {
                 name = "Huntsman's Ethereal Quiver",
                 type = "Item",
-                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 1 end,
+                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.FindItemCount("Ethereal Arrow")() < 1 and mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
+                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
+                        mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
                 end,
             },
         },
@@ -1574,12 +1575,12 @@ return {
             Answer = "Make sure you have the [DoReverseDS] setting enabled.",
         },
         ['SummonArrows'] = {
-            DisplayName = "Summon Arrows",
-            Category = "Utilities",
-            Tooltip = "Enable Summon Arrows",
-            Default = true,
-            FAQ = "Why do I keep running out of arrows?",
-            Answer = "Make sure you have the [SummonArrows] setting enabled.",
+            DisplayName = "Use Huntsman's Quiver",
+            Category = "Equipment",
+            Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
+            Default = false,
+            FAQ = "How do I summon arrows?",
+            Answer = "If you are at least level 90, keep a Huntsman's Ethereal Quiver in your inventory and enable its use in the options.",
         },
         ['DoBrells']     = {
             DisplayName = "Do Brells",
