@@ -151,19 +151,19 @@ return {
             "Divine Might",      		  -- Level 45
             "Ward of Nife", 			  -- Level 62
             "Pious Might",  			  -- Level 63
-            "Holy Order",  				  -- Level 65
+            "Holy Order",  			  -- Level 65
             "Silvered Fury",  			  -- Level 67
-            "Pious Fury",  				  -- Level 68
+            "Pious Fury",  			  -- Level 68
             "Righteous Fury",  			  -- Level 80
-            "Devout Fury", 				  -- Level 85
+            "Devout Fury", 			  -- Level 85
             "Earnest Fury",   			  -- Level 90
             "Zealous Fury",   			  -- Level 95
             "Reverent Fury",  			  -- Level 100
             "Ardent Fury",      		  -- Level 105
             "Merciful Fury",      		  -- Level 110
-			"Sincere Fury",      		  -- Level 115
-			"Wrathful Fury",      		  -- Level 120
-			"Avowed Fury",      		  -- Level 125
+	    "Sincere Fury",      		  -- Level 115
+	    "Wrathful Fury",      		  -- Level 120
+	    "Avowed Fury",      		  -- Level 125
         },
         ["Aurora"] = {
             "Aurora of Dawning",
