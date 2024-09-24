@@ -1021,6 +1021,7 @@ function loot.lootMobs(limit)
     if #corpseList > 0 then
         RGMercsLogger.log_debug('\awlootMobs(): \ayTrying to loot %d corpses.', #corpseList)
         for i = 1, #corpseList do
+            if RGMercConfig.Globals.PauseMain then break end
             local corpse = corpseList[i]
             local corpseID = corpse.ID()
             if corpseID and corpseID > 0 and not loot.corpseLocked(corpseID) and (mq.TLO.Navigation.PathLength('spawn id ' .. tostring(corpseID))() or 100) < 60 then
