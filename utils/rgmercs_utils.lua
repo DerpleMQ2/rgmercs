@@ -24,9 +24,9 @@ RGMercUtils.UseGem             = mq.TLO.Me.NumGems()
 RGMercUtils.ConfigFilter       = ""
 RGMercUtils.SafeTargetCache    = {}
 
---- Checks to see if a file exists on the local drive.
----@param path string
----@return boolean
+--- Checks if a file exists at the given path.
+--- @param path string: The path to the file.
+--- @return boolean: True if the file exists, false otherwise.
 function RGMercUtils.file_exists(path)
     local f = io.open(path, "r")
     if f ~= nil then
@@ -37,10 +37,10 @@ function RGMercUtils.file_exists(path)
     end
 end
 
---- Copies a file
----@param from_path string
----@param to_path string
----@return boolean
+--- Copies a file from one path to another.
+--- @param from_path string The source file path.
+--- @param to_path string The destination file path.
+--- @return boolean success True if the file was copied successfully, false otherwise.
 function RGMercUtils.copy_file(from_path, to_path)
     if RGMercUtils.file_exists(from_path) then
         local file = io.open(from_path, "r")
@@ -62,10 +62,11 @@ function RGMercUtils.copy_file(from_path, to_path)
     return false
 end
 
---- Actors to tell all clients that something changed.
----@param module string
----@param event string
----@param data table|nil
+--- Broadcasts an update event to the specified module.
+---
+--- @param module string The name of the module to broadcast the update to.
+--- @param event string The event type to broadcast.
+--- @param data table? The data associated with the event.
 function RGMercUtils.BroadcastUpdate(module, event, data)
     RGMercUtils.Actors.send({
         from = RGMercConfig.Globals.CurLoadedChar,
@@ -77,17 +78,19 @@ function RGMercUtils.BroadcastUpdate(module, event, data)
     })
 end
 
----@param t table
----@return number
+--- Gets the size of a table.
+--- @param t table The table whose size is to be determined.
+--- @return number The size of the table.
 function RGMercUtils.GetTableSize(t)
     local i = 0
     for _, _ in pairs(t) do i = i + 1 end
     return i
 end
 
----@param t table
----@param value string
----@return boolean
+--- Checks if a table contains a specific value.
+--- @param t table The table to search.
+--- @param value any The value to search for in the table.
+--- @return boolean True if the value is found in the table, false otherwise.
 function RGMercUtils.TableContains(t, value)
     for _, v in pairs(t) do
         if v == value then
@@ -97,9 +100,11 @@ function RGMercUtils.TableContains(t, value)
     return false
 end
 
----@param time integer # in seconds
----@param formatString string? # in seconds
----@return string
+--- Formats a given time according to the specified format string.
+---
+--- @param time number The time value to format.
+--- @param formatString string? The format string to use for formatting the time.
+--- @return string The formatted time as a string.
 function RGMercUtils.FormatTime(time, formatString)
     local days = math.floor(time / 86400)
     local hours = math.floor((time % 86400) / 3600)
@@ -134,6 +139,12 @@ function RGMercUtils.gsplit(text, pattern, plain)
     end
 end
 
+--- Splits a given text into a table of substrings based on a specified pattern.
+---
+--- @param text string: The text to be split.
+--- @param pattern string: The pattern to split the text by.
+--- @param plain boolean?: If true, the pattern is treated as a plain string.
+--- @return table: A table containing the substrings.
 function RGMercUtils.split(text, pattern, plain)
     local ret = {}
     if text ~= nil then
@@ -144,8 +155,9 @@ function RGMercUtils.split(text, pattern, plain)
     return ret
 end
 
----@param msg string
----@param ... any
+--- Prints a group message with the given format and arguments.
+--- @param msg string: The message format string.
+--- @param ... any: Additional arguments to format the message.
 function RGMercUtils.PrintGroupMessage(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
@@ -153,9 +165,13 @@ function RGMercUtils.PrintGroupMessage(msg, ...)
     RGMercUtils.DoCmd("/dgt group_%s_%s %s", RGMercConfig.Globals.CurServer, mq.TLO.Group.Leader() or "None", output)
 end
 
----@param defaults table
----@param settings table
----@return table, boolean
+--- Resolves the default values for a given settings table.
+--- This function takes a table of default values and a table of settings,
+--- and ensures that any missing settings are filled in with the default values.
+---
+--- @param defaults table The table containing default values.
+--- @param settings table The table containing user-defined settings.
+--- @return table, boolean The settings table with defaults applied where necessary. A bool if the table changed and requires saving.
 function RGMercUtils.ResolveDefaults(defaults, settings)
     -- Setup Defaults
     local changed = false
@@ -181,8 +197,9 @@ function RGMercUtils.ResolveDefaults(defaults, settings)
     return settings, changed
 end
 
----@param msg string
----@param ... any
+--- Displays a pop-up message with the given text.
+--- @param msg string: The message to be displayed in the pop-up.
+--- @param ... any: Additional arguments that may be used within the function.
 function RGMercUtils.PopUp(msg, ...)
     local output = msg
     if (... ~= nil) then output = string.format(output, ...) end
@@ -190,7 +207,8 @@ function RGMercUtils.PopUp(msg, ...)
     RGMercUtils.DoCmd("/popup %s", output)
 end
 
----@param targetId integer
+--- Sets the target for the RGMercUtils.
+--- @param targetId number The ID of the target to be set.
 function RGMercUtils.SetTarget(targetId)
     if targetId == 0 then return end
 
@@ -204,6 +222,9 @@ function RGMercUtils.SetTarget(targetId)
     end
 end
 
+--- Clears the current target.
+---
+--- This function is used to clear any selected target in the game.
 function RGMercUtils.ClearTarget()
     RGMercsLogger.log_debug("Clearing Target")
     if RGMercUtils.GetSetting('DoAutoTarget') then
@@ -213,6 +234,8 @@ function RGMercUtils.ClearTarget()
     end
 end
 
+--- Handles the death event for RGMercs.
+--- This function is triggered when a death event occurs and performs necessary operations.
 function RGMercUtils.HandleDeath()
     RGMercsLogger.log_warn("You are sleeping with the fishes.")
 
@@ -249,7 +272,11 @@ function RGMercUtils.HandleDeath()
     end
 end
 
----@param t table
+--- Checks the status of plugins.
+---
+--- This function iterates over the provided table of plugins and performs a check on each one.
+---
+--- @param t table A table containing plugin information to be checked.
 function RGMercUtils.CheckPlugins(t)
     for _, p in pairs(t) do
         if not mq.TLO.Plugin(p)() then
@@ -259,8 +286,11 @@ function RGMercUtils.CheckPlugins(t)
     end
 end
 
----@param t table
----@return table
+--- Unchecks the specified plugins.
+---
+--- This function iterates over the provided table `t` and unchecks each plugin listed.
+---
+--- @param t table A table containing the plugins to be unchecked.
 function RGMercUtils.UnCheckPlugins(t)
     local r = {}
     for _, p in pairs(t) do
@@ -274,6 +304,8 @@ function RGMercUtils.UnCheckPlugins(t)
     return r
 end
 
+--- Displays a welcome message to the user.
+--- This function does not take any parameters.
 function RGMercUtils.WelcomeMsg()
     RGMercsLogger.log_info("\aw****************************")
     RGMercsLogger.log_info("\aw\awWelcome to \ag%s", RGMercConfig._name)
@@ -288,8 +320,9 @@ function RGMercUtils.WelcomeMsg()
     RGMercsLogger.log_info("\ay*** END NOTE ***")
 end
 
----@param aaName string
----@return boolean
+--- Checks if a given Alternate Advancement (AA) ability can be used.
+--- @param aaName string The name of the AA ability to check.
+--- @return boolean Returns true if the AA ability can be used, false otherwise.
 function RGMercUtils.CanUseAA(aaName)
     local haveAbility = mq.TLO.Me.AltAbility(aaName)()
     local levelCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level()
@@ -299,13 +332,15 @@ function RGMercUtils.CanUseAA(aaName)
     return haveAbility and levelCheck and rankCheck
 end
 
----@return boolean
+--- Determines if an alliance can be formed.
+--- @return boolean True if an alliance can be formed, false otherwise.
 function RGMercUtils.CanAlliance()
     return true
 end
 
----@param aaName string
----@return boolean
+--- Checks if a specific Alternate Advancement (AA) ability is ready to use.
+--- @param aaName string The name of the AA ability to check.
+--- @return boolean Returns true if the AA ability is ready, false otherwise.
 function RGMercUtils.AAReady(aaName)
     local canUse = RGMercUtils.CanUseAA(aaName)
     local ready = mq.TLO.Me.AltAbilityReady(aaName)()
@@ -313,20 +348,24 @@ function RGMercUtils.AAReady(aaName)
     return ready and canUse
 end
 
----@param abilityName string
----@return boolean
+--- Checks if a given ability is ready to be used.
+--- @param abilityName string The name of the ability to check.
+--- @return boolean True if the ability is ready, false otherwise.
 function RGMercUtils.AbilityReady(abilityName)
     return mq.TLO.Me.AbilityReady(abilityName)()
 end
 
----@param aaName string
----@return number
+--- Retrieves the rank of a specified Alternate Advancement (AA) ability.
+--- @param aaName string The name of the AA ability.
+--- @return number The rank of the specified AA ability.
 function RGMercUtils.AARank(aaName)
     return RGMercUtils.CanUseAA(aaName) and mq.TLO.Me.AltAbility(aaName).Rank() or 0
 end
 
----@param name string
----@return boolean
+--- Checks if the given name corresponds to a discipline.
+---
+--- @param name string The name to check.
+--- @return boolean True if the name is a discipline, false otherwise.
 function RGMercUtils.IsDisc(name)
     local spell = mq.TLO.Spell(name)
 
@@ -334,8 +373,10 @@ function RGMercUtils.IsDisc(name)
         true or false
 end
 
----@param spell MQSpell
----@return boolean
+--- Checks if a player character's spell is ready to be cast.
+---
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean Returns true if the spell is ready, false otherwise.
 function RGMercUtils.PCSpellReady(spell)
     if not spell or not spell() then return false end
     local me = mq.TLO.Me
@@ -346,8 +387,9 @@ function RGMercUtils.PCSpellReady(spell)
         not (me.Moving() and (spell.MyCastTime() or -1) > 0)
 end
 
----@param discSpell MQSpell
----@return boolean
+--- Checks if a given discipline spell is ready to be used by the player character.
+--- @param discSpell MQSpell The name of the discipline spell to check.
+--- @return boolean Returns true if the discipline spell is ready, false otherwise.
 function RGMercUtils.PCDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
     RGMercsLogger.log_super_verbose("PCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
@@ -355,8 +397,10 @@ function RGMercUtils.PCDiscReady(discSpell)
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
 
----@param discSpell MQSpell
----@return boolean
+--- Checks if a given PC discipline spell is ready to be used on the NPC Target.
+---
+--- @param discSpell MQSpell The name of the discipline spell to check.
+--- @return boolean True if the discipline spell is ready, false otherwise.
 function RGMercUtils.NPCDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
     local target = mq.TLO.Target
@@ -368,18 +412,22 @@ function RGMercUtils.NPCDiscReady(discSpell)
         target.LineOfSight() and not target.Hovering()
 end
 
----@param aaName string
----@return boolean
+--- Checks if a particular Alternate Advancement (AA) ability is ready for use.
+---
+--- @param aaName string The name of the AA ability to check.
+--- @return boolean Returns true if the AA ability is ready, false otherwise.
 function RGMercUtils.PCAAReady(aaName)
     local spell = mq.TLO.Me.AltAbility(aaName).Spell
     return RGMercUtils.AAReady(aaName) and mq.TLO.Me.CurrentMana() >= (spell.Mana() or 0) or
         mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0)
 end
 
----@param spellName string
----@param targetId number?
----@param healingSpell boolean?
----@return boolean
+--- Checks if an PC spell is ready to be cast on the target NPC.
+---
+--- @param spellName string The name of the spell to check.
+--- @param targetId number? The ID of the target NPC.
+--- @param healingSpell boolean? Indicates if the spell is a healing spell.
+--- @return boolean Returns true if the spell is ready, false otherwise.
 function RGMercUtils.NPCSpellReady(spellName, targetId, healingSpell)
     local me = mq.TLO.Me
     local spell = mq.TLO.Spell(spellName)
@@ -407,10 +455,10 @@ function RGMercUtils.NPCSpellReady(spellName, targetId, healingSpell)
     return false
 end
 
----@param aaName string
----@param targetId number?
----@param healingSpell boolean?
----@return boolean
+--- @param aaName string
+--- @param targetId number?
+--- @param healingSpell boolean?
+--- @return boolean
 function RGMercUtils.NPCAAReady(aaName, targetId, healingSpell)
     RGMercsLogger.log_verbose("NPCAAReady(%s)", aaName)
     local me = mq.TLO.Me
@@ -455,6 +503,10 @@ function RGMercUtils.NPCAAReady(aaName, targetId, healingSpell)
     return false
 end
 
+--- Gives a specified item to a target.
+--- @param toId number The ID of the target to give the item to.
+--- @param itemName string The name of the item to give.
+--- @param count number The number of items to give.
 function RGMercUtils.GiveTo(toId, itemName, count)
     if toId ~= mq.TLO.Target.ID() then
         RGMercUtils.SetTarget(toId)
@@ -505,8 +557,12 @@ function RGMercUtils.GiveTo(toId, itemName, count)
     end
 end
 
----@param t table
----@return string|nil
+--- Get the best item from a given table.
+---
+--- This function evaluates the items in the provided table and returns the best item based on predefined criteria.
+---
+--- @param t table The table containing items to evaluate.
+--- @return any The best item from the table.
 function RGMercUtils.GetBestItem(t)
     local selectedItem = nil
 
@@ -526,11 +582,13 @@ function RGMercUtils.GetBestItem(t)
     return selectedItem
 end
 
----@param varName string
----@param spellList table
----@param alreadyMissingSpells table
----@param highestOnly boolean
----@return table
+--- Finds missing spells from a given spell list.
+---
+--- @param varName string: The name of the variable to check for missing spells.
+--- @param spellList table: A table containing the list of spells to check.
+--- @param alreadyMissingSpells table: A table to store spells that are already missing.
+--- @param highestOnly boolean: A flag indicating whether to only consider the highest level spells.
+--- @return table: A table containing the missing spells.
 function RGMercUtils.FindMissingSpells(varName, spellList, alreadyMissingSpells, highestOnly)
     local tmpTable = {}
     for _, spellName in ipairs(spellList or {}) do
@@ -571,9 +629,13 @@ function RGMercUtils.FindMissingSpells(varName, spellList, alreadyMissingSpells,
     return alreadyMissingSpells
 end
 
----@param spellList table
----@param alreadyResolvedMap table # table of already resolved items
----@return MQSpell|nil
+--- Get the best spell from a list of spells.
+---
+--- This function iterates through a list of spells and determines the best spell based on certain criteria.
+---
+--- @param spellList table A list of spells to evaluate.
+--- @param alreadyResolvedMap table A map of spells that have already been resolved.
+--- @return MQSpell|nil The best spell from the list.
 function RGMercUtils.GetBestSpell(spellList, alreadyResolvedMap)
     local highestLevel = 0
     local selectedSpell = nil
@@ -618,8 +680,10 @@ function RGMercUtils.GetBestSpell(spellList, alreadyResolvedMap)
     return selectedSpell
 end
 
----@param target MQSpawn
----@param bAllowDead boolean
+--- Waits for the casting to finish on the specified target.
+---
+--- @param target MQSpawn The target to wait for the casting to finish.
+--- @param bAllowDead boolean Whether to allow the target to be dead.
 function RGMercUtils.WaitCastFinish(target, bAllowDead) --I am not vested in the math below, I simply converted the existing entry from sec to ms
     local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime() or 0) + ((mq.TLO.EverQuest.Ping() * 20) + 1000))
     local maxWait = maxWaitOrig
@@ -664,19 +728,25 @@ function RGMercUtils.WaitCastFinish(target, bAllowDead) --I am not vested in the
     end
 end
 
----@return boolean
+--- Checks the mana level of the character.
+--- This function evaluates the current mana level and performs necessary actions based on the result.
+--- @return boolean True if you have more mana than Mana To Nuke false otherwise
 function RGMercUtils.ManaCheck()
     return mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToNuke')
 end
 
+--- Checks the mana status for the character.
+--- This function evaluates the current mana level and determines if it meets the required threshold.
+--- @return boolean True if the mana level is sufficient, false otherwise.
 function RGMercUtils.DotManaCheck()
     return mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('ManaToDot')
 end
 
----@param gem integer
----@param spell string
----@param waitSpellReady boolean
----@param maxWait number # max wait in ms
+--- Memorizes a spell in the specified gem slot.
+--- @param gem number The gem slot number where the spell should be memorized.
+--- @param spell string The name of the spell to memorize.
+--- @param waitSpellReady boolean Whether to wait until the spell is ready to be memorized.
+--- @param maxWait number The maximum time to wait for the spell to be ready, in seconds.
 function RGMercUtils.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     RGMercsLogger.log_info("\ag Meming \aw %s in \ag slot %d", spell, gem)
     RGMercUtils.DoCmd("/memspell %d \"%s\"", gem, spell)
@@ -696,13 +766,17 @@ function RGMercUtils.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     RGMercUtils.Memorizing = false
 end
 
----@param spell string
+--- Checks if a spell is ready to be cast.
+---
+--- @param spell string The name of the spell to check.
+--- @return boolean Returns true if the spell is ready to be cast, false otherwise.
 function RGMercUtils.CastReady(spell)
     return mq.TLO.Me.SpellReady(spell)()
 end
 
----@param spell string
----@param maxWait number # how many ms to wait before giving up
+--- Waits until the specified spell is ready to be cast or the maximum wait time is reached.
+--- @param spell string The name of the spell to wait for.
+--- @param maxWait number The maximum amount of time (in seconds) to wait for the spell to be ready.
 function RGMercUtils.WaitCastReady(spell, maxWait)
     while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
         mq.delay(1)
@@ -724,12 +798,21 @@ function RGMercUtils.WaitCastReady(spell, maxWait)
     mq.delay(pingDelay)
 end
 
+--- Checks if a spell is loaded.
+---
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean Returns true if the spell is loaded, false otherwise.
 function RGMercUtils.SpellLoaded(spell)
     if not spell or not spell() then return false end
 
     return (mq.TLO.Me.Gem(spell.RankName.Name())() ~= nil)
 end
 
+--- Waits for the global cooldown to complete.
+---
+--- This function pauses execution until the global cooldown period has elapsed.
+---
+--- @param logPrefix string|nil: An optional prefix to be used in log messages.
 function RGMercUtils.WaitGlobalCoolDown(logPrefix)
     while mq.TLO.Me.SpellInCooldown() do
         mq.delay(100)
@@ -738,6 +821,10 @@ function RGMercUtils.WaitGlobalCoolDown(logPrefix)
     end
 end
 
+--- Prepares the necessary actions for the RGMercUtils module.
+--- This function is responsible for setting up any prerequisites or initial configurations
+--- required before executing the main functionalities of the RGMercUtils module.
+--- It ensures that all necessary conditions are met and resources are allocated properly.
 function RGMercUtils.ActionPrep()
     if not mq.TLO.Me.Standing() then
         mq.TLO.Me.Stand()
@@ -751,9 +838,10 @@ function RGMercUtils.ActionPrep()
     end
 end
 
----@param aaName string @ AA Ability Name
----@param targetId integer @ Target ID
----@return boolean @ Success
+--- Uses the specified Alternate Advancement (AA) ability on a given target.
+--- @param aaName string The name of the AA ability to use.
+--- @param targetId number The ID of the target on which to use the AA ability.
+--- @return boolean True if the AA ability was successfully used, false otherwise.
 function RGMercUtils.UseAA(aaName, targetId)
     local me = mq.TLO.Me
     local oldTargetId = mq.TLO.Target.ID()
@@ -822,9 +910,10 @@ function RGMercUtils.UseAA(aaName, targetId)
     return true
 end
 
----@param itemName string
----@param targetId integer
----@return boolean
+--- Uses an item on a specified target.
+--- @param itemName string The name of the item to be used.
+--- @param targetId number The ID of the target on which the item will be used.
+--- @return boolean
 function RGMercUtils.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
@@ -933,8 +1022,10 @@ function RGMercUtils.UseItem(itemName, targetId)
     return true
 end
 
----@param spell MQSpell
----@return integer
+--- Retrieves the ID of the item summoned by a given spell.
+---
+--- @param spell MQSpell The name or identifier of the spell.
+--- @return number The ID of the summoned item.
 function RGMercUtils.GetSummonedItemIDFromSpell(spell)
     if not spell or not spell() then return 0 end
 
@@ -948,9 +1039,10 @@ function RGMercUtils.GetSummonedItemIDFromSpell(spell)
     return 0
 end
 
----comment
----@param slot string
----@param item string
+--- Swaps the specified item to the given slot.
+---
+--- @param slot string The slot number where the item should be placed.
+--- @param item string The item to be swapped into the slot.
 function RGMercUtils.SwapItemToSlot(slot, item)
     RGMercsLogger.log_verbose("\aySwapping item %s to %s", item, slot)
 
@@ -972,7 +1064,9 @@ function RGMercUtils.SwapItemToSlot(slot, item)
     end
 end
 
----@param abilityName string
+--- Uses the specified ability.
+---
+--- @param abilityName string The name of the ability to use.
 function RGMercUtils.UseAbility(abilityName)
     local me = mq.TLO.Me
     RGMercUtils.DoCmd("/doability %s", abilityName)
@@ -980,9 +1074,11 @@ function RGMercUtils.UseAbility(abilityName)
     RGMercsLogger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", abilityName)
 end
 
----@param discSpell MQSpell
----@param targetId integer
----@return boolean
+--- Uses a discipline spell on a specified target.
+---
+--- @param discSpell MQSpell The name of the discipline spell to use.
+--- @param targetId number The ID of the target on which to use the discipline spell.
+--- @return boolean True if we were able to fire the Disc false otherwise.
 function RGMercUtils.UseDisc(discSpell, targetId)
     local me = mq.TLO.Me
 
@@ -1025,12 +1121,13 @@ function RGMercUtils.UseDisc(discSpell, targetId)
     end
 end
 
---- Modified Version of UseSpell to accomodate Songs
----@param songName string
----@param targetId integer
----@param bAllowMem boolean
----@param retryCount integer?
----@return boolean
+--- Uses a specified song on a target.
+---
+--- @param songName string The name of the song to be used.
+--- @param targetId number The ID of the target on which the song will be used.
+--- @param bAllowMem boolean A flag indicating whether memorization is allowed.
+--- @param retryCount number? The number of times to retry using the song if it fails.
+--- @return boolean True if we were able to sing the song, false otherwise
 function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
     if not songName then return false end
     local me = mq.TLO.Me
@@ -1161,13 +1258,15 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
     return false
 end
 
----@param spellName string
----@param targetId integer
----@param bAllowMem boolean
----@param bAllowDead boolean?
----@param overrideWaitForGlobalCooldown boolean?
----@param retryCount integer?
----@return boolean
+--- Uses a specified spell on a target.
+---
+--- @param spellName string The name of the spell to be used.
+--- @param targetId number The ID of the target on which the spell will be cast.
+--- @param bAllowMem boolean Whether to allow the spell to be memorized if not already.
+--- @param bAllowDead boolean? Whether to allow casting the spell on a dead target.
+--- @param overrideWaitForGlobalCooldown boolean? Whether to override the wait for the global cooldown.
+--- @param retryCount number? The number of times to retry casting the spell if it fails.
+--- @return boolean Returns true if the spell was successfully cast, false otherwise.
 function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown, retryCount)
     local me = mq.TLO.Me
     -- Immediately send bards to the song handler.
@@ -1312,18 +1411,21 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
     return false
 end
 
---- gets the last used spell name
----@return string
+--- Retrieves the last used spell.
+---
+--- @return string The name of the last used spell.
 function RGMercUtils.GetLastUsedSpell()
     return RGMercConfig.Globals.LastUsedSpell
 end
 
----@param caller self               # caller object to pass back into condition checks
----@param entry table               # entry to execute
----@param targetId integer          # target id for this entry
----@param resolvedActionMap table   # map of AbilitySet items to resolved spells and abilities
----@param bAllowMem boolean         # allow memorization of spells if needed.
----@return boolean
+--- Executes an entry action for a given caller.
+---
+--- @param caller any The entity or object that is calling the function.
+--- @param entry any The entry action to be executed.
+--- @param targetId any The ID of the target for the action.
+--- @param resolvedActionMap table A table containing resolved actions.
+--- @param bAllowMem boolean A flag indicating whether memory actions are allowed.
+--- @return boolean True if exec of entry was successful, false otherwise.
 function RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
     local ret = false
 
@@ -1436,6 +1538,11 @@ function RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllo
     return ret
 end
 
+--- Retrieves the argument for the entry condition from the specified map.
+---
+--- @param map table The table containing the entry conditions.
+--- @param entry table RotationEntry object from class config.
+--- @return any The argument associated with the entry condition.
 function RGMercUtils.GetEntryConditionArg(map, entry)
     local condArg = map[entry.name] or mq.TLO.Spell(entry.name)
     local entryType = entry.type:lower()
@@ -1446,10 +1553,12 @@ function RGMercUtils.GetEntryConditionArg(map, entry)
     return condArg
 end
 
----@param logInfo string #appended to logs for tracing
----@param fn any
----@param ... any
----@return any
+--- Safely calls a function and logs information.
+---
+--- @param logInfo string: Information to log before calling the function.
+--- @param fn function: The function to be called safely.
+--- @param ... any: Additional arguments to pass to the function.
+--- @return any: Returns the result of the function call, or nil if an error occurs.
 function RGMercUtils.SafeCallFunc(logInfo, fn, ...)
     if not fn then return true end -- no condition func == pass
 
@@ -1461,11 +1570,13 @@ function RGMercUtils.SafeCallFunc(logInfo, fn, ...)
     return ret
 end
 
----@param caller self
----@param resolvedActionMap table
----@param entry table
----@param targetId integer
----@return boolean, boolean # check pass and active pass
+--- Tests a condition for a given entry.
+---
+--- @param caller any The entity calling this function.
+--- @param resolvedActionMap table The map of resolved actions.
+--- @param entry table The RotationEntry to test the condition for.
+--- @param targetId any The ID of the target.
+--- @return boolean, boolean Returns bool for both check pass and active pass
 function RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
     local condArg = RGMercUtils.GetEntryConditionArg(resolvedActionMap, entry)
     local condTarg = mq.TLO.Spawn(targetId)
@@ -1491,16 +1602,18 @@ function RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, tar
     return pass, active
 end
 
----@param caller self #caller's self object to pass back into class config conditions
----@param rotationTable table #rotation table to run through
----@param targetId integer # target to cast on
----@param resolvedActionMap table #mapping of the class AbilitySet names to what spell or ability they resolved to
----@param steps integer|nil # number of success steps before we yeild back control - if nil we will run the whole rotation
----@param start_step integer|nil # setp to start on
----@param bAllowMem boolean # allow memorization of spells
----@param bDoFullRotation boolean # Start at step 1 every time
----@param fnRotationCond fun()|nil # rotation condition func
----@return integer, boolean
+--- Executes a rotation of actions based on the provided parameters.
+---
+--- @param caller any The entity calling this function.
+--- @param rotationTable table The table containing the rotation actions.
+--- @param targetId number The ID of the target for the rotation actions.
+--- @param resolvedActionMap table A map of resolved actions.
+--- @param steps number The number of steps in the rotation.
+--- @param start_step number The step to start the rotation from.
+--- @param bAllowMem boolean Flag to allow memory usage.
+--- @param bDoFullRotation boolean? Flag to perform a full rotation.
+--- @param fnRotationCond function? A function to determine rotation conditions.
+--- @return number, boolean
 function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation, fnRotationCond)
     local oldSpellInSlot = mq.TLO.Me.Gem(RGMercUtils.UseGem)
     local stepsThisTime  = 0
@@ -1586,8 +1699,10 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
     return lastStepIdx, anySuccess
 end
 
----@param spell MQSpell
----@return boolean
+--- Checks if a self-buff spell can be cast on a pet.
+---
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean Returns true if the spell can be cast on a pet, false otherwise.
 function RGMercUtils.SelfBuffPetCheck(spell)
     if not spell or not spell() then return false end
 
@@ -1604,8 +1719,10 @@ function RGMercUtils.SelfBuffPetCheck(spell)
     return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and (not mq.TLO.Me.PetBuff(spell.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
 
----@param spell MQSpell|string
----@return boolean
+--- Checks if the self-buff spell is active.
+---
+--- @param spell MQSpell|string The name of the spell to check.
+--- @return boolean Returns true if the spell is active, false otherwise.
 function RGMercUtils.SelfBuffCheck(spell)
     if type(spell) == "string" then
         RGMercsLogger.log_verbose("\agSelfBuffCheck(%s) string", spell)
@@ -1625,10 +1742,13 @@ function RGMercUtils.SelfBuffCheck(spell)
     return res
 end
 
----@param string string
----@param len number
----@param padFront boolean
----@param padChar string?
+--- Pads a string to a specified length with a given character.
+---
+--- @param string string The original string to be padded.
+--- @param len number The desired length of the resulting string.
+--- @param padFront boolean If true, padding is added to the front of the string; otherwise, it is added to the back.
+--- @param padChar string? The character to use for padding. Defaults to a space if not provided.
+--- @return string The padded string.
 function RGMercUtils.PadString(string, len, padFront, padChar)
     if not padChar then padChar = " " end
     local cleanText = string:gsub("\a[-]?.", "")
@@ -1646,22 +1766,25 @@ function RGMercUtils.PadString(string, len, padFront, padChar)
     return string
 end
 
----@param b boolean
----@return string
+--- Converts a boolean value to its string representation.
+--- @param b boolean: The boolean value to convert.
+--- @return string: "true" if the boolean is true, "false" otherwise.
 function RGMercUtils.BoolToString(b)
     return b and "true" or "false"
 end
 
----@param b boolean
----@return string
+--- Converts a boolean value to a color string.
+--- If the boolean is true, it returns "green", otherwise "red".
+--- @param b boolean: The boolean value to convert.
+--- @return string: The color string corresponding to the boolean value.
 function RGMercUtils.BoolToColorString(b)
     return b and "\agtrue\ax" or "\arfalse\ax"
 end
 
----Returns a setting from either the global or a module setting table.
----@param setting string #name of setting to get
----@param failOk boolean? # if we cant find it that is okay.
----@return any|string|nil
+--- Retrieves a specified setting.
+--- @param setting string The name of the setting to retrieve.
+--- @param failOk boolean? If true, the function will not raise an error if the setting is not found.
+--- @return any The value of the setting, or nil if the setting is not found and failOk is true.
 function RGMercUtils.GetSetting(setting, failOk)
     local ret = { module = "Base", value = RGMercConfig:GetSettings()[setting], }
 
@@ -1695,10 +1818,11 @@ function RGMercUtils.GetSetting(setting, failOk)
     return ret.value
 end
 
----@param module string
----@param setting string
----@param value any
----@return boolean|string|number|nil
+--- Validates and sets a configuration setting for a specified module.
+--- @param module string: The name of the module for which the setting is being configured.
+--- @param setting string: The name of the setting to be validated and set.
+--- @param value any: The value to be assigned to the setting.
+--- @return boolean|string|number|nil: Returns a valid value for the setting.
 function RGMercUtils.MakeValidSetting(module, setting, value)
     local defaultConfig = RGMercConfig.DefaultConfig
 
@@ -1730,8 +1854,10 @@ function RGMercUtils.MakeValidSetting(module, setting, value)
     return nil
 end
 
----@param setting string
----@return string, string
+--- Converts a given setting name into a valid format and module name
+--- This function ensures that the setting name adheres to the required format for further processing.
+--- @param setting string The original setting name that needs to be validated and formatted.
+--- @return string, string The module of the setting and The validated and formatted setting name.
 function RGMercUtils.MakeValidSettingName(setting)
     for s, _ in pairs(RGMercConfig:GetSettings()) do
         if s:lower() == setting:lower() then return "Core", s end
@@ -1747,8 +1873,8 @@ function RGMercUtils.MakeValidSettingName(setting)
 end
 
 ---Sets a setting from either in global or a module setting table.
----@param setting string #name of setting to get
----@param value string|boolean|number
+--- @param setting string: The name of the setting to be updated.
+--- @param value any: The new value to assign to the setting.
 function RGMercUtils.SetSetting(setting, value)
     local defaultConfig = RGMercConfig.DefaultConfig
     local settingModuleName = "Core"
@@ -1784,8 +1910,9 @@ function RGMercUtils.SetSetting(setting, value)
     RGMercsLogger.log_info("[%s] \ag%s :: After  :: %-5s", settingModuleName, setting, afterUpdate)
 end
 
----@param aaName string
----@return boolean
+--- Checks if the specified AA (Alternate Advancement) ability is available for self-buffing.
+--- @param aaName string The name of the AA ability to check.
+--- @return boolean Returns true if the AA ability is available for self-buffing, false otherwise.
 function RGMercUtils.SelfBuffAACheck(aaName)
     local abilityReady = mq.TLO.Me.AltAbilityReady(aaName)()
     local buffNotActive = not RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID())
@@ -1805,24 +1932,31 @@ function RGMercUtils.SelfBuffAACheck(aaName)
     return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks and triggerStacks
 end
 
----@return string
+--- Retrieves the name of the last cast result.
+---
+--- @return string The name of the last cast result.
 function RGMercUtils.GetLastCastResultName()
     return RGMercConfig.Constants.CastResultsIdToName[RGMercConfig.Globals.CastResult]
 end
 
----@return number
+--- Retrieves the ID of the last cast result.
+---
+--- @return number The ID of the last cast result.
 function RGMercUtils.GetLastCastResultId()
     return RGMercConfig.Globals.CastResult
 end
 
----@param result number
+--- Sets the result of the last cast operation.
+--- @param result number The result to be set for the last cast operation.
 function RGMercUtils.SetLastCastResult(result)
     RGMercsLogger.log_debug("\awSet Last Cast Result => \ag%s", RGMercConfig.Constants.CastResultsIdToName[result])
     RGMercConfig.Globals.CastResult = result
 end
 
----@param spell MQSpell
----@return boolean
+--- Checks if the given Damage Over Time (DoT) spell can fire.
+---
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean Returns true if the DoT spell can fire, false otherwise.
 function RGMercUtils.DotSpellCheck(spell)
     if not spell or not spell() then return false end
     local named = RGMercUtils.IsNamed(mq.TLO.Target)
@@ -1832,16 +1966,19 @@ function RGMercUtils.DotSpellCheck(spell)
         ((named and (RGMercUtils.GetSetting('NamedStopDOT') < targethp)) or (RGMercUtils.GetSetting('HPStopDOT') < targethp))
 end
 
----@param spell MQSpell
----@return boolean
+--- DetSpellCheck checks if the detrimental spell can fire.
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean Returns true if the spell detrimental spell should fire, false otherwise.
 function RGMercUtils.DetSpellCheck(spell)
     if not spell or not spell() then return false end
     return not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.SpellStacksOnTarget(spell)
 end
 
----@param peerName string
----@param IDs table <integer> IDs
----@return boolean
+--- Searches for a specific buff on a peer using DanNet.
+---
+--- @param peerName string The name of the peer to search for the buff.
+--- @param IDs table A table containing the IDs of the buffs to search for.
+--- @return boolean Returns true if the buff is found, false otherwise.
 function RGMercUtils.DanNetFindBuff(peerName, IDs)
     local text = ""
     for _, id in ipairs(IDs) do
@@ -1856,13 +1993,12 @@ function RGMercUtils.DanNetFindBuff(peerName, IDs)
     return (DanNet.query(peerName, buffSearch, 1000) or "null"):lower() ~= "null"
 end
 
----@param spell MQSpell
----@param peerName string
----@return boolean|nil
+--- Checks if a peer has a specific buff.
+--- @param spell MQSpell The name of the spell (buff) to check for.
+--- @param peerName string The name of the peer to check.
+--- @return boolean|nil True if the peer has the buff, false otherwise.
 function RGMercUtils.PeerHasBuff(spell, peerName)
     peerName = (peerName or ""):lower()
-    local peerFound = false
-
     local peerFound = (mq.TLO.DanNet.Peers() or ""):lower():find(peerName:lower() .. "|") ~= nil
 
     if not peerFound then
@@ -1897,9 +2033,10 @@ function RGMercUtils.PeerHasBuff(spell, peerName)
     return ret
 end
 
----@param spell MQSpell
----@param target MQSpawn
----@return boolean
+--- Checks if a group buff can be cast on the target.
+--- @param spell MQSpell The name of the spell to check.
+--- @param target MQSpawn The name of the target to receive the buff.
+--- @return boolean Returns true if the buff can be cast, false otherwise.
 function RGMercUtils.GroupBuffCheck(spell, target)
     if not spell or not spell() then return false end
     if not target or not target() then return false end
@@ -1961,11 +2098,12 @@ function RGMercUtils.GroupBuffCheck(spell, target)
     return false
 end
 
----@param spell MQSpell
----@param buffTarget (target|spawn|character|fun():string|nil)?
----@return boolean
+--- Checks if the target has a specific buff.
+--- @param spell MQSpell The name of the spell to check for.
+--- @param buffTarget MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @return boolean Returns true if the target has the buff, false otherwise.
 function RGMercUtils.TargetHasBuff(spell, buffTarget)
-    ---@type target|spawn|character|fun():string|nil
+    --- @type target|spawn|character|fun():string|nil
     local target = mq.TLO.Target
 
     if buffTarget ~= nil and buffTarget.ID() > 0 then
@@ -2024,8 +2162,9 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
     return false
 end
 
----@param spell MQSpell # Must be Targetting Target.
----@return boolean
+--- Checks if a spell stacks on the target.
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean True if the spell stacks on the target, false otherwise.
 function RGMercUtils.SpellStacksOnTarget(spell)
     local target = mq.TLO.Target
 
@@ -2046,8 +2185,9 @@ function RGMercUtils.SpellStacksOnTarget(spell)
     return true
 end
 
----@param spell MQSpell # Must be Targetting Target.
----@return boolean
+--- Checks if a given spell stacks on the player.
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean True if the spell stacks on the player, false otherwise.
 function RGMercUtils.SpellStacksOnMe(spell)
     if not spell or not spell() then return false end
 
@@ -2065,17 +2205,19 @@ function RGMercUtils.SpellStacksOnMe(spell)
     return true
 end
 
----@param buffName string
----@param buffTarget (target|spawn|character|fun():string|nil)?
----@return boolean
+--- Checks if the target has a specific buff by name.
+--- @param buffName string The name of the buff to check for.
+--- @param buffTarget MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @return boolean True if the target has the buff, false otherwise.
 function RGMercUtils.TargetHasBuffByName(buffName, buffTarget)
     if buffName == nil then return false end
     return RGMercUtils.TargetHasBuff(mq.TLO.Spell(buffName), buffTarget)
 end
 
----@param target MQTarget|nil
----@param type string
----@return boolean
+--- Checks if the target's body type matches the specified type.
+--- @param target MQTarget The target whose body type is to be checked.
+--- @param type string The body type to check against.
+--- @return boolean True if the target's body type matches the specified type, false otherwise.
 function RGMercUtils.TargetBodyIs(target, type)
     if not target then target = mq.TLO.Target end
     if not target or not target() then return false end
@@ -2084,9 +2226,11 @@ function RGMercUtils.TargetBodyIs(target, type)
     return targetBody:lower() == type:lower()
 end
 
----@param classTable string|table
----@param target MQTarget|nil
----@return boolean
+--- Checks if the target's class is in the provided class table.
+---
+--- @param classTable string|table The string or table of strings containing class names to check against.
+--- @param target MQTarget The class name of the target to check.
+--- @return boolean True if the target's class is in the class table, false otherwise.
 function RGMercUtils.TargetClassIs(classTable, target)
     local classSet = type(classTable) == 'table' and Set.new(classTable) or Set.new({ classTable, })
 
@@ -2096,32 +2240,38 @@ function RGMercUtils.TargetClassIs(classTable, target)
     return classSet:contains(target.Class.ShortName() or "None")
 end
 
----@param target MQTarget|nil
----@return number
+--- Retrieves the level of the specified target.
+---
+--- @param target MQTarget? The target whose level is to be retrieved.
+--- @return number The level of the target.
 function RGMercUtils.GetTargetLevel(target)
     return (target and target.Level() or (mq.TLO.Target.Level() or 0))
 end
 
----@param target MQTarget|spawn|nil
----@return number
+--- Calculates the distance to the specified target.
+--- @param target MQTarget|MQSpawn? The target entity whose distance is to be calculated.
+--- @return number The distance to the target.
 function RGMercUtils.GetTargetDistance(target)
     return (target and target.Distance() or (mq.TLO.Target.Distance() or 9999))
 end
 
----@param target MQTarget|spawn|nil
----@return number
+--- Calculates the vertical distance (Z-axis) to the specified target.
+--- @param target MQTarget|MQSpawn? The target entity to measure the distance to.
+--- @return number The vertical distance to the target.
 function RGMercUtils.GetTargetDistanceZ(target)
     return (target and target.DistanceZ() or (mq.TLO.Target.DistanceZ() or 9999))
 end
 
----@param target MQTarget|nil
----@return number
+--- Gets the maximum range to the specified target.
+--- @param target MQTarget? The target entity to measure the range to.
+--- @return number The maximum range to the target.
 function RGMercUtils.GetTargetMaxRangeTo(target)
     return (target and target.MaxRangeTo() or (mq.TLO.Target.MaxRangeTo() or 15))
 end
 
----@param target MQTarget|spawn|nil
----@return number
+--- Retrieves the percentage of hit points (HP) remaining for the specified target.
+--- @param target MQTarget|MQSpawn? The target entity whose HP percentage is to be retrieved.
+--- @return number The percentage of HP remaining for the target.
 function RGMercUtils.GetTargetPctHPs(target)
     local useTarget = target
     if not useTarget then useTarget = mq.TLO.Target end
@@ -2130,8 +2280,9 @@ function RGMercUtils.GetTargetPctHPs(target)
     return useTarget.PctHPs() or 0
 end
 
----@param target MQTarget|nil
----@return boolean
+--- Checks if the specified target is dead.
+--- @param target MQTarget The name or identifier of the target to check.
+--- @return boolean Returns true if the target is dead, false otherwise.
 function RGMercUtils.GetTargetDead(target)
     local useTarget = target
     if not useTarget then useTarget = mq.TLO.Target end
@@ -2140,31 +2291,36 @@ function RGMercUtils.GetTargetDead(target)
     return useTarget.Dead()
 end
 
----@param target MQTarget|nil
----@return string
+--- Retrieves the name of the given target.
+--- @param target MQTarget? The target whose name is to be retrieved.
+--- @return string The name of the target.
 function RGMercUtils.GetTargetName(target)
     return (target and target.Name() or (mq.TLO.Target.Name() or ""))
 end
 
----@param target MQTarget|spawn|nil
----@return string
+--- Retrieves the clean name of the given target.
+--- @param target MQTarget|MQSpawn? The target from which to extract the clean name.
+--- @return string The clean name of the target.
 function RGMercUtils.GetTargetCleanName(target)
     return (target and target.Name() or (mq.TLO.Target.CleanName() or ""))
 end
 
----@param target MQTarget|nil
----@return number
+--- Retrieves the ID of the given target.
+--- @param target MQTarget? The target whose ID is to be retrieved.
+--- @return number The ID of the target.
 function RGMercUtils.GetTargetID(target)
     return (target and target.ID() or (mq.TLO.Target.ID() or 0))
 end
 
----@return number
+--- Retrieves the aggro percentage of the current target.
+--- @return number The aggro percentage of the current target.
 function RGMercUtils.GetTargetAggroPct()
     return (mq.TLO.Target.PctAggro() or 0)
 end
 
----@param target spawn|groupmember|MQTarget?
----@return string
+--- Determines the type of the given target.
+--- @param target MQSpawn|MQTarget|groupmember? The target whose type is to be determined.
+--- @return string The type of the target as a string.
 function RGMercUtils.GetTargetType(target)
     local useTarget = target
     if not useTarget then useTarget = mq.TLO.Target end
@@ -2173,20 +2329,22 @@ function RGMercUtils.GetTargetType(target)
     return (useTarget.Type() or "")
 end
 
----@param type string
----@param target spawn|groupmember|MQTarget?
----@return boolean
+--- Checks if the target is of the specified type.
+--- @param type string The type to check against the target.
+--- @param target MQSpawn|groupmember|MQTarget? The target to be checked.
+--- @return boolean Returns true if the target is of the specified type, false otherwise.
 function RGMercUtils.TargetIsType(type, target)
     return RGMercUtils.GetTargetType(target):lower() == type:lower()
 end
 
----@param target MQTarget|nil
----@return boolean
+--- @param target MQTarget|nil
+--- @return boolean
 function RGMercUtils.GetTargetAggressive(target)
     return (target and target.Aggressive() or (mq.TLO.Target.Aggressive() or false))
 end
 
----@return number
+--- Retrieves the percentage by which the target is slowed.
+--- @return number The percentage by which the target is slowed.
 function RGMercUtils.GetTargetSlowedPct()
     -- no valid target
     if mq.TLO.Target and not mq.TLO.Target.Slowed() then return 0 end
@@ -2194,58 +2352,70 @@ function RGMercUtils.GetTargetSlowedPct()
     return (mq.TLO.Target.Slowed.SlowPct() or 0)
 end
 
----@return integer
+--- Retrieves the ID of the main assist in the group.
+--- @return number The ID of the main assist in the group.
 function RGMercUtils.GetGroupMainAssistID()
     return (mq.TLO.Group.MainAssist.ID() or 0)
 end
 
----@return string
+--- Retrieves the name of the main assist in the group.
+--- @return string The name of the main assist in the group.
 function RGMercUtils.GetGroupMainAssistName()
     return (mq.TLO.Group.MainAssist.CleanName() or "")
 end
 
----@param mode string
----@return boolean
+--- Checks if a given mode is active.
+--- @param mode string The mode to check.
+--- @return boolean Returns true if the mode is active, false otherwise.
 function RGMercUtils.IsModeActive(mode)
     return RGMercModules:ExecModule("Class", "IsModeActive", mode)
 end
 
----@return boolean
+--- Checks if the character is currently tanking.
+--- @return boolean True if the character is tanking, false otherwise.
 function RGMercUtils.IsTanking()
     return RGMercModules:ExecModule("Class", "IsTanking")
 end
 
----@return boolean
+--- Checks if the current character is performing a healing action.
+--- @return boolean True if the character is healing, false otherwise.
 function RGMercUtils.IsHealing()
     return RGMercModules:ExecModule("Class", "IsHealing")
 end
 
----@return boolean
+--- Checks if the curing process is active.
+--- @return boolean True if curing is active, false otherwise.
 function RGMercUtils.IsCuring()
     return RGMercModules:ExecModule("Class", "IsCuring")
 end
 
----@return boolean
+--- Checks if the character is currently mezzing.
+--- @return boolean True if the character is mezzing, false otherwise.
 function RGMercUtils.IsMezzing()
     return RGMercModules:ExecModule("Class", "IsMezzing") and RGMercUtils.GetSetting('MezOn')
 end
 
----@return boolean
+--- Checks if the character is currently charming.
+--- @return boolean True if the character is charming, false otherwise.
 function RGMercUtils.IsCharming()
     return RGMercModules:ExecModule("Class", "IsCharming")
 end
 
----@return boolean
+--- Determines if the character can perform a mez (mesmerize) action.
+--- @return boolean True if the character can mez, false otherwise.
 function RGMercUtils.CanMez()
     return RGMercModules:ExecModule("Class", "CanMez")
 end
 
----@return boolean
+--- Checks if the character can charm.
+--- @return boolean True if the character can charm, false otherwise.
 function RGMercUtils.CanCharm()
     return RGMercModules:ExecModule("Class", "CanCharm")
 end
 
----@return boolean
+--- Checks if the burn condition is met for RGMercs.
+--- This function evaluates certain criteria to determine if the burn phase should be initiated.
+--- @return boolean True if the burn condition is met, false otherwise.
 function RGMercUtils.BurnCheck()
     local settings = RGMercConfig:GetSettings()
     local autoBurn = settings.BurnAuto and
@@ -2257,11 +2427,16 @@ function RGMercUtils.BurnCheck()
     return RGMercUtils.LastBurnCheck
 end
 
+--- Determines if the current entity can receive buffs.
+--- @return boolean True if the entity can be buffed, false otherwise.
 function RGMercUtils.AmIBuffable()
     local myCorpseCount = RGMercUtils.GetSetting('BuffRezables') and 0 or mq.TLO.SpawnCount(string.format('pccorpse %s radius 100 zradius 50', mq.TLO.Me.CleanName()))()
     return myCorpseCount == 0
 end
 
+--- Retrieves the list of group IDs that can be buffed.
+---
+--- @return table A table containing the IDs of the groups that can receive buffs.
 function RGMercUtils.GetBuffableGroupIDs()
     local groupIds = RGMercUtils.AmIBuffable() and { mq.TLO.Me.ID(), } or {}
     local count = mq.TLO.Group.Members()
@@ -2285,7 +2460,8 @@ function RGMercUtils.GetBuffableGroupIDs()
     return groupIds
 end
 
----@param targetId integer
+--- Sticks the player to the specified target.
+--- @param targetId number The ID of the target to stick to.
 function RGMercUtils.DoStick(targetId)
     if os.clock() - RGMercUtils.LastDoStick < 4 then
         RGMercsLogger.log_debug(
@@ -2306,6 +2482,9 @@ function RGMercUtils.DoStick(targetId)
     end
 end
 
+--- Executes a group command with the provided arguments.
+--- @param cmd string The command to be executed.
+--- @param ... any Additional arguments for the command.
 function RGMercUtils.DoGroupCmd(cmd, ...)
     local dgcmd = "/dga /if ($\\{Zone.ID} == ${Zone.ID} && $\\{Group.Leader.Name.Equal[${Group.Leader.Name}]}) "
     local formatted = cmd
@@ -2315,6 +2494,9 @@ function RGMercUtils.DoGroupCmd(cmd, ...)
     mq.cmd(formatted)
 end
 
+--- Executes a given command with optional arguments.
+--- @param cmd string: The command to execute.
+--- @param ... any: Optional arguments for the command.
 function RGMercUtils.DoCmd(cmd, ...)
     local formatted = cmd
     if ... ~= nil then formatted = string.format(cmd, ...) end
@@ -2322,9 +2504,10 @@ function RGMercUtils.DoCmd(cmd, ...)
     mq.cmd(formatted)
 end
 
----@param target MQTarget
----@param radius number
----@return boolean
+--- Navigates around a circle centered on the target with a specified radius.
+--- @param target MQTarget The central point around which to navigate.
+--- @param radius number The radius of the circle to navigate around.
+--- @return boolean True if we were able to successfully navigate around
 function RGMercUtils.NavAroundCircle(target, radius)
     if not RGMercUtils.GetSetting('DoAutoEngage') then return false end
     if not target or not target() and not target.Dead() then return false end
@@ -2379,9 +2562,10 @@ function RGMercUtils.NavAroundCircle(target, radius)
     return false
 end
 
----@param targetId integer
----@param distance integer
----@param bDontStick boolean
+--- Navigates to a target during combat.
+--- @param targetId number The ID of the target to navigate to.
+--- @param distance number The distance to maintain from the target.
+--- @param bDontStick boolean Whether to avoid sticking to the target.
 function RGMercUtils.NavInCombat(targetId, distance, bDontStick)
     if not RGMercUtils.GetSetting('DoAutoEngage') then return end
 
@@ -2406,10 +2590,16 @@ function RGMercUtils.NavInCombat(targetId, distance, bDontStick)
     end
 end
 
+--- Retrieves the ID of the main assist.
+---
+--- @return number The ID of the main assist.
 function RGMercUtils.GetMainAssistId()
     return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist)).ID() or 0
 end
 
+--- Retrieves the percentage of hit points (HP) of the main assist.
+---
+--- @return number The percentage of HP of the main assist.
 function RGMercUtils.GetMainAssistPctHPs()
     local groupMember = mq.TLO.Group.Member(RGMercConfig.Globals.MainAssist)
     if groupMember and groupMember() then
@@ -2423,33 +2613,44 @@ function RGMercUtils.GetMainAssistPctHPs()
     return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist)).PctHPs() or 0
 end
 
+--- Retrieves the main assist spawn.
+--- @return MQSpawn The main assist spawn data.
 function RGMercUtils.GetMainAssistSpawn()
     return mq.TLO.Spawn(string.format("PC =%s", RGMercConfig.Globals.MainAssist))
 end
 
+--- Retrieves the current auto-target.
+---
+--- @return MQSpawn The current auto-target.
 function RGMercUtils.GetAutoTarget()
     return mq.TLO.Spawn(string.format("id %d", RGMercConfig.Globals.AutoTargetID))
 end
 
+--- Retrieves the percentage of HPs for auto-targeting.
+---
+--- @return number The percentage of HPs for auto-targeting.
 function RGMercUtils.GetAutoTargetPctHPs()
     local autoTarget = RGMercUtils.GetAutoTarget()
     if not autoTarget or not autoTarget() then return 0 end
     return autoTarget.PctHPs() or 0
 end
 
----@return boolean
+--- Determines whether the utility should shrink.
+--- @return boolean True if the utility should shrink, false otherwise.
 function RGMercUtils.ShouldShrink()
     return (RGMercUtils.GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2.2 and
         (RGMercUtils.GetSetting('ShrinkItem'):len() > 0) and RGMercUtils.DoBuffCheck()
 end
 
----@return boolean
+--- Determines whether the pet should be shrunk.
+--- @return boolean True if the pet should be shrunk, false otherwise.
 function RGMercUtils.ShouldShrinkPet()
     return (RGMercUtils.GetSetting('DoShrinkPet') and true or false) and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() > 1.8 and
         (RGMercUtils.GetSetting('ShrinkPetItem'):len() > 0) and RGMercUtils.DoPetCheck()
 end
 
----@return boolean
+--- Determines if the character should mount.
+--- @return boolean True if the character should mount, false otherwise.
 function RGMercUtils.ShouldMount()
     if RGMercUtils.GetSetting('DoMount') == 1 then return false end
 
@@ -2469,12 +2670,16 @@ function RGMercUtils.ShouldMount()
     return passBasicChecks and (passCheckMountOne or (passCheckMountTwo and passMountItemGivesBlessing))
 end
 
----@return boolean
+--- Determines whether the character should dismount.
+--- This function checks certain conditions to decide if the character should dismount.
+--- @return boolean True if the character should dismount, false otherwise.
 function RGMercUtils.ShouldDismount()
     return RGMercUtils.GetSetting('DoMount') ~= 2 and ((mq.TLO.Me.Mount.ID() or 0) > 0)
 end
 
----@return boolean
+--- Determines whether the target should be reset for killing.
+---
+--- @return boolean True if the target should be reset, false otherwise.
 function RGMercUtils.ShouldKillTargetReset()
     local killSpawn = mq.TLO.Spawn(string.format("targetable id %d", RGMercConfig.Globals.AutoTargetID))
     local killCorpse = mq.TLO.Spawn(string.format("corpse id %d", RGMercConfig.Globals.AutoTargetID))
@@ -2482,6 +2687,9 @@ function RGMercUtils.ShouldKillTargetReset()
         false
 end
 
+--- Automatically manages the medication process for the character.
+--- This function handles the logic for ensuring the character takes the necessary medication at the appropriate times.
+---
 function RGMercUtils.AutoMed()
     local me = mq.TLO.Me
     if RGMercUtils.GetSetting('DoMed') == 1 then return end
@@ -2587,8 +2795,10 @@ function RGMercUtils.ClickModRod()
     end
 end
 
----@param songSpell MQSpell
----@return boolean
+--- Checks if a song spell is memorized.
+---
+--- @param songSpell MQSpell The name of the song spell to check.
+--- @return boolean True if the song spell is memorized, false otherwise.
 function RGMercUtils.SongMemed(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
@@ -2596,8 +2806,9 @@ function RGMercUtils.SongMemed(songSpell)
     return me.Gem(songSpell.RankName.Name())() ~= nil
 end
 
----@param songSpell MQSpell
----@return boolean
+--- Returns if a Buff Song is in need of recast
+--- @param songSpell MQSpell The name of the song spell to be used for buffing.
+--- @return boolean Returns true if the buff is needed, false otherwise.
 function RGMercUtils.BuffSong(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
@@ -2612,8 +2823,9 @@ function RGMercUtils.BuffSong(songSpell)
     return res
 end
 
----@param songSpell MQSpell
----@return boolean
+--- Returns if a Debuff Song is in need of recast
+--- @param songSpell MQSpell The name of the song spell to be used for debuffing.
+--- @return boolean Returns true if the debuff was successfully applied, false otherwise.
 function RGMercUtils.DebuffSong(songSpell)
     if not songSpell or not songSpell() then return false end
     local me = mq.TLO.Me
@@ -2624,13 +2836,19 @@ function RGMercUtils.DebuffSong(songSpell)
     return res
 end
 
----@return boolean
+--- Checks the debuff condition for the Target
+--- This function evaluates the current debuff status and performs necessary actions.
+---
+--- @return boolean True if the target matches the Con requirements for debuffing.
 function RGMercUtils.DebuffConCheck()
     local conLevel = (RGMercConfig.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
     return conLevel >= RGMercUtils.GetSetting('DebuffMinCon') or (RGMercUtils.IsNamed(mq.TLO.Target) and RGMercUtils.GetSetting('DebuffNamedAlways'))
 end
 
----@return boolean
+--- Checks if we should be casting buffs.
+--- This function checks if we should be casting buffs - Enabled by user and not moving or trying to move or follow..
+---
+--- @return boolean
 function RGMercUtils.DoBuffCheck()
     if not RGMercUtils.GetSetting('DoBuffs') then return false end
 
@@ -2645,6 +2863,9 @@ function RGMercUtils.DoBuffCheck()
     return true
 end
 
+--- Performs a check on the pet status.
+--- This function checks various conditions related to the pet.
+--- @return boolean Returns true if the pet check is successful, false otherwise.
 function RGMercUtils.DoPetCheck()
     if not RGMercUtils.GetSetting('DoPet') then return false end
 
@@ -2659,7 +2880,8 @@ function RGMercUtils.DoPetCheck()
     return true
 end
 
----@return boolean
+--- Determines if the priority follow condition is met.
+--- @return boolean True if the priority follow condition is met, false otherwise.
 function RGMercUtils.ShouldPriorityFollow()
     local chaseTarget = RGMercUtils.GetSetting('ChaseTarget', true) or "NoOne"
 
@@ -2676,7 +2898,11 @@ function RGMercUtils.ShouldPriorityFollow()
     return false
 end
 
----@return boolean
+--- Uses the Origin ability for the character.
+--- This function triggers the Origin ability, which typically teleports the character to their bind point.
+--- Ensure that the character has the Origin ability available before calling this function.
+---
+--- @return boolean True if successful
 function RGMercUtils.UseOrigin()
     if mq.TLO.FindItem("=Drunkard's Stein").ID() or 0 > 0 and mq.TLO.Me.ItemReady("=Drunkard's Stein") then
         RGMercsLogger.log_debug("\ag--\atFound a Drunkard's Stein, using that to get to PoK\ag--")
@@ -2703,33 +2929,40 @@ function RGMercUtils.UseOrigin()
     return false
 end
 
----@param x1 number
----@param y1 number
----@param x2 number
----@param y2 number
----@return number
+--- Calculates the distance between two points (x1, y1) and (x2, y2).
+--- @param x1 number The x-coordinate of the first point.
+--- @param y1 number The y-coordinate of the first point.
+--- @param x2 number The x-coordinate of the second point.
+--- @param y2 number The y-coordinate of the second point.
+--- @return number The distance between the two points.
 function RGMercUtils.GetDistance(x1, y1, x2, y2)
     --return mq.TLO.Math.Distance(string.format("%d,%d:%d,%d", y1 or 0, x1 or 0, y2 or 0, x2 or 0))()
     return math.sqrt(RGMercUtils.GetDistanceSquared(x1, y1, x2, y2))
 end
 
----@param x1 number
----@param y1 number
----@param x2 number
----@param y2 number
----@return number
+--- Calculates the squared distance between two points (x1, y1) and (x2, y2).
+--- This is useful for distance comparisons without the computational cost of a square root.
+--- @param x1 number The x-coordinate of the first point.
+--- @param y1 number The y-coordinate of the first point.
+--- @param x2 number The x-coordinate of the second point.
+--- @param y2 number The y-coordinate of the second point.
+--- @return number The squared distance between the two points.
 function RGMercUtils.GetDistanceSquared(x1, y1, x2, y2)
     return ((x2 or 0) - (x1 or 0)) ^ 2 + ((y2 or 0) - (y1 or 0)) ^ 2
 end
 
----@return boolean
+--- Checks if we should be doing our camping functionality
+--- This function handles the logic required to return to camp.
+---
+--- @return boolean
 function RGMercUtils.DoCamp()
     return
         (RGMercUtils.GetXTHaterCount() == 0 and RGMercConfig.Globals.AutoTargetID == 0) or
         (not RGMercUtils.IsTanking() and RGMercUtils.GetAutoTargetPctHPs() > RGMercUtils.GetSetting('AutoAssistAt'))
 end
 
----@param tempConfig table
+--- Checks if the auto camp feature should be activated based on the provided temporary configuration.
+--- @param tempConfig table: A table containing temporary configuration settings for the auto camp feature.
 function RGMercUtils.AutoCampCheck(tempConfig)
     if not RGMercUtils.GetSetting('ReturnToCamp') then return end
 
@@ -2788,7 +3021,8 @@ function RGMercUtils.AutoCampCheck(tempConfig)
     end
 end
 
----@param tempConfig table
+--- Checks the combat camp configuration.
+--- @param tempConfig table: A table containing temporary configuration settings.
 function RGMercUtils.CombatCampCheck(tempConfig)
     if not RGMercUtils.GetSetting('ReturnToCamp') then return end
 
@@ -2831,7 +3065,8 @@ function RGMercUtils.CombatCampCheck(tempConfig)
     end
 end
 
----@param autoTargetId integer
+--- Engages the target specified by the given autoTargetId.
+--- @param autoTargetId number The ID of the target to engage.
 function RGMercUtils.EngageTarget(autoTargetId)
     if not RGMercUtils.GetSetting('DoAutoEngage') then return end
 
@@ -2898,11 +3133,18 @@ function RGMercUtils.EngageTarget(autoTargetId)
     end
 end
 
+--- MercAssist handles the assistance logic for mercenaries.
+--- This function is responsible for coordinating the actions of mercenaries to assist in combat or other tasks.
+---
 function RGMercUtils.MercAssist()
     mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_CallForAssistButton").LeftMouseUp()
 end
 
----@return boolean
+--- Engages the mercenaries in combat.
+---
+--- This function initiates the engagement process for mercenaries.
+--- It is typically called when mercenaries need to start fighting.
+---
 function RGMercUtils.MercEngage()
     local merc = mq.TLO.Me.Mercenary
 
@@ -2917,6 +3159,10 @@ function RGMercUtils.MercEngage()
     return false
 end
 
+--- Kills the player's pet.
+---
+--- This function is used to terminate the player's pet in the game.
+--- It performs necessary checks and actions to ensure the pet is properly removed.
 function RGMercUtils.KillPCPet()
     RGMercsLogger.log_warn("\arKilling your pet!")
     local problemPetOwner = mq.TLO.Spawn(string.format("id %d", mq.TLO.Me.XTarget(1).ID())).Master.CleanName()
@@ -2928,20 +3174,23 @@ function RGMercUtils.KillPCPet()
     end
 end
 
----@param name string
----@return boolean
+--- Checks if the specified expansion is available.
+--- @param name string The name of the expansion to check.
+--- @return boolean True if the expansion is available, false otherwise.
 function RGMercUtils.HaveExpansion(name)
     return mq.TLO.Me.HaveExpansion(RGMercConfig.Constants.ExpansionNameToID[name])
 end
 
----@param class string
----@return boolean
+--- Checks if the player's class matches the specified class.
+--- @param class string The class to check against the player's class.
+--- @return boolean True if the player's class matches the specified class, false otherwise.
 function RGMercUtils.MyClassIs(class)
     return mq.TLO.Me.Class.ShortName():lower() == class:lower()
 end
 
----@param spawn MQSpawn
----@return boolean
+--- Checks if the given spawn is a named entity.
+--- @param spawn MQSpawn The spawn object to check.
+--- @return boolean True if the spawn is named, false otherwise.
 function RGMercUtils.IsNamed(spawn)
     if not spawn() then return false end
 
@@ -2949,20 +3198,20 @@ function RGMercUtils.IsNamed(spawn)
         if spawn.Name() == n or spawn.CleanName() == n then return true end
     end
 
-    ---@diagnostic disable-next-line: undefined-field
+    --- @diagnostic disable-next-line: undefined-field
     if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil then
-        ---@diagnostic disable-next-line: undefined-field
+        --- @diagnostic disable-next-line: undefined-field
         return mq.TLO.SpawnMaster.HasSpawn(spawn.ID())()
     end
 
     return RGMercUtils.ForceNamed
 end
 
---- Replaces IsPCSafe
----@param t string: character type
----@param name string
----@return boolean
-function RGMercUtils.IsSafeName(t, name)
+--- Checks if the given name is considered safe within the provided table.
+--- @param spawnType string Type of spawn pc/pcpet/merc/etc.
+--- @param name string The name to check for safety.
+--- @return boolean Returns true if the name is safe, false otherwise.
+function RGMercUtils.IsSafeName(spawnType, name)
     RGMercsLogger.log_verbose("IsSafeName(%s)", name)
     if mq.TLO.DanNet(name)() then
         RGMercsLogger.log_verbose("IsSafeName(%s): Dannet Safe", name)
@@ -2986,7 +3235,7 @@ function RGMercUtils.IsSafeName(t, name)
     end
 
     if mq.TLO.Me.Guild() ~= nil then
-        if mq.TLO.Spawn(string.format("%s =%s", t, name)).Guild() == mq.TLO.Me.Guild() then
+        if mq.TLO.Spawn(string.format("%s =%s", spawnType, name)).Guild() == mq.TLO.Me.Guild() then
             RGMercsLogger.log_verbose("IsSafeName(%s): Guild Safe", name)
             return true
         end
@@ -2996,13 +3245,16 @@ function RGMercUtils.IsSafeName(t, name)
     return false
 end
 
+--- Clears the Safe Target Cache after combat.
 function RGMercUtils.ClearSafeTargetCache()
     RGMercUtils.SafeTargetCache = {}
 end
 
----@param spawn MQSpawn
----@param radius number
----@return boolean
+--- Checks if a given spawn is fighting a stranger within a specified radius.
+---
+--- @param spawn MQSpawn The spawn object to check.
+--- @param radius number The radius within which to check for strangers.
+--- @return boolean Returns true if the spawn is fighting a stranger within the specified radius, false otherwise.
 function RGMercUtils.IsSpawnFightingStranger(spawn, radius)
     local searchTypes = { "PC", "PCPET", "MERCENARY", }
 
@@ -3042,7 +3294,10 @@ function RGMercUtils.IsSpawnFightingStranger(spawn, radius)
     return false
 end
 
----@return boolean
+--- Checks if combat actions should happen
+--- This function handles the combat logic for the RGMercUtils module.
+---
+--- @return boolean True if actions should happen.
 function RGMercUtils.DoCombatActions()
     if not RGMercConfig.Globals.LastMove then return false end
     if RGMercConfig.Globals.AutoTargetID == 0 then return false end
@@ -3055,9 +3310,11 @@ function RGMercUtils.DoCombatActions()
     return true
 end
 
----@param radius number
----@param zradius number
----@return number
+--- Scans for targets within a specified radius.
+---
+--- @param radius number The horizontal radius to scan for targets.
+--- @param zradius number The vertical radius to scan for targets.
+--- @return number spawn id of the new target.
 function RGMercUtils.MATargetScan(radius, zradius)
     local aggroSearch    = string.format("npc radius %d zradius %d targetable playerstate 4", radius, zradius)
     local aggroSearchPet = string.format("npcpet radius %d zradius %d targetable playerstate 4", radius, zradius)
@@ -3171,17 +3428,18 @@ function RGMercUtils.MATargetScan(radius, zradius)
     return killId
 end
 
+--- Sets the AutoTarget to that of your group or raid MA.
 function RGMercUtils.SetAutoTargetToGroupOrRaidTarget()
     if mq.TLO.Raid.Members() > 0 then
         RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.RaidAssistTarget(1) and mq.TLO.Me.RaidAssistTarget(1).ID()) or 0)
     elseif mq.TLO.Group.Members() > 0 then
-        ---@diagnostic disable-next-line: undefined-field
+        --- @diagnostic disable-next-line: undefined-field
         RGMercConfig.Globals.AutoTargetID = ((mq.TLO.Me.GroupAssistTarget() and mq.TLO.Me.GroupAssistTarget.ID()) or 0)
     end
 end
 
 --- This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID
----@param validateFn function? # Function which is run before changing targets to avoid target strobing
+--- @param validateFn function? A function used to validate potential targets. Should return true for valid targets and false otherwise.
 function RGMercUtils.FindTarget(validateFn)
     RGMercsLogger.log_verbose("FindTarget()")
     if mq.TLO.Spawn(string.format("id %d pcpet xtarhater", mq.TLO.Me.XTarget(1).ID())).ID() > 0 and RGMercUtils.GetSetting('ForceKillPet') then
@@ -3255,7 +3513,7 @@ function RGMercUtils.FindTarget(validateFn)
         -- Only change if the group main assist target is an NPC ID that doesn't match the current autotargetid. This prevents us from
         -- swapping to non-NPCs if the  MA is trying to heal/buff a friendly or themselves.
         if RGMercUtils.GetSetting('AssistOutside') then
-            ---@diagnostic disable-next-line: redundant-parameter
+            --- @diagnostic disable-next-line: redundant-parameter
             local peer = mq.TLO.DanNet.Peers(RGMercConfig.Globals.MainAssist)()
             local assistTarget = nil
 
@@ -3300,10 +3558,10 @@ function RGMercUtils.FindTarget(validateFn)
     end
 end
 
--- cleaned up message handlers for announcements
----@param msg string
----@param sendGroup boolean
----@param sendDan boolean
+--- Handles the announcement message.
+--- @param msg string: The message to be announced.
+--- @param sendGroup boolean: Whether to send the message to the group.
+--- @param sendDan boolean: Whether to send the message to DanNet.
 function RGMercUtils.HandleAnnounce(msg, sendGroup, sendDan)
     if sendGroup then
         local cleanMsg = msg:gsub("\a.", "")
@@ -3317,8 +3575,9 @@ function RGMercUtils.HandleAnnounce(msg, sendGroup, sendDan)
     RGMercsLogger.log_debug(msg)
 end
 
----@param printDebug boolean?
----@return table # list of haters.
+--- Retrieves the IDs of the top haters.
+--- @param printDebug boolean?: If true, debug information will be printed.
+--- @return table: A table containing the IDs of the top haters.
 function RGMercUtils.GetXTHaterIDs(printDebug)
     local xtCount = mq.TLO.Me.XTarget() or 0
     local haters = {}
@@ -3337,15 +3596,18 @@ function RGMercUtils.GetXTHaterIDs(printDebug)
     return haters
 end
 
----@param printDebug boolean?
----@return integer
+--- Gets the count of XTHaters.
+--- @param printDebug boolean?: If true, debug information will be printed.
+--- @return number: The count of XTHaters.
 function RGMercUtils.GetXTHaterCount(printDebug)
     return #RGMercUtils.GetXTHaterIDs(printDebug)
 end
 
----@param t table # Set of haters.
----@param printDebug boolean?
----@return boolean
+--- Computes the difference in Hater IDs.
+---
+--- @param t table The table containing Hater IDs.
+--- @param printDebug boolean? Whether to print debug information.
+--- @return boolean True if there is a difference, false otherwise
 function RGMercUtils.DiffXTHaterIDs(t, printDebug)
     local oldHaterSet = Set.new(t)
     local curHaters   = RGMercUtils.GetXTHaterIDs(printDebug)
@@ -3357,6 +3619,9 @@ function RGMercUtils.DiffXTHaterIDs(t, printDebug)
     return false
 end
 
+--- Finds the group member with the lowest mana percentage.
+--- @param minMana number The minimum mana percentage to consider.
+--- @return number The group member with the lowest mana percentage, or nil if no member meets the criteria.
 function RGMercUtils.FindWorstHurtManaGroupMember(minMana)
     local groupSize = mq.TLO.Group.Members()
     local worstId = mq.TLO.Me.ID() --initializes with the BST's ID/Mana because it isn't checked below
@@ -3388,6 +3653,9 @@ function RGMercUtils.FindWorstHurtManaGroupMember(minMana)
     return (worstPct < minMana and worstId or 0)
 end
 
+--- Finds the group member with the lowest health percentage.
+--- @param minHPs number The minimum health percentage to consider.
+--- @return number The group member with the lowest health percentage, or nil if no member meets the criteria.
 function RGMercUtils.FindWorstHurtGroupMember(minHPs)
     local groupSize = mq.TLO.Group.Members()
     local worstId = mq.TLO.Me.ID()
@@ -3425,6 +3693,9 @@ function RGMercUtils.FindWorstHurtGroupMember(minHPs)
     return (worstPct < 100 and worstId or 0)
 end
 
+--- Finds the entity with the worst hurt mana exceeding a minimum threshold.
+--- @param minMana number The minimum mana threshold to consider.
+--- @return number The spawn id with the worst hurt mana above the specified threshold.
 function RGMercUtils.FindWorstHurtManaXT(minMana)
     local xtSize = mq.TLO.Me.XTargetSlots()
     local worstId = 0
@@ -3455,6 +3726,9 @@ function RGMercUtils.FindWorstHurtManaXT(minMana)
     return worstId
 end
 
+--- Finds the entity with the worst health condition that meets the minimum HP requirement.
+--- @param minHPs number The minimum HP threshold to consider.
+--- @return number The spawn id with the worst health condition that meets the criteria.
 function RGMercUtils.FindWorstHurtXT(minHPs)
     local xtSize = mq.TLO.Me.XTargetSlots()
     local worstId = 0
@@ -3492,9 +3766,10 @@ function RGMercUtils.FindWorstHurtXT(minHPs)
     return worstId
 end
 
----@param spawnId number
----@return boolean
-function RGMercUtils.IsSpawnXHater(spawnId)
+--- Checks if the given spawn is an XTHater.
+--- @param spawnId number The ID of the spawn to check.
+--- @return boolean True if the spawn is an XTHater, false otherwise.
+function RGMercUtils.IsSpawnXTHater(spawnId)
     local xtCount = mq.TLO.Me.XTarget() or 0
 
     for i = 1, xtCount do
@@ -3505,6 +3780,9 @@ function RGMercUtils.IsSpawnXHater(spawnId)
     return false
 end
 
+--- Adds an XT by its name to the specified slot.
+--- @param slot number The slot number where the XT should be added.
+--- @param name string The name of the XT to be added.
 function RGMercUtils.AddXTByName(slot, name)
     local spawnToAdd = mq.TLO.Spawn(name)
     if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
@@ -3512,6 +3790,9 @@ function RGMercUtils.AddXTByName(slot, name)
     end
 end
 
+--- Adds an item to a slot by its ID.
+--- @param slot number The slot number where the item should be added.
+--- @param id number The ID of the item to be added.
 function RGMercUtils.AddXTByID(slot, id)
     local spawnToAdd = mq.TLO.Spawn(id)
     if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
@@ -3519,10 +3800,15 @@ function RGMercUtils.AddXTByID(slot, id)
     end
 end
 
+--- Resets the specified XT slot.
+--- @param slot number The slot number to reset.
 function RGMercUtils.ResetXTSlot(slot)
     RGMercUtils.DoCmd("/xtarget set %d autohater", slot)
 end
 
+--- Sets the control (Assist) toon for RGMercs
+--- This function is responsible for designating a specific toon as the control toon.
+---
 function RGMercUtils.SetControlToon()
     RGMercsLogger.log_verbose("Checking for best Control Toon")
     if RGMercUtils.GetSetting('AssistOutside') then
@@ -3567,17 +3853,21 @@ function RGMercUtils.SetControlToon()
     end
 end
 
----@return boolean
+--- Checks if the current character is a Main Assistant (MA).
+--- @return boolean True if the character is the Main Assistant, false otherwise.
 function RGMercUtils.IAmMA()
     return RGMercUtils.GetMainAssistId() == mq.TLO.Me.ID()
 end
 
----@return boolean
+--- Checks if the character is currently feigning death.
+--- @return boolean True if the character is feigning death, false otherwise.
 function RGMercUtils.Feigning()
     return mq.TLO.Me.State():lower() == "feign"
 end
 
----@return number
+--- Retrieves the highest aggro percentage among all players.
+---
+--- @return number The highest aggro percentage.
 function RGMercUtils.GetHighestAggroPct()
     local target     = mq.TLO.Target
     local me         = mq.TLO.Me
@@ -3597,8 +3887,9 @@ function RGMercUtils.GetHighestAggroPct()
     return highestPct
 end
 
----@param pct number #Pct Aggro Minimum
----@return boolean
+--- Checks if the player has aggro based on a given percentage.
+--- @param pct number The percentage threshold to determine if the player has aggro.
+--- @return boolean Returns true if the player has aggro above the given percentage, false otherwise.
 function RGMercUtils.IHaveAggro(pct)
     local target = mq.TLO.Target
     local me     = mq.TLO.Me
@@ -3618,7 +3909,11 @@ function RGMercUtils.IHaveAggro(pct)
     return false
 end
 
----@return boolean
+--- Finds and checks the target.
+---
+--- This function performs a check on the current target to determine if it meets certain criteria.
+---
+--- @return boolean True if the target meets the criteria, false otherwise.
 function RGMercUtils.FindTargetCheck()
     local config = RGMercConfig:GetSettings()
 
@@ -3647,8 +3942,11 @@ function RGMercUtils.FindTargetCheck()
         not RGMercConfig.Globals.BackOffFlag
 end
 
----@param targetId integer
----@return boolean
+--- Validates if it is acceptable to engage with a target based on its ID.
+--- This function performs pre-validation checks to determine if engagement is permissible.
+---
+--- @param targetId number The ID of the target to be validated.
+--- @return boolean Returns true if it is acceptable to engage with the target, false otherwise.
 function RGMercUtils.OkToEngagePreValidateId(targetId)
     if not RGMercUtils.GetSetting('DoAutoEngage') then return false end
     local target = mq.TLO.Spawn(targetId)
@@ -3703,8 +4001,9 @@ function RGMercUtils.OkToEngagePreValidateId(targetId)
     return false
 end
 
----@param autoTargetId integer
----@return boolean
+--- Determines if it is acceptable to engage a target.
+--- @param autoTargetId number The ID of the target to check.
+--- @return boolean Returns true if it is okay to engage the target, false otherwise.
 function RGMercUtils.OkToEngage(autoTargetId)
     if not RGMercUtils.GetSetting('DoAutoEngage') then return false end
     local target = mq.TLO.Target
@@ -3767,6 +4066,9 @@ function RGMercUtils.OkToEngage(autoTargetId)
     return false
 end
 
+--- Sends your pet in to attack.
+--- @param targetId number The ID of the target to attack.
+--- @param sendSwarm boolean Whether to send a swarm attack or not.
 function RGMercUtils.PetAttack(targetId, sendSwarm)
     local pet = mq.TLO.Me.Pet
 
@@ -3784,8 +4086,9 @@ function RGMercUtils.PetAttack(targetId, sendSwarm)
     end
 end
 
----@param spell MQSpell
----@return boolean
+--- Checks if the required reagents for a given spell are available.
+--- @param spell MQSpell The name of the spell to check for reagents.
+--- @return boolean True if the required reagents are available, false otherwise.
 function RGMercUtils.ReagentCheck(spell)
     if not spell or not spell() then return false end
 
@@ -3804,13 +4107,17 @@ function RGMercUtils.ReagentCheck(spell)
     return true
 end
 
----@return boolean
+--- Checks if the current environment is EMU (Emulator).
+---
+--- @return boolean True if the environment is EMU, false otherwise.
 function RGMercUtils.OnEMU()
     return (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu"
 end
 
----@param song MQSpell|buff|fun():string|nil
----@return boolean
+--- Checks if a given song is currently active.
+---
+--- @param song MQSpell|MQBuff The name of the song to check.
+--- @return boolean Returns true if the song is active, false otherwise.
 function RGMercUtils.SongActive(song)
     if not song or not song() then return false end
 
@@ -3820,8 +4127,10 @@ function RGMercUtils.SongActive(song)
     return false
 end
 
----@param songName string
----@return boolean
+--- Checks if a song is active by its name.
+---
+--- @param songName string The name of the song to check.
+--- @return boolean True if the song is active, false otherwise.
 function RGMercUtils.SongActiveByName(songName)
     if not songName then return false end
     if type(songName) ~= "string" then
@@ -3831,35 +4140,17 @@ function RGMercUtils.SongActiveByName(songName)
     return ((mq.TLO.Me.Song(songName).ID() or 0) > 0)
 end
 
----@param spell MQSpell
----@return boolean
-function RGMercUtils.BuffActive(spell)
-    if not spell or not spell() then return false end
-
-    return RGMercUtils.TargetHasBuff(spell, mq.TLO.Me)
-end
-
----@param buffName string
----@return boolean
-function RGMercUtils.BuffActiveByName(buffName)
-    if not buffName or buffName:len() == 0 then return false end
-    if type(buffName) ~= "string" then
-        RGMercsLogger.log_error("\arRGMercUtils.BuffActiveByName was passed a non-string buffname! %s", type(buffName))
-        return false
-    end
-
-    return RGMercUtils.BuffActive(mq.TLO.Spell(buffName))
-end
-
----@param buffId integer
----@return boolean
+--- Checks if a specific buff (spell) is currently active.
+--- @param buffId number The id of the spell to check.
+--- @return boolean True if the buff is active, false otherwise.
 function RGMercUtils.BuffActiveByID(buffId)
     if not buffId then return false end
     return RGMercUtils.BuffActive(mq.TLO.Spell(buffId))
 end
 
----@param auraName string
----@return boolean
+--- Checks if an aura is active by its name.
+--- @param auraName string The name of the aura to check.
+--- @return boolean True if the aura is active, false otherwise.
 function RGMercUtils.AuraActiveByName(auraName)
     if not auraName then return false end
     local auraOne = string.find(mq.TLO.Me.Aura(1)() or "", auraName) ~= nil
@@ -3872,13 +4163,18 @@ function RGMercUtils.AuraActiveByName(auraName)
     return auraOne or auraTwo
 end
 
----@return boolean
+--- DetGOMCheck performs a check if Gift of Mana is active
+--- This function does not take any parameters.
+---
+--- @return boolean
 function RGMercUtils.DetGOMCheck()
     local me = mq.TLO.Me
     return me.Song("Gift of Mana").ID() ~= nil
 end
 
----@return boolean
+--- DetGambitCheck performs a check for a specific gambit condition.
+--- This function is part of the RGMercUtils module.
+--- @return boolean Returns true if the gambit condition is met, false otherwise.
 function RGMercUtils.DetGambitCheck()
     local me = mq.TLO.Me
     local gambitSpell = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "GambitSpell")
@@ -3886,15 +4182,17 @@ function RGMercUtils.DetGambitCheck()
     return (gambitSpell and gambitSpell() and ((me.Song(gambitSpell.RankName.Name()).ID() or 0) > 0)) and true or false
 end
 
----@return boolean
+--- Determines if the player is facing the target.
+--- @return boolean True if the player is facing the target, false otherwise.
 function RGMercUtils.FacingTarget()
     if mq.TLO.Target.ID() == 0 then return true end
 
     return math.abs(mq.TLO.Target.HeadingTo.DegreesCCW() - mq.TLO.Me.Heading.DegreesCCW()) <= 20
 end
 
----@param aaId integer
----@return boolean
+--- Checks if the detrimental Alternate Advancement (AA) ability should be used.
+--- @param aaId number The ID of the AA ability to check.
+--- @return boolean True if the AA ability should be used, false otherwise.
 function RGMercUtils.DetAACheck(aaId)
     if RGMercUtils.GetTargetID() == 0 then return false end
     local me = mq.TLO.Me
@@ -3903,9 +4201,11 @@ function RGMercUtils.DetAACheck(aaId)
         RGMercUtils.SpellStacksOnTarget(me.AltAbility(aaId).Spell))
 end
 
----@param abilitySets table
----@param highestOnly boolean
----@return table
+--- Finds all missing spells from the given ability sets.
+---
+--- @param abilitySets table A table containing sets of abilities to check.
+--- @param highestOnly boolean If true, only the highest level missing spells will be returned.
+--- @return table A table containing the missing spells.
 function RGMercUtils.FindAllMissingSpells(abilitySets, highestOnly)
     local missingSpellList = {}
 
@@ -3916,10 +4216,11 @@ function RGMercUtils.FindAllMissingSpells(abilitySets, highestOnly)
     return missingSpellList
 end
 
----@param caller self
----@param spellGemList table
----@param itemSets table
----@param abilitySets table
+--- Sets the loadout for a caller, including spell gems, item sets, and ability sets.
+--- @param caller any The entity that is calling the function.
+--- @param spellGemList table A list of spell gems to be set.
+--- @param itemSets table A list of item sets to be equipped.
+--- @param abilitySets table A list of ability sets to be configured.
 function RGMercUtils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
     local spellLoadOut = {}
     local resolvedActionMap = {}
@@ -4019,10 +4320,16 @@ function RGMercUtils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
     return resolvedActionMap, spellLoadOut
 end
 
+--- Retrieves the resolved action map item for a given action.
+--- @param action string The action for which to retrieve the resolved map item.
+--- @return any The resolved action map item corresponding to the given action.
 function RGMercUtils.GetResolvedActionMapItem(action)
     return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", action)
 end
 
+--- Generates a dynamic tooltip for a given spell action.
+--- @param action string The action identifier for the spell.
+--- @return string The generated tooltip for the spell.
 function RGMercUtils.GetDynamicTooltipForSpell(action)
     local resolvedItem = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", action)
 
@@ -4034,6 +4341,9 @@ function RGMercUtils.GetDynamicTooltipForSpell(action)
         resolvedItem.Description() or "None")
 end
 
+--- Generates a dynamic tooltip for a given action.
+--- @param action string The action for which the tooltip is generated.
+--- @return string The generated tooltip for the specified action.
 function RGMercUtils.GetDynamicTooltipForAA(action)
     local resolvedItem = mq.TLO.Spell(action)
 
@@ -4041,6 +4351,9 @@ function RGMercUtils.GetDynamicTooltipForAA(action)
         resolvedItem.Description() or "None")
 end
 
+--- Get the con color based on the provided color value.
+--- @param color string The color value to determine the con color.
+--- @return number, number, number, number The corresponding con color in RGBA format
 function RGMercUtils.GetConColor(color)
     if color then
         if color:lower() == "dead" then
@@ -4075,13 +4388,16 @@ function RGMercUtils.GetConColor(color)
     return 1.0, 1.0, 1.0, 1.0
 end
 
+--- @param spawn MQSpawn The spawn object for which to determine the con color.
+--- @return number, number, number, number The con color associated with the given spawn in RGBA format.
 function RGMercUtils.GetConColorBySpawn(spawn)
     if not spawn or not spawn or spawn.Dead() then return RGMercUtils.GetConColor("Dead") end
 
     return RGMercUtils.GetConColor(spawn.ConColor())
 end
 
----@param loc string
+--- Checks if navigation is enabled for a given location.
+--- @param loc string The location to check, represented as a string with coordinates.
 function RGMercUtils.NavEnabledLoc(loc)
     ImGui.PushStyleColor(ImGuiCol.Text, 0.690, 0.553, 0.259, 1)
     ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0.33, 0.33, 0.33, 0.5)
@@ -4097,7 +4413,8 @@ function RGMercUtils.NavEnabledLoc(loc)
     end
 end
 
----@param desc string
+--- Generates a tooltip with the given description.
+--- @param desc string: The description to be displayed in the tooltip.
 function RGMercUtils.Tooltip(desc)
     ImGui.SameLine()
     if ImGui.IsItemHovered() then
@@ -4113,7 +4430,8 @@ function RGMercUtils.Tooltip(desc)
     end
 end
 
----@param name string
+--- Adds an OA (Outside Assist) with the given name.
+--- @param name string: The name of the OA to be added.
 function RGMercUtils.AddOA(name)
     for idx, cur_name in ipairs(RGMercUtils.GetSetting('OutsideAssistList') or {}) do
         if cur_name == name then
@@ -4125,7 +4443,8 @@ function RGMercUtils.AddOA(name)
     RGMercConfig:SaveSettings(false)
 end
 
----@param name string
+--- Deletes the OA with the given ID
+--- @param name string The name of the OA to delete
 function RGMercUtils.DeleteOAByName(name)
     for idx, cur_name in ipairs(RGMercUtils.GetSetting('OutsideAssistList') or {}) do
         if cur_name == name then
@@ -4135,6 +4454,8 @@ function RGMercUtils.DeleteOAByName(name)
     end
 end
 
+--- Deletes the OA with the given ID
+--- @param idx number The ID of the OA to delete
 function RGMercUtils.DeleteOA(idx)
     if idx <= #RGMercUtils.GetSetting('OutsideAssistList') then
         RGMercsLogger.log_info("\axOutside Assist \at%d\ax \ag%s\ax - \arDeleted!\ax", idx,
@@ -4146,7 +4467,8 @@ function RGMercUtils.DeleteOA(idx)
     end
 end
 
----@param id number
+--- Moves the OA with the given ID up.
+--- @param id number The ID of the OA to move up.
 function RGMercUtils.MoveOAUp(id)
     local newId = id - 1
 
@@ -4159,7 +4481,6 @@ function RGMercUtils.MoveOAUp(id)
     RGMercConfig:SaveSettings(false)
 end
 
----@param id number
 function RGMercUtils.MoveOADown(id)
     local newId = id + 1
 
@@ -4172,6 +4493,9 @@ function RGMercUtils.MoveOADown(id)
     RGMercConfig:SaveSettings(false)
 end
 
+--- Renders the OA (Outside Assist) list.
+--- This function is responsible for displaying the list of Outside Assist names
+--- It does not take any parameters and does not return any values.
 function RGMercUtils.RenderOAList()
     if mq.TLO.Target.ID() > 0 then
         ImGui.PushID("##_small_btn_create_oa")
@@ -4246,6 +4570,10 @@ function RGMercUtils.RenderOAList()
     end
 end
 
+--- Renders a table of the named creatures of the current zone.
+---
+--- This function retrieves and displays the name of the current zone in the game.
+---
 function RGMercUtils.RenderZoneNamed()
     if RGMercUtils.LastZoneID ~= mq.TLO.Zone.ID() then
         RGMercUtils.LastZoneID = mq.TLO.Zone.ID()
@@ -4308,8 +4636,10 @@ function RGMercUtils.RenderZoneNamed()
     end
 end
 
----@param iconID integer
----@param spell MQSpell
+--- Draws an inspectable spell icon.
+---
+--- @param iconID number The ID of the icon to be drawn.
+--- @param spell MQSpell The spell data to be used for the icon.
 function RGMercUtils.DrawInspectableSpellIcon(iconID, spell)
     local cursor_x, cursor_y = ImGui.GetCursorPos()
 
@@ -4328,7 +4658,11 @@ function RGMercUtils.DrawInspectableSpellIcon(iconID, spell)
     ImGui.PopID()
 end
 
----@param loadoutTable table
+--- Renders the loadout table.
+---
+--- This function takes a loadout table and renders it in a specific format.
+---
+--- @param loadoutTable table The table containing loadout information to be rendered.
 function RGMercUtils.RenderLoadoutTable(loadoutTable)
     if ImGui.BeginTable("Spells", 5, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
@@ -4360,6 +4694,9 @@ function RGMercUtils.RenderLoadoutTable(loadoutTable)
     end
 end
 
+--- Renders the rotation table key.
+--- This function is responsible for displaying the key for the rotation table.
+--- It does not take any parameters and does not return any value.
 function RGMercUtils.RenderRotationTableKey()
     if ImGui.BeginTable("Rotation_keys", 2, ImGuiTableFlags.Borders) then
         ImGui.TableNextColumn()
@@ -4389,12 +4726,15 @@ function RGMercUtils.RenderRotationTableKey()
     end
 end
 
----@param name string               # name of the rotation table
----@param rotationTable table       # rotation Table to render
----@param resolvedActionMap table   # map of AbilitySet items to resolved spells and abilities
----@param rotationState integer     # current state
----@param showFailed boolean        # show items that fail their conitionals
----@return boolean
+--- Renders a rotation table for a given name.
+---
+--- @param name string: The name associated with the rotation table.
+--- @param rotationTable table: The table containing rotation data.
+--- @param resolvedActionMap table: A map of resolved actions.
+--- @param rotationState number|nil: The current state of the rotation.
+--- @param showFailed boolean: Flag to indicate whether to show failed actions.
+---
+--- @return boolean returns showFailed input
 function RGMercUtils.RenderRotationTable(name, rotationTable, resolvedActionMap, rotationState, showFailed)
     if ImGui.BeginTable("Rotation_" .. name, rotationState > 0 and 5 or 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
@@ -4512,11 +4852,12 @@ function RGMercUtils.RenderRotationTable(name, rotationTable, resolvedActionMap,
     return showFailed
 end
 
----@param id string
----@param text string
----@param on boolean
----@return boolean: state
----@return boolean: changed
+--- Renders a toggle option in the UI.
+--- @param id string: The unique identifier for the toggle option.
+--- @param text string: The display text for the toggle option.
+--- @param on boolean: The current state of the toggle option (true for on, false for off).
+--- @return boolean: state
+--- @return boolean: changed
 function RGMercUtils.RenderOptionToggle(id, text, on)
     local toggled = false
     local state   = on
@@ -4547,9 +4888,10 @@ function RGMercUtils.RenderOptionToggle(id, text, on)
     return state, toggled
 end
 
----@param pct number # % of bar
----@param width number
----@param height number
+--- Renders a progress bar.
+--- @param pct number The percentage to fill the progress bar (0-100).
+--- @param width number The width of the progress bar.
+--- @param height number The height of the progress bar.
 function RGMercUtils.RenderProgressBar(pct, width, height)
     local style = ImGui.GetStyle()
     local start_x, start_y = ImGui.GetCursorPos()
@@ -4563,14 +4905,15 @@ function RGMercUtils.RenderProgressBar(pct, width, height)
     ImGui.SetCursorPos(end_x, end_y)
 end
 
----@param id string
----@param text string
----@param cur number
----@param min number
----@param max number
----@param step number?
----@return number   # input
----@return boolean  # changed
+--- Renders a numerical option with a specified range and step.
+--- @param id string: The identifier for the option.
+--- @param text string: The display text for the option.
+--- @param cur number: The current value of the option.
+--- @param min number: The minimum value of the option.
+--- @param max number: The maximum value of the option.
+--- @param step number?: The step value for incrementing/decrementing the option.
+--- @return number   # input
+--- @return boolean  # changed
 function RGMercUtils.RenderOptionNumber(id, text, cur, min, max, step)
     ImGui.PushID("##num_spin_" .. id)
     ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0.5, 0.5, 0.5, 1.0)
@@ -4589,17 +4932,19 @@ function RGMercUtils.RenderOptionNumber(id, text, cur, min, max, step)
     return input, changed
 end
 
----@param settings table
----@param settingNames table
----@param defaults table
----@param category string
----@return table   # settings
----@return boolean # any_pressed
----@return boolean # requires_new_loadout
+--- Renders a settings table.
+---
+--- @param settings table The settings table to render.
+--- @param settingNames table A table containing the names of the settings.
+--- @param defaults table A table containing the default values for the settings.
+--- @param category string The category of the settings.
+--- @return table   # settings
+--- @return boolean # any_pressed
+--- @return boolean # requires_new_loadout
 function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, category)
     local any_pressed           = false
     local new_loadout           = false
-    ---@type boolean|nil
+    --- @type boolean|nil
     local pressed               = false
     local renderWidth           = 300
     local windowWidth           = ImGui.GetWindowWidth()
@@ -4712,14 +5057,17 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
     return settings, any_pressed, new_loadout
 end
 
----@param settings table
----@param defaults table
----@param categories table
----@param hideControls? boolean
----@param showMainOptions? boolean
----@return table: settings
----@return boolean: any_pressed
----@return boolean: requires_new_loadout
+--- Renders the settings UI for the RGMercUtils module.
+---
+--- @param settings table The current settings to be rendered.
+--- @param defaults table The default settings to be used as a reference.
+--- @param categories table The categories of settings to be displayed.
+--- @param hideControls? boolean Whether to hide certain controls in the UI.
+--- @param showMainOptions? boolean Whether to show the main options in the UI.
+---
+--- @return table: settings updated
+--- @return boolean: any_pressed was anythign pressed?
+--- @return boolean: requires_new_loadout do we require a new loadout?
 function RGMercUtils.RenderSettings(settings, defaults, categories, hideControls, showMainOptions)
     local any_pressed = false
     local new_loadout = false
@@ -4805,7 +5153,8 @@ function RGMercUtils.RenderSettings(settings, defaults, categories, hideControls
     return settings, any_pressed, new_loadout
 end
 
----@param spellLoadOut table
+--- Loads a spell loadout for the Character.
+--- @param spellLoadOut table The spell loadout to be loaded.
 function RGMercUtils.LoadSpellLoadOut(spellLoadOut)
     local selectedRank = ""
 
@@ -4822,6 +5171,8 @@ function RGMercUtils.LoadSpellLoadOut(spellLoadOut)
     end
 end
 
+--- Swaps the current bandolier set to the one specified by the index name.
+--- @param indexName string The name of the bandolier set to swap to.
 function RGMercUtils.BandolierSwap(indexName)
     if RGMercUtils.GetSetting('UseBandolier') and mq.TLO.Me.Bandolier(indexName).Index() and not mq.TLO.Me.Bandolier(indexName).Active() then
         RGMercUtils.DoCmd("/bandolier activate %s", indexName)
@@ -4829,6 +5180,8 @@ function RGMercUtils.BandolierSwap(indexName)
     end
 end
 
+--- Checks if the shield is equipped.
+--- @return boolean True if the shield is equipped, false otherwise.
 function RGMercUtils.ShieldEquipped()
     return mq.TLO.InvSlot("Offhand").Item.Type() and mq.TLO.InvSlot("Offhand").Item.Type() == "Shield"
 end

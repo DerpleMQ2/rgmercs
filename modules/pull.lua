@@ -1292,12 +1292,12 @@ function Module:FindTarget()
 
         if spawn and (spawn.ID() or 0) > 0 and spawn.Targetable() then
             if spawn.Master.Type() == 'PC' then
-                if RGMercUtils.IsSpawnXHater(spawn.ID()) then
+                if RGMercUtils.IsSpawnXTHater(spawn.ID()) then
                     RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) is Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
                     skipSpawn = true
                 end
             elseif self:IsPullMode("Chain") then
-                if RGMercUtils.IsSpawnXHater(spawn.ID()) then
+                if RGMercUtils.IsSpawnXTHater(spawn.ID()) then
                     RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) Already on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
                     skipSpawn = true
                 end
@@ -1948,7 +1948,7 @@ function Module:GiveTime(combat_state)
             end
 
             -- they ain't coming!
-            if not RGMercUtils.IsSpawnXHater(self.TempSettings.PullID) then
+            if not RGMercUtils.IsSpawnXTHater(self.TempSettings.PullID) then
                 break
             end
         end
