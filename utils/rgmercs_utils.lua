@@ -4140,6 +4140,26 @@ function RGMercUtils.SongActiveByName(songName)
     return ((mq.TLO.Me.Song(songName).ID() or 0) > 0)
 end
 
+--- Checks if a specific buff (spell) is currently active by its spell object
+--- @param spell MQSpell spell object to check
+--- @return boolean True if active, false otherwise.
+function RGMercUtils.BuffActive(spell)
+    if not spell or not spell() then return false end
+    return RGMercUtils.TargetHasBuff(spell, mq.TLO.Me)
+end
+
+--- Checks if a specific buff (spell) is currently active by its name
+--- @param buffName string name of the buff spell
+--- @return boolean True if active, false otherwise.
+function RGMercUtils.BuffActiveByName(buffName)
+    if not buffName or buffName:len() == 0 then return false end
+    if type(buffName) ~= "string" then
+        RGMercsLogger.log_error("\arRGMercUtils.BuffActiveByName was passed a non-string buffname! %s", type(buffName))
+        return false
+    end
+    return RGMercUtils.BuffActive(mq.TLO.Spell(buffName))
+end
+
 --- Checks if a specific buff (spell) is currently active.
 --- @param buffId number The id of the spell to check.
 --- @return boolean True if the buff is active, false otherwise.
