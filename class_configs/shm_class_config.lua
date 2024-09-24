@@ -1420,6 +1420,7 @@ local _ClassConfig = {
                     if not RGMercUtils.GetSetting('DoAura') or mq.TLO.Me.Aura("Pact of the Wolf Effect")() ~= nil then return false end
 
                     RGMercUtils.UseAA("Pact of the Wolf", mq.TLO.Me.ID())
+                    mq.delay(500, function() return RGMercUtils.AAReady('Group Pact of the Wolf') end)
                     RGMercUtils.UseAA("Group Pact of the Wolf", mq.TLO.Me.ID())
                     return true
                 end,
