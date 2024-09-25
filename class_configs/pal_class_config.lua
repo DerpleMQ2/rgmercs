@@ -146,19 +146,21 @@ return {
             "Renewing Steel",
         },
         ["FuryProc"] = {
-            -- - Fury Proc Strike  67+
-            "Avowed Fury",
-            "Wrathful Fury",
-            "Silvered Fury",
-            "Pious Fury",
-            "Righteous Fury",
-            "Devout Fury",
-            "Earnest Fury",
-            "Zealous Fury",
-            "Reverent Fury",
-            "Ardent Fury",
-            "Merciful Fury",
-            "Sincere Fury",
+            --- Fury Proc Strike
+            "Divine Might",   -- Level 45
+            "Pious Might",    -- Level 63
+            "Holy Order",     -- Level 65
+            "Pious Fury",     -- Level 68
+            "Righteous Fury", -- Level 80
+            "Devout Fury",    -- Level 85
+            "Earnest Fury",   -- Level 90
+            "Zealous Fury",   -- Level 95
+            "Reverent Fury",  -- Level 100
+            "Ardent Fury",    -- Level 105
+            "Merciful Fury",  -- Level 110
+            "Sincere Fury",   -- Level 115
+            "Wrathful Fury",  -- Level 120
+            "Avowed Fury",    -- Level 125
         },
         ["Aurora"] = {
             "Aurora of Dawning",
