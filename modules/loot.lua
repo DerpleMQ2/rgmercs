@@ -887,14 +887,13 @@ function Module:Render()
 								local k = self.TempSettings.SortedGlobalItemKeys[index]
 								if k then
 									local v = self.GlobalItemsTable[k]
-									if (self.TempSettings.SearchGlobalItems == nil or self.TempSettings.SearchGlobalItems == "") or k:lower():find(self.TempSettings.SearchGlobalItems:lower()) then
+									if (self.TempSettings.SearchGlobalItems == nil or self.TempSettings.SearchGlobalItems == "") or k:lower():find(self.TempSettings.SearchGlobalItems:lower()) or v:lower():find(self.TempSettings.SearchGlobalItems:lower()) then
 										self.TempSettings.GlobalItems[k] = self.TempSettings.GlobalItems[k] or
 											{ Key = k, Value = v, }
 
 										ImGui.TableNextColumn()
 										ImGui.SetNextItemWidth(140)
-										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.GlobalItems[k]
-											.Key)
+										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.GlobalItems[k].Key)
 
 										ImGui.TableNextColumn()
 										local newValue = ImGui.InputText("##Value" .. k,
@@ -990,7 +989,7 @@ function Module:Render()
 								local k = self.TempSettings.SortedNormalItemKeys[index]
 								if k then
 									local v = self.NormalItemsTable[k]
-									if (self.TempSettings.SearchItems == nil or self.TempSettings.SearchItems == "") or k:lower():find(self.TempSettings.SearchItems:lower()) then
+									if (self.TempSettings.SearchItems == nil or self.TempSettings.SearchItems == "") or k:lower():find(self.TempSettings.SearchItems:lower()) or v:lower():find(self.TempSettings.SearchItems:lower()) then
 										self.TempSettings.NormalItems[k] = self.TempSettings.NormalItems[k] or
 											{ Key = k, Value = v, }
 
