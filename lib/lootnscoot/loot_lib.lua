@@ -911,6 +911,7 @@ function loot.lootCorpse(corpseID)
             local itemLink = corpseItem.ItemLink('CLICKABLE')()
             if corpseItem() then
                 local itemRule, qKeep, newRule = loot.getRule(corpseItem)
+                RGMercsLogger.log_debug("LootCorpse(): item=%s, rule=%s, qKeep=%s, newRule=%s", corpseItem.Name(), itemRule, qKeep, newRule)
                 local stackable = corpseItem.Stackable()
                 local freeStack = corpseItem.FreeStack()
                 if corpseItem.Lore() then
