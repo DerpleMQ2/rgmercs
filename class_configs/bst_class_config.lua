@@ -1485,7 +1485,7 @@ return {
             Tooltip = "Use Group or Focused Paragon AAs.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Paragon Spirits Abilities?",
+            FAQ = "How do I use my Paragon of Spirit(s) abilities?",
             Answer = "Make sure you have [DoParagon] enabled.\n" ..
                 "Set the [ParaPct] to the minimum mana % before we use Paragon of Spirit.\n" ..
                 "Set the [FParaPct] to the minimum mana % before we use Focused Paragon.\n" ..
@@ -1541,7 +1541,7 @@ return {
             Index = 1,
             Tooltip = "Use abilities designed for your pet to tank.",
             Default = false,
-            FAQ = "How do I make my pet the tank?",
+            FAQ = "Why am I not giving my pet tank buffs?",
             Answer = "Enable [DoTankPet] to use abilities designed for your pet to tank.\n" ..
                 "Disable [DoTankPet] to use abilities designed for your pet to DPS.",
         },
@@ -1562,9 +1562,10 @@ return {
             Index = 3,
             Tooltip = "Use your Pet Slow Proc Buff (does not stack with Pet Damage or Snare Proc Buff).",
             Default = false,
-            FAQ = "How do I use my Pet Slow Proc?",
-            Answer = "Enable [DoPetSlow] to use your Pet Slow Proc Buff.\n" ..
-                "This does not stack with Pet Damage or Snare Proc Buff.",
+            FAQ = "Why am I not buffing my pet with (Slow, Damage, Snare) proc buff?",
+            Answer =
+                "Pet proc buffs do not stack with each other and the one you wish to use should be selected.\n" ..
+                "If neither Snare nor Slow proc are selected, the Damage proc will be used.",
         },
         ['DoPetSnare']     = {
             DisplayName = "Pet Snare Proc",
@@ -1572,9 +1573,9 @@ return {
             Index = 4,
             Tooltip = "Use your Pet Snare Proc Buff (does not stack with Pet Damage or Slow Proc Buff).",
             Default = false,
-            FAQ = "How do I use my Pet Snare Proc?",
-            Answer = "Enable [DoPetSnare] to use your Pet Snare Proc Buff.\n" ..
-                "This does not stack with Pet Damage or Slow Proc Buff.",
+            FAQ = "Why am I continually buffing my pet?",
+            Answer = "Pet proc buffs do not stack, you should only select one.\n" ..
+                "If neither Snare nor Slow proc are selected, the Damage proc will be used.",
         },
         ['DoSpellGuard']   = {
             DisplayName = "Do Spellguard",
@@ -1585,7 +1586,7 @@ return {
             ConfigType = "Advanced",
             FAQ = "How do I use my Pet Spell Guard?",
             Answer = "Enable [DoSpellGuard] to use your Pet Spell Guard.\n" ..
-                "This has a long refresh time, so use it wisely.",
+                "This has a long refresh time, so expect delays in use.",
         },
         ['DoFeralgia']     = {
             DisplayName = "Do Feralgia",
@@ -1595,9 +1596,8 @@ return {
             Default = true,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use Feralgia instead of the Growl Spell?",
-            Answer = "Enable [DoFeralgia] to use Feralgia for the Growl Effect on your Pet instead of the Growl Spell.\n" ..
-                "This will save you mana and a spell slot.",
+            FAQ = "Why is my BST not using the Growl Buff?",
+            Answer = "Feralgia provides a similar buff and also summons swarm pets and is enabled by default. Disable it to use Growl.",
         },
         ['DoSwarmPet']     = {
             DisplayName = "Do Swarm Pet",
@@ -1607,9 +1607,9 @@ return {
             Default = false,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Swarm Pet?",
-            Answer = "Enable [DoSwarmPet] to use your Swarm Pet spell in addition to Feralgia.\n" ..
-                "This will save you mana and a spell slot.",
+            FAQ = "Why am I only using swarm pets every couple of minutes?",
+            Answer = "By default, our only source of swarm pet is the Feralgia line. In many situations, using swarm pets outside of this can be a DPS loss.\n" ..
+                "For those situations where swarm pet DPS is greatly boosted (BRD SHM and MAG in group comes to mind), you can enable Do Swarm Pet to summon them outside of Feralgia.",
         },
         ['DoEpic']         = {
             DisplayName = "Do Epic",
@@ -1618,7 +1618,7 @@ return {
             Tooltip = "Click your Epic Weapon.",
             Default = false,
             FAQ = "How do I use my Epic Weapon?",
-            Answer = "Enable [DoEpic] to click your Epic Weapon.",
+            Answer = "Enable Do Epic to click your Epic Weapon.",
         },
         --Spells/Abilities
         ['DoHeals']        = {
@@ -1639,9 +1639,8 @@ return {
             Tooltip = "Use your slow spell or AA.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Slow Spell?",
-            Answer = "Make sure you have [DoSlow] enabled.\n" ..
-                "If you have a Slow AA, make sure it is enabled in your AA Loadout.",
+            FAQ = "Why is my BST slowing, when I have a SHM in group?",
+            Answer = "Simply deselect the option to Do Slow.",
         },
         ['DoDot']          = {
             DisplayName = "Cast DOTs",
@@ -1650,8 +1649,9 @@ return {
             Tooltip = "Enable casting Damage Over Time spells.",
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "How do I use my Damage Over Time Spells?",
-            Answer = "Make sure you have [DoDot] enabled.",
+            FAQ = "Why am I using so many DOTs? I'm always running low mana!",
+            Answer = "Generally, BST DoT spells are worth using at all levels of play.\n" ..
+                "Dots have additional settings in the RGMercs Main config, such as the min mana% to use them, or mob HP to stop using them",
         },
         ['DoAoe']          = {
             DisplayName = "Do AoE",
@@ -1660,8 +1660,8 @@ return {
             Tooltip = "Enable using AoE Claw Ability. --TODO: Add AoE DD Nuke",
             Default = false,
             ConfigType = "Advanced",
-            FAQ = "How do I use my AoE Abilities?",
-            Answer = "Make sure you have [DoAoe] enabled.",
+            FAQ = "I have Do AoE selected, why am I not using my Roar line?",
+            Answer = "Roar line will be added soon™, until then, Do AoE only governs your \"Of Claws\" ability selection.",
         },
         ['DoRunSpeed']     = {
             DisplayName = "Do Run Speed",
@@ -1669,16 +1669,15 @@ return {
             Index = 5,
             Tooltip = "Do Run Speed Spells/AAs",
             Default = true,
-            FAQ = "How do I use my Run Speed Buffs?",
-            Answer = "Make sure you have [DoRunSpeed] enabled.\n" ..
-                "Also double check [DoBuffs] is enabled so you can cast on others.",
+            FAQ = "Why are my buffers in a run speed buff war?",
+            Answer = "Many run speed spells freely stack and overwrite each other, you will need to disable Run Speed Buffs on some of the buffers.",
         },
         ['DoAvatar']       = {
             DisplayName = "Do Avatar",
             Category = "Spells and Abilities",
             Index = 6,
-            Tooltip = "Buff Group/Pet with Avatar",
-            Default = true,
+            Tooltip = "Buff Group/Pet with Infusion of Spirit",
+            Default = false,
             FAQ = "How do I use my Avatar Buffs?",
             Answer = "Make sure you have [DoAvatar] enabled.\n" ..
                 "Also double check [DoBuffs] is enabled so you can cast on others.",
@@ -1690,9 +1689,9 @@ return {
             Tooltip = "Click your chest item during burns.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "How do I use my Chest item Clicky?",
-            Answer = "Make sure you have [DoChestClick] enabled.\n" ..
-                "This will use your chest item clicky during burns.",
+            FAQ = "What is a Chest Click?",
+            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
+                "BST is set to use theirs during burns, so long as the item equipped has a clicky effect.",
         },
         ['AggroFeign']     = {
             DisplayName = "Emergency Feign",
