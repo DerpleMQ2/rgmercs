@@ -1149,6 +1149,14 @@ Config.DefaultConfig = {
     },
 
     -- [ UI ] --
+    ['DisplayManualTarget']  = {
+        DisplayName = "Display Manual Target",
+        Category = "UI",
+        Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
+        Default = false,
+        FAQ = "When my auto target is empty how can I see information about my current manually set target?",
+        Answer = "You can enabled [DisplayManualTarget] and it will show your manual target in the UI if there is no auto target.",
+    },
     ['BgOpacity']            = {
         DisplayName = "Background Opacity",
         Category = "UI",

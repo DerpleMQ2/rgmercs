@@ -65,13 +65,19 @@ local function RenderTarget()
         ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
             string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
     end
+
+    local assistSpawn = RGMercUtils.GetAutoTarget()
+
+    if RGMercUtils.GetSetting('DisplayManualTarget') and (not assistSpawn or not assistSpawn() or assistSpawn.ID() == 0) then
+        assistSpawn = mq.TLO.Target
+    end
+
     ImGui.Text("Auto Target: ")
     ImGui.SameLine()
-    if RGMercConfig.Globals.AutoTargetID == 0 then
+    if not assistSpawn or assistSpawn.ID() == 0 then
         ImGui.Text("None")
         RGMercUtils.RenderProgressBar(0, -1, 25)
     else
-        local assistSpawn = RGMercUtils.GetAutoTarget()
         local pctHPs = assistSpawn.PctHPs() or 0
         if not pctHPs then pctHPs = 0 end
         local ratioHPs = pctHPs / 100
@@ -84,6 +90,11 @@ local function RenderTarget()
         ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
             assistSpawn.ID() or 0, assistSpawn.Level() or 0,
             assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
+        if RGMercUtils.IsNamed(assistSpawn) then
+            ImGui.SameLine()
+            ImGui.TextColored(IM_COL32(52, 200, 52, 255),
+                string.format("**Named**"))
+        end
         if RGMercUtils.LastBurnCheck and assistSpawn.ID() > 0 then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),

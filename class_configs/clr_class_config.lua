@@ -742,7 +742,7 @@ local _ClassConfig = {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         DoRez = function(self, corpseId)
             if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
-                RGMercUtils.SetTarget(corpseId)
+                RGMercUtils.SetTarget(corpseId, true)
 
                 local target = mq.TLO.Target
 

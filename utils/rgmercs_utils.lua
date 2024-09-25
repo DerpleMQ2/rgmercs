@@ -209,7 +209,8 @@ end
 
 --- Sets the target for the RGMercUtils.
 --- @param targetId number The ID of the target to be set.
-function RGMercUtils.SetTarget(targetId)
+--- @param ignoreBuffPopulation boolean? Wait to return until buffs are populated Default: false
+function RGMercUtils.SetTarget(targetId, ignoreBuffPopulation)
     if targetId == 0 then return end
 
     if targetId == mq.TLO.Target.ID() then return end
@@ -218,6 +219,7 @@ function RGMercUtils.SetTarget(targetId)
         if RGMercUtils.GetTargetID() ~= targetId then
             mq.TLO.Spawn(targetId).DoTarget()
             mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
+            mq.delay(500, function() return ignoreBuffPopulation or mq.TLO.Target.BuffsPopulated() end)
         end
     end
 end
@@ -509,7 +511,7 @@ end
 --- @param count number The number of items to give.
 function RGMercUtils.GiveTo(toId, itemName, count)
     if toId ~= mq.TLO.Target.ID() then
-        RGMercUtils.SetTarget(toId)
+        RGMercUtils.SetTarget(toId, true)
     end
 
     if not mq.TLO.Target() then
@@ -887,7 +889,7 @@ function RGMercUtils.UseAA(aaName, targetId)
         end
 
         RGMercsLogger.log_debug("\awUseAA():NOTICE:\ax Swapping target to %s [%d] to use %s", target.DisplayName(), targetId, aaName)
-        RGMercUtils.SetTarget(targetId)
+        RGMercUtils.SetTarget(targetId, true)
     end
 
     local cmd = string.format("/alt act %d", aaAbility.ID())
@@ -904,7 +906,7 @@ function RGMercUtils.UseAA(aaName, targetId)
 
     if oldTargetId > 0 then
         RGMercsLogger.log_debug("UseAA():switching target back to old target after casting aa")
-        RGMercUtils.SetTarget(oldTargetId)
+        RGMercUtils.SetTarget(oldTargetId, true)
     end
 
     return true
@@ -1179,7 +1181,7 @@ function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
         end
 
         if targetId > 0 and targetId ~= mq.TLO.Me.ID() then
-            RGMercUtils.SetTarget(targetId)
+            RGMercUtils.SetTarget(targetId, true)
         end
 
         RGMercUtils.WaitCastReady(songName, spellRequiredMem and (5 * 60 * 100) or 5000)
@@ -1372,7 +1374,7 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         retryCount = retryCount or 5
 
         if targetId > 0 then
-            RGMercUtils.SetTarget(targetId)
+            RGMercUtils.SetTarget(targetId, true)
         end
 
         --if not RGMercUtils.SpellStacksOnTarget(spell) then
@@ -2128,8 +2130,6 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
     if mq.TLO.Me.ID() ~= target.ID() then
         RGMercUtils.SetTarget(target.ID())
     end
-
-    mq.delay(500, function() return target.BuffsPopulated() end)
 
     RGMercsLogger.log_verbose("TargetHasBuff(): Target Buffs Populated: %s", RGMercUtils.BoolToColorString(target.BuffsPopulated()))
 
@@ -3193,10 +3193,9 @@ end
 --- @return boolean True if the spawn is named, false otherwise.
 function RGMercUtils.IsNamed(spawn)
     if not spawn() then return false end
+    RGMercUtils.RefreshNamedCache()
 
-    for _, n in ipairs(RGMercUtils.NamedList) do
-        if spawn.Name() == n or spawn.CleanName() == n then return true end
-    end
+    if RGMercUtils.NamedList[spawn.Name()] or RGMercUtils.NamedList[spawn.CleanName()] then return true end
 
     --- @diagnostic disable-next-line: undefined-field
     if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil then
@@ -3527,7 +3526,7 @@ function RGMercUtils.FindTarget(validateFn)
             else
                 local assistSpawn = RGMercConfig.Globals.GetMainAssistSpawn()
                 if assistSpawn and assistSpawn() then
-                    RGMercUtils.SetTarget(assistSpawn.ID())
+                    RGMercUtils.SetTarget(assistSpawn.ID(), true)
                     assistTarget = mq.TLO.Me.TargetOfTarget
                     RGMercsLogger.log_verbose("\ayFindTargetCheck Assist's Target via TargetOfTarget :: %s ",
                         assistTarget.CleanName() or "None")
@@ -3553,7 +3552,7 @@ function RGMercUtils.FindTarget(validateFn)
 
     if RGMercConfig.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= RGMercConfig.Globals.AutoTargetID then
         if not validateFn or validateFn(RGMercConfig.Globals.AutoTargetID) then
-            RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID)
+            RGMercUtils.SetTarget(RGMercConfig.Globals.AutoTargetID, true)
         end
     end
 end
@@ -4590,32 +4589,37 @@ function RGMercUtils.RenderOAList()
     end
 end
 
---- Renders a table of the named creatures of the current zone.
+--- Caches the named list in the zone
 ---
---- This function retrieves and displays the name of the current zone in the game.
----
-function RGMercUtils.RenderZoneNamed()
+function RGMercUtils.RefreshNamedCache()
     if RGMercUtils.LastZoneID ~= mq.TLO.Zone.ID() then
         RGMercUtils.LastZoneID = mq.TLO.Zone.ID()
         RGMercUtils.NamedList = {}
         local zoneName = mq.TLO.Zone.Name():lower()
 
         for _, n in ipairs(RGMercNameds[zoneName] or {}) do
-            table.insert(RGMercUtils.NamedList, n)
+            RGMercUtils.NamedList[n] = true
         end
 
         zoneName = mq.TLO.Zone.ShortName():lower()
 
         for _, n in ipairs(RGMercNameds[zoneName] or {}) do
-            table.insert(RGMercUtils.NamedList, n)
+            RGMercUtils.NamedList[n] = true
         end
     end
+end
+
+--- Renders a table of the named creatures of the current zone.
+---
+--- This function retrieves and displays the name of the current zone in the game.
+---
+function RGMercUtils.RenderZoneNamed()
+    RGMercUtils.RefreshNamedCache()
 
     RGMercUtils.ShowDownNamed, _ = RGMercUtils.RenderOptionToggle("ShowDown", "Show Down Nameds", RGMercUtils.ShowDownNamed)
 
-    if ImGui.BeginTable("Zone Nameds", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("Zone Nameds", 4, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
-        ImGui.TableSetupColumn('Index', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
         ImGui.TableSetupColumn('Up', (ImGuiTableColumnFlags.WidthFixed), 20.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 60.0)
@@ -4623,11 +4627,9 @@ function RGMercUtils.RenderZoneNamed()
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for idx, name in ipairs(RGMercUtils.NamedList) do
+        for name, _ in pairs(RGMercUtils.NamedList) do
             local spawn = mq.TLO.Spawn(string.format("NPC %s", name))
             if RGMercUtils.ShowDownNamed or (spawn() and spawn.ID() > 0) then
-                ImGui.TableNextColumn()
-                ImGui.Text(tostring(idx))
                 ImGui.TableNextColumn()
                 local _, clicked = ImGui.Selectable(name, false)
                 if clicked then
