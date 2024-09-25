@@ -2003,8 +2003,8 @@ local _ClassConfig = {
             Default = 1,
             Min = 1,
             Max = 2,
-            FAQ = "What do the different Modes Do?",
-            Answer = "Tank Mode will focus on tanking and aggro, while DPS mode will focus on DPS and aggro.",
+            FAQ = "What do the different Modes do?",
+            Answer = "Tank Mode will focus on tanking and aggro, while DPS mode will focus on DPS.",
         },
 
         --Buffs and Debuffs
@@ -2015,8 +2015,8 @@ local _ClassConfig = {
             Tooltip = "Use Snare(Snare Dot used until AA is available).",
             Default = false,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight Not snaring?",
-            Answer = "Make sure you have [DoSnare] enabled in your class settings.",
+            FAQ = "Why is my Shadow Knight not snaring?",
+            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
         ['SnareCount']       = {
             DisplayName = "Snare Max Mob Count",
@@ -2028,7 +2028,7 @@ local _ClassConfig = {
             Max = 99,
             FAQ = "Why is my Shadow Knight Not snaring?",
             Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
-                "Double check [SnareCount] seetting, this setting will prevent snare from being used if there are more than [x] mobs on aggro.",
+                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
         ['DoTempHP']         = {
             DisplayName = "Use HP Buff",
@@ -2037,8 +2037,8 @@ local _ClassConfig = {
             Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("TempHP") end,
             Default = true,
             RequiresLoadoutChange = true,
-            FAQ = "Why is my Shadow Knight Not using Temp HP?",
-            Answer = "Make sure you have [DoTempHP] enabled in your class settings.",
+            FAQ = "Why do we have the Temp HP Buff always memorized?",
+            Answer = "Temp HP buffs have a very long refresh time after scribing, making them infeasible to use if not gemmed.",
         },
         ['DoTorrent']        = {
             DisplayName = "Use Torrents",
@@ -2048,8 +2048,8 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Torrents?",
-            Answer = "Make sure you have [DoTorrent] enabled in your class settings.",
+            FAQ = "When should I be using Torrents?",
+            Answer = "Generally, this is only advised at 100+ when you can benefit from the increased AC. Some early level ranges may find their use appropriate.",
         },
         ['DoBuffTap']        = {
             DisplayName = "Use Buff Tap",
@@ -2060,17 +2060,16 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
             FAQ = "Why is my Shadow Knight Not using Buff Tap?",
-            Answer = "Make sure you have [DoBuffTap] enabled in your class settings.",
+            Answer = "The term is a misnomer; contrary to common belief, these spells are not Life Taps. The HP buff is negligible in most situations.",
         },
         ['DoVetAA']          = {
             DisplayName = "Use Vet AA",
             Category = "Buffs/Debuffs",
             Index = 5,
-            Tooltip = "Use Veteran AA's in emergencies or during Burn.",
+            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
-            FAQ = "Why is my Shadow Knight Not using Veteran's AA?",
-            Answer = "Make sure you have [DoVetAA] enabled in your class settings.\n" ..
-                "This will allow your Shadow Knight to use Veteran's AA's in emergencies or during Burn.",
+            FAQ = "What Vet AA's does SHD use?",
+            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
         },
 
         --Taps
@@ -2082,7 +2081,7 @@ local _ClassConfig = {
             Default = 99,
             Min = 1,
             Max = 100,
-            FAQ = "Why is my Shadow Knight Not using Life Taps?",
+            FAQ = "Why is my Shadow Knight not using Life Taps?",
             Answer = "Make sure you have [DoLifeTap] enabled in your class settings.\n" ..
                 "Double check [StartLifeTap] seetting, this setting will prevent Life Taps from being used if your HP is above [x]%",
         },
@@ -2094,9 +2093,8 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Dire Taps?",
-            Answer = "Make sure you have [DoDireTap] enabled in your class settings.\n" ..
-                "Double check [StartDireTap] seetting, this setting will prevent Dire Taps from being used if your HP is above [x]%",
+            FAQ = "Why would someone want to disable Dire Taps at all?",
+            Answer = "Now that I think about it... I'm not quite sure.",
         },
         ['StartDireTap']     = {
             DisplayName = "HP % for Dire",
@@ -2107,9 +2105,8 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Dire Taps?",
-            Answer = "Make sure you have [DoDireTap] enabled in your class settings.\n" ..
-                "Double check [StartDireTap] seetting, this setting will prevent Dire Taps from being used if your HP is above [x]%",
+            FAQ = "Why is my Shadow Knight not using Dire Taps on cooldown for more DPS?",
+            Answer = "The default HP% to begin using Dire Taps is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
         ['DoDicho']          = {
             DisplayName = "Cast Dicho Taps",
@@ -2119,9 +2116,8 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Dicho Taps?",
-            Answer = "Make sure you have [DoDicho] enabled in your class settings.\n" ..
-                "Double check [StartDicho] seetting, this setting will prevent Dicho Taps from being used if your HP is above [x]%",
+            FAQ = "Why would someone want to disable Dicho Taps at all?",
+            Answer = "Also a question that I am unsure of the answer to. Drop in to Discord and let me know!",
         },
         ['StartDicho']       = {
             DisplayName = "HP % for Dicho",
@@ -2132,9 +2128,8 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Dicho Taps?",
-            Answer = "Make sure you have [DoDicho] enabled in your class settings.\n" ..
-                "Double check [StartDicho] seetting, this setting will prevent Dicho Taps from being used if your HP is above [x]%",
+            FAQ = "Why is my Shadow Knight not using Dicho on cooldown for more DPS?",
+            Answer = "The default HP% to begin using Dicho is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
         ['DoThoughtLeech']   = {
             DisplayName = "Thought Leech Use:",
@@ -2162,8 +2157,8 @@ local _ClassConfig = {
             Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("BondTap") end,
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why is my Shadow Knight Not using Bond Taps?",
-            Answer = "Make sure you have [DoBondTap] enabled in your class settings.",
+            FAQ = "Why do I spend so much mana using these DoTs?",
+            Answer = "Dots have additional settings in the RGMercs Main config, such as the min mana% to use them.",
         },
         ['DoPoisonDot']      = {
             DisplayName = "Use Poison Dot",
@@ -2172,8 +2167,8 @@ local _ClassConfig = {
             ToolTip = function() return RGMercUtils.GetDynamicTooltipForSpell("PoisonDot") end,
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why is my Shadow Knight Not using Poison Dot?",
-            Answer = "Make sure you have [DoPoisonDot] enabled in your class settings.",
+            FAQ = "Why do I use a DoT just before a mob dies?",
+            Answer = "Dots have additional settings in the RGMercs Main config, such as the HP% to stop using them (for both trash and named).",
         },
         ['DoCorruptionDot']  = {
             DisplayName = "Use Corrupt Dot",
@@ -2182,8 +2177,8 @@ local _ClassConfig = {
             Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("CorruptDot") end,
             RequiresLoadoutChange = true,
             Default = true,
-            FAQ = "Why is my Shadow Knight Not using Corrupt Dot?",
-            Answer = "Make sure you have [DoCorruptionDot] enabled in your class settings.",
+            FAQ = "I heard SHD dots suck, why are we using them?",
+            Answer = "On live, SHD dot damage has been buffed more than once in the last few years, and is likely worthwhile. For other servers or eras, consult your class experts!",
         },
         ['DoDireDot']        = {
             DisplayName = "Use Dire Dot",
@@ -2192,8 +2187,8 @@ local _ClassConfig = {
             Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("Dicho") end,
             RequiresLoadoutChange = true,
             Default = false,
-            FAQ = "Why is my Shadow Knight Not using Dire Dot?",
-            Answer = "Make sure you have [DoDireDot] enabled in your class settings.",
+            FAQ = "Why is my Shadow Knight not using Dire Dot?",
+            Answer = "Dire Dot is not enabled by default, you may need to select it.",
         },
 
         --Hate Tools
@@ -2204,8 +2199,8 @@ local _ClassConfig = {
             Tooltip = "Use Hate Buff AA. Spells currently not used because of low values and long refresh times.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using VoT AA?",
-            Answer = "Make sure you have [UseVoT] enabled in your class settings.",
+            FAQ = "Why do we only use Voice of Thule, and not the aggro spells?",
+            Answer = "Very high refresh times paired with low gem slots and low aggro increase %'s are why we wait for the AA. They can be manually cast, if desired.",
         },
         ['DoTerror']         = {
             DisplayName = "Terror Taunts:",
@@ -2219,7 +2214,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             FAQ = "Why is my Shadow Knight Not using Terror Taunts?",
-            Answer = "Make sure you have [DoTerror] enabled in your class settings.",
+            Answer = "By default, terrors won't be used once the \"For Power\" line is available. This can be adjusted on the Hate Tool tab.",
         },
         ['DoForPower']       = {
             DisplayName = "Use \"For Power\"",
@@ -2229,8 +2224,8 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using For Power?",
-            Answer = "Make sure you have [DoForPower] enabled in your class settings.",
+            FAQ = "I've set the option to always use Terrors, why is For Power still being memorized?",
+            Answer = "You must also disable its use in the Hate Tools Tab (Use For Power)",
         },
         ['AETauntAA']        = {
             DisplayName = "Use AE Taunt AA",
@@ -2239,9 +2234,8 @@ local _ClassConfig = {
             Tooltip = "Use Explosions of Hatred and Spite.",
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using AE Taunt AA?",
-            Answer = "Make sure you have [AETauntAA] enabled in your class settings.\n" ..
-                "You will also want to adjust your [AETauntSpell] and [AETauntCnt] settings to match your current needs.",
+            FAQ = "Why do we treat the Explosions the same? One is targeted, one is PBAE",
+            Answer = "There are currently no scripted conditions where Hatred would be used at long range, thus, for ease of use, we can treat them similarly.",
         },
         ['AETauntSpell']     = {
             DisplayName = "AE Taunt Spell Choice:",
@@ -2255,7 +2249,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using AE Taunt Spells?",
+            FAQ = "Why is my Shadow Knight not using AE Taunt Spells?",
             Answer = "Make sure you have [AETauntSpell] enabled in your class settings.\n" ..
                 "You will also want to adjust your [AETauntAA] options (Never, Until Explosions (AA Taunts) are available, Always)\n" ..
                 "And set [AETauntCnt] settings to match your current needs.",
@@ -2268,10 +2262,9 @@ local _ClassConfig = {
             Default = 2,
             Min = 1,
             Max = 10,
-            FAQ = "Why is my Shadow Knight Not using AE Taunt Spells?",
-            Answer = "Make sure you have [AETauntSpell] enabled in your class settings.\n" ..
-                "You will also want to adjust your [AETauntAA] options (Never, Until Explosions (AA Taunts) are available, Always)\n" ..
-                "And set [AETauntCnt] settings to match your current needs.",
+            FAQ = "Why don't we use AE taunts on single targets?",
+            Answer =
+            "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
         },
         ['SafeAETaunt']      = {
             DisplayName = "AE Taunt Safety Check",
@@ -2279,10 +2272,9 @@ local _ClassConfig = {
             Index = 7,
             Tooltip = "Limit unintended pulls with AE Taunt Spells or AA. May result in non-use due to false positives.",
             Default = false,
-            FAQ = "Why is my Shadow Knight Not using AE Taunt Spells?",
-            Answer = "Make sure you have [AETauntSpell] enabled in your class settings.\n" ..
-                "If you already checked [AETauntCnt] and [AETauntSpell].\n" ..
-                "You may have [SafeAETaunt] enabled, this will prevent AE Taunt Spells or AA from being used if there are more than [AETauntCnt] mobs on aggro.",
+            FAQ = "Can you better explain the AE Taunt Safety Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the taunt.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the taunt not being used when it is safe to do so.",
         },
 
         --Defenses
@@ -2295,8 +2287,8 @@ local _ClassConfig = {
             Min = 1,
             Max = 10,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Defensive Discs?",
-            Answer = "Make sure you have [DiscCount] set to the number of mobs nearby before using Defensive Disc's.",
+            FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
+            Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
         },
         ['EmergencyStart']   = {
             DisplayName = "Emergency Start",
@@ -2307,8 +2299,8 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Emergency Abilities?",
-            Answer = "Make sure you have [EmergencyStart] set to the HP % you want to start using emergency abilities.",
+            FAQ = "My SHD health spikes up and down a lot and abilities aren't being triggered, what gives?",
+            Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
         ['EmergencyLockout'] = {
             DisplayName = "Emergency Only",
@@ -2319,8 +2311,9 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Emergency Abilities?",
-            Answer = "Make sure you have [EmergencyLockout] set to the HP % you want to start prioritizing emergency abilities.",
+            FAQ = "What rotations are cut during Emergency Lockout?",
+            Answer = "Hate Tools - death will cause a bigger issue with aggro. Defenses - we stop using preemptives and go for the oh*#$#.\n" ..
+                "Debuffs, Weaves and other (non-LifeTap) DPS will also be cut.",
         },
 
         --Equipment
@@ -2330,8 +2323,8 @@ local _ClassConfig = {
             Index = 1,
             Tooltip = "Click your equipped chest.",
             Default = true,
-            FAQ = "Why is my Shadow Knight Not using Chest Click?",
-            Answer = "Make sure you have [DoChestClick] enabled in your class settings.",
+            FAQ = "What the heck is a chest click?",
+            Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHD's is generally a healing tool (a lifetapping pet).",
         },
         ['DoCharmClick']     = {
             DisplayName = "Do Charm Click",
@@ -2339,8 +2332,8 @@ local _ClassConfig = {
             Index = 2,
             Tooltip = "Click your charm for Geomantra.",
             Default = true,
-            FAQ = "Why is my Shadow Knight Not using Charm Click?",
-            Answer = "Make sure you have [DoCharmClick] enabled in your class settings.",
+            FAQ = "Why is my Shadow Knight not clicking his charm?",
+            Answer = "Charm clicks won't happen if you are in combat.",
         },
         ['UseBandolier']     = {
             DisplayName = "Dynamic Weapon Swap",
@@ -2348,7 +2341,7 @@ local _ClassConfig = {
             Index = 3,
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"2Hand\" TO USE THIS FUNCTION.***",
             Default = false,
-            FAQ = "Why is my Shadow Knight Not using Dynamic Weapon Swapping?",
+            FAQ = "Why is my Shadow Knight not using Dynamic Weapon Swapping?",
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
@@ -2361,7 +2354,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Shield?",
+            FAQ = "Why is my Shadow Knight not using a shield?",
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
@@ -2374,7 +2367,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using 2Hand?",
+            FAQ = "Why is my Shadow Knight not using a 2Hand?",
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
@@ -2384,8 +2377,8 @@ local _ClassConfig = {
             Index = 6,
             Tooltip = "Keep Shield equipped for Named mobs(must be in SpawnMaster or named.lua)",
             Default = true,
-            FAQ = "Why is my Shadow Knight Not using Shield on Named?",
-            Answer = "Make sure you have [NamedShieldLock] enabled in your class settings.",
+            FAQ = "Why does my SHD switch to a Shield on puny gray named?",
+            Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
         },
     },
 }
