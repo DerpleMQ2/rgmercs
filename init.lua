@@ -524,6 +524,7 @@ local function Main()
             -- clear the cache during state transition.
             RGMercUtils.ClearSafeTargetCache()
             RGMercUtils.ForceBurnTargetID = 0
+            RGMercModules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
 
         curState = "Downtime"

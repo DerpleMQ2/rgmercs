@@ -1,31 +1,31 @@
 -- Sample Pull Class Module
-local mq                                 = require('mq')
-local RGMercUtils                        = require("utils.rgmercs_utils")
-local Set                                = require("mq.Set")
-local ICONS                              = require('mq.Icons')
+local mq                                  = require('mq')
+local RGMercUtils                         = require("utils.rgmercs_utils")
+local Set                                 = require("mq.Set")
+local ICONS                               = require('mq.Icons')
 
-local Module                             = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
-Module.__index                           = Module
-Module.settings                          = {}
-Module.ModuleLoaded                      = false
-Module.TempSettings                      = {}
-Module.TempSettings.LastPull             = os.clock()
-Module.TempSettings.TargetSpawnID        = 0
-Module.TempSettings.CurrentWP            = 1
-Module.TempSettings.PullTargets          = {}
-Module.TempSettings.AbortPull            = false
-Module.TempSettings.PullID               = 0
-Module.TempSettings.LastPullAbilityCheck = 0
-Module.TempSettings.LastPullerMercChec   = 0
-Module.TempSettings.HuntX                = 0
-Module.TempSettings.HuntY                = 0
-Module.TempSettings.HuntZ                = 0
-Module.TempSettings.MyPaths              = {}
-Module.TempSettings.SelectedPath         = "None"
-Module.FAQ                               = {}
-Module.ClassFAQ                          = {}
+local Module                              = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
+Module.__index                            = Module
+Module.settings                           = {}
+Module.ModuleLoaded                       = false
+Module.TempSettings                       = {}
+Module.TempSettings.LastPullOrCombatEnded = os.clock()
+Module.TempSettings.TargetSpawnID         = 0
+Module.TempSettings.CurrentWP             = 1
+Module.TempSettings.PullTargets           = {}
+Module.TempSettings.AbortPull             = false
+Module.TempSettings.PullID                = 0
+Module.TempSettings.LastPullAbilityCheck  = 0
+Module.TempSettings.LastPullerMercChec    = 0
+Module.TempSettings.HuntX                 = 0
+Module.TempSettings.HuntY                 = 0
+Module.TempSettings.HuntZ                 = 0
+Module.TempSettings.MyPaths               = {}
+Module.TempSettings.SelectedPath          = "None"
+Module.FAQ                                = {}
+Module.ClassFAQ                           = {}
 
-local PullStates                         = {
+local PullStates                          = {
     ['PULL_IDLE']               = 1,
     ['PULL_GROUPWATCH_WAIT']    = 2,
     ['PULL_NAV_INTERRUPT']      = 3,
@@ -38,7 +38,7 @@ local PullStates                         = {
     ['PULL_WAITING_SHOULDPULL'] = 10,
 }
 
-local PullStateDisplayStrings            = {
+local PullStateDisplayStrings             = {
     ['PULL_IDLE']               = { Display = ICONS.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
     ['PULL_GROUPWATCH_WAIT']    = { Display = ICONS.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_NAV_INTERRUPT']      = { Display = ICONS.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation Interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
@@ -51,7 +51,7 @@ local PullStateDisplayStrings            = {
     ['PULL_WAITING_SHOULDPULL'] = { Display = ICONS.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
 }
 
-local PullStatesIDToName                 = {}
+local PullStatesIDToName                  = {}
 for k, v in pairs(PullStates) do PullStatesIDToName[v] = k end
 
 Module.TempSettings.PullState          = PullStates.PULL_IDLE
@@ -765,7 +765,7 @@ function Module:Render()
             end
         end
 
-        local nextPull = self.settings.PullDelay - (os.clock() - self.TempSettings.LastPull)
+        local nextPull = self.settings.PullDelay - (os.clock() - self.TempSettings.LastPullOrCombatEnded)
         if nextPull < 0 then nextPull = 0 end
         if ImGui.BeginTable("PullState", 2, bit32.bor(ImGuiTableFlags.Borders)) then
             ImGui.TableNextColumn()
@@ -794,7 +794,7 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text("Last Pull Attempt")
             ImGui.TableNextColumn()
-            ImGui.Text(RGMercUtils.FormatTime((os.clock() - self.TempSettings.LastPull)))
+            ImGui.Text(RGMercUtils.FormatTime((os.clock() - self.TempSettings.LastPullOrCombatEnded)))
             ImGui.TableNextColumn()
             ImGui.Text("Next Pull Attempt")
             ImGui.TableNextColumn()
@@ -1556,9 +1556,9 @@ function Module:GiveTime(combat_state)
         return
     end
 
-    RGMercsLogger.log_verbose("PULL:GiveTime() - Last Pull: %d < %d ", os.clock() - self.TempSettings.LastPull, self.settings.PullDelay)
+    RGMercsLogger.log_verbose("PULL:GiveTime() - Last Pull: %d < %d ", os.clock() - self.TempSettings.LastPullOrCombatEnded, self.settings.PullDelay)
 
-    if (os.clock() - self.TempSettings.LastPull) < self.settings.PullDelay then return end
+    if (os.clock() - self.TempSettings.LastPullOrCombatEnded) < self.settings.PullDelay then return end
 
     -- GROUPWATCH and NAVINTERRUPT are the two states we can't reset. In the future it may be best to
     -- limit this to only the states we know should be transitionable to the IDLE state.
@@ -1566,7 +1566,7 @@ function Module:GiveTime(combat_state)
         self:SetPullState(PullStates.PULL_IDLE, "")
     end
 
-    self.TempSettings.LastPull = os.clock()
+    self:SetLastPullOrCombatEndedTimer()
 
     if self.settings.GroupWatch == 2 then
         local groupReady, groupReason = self:CheckGroupForPull(Set.new({ "CLR", "DRU", "SHM", }), self.settings.GroupWatchStartPct, self.settings.GroupWatchStopPct, campData)
@@ -1948,7 +1948,7 @@ function Module:GiveTime(combat_state)
             end
 
             -- they ain't coming!
-            if not RGMercUtils.IsSpawnXTHater(self.TempSettings.PullID) then
+            if not RGMercUtils.IsSpawnXHater(self.TempSettings.PullID) then
                 break
             end
         end
@@ -1991,6 +1991,10 @@ end
 
 function Module:GetClassFAQ()
     return { module = self._name, FAQ = self.ClassFAQ or {}, }
+end
+
+function Module:SetLastPullOrCombatEndedTimer()
+    self.TempSettings.LastPullOrCombatEnded = os.clock()
 end
 
 ---@param cmd string
