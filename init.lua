@@ -1,6 +1,7 @@
 local mq         = require('mq')
 local ImGui      = require('ImGui')
 local GitCommit  = require('extras.version')
+local Icons      = require('mq.ICONS')
 DanNet           = require('lib.dannet.helpers')
 
 local PackageMan = require('mq/PackageMan')
@@ -27,14 +28,15 @@ RGMercModules     = require("utils.rgmercs_modules").load()
 require('utils.rgmercs_datatypes')
 
 -- ImGui Variables
-local openGUI       = true
-local shouldDrawGUI = true
-local notifyZoning  = true
-local curState      = "Downtime"
-local logFilter     = ""
+local openGUI         = true
+local shouldDrawGUI   = true
+local notifyZoning    = true
+local curState        = "Downtime"
+local logFilter       = ""
+local logFilterLocked = true
 
 -- Icon Rendering
-local derpImg       = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
+local derpImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
 
 -- Constants
 
@@ -61,7 +63,7 @@ local function GetTheme()
 end
 
 local function RenderTarget()
-    if mq.TLO.Group() and not mq.TLO.Group.MainAssist() then
+    if (mq.TLO.Raid() and not mq.TLO.Raid.MainAssist(1)()) or (mq.TLO.Group() and not mq.TLO.Group.MainAssist()) then
         ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
             string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
     end
@@ -304,8 +306,18 @@ local function RGMercsGUI()
 
                     ImGui.TableNextColumn()
                     ImGui.Text("Log Filter")
+                    ImGui.SameLine()
+                    if ImGui.Button(logFilterLocked and Icons.FA_LOCK or Icons.FA_UNLOCK, 22, 22) then
+                        logFilterLocked = not logFilterLocked
+                    end
                     ImGui.TableNextColumn()
+                    if logFilterLocked then
+                        ImGui.BeginDisabled()
+                    end
                     logFilter, changed = ImGui.InputText("##logfilter", logFilter)
+                    if logFilterLocked then
+                        ImGui.EndDisabled()
+                    end
 
                     if changed then
                         if logFilter:len() == 0 then

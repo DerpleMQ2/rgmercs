@@ -4623,8 +4623,9 @@ function RGMercUtils.RenderForceTargetList()
     if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
         RGMercConfig.Globals.ForceTargetID = 0
     end
-    if ImGui.BeginTable("XTargs", 3, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("XTargs", 4, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 200)
         ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 80.0)
@@ -4636,6 +4637,14 @@ function RGMercUtils.RenderForceTargetList()
         for i = 1, xtCount do
             local xtarg = mq.TLO.Me.XTarget(i)
             if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or RGMercUtils.ForceCombat) then
+                ImGui.TableNextColumn()
+                if RGMercConfig.Globals.ForceTargetID > 0 and RGMercConfig.Globals.ForceTargetID == xtarg.ID() then
+                    ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
+                    ImGui.Text(ICONS.MD_STAR)
+                    ImGui.PopStyleColor(1)
+                else
+                    ImGui.Text("")
+                end
                 ImGui.TableNextColumn()
                 ImGui.PushStyleColor(ImGuiCol.Text, RGMercUtils.GetConColorBySpawn(xtarg))
                 ImGui.PushID(string.format("##select_forcetarget_%d", i))
