@@ -156,6 +156,17 @@ local function RGMercsGUI()
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
         ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, RGMercConfig:GetSettings().ScrollBarRounding)
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, RGMercConfig:GetSettings().FrameEdgeRounding)
+        if RGMercUtils.GetSetting('PopOutForceTarget') then
+            local openFT, showFT = ImGui.Begin("Force Target", RGMercUtils.GetSetting('PopOutForceTarget'))
+            if showFT then
+                RGMercUtils.RenderForceTargetList()
+            end
+            ImGui.End()
+            if not openFT then
+                RGMercUtils.SetSetting('PopOutForceTarget', false)
+                showFT = false
+            end
+        end
         if not RGMercConfig.Globals.Minimized then
             openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
         else
@@ -265,17 +276,6 @@ local function RGMercsGUI()
                     if RGMercUtils.IAmMA() then
                         if ImGui.CollapsingHeader("Force Target") then
                             RGMercUtils.RenderForceTargetList()
-                        end
-                        if RGMercUtils.GetSetting('PopOutForceTarget') then
-                            local openFT, showFT = ImGui.Begin("Force Target", RGMercUtils.GetSetting('PopOutForceTarget'))
-                            if showFT then
-                                RGMercUtils.RenderForceTargetList()
-                            end
-                            ImGui.End()
-                            if not openFT then
-                                RGMercUtils.SetSetting('PopOutForceTarget', false)
-                                showFT = false
-                            end
                         end
                     end
                     ImGui.EndTabItem()
