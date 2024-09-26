@@ -95,6 +95,11 @@ local function RenderTarget()
             ImGui.TextColored(IM_COL32(52, 200, 52, 255),
                 string.format("**Named**"))
         end
+        if assistSpawn.ID() == RGMercConfig.Globals.ForceTargetID then
+            ImGui.SameLine()
+            ImGui.TextColored(IM_COL32(52, 200, 200, 255),
+                string.format("**ForcedTarget**"))
+        end
         if RGMercUtils.LastBurnCheck and assistSpawn.ID() > 0 then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
@@ -250,10 +255,16 @@ local function RGMercsGUI()
                     if ImGui.CollapsingHeader("Outside Assist List") then
                         RGMercUtils.RenderOAList()
                     end
+
                     if ImGui.CollapsingHeader("Zone Named") then
                         RGMercUtils.RenderZoneNamed()
                     end
 
+                    if RGMercUtils.IAmMA() then
+                        if ImGui.CollapsingHeader("Force Target") then
+                            RGMercUtils.RenderForceTargetList()
+                        end
+                    end
                     ImGui.EndTabItem()
                 end
 
@@ -474,6 +485,7 @@ local function Main()
         if notifyZoning then
             RGMercModules:ExecAll("OnZone")
             notifyZoning = false
+            RGMercConfig.Globals.ForceTargetID = 0
         end
         mq.delay(100)
         RGMercConfig.Globals.CurZoneId = mq.TLO.Zone.ID()

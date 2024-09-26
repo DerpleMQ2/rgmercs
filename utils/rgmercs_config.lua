@@ -17,6 +17,7 @@ Config.FAQ                           = {}
 Config.Globals                       = {}
 Config.Globals.MainAssist            = ""
 Config.Globals.AutoTargetID          = 0
+Config.Globals.ForceTargetID         = 0
 Config.Globals.SubmodulesLoaded      = false
 Config.Globals.PauseMain             = false
 Config.Globals.LastMove              = nil

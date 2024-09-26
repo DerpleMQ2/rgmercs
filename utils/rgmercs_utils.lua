@@ -3470,40 +3470,50 @@ function RGMercUtils.FindTarget(validateFn)
     -- Now handle normal situations where we need to choose a target because we don't have one.
     if RGMercUtils.IAmMA() then
         RGMercsLogger.log_verbose("FindTarget() ==> I am MA!")
-        -- We need to handle manual targeting and autotargeting seperately
-        if not RGMercUtils.GetSetting('DoAutoTarget') then
-            -- Manual targetting let the manual user target any npc or npcpet.
-            if RGMercConfig.Globals.AutoTargetID ~= target.ID() and
-                (RGMercUtils.TargetIsType("npc", target) or RGMercUtils.TargetIsType("npcpet", target)) and
-                RGMercUtils.GetTargetDistance(target) < RGMercUtils.GetSetting('AssistRange') and
-                RGMercUtils.GetTargetDistanceZ(target) < 20 and
-                RGMercUtils.GetTargetAggressive(target) and
-                target.Mezzed.ID() == nil and target.Charmed.ID() == nil then
-                RGMercsLogger.log_info("Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName() or "None", target.ID())
-                RGMercConfig.Globals.AutoTargetID = target.ID()
+        if RGMercConfig.Globals.ForceTargetID ~= 0 then
+            local forceSpawn = mq.TLO.Spawn(RGMercConfig.Globals.ForceTargetID)
+            if forceSpawn and forceSpawn() and not forceSpawn.Dead() then
+                RGMercConfig.Globals.AutoTargetID = RGMercConfig.Globals.ForceTargetID
+                RGMercsLogger.log_info("FindTarget(): Forced Targeting: \ag%s\ax [ID: \ag%d\ax]", forceSpawn.CleanName() or "None", forceSpawn.ID())
+            else
+                RGMercConfig.Globals.ForceTargetID = 0
             end
         else
-            -- If we're the main assist, we need to scan our nearby area and choose a target based on our built in algorithm. We
-            -- only need to do this if we don't already have a target. Assume if any mob runs into camp, we shouldn't reprioritize
-            -- unless specifically told.
-
-            if RGMercConfig.Globals.AutoTargetID == 0 then
-                -- If we currently don't have a target, we should see if there's anything nearby we should go after.
-                RGMercConfig.Globals.AutoTargetID = RGMercUtils.MATargetScan(RGMercUtils.GetSetting('AssistRange'),
-                    RGMercUtils.GetSetting('MAScanZRange'))
-                RGMercsLogger.log_verbose("MATargetScan returned %d -- Current Target: %s [%d]",
-                    RGMercConfig.Globals.AutoTargetID, target.CleanName(), target.ID())
+            -- We need to handle manual targeting and autotargeting seperately
+            if not RGMercUtils.GetSetting('DoAutoTarget') then
+                -- Manual targetting let the manual user target any npc or npcpet.
+                if RGMercConfig.Globals.AutoTargetID ~= target.ID() and
+                    (RGMercUtils.TargetIsType("npc", target) or RGMercUtils.TargetIsType("npcpet", target)) and
+                    RGMercUtils.GetTargetDistance(target) < RGMercUtils.GetSetting('AssistRange') and
+                    RGMercUtils.GetTargetDistanceZ(target) < 20 and
+                    RGMercUtils.GetTargetAggressive(target) and
+                    target.Mezzed.ID() == nil and target.Charmed.ID() == nil then
+                    RGMercsLogger.log_info("FindTarget(): Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName() or "None", target.ID())
+                    RGMercConfig.Globals.AutoTargetID = target.ID()
+                end
             else
-                -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
-                -- Only be turned off by tank modes.
-                if not RGMercUtils.GetSetting('StayOnTarget') then
+                -- If we're the main assist, we need to scan our nearby area and choose a target based on our built in algorithm. We
+                -- only need to do this if we don't already have a target. Assume if any mob runs into camp, we shouldn't reprioritize
+                -- unless specifically told.
+
+                if RGMercConfig.Globals.AutoTargetID == 0 then
+                    -- If we currently don't have a target, we should see if there's anything nearby we should go after.
                     RGMercConfig.Globals.AutoTargetID = RGMercUtils.MATargetScan(RGMercUtils.GetSetting('AssistRange'),
                         RGMercUtils.GetSetting('MAScanZRange'))
-                    local autoTarget = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
-                    RGMercsLogger.log_verbose(
-                        "Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
-                        autoTarget.CleanName() or "None", RGMercConfig.Globals.AutoTargetID or 0,
-                        target() and target.CleanName() or "None", target() and target.ID() or 0)
+                    RGMercsLogger.log_verbose("MATargetScan returned %d -- Current Target: %s [%d]",
+                        RGMercConfig.Globals.AutoTargetID, target.CleanName(), target.ID())
+                else
+                    -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
+                    -- Only be turned off by tank modes.
+                    if not RGMercUtils.GetSetting('StayOnTarget') then
+                        RGMercConfig.Globals.AutoTargetID = RGMercUtils.MATargetScan(RGMercUtils.GetSetting('AssistRange'),
+                            RGMercUtils.GetSetting('MAScanZRange'))
+                        local autoTarget = mq.TLO.Spawn(RGMercConfig.Globals.AutoTargetID)
+                        RGMercsLogger.log_verbose(
+                            "Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
+                            autoTarget.CleanName() or "None", RGMercConfig.Globals.AutoTargetID or 0,
+                            target() and target.CleanName() or "None", target() and target.ID() or 0)
+                    end
                 end
             end
         end
@@ -4606,6 +4616,44 @@ function RGMercUtils.RefreshNamedCache()
         for _, n in ipairs(RGMercNameds[zoneName] or {}) do
             RGMercUtils.NamedList[n] = true
         end
+    end
+end
+
+function RGMercUtils.RenderForceTargetList()
+    if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
+        RGMercConfig.Globals.ForceTargetID = 0
+    end
+    if ImGui.BeginTable("XTargs", 3, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+        ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 200)
+        ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.PopStyleColor()
+        ImGui.TableHeadersRow()
+
+        local xtCount = mq.TLO.Me.XTarget() or 0
+
+        for i = 1, xtCount do
+            local xtarg = mq.TLO.Me.XTarget(i)
+            if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or RGMercUtils.ForceCombat) then
+                ImGui.TableNextColumn()
+                ImGui.PushStyleColor(ImGuiCol.Text, RGMercUtils.GetConColorBySpawn(xtarg))
+                ImGui.PushID(string.format("##select_forcetarget_%d", i))
+                local _, clicked = ImGui.Selectable(xtarg.CleanName() or "None", false)
+                if clicked then
+                    RGMercConfig.Globals.ForceTargetID = xtarg.ID()
+                    RGMercsLogger.log_debug("Forcing Target to: %s %d", xtarg.CleanName(), xtarg.ID())
+                end
+                ImGui.PopID()
+                ImGui.PopStyleColor(1)
+                ImGui.TableNextColumn()
+                ImGui.Text(tostring(math.ceil(xtarg.PctHPs() or 0)))
+                ImGui.TableNextColumn()
+                ImGui.Text(tostring(math.ceil(xtarg.Distance() or 0)))
+            end
+        end
+
+        ImGui.EndTable()
     end
 end
 

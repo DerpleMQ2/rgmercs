@@ -51,6 +51,16 @@ Bind.Handlers     = {
             end
         end,
     },
+    ['forcetarget'] = {
+        usage = "/rgl forcetarget",
+        about = "Will force the current target to be your autotarget no matter what until it is no longer valid.",
+        handler = function()
+            if mq.TLO.Target.ID() > 0 and (RGMercUtils.TargetIsType("npc") or RGMercUtils.TargetIsType("npcpet")) then
+                RGMercConfig.Globals.ForceTargetID = mq.TLO.Target.ID()
+                RGMercsLogger.log_info("\awForced Target: %s", mq.TLO.Target.CleanName() or "None")
+            end
+        end,
+    },
     ['forcenamed'] = {
         usage = "/rgl forcenamed",
         about = "Will force the current target to be considered a name mainly for testing purposes.",
