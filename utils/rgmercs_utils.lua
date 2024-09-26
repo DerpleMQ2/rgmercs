@@ -4623,11 +4623,12 @@ function RGMercUtils.RenderForceTargetList()
     if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
         RGMercConfig.Globals.ForceTargetID = 0
     end
-    if ImGui.BeginTable("XTargs", 4, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("XTargs", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
-        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 200)
+        ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 300)
         ImGui.TableSetupColumn('HP %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
+        ImGui.TableSetupColumn('Aggro %', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.TableSetupColumn('Distance', (ImGuiTableColumnFlags.WidthFixed), 80.0)
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
@@ -4657,6 +4658,8 @@ function RGMercUtils.RenderForceTargetList()
                 ImGui.PopStyleColor(1)
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(math.ceil(xtarg.PctHPs() or 0)))
+                ImGui.TableNextColumn()
+                ImGui.Text(tostring(math.ceil(xtarg.PctAggro() or 0)))
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(math.ceil(xtarg.Distance() or 0)))
             end
