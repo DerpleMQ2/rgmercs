@@ -1948,7 +1948,7 @@ function Module:GiveTime(combat_state)
             end
 
             -- they ain't coming!
-            if not RGMercUtils.IsSpawnXHater(self.TempSettings.PullID) then
+            if not RGMercUtils.IsSpawnXTHater(self.TempSettings.PullID) then
                 break
             end
         end
