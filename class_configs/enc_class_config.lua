@@ -1005,8 +1005,9 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, spell)
+                    if (self:GetResolvedActionMapItem('TwincastAura') or RGMercUtils.GetSetting('DoLearners')) and not RGMercUtils.CanUseAA('Auroria Mastery') then return false end
                     local aura = string.sub(spell.Name() or "", 1, 8)
-                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(aura) and not RGMercUtils.GetSetting('DoLearners')
+                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(aura)
                 end,
             },
         },
@@ -1615,7 +1616,8 @@ local _ClassConfig = {
             FAQ = "What are the different Modes about?",
             Answer = "The Default Mode is the original RGMercs configuration designed for levels 1 - 90.\n" ..
                 "ModernEra Mode is a DPS rotation and spellset aimed at modern live play (~90+).\n" ..
-                "The ModernEra Mode is designed to be used with the ModernEra DPS rotation and spellset. It is recommended to use the ModernEra Mode if you are level 90 or higher.",
+                "The ModernEra Mode is designed to be used with the ModernEra DPS rotation and spellset.\n" ..
+                "It should function well starting around level 90, but may not fully come into its own for a few levels after.",
         },
         ['DoLearners']       = {
             DisplayName = "Do Learners",
@@ -1647,31 +1649,31 @@ local _ClassConfig = {
                 "If you are not Tashing, you may need to Enable the [DoTash] setting.",
         },
         ['DoTwincastDPS']    = {
-            DisplayName = "Do Twincast DPS",
+            DisplayName = "Use TwincastMez as DPS",
             Category = "Combat",
-            Tooltip = "(Default Mode Only) Cast TwinCast DPS during DPS rotation",
+            Tooltip = "(Default Mode Only) Cast TwinCast Mez during DPS rotation to proc a Twincast effect.",
             Default = true,
-            FAQ = "I have Twincast AA why am I not using it on my DPS?",
-            Answer = "The [DoTwincastDPS] setting determines whether or not your PC will cast TwinCast DPS during the DPS rotation.\n" ..
-                "If you have the Twincast AA and are not using it, you may need to Enable the [DoTwincastDPS] setting.",
+            FAQ = "Why do I have a mez in the DPS rotation?",
+            Answer = "The Default mode uses the TwinCast Mez during the DPS rotation solely to proc the TwinCast effect (the mez is instantly broken by attackers generally).\n" ..
+                "You can delect this option on the Combat Tab.",
         },
         ['DoTwincastMez']    = {
-            DisplayName = "Use Twincast Mez",
+            DisplayName = "Use TwincastMez as Mez",
             Category = "Debuffs",
             Tooltip = "(ModernEra Mode Only) Use TwinCast Mez as your main ST Mez",
             Default = true,
-            FAQ = "I have Twincast AA why am I not using it on my Mez?",
-            Answer = "The [DoTwincastMez] setting determines whether or not your PC will cast TwinCast Mez as your main ST Mez.\n" ..
-                "If you have the Twincast AA and are not using it, you may need to Enable the [DoTwincastMez] setting.",
+            FAQ = "Can you explain why the Twincast Mez is implemented differently in the Modern Era Mode?",
+            Answer =
+                "The Twincast Mez offers a marginal DPS increase when used with a (even slighter) marginal loss of effectiveness.\n" ..
+                "Unfortunately, gem slots are tight so we won't use them both together in this mode, and allow you to choose which you prefer.",
         },
         ['DoDot']            = {
             DisplayName = "Cast DOTs",
             Category = "Combat",
             Tooltip = "Enable casting Damage Over Time spells. (Dots always used for ModernEra Mode)",
             Default = true,
-            FAQ = "Why do I not cast any DOTs?",
-            Answer = "The [DoDot] setting determines whether or not your PC will cast Damage Over Time spells.\n" ..
-                "If you are not casting any DOTs, you may need to Enable the [DoDot] setting.",
+            FAQ = "I turned Cast DOTS off, why am I still using them?",
+            Answer = "The Modern Era mode does not respect this setting, as DoTs are integral to the DPS rotation.",
         },
         ['DoSlow']           = {
             DisplayName = "Cast Slow",
@@ -1689,7 +1691,8 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why am I not Crippling?",
             Answer = "The [DoCripple] setting determines whether or not your PC will cast Cripple spells.\n" ..
-                "If you are not Crippling, you may need to Enable the [DoCripple] setting.",
+                "If you are not Crippling, you may need to Enable the [DoCripple] setting.\n" ..
+                "Please note that eventually, Cripple and Slow lines are merged together in the Helix line.",
         },
         ['DoDicho']          = {
             DisplayName = "Cast Dicho",
@@ -1697,8 +1700,8 @@ local _ClassConfig = {
             Tooltip = "Enable casting Dicho spells.(Dicho always used for ModernEra Mode)",
             Default = true,
             FAQ = "Why am I not using Dicho spells?",
-            Answer = "The [DoDicho] setting determines whether or not your PC will cast Dicho spells.\n" ..
-                "If you are not using Dicho spells, you may need to Enable the [DoDicho] setting.",
+            Answer = "The Cast Dicho setting determines whether or not your PC will cast Dicho spells.\n" ..
+                "Modern Era mode will always use the Dicho spell as a core part of its function.",
         },
         ['DoNDTBuff']        = {
             DisplayName = "Cast NDT",
@@ -1707,7 +1710,7 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why am I not using NDT?",
             Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
-                "If you are not using NDT, you may need to Enable the [DoNDTBuff] setting.",
+                "Please note that the single target versions are only set to be used on melee.",
         },
         ['DoGroupAbsorb']    = {
             DisplayName = "Do Group Absorb",
@@ -1751,8 +1754,8 @@ local _ClassConfig = {
             Tooltip = "Click your equipped chest item during burns.",
             Default = true,
             FAQ = "Why am I not clicking my chest item?",
-            Answer = "The [DoChestClick] setting determines whether or not your PC will click your equipped chest item during burns.\n" ..
-                "If you are not clicking your chest item, you may need to Enable the [DoChestClick] setting.",
+            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
+                "ENC is set to use theirs during burns, so long as the item equipped has a clicky effect.",
         },
     },
 }
