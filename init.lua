@@ -548,6 +548,7 @@ local function Main()
             -- clear the cache during state transition.
             RGMercUtils.ClearSafeTargetCache()
             RGMercUtils.ForceBurnTargetID = 0
+            RGMercUtils.LastBurnCheck = false
             RGMercModules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
 
