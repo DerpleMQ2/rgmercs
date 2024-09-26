@@ -387,7 +387,7 @@ return {
                         if spell and spell() then
                             for i = 1, 4 do
                                 local requiredItemID = spell.ReagentID(i)()
-                                if requiredItemID > 0 and mq.TLO.FindItemCount(requiredItemID)() == 0 then
+                                if requiredItemID > 0 then
                                     local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
                                     if summonSkill then
                                         RGMercsLogger.log_verbose("\ayReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
