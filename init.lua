@@ -266,6 +266,17 @@ local function RGMercsGUI()
                         if ImGui.CollapsingHeader("Force Target") then
                             RGMercUtils.RenderForceTargetList()
                         end
+                        if RGMercUtils.GetSetting('PopOutForceTarget') then
+                            local openFT, showFT = ImGui.Begin("Force Target", RGMercUtils.GetSetting('PopOutForceTarget'))
+                            if showFT then
+                                RGMercUtils.RenderForceTargetList()
+                            end
+                            ImGui.End()
+                            if not openFT then
+                                RGMercUtils.SetSetting('PopOutForceTarget', false)
+                                showFT = false
+                            end
+                        end
                     end
                     ImGui.EndTabItem()
                 end

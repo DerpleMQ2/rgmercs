@@ -1333,6 +1333,15 @@ Config.DefaultConfig = {
         FAQ = "Why am I not announcing Cure casts to the group?",
         Answer = "You can set the [CureAnnounceGroup] option to true to announce Cure casts in group.",
     },
+    ['PopOutForceTarget']    = {
+        DisplayName = "Pop Out Force Target",
+        Category = "UI",
+        Tooltip = "Pop out the Force Target into it's own Window",
+        Default = false,
+        ConfigType = "Advanced",
+        FAQ = "How do I pop out the Force Target?",
+        Answer = "You can set the [PopOutForceTarget] option to true to pop out the Force Target into it's own Window.",
+    },
 }
 
 Config.DefaultCategories = Set.new({})
