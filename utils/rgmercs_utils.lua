@@ -1436,7 +1436,7 @@ function RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllo
     local target = mq.TLO.Target
 
     if target and target() and target.ID() == targetId then
-        if target.Mezzed and target.Mezzed.ID() and not RGMercUtils.GetSetting('AllowMezBreak') then
+        if target.Mezzed() and target.Mezzed.ID() and not RGMercUtils.GetSetting('AllowMezBreak') then
             RGMercsLogger.log_debug("  OkayToEngage() Target is mezzed and not AllowMezBreak --> Not Casting!")
             return false
         end
@@ -4044,7 +4044,7 @@ function RGMercUtils.OkToEngage(autoTargetId)
     end
 
     -- if this target is from a target ID then it wont have .Mezzed
-    if target.Mezzed and target.Mezzed.ID() and not RGMercUtils.GetSetting('AllowMezBreak') then
+    if target.Mezzed() and target.Mezzed.ID() and not RGMercUtils.GetSetting('AllowMezBreak') then
         RGMercsLogger.log_debug("  OkayToEngage() Target is mezzed and not AllowMezBreak --> Not Engaging")
         return false
     end
