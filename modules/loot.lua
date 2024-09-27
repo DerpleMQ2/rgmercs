@@ -642,6 +642,14 @@ function Module:ShouldRender()
 	return RGMercUtils.OnEMU()
 end
 
+function Module:SearchLootTable(search, key, value)
+	if (search == nil or search == "") or key:lower():find(search:lower()) or value:lower():find(search:lower()) then
+		return true
+	else
+		return false
+	end
+end
+
 function Module:Render()
 	ImGui.Text("EMU Loot")
 	local pressed
@@ -739,7 +747,7 @@ function Module:Render()
 								local k = self.TempSettings.SortedBuyItemKeys[index]
 								if k then
 									local v = self.BuyItemsTable[k]
-									if (self.TempSettings.SearchBuyItems == nil or self.TempSettings.SearchBuyItems == "") or k:lower():find(self.TempSettings.SearchBuyItems:lower()) then
+									if self:SearchLootTable(self.TempSettings.SearchBuyItems, k, v) then
 										self.TempSettings.BuyItems[k] = self.TempSettings.BuyItems[k] or
 											{ Key = k, Value = v, }
 
@@ -887,14 +895,13 @@ function Module:Render()
 								local k = self.TempSettings.SortedGlobalItemKeys[index]
 								if k then
 									local v = self.GlobalItemsTable[k]
-									if (self.TempSettings.SearchGlobalItems == nil or self.TempSettings.SearchGlobalItems == "") or k:lower():find(self.TempSettings.SearchGlobalItems:lower()) then
+									if self:SearchLootTable(self.TempSettings.SearchGlobalItems, k, v) then
 										self.TempSettings.GlobalItems[k] = self.TempSettings.GlobalItems[k] or
 											{ Key = k, Value = v, }
 
 										ImGui.TableNextColumn()
 										ImGui.SetNextItemWidth(140)
-										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.GlobalItems[k]
-											.Key)
+										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.GlobalItems[k].Key)
 
 										ImGui.TableNextColumn()
 										local newValue = ImGui.InputText("##Value" .. k,
@@ -990,7 +997,7 @@ function Module:Render()
 								local k = self.TempSettings.SortedNormalItemKeys[index]
 								if k then
 									local v = self.NormalItemsTable[k]
-									if (self.TempSettings.SearchItems == nil or self.TempSettings.SearchItems == "") or k:lower():find(self.TempSettings.SearchItems:lower()) then
+									if self:SearchLootTable(self.TempSettings.SearchItems, k, v) then
 										self.TempSettings.NormalItems[k] = self.TempSettings.NormalItems[k] or
 											{ Key = k, Value = v, }
 
