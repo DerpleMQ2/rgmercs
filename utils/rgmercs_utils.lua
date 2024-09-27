@@ -4619,10 +4619,17 @@ function RGMercUtils.RefreshNamedCache()
     end
 end
 
-function RGMercUtils.RenderForceTargetList()
+function RGMercUtils.RenderForceTargetList(showPopout)
+    if showPopout then
+        if ImGui.Button(ICONS.MD_OPEN_IN_NEW, 0, 18) then
+            RGMercUtils.SetSetting('PopOutForceTarget', true)
+        end
+    end
+
     if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
         RGMercConfig.Globals.ForceTargetID = 0
     end
+
     if ImGui.BeginTable("XTargs", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)

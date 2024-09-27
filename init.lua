@@ -275,7 +275,7 @@ local function RGMercsGUI()
 
                     if RGMercUtils.IAmMA() then
                         if ImGui.CollapsingHeader("Force Target") then
-                            RGMercUtils.RenderForceTargetList()
+                            RGMercUtils.RenderForceTargetList(true)
                         end
                     end
                     ImGui.EndTabItem()
