@@ -21,7 +21,7 @@ Module.FAQ               = {}
 Module.ClassFAQ          = {}
 
 Module.DefaultConfig     = {
-	['DoLoot']          = {
+	['DoLoot']                                 = {
 		DisplayName = "DoLoot",
 		Category = "Loot N Scoot",
 		Tooltip = "Enables Loot Settings for Looting",
@@ -31,7 +31,7 @@ Module.DefaultConfig     = {
 	},
 
 	--- Looted Settings
-	['LootFile']        = {
+	['LootFile']                               = {
 		DisplayName = 'Loot File',
 		Category = 'Loot Settings',
 		Tooltip = "Where your loot.ini file lives",
@@ -40,7 +40,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"You most likely have your [LootFile] set to the wrong location or it is empty. You could also need to issue /rgl lootimport to import the items.",
 	},
-	['SettingsFile']    = {
+	['SettingsFile']                           = {
 		DisplayName = 'Loot Settings File',
 		Category = 'Loot Settings',
 		Tooltip = 'Location of LootnScoot settings file',
@@ -48,7 +48,7 @@ Module.DefaultConfig     = {
 		FAQ = "What file is used to create my initial settings?",
 		Answer = "Your Default [SettingsFile] is located at " .. LootnScoot.Settings.SettingsFile,
 	},
-	['GlobalLootOn']    = {
+	['GlobalLootOn']                           = {
 		DisplayName = 'Do Global Loot',
 		Category = 'Loot Settings',
 		Tooltip = 'Enable Global Loot Items',
@@ -56,7 +56,7 @@ Module.DefaultConfig     = {
 		FAQ = "How do I set items to ALWAYS use a rule and never evaluate to something new??",
 		Answer = "Turn on [GlobalLootOn] and Set the item as a GlobalItem with /rgl setglobalitem",
 	},
-	['CombatLooting']   = {
+	['CombatLooting']                          = {
 		DisplayName = "Loot In Combat",
 		Category = 'Loot Settings',
 		Tooltip = "Enables looting during combat. Not recommended on the MT",
@@ -64,7 +64,7 @@ Module.DefaultConfig     = {
 		FAQ = "Why are my goobers trying to Loot while fighting?",
 		Answer = "You most likely have [CombatLooting] turned ON",
 	},
-	['CorpseRadius']    = {
+	['CorpseRadius']                           = {
 		DisplayName = "Corpse Radius",
 		Category = 'Loot Settings',
 		Tooltip = "Radius to activly loot corpses",
@@ -74,7 +74,7 @@ Module.DefaultConfig     = {
 		FAQ = "How do I keep my Goobers from running a mile away for a corpse?",
 		Answer = "Adjust your [CorpseRadius] setting to a shorter range.",
 	},
-	['MobsTooClose']    = {
+	['MobsTooClose']                           = {
 		DisplayName = "Mobs To Close",
 		Category = 'Loot Settings',
 		Tooltip = "Don't loot if mobs are in this range.",
@@ -84,7 +84,7 @@ Module.DefaultConfig     = {
 		FAQ = "Why are my goobers not looting?",
 		Answer = "You could have mobs to close to you, try setting [MobsTooClose] range lower.",
 	},
-	['SaveBagSlots']    = {
+	['SaveBagSlots']                           = {
 		DisplayName = "Save Bag Slots",
 		Category = 'Loot Settings',
 		Default = LootnScoot.Settings.SaveBagSlots,
@@ -95,7 +95,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"You Might have run out of Free Bag Slots, [SaveBagSlots] setting will set the number of slots you always want to keep empty.",
 	},
-	['TributeKeep']     = {
+	['TributeKeep']                            = {
 		DisplayName = "Tribute Keep",
 		Category = "Loot Settings",
 		Default = LootnScoot.Settings.TributeKeep,
@@ -105,7 +105,7 @@ Module.DefaultConfig     = {
 			"You need to turn on [TributeKeep] and set your [MinTributeValue]. If the item sells for less than our [MinSellPrice] and " ..
 			"has a tribute value above our [MinTributeValue] we will mark it as Tribute and loot it.",
 	},
-	['MinTributeValue'] = {
+	['MinTributeValue']                        = {
 		DisplayName = "Minimum Tribute Value",
 		Category = "Loot Settings",
 		Default = LootnScoot.Settings.MinTributeValue,
@@ -116,7 +116,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"You most likely have one of these: [TributeKeep], or [AddNewTributes] turned off. Otherwise Check your [MinTributeValue] setting.",
 	},
-	['MinSellPrice']    = {
+	['MinSellPrice']                           = {
 		DisplayName = "Minimum Sell Price",
 		Category = "Loot Settings",
 		Default = LootnScoot.Settings.MinSellPrice,
@@ -126,7 +126,7 @@ Module.DefaultConfig     = {
 		FAQ = "Why are my goobers not looting?",
 		Answer = "The Items value might be lower than your [MinSellPrice] Setting.",
 	},
-	['StackPlatValue']  = {
+	['StackPlatValue']                         = {
 		DisplayName = "Stack Plat Value",
 		Default = LootnScoot.Settings.StackPlatValue,
 		Min = -1,
@@ -137,7 +137,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"Check your [StackPlatValue] setting, this setting is the total value in Plat for a Full Stack Typically qyt(1000)",
 	},
-	['StackableOnly']   = {
+	['StackableOnly']                          = {
 		DisplayName = "Stackable Only",
 		Default = LootnScoot.Settings.StackableOnly,
 		Category = "Loot Settings",
@@ -145,7 +145,7 @@ Module.DefaultConfig     = {
 		FAQ = "Why are my goobers Only Looting Stackingable Items?",
 		Answer = "You most likely have [StackableOnly] turned On.",
 	},
-	['AlwaysEval']      = {
+	['AlwaysEval']                             = {
 		DisplayName = "Always Evaluate",
 		Default = LootnScoot.Settings.AlwaysEval,
 		Category = "Loot Settings",
@@ -155,7 +155,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"You Can turn on [AlwaysEval]. Then anytime you change your thresholds we will re-evaluate based on the new settings instead of the old saved ones.",
 	},
-	['BankTradeskills'] = {
+	['BankTradeskills']                        = {
 		DisplayName = "Bank Tradeskil",
 		Default = LootnScoot.Settings.BankTradeskills,
 		Category = "Loot Settings",
@@ -163,7 +163,7 @@ Module.DefaultConfig     = {
 		FAQ = "Why am I looting all of this tradeskill stuff?",
 		Answer = "You most likely have [BankTradskills] turned On",
 	},
-	['LootForage']      = {
+	['LootForage']                             = {
 		DisplayName = "Loot Forage",
 		Default = LootnScoot.Settings.LootForage,
 		Category = "Loot Settings",
@@ -171,7 +171,7 @@ Module.DefaultConfig     = {
 		FAQ = "How do I auto loot Foraged items?",
 		Answer = "You can turn on [LootForage] to loot Foraged items.",
 	},
-	['LootNoDrop']      = {
+	['LootNoDrop']                             = {
 		DisplayName = "Loot NoDrop",
 		Default = LootnScoot.Settings.LootNoDrop,
 		Category = "Loot Settings",
@@ -180,7 +180,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"You can turn on [LootNoDrop] to enable looting of NODROP items and also [LootNoDropNew] will loot nodrop items you don't already have in the loot table.",
 	},
-	['LootNoDropNew']   = {
+	['LootNoDropNew']                          = {
 		DisplayName = "Loot NoDrop New",
 		Default = LootnScoot.Settings.LootNoDropNew,
 		Category = "Loot Settings",
@@ -189,7 +189,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"You can turn on [LootNoDrop] to enable looting of NODROP items and also [LootNoDropNew] will loot nodrop items you don't already have in the loot table.",
 	},
-	['LootQuest']       = {
+	['LootQuest']                              = {
 		DisplayName = "Loot Quest",
 		Default = LootnScoot.Settings.LootQuest,
 		Category = "Loot Settings",
@@ -199,7 +199,7 @@ Module.DefaultConfig     = {
 			"If the Item is Marked as Quest or Quest|qty and you have [LootQuest] enabled you will loot Quest items up to their qty max or the default " ..
 			"[QuestKeep] setting if not specified. If the Quest Item is NODROP you will also neeed [LootNoDrop] turned on.",
 	},
-	['DoDestroy']       = {
+	['DoDestroy']                              = {
 		DisplayName = "DoDestroy",
 		Default = LootnScoot.Settings.DoDestroy,
 		Category = "Loot Settings",
@@ -209,7 +209,7 @@ Module.DefaultConfig     = {
 			"If You enable [DoDestroy], your Toons will destroy any items marked for Destroy in the loot Rules.\n" ..
 			"You can enable [AlwaysDestroy] to make your toons also delete any item marked as IGNORE as well as DESTROY to clean the corpses.",
 	},
-	['AlwaysDestroy']   = {
+	['AlwaysDestroy']                          = {
 		DisplayName = "Always Destroy",
 		Default = LootnScoot.Settings.AlwaysDestroy,
 		Category = "Loot Settings",
@@ -219,7 +219,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"Enabling [AlwaysDestroy] and [DoDestroy] will make your toons try to destroy any items not deamed worthy of keeping.",
 	},
-	['QuestKeep']       = {
+	['QuestKeep']                              = {
 		DisplayName = "QuestKeep",
 		Default = LootnScoot.Settings.QuestKeep,
 		Min = 1,
@@ -230,7 +230,7 @@ Module.DefaultConfig     = {
 		Answer =
 		" If you Enable [LootQuest] your toons will loot any items flagged as Quest up to the qty specified or the [QuestKeep] setting.",
 	},
-	['LootChannel']     = {
+	['LootChannel']                            = {
 		DisplayName = "Loot Channel",
 		Default = LootnScoot.Settings.LootChannel,
 		Category = "Loot Settings",
@@ -239,7 +239,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"Silly wabbit EQBC is for kids, but alas the [LootChannel] setting will change which channel you report back on if enabled.",
 	},
-	['GroupChannel']    = {
+	['GroupChannel']                           = {
 		DisplayName = "Group Channel",
 		Default = LootnScoot.Settings.GroupChannel,
 		Category = "Loot Settings",
@@ -248,7 +248,7 @@ Module.DefaultConfig     = {
 		Answer =
 		"Silly wabbit EQBC is for kids, but alas the [GroupChannel] setting will change which channel you report back to your group on if enabled.",
 	},
-	['ReportLoot']      = {
+	['ReportLoot']                             = {
 		DisplayName = "Report Loot",
 		Default = LootnScoot.Settings.ReportLoot,
 		Category = "Loot Settings",
@@ -256,7 +256,7 @@ Module.DefaultConfig     = {
 		FAQ = "I Can't see what the other Goobers are looting, how do I change that?",
 		Answer = "Enable [ReportLoot] to report to the other characters what is looted.",
 	},
-	['SpamLootInfo']    = {
+	['SpamLootInfo']                           = {
 		DisplayName = "Spam LootInfo",
 		Default = LootnScoot.Settings.SpamLootInfo,
 		Category = "Loot Settings",
@@ -264,7 +264,7 @@ Module.DefaultConfig     = {
 		FAQ = "Why is there so much loot spam?",
 		Answer = "Disable [SpamLootInfo] to Disable your local echo when you loot.",
 	},
-	['LootForageSpam']  = {
+	['LootForageSpam']                         = {
 		DisplayName = "Loot Forage Spam",
 		Default = LootnScoot.Settings.LootForageSpam,
 		Category = "Loot Settings",
@@ -272,7 +272,7 @@ Module.DefaultConfig     = {
 		FAQ = "Why is there so much loot spam?",
 		Answer = "Disable [LootForageSpam] to Disable your local echo when you loot Foraged Items.",
 	},
-	['AddNewSales']     = {
+	['AddNewSales']                            = {
 		DisplayName = "Add New Sales",
 		Default = LootnScoot.Settings.AddNewSales,
 		Category = "Loot Settings",
@@ -280,7 +280,7 @@ Module.DefaultConfig     = {
 		FAQ = "I don't want to go through and add each item to be sold or now, how do I automate this?",
 		Answer = "Enable [AddNewSales] and your Goobers will set any item as Sell after seeing you sell one.",
 	},
-	['AddNewTributes']  = {
+	['AddNewTributes']                         = {
 		DisplayName = "Add New Tributes",
 		Default = LootnScoot.Settings.AddNewTributes,
 		Category = "Loot Settings",
@@ -288,7 +288,7 @@ Module.DefaultConfig     = {
 		FAQ = "I don't want to go through and add each item to be Triobuted or now, how do I automate this?",
 		Answer = "Enable [AddNewTributes] and your Goobers will set any item as Tribute after seeing you Tribute one.",
 	},
-	['ExcludeBag1']     = {
+	['ExcludeBag1']                            = {
 		DisplayName = "Exclude Bag1",
 		Default = LootnScoot.Settings.ExcludeBag1,
 		Category = "Loot Settings",
@@ -296,7 +296,7 @@ Module.DefaultConfig     = {
 		FAQ = "I want to not sell anything in a certain bag. How can I do that?",
 		Answer = " You can set [ExcludeBag]# to ignore all items in that bag when selling / tributing.",
 	},
-	['HideNames']       = {
+	['HideNames']                              = {
 		DisplayName = "Hide Names",
 		Default     = LootnScoot.Settings.HideNames,
 		Category    = "Loot Settings",
@@ -305,7 +305,7 @@ Module.DefaultConfig     = {
 		Answer      =
 		"Yes you can set [HideNames] to true and the loot report will show the class shortname instead of the full name.",
 	},
-	['RecordData']      = {
+	['RecordData']                             = {
 		DisplayName = "Record Data",
 		Default = LootnScoot.Settings.RecordData,
 		Category = "Loot Settings",
@@ -315,7 +315,7 @@ Module.DefaultConfig     = {
 			"If you enable [RecordData] you can view the report via /rgl reportloot.\n\n" ..
 			"This will display a Table of items Looted in this session and allow you can adjust their settings with a right click.",
 	},
-	['AutoTag']         = {
+	['AutoTag']                                = {
 		DisplayName = "Auto Tag",
 		Default = LootnScoot.Settings.AutoTag,
 		Category = "Loot Settings",
@@ -326,7 +326,7 @@ Module.DefaultConfig     = {
 			"You can enable the [AutoTag] setting, this will set your item rules based on the evaulation.\n" ..
 			"Normally we only record Keep and Ignore unless and let the user pick beyond that. With the exception of [AddNewSales], and [AddNewTribute]",
 	},
-	['AutoRestock']     = {
+	['AutoRestock']                            = {
 		DisplayName = "Auto Restock",
 		Default = LootnScoot.Settings.AutoRestock,
 		Category = "Loot Settings",
@@ -336,7 +336,7 @@ Module.DefaultConfig     = {
 			"Set the items you would like to buy all the time in the BuyItems section. You can do this through the GUI.\n\n" ..
 			"Then Enable [AutoRestock] and your toons will purchase what they can after selling to the merchant.",
 	},
-	['LookupLinks']     = {
+	['LookupLinks']                            = {
 		DisplayName = "Lookup Links",
 		Default = LootnScoot.Settings.LookupLinks,
 		Category = "Loot Settings",
@@ -345,7 +345,7 @@ Module.DefaultConfig     = {
 		FAQ = "How do I enable Links in the reporting?",
 		Answer = "Enabling [LookupLinks] should enable reporting of the links if you are not already using Actors.",
 	},
-	['LootMyCorpse']    = {
+	['LootMyCorpse']                           = {
 		DisplayName = "Loot My Corpse",
 		Default = LootnScoot.Settings.LootMyCorpse,
 		Category = "Loot Settings",
@@ -354,6 +354,14 @@ Module.DefaultConfig     = {
 		FAQ = "I keep looting items when naked how can i fix this?",
 		Answer = "Enabling [LootMyCorpse] should enable looting of your own corpse, this will make sure to loot your own corpse FIRST." ..
 			"Before proceeding to the NPC corpses. This will not check for a REZ.",
+	},
+	[string.format("%s_Popped", Module._name)] = {
+		DisplayName = Module._name .. " Popped",
+		Category = "Loot N Scoot",
+		Tooltip = Module._name .. " Pop Out Into Window",
+		Default = false,
+		FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
+		Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling loot_Popped",
 	},
 }
 
@@ -415,6 +423,7 @@ Module.CommandHandlers   = {
 		usage = "/rgl setitem <setting>",
 		about = "Set the Item on your Cursor's Normal loot setting (sell, keep, destroy, ignore, quest, tribute, bank).",
 		handler = function(self, params)
+			printf("Setting Item: %s", params)
 			self:SetItem(params)
 		end,
 	},
@@ -469,6 +478,7 @@ for k, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
 	end
+
 	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 end
 
@@ -508,12 +518,15 @@ function Module:ModifyLootSettings()
 		self.settings = LootnScoot.Settings
 	end
 	if LootnScoot.GlobalItems ~= nil then
+		self.GlobalItemsTable = {}
 		self.GlobalItemsTable = LootnScoot.GlobalItems
 	end
 	if LootnScoot.BuyItems ~= nil then
+		self.BuyItemsTable = {}
 		self.BuyItemsTable = LootnScoot.BuyItems
 	end
 	if LootnScoot.NormalItems ~= nil then
+		self.NormalItemsTable = {}
 		self.NormalItemsTable = LootnScoot.NormalItems
 	end
 	self:SaveSettings(false)
@@ -588,18 +601,19 @@ end
 
 function Module:SortItemTables()
 	self.TempSettings.SortedGlobalItemKeys = {}
+	self.TempSettings.SortedBuyItemKeys = {}
+	self.TempSettings.SortedNormalItemKeys = {}
+
 	for k in pairs(self.GlobalItemsTable) do
 		table.insert(self.TempSettings.SortedGlobalItemKeys, k)
 	end
 	table.sort(self.TempSettings.SortedGlobalItemKeys, function(a, b) return a < b end)
 
-	self.TempSettings.SortedBuyItemKeys = {}
 	for k in pairs(self.BuyItemsTable) do
 		table.insert(self.TempSettings.SortedBuyItemKeys, k)
 	end
 	table.sort(self.TempSettings.SortedBuyItemKeys, function(a, b) return a < b end)
 
-	self.TempSettings.SortedNormalItemKeys = {}
 	for k in pairs(self.NormalItemsTable) do
 		table.insert(self.TempSettings.SortedNormalItemKeys, k)
 	end
@@ -1077,6 +1091,7 @@ function Module:SetItem(params)
 		else
 			RGMercUtils.DoCmd("/autoinv")
 		end
+		-- self.NormalItemsTable = LootnScoot.NormalItems
 	end
 end
 
@@ -1088,6 +1103,7 @@ function Module:SetGlobalItem(params)
 		else
 			RGMercUtils.DoCmd("/autoinv")
 		end
+		-- self.GlobalItemsTable = LootnScoot.GlobalItems
 	end
 end
 

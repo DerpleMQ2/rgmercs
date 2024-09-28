@@ -54,6 +54,25 @@ local function renderModulesTabs()
     end
 end
 
+local function rednerModulesPopped()
+    if not RGMercConfig:SettingsLoaded() then return end
+
+    for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
+        if RGMercUtils.GetSetting(name .. "_Popped", true) then
+            if RGMercModules:ExecModule(name, "ShouldRender") then
+                local open, show = ImGui.Begin(name, true)
+                if show then
+                    RGMercModules:ExecModule(name, "Render")
+                end
+                ImGui.End()
+                if not open then
+                    RGMercUtils.SetSetting(name .. "_Popped", false)
+                end
+            end
+        end
+    end
+end
+
 local function Alive()
     return mq.TLO.NearestSpawn('pc')() ~= nil
 end
@@ -167,6 +186,7 @@ local function RGMercsGUI()
                 showFT = false
             end
         end
+        rednerModulesPopped()
         if not RGMercConfig.Globals.Minimized then
             openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
         else
