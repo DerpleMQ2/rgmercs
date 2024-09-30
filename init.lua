@@ -137,6 +137,72 @@ local function GetMainOpacity()
     return tonumber(RGMercConfig:GetSettings().BgOpacity / 100) or 1.0
 end
 
+local function DrawConsole()
+    if RGMercsConsole then
+        local changed
+        if ImGui.BeginTable("##debugoptions", 2, ImGuiTableFlags.None) then
+            ImGui.TableSetupColumn("Opt Name", ImGuiTableColumnFlags.NoResize, 100)
+            ImGui.TableSetupColumn("Opt Value", ImGuiTableColumnFlags.WidthStretch, ImGui.GetWindowWidth() - 150)
+            ImGui.TableNextColumn()
+            RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file",
+                "", RGMercConfig:GetSettings().LogToFile)
+            if changed then
+                RGMercConfig:SaveSettings(false)
+            end
+            ImGui.TableNextColumn()
+            ImGui.Text("Log to File")
+            ImGui.TableNextColumn()
+            ImGui.Text("Debug Level")
+            ImGui.TableNextColumn()
+            RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("##Debug Level",
+                RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
+                #RGMercConfig.Constants.LogLevels)
+
+            if changed then
+                RGMercConfig:SaveSettings(false)
+            end
+
+            ImGui.TableNextColumn()
+            ImGui.Text("Log Filter")
+            ImGui.SameLine()
+            if ImGui.Button(logFilterLocked and RGMercIcons.FA_LOCK or RGMercIcons.FA_UNLOCK, 22, 22) then
+                logFilterLocked = not logFilterLocked
+            end
+            ImGui.TableNextColumn()
+            if logFilterLocked then
+                ImGui.BeginDisabled()
+            end
+            logFilter, changed = ImGui.InputText("##logfilter", logFilter)
+            if logFilterLocked then
+                ImGui.EndDisabled()
+            end
+
+            if changed then
+                if logFilter:len() == 0 then
+                    RGMercsLogger.clear_log_filter()
+                else
+                    RGMercsLogger.set_log_filter(logFilter)
+                end
+            end
+            ImGui.EndTable()
+        end
+
+        if ImGui.CollapsingHeader("RGMercs Output", ImGuiTreeNodeFlags.DefaultOpen) then
+            local cur_x, cur_y = ImGui.GetCursorPos()
+            local contentSizeX, contentSizeY = ImGui.GetContentRegionAvail()
+            if not RGMercsConsole.opacity then
+                local scroll = ImGui.GetScrollY()
+                ImGui.Dummy(contentSizeX, 410)
+                ImGui.SetCursorPos(cur_x, cur_y)
+                RGMercsConsole:Render(ImVec2(contentSizeX, math.min(400, contentSizeY + scroll)))
+            else
+                RGMercsConsole:Render(ImVec2(contentSizeX, math.max(200, (contentSizeY - 10))))
+            end
+            ImGui.Separator()
+        end
+    end
+end
+
 local function RGMercsGUI()
     local theme = GetTheme()
     local themeColorPop = 0
@@ -187,6 +253,17 @@ local function RGMercsGUI()
                 showFT = false
             end
         end
+        if RGMercUtils.GetSetting('PopOutConsole') then
+            local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", RGMercUtils.GetSetting('PopOutConsole'))
+            if showConsole then
+                DrawConsole()
+            end
+            ImGui.End()
+            if not openConsole then
+                RGMercUtils.SetSetting('PopOutConsole', false)
+                showConsole = false
+            end
+        end
         rednerModulesPopped()
         if not RGMercConfig.Globals.Minimized then
             openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
@@ -198,7 +275,8 @@ local function RGMercsGUI()
 
         if shouldDrawGUI and not RGMercConfig.Globals.Minimized then
             local pressed
-            ImGui.Image(derpImg:GetTextureID(), ImVec2(60, 60))
+            local imgDisplayed = RGMercUtils.LastBurnCheck and burnImg or derpImg
+            ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
             ImGui.SameLine()
             ImGui.Text(string.format("RGMercs [%s/%s] by: %s\nLoaded Char: %s\nClass Config: %s\nBuild: %s",
                 RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
@@ -307,69 +385,8 @@ local function RGMercsGUI()
             ImGui.NewLine()
             ImGui.NewLine()
             ImGui.Separator()
-
-            if RGMercsConsole then
-                local changed
-                if ImGui.BeginTable("##debugoptions", 2, ImGuiTableFlags.None) then
-                    ImGui.TableSetupColumn("Opt Name", ImGuiTableColumnFlags.NoResize, 100)
-                    ImGui.TableSetupColumn("Opt Value", ImGuiTableColumnFlags.WidthStretch, ImGui.GetWindowWidth() - 150)
-                    ImGui.TableNextColumn()
-                    RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file",
-                        "", RGMercConfig:GetSettings().LogToFile)
-                    if changed then
-                        RGMercConfig:SaveSettings(false)
-                    end
-                    ImGui.TableNextColumn()
-                    ImGui.Text("Log to File")
-                    ImGui.TableNextColumn()
-                    ImGui.Text("Debug Level")
-                    ImGui.TableNextColumn()
-                    RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("##Debug Level",
-                        RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
-                        #RGMercConfig.Constants.LogLevels)
-
-                    if changed then
-                        RGMercConfig:SaveSettings(false)
-                    end
-
-                    ImGui.TableNextColumn()
-                    ImGui.Text("Log Filter")
-                    ImGui.SameLine()
-                    if ImGui.Button(logFilterLocked and RGMercIcons.FA_LOCK or RGMercIcons.FA_UNLOCK, 22, 22) then
-                        logFilterLocked = not logFilterLocked
-                    end
-                    ImGui.TableNextColumn()
-                    if logFilterLocked then
-                        ImGui.BeginDisabled()
-                    end
-                    logFilter, changed = ImGui.InputText("##logfilter", logFilter)
-                    if logFilterLocked then
-                        ImGui.EndDisabled()
-                    end
-
-                    if changed then
-                        if logFilter:len() == 0 then
-                            RGMercsLogger.clear_log_filter()
-                        else
-                            RGMercsLogger.set_log_filter(logFilter)
-                        end
-                    end
-                    ImGui.EndTable()
-                end
-
-                if ImGui.CollapsingHeader("RGMercs Output", ImGuiTreeNodeFlags.DefaultOpen) then
-                    local cur_x, cur_y = ImGui.GetCursorPos()
-                    local contentSizeX, contentSizeY = ImGui.GetContentRegionAvail()
-                    if not RGMercsConsole.opacity then
-                        local scroll = ImGui.GetScrollY()
-                        ImGui.Dummy(contentSizeX, 410)
-                        ImGui.SetCursorPos(cur_x, cur_y)
-                        RGMercsConsole:Render(ImVec2(contentSizeX, math.min(400, contentSizeY + scroll)))
-                    else
-                        RGMercsConsole:Render(ImVec2(contentSizeX, math.max(200, (contentSizeY - 10))))
-                    end
-                    ImGui.Separator()
-                end
+            if not RGMercUtils.GetSetting('PopOutConsole') then
+                DrawConsole()
             end
         elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
             local btnImg = RGMercUtils.LastBurnCheck and burnImg or derpImg
