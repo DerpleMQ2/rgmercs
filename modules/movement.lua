@@ -245,8 +245,13 @@ end
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
-    RGMercUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
-    RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))
+    if RGMercUtils.GetSetting('ReturnToCamp') then
+        RGMercUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
+        RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))
+    else
+        RGMercUtils.DoCmd("/squelch /mapfilter campradius off")
+        RGMercUtils.DoCmd("/squelch /mapfilter pullradius off")
+    end
 
     if doBroadcast == true then
         RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
