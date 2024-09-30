@@ -80,7 +80,7 @@ end
 
 function Module:ExecModule(m, fn, ...)
     for name, module in pairs(self.modules) do
-        if name == m then
+        if name:lower() == m:lower() then
             return module[fn](module, ...)
         end
     end

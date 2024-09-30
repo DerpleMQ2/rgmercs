@@ -18,7 +18,7 @@ Module.ClassFAQ                  = {}
 
 Module.DefaultConfig             = {
 	-- [ CHARM ] --
-	['CharmOn']             = {
+	['CharmOn']                                = {
 		DisplayName           = "Charm On",
 		Category              = "Charm Pet",
 		Default               = false,
@@ -28,7 +28,7 @@ Module.DefaultConfig             = {
 		Answer                =
 		"Bards, Enchanters, Druids, and Necros all have the option to Enable [CharmOn] so they can Charm a pet.",
 	},
-	['CharmStartCount']     = {
+	['CharmStartCount']                        = {
 		DisplayName = "Charm Start Count",
 		Category    = "Charm Pet",
 		Default     = 2,
@@ -39,7 +39,7 @@ Module.DefaultConfig             = {
 		Answer      =
 		"Make sure your [CharmStartCount] setting is at an appropriate level.\n\nThis setting is the minimum mobs on Xtarget before we start Trying to Charm.",
 	},
-	['CharmRadius']         = {
+	['CharmRadius']                            = {
 		DisplayName = "Charm Radius",
 		Category    = "Charm Range",
 		Default     = 100,
@@ -49,7 +49,7 @@ Module.DefaultConfig             = {
 		FAQ         = "Why won't I Charm pets?",
 		Answer      = "Your [CharmRadius] may be set to low.\nIncrease this to charm mobs farther away from you.",
 	},
-	['CharmZRadius']        = {
+	['CharmZRadius']                           = {
 		DisplayName = "Charm ZRadius",
 		Category    = "Charm Range",
 		Default     = 15,
@@ -60,7 +60,7 @@ Module.DefaultConfig             = {
 		FAQ         = "Why won't I Charm pets?",
 		Answer      = "Your [CharmZRadius] may be set to low.\n\nIncrease this to charm mobs farther above / below you.",
 	},
-	['AutoLevelRangeCharm'] = {
+	['AutoLevelRangeCharm']                    = {
 		DisplayName = "Auto Level Range",
 		Category    = "Charm Target",
 		Default     = true,
@@ -69,7 +69,7 @@ Module.DefaultConfig             = {
 		Answer      =
 		"Enable [AutoLevelRangeCharm] to have the max level set for you based on the currently selected spell.",
 	},
-	['CharmStopHPs']        = {
+	['CharmStopHPs']                           = {
 		DisplayName = "Charm Stop HPs",
 		Category    = "Charm Target",
 		Default     = 80,
@@ -79,7 +79,7 @@ Module.DefaultConfig             = {
 		FAQ         = "Why are all of my Charm Pets nearly Dead?",
 		Answer      = "Raise the [CharmStopHPs] setting so you won't try to charm a mob below that health Percentage.",
 	},
-	['CharmMinLevel']       = {
+	['CharmMinLevel']                          = {
 		DisplayName = "Charm Min Level",
 		Category    = "Charm Target",
 		Default     = 0,
@@ -91,7 +91,7 @@ Module.DefaultConfig             = {
 		Answer      =
 		"Adjust the [CharmMinLevel] to an appropriate level so you don't try to charm spawns lower level than you want.",
 	},
-	['CharmMaxLevel']       = {
+	['CharmMaxLevel']                          = {
 		DisplayName = "Charm Max Level",
 		Category    = "Charm Target",
 		Default     = 0,
@@ -103,7 +103,7 @@ Module.DefaultConfig             = {
 		Answer      =
 		"Your [CharmMaxLevel] may be set to High.\n\nSet this to the Max Level your charm spell can handle.\n\nYou can also enable [AutoLevelRangeCharm] and have it do this for you.",
 	},
-	['DireCharmMaxLvl']     = {
+	['DireCharmMaxLvl']                        = {
 		DisplayName = "DireCharm Max Level",
 		Category    = "Charm Target",
 		Default     = 0,
@@ -116,7 +116,7 @@ Module.DefaultConfig             = {
 			"Your [DireCharmMaxLvl] may be set to High.\n\nAdjust approptiatly or Enable [AutoLevelRangeCharm] and set the value really High, " ..
 			"to have this automatically adjust down to find the appropriate level for you.",
 	},
-	['DireCharm']           = {
+	['DireCharm']                              = {
 		DisplayName = "Dire Charm",
 		Category    = "Charm Pet",
 		Default     = false,
@@ -124,7 +124,7 @@ Module.DefaultConfig             = {
 		FAQ         = "How do I use Dire Charm AA?",
 		Answer      = "Enable [DireCharm] setting and we will attempt to use [DireCharm] based upon the other settings.",
 	},
-	['PreferCharm']         = {
+	['PreferCharm']                            = {
 		DisplayName = "Prefer Charmed Pet",
 		Category    = "Charm Pet",
 		Default     = false,
@@ -132,6 +132,14 @@ Module.DefaultConfig             = {
 		FAQ         = "I want to only use Charm Pets and ignore summoning my own, can I do that?",
 		Answer      =
 		"The setting is currently there but not implimented yet [PreferCharm].\n\nIf you have [DoCharm] enabled you shouldn't try to summon a pet.",
+	},
+	[string.format("%s_Popped", Module._name)] = {
+		DisplayName = Module._name .. " Popped",
+		Category = "Monitoring",
+		Tooltip = Module._name .. " Pop Out Into Window",
+		Default = false,
+		FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
+		Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling " .. Module._name .. "_Popped",
 	},
 }
 
@@ -208,15 +216,6 @@ function Module:LoadSettings()
 	end
 end
 
-local function testing()
-	if RGMercUtils.GetSetting('IsCharming') then
-		if RGMercUtils.GetSetting('CharmOn') and RGMercUtils.GetSetting('PreferCharm') then
-			return false
-		end
-	end
-end
-
-
 function Module:GetSettings()
 	return self.settings
 end
@@ -253,6 +252,11 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
+	if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+		self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+		self:SaveSettings(false)
+	end
+	ImGui.SameLine()
 	ImGui.Text("Charm Module")
 
 	---@type boolean|nil
@@ -327,6 +331,11 @@ function Module:Render()
 
 		ImGui.Separator()
 	end
+end
+
+function Module:Pop()
+	self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+	self:SaveSettings(false)
 end
 
 function Module:HandleCharmBroke(mobName, breakerName)

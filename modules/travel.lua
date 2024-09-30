@@ -1,6 +1,7 @@
 -- Sample Basic Class Module
 local mq                           = require('mq')
 local RGMercUtils                  = require("utils.rgmercs_utils")
+local Set                          = require("mq.Set")
 
 local Module                       = { _version = '0.1a', _name = "Travel", _author = 'Derple', }
 Module.__index                     = Module
@@ -42,6 +43,25 @@ travelColors["Self"]["b"]          = 80
 travelColors["Single"]["r"]        = 180
 travelColors["Single"]["g"]        = 80
 travelColors["Single"]["b"]        = 180
+
+Module.DefaultConfig               = {
+    [string.format("%s_Popped", Module._name)] = {
+        DisplayName = Module._name .. " Popped",
+        Category = "FAQ",
+        Tooltip = Module._name .. " Pop Out Into Window",
+        Default = false,
+        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
+        Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling " .. Module._name .. "_Popped",
+    },
+}
+
+Module.DefaultCategories           = Set.new({})
+for k, v in pairs(Module.DefaultConfig or {}) do
+    if v.Type ~= "Custom" then
+        Module.DefaultCategories:add(v.Category)
+    end
+    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
+end
 
 local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
@@ -211,7 +231,11 @@ function Module:Render()
     local width = ImGui.GetWindowWidth()
     local buttonsPerRow = math.max(1, math.floor(width / self.ButtonWidth))
     local changed
-
+    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+        self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+        self:SaveSettings(false)
+    end
+    ImGui.SameLine()
     ImGui.Text("Travel")
     if #self.TempSettings.PorterList > 0 then
         self.TempSettings.SelectedPorter, changed = ImGui.Combo("Select Character", self.TempSettings.SelectedPorter, self.TempSettings.PorterList)
@@ -275,6 +299,11 @@ function Module:Render()
     else
         ImGui.Text("No Porters Loaded...")
     end
+end
+
+function Module:Pop()
+    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+    self:SaveSettings(false)
 end
 
 function Module:GiveTime(combat_state)

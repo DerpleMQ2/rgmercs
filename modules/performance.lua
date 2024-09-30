@@ -5,7 +5,7 @@ local ImPlot              = require('ImPlot')
 local Set                 = require('mq.Set')
 local ScrollingPlotBuffer = require('utils.scrolling_plot_buffer')
 
-local Module              = { _version = '0.1a', _name = "Performance", _author = 'Derple', }
+local Module              = { _version = '0.1a', _name = "Perf", _author = 'Derple', }
 Module.__index            = Module
 Module.settings           = {}
 Module.DefaultConfig      = {}
@@ -22,7 +22,7 @@ Module.FAQ                = {}
 Module.ClassFAQ           = {}
 
 Module.DefaultConfig      = {
-    ['SecondsToStore']       = {
+    ['SecondsToStore']                         = {
         DisplayName = "Seconds to Store",
         Category = "Monitoring",
         Tooltip = "The number of Seconds to keep in history.",
@@ -34,7 +34,7 @@ Module.DefaultConfig      = {
         FAQ = "I want to see a longer span of time, can I adjust this?",
         Answer = "Yes, you can adjust the number of [SecondsToStore] in the history with this setting.",
     },
-    ['EnablePerfMonitoring'] = {
+    ['EnablePerfMonitoring']                   = {
         DisplayName = "Enable Performance Monitoring",
         Category    = "Monitoring",
         Tooltip     = "Might cause some lag so only use if you want it",
@@ -42,13 +42,21 @@ Module.DefaultConfig      = {
         FAQ         = "I want to see how long my modules are taking to run, how do I do that?",
         Answer      = "Enable [EnablePerfMonitoring] and you will see the performance of your modules in the Performance Monitor.",
     },
-    ['PlotFillLines']        = {
+    ['PlotFillLines']                          = {
         DisplayName = "Enable Fill Lines",
         Category = "Graph",
         Tooltip = "Fill in the Plot Lines",
         Default = true,
         FAQ = "Can I toggle between Lines and Bars?",
         Answer = "Yes, Sort of. You can enable [PlotFillLines] and the graph will fill under the lines.",
+    },
+    [string.format("%s_Popped", Module._name)] = {
+        DisplayName = Module._name .. " Popped",
+        Category = "Monitoring",
+        Tooltip = Module._name .. " Pop Out Into Window",
+        Default = false,
+        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
+        Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling " .. Module._name .. "_Popped",
     },
 }
 
@@ -129,6 +137,11 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
+    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+        self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+        self:SaveSettings(false)
+    end
+    ImGui.SameLine()
     ImGui.Text("Performance Monitor Modules")
     local pressed
     if not self.SettingsLoaded then return end
@@ -188,6 +201,11 @@ function Module:Render()
             self:SaveSettings(false)
         end
     end
+end
+
+function Module:Pop()
+    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+    self:SaveSettings(false)
 end
 
 function Module:GiveTime(combat_state)

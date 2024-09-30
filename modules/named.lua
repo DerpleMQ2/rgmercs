@@ -43,14 +43,7 @@ Module.DefaultConfig     = {
 }
 
 Module.CommandHandlers   = {
-    popnamed = {
-        usage = "/rgl popnamed",
-        about =
-        "Pops out the Named Module into its own window.",
-        handler = function(self, _)
-            self:PopNamed()
-        end,
-    },
+
 }
 
 Module.DefaultCategories = Set.new({})
@@ -255,8 +248,9 @@ function Module:DoGetState()
     return "Running..."
 end
 
-function Module:PopNamed()
+function Module:Pop()
     self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+    self:SaveSettings(false)
 end
 
 function Module:GetCommandHandlers()
