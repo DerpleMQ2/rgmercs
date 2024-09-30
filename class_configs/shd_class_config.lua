@@ -17,7 +17,8 @@ local Tooltips     = {
     PetSpell            = "Spell Line: Summons SK Pet",
     PetHaste            = "Spell Line: Haste Buff for SK Pet",
     Shroud              = "Spell Line: Add Melee LifeTap Proc",
-    Horror              = "Spell Line: Proc Mana Return",
+    Horror              = "Spell Line: Proc HP Return",
+    Mental              = "Spell Line: Proc Mana Return",
     Skin                = "Spell Line: Melee Absorb Proc",
     SelfDS              = "Spell Line: Self Damage Shield",
     Demeanor            = "Spell Line: Add LifeTap Proc Buff on Killshot",
@@ -46,6 +47,7 @@ local Tooltips     = {
     AllianceNuke        = "Spell Line: Alliance (Requires Multiple of Same Class) - Increase Spell Damage Taken by Target + Large LifeTap",
     InfluenceDisc       = "Ability Line: Increase AC + Absorb Damage + Melee Proc (LifeTap + Max HP Increase)",
     DLUA                = "AA: Cast Highest Level of Scribed Buffs (Shroud, Horror, Drape, Demeanor, Skin, Covenant, CallATK)",
+    DLUB                = "AA: Cast Highest Level of Scribed Buffs (Shroud, Mental, Drape, Demeanor, Skin, Covenant, CallATK)",
     HarmTouch           = "AA: Harms Target HP",
     ThoughtLeech        = "AA: Harms Target HP + Harms Target Mana",
     VisageOfDeath       = "Spell: Increases Melee Hit Dmg + Illusion",
@@ -64,7 +66,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version            = "1.4",
+    _version            = "1.5",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
@@ -218,11 +220,8 @@ local _ClassConfig = {
             "Augment Death",
             "Strengthen Death",
         },
-        ['Shroud'] = {
-            "Shroud of Death",
-            "Shroud of Chaos",
-            "Black Shroud",
-            "Shroud of Discord",
+        ['Shroud'] = { --Some Shrouds listed under the Horror Line as HP/Mana Proc Choice was shroud vs. mental in buff slot 1 at lower levels.
+            "Shroud of the Nightborn",
             "Shroud of the Gloomborn",
             "Shroud of the Blightborn",
             "Shroud of the Plagueborne",
@@ -234,19 +233,32 @@ local _ClassConfig = {
             "Shroud of Zelinstein",
             "Shroud of Rimeclaw",
         },
-        ['Horror'] = {
-            "Mental Horror",
-            "Marrowthirst Horror",
-            "Soulthirst Horror",
-            "Mindshear Horror",
-            "Amygdalan Horror",
-            "Sholothian Horror",
-            "Grelleth's Horror",
-            "Vizat's Horror",
-            "Tylix's Horror",
-            "Cadcane's Horror",
-            "Brightfeld's Horror",
-            "Mortimus' Horror",
+        ['Horror'] = {             -- HP Tap Proc
+            "Shroud of Death",     -- Level 55
+            "Shroud of Chaos",     -- Level 63
+            "Black Shroud",        -- Level 65
+            "Shroud of Discord",   -- Level 67 -- Buff Slot 1 <
+            "Marrowthirst Horror", -- Level 71 -- Buff Slot 2 >
+            "Soulthirst Horror",   -- Level 76
+            "Mindshear Horror",    -- Level 81
+            "Amygdalan Horror",    -- Level 86
+            "Sholothian Horror",   -- Level 91
+            "Grelleth's Horror",   -- Level 96
+            "Vizat's Horror",      -- Level 101
+            "Tylix's Horror",      -- Level 106
+            "Cadcane's Horror",    -- Level 111
+            "Brightfeld's Horror", -- Level 116
+            "Mortimus' Horror",    -- Level 121
+        },
+        ['Mental'] = {             -- Mana Tap Proc
+            "Mental Retchedness",  -- Level 121
+            "Mental Anguish",      -- Level 116
+            "Mental Torment",      -- Level 111
+            "Mental Fright",       -- Level 106
+            "Mental Dread",        -- Level 101
+            "Mental Terror",       -- Level 96 --Buff Slot 2 <
+            "Mental Horror",       -- Level 65 --Buff Slot 1 >
+            "Mental Corruption",   -- Level 52
         },
         ['Skin'] = {
             "Decrepit Skin", -- Level 70
@@ -310,7 +322,6 @@ local _ClassConfig = {
             "Kar's Covenant",
         },
         ['CallAtk'] = {
-            "Call of Blight",
             "Call of Darkness",
             "Call of Dusk",
             "Call of Shadow",
@@ -318,6 +329,7 @@ local _ClassConfig = {
             "Call of Nightfall",
             "Call of Twilight",
             "Penumbral Call",
+            "Call of Blight",
         },
         ['AETaunt'] = {
             "Dread Gaze", -- Level 69
@@ -632,24 +644,10 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
-        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
-        -- TODO: Consider making a toggle for Azia vs Beza
-        castDLU = function(self)
-            local shroudAction = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "Shroud")
-            if not shroudAction then return false end
-            local shroudAA = mq.TLO.Me.AltAbility("Dark Lord's Unity (Azia)")
-            local numEffects = shroudAA.Spell.NumEffects() or 0
-
-            local res = shroudAction.Level() <=
-                (shroudAA.Spell.Level() or 0) and
-                shroudAA.MinLevel() <= mq.TLO.Me.Level() and
-                shroudAA.Rank() > 0
-
-            for i = 1, numEffects do
-                if not shroudAA.Spell.Trigger(i)() then return false end
-            end
-
-            return res
+        --determine whether we should overwrite DLU buffs with better single buffs
+        SingleBuffCheck = function(self)
+            if RGMercUtils.CanUseAA("Dark Lord's Unity (Azia)") and not RGMercUtils.GetSetting('OverwriteDLUBuffs') then return false end
+            return true
         end,
         --function to determine if we should AE taunt and optionally, if it is safe to do so
         AETauntCheck = function(printDebug)
@@ -667,7 +665,7 @@ local _ClassConfig = {
                     table.insert(tauntme, xtarg.ID())
                 end
             end
-            return #tauntme >= RGMercUtils.GetSetting('AETauntCnt') and not (RGMercUtils.GetSetting('SafeAETaunt') and #tauntme < mobs)
+            return #tauntme > 0 and not (RGMercUtils.GetSetting('SafeAETaunt') and #tauntme < mobs)
         end,
         --function to determine if we have enough mobs in range to use a defensive disc
         DefensiveDiscCheck = function(printDebug)
@@ -827,46 +825,22 @@ local _ClassConfig = {
                 name = "Dark Lord's Unity (Azia)",
                 type = "AA",
                 tooltip = Tooltips.DLUA,
-                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or 0) end,
-                cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and self.ClassConfig.HelperFunctions.castDLU(self) and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility(aaName).Spell)
+                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(2).ID() or 0) end,
+                cond = function(self, aaName, target)
+                    if RGMercUtils.GetSetting('ProcChoice') ~= 1 then return false end
+                    --SelfBuffAACheck does not work for this specific AA, it returns a strange spell in the stacking check
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
             {
-                name = "Horror",
-                type = "Spell",
-                tooltip = Tooltips.Horror,
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "Demeanor",
-                type = "Spell",
-                tooltip = Tooltips.Demeanor,
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "CloakHP",
-                type = "Spell",
-                tooltip = Tooltips.CloakHP,
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "SelfDS",
-                type = "Spell",
-                tooltip = Tooltips.SelfDS,
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
-                cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDLU(self) and mq.TLO.Me.Level() <= 60 and RGMercUtils.ReagentCheck(spell) and
-                        RGMercUtils.SelfBuffCheck(spell)
+                name = "Dark Lord's Unity (Beza)",
+                type = "AA",
+                tooltip = Tooltips.DLUB,
+                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(2).ID() or 0) end,
+                cond = function(self, aaName, target)
+                    if RGMercUtils.GetSetting('ProcChoice') ~= 2 then return false end
+                    --SelfBuffAACheck does not work for this specific AA, it returns a strange spell in the stacking check
+                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
             {
@@ -875,7 +849,54 @@ local _ClassConfig = {
                 tooltip = Tooltips.Shroud,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
+                    return self.ClassConfig.HelperFunctions.SingleBuffCheck() and RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "Horror",
+                type = "Spell",
+                tooltip = Tooltips.Horror,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    if RGMercUtils.GetSetting('ProcChoice') ~= 1 then return false end
+                    return self.ClassConfig.HelperFunctions.SingleBuffCheck() and RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "Mental",
+                type = "Spell",
+                tooltip = Tooltips.Horror,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    if RGMercUtils.GetSetting('ProcChoice') ~= 2 then return false end
+                    return self.ClassConfig.HelperFunctions.SingleBuffCheck() and RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "Demeanor",
+                type = "Spell",
+                tooltip = Tooltips.Demeanor,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    return self.ClassConfig.HelperFunctions.SingleBuffCheck() and RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "CloakHP",
+                type = "Spell",
+                tooltip = Tooltips.CloakHP,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    return self.ClassConfig.HelperFunctions.SingleBuffCheck() and RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
+                name = "SelfDS",
+                type = "Spell",
+                tooltip = Tooltips.SelfDS,
+                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                cond = function(self, spell)
+                    return self.ClassConfig.HelperFunctions.SingleBuffCheck() and RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.ReagentCheck(spell)
                 end,
             },
             {
@@ -884,7 +905,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Covenant,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
+                    return self.ClassConfig.HelperFunctions.SingleBuffCheck() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -893,7 +914,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.CallAtk,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDLU(self) and RGMercUtils.SelfBuffCheck(spell)
+                    return self.ClassConfig.HelperFunctions.SingleBuffCheck() and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             --You'll notice my use of TotalSeconds, this is to keep as close to 100% uptime as possible on these buffs, rebuffing early to decrease the chance of them falling off in combat
@@ -1994,7 +2015,7 @@ local _ClassConfig = {
     },
     ['DefaultConfig']   = {
         --Mode
-        ['Mode']             = {
+        ['Mode']              = {
             DisplayName = "Mode",
             Category = "Mode",
             Tooltip = "Select the active Combat Mode for this PC.",
@@ -2008,7 +2029,7 @@ local _ClassConfig = {
         },
 
         --Buffs and Debuffs
-        ['DoSnare']          = {
+        ['DoSnare']           = {
             DisplayName = "Use Snares",
             Category = "Buffs/Debuffs",
             Index = 1,
@@ -2018,10 +2039,10 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not snaring?",
             Answer = "Make sure Use Snares is enabled in your class settings.",
         },
-        ['SnareCount']       = {
+        ['SnareCount']        = {
             DisplayName = "Snare Max Mob Count",
             Category = "Buffs/Debuffs",
-            Index = 1,
+            Index = 2,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
             Min = 1,
@@ -2030,20 +2051,44 @@ local _ClassConfig = {
             Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
                 "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
-        ['DoTempHP']         = {
+        ['DoTempHP']          = {
             DisplayName = "Use HP Buff",
             Category = "Buffs/Debuffs",
-            Index = 2,
+            Index = 3,
             Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("TempHP") end,
             Default = true,
             RequiresLoadoutChange = true,
             FAQ = "Why do we have the Temp HP Buff always memorized?",
             Answer = "Temp HP buffs have a very long refresh time after scribing, making them infeasible to use if not gemmed.",
         },
-        ['DoTorrent']        = {
+        ['ProcChoice']        = {
+            DisplayName = "HP/Mana Proc:",
+            Category = "Buffs/Debuffs",
+            Index = 4,
+            Tooltip = "Prefer HP Proc and DLU(Azia) or Mana Proc and DLU(Beza)",
+            Type = "Combo",
+            ComboOptions = { 'HP Proc: Terror Line, DLU(Azia)', 'Mana Proc: Mental Line, DLU(Beza)', 'Disabled', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            FAQ = "I am constantly running out of mana, what can I do to help?",
+            Answer = "During certain level ranges, it may be helpful to use the Mana Proc (Mental) line over the HP proc (Terror) line.\n" ..
+                "This can be adjusted on the Buffs/Debuffs tab.",
+        },
+        ['OverwriteDLUBuffs'] = {
+            DisplayName = "Overwrite DLU Buffs",
+            Category = "Buffs/Debuffs",
+            Index = 5,
+            Tooltip = "Overwrite DLU with single buffs when they are better than the DLU effect.",
+            Default = false,
+            ConfigType = "Advanced",
+            FAQ = "I have new buffs but I am still using DLU, why?",
+            Answer = "Toggle to Overwrite DLU with single buffs when appropriate from the Buffs/Debuffs tab. This is disabled by default to speed up buffing.",
+        },
+        ['DoTorrent']         = {
             DisplayName = "Use Torrents",
             Category = "Buffs/Debuffs",
-            Index = 3,
+            Index = 6,
             Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("Torrent") end,
             RequiresLoadoutChange = true,
             Default = true,
@@ -2051,10 +2096,10 @@ local _ClassConfig = {
             FAQ = "When should I be using Torrents?",
             Answer = "Generally, this is only advised at 100+ when you can benefit from the increased AC. Some early level ranges may find their use appropriate.",
         },
-        ['DoBuffTap']        = {
+        ['DoBuffTap']         = {
             DisplayName = "Use Buff Tap",
             Category = "Buffs/Debuffs",
-            Index = 4,
+            Index = 7,
             Tooltip = function() return RGMercUtils.GetDynamicTooltipForSpell("BuffTap") end,
             Default = false,
             RequiresLoadoutChange = true,
@@ -2062,10 +2107,10 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight Not using Buff Tap?",
             Answer = "The term is a misnomer; contrary to common belief, these spells are not Life Taps. The HP buff is negligible in most situations.",
         },
-        ['DoVetAA']          = {
+        ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
             Category = "Buffs/Debuffs",
-            Index = 5,
+            Index = 8,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
             FAQ = "What Vet AA's does SHD use?",
@@ -2073,7 +2118,7 @@ local _ClassConfig = {
         },
 
         --Taps
-        ['StartLifeTap']     = {
+        ['StartLifeTap']      = {
             DisplayName = "HP % for LifeTaps",
             Category = "Taps",
             Index = 1,
@@ -2085,7 +2130,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [DoLifeTap] enabled in your class settings.\n" ..
                 "Double check [StartLifeTap] seetting, this setting will prevent Life Taps from being used if your HP is above [x]%",
         },
-        ['DoDireTap']        = {
+        ['DoDireTap']         = {
             DisplayName = "Cast Dire Taps",
             Category = "Taps",
             Index = 2,
@@ -2096,7 +2141,7 @@ local _ClassConfig = {
             FAQ = "Why would someone want to disable Dire Taps at all?",
             Answer = "Now that I think about it... I'm not quite sure.",
         },
-        ['StartDireTap']     = {
+        ['StartDireTap']      = {
             DisplayName = "HP % for Dire",
             Category = "Taps",
             Index = 3,
@@ -2108,7 +2153,7 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not using Dire Taps on cooldown for more DPS?",
             Answer = "The default HP% to begin using Dire Taps is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
-        ['DoDicho']          = {
+        ['DoDicho']           = {
             DisplayName = "Cast Dicho Taps",
             Category = "Taps",
             Index = 4,
@@ -2119,7 +2164,7 @@ local _ClassConfig = {
             FAQ = "Why would someone want to disable Dicho Taps at all?",
             Answer = "Also a question that I am unsure of the answer to. Drop in to Discord and let me know!",
         },
-        ['StartDicho']       = {
+        ['StartDicho']        = {
             DisplayName = "HP % for Dicho",
             Category = "Taps",
             Index = 5,
@@ -2131,7 +2176,7 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not using Dicho on cooldown for more DPS?",
             Answer = "The default HP% to begin using Dicho is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
-        ['DoThoughtLeech']   = {
+        ['DoThoughtLeech']    = {
             DisplayName = "Thought Leech Use:",
             Category = "Taps",
             Index = 6,
@@ -2150,7 +2195,7 @@ local _ClassConfig = {
         },
 
         --DoTs
-        ['DoBondTap']        = {
+        ['DoBondTap']         = {
             DisplayName = "Use Bond Dot",
             Category = "DoT Spells",
             Index = 1,
@@ -2160,7 +2205,7 @@ local _ClassConfig = {
             FAQ = "Why do I spend so much mana using these DoTs?",
             Answer = "Dots have additional settings in the RGMercs Main config, such as the min mana% to use them.",
         },
-        ['DoPoisonDot']      = {
+        ['DoPoisonDot']       = {
             DisplayName = "Use Poison Dot",
             Category = "DoT Spells",
             Index = 2,
@@ -2170,7 +2215,7 @@ local _ClassConfig = {
             FAQ = "Why do I use a DoT just before a mob dies?",
             Answer = "Dots have additional settings in the RGMercs Main config, such as the HP% to stop using them (for both trash and named).",
         },
-        ['DoCorruptionDot']  = {
+        ['DoCorruptionDot']   = {
             DisplayName = "Use Corrupt Dot",
             Category = "DoT Spells",
             Index = 3,
@@ -2180,7 +2225,7 @@ local _ClassConfig = {
             FAQ = "I heard SHD dots suck, why are we using them?",
             Answer = "On live, SHD dot damage has been buffed more than once in the last few years, and is likely worthwhile. For other servers or eras, consult your class experts!",
         },
-        ['DoDireDot']        = {
+        ['DoDireDot']         = {
             DisplayName = "Use Dire Dot",
             Category = "DoT Spells",
             Index = 4,
@@ -2192,7 +2237,7 @@ local _ClassConfig = {
         },
 
         --Hate Tools
-        ['UseVoT']           = {
+        ['UseVoT']            = {
             DisplayName = "Use VoT AA",
             Category = "Hate Tools",
             Index = 1,
@@ -2202,7 +2247,7 @@ local _ClassConfig = {
             FAQ = "Why do we only use Voice of Thule, and not the aggro spells?",
             Answer = "Very high refresh times paired with low gem slots and low aggro increase %'s are why we wait for the AA. They can be manually cast, if desired.",
         },
-        ['DoTerror']         = {
+        ['DoTerror']          = {
             DisplayName = "Terror Taunts:",
             Category = "Hate Tools",
             Index = 2,
@@ -2216,7 +2261,7 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight Not using Terror Taunts?",
             Answer = "By default, terrors won't be used once the \"For Power\" line is available. This can be adjusted on the Hate Tool tab.",
         },
-        ['DoForPower']       = {
+        ['DoForPower']        = {
             DisplayName = "Use \"For Power\"",
             Category = "Hate Tools",
             Index = 3,
@@ -2227,7 +2272,7 @@ local _ClassConfig = {
             FAQ = "I've set the option to always use Terrors, why is For Power still being memorized?",
             Answer = "You must also disable its use in the Hate Tools Tab (Use For Power)",
         },
-        ['AETauntAA']        = {
+        ['AETauntAA']         = {
             DisplayName = "Use AE Taunt AA",
             Category = "Hate Tools",
             Index = 4,
@@ -2237,7 +2282,7 @@ local _ClassConfig = {
             FAQ = "Why do we treat the Explosions the same? One is targeted, one is PBAE",
             Answer = "There are currently no scripted conditions where Hatred would be used at long range, thus, for ease of use, we can treat them similarly.",
         },
-        ['AETauntSpell']     = {
+        ['AETauntSpell']      = {
             DisplayName = "AE Taunt Spell Choice:",
             Category = "Hate Tools",
             Index = 5,
@@ -2254,7 +2299,7 @@ local _ClassConfig = {
                 "You will also want to adjust your [AETauntAA] options (Never, Until Explosions (AA Taunts) are available, Always)\n" ..
                 "And set [AETauntCnt] settings to match your current needs.",
         },
-        ['AETauntCnt']       = {
+        ['AETauntCnt']        = {
             DisplayName = "AE Taunt Count",
             Category = "Hate Tools",
             Index = 6,
@@ -2266,7 +2311,7 @@ local _ClassConfig = {
             Answer =
             "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
         },
-        ['SafeAETaunt']      = {
+        ['SafeAETaunt']       = {
             DisplayName = "AE Taunt Safety Check",
             Category = "Hate Tools",
             Index = 7,
@@ -2278,7 +2323,7 @@ local _ClassConfig = {
         },
 
         --Defenses
-        ['DiscCount']        = {
+        ['DiscCount']         = {
             DisplayName = "Def. Disc. Count",
             Category = "Defenses",
             Index = 1,
@@ -2290,7 +2335,7 @@ local _ClassConfig = {
             FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
             Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
         },
-        ['EmergencyStart']   = {
+        ['EmergencyStart']    = {
             DisplayName = "Emergency Start",
             Category = "Defenses",
             Index = 2,
@@ -2302,7 +2347,7 @@ local _ClassConfig = {
             FAQ = "My SHD health spikes up and down a lot and abilities aren't being triggered, what gives?",
             Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
-        ['EmergencyLockout'] = {
+        ['EmergencyLockout']  = {
             DisplayName = "Emergency Only",
             Category = "Defenses",
             Index = 3,
@@ -2317,7 +2362,7 @@ local _ClassConfig = {
         },
 
         --Equipment
-        ['DoChestClick']     = {
+        ['DoChestClick']      = {
             DisplayName = "Do Chest Click",
             Category = "Equipment",
             Index = 1,
@@ -2326,7 +2371,7 @@ local _ClassConfig = {
             FAQ = "What the heck is a chest click?",
             Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHD's is generally a healing tool (a lifetapping pet).",
         },
-        ['DoCharmClick']     = {
+        ['DoCharmClick']      = {
             DisplayName = "Do Charm Click",
             Category = "Equipment",
             Index = 2,
@@ -2335,7 +2380,7 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not clicking his charm?",
             Answer = "Charm clicks won't happen if you are in combat.",
         },
-        ['UseBandolier']     = {
+        ['UseBandolier']      = {
             DisplayName = "Dynamic Weapon Swap",
             Category = "Equipment",
             Index = 3,
@@ -2345,7 +2390,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
-        ['EquipShield']      = {
+        ['EquipShield']       = {
             DisplayName = "Equip Shield",
             Category = "Equipment",
             Index = 4,
@@ -2358,7 +2403,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
-        ['Equip2Hand']       = {
+        ['Equip2Hand']        = {
             DisplayName = "Equip 2Hand",
             Category = "Equipment",
             Index = 5,
@@ -2371,7 +2416,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
-        ['NamedShieldLock']  = {
+        ['NamedShieldLock']   = {
             DisplayName = "Shield on Named",
             Category = "Equipment",
             Index = 6,
