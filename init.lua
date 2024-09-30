@@ -46,7 +46,7 @@ local function renderModulesTabs()
     if not RGMercConfig:SettingsLoaded() then return end
 
     for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
-        if RGMercModules:ExecModule(name, "ShouldRender") then
+        if RGMercModules:ExecModule(name, "ShouldRender") and not RGMercUtils.GetSetting(name .. "_Popped", true) then
             if ImGui.BeginTabItem(name) then
                 RGMercModules:ExecModule(name, "Render")
                 ImGui.EndTabItem()
