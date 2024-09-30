@@ -10,6 +10,7 @@ local module_order = {
     "Mez",
     "Travel",
     --"Exp",
+    "Named",
     "Perf",
     --"Loot",
     "Contributors",
@@ -28,6 +29,7 @@ function Module.load()
             "Mez",
             "Travel",
             --'Exp',
+            "Named",
             "Perf",
             "Loot",
             "Contributors",
@@ -45,6 +47,7 @@ function Module.load()
             Charm        = require("modules.charm").New(),
             Loot         = RGMercConfig.Globals.BuildType == "Emu" and require("modules.loot").New() or nil,
             --Exp          = require("modules.experience").New(),
+            Named        = require("modules.named").New(),
             Perf         = require("modules.performance").New(),
             Contributors = require("modules.contributors").New(),
             FAQ          = require("modules.faq").New(),
@@ -77,7 +80,7 @@ end
 
 function Module:ExecModule(m, fn, ...)
     for name, module in pairs(self.modules) do
-        if name == m then
+        if name:lower() == m:lower() then
             return module[fn](module, ...)
         end
     end

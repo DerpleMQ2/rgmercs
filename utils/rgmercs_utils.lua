@@ -2,7 +2,6 @@
 local mq                       = require('mq')
 local Set                      = require('mq.set')
 local animSpellGems            = mq.FindTextureAnimation('A_SpellGems')
-local ICONS                    = require('mq.Icons')
 local ICON_SIZE                = 20
 
 local RGMercUtils              = { _version = '0.2a', _name = "RGMercUtils", _author = 'Derple', }
@@ -4569,16 +4568,16 @@ function RGMercUtils.RenderOAList()
             end
             ImGui.TableNextColumn()
             ImGui.PushID("##_small_btn_delete_oa_" .. tostring(idx))
-            if ImGui.SmallButton(ICONS.FA_TRASH) then
+            if ImGui.SmallButton(RGMercIcons.FA_TRASH) then
                 RGMercUtils.DeleteOA(idx)
             end
             ImGui.PopID()
             ImGui.SameLine()
             ImGui.PushID("##_small_btn_up_oa_" .. tostring(idx))
             if idx == 1 then
-                ImGui.InvisibleButton(ICONS.FA_CHEVRON_UP, ImVec2(22, 1))
+                ImGui.InvisibleButton(RGMercIcons.FA_CHEVRON_UP, ImVec2(22, 1))
             else
-                if ImGui.SmallButton(ICONS.FA_CHEVRON_UP) then
+                if ImGui.SmallButton(RGMercIcons.FA_CHEVRON_UP) then
                     RGMercUtils.MoveOAUp(idx)
                 end
             end
@@ -4586,9 +4585,9 @@ function RGMercUtils.RenderOAList()
             ImGui.SameLine()
             ImGui.PushID("##_small_btn_dn_oa_" .. tostring(idx))
             if idx == #RGMercUtils.GetSetting('OutsideAssistList') then
-                ImGui.InvisibleButton(ICONS.FA_CHEVRON_DOWN, ImVec2(22, 1))
+                ImGui.InvisibleButton(RGMercIcons.FA_CHEVRON_DOWN, ImVec2(22, 1))
             else
-                if ImGui.SmallButton(ICONS.FA_CHEVRON_DOWN) then
+                if ImGui.SmallButton(RGMercIcons.FA_CHEVRON_DOWN) then
                     RGMercUtils.MoveOADown(idx)
                 end
             end
@@ -4600,7 +4599,6 @@ function RGMercUtils.RenderOAList()
 end
 
 --- Caches the named list in the zone
----
 function RGMercUtils.RefreshNamedCache()
     if RGMercUtils.LastZoneID ~= mq.TLO.Zone.ID() then
         RGMercUtils.LastZoneID = mq.TLO.Zone.ID()
@@ -4621,7 +4619,7 @@ end
 
 function RGMercUtils.RenderForceTargetList(showPopout)
     if showPopout then
-        if ImGui.Button(ICONS.MD_OPEN_IN_NEW, 0, 18) then
+        if ImGui.Button(RGMercIcons.MD_OPEN_IN_NEW, 0, 18) then
             RGMercUtils.SetSetting('PopOutForceTarget', true)
         end
     end
@@ -4630,7 +4628,7 @@ function RGMercUtils.RenderForceTargetList(showPopout)
         RGMercConfig.Globals.ForceTargetID = 0
     end
 
-    if ImGui.BeginTable("XTargs", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders) then
+    if ImGui.BeginTable("XTargs", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders + ImGuiTableFlags.Resizable) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 300)
@@ -4648,7 +4646,7 @@ function RGMercUtils.RenderForceTargetList(showPopout)
                 ImGui.TableNextColumn()
                 if RGMercConfig.Globals.ForceTargetID > 0 and RGMercConfig.Globals.ForceTargetID == xtarg.ID() then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
-                    ImGui.Text(ICONS.MD_STAR)
+                    ImGui.Text(RGMercIcons.MD_STAR)
                     ImGui.PopStyleColor(1)
                 else
                     ImGui.Text("")
@@ -4676,6 +4674,23 @@ function RGMercUtils.RenderForceTargetList(showPopout)
     end
 end
 
+function RGMercUtils.CheckNamed()
+    RGMercUtils.RefreshNamedCache()
+
+    local tmpTbl = {}
+    for name, _ in pairs(RGMercUtils.NamedList) do
+        local spawn = mq.TLO.Spawn(string.format("NPC %s", name))
+        if RGMercUtils.ShowDownNamed or (spawn() and spawn.ID() > 0) then
+            table.insert(tmpTbl, { Name = name, Distance = spawn.Distance() or 9999, Spawn = spawn, })
+        end
+    end
+
+    table.sort(tmpTbl, function(a, b)
+        return a.Distance < b.Distance
+    end)
+    return tmpTbl
+end
+
 --- Renders a table of the named creatures of the current zone.
 ---
 --- This function retrieves and displays the name of the current zone in the game.
@@ -4694,30 +4709,30 @@ function RGMercUtils.RenderZoneNamed()
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for name, _ in pairs(RGMercUtils.NamedList) do
-            local spawn = mq.TLO.Spawn(string.format("NPC %s", name))
-            if RGMercUtils.ShowDownNamed or (spawn() and spawn.ID() > 0) then
+        local namedList = RGMercUtils.CheckNamed()
+        for _, named in ipairs(namedList) do
+            if RGMercUtils.ShowDownNamed or (named.Spawn() and named.Spawn.ID() > 0) then
                 ImGui.TableNextColumn()
-                local _, clicked = ImGui.Selectable(name, false)
+                local _, clicked = ImGui.Selectable(named.Name, false)
                 if clicked then
-                    RGMercUtils.DoCmd("/target id %d", spawn() and spawn.ID() or 0)
+                    RGMercUtils.DoCmd("/target id %d", named.Spawn() and named.Spawn.ID() or 0)
                 end
                 ImGui.TableNextColumn()
-                if spawn() and spawn.PctHPs() > 0 then
+                if named.Spawn() and named.Spawn.PctHPs() > 0 then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
-                    ImGui.Text(ICONS.FA_SMILE_O)
+                    ImGui.Text(RGMercIcons.FA_SMILE_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
-                    ImGui.Text(tostring(math.ceil(spawn.Distance())))
+                    ImGui.Text(tostring(math.ceil(named.Distance)))
                 else
                     ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-                    ImGui.Text(ICONS.FA_FROWN_O)
+                    ImGui.Text(RGMercIcons.FA_FROWN_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
                     ImGui.Text("0")
                 end
                 ImGui.TableNextColumn()
-                RGMercUtils.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
+                RGMercUtils.NavEnabledLoc(named.Spawn.LocYXZ() or "0,0,0")
             end
         end
 
@@ -4790,25 +4805,25 @@ function RGMercUtils.RenderRotationTableKey()
     if ImGui.BeginTable("Rotation_keys", 2, ImGuiTableFlags.Borders) then
         ImGui.TableNextColumn()
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(ICONS.FA_SMILE_O .. ": Active")
+        ImGui.Text(RGMercIcons.FA_SMILE_O .. ": Active")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(ICONS.MD_CHECK .. ": Will Cast (Coditions Met)")
+        ImGui.Text(RGMercIcons.MD_CHECK .. ": Will Cast (Coditions Met)")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-        ImGui.Text(ICONS.FA_EXCLAMATION .. ": Cannot Cast")
+        ImGui.Text(RGMercIcons.FA_EXCLAMATION .. ": Cannot Cast")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
-        ImGui.Text(ICONS.MD_CHECK .. ": Will Cast (No Conditions)")
+        ImGui.Text(RGMercIcons.MD_CHECK .. ": Will Cast (No Conditions)")
 
         ImGui.PopStyleColor()
         ImGui.EndTable()
@@ -4845,7 +4860,7 @@ function RGMercUtils.RenderRotationTable(name, rotationTable, resolvedActionMap,
                 ImGui.TableNextColumn()
                 ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
                 if idx == rotationState then
-                    ImGui.Text(ICONS.FA_DOT_CIRCLE_O)
+                    ImGui.Text(RGMercIcons.FA_DOT_CIRCLE_O)
                 else
                     ImGui.Text("")
                 end
@@ -4861,17 +4876,17 @@ function RGMercUtils.RenderRotationTable(name, rotationTable, resolvedActionMap,
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-                    ImGui.Text(ICONS.FA_SMILE_O)
+                    ImGui.Text(RGMercIcons.FA_SMILE_O)
                 elseif pass == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-                    ImGui.Text(ICONS.MD_CHECK)
+                    ImGui.Text(RGMercIcons.MD_CHECK)
                 else
                     ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-                    ImGui.Text(ICONS.FA_EXCLAMATION)
+                    ImGui.Text(RGMercIcons.FA_EXCLAMATION)
                 end
             else
                 ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
-                ImGui.Text(ICONS.MD_CHECK)
+                ImGui.Text(RGMercIcons.MD_CHECK)
             end
             ImGui.PopStyleColor()
             if entry.tooltip then
@@ -4958,13 +4973,13 @@ function RGMercUtils.RenderOptionToggle(id, text, on)
 
     if on then
         ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.9)
-        if ImGui.Button(ICONS.FA_TOGGLE_ON) then
+        if ImGui.Button(RGMercIcons.FA_TOGGLE_ON) then
             toggled = true
             state   = false
         end
     else
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
-        if ImGui.Button(ICONS.FA_TOGGLE_OFF) then
+        if ImGui.Button(RGMercIcons.FA_TOGGLE_OFF) then
             toggled = true
             state   = true
         end
@@ -5110,7 +5125,7 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
 
                             ImGui.SameLine()
                             ImGui.PushID(k .. "__clear_btn")
-                            if ImGui.SmallButton(ICONS.MD_CLEAR) then
+                            if ImGui.SmallButton(RGMercIcons.MD_CLEAR) then
                                 settings[k] = ""
                                 pressed = true
                             end

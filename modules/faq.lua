@@ -12,11 +12,25 @@ Module.FAQ               = {}
 Module.ClassFAQ          = {}
 Module.TempSettings      = {}
 Module.DefaultCategories = Set.new({})
-local function getConfigFileName()
-	local server = mq.TLO.EverQuest.Server()
-	server = server:gsub(" ", "")
-	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+
+Module.DefaultConfig     = {
+	[string.format("%s_Popped", Module._name)] = {
+		DisplayName = Module._name .. " Popped",
+		Category = "FAQ",
+		Tooltip = Module._name .. " Pop Out Into Window",
+		Default = false,
+		FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
+		Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling " .. Module._name .. "_Popped",
+	},
+}
+
+Module.DefaultCategories = Set.new({})
+for k, v in pairs(Module.DefaultConfig or {}) do
+	if v.Type ~= "Custom" then
+		Module.DefaultCategories:add(v.Category)
+	end
+
+	Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
 end
 
 Module.CommandHandlers = {
@@ -28,6 +42,13 @@ Module.CommandHandlers = {
 		end,
 	},
 }
+
+local function getConfigFileName()
+	local server = mq.TLO.EverQuest.Server()
+	server = server:gsub(" ", "")
+	return mq.configDir ..
+		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+end
 
 function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
@@ -225,6 +246,11 @@ function Module:ExportFAQToWiki()
 end
 
 function Module:Render()
+	if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+		self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+		self:SaveSettings(false)
+	end
+	ImGui.SameLine()
 	ImGui.Text("FAQ Module")
 	ImGui.Spacing()
 	ImGui.PushStyleColor(ImGuiCol.Text, ImVec4(1, 1, 0, 1))
@@ -395,6 +421,11 @@ end
 
 function Module:GetCommandHandlers()
 	return { module = self._name, CommandHandlers = self.CommandHandlers, }
+end
+
+function Module:Pop()
+	self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+	self:SaveSettings(false)
 end
 
 function Module:GetFAQ()

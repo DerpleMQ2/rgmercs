@@ -2,7 +2,6 @@
 local mq                                  = require('mq')
 local RGMercUtils                         = require("utils.rgmercs_utils")
 local Set                                 = require("mq.Set")
-local ICONS                               = require('mq.Icons')
 
 local Module                              = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
 Module.__index                            = Module
@@ -39,16 +38,16 @@ local PullStates                          = {
 }
 
 local PullStateDisplayStrings             = {
-    ['PULL_IDLE']               = { Display = ICONS.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
-    ['PULL_GROUPWATCH_WAIT']    = { Display = ICONS.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_NAV_INTERRUPT']      = { Display = ICONS.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation Interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
-    ['PULL_SCAN']               = { Display = ICONS.FA_EYE, Text = "Scanning for Targets", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_PULLING']            = { Display = ICONS.FA_BULLSEYE, Text = "Pulling", Color = { r = 0.8, g = 0.03, b = 0.02, a = 1.0, }, },
-    ['PULL_MOVING_TO_WP']       = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_NAV_TO_TARGET']      = { Display = ICONS.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_RETURN_TO_CAMP']     = { Display = ICONS.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_WAITING_ON_MOB']     = { Display = ICONS.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_WAITING_SHOULDPULL'] = { Display = ICONS.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
+    ['PULL_IDLE']               = { Display = RGMercIcons.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
+    ['PULL_GROUPWATCH_WAIT']    = { Display = RGMercIcons.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_NAV_INTERRUPT']      = { Display = RGMercIcons.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation Interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
+    ['PULL_SCAN']               = { Display = RGMercIcons.FA_EYE, Text = "Scanning for Targets", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_PULLING']            = { Display = RGMercIcons.FA_BULLSEYE, Text = "Pulling", Color = { r = 0.8, g = 0.03, b = 0.02, a = 1.0, }, },
+    ['PULL_MOVING_TO_WP']       = { Display = RGMercIcons.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_NAV_TO_TARGET']      = { Display = RGMercIcons.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_RETURN_TO_CAMP']     = { Display = RGMercIcons.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_WAITING_ON_MOB']     = { Display = RGMercIcons.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_WAITING_SHOULDPULL'] = { Display = RGMercIcons.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
 }
 
 local PullStatesIDToName                  = {}
@@ -132,7 +131,7 @@ local PullAbilityIDToName              = {}
 Module.TempSettings.ValidPullAbilities = {}
 
 Module.DefaultConfig                   = {
-    ['DoPull']             = {
+    ['DoPull']                                 = {
         DisplayName = "Enable Pulling",
         Category = "Pulling",
         Tooltip = "Enable pulling",
@@ -140,7 +139,7 @@ Module.DefaultConfig                   = {
         FAQ = "My Puller isn't Pulling, what do I do?",
         Answer = "Make sure you have [DoPull] enabled.",
     },
-    ['PullDebuffed']       = {
+    ['PullDebuffed']                           = {
         DisplayName = "Pull While Debuffed",
         Category = "Pulling",
         Tooltip = "Pull in spite of being debuffed (Not ignored: Rez Sickness, Snare, Root.)",
@@ -149,7 +148,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep stopping pulls while diseased or debuffed, how do I fix this?",
         Answer = "Enable [PullDebuffed] and you will pull even if you are debuffed.",
     },
-    ['StopPullAfterDeath'] = {
+    ['StopPullAfterDeath']                     = {
         DisplayName = "Stop Pulling After Death",
         Category = "Pulling",
         Tooltip = "Stop pulling after you die and are rezed back.",
@@ -157,7 +156,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep trying to pull after I die, how do I stop this?",
         Answer = "Enable [StopPullAfterDeath] and you will stop pulling after you die.",
     },
-    ['PullBackwards']      = {
+    ['PullBackwards']                          = {
         DisplayName = "Pull Facing Backwards",
         Category = "Pulling",
         Tooltip = "Run back to camp facing the mmob",
@@ -165,7 +164,7 @@ Module.DefaultConfig                   = {
         FAQ = "I don't like getting backstabbed when I pull, how do I fix this?",
         Answer = "Enable [PullBackwards] and you will run back to camp facing the mob.",
     },
-    ['AutoSetRoles']       = {
+    ['AutoSetRoles']                           = {
         DisplayName = "Auto Set Roles",
         Category = "Pulling",
         Tooltip = "Make yourself MA and Puller when you start pulls.",
@@ -173,7 +172,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep forgetting to set myself as MA and Puller, how do I fix this?",
         Answer = "Enable [AutoSetRoles] and you will be set as MA and Puller when you start pulls.",
     },
-    ['PullAbility']        = {
+    ['PullAbility']                            = {
         DisplayName = "Pull Ability",
         Category = "Pulling",
         Tooltip = "What should we pull with?",
@@ -182,7 +181,7 @@ Module.DefaultConfig                   = {
         FAQ = "I want to use a different ability to pull, how do I change it?",
         Answer = "Select a different ability from the [PullAbility] dropdown.",
     },
-    ['PullMode']           = {
+    ['PullMode']                               = {
         DisplayName = "Pull Mode",
         Category = "Pulling",
         Tooltip = "1 = Normal, 2 = Chain, 3 = Hunt, 4 = Farm",
@@ -197,7 +196,7 @@ Module.DefaultConfig                   = {
             "Hunt = Roam the Hunt Pull Radius moving to each mob to fight.\n" ..
             "Farm = Follow the Farm Path waypoints and kill at each stop.\n",
     },
-    ['ChainCount']         = {
+    ['ChainCount']                             = {
         DisplayName = "Chain Count",
         Category = "Pulling",
         Tooltip = "Number of mobs in chain pull mode on xtarg before we stop pulling",
@@ -207,7 +206,7 @@ Module.DefaultConfig                   = {
         FAQ = "Can I adjust the number of mobs I pull in Chain Mode?",
         Answer = "Yes, you can adjust the number of mobs in the chain with [ChainCount].",
     },
-    ['PullDelay']          = {
+    ['PullDelay']                              = {
         DisplayName = "Pull Delay",
         Category = "Pulling",
         Tooltip = "Seconds between pulls",
@@ -217,7 +216,7 @@ Module.DefaultConfig                   = {
         FAQ = "I want to adjust the time between pulls so I have time to Manually Loot, how do I do that?",
         Answer = "You can adjust the time between pulls with [PullDelay].",
     },
-    ['PullRadius']         = {
+    ['PullRadius']                             = {
         DisplayName = "Pull Radius",
         Category = "Pull Distance",
         Tooltip = "Distnace to pull",
@@ -227,7 +226,7 @@ Module.DefaultConfig                   = {
         FAQ = "I want to adjust the distance I pull from, how do I do that?",
         Answer = "You can adjust the distance you pull from with [PullRadius].",
     },
-    ['PullZRadius']        = {
+    ['PullZRadius']                            = {
         DisplayName = "Pull Z Radius",
         Category = "Pull Distance",
         Tooltip = "Distnace to pull on Z axis",
@@ -237,7 +236,7 @@ Module.DefaultConfig                   = {
         FAQ = "I can't seem to pull mobs on this ledge/hill/pit?",
         Answer = "You can adjust the distance you pull on the Z axis with [PullZRadius].",
     },
-    ['PullRadiusFarm']     = {
+    ['PullRadiusFarm']                         = {
         DisplayName = "Pull Radius Farm",
         Category = "Pull Distance",
         Tooltip = "Distnace to pull in Farm mode",
@@ -247,7 +246,7 @@ Module.DefaultConfig                   = {
         FAQ = "I want to adjust the distance I pull from at the waypoint stops in Farm Mode, how do I do that?",
         Answer = "You can adjust how far you pull from at the stops using the [PullRadiusFarm] setting.",
     },
-    ['HuntFromPlayer']     = {
+    ['HuntFromPlayer']                         = {
         DisplayName = "Hunt from Player",
         Category = "Pull Distance",
         Tooltip =
@@ -256,7 +255,7 @@ Module.DefaultConfig                   = {
         FAQ = "How do I just Hunt then entire zone?",
         Answer = "Enable [HuntFromPlayer] and you will scan from your current location after every pull, instead of the Hunt Starting Position.",
     },
-    ['PullRadiusHunt']     = {
+    ['PullRadiusHunt']                         = {
         DisplayName = "Pull Radius Hunt",
         Category = "Pull Distance",
         Tooltip = "Distnace to pull in Hunt mode from your starting position",
@@ -266,7 +265,7 @@ Module.DefaultConfig                   = {
         FAQ = "I run out of spawns to pull in Hunt Mode, how do I fix this?",
         Answer = "You can adjust the distance you pull from in Hunt Mode with [PullRadiusHunt].",
     },
-    ['PullMinCon']         = {
+    ['PullMinCon']                             = {
         DisplayName = "Pull Min Con",
         Category = "Pull Targets",
         Tooltip = "Min Con Mobs to consider pulling",
@@ -280,7 +279,7 @@ Module.DefaultConfig                   = {
         Answer = "You probably have your [PullMinCon] set too low, adjust it to the lowest con you want to pull.",
 
     },
-    ['PullMaxCon']         = {
+    ['PullMaxCon']                             = {
         DisplayName = "Pull Max Con",
         Category = "Pull Targets",
         Tooltip = "Max Con Mobs to consider pulling",
@@ -292,7 +291,7 @@ Module.DefaultConfig                   = {
         FAQ = "Why am I not pulling Red con mobs?",
         Answer = "You probably have your [PullMaxCon] set too low, adjust it to the highest con you want to pull.",
     },
-    ['UsePullLevels']      = {
+    ['UsePullLevels']                          = {
         DisplayName = "Use Pull Levels",
         Category = "Pull Targets",
         Tooltip = "Use Min and Max Levels Instead of Con.",
@@ -301,7 +300,7 @@ Module.DefaultConfig                   = {
         FAQ = "Con colors have to wide of a range, can I use levels instead?",
         Answer = "Enable [UsePullLevels] and you will use Min and Max Levels instead of Con Colors.",
     },
-    ['PullMinLevel']       = {
+    ['PullMinLevel']                           = {
         DisplayName = "Pull Min Level",
         Category = "Pull Targets",
         Tooltip = "Min Level Mobs to consider pulling",
@@ -312,7 +311,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep pulling low level mobs, how do I fix this?",
         Answer = "You probably have your [PullMinLevel] set too low, adjust it to the lowest level you want to pull.",
     },
-    ['PullMaxLevel']       = {
+    ['PullMaxLevel']                           = {
         DisplayName = "Pull Max Level",
         Category = "Pull Targets",
         Tooltip = "Max Level Mobs to consider pulling",
@@ -323,7 +322,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep pulling high level mobs, how do I fix this?",
         Answer = "You probably have your [PullMaxLevel] set too high, adjust it to the highest level you want to pull.",
     },
-    ['GroupWatch']         = {
+    ['GroupWatch']                             = {
         DisplayName = "Enable Group Watch",
         Category = "Group Watch",
         Tooltip = "1 = Off, 2 = Healers, 3 = Everyone",
@@ -338,7 +337,7 @@ Module.DefaultConfig                   = {
             "Healers = Check Healers for Mana, HP, or Endurance.\n" ..
             "Everyone = Check Everyone for Mana, HP, or Endurance.",
     },
-    ['GroupWatchEnd']      = {
+    ['GroupWatchEnd']                          = {
         DisplayName = "Watch Group Endurance",
         Category = "Group Watch",
         Tooltip = "Check for Endurance on Group Members",
@@ -347,7 +346,7 @@ Module.DefaultConfig                   = {
         Answer = "Enable [GroupWatchEnd] and you will check for Endurance on Group Members.",
 
     },
-    ['GroupWatchStartPct'] = {
+    ['GroupWatchStartPct']                     = {
         DisplayName = "Group Watch Start %",
         Category = "Group Watch",
         Tooltip = "If your group member is above [X]% resource, start pulls again.",
@@ -357,7 +356,7 @@ Module.DefaultConfig                   = {
         FAQ = "My Cleric never meds to full, how do I fix this?",
         Answer = "You can adjust the start % for pulls with [GroupWatchStartPct] and you will not pull until they are above that setting.",
     },
-    ['GroupWatchStopPct']  = {
+    ['GroupWatchStopPct']                      = {
         DisplayName = "Group Watch Stop %",
         Category = "Group Watch",
         Tooltip = "If your group member is below [X]% resource, stop pulls.",
@@ -368,7 +367,7 @@ Module.DefaultConfig                   = {
         Answer = "Make sure [GroupWatch] is enabled. \n" ..
             "You can adjust the stop % for pulls with [GroupWatchStopPct] and you will stop pulling until they are above that setting.",
     },
-    ['PullHPPct']          = {
+    ['PullHPPct']                              = {
         DisplayName = "Pull HP %",
         Category = "Group Watch",
         Tooltip = "Make sure you have at least this much HP %",
@@ -378,7 +377,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep trying to pull when I have half health. I don't want to die, how do I fix this?",
         Answer = "You can adjust the HP % for pulls with [PullHPPct] and you will not pull until you are above that setting.",
     },
-    ['PullManaPct']        = {
+    ['PullManaPct']                            = {
         DisplayName = "Pull Mana %",
         Category = "Group Watch",
         Tooltip = "Make sure you have at least this much Mana %",
@@ -388,7 +387,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep trying to pull when I have half mana. I don't want to run out, how do I fix this?",
         Answer = "You can adjust the Mana % for pulls with [PullManaPct] and you will not pull until you are above that setting.",
     },
-    ['PullEndPct']         = {
+    ['PullEndPct']                             = {
         DisplayName = "Pull End %",
         Category = "Group Watch",
         Tooltip = "Make sure you have at least this much Endurance %",
@@ -398,7 +397,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep trying to pull when I have half endurance. I don't want to run out, how do I fix this?",
         Answer = "You can adjust the Endurance % for pulls with [PullEndPct] and you will not pull until you are above that setting.",
     },
-    ['FarmWayPoints']      = {
+    ['FarmWayPoints']                          = {
         DisplayName = "Farming Waypoints",
         Category = "",
         Tooltip = "",
@@ -407,7 +406,7 @@ Module.DefaultConfig                   = {
         FAQ = "How can I set a path for my characters to follow while farming?",
         Answer = "You can set a path for your characters to follow while farming by adding waypoints to the [FarmWayPoints] list.",
     },
-    ['PullAllowList']      = {
+    ['PullAllowList']                          = {
         DisplayName = "Allow List",
         Category = "",
         Tooltip = "",
@@ -416,7 +415,7 @@ Module.DefaultConfig                   = {
         FAQ = "Can I manually add a mob to the pull list?",
         Answer = "You can add a mob to the [PullAllowList] and it will be pulled.",
     },
-    ['PullDenyList']       = {
+    ['PullDenyList']                           = {
         DisplayName = "Deny List",
         Category = "",
         Tooltip = "",
@@ -425,7 +424,7 @@ Module.DefaultConfig                   = {
         FAQ = "Can I manually add a mob to the pull deny list?",
         Answer = "You can add a mob to the [PullDenyList] and it will not be pulled.",
     },
-    ['PullMobsInWater']    = {
+    ['PullMobsInWater']                        = {
         DisplayName = "Pull Mobs In Water",
         Category = "Pulling",
         Tooltip = "Pull Mobs that are in water bodies? If you are low level you might drown.",
@@ -433,7 +432,7 @@ Module.DefaultConfig                   = {
         FAQ = "I keep pulling mobs in the water and drowning, how do I fix this?",
         Answer = "Disable [PullMobsInWater] and you will NOT pull mobs in the water.",
     },
-    ['PullSafeZones']      = {
+    ['PullSafeZones']                          = {
         DisplayName = "SafeZones",
         Category = "",
         Tooltip = "",
@@ -442,6 +441,14 @@ Module.DefaultConfig                   = {
         FAQ = "How do I make it so my puller doesn't pull in certain zones?",
         Answer = "You can add a zone to the [PullSafeZones] and it will not pull in that zone.\n" ..
             "This list is found in /config/rgmercs/PCConfigs/Pull_<Server>_<Character>.lua",
+    },
+    [string.format("%s_Popped", Module._name)] = {
+        DisplayName = Module._name .. " Popped",
+        Category = "UI",
+        Tooltip = Module._name .. " Pop Out Into Window",
+        Default = false,
+        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
+        Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling " .. Module._name .. "_Popped",
     },
 }
 
@@ -634,7 +641,7 @@ function Module:RenderMobList(displayName, settingName)
                 ImGui.Text(mobName)
                 ImGui.TableNextColumn()
                 ImGui.PushID("##_small_btn_delete_mob_" .. settingName .. tostring(idx))
-                if ImGui.SmallButton(ICONS.FA_TRASH) then
+                if ImGui.SmallButton(RGMercIcons.FA_TRASH) then
                     self:DeleteMobFromList(settingName, idx)
                 end
                 ImGui.PopID()
@@ -687,6 +694,11 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
+    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+        self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+        self:SaveSettings(false)
+    end
+    ImGui.SameLine()
     ImGui.Text("Pull")
 
     local pressed
@@ -723,7 +735,7 @@ function Module:Render()
 
         if mq.TLO.Target() and RGMercUtils.TargetIsType("NPC") then
             ImGui.SameLine()
-            if ImGui.Button("Pull Target " .. ICONS.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
+            if ImGui.Button("Pull Target " .. RGMercIcons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
                 self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
                 table.insert(self.TempSettings.PullTargets, { spawn = mq.TLO.Target, distance = mq.TLO.Target.Distance(), })
             end
@@ -882,16 +894,16 @@ function Module:Render()
                     ImGui.Text(string.format("[y: %0.2f, x: %0.2f, z: %0.2f]", wpData.y, wpData.x, wpData.z))
                     ImGui.TableNextColumn()
                     ImGui.PushID("##_small_btn_delete_wp_" .. tostring(idx))
-                    if ImGui.SmallButton(ICONS.FA_TRASH) then
+                    if ImGui.SmallButton(RGMercIcons.FA_TRASH) then
                         self:DeleteWayPoint(idx)
                     end
                     ImGui.PopID()
                     ImGui.SameLine()
                     ImGui.PushID("##_small_btn_up_wp_" .. tostring(idx))
                     if idx == 1 then
-                        ImGui.InvisibleButton(ICONS.FA_CHEVRON_UP, ImVec2(22, 1))
+                        ImGui.InvisibleButton(RGMercIcons.FA_CHEVRON_UP, ImVec2(22, 1))
                     else
-                        if ImGui.SmallButton(ICONS.FA_CHEVRON_UP) then
+                        if ImGui.SmallButton(RGMercIcons.FA_CHEVRON_UP) then
                             self:MoveWayPointUp(idx)
                         end
                     end
@@ -899,9 +911,9 @@ function Module:Render()
                     ImGui.SameLine()
                     ImGui.PushID("##_small_btn_dn_wp_" .. tostring(idx))
                     if idx == #waypointList then
-                        ImGui.InvisibleButton(ICONS.FA_CHEVRON_DOWN, ImVec2(22, 1))
+                        ImGui.InvisibleButton(RGMercIcons.FA_CHEVRON_DOWN, ImVec2(22, 1))
                     else
-                        if ImGui.SmallButton(ICONS.FA_CHEVRON_DOWN) then
+                        if ImGui.SmallButton(RGMercIcons.FA_CHEVRON_DOWN) then
                             self:MoveWayPointDown(idx)
                         end
                     end
@@ -1748,6 +1760,11 @@ function Module:GiveTime(combat_state)
 
     RGMercUtils.SetTarget(self.TempSettings.PullID)
 
+    if mq.TLO.Target.Master.Type() == 'PC' then
+        RGMercsLogger.log_debug("\atPULL::PullTarget \awPullTarget :: Spawn \am%s\aw (\at%d\aw) is Charmed Pet -- Skipping", mq.TLO.Target.CleanName(), mq.TLO.Target.ID())
+        abortPull = true
+    end
+
     if RGMercUtils.GetSetting('SafeTargeting') then
         -- Hard coding 500 units as our radius as it's probably twice our effective spell range.
         if RGMercUtils.IsSpawnFightingStranger(mq.TLO.Spawn(self.TempSettings.PullID), 500) then
@@ -1964,6 +1981,11 @@ function Module:OnDeath()
     if RGMercUtils.GetSetting('StopPullAfterDeath') then
         self.settings.DoPull = false
     end
+end
+
+function Module:Pop()
+    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+    self:SaveSettings(false)
 end
 
 function Module:OnZone()

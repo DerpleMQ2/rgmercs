@@ -471,14 +471,7 @@ Module.CommandHandlers   = {
 			self:LootUpdate()
 		end,
 	},
-	poploot = {
-		usage = "/rgl poploot",
-		about =
-		"Pops out the Loot Module into its own window.",
-		handler = function(self, _)
-			self:PopLoot()
-		end,
-	},
+
 }
 
 Module.DefaultCategories = Set.new({})
@@ -1149,9 +1142,10 @@ function Module:LootUpdate()
 	end
 end
 
-function Module:PopLoot()
+function Module:Pop()
 	if LootnScoot ~= nil then
 		self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+		self:SaveSettings(false)
 	end
 end
 

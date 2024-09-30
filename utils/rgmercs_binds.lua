@@ -257,8 +257,7 @@ Bind.Handlers     = {
             RGMercConfig.Globals.Minimized = not RGMercConfig.Globals.Minimized
         end,
     },
-    ['help'] =
-    {
+    ['help'] = {
         handler = function()
             printf("RGMercs [%s/%s] by: %s running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
                 RGMercConfig.Globals.CurLoadedChar,
@@ -286,7 +285,13 @@ Bind.Handlers     = {
             end
         end,
     },
-
+    ['pop'] = {
+        usage = "/rgl pop [Module Name]",
+        about = "Toggle Popout of Module",
+        handler = function(config, value)
+            RGMercModules:ExecModule(config, "Pop")
+        end,
+    },
 }
 
 return Bind

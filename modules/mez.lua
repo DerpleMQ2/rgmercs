@@ -19,7 +19,7 @@ Module.ClassFAQ                    = {}
 
 Module.DefaultConfig               = {
     -- [ MEZ ] --
-    ['MezAECount']      = {
+    ['MezAECount']                             = {
         DisplayName = "Mez AE Count",
         Category = "Mez",
         Tooltip = "Mez if you have more than [X] on xtarget",
@@ -29,7 +29,7 @@ Module.DefaultConfig               = {
         Min = 1,
         Max = 20,
     },
-    ['MezOn']           = {
+    ['MezOn']                                  = {
         DisplayName = "Mez On",
         Category = "Mez",
         Default = true,
@@ -37,7 +37,7 @@ Module.DefaultConfig               = {
         FAQ = "How do I turn on Mez?",
         Answer = "Toggle [MezOn] to the on position.",
     },
-    ['UseSingleTgtMez'] = {
+    ['UseSingleTgtMez']                        = {
         DisplayName = "Use Single Tgt Mez",
         Category = "Mez",
         Default = true,
@@ -45,7 +45,7 @@ Module.DefaultConfig               = {
         FAQ = "How come my character is only using the AE Mez?",
         Answer = "To use Single Target mez turn on [UseSingleTgtMez].",
     },
-    ['MezStartCount']   = {
+    ['MezStartCount']                          = {
         DisplayName = "Mez Start Count",
         Category = "Mez",
         Default = 2,
@@ -55,7 +55,7 @@ Module.DefaultConfig               = {
         FAQ = "How do I control when to cast Mez?",
         Answer = "You can adjust your [MezStartCount] to set how many mobs are on XTarget before casting Mez spells",
     },
-    ['MaxMezCount']     = {
+    ['MaxMezCount']                            = {
         DisplayName = "Max Mez Count",
         Category = "Mez",
         Default = 13,
@@ -65,7 +65,7 @@ Module.DefaultConfig               = {
         FAQ = "My Character stops mezzing and there are still mobs in camp, why?",
         Answer = "You may hae the [MaxMezCount] set too low, increase it to allow more mobs to be mezzed. (max value = 20)",
     },
-    ['MezRadius']       = {
+    ['MezRadius']                              = {
         DisplayName = "Mez Radius",
         Category = "Mez Range",
         Default = 100,
@@ -75,7 +75,7 @@ Module.DefaultConfig               = {
         FAQ = "I keep trying to mez mobs that are too far away, how do I fix this?",
         Answer = "Adnust your [MezRadius] to the distance you want to start mezzing mobs.",
     },
-    ['MezZRadius']      = {
+    ['MezZRadius']                             = {
         DisplayName = "Mez ZRadius",
         Category = "Mez Range",
         Default = 15,
@@ -86,7 +86,7 @@ Module.DefaultConfig               = {
         FAQ = "I can't get my enchanter to mez mobs on hills, how do I fix this?",
         Answer = "Adjust your [MezZRadius] to the height above/below you want to start mezzing mobs.",
     },
-    ['AutoLevelRange']  = {
+    ['AutoLevelRange']                         = {
         DisplayName = "Auto Level Range",
         Category = "Mez Target",
         Default = true,
@@ -94,7 +94,7 @@ Module.DefaultConfig               = {
         FAQ = "I'm Lazy and hate updating my thresholds. How do I make my character do it for me?",
         Answer = "Turning on [AutoLevelRange] will automatically adjust the level range for mezzing based on the spells you have.",
     },
-    ['MezMinLevel']     = {
+    ['MezMinLevel']                            = {
         DisplayName = "Mez Min Level",
         Category = "Mez Target",
         Default = 0,
@@ -105,7 +105,7 @@ Module.DefaultConfig               = {
         FAQ = "Why do I keep mezzing the Grey con mobs?",
         Answer = "You may have your [MezMinLevel] set too low, increase it to avoid mezzing grey con mobs.",
     },
-    ['MezMaxLevel']     = {
+    ['MezMaxLevel']                            = {
         DisplayName = "Mez Max Level",
         Category = "Mez Target",
         Default = 0,
@@ -116,7 +116,7 @@ Module.DefaultConfig               = {
         FAQ = "Why won't my enchanter mez this mob? His new spell should work on it.",
         Answer = "You most likely have [AutoLevelRange] turned off and forgot to increase the [MezMaxLevel] to the max for this spell.",
     },
-    ['MezStopHPs']      = {
+    ['MezStopHPs']                             = {
         DisplayName = "Mez Stop HPs",
         Category = "Mez Target",
         Default = 80,
@@ -126,13 +126,21 @@ Module.DefaultConfig               = {
         FAQ = "I keep trying to mez mobs that are about to die -- how do I fix this?",
         Answer = "Adjust your [MezStopHPs] to the HP% you want to stop trying to mez mobs.",
     },
-    ['UseAEAAMez']      = {
+    ['UseAEAAMez']                             = {
         DisplayName = "Use AE AAMez",
         Category = "Mez",
         Default = false,
         Tooltip = "Toggle 0/1 to use Area Effect AA Mez (Default: 0).",
         FAQ = "I just learned my AA AOE Mez, Can I use that when its avail?",
         Answer = "Certainly you can use your AA AOE Mez just Toggle [UseAEAAMez] on to use Area Effect AA Mez.",
+    },
+    [string.format("%s_Popped", Module._name)] = {
+        DisplayName = Module._name .. " Popped",
+        Category = "Monitoring",
+        Tooltip = Module._name .. " Pop Out Into Window",
+        Default = false,
+        FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
+        Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling " .. Module._name .. "_Popped",
     },
 }
 
@@ -218,6 +226,11 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
+    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+        self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+        self:SaveSettings(false)
+    end
+    ImGui.SameLine()
     ImGui.Text("Mez Module")
 
     ---@type boolean|nil
@@ -286,6 +299,11 @@ function Module:Render()
 
         ImGui.Separator()
     end
+end
+
+function Module:Pop()
+    self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+    self:SaveSettings(false)
 end
 
 function Module:HandleMezBroke(mobName, breakerName)
