@@ -474,11 +474,11 @@ function loot.addRule(itemName, section, rule)
         lootData[section] = {}
     end
     lootData[section][itemName] = rule
-    loot.NormalItems[itemName] = rule
     if section == 'GlobalItems' then
         loot.GlobalItems[itemName] = rule
         loot.modifyItem(itemName, rule, 'Global_Rules')
     else
+        loot.NormalItems[itemName] = rule
         loot.modifyItem(itemName, rule, 'Normal_Rules')
     end
     loot.lootActor:send({ mailbox = 'lootnscoot', }, { who = RGMercConfig.Globals.CurLoadedChar, action = 'addrule', item = itemName, rule = rule, section = section, })
