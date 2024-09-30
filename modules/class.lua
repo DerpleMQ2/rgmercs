@@ -68,6 +68,17 @@ Module.CommandHandlers                       = {
                 return true
             end,
     },
+    spellreload = {
+        usage = "/rgl spellreload",
+        about = "Rescans and (if necessary) reloads your default spell gems.",
+        handler = function(self)
+            self:RescanLoadout()
+
+            RGMercsLogger.log_info("\awManual loadout scan initiated.")
+
+            return true
+        end,
+    },
 }
 
 local function getConfigFileName()
@@ -703,14 +714,16 @@ function Module:GiveTime(combat_state)
 
     self.CombatState = combat_state
 
-    -- Healing Happens reguardless of combat_state and happens first.
+    -- Healing happens first and anytime we aren't in downtime while invis and set not to break it.
     if self:IsHealing() then
-        self:RunHealRotation()
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercUtils.GetSetting('BreakInvis')) then
+            self:RunHealRotation()
+        end
     end
 
     if self:IsRezing() then
         -- Check Rezes
-        if (not mq.TLO.Me.Invis() or RGMercUtils.GetSetting('BreakInvis')) then
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercUtils.GetSetting('BreakInvis')) then
             self:IGCheckAndRez()
 
             self:SelfCheckAndRez()
@@ -722,8 +735,10 @@ function Module:GiveTime(combat_state)
     end
 
     if self:IsCuring() then
-        RGMercsLogger.log_verbose("\ao[Cures] Checking for curables...")
-        self:RunCureRotation()
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercUtils.GetSetting('BreakInvis')) then
+            RGMercsLogger.log_verbose("\ao[Cures] Checking for curables...")
+            self:RunCureRotation()
+        end
     end
 
     if self:IsTanking() and RGMercUtils.GetSetting('MovebackWhenBehind') then
