@@ -4674,6 +4674,23 @@ function RGMercUtils.RenderForceTargetList(showPopout)
     end
 end
 
+function RGMercUtils.CheckNamed()
+    RGMercUtils.RefreshNamedCache()
+
+    local tmpTbl = {}
+    for name, _ in pairs(RGMercUtils.NamedList) do
+        local spawn = mq.TLO.Spawn(string.format("NPC %s", name))
+        if RGMercUtils.ShowDownNamed or (spawn() and spawn.ID() > 0) then
+            table.insert(tmpTbl, { Name = name, Distance = spawn.Distance() or 9999, Spawn = spawn, })
+        end
+    end
+
+    table.sort(tmpTbl, function(a, b)
+        return a.Distance < b.Distance
+    end)
+    return tmpTbl
+end
+
 --- Renders a table of the named creatures of the current zone.
 ---
 --- This function retrieves and displays the name of the current zone in the game.
@@ -4692,21 +4709,21 @@ function RGMercUtils.RenderZoneNamed()
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for name, _ in pairs(RGMercUtils.NamedList) do
-            local spawn = mq.TLO.Spawn(string.format("NPC %s", name))
-            if RGMercUtils.ShowDownNamed or (spawn() and spawn.ID() > 0) then
+        local namedList = RGMercUtils.CheckNamed()
+        for _, named in ipairs(namedList) do
+            if RGMercUtils.ShowDownNamed or (named.Spawn() and named.Spawn.ID() > 0) then
                 ImGui.TableNextColumn()
-                local _, clicked = ImGui.Selectable(name, false)
+                local _, clicked = ImGui.Selectable(named.Name, false)
                 if clicked then
-                    RGMercUtils.DoCmd("/target id %d", spawn() and spawn.ID() or 0)
+                    RGMercUtils.DoCmd("/target id %d", named.Spawn() and named.Spawn.ID() or 0)
                 end
                 ImGui.TableNextColumn()
-                if spawn() and spawn.PctHPs() > 0 then
+                if named.Spawn() and named.Spawn.PctHPs() > 0 then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
                     ImGui.Text(RGMercIcons.FA_SMILE_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
-                    ImGui.Text(tostring(math.ceil(spawn.Distance())))
+                    ImGui.Text(tostring(math.ceil(named.Distance)))
                 else
                     ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
                     ImGui.Text(RGMercIcons.FA_FROWN_O)
@@ -4715,7 +4732,7 @@ function RGMercUtils.RenderZoneNamed()
                     ImGui.Text("0")
                 end
                 ImGui.TableNextColumn()
-                RGMercUtils.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
+                RGMercUtils.NavEnabledLoc(named.Spawn.LocYXZ() or "0,0,0")
             end
         end
 
