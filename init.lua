@@ -290,7 +290,7 @@ local function RGMercsGUI()
                         RGMercUtils.RenderOAList()
                     end
 
-                    if RGMercUtils.IAmMA() then
+                    if RGMercUtils.IAmMA() and not RGMercUtils.GetSetting('PopOutForceTarget') then
                         if ImGui.CollapsingHeader("Force Target") then
                             RGMercUtils.RenderForceTargetList(true)
                         end
