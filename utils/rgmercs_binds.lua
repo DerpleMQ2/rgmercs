@@ -147,6 +147,17 @@ Bind.Handlers     = {
             end
         end,
     },
+    ['castaa'] = {
+        usage = "/rgl castaa \"<AAName>\" <targetId?>",
+        about = "All RGMercs will try to use <AAName> you can pass an optional <target id>",
+        handler = function(spell, targetId)
+            targetId = targetId and tonumber(targetId)
+            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
+            RGMercsLogger.log_debug("\atUsing AA: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
+
+            RGMercUtils.UseAA(spell, targetId)
+        end,
+    },
     ['setlogfilter'] = {
         usage = "/rgl setlogfilter <filter|filter|filter|...>",
         about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging)",
@@ -290,6 +301,13 @@ Bind.Handlers     = {
         about = "Toggle Popout of Module",
         handler = function(config, value)
             RGMercModules:ExecModule(config, "Pop")
+        end,
+    },
+    ['faq'] = {
+        usage = "/rgl faq [question]",
+        about = "Toggle Popout of Module",
+        handler = function(config, value)
+            RGMercModules:ExecModule('FAQ', "FaqFind", config)
         end,
     },
 }
