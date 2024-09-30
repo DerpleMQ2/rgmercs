@@ -245,6 +245,47 @@ function Module:ExportFAQToWiki()
 	end
 end
 
+function Module:FaqFind(question)
+	self.TempSettings.Search = question
+	for cmd, data in pairs(RGMercsBinds.Handlers) do
+		if cmd ~= "help" then
+			if self:MatchSearch(data.usage, data.about, cmd) then
+				RGMercsLogger.log_info("\ayCommand: \ax%s \aoUsage:\ax %s\nDescription: \at%s", cmd, data.usage, data.about)
+				mq.delay(5) -- Delay to prevent spamming
+			end
+		end
+	end
+
+	local questions = RGMercModules:ExecAll("GetFAQ")
+	if questions ~= nil then
+		for module, info in pairs(questions or {}) do
+			if info.FAQ then
+				for _, data in pairs(info.FAQ or {}) do
+					if self:MatchSearch(data.Question, data.Answer, data.Settings_Used, module) then
+						RGMercsLogger.log_info("\ayModule:\ax %s \aoQuestion: \ax%s\nAnswer: \at%s", module, data.Question, data.Answer)
+						mq.delay(5)
+					end
+				end
+			end
+		end
+	end
+
+	local classFaq = RGMercModules:ExecAll("GetClassFAQ")
+	if classFaq ~= nil then
+		for module, info in pairs(classFaq or {}) do
+			if info.FAQ then
+				for _, data in pairs(info.FAQ or {}) do
+					if self:MatchSearch(data.Question, data.Answer, data.Settings_Used, module) then
+						RGMercsLogger.log_info("\ayClass:\ax %s \aoQuestion:\ax %s\nAnswer:\at %s", module, data.Question, data.Answer)
+						mq.delay(5)
+					end
+				end
+			end
+		end
+	end
+	self.TempSettings.Search = ''
+end
+
 function Module:Render()
 	if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
 		self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]

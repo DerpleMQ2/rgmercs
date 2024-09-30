@@ -292,6 +292,13 @@ Bind.Handlers     = {
             RGMercModules:ExecModule(config, "Pop")
         end,
     },
+    ['faq'] = {
+        usage = "/rgl faq [question]",
+        about = "Toggle Popout of Module",
+        handler = function(config, value)
+            RGMercModules:ExecModule('FAQ', "FaqFind", config)
+        end,
+    },
 }
 
 return Bind
