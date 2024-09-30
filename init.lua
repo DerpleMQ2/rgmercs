@@ -1,7 +1,7 @@
 local mq         = require('mq')
 local ImGui      = require('ImGui')
 local GitCommit  = require('extras.version')
-local Icons      = require('mq.ICONS')
+RGMercIcons      = require('mq.ICONS')
 DanNet           = require('lib.dannet.helpers')
 
 local PackageMan = require('mq/PackageMan')
@@ -37,6 +37,7 @@ local logFilterLocked = true
 
 -- Icon Rendering
 local derpImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
+local burnImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_burn.png")
 
 -- Constants
 
@@ -289,10 +290,6 @@ local function RGMercsGUI()
                         RGMercUtils.RenderOAList()
                     end
 
-                    if ImGui.CollapsingHeader("Zone Named") then
-                        RGMercUtils.RenderZoneNamed()
-                    end
-
                     if RGMercUtils.IAmMA() then
                         if ImGui.CollapsingHeader("Force Target") then
                             RGMercUtils.RenderForceTargetList(true)
@@ -338,7 +335,7 @@ local function RGMercsGUI()
                     ImGui.TableNextColumn()
                     ImGui.Text("Log Filter")
                     ImGui.SameLine()
-                    if ImGui.Button(logFilterLocked and Icons.FA_LOCK or Icons.FA_UNLOCK, 22, 22) then
+                    if ImGui.Button(logFilterLocked and RGMercIcons.FA_LOCK or RGMercIcons.FA_UNLOCK, 22, 22) then
                         logFilterLocked = not logFilterLocked
                     end
                     ImGui.TableNextColumn()
@@ -375,19 +372,27 @@ local function RGMercsGUI()
                 end
             end
         elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
+            local btnImg = RGMercUtils.LastBurnCheck and burnImg or derpImg
             if RGMercConfig.Globals.PauseMain then
-                if ImGui.ImageButton('RGMercsButton', derpImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
+                if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
                     RGMercConfig.Globals.Minimized = false
                 end
                 if ImGui.IsItemHovered() then
                     ImGui.SetTooltip("RGMercs is Paused")
                 end
             else
-                if ImGui.ImageButton('RGMercsButton', derpImg:GetTextureID(), ImVec2(30, 30)) then
+                if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then
                     RGMercConfig.Globals.Minimized = false
                 end
                 if ImGui.IsItemHovered() then
-                    ImGui.SetTooltip("RGMercs is Running")
+                    ImGui.BeginTooltip()
+                    if RGMercUtils.LastBurnCheck then
+                        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
+                            string.format("RGMercs is BURNING!!"))
+                    else
+                        ImGui.Text("RGMercs is Running")
+                    end
+                    ImGui.EndTooltip()
                 end
             end
             if ImGui.BeginPopupContextWindow() then

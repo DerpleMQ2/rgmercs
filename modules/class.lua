@@ -3,7 +3,6 @@ local mq                 = require('mq')
 local RGMercUtils        = require("utils.rgmercs_utils")
 local Set                = require("mq.Set")
 local RGMercsClassLoader = require('utils.rgmercs_classloader')
-local Icons              = require('mq.Icons')
 require('utils.rgmercs_datatypes')
 
 local Module                                 = { _version = '0.1a', _name = "Class", _author = 'Derple', }
@@ -310,7 +309,7 @@ function Module:Render()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
                     local rotationName = r.name
-                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
+                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and RGMercIcons.MD_CHECK or RGMercIcons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(r.name,
                             self.ClassConfig.Rotations[r.name],
@@ -329,7 +328,7 @@ function Module:Render()
 
                 for _, r in pairs(self.TempSettings.HealingRotationStates) do
                     local rotationName = r.name
-                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
+                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and RGMercIcons.MD_CHECK or RGMercIcons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(r.name,
                             self.ClassConfig.HealRotations[r.name],
