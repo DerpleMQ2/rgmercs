@@ -751,16 +751,16 @@ function loot.commandHandler(...)
         elseif args[1] == 'tsbank' then
             loot.markTradeSkillAsBank()
         elseif validActions[args[1]] and mq.TLO.Cursor() then
-            loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor(), validActions[args[1]])
+            loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor():sub(1, 1):upper(), validActions[args[1]])
             RGMercsLogger.log_info(string.format("Setting \ay%s\ax to \ay%s\ax", mq.TLO.Cursor(), validActions[args[1]]))
         elseif string.find(args[1], "quest%|") and mq.TLO.Cursor() then
             local val = string.gsub(args[1], "quest", "Quest")
-            loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor(), val)
+            loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor():sub(1, 1):upper(), val)
             RGMercsLogger.log_info(string.format("Setting \ay%s\ax to \ay%s\ax", mq.TLO.Cursor(), val))
         end
     elseif #args == 2 then
         if args[1] == 'quest' and mq.TLO.Cursor() then
-            loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor(), 'Quest|' .. args[2])
+            loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor():sub(1, 1):upper(), 'Quest|' .. args[2])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayQuest|%s\ax", mq.TLO.Cursor(), args[2])
         elseif args[1] == 'buy' and mq.TLO.Cursor() then
             loot.BuyItems[mq.TLO.Cursor()] = args[2]
@@ -771,7 +771,7 @@ function loot.commandHandler(...)
             loot.addRule(mq.TLO.Cursor(), 'GlobalItems', validActions[args[2]])
             RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", mq.TLO.Cursor(), validActions[args[2]])
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
-            loot.addRule(args[2], args[2], validActions[args[1]])
+            loot.addRule(args[2], args[2]:sub(1, 1):upper(), validActions[args[1]])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ay%s\ax", args[2], validActions[args[1]])
         end
     elseif #args == 3 then
@@ -786,7 +786,7 @@ function loot.commandHandler(...)
             RGMercUtils.DoCmd('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, args[2], args[3])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", args[2], args[3])
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
-            loot.addRule(args[2], args[2], validActions[args[1]] .. '|' .. args[3])
+            loot.addRule(args[2], args[2]:sub(1, 1):upper(), validActions[args[1]] .. '|' .. args[3])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ay%s|%s\ax", args[2], validActions[args[1]], args[3])
         end
     elseif #args == 4 then
