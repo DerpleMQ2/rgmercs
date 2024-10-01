@@ -3593,7 +3593,7 @@ function RGMercUtils.GetXTHaterIDs(printDebug)
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or RGMercUtils.ForceCombat) then
+        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs()) or 0) > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or RGMercUtils.ForceCombat) then
             if printDebug then
                 RGMercsLogger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
             end
