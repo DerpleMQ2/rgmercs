@@ -652,8 +652,10 @@ local _ClassConfig = {
         --function to determine if we should AE taunt and optionally, if it is safe to do so
         AETauntCheck = function(printDebug)
             local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
-            if mobs < RGMercUtils.GetSetting('AETauntCnt') then return false end
             local xtCount = mq.TLO.Me.XTarget() or 0
+
+            if (mobs or xtCount) < RGMercUtils.GetSetting('AETauntCnt') then return false end
+
             local tauntme = {}
             for i = 1, xtCount do
                 local xtarg = mq.TLO.Me.XTarget(i)

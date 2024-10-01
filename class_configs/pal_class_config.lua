@@ -147,11 +147,11 @@ return {
         },
         ["FuryProc"] = {
             --- Fury Proc Strike
-            "Divine Might",   -- Level 45
-            "Pious Might",    -- Level 63
-            "Holy Order",     -- Level 65
-            "Pious Fury",     -- Level 68
-            "Righteous Fury", -- Level 80
+            "Divine Might",   -- Level 45, 65pt
+            "Pious Might",    -- Level 63, 150pt
+            "Holy Order",     -- Level 65, 180pt
+            "Pious Fury",     -- Level 68, 190pt
+            "Righteous Fury", -- Level 80, 268pt --For simplicity of coding and conflict prevention, once fury is rolled into DPU at 80, we will no longer use the undead proc.
             "Devout Fury",    -- Level 85
             "Earnest Fury",   -- Level 90
             "Zealous Fury",   -- Level 95
@@ -161,6 +161,12 @@ return {
             "Sincere Fury",   -- Level 115
             "Wrathful Fury",  -- Level 120
             "Avowed Fury",    -- Level 125
+        },
+        ["UndeadProc"] = {
+            --- Undead Proc Strike : does not stack with Fury Proc, will be used until Fury is available even if setting not enabled.
+            "Instrument of Nife", -- Level 26, 243pt
+            "Ward of Nife",       -- Level 62, 300pt
+            "Silvered Fury",      -- Level 67, 390pt
         },
         ["Aurora"] = {
             "Aurora of Dawning",
@@ -1283,6 +1289,14 @@ return {
                 end,
             },
             {
+                name = "UndeadProc",
+                type = "Spell",
+                cond = function(self, spell) --use this always until we have a Fury proc, and optionally after that, up until the point that Fury is rolled into DPU
+                    if (mq.TLO.Me.AltAbility("Divine Protector's Unity").Rank() or 0) > 1 or (self:GetResolvedActionMapItem("FuryProc") and not RGMercUtils.GetSetting('DoUndeadProc')) then return false end
+                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                end,
+            },
+            {
                 name = "Remorse",
                 type = "Spell",
                 cond = function(self, spell)
@@ -1529,6 +1543,15 @@ return {
             Default = true,
             FAQ = "Why am I not curing?",
             Answer = "Make sure you have the [DoCures] setting enabled.",
+        },
+        ['DoUndeadProc'] = {
+            DisplayName = "Use Undead Proc",
+            Category = "Spells and Abilities",
+            Tooltip = "Use Undead proc over Fury proc until Fury is rolled into Divine Protector's Unity (Level 80).",
+            Default = false,
+            FAQ = "I was using an undead proc buff and it recently switched to the Fury line proc, how do I get it back?",
+            Answer = "By default, we will use the undead proc from levels 26-44 as it is the only proc available.\n" ..
+                "If you would like to continue to use the Undead proc after that, please enable it in the Spells and Abilities tab.",
         },
         ['FlashHP']      = {
             DisplayName = "Use Shield Flash",
