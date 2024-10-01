@@ -671,7 +671,7 @@ function Module:ShouldFollow()
 
     return not mq.TLO.MoveTo.Moving() and
         (not me.Casting.ID() or RGMercUtils.MyClassIs("brd")) and
-        (RGMercUtils.GetXTHaterCount() == 0 or (assistSpawn() and assistSpawn.Distance() > self.settings.ChaseDistance))
+        (RGMercUtils.GetXTHaterCount() == 0 or (assistSpawn() and (assistSpawn.Distance() or 0) > self.settings.ChaseDistance))
 end
 
 function Module:Go2GGH()

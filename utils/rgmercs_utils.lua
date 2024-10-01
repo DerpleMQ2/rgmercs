@@ -230,6 +230,7 @@ function RGMercUtils.ClearTarget()
     RGMercsLogger.log_debug("Clearing Target")
     if RGMercUtils.GetSetting('DoAutoTarget') then
         RGMercConfig.Globals.AutoTargetID = 0
+        RGMercConfig.Globals.ForceTargetID = 0
         if mq.TLO.Stick.Status():lower() == "on" then RGMercUtils.DoCmd("/stick off") end
         RGMercUtils.DoCmd("/target clear")
     end
