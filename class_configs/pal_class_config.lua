@@ -147,6 +147,7 @@ return {
         },
         ["FuryProc"] = {
             --- Fury Proc Strike
+            "Instrument of Nife",   -- Level 26 (undead-only)
             "Divine Might",   -- Level 45
             "Pious Might",    -- Level 63
             "Holy Order",     -- Level 65
