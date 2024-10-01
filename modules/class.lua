@@ -748,7 +748,7 @@ function Module:GiveTime(combat_state)
 
         for i = 1, xtCount do
             local xtSpawn = mq.TLO.Me.XTarget(i)
-            if xtSpawn and xtSpawn() and xtSpawn.ID() > 0 and not xtSpawn.Dead() and (math.ceil(xtSpawn.PctHPs()) or 0) > 0 and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
+            if xtSpawn and xtSpawn() and xtSpawn.ID() > 0 and not xtSpawn.Dead() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
                 RGMercsLogger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(),
                     (xtSpawn.Heading.Degrees() or 0))
