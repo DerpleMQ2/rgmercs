@@ -315,11 +315,8 @@ function RGMercUtils.WelcomeMsg()
     RGMercsLogger.log_info("\aw\awBy \ag%s", RGMercConfig._author)
     RGMercsLogger.log_info("\aw****************************")
     RGMercsLogger.log_info("\aw use \ag /rg \aw for a list of commands")
-    RGMercsLogger.log_info("\ay*** PLEASE NOTE ***")
-    RGMercsLogger.log_info("\awOur humblest apologies...")
-    RGMercsLogger.log_info(
-        "\awThe setting to run movement while paused has been moved from the \ag\"RGMercsMain\" \awtab to the \ag\"Movement\" \awtab and must be re-selected to use it.")
-    RGMercsLogger.log_info("\ay*** END NOTE ***")
+    --RGMercsLogger.log_info("\ay*** PLEASE NOTE ***")
+    --RGMercsLogger.log_info("\ay*** END NOTE ***")
 end
 
 --- Checks if a given Alternate Advancement (AA) ability can be used.

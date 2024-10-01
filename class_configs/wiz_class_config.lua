@@ -767,7 +767,7 @@ return {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
         },
@@ -847,7 +847,7 @@ return {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
         },
@@ -1120,7 +1120,7 @@ return {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
             {
