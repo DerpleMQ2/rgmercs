@@ -857,7 +857,12 @@ end
 
 function Module:GetVersionString()
     if not self.ClassConfig then return "Unknown" end
-    return string.format("%s %s by %s%s", RGMercConfig.Globals.CurLoadedClass, self.ClassConfig._version, self.ClassConfig._author, self.ClassConfig.IsCustom and " [Custom]" or "")
+    return string.format("%s %s", RGMercConfig.Globals.CurLoadedClass, self.ClassConfig._version)
+end
+
+function Module:GetAuthorString()
+    if not self.ClassConfig then return "Unknown" end
+    return string.format("%s", self.ClassConfig._author)
 end
 
 function Module:GetCommandHandlers()
