@@ -101,7 +101,7 @@ local function castWSU()
 end
 
 local _ClassConfig = {
-    _version              = "0.1a - Project Lazarus",
+    _version              = "1.0 - Project Lazarus",
     _author               = "MrInfernal",
     ['CommandHandlers']   = {
         makeammo = {

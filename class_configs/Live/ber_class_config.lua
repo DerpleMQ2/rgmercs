@@ -2,7 +2,7 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version            = "1.4",
+    _version            = "1.4 - Live",
     -- 1.1 added Dicho to rotation -SCVOne
     -- 1.2 added Bfrenzy  timer 11 -SCVOne
     -- 1.3 seperated DPS into 3 sections to increase freq of attacks -SCVOne

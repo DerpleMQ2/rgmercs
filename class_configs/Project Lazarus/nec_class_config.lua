@@ -12,7 +12,7 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    _version            = "0.2a - Project Lazarus",
+    _version            = "1.0 - Project Lazarus",
     _author             = "Derple, Grimmier",
     ['Modes']           = {
         'DPS',

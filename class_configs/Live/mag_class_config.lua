@@ -2,7 +2,7 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 _ClassConfig      = {
-    _version              = "0.2B",
+    _version              = "1.0 - Live",
     _author               = "Derple, Morisato",
     ['ModeChecks']        = {
         IsTanking = function() return RGMercUtils.IsModeActive("PetTank") end,

@@ -2,7 +2,7 @@ local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
 
 local _ClassConfig = {
-    _version            = "1.2",
+    _version            = "1.2 - Live",
     _author             = "Derple, Grimmier, Algar",
     ['ModeChecks']      = {
         CanMez     = function() return true end,
