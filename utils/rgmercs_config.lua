@@ -3,8 +3,8 @@ local RGMercUtils                    = require("utils.rgmercs_utils")
 local Set                            = require("mq.Set")
 
 local Config                         = {
-    _version = '1.0 Beta',
-    _subVersion = "2023 Laurion\'s Song!",
+    _version = '1.1',
+    _subVersion = "2024 Laurion\'s Song!",
     _name =
     "RGMercs Lua Edition",
     _author = 'Derple, Morisato, Greyn, Algar, Grimmier',
