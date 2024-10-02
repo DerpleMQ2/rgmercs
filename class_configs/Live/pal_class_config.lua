@@ -2,7 +2,7 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version              = "1.0 Beta",
+    _version              = "1.0 - Live",
     _author               = "Derple",
     ['ModeChecks']        = {
         IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
@@ -1424,7 +1424,7 @@ return {
                 { name = "BurstHeal",    cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
                 { name = "TotLightHeal", },
                 { name = "Preservation", },
-                { name = "LightHeal",	 },
+                { name = "LightHeal", },
             },
         },
         {

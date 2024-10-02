@@ -7,7 +7,7 @@ local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
 
 return {
-    _version         = "1.0 Beta - Project Lazarus",
+    _version         = "1.0 - Project Lazarus",
     _author          = "Derple",
     ['Modes']        = {
         'Combo',
