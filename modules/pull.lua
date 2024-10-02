@@ -1841,6 +1841,12 @@ function Module:GiveTime(combat_state)
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
+
+                    if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
+                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                    end
+
                     RGMercUtils.DoCmd("/ranged %d", self.TempSettings.PullID)
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
@@ -1863,6 +1869,12 @@ function Module:GiveTime(combat_state)
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
                     RGMercUtils.DoCmd("/attack")
+
+                    if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
+                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                    end
+
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
@@ -1886,7 +1898,7 @@ function Module:GiveTime(combat_state)
                     end
 
                     if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
-                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
+                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
                     end
 
