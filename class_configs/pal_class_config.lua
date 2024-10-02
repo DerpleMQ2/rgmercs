@@ -1424,6 +1424,7 @@ return {
                 { name = "BurstHeal",    cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
                 { name = "TotLightHeal", },
                 { name = "Preservation", },
+                { name = "LightHeal",	 },
             },
         },
         {
