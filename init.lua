@@ -85,11 +85,20 @@ local function GetTheme()
     return RGMercModules:ExecModule("Class", "GetTheme")
 end
 
+local function GetClassConfigIDFromName(name)
+    for idx, curName in ipairs(RGMercConfig.Globals.ClassConfigDirs) do
+        if curName == name then return idx end
+    end
+
+    return 1
+end
+
 local function RenderConfigSelector()
     ImGui.Text("Configuration Type")
-    local newConfigDir, changed = ImGui.Combo("##config_type", RGMercUtils.GetSetting('ClassConfigDir'), RGMercConfig.Globals.ClassConfigDirs, #RGMercConfig.Globals.ClassConfigDirs)
+    local newConfigDir, changed = ImGui.Combo("##config_type", GetClassConfigIDFromName(RGMercUtils.GetSetting('ClassConfigDir')), RGMercConfig.Globals.ClassConfigDirs,
+        #RGMercConfig.Globals.ClassConfigDirs)
     if changed then
-        RGMercUtils.SetSetting('ClassConfigDir', newConfigDir)
+        RGMercUtils.SetSetting('ClassConfigDir', RGMercConfig.Globals.ClassConfigDirs[newConfigDir])
         RGMercConfig:SaveSettings(false)
         RGMercConfig:LoadSettings()
         RGMercModules:ExecAll("LoadSettings")
