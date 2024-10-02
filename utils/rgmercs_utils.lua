@@ -61,6 +61,21 @@ function RGMercUtils.copy_file(from_path, to_path)
     return false
 end
 
+--- Scans for updates in the class_configs folder.
+function RGMercUtils.ScanConfigDirs()
+    RGMercConfig.Globals.ClassConfigDirs = {}
+
+    local classConfigDir = RGMercConfig.Globals.ScriptDir .. "/class_configs"
+
+    for file in LuaFS.dir(classConfigDir) do
+        if file ~= "." and file ~= ".." and LuaFS.attributes(classConfigDir .. "/" .. file).mode == "directory" then
+            table.insert(RGMercConfig.Globals.ClassConfigDirs, file)
+        end
+    end
+
+    table.insert(RGMercConfig.Globals.ClassConfigDirs, "Custom")
+end
+
 --- Broadcasts an update event to the specified module.
 ---
 --- @param module string The name of the module to broadcast the update to.

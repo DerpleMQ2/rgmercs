@@ -7,7 +7,7 @@ DanNet           = require('lib.dannet.helpers')
 local PackageMan = require('mq/PackageMan')
 SQLite3          = PackageMan.Require('lsqlite3')
 
-local LuaFS      = PackageMan.Require('luafilesystem', 'lfs')
+LuaFS            = PackageMan.Require('luafilesystem', 'lfs')
 
 RGMercsBinds     = require('utils.rgmercs_binds')
 RGMercsEvents    = require('utils.rgmercs_events')
@@ -102,6 +102,11 @@ local function RenderConfigSelector()
         RGMercConfig:SaveSettings(false)
         RGMercConfig:LoadSettings()
         RGMercModules:ExecAll("LoadSettings")
+    end
+
+    ImGui.SameLine()
+    if ImGui.SmallButton(RGMercIcons.FA_REFRESH) then
+        RGMercUtils.ScanConfigDirs()
     end
 end
 
@@ -469,20 +474,6 @@ mq.imgui.init('RGMercsUI', RGMercsGUI)
 -- End UI --
 local unloadedPlugins = {}
 
-local function ScanConfigDirs()
-    RGMercConfig.Globals.ClassConfigDirs = {}
-
-    local classConfigDir = RGMercConfig.Globals.ScriptDir .. "/class_configs"
-
-    for file in LuaFS.dir(classConfigDir) do
-        if file ~= "." and file ~= ".." and LuaFS.attributes(classConfigDir .. "/" .. file).mode == "directory" then
-            table.insert(RGMercConfig.Globals.ClassConfigDirs, file)
-        end
-    end
-
-    table.insert(RGMercConfig.Globals.ClassConfigDirs, "Custom")
-end
-
 local function RGInit(...)
     RGMercUtils.CheckPlugins({
         "MQ2Rez",
@@ -505,7 +496,7 @@ local function RGInit(...)
         end
     end
 
-    ScanConfigDirs()
+    RGMercUtils.ScanConfigDirs()
 
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
     RGMercModules:ExecAll("Init")
