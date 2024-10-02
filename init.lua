@@ -462,11 +462,11 @@ local unloadedPlugins = {}
 
 local function ScanConfigDirs()
     RGMercConfig.Globals.ClassConfigDirs = {}
-    local info = debug.getinfo(1, "S")
-    local dir = info.short_src:sub(0, -9) .. "class_configs"
 
-    for file in LuaFS.dir(dir) do
-        if file ~= "." and file ~= ".." and LuaFS.attributes(dir .. "/" .. file).mode == "directory" then
+    local classConfigDir = RGMercConfig.Globals.ScriptDir .. "/class_configs"
+
+    for file in LuaFS.dir(classConfigDir) do
+        if file ~= "." and file ~= ".." and LuaFS.attributes(classConfigDir .. "/" .. file).mode == "directory" then
             table.insert(RGMercConfig.Globals.ClassConfigDirs, file)
         end
     end

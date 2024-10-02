@@ -5,20 +5,20 @@ local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple
 
 function ClassLoader.getClassConfigFileName(class)
     local info = debug.getinfo(6, "S")
-    local dir = info.short_src:sub(0, -9) .. "class_configs"
+    local baseConfigDir = RGMercConfig.Globals.ScriptDir .. "/class_configs"
 
     local customConfigFile = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
 
     local classConfigDir = RGMercConfig.Globals.ClassConfigDirs[RGMercUtils.GetSetting('ClassConfigDir')] or "Live"
-    local customConfig = classConfigDir == "Custom"
+    local customConfig = (classConfigDir == "Custom")
 
-    local configFile = customConfig and customConfigFile or string.format("%s/%s/%s_class_config.lua", dir, classConfigDir, class:lower())
+    local configFile = customConfig and customConfigFile or string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
 
     if not RGMercUtils.file_exists(configFile) then
         -- Fall back to live.
         local oldConfig = configFile
         customConfig = false
-        configFile = string.format("%s/%s/%s_class_config.lua", dir, "Live", class:lower())
+        configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, "Live", class:lower())
         RGMercsLogger.log_error("Could not find requested class config %s falling back to %s", oldConfig, configFile)
     end
 

@@ -16,6 +16,7 @@ Config.FAQ                           = {}
 -- Global State
 Config.Globals                       = {}
 Config.Globals.MainAssist            = ""
+Config.Globals.ScriptDir             = ""
 Config.Globals.AutoTargetID          = 0
 Config.Globals.ForceTargetID         = 0
 Config.Globals.SubmodulesLoaded      = false
@@ -1418,6 +1419,11 @@ function Config:LoadSettings()
     if needSave or settingsChanged then
         self:SaveSettings(false)
     end
+
+    -- setup our script path for later usage since getting it kind of sucks.
+    local info = debug.getinfo(2, "S")
+    local scriptDir = info.short_src:sub(info.short_src:find("lua") + 4):sub(0, -10)
+    Config.Globals.ScriptDir = string.format("%s/%s", mq.TLO.Lua.Dir(), scriptDir)
 
     return true
 end
