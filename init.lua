@@ -292,10 +292,11 @@ local function RGMercsGUI()
             local imgDisplayed = RGMercUtils.LastBurnCheck and burnImg or derpImg
             ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
             ImGui.SameLine()
-            ImGui.Text(string.format("RGMercs %s\nClass Config: %s\nBuild: %s",
+            ImGui.Text(string.format("RGMercs %s [%s]\nClass Config: %s",
                 RGMercConfig._version,
-                RGMercModules:ExecModule("Class", "GetVersionString"),
-                GitCommit.commitId or "None"))
+                GitCommit.commitId or "None",
+                RGMercModules:ExecModule("Class", "GetVersionString"))
+            )
             if ImGui.SmallButton('Create Custom Config') then
                 RGMercModules:ExecModule("Class", "WriteCustomConfig")
             end
