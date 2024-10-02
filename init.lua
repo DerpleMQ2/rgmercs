@@ -7,6 +7,8 @@ DanNet           = require('lib.dannet.helpers')
 local PackageMan = require('mq/PackageMan')
 SQLite3          = PackageMan.Require('lsqlite3')
 
+local LuaFS      = PackageMan.Require('luafilesystem', 'lfs')
+
 RGMercsBinds     = require('utils.rgmercs_binds')
 RGMercsEvents    = require('utils.rgmercs_events')
 RGMercsLogger    = require("utils.rgmercs_logger")
@@ -37,8 +39,8 @@ local logFilterLocked = true
 
 -- Icon Rendering
 local derpImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
-local burnImg2        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_burn.png")  -- DerpDog Burning Ring of Fire
-local burnImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/algar2.png")        -- Algar
+local burnImg2        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_burn.png") -- DerpDog Burning Ring of Fire
+local burnImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/algar2.png")       -- Algar
 
 -- Constants
 
@@ -81,6 +83,17 @@ end
 
 local function GetTheme()
     return RGMercModules:ExecModule("Class", "GetTheme")
+end
+
+local function RenderConfigSelector()
+    ImGui.Text("Configuration Type")
+    local newConfigDir, changed = ImGui.Combo("##config_type", RGMercUtils.GetSetting('ClassConfigDir'), RGMercConfig.Globals.ClassConfigDirs, #RGMercConfig.Globals.ClassConfigDirs)
+    if changed then
+        RGMercUtils.SetSetting('ClassConfigDir', newConfigDir)
+        RGMercConfig:SaveSettings(false)
+        RGMercConfig:LoadSettings()
+        RGMercModules:ExecAll("LoadSettings")
+    end
 end
 
 local function RenderTarget()
@@ -291,6 +304,7 @@ local function RGMercsGUI()
             if ImGui.SmallButton('Minimize') then
                 RGMercConfig.Globals.Minimized = true
             end
+
             if not RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
             else
@@ -311,6 +325,8 @@ local function RGMercsGUI()
 
             ImGui.NewLine()
             ImGui.Separator()
+
+            RenderConfigSelector()
 
             if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
                 ImGui.SetItemDefaultFocus()
@@ -444,6 +460,20 @@ mq.imgui.init('RGMercsUI', RGMercsGUI)
 -- End UI --
 local unloadedPlugins = {}
 
+local function ScanConfigDirs()
+    RGMercConfig.Globals.ClassConfigDirs = {}
+    local info = debug.getinfo(1, "S")
+    local dir = info.short_src:sub(0, -9) .. "class_configs"
+
+    for file in LuaFS.dir(dir) do
+        if file ~= "." and file ~= ".." and LuaFS.attributes(dir .. "/" .. file).mode == "directory" then
+            table.insert(RGMercConfig.Globals.ClassConfigDirs, file)
+        end
+    end
+
+    table.insert(RGMercConfig.Globals.ClassConfigDirs, "Custom")
+end
+
 local function RGInit(...)
     RGMercUtils.CheckPlugins({
         "MQ2Rez",
@@ -465,6 +495,9 @@ local function RGInit(...)
             end
         end
     end
+
+    ScanConfigDirs()
+
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
     RGMercModules:ExecAll("Init")
     RGMercConfig.Globals.SubmodulesLoaded = true

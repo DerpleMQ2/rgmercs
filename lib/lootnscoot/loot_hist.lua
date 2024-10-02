@@ -188,7 +188,7 @@ local function loadSettings()
 	else
 		-- Load settings from the Lua config file
 		temp = {}
-		settings = dofile(configFile)
+		settings = dofile(configFile) or {}
 		if not settings[script] then
 			settings[script] = {}
 			settings[script] = defaults

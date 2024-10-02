@@ -1885,6 +1885,11 @@ function Module:GiveTime(combat_state)
                         RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, RGMercUtils.GetTargetDistance() * 0.9, requireLOS)
                     end
 
+                    if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
+                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
+                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                    end
+
                     if pullAbility.Type:lower() == "ability" then
                         if mq.TLO.Me.AbilityReady(pullAbility.id)() then
                             local abilityName = pullAbility.AbilityName

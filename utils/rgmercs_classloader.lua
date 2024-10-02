@@ -3,39 +3,47 @@ local RGMercUtils = require("utils.rgmercs_utils")
 
 local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple', }
 
+function ClassLoader.getClassConfigFileName(class)
+    local info = debug.getinfo(6, "S")
+    local dir = info.short_src:sub(0, -9) .. "class_configs"
+
+    local customConfigFile = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
+
+    local classConfigDir = RGMercConfig.Globals.ClassConfigDirs[RGMercUtils.GetSetting('ClassConfigDir')] or "Live"
+    local customConfig = classConfigDir == "Custom"
+
+    local configFile = customConfig and customConfigFile or string.format("%s/%s/%s_class_config.lua", dir, classConfigDir, class:lower())
+
+    if not RGMercUtils.file_exists(configFile) then
+        -- Fall back to live.
+        local oldConfig = configFile
+        customConfig = false
+        configFile = string.format("%s/%s/%s_class_config.lua", dir, "Live", class:lower())
+        RGMercsLogger.log_error("Could not find requested class config %s falling back to %s", oldConfig, configFile)
+    end
+
+    return configFile, customConfig
+end
+
 ---@param class string # EQ Class ShortName
 function ClassLoader.load(class)
-    local baseClassConfig = require(string.format("class_configs.%s_class_config", class:lower()))
-    local overrideClassConfig = {}
-    local customConfigLoaded = false
+    local classConfigFile, customConfig = ClassLoader.getClassConfigFileName(class)
+    RGMercsLogger.log_info("Loading Base Config: %s", classConfigFile)
 
-    -- check for overrides
-    local custom_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
-
-    if RGMercUtils.file_exists(custom_config_file) then
-        RGMercsLogger.log_info("Loading Custom Core Class Config: %s", custom_config_file)
-        local config, err = loadfile(custom_config_file)
+    if RGMercUtils.file_exists(classConfigFile) then
+        local config, err = loadfile(classConfigFile)
         if not config or err then
-            RGMercsLogger.log_error("Failed to Load Custom Core Class Config: %s", custom_config_file)
+            RGMercsLogger.log_error("Failed to Load Custom Core Class Config: %s", classConfigFile)
         else
-            overrideClassConfig = config()
-            customConfigLoaded = true
-        end
-    end
-    local classConfig
-    if overrideClassConfig['FullConfig'] ~= nil then
-        if overrideClassConfig['FullConfig'] then
-            RGMercsLogger.log_info("\agFull Replacement Config Loaded")
-            classConfig = {}
-            classConfig = overrideClassConfig
-            classConfig.IsCustom = customConfigLoaded
+            local classConfig
+            RGMercsLogger.log_info("\agFull Config Loaded")
+            classConfig = config()
+            classConfig.IsCustom = customConfig
             return classConfig
         end
-    else
-        classConfig = ClassLoader.mergeTables(baseClassConfig, overrideClassConfig)
     end
-    classConfig.IsCustom = customConfigLoaded
-    return classConfig
+
+    return {}
 end
 
 function ClassLoader.writeCustomConfig(class)

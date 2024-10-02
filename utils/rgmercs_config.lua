@@ -640,6 +640,17 @@ Config.DefaultConfig = {
         FAQ = "How do I Setup who to assist from outside of my group?",
         Answer = "You can add characters to the [OutsideAssistList] to allow you to assist them.",
     },
+    ['ClassConfigDir']       = {
+        DisplayName = "Class Config Dir",
+        Category = "Main",
+        Index = 14,
+        Tooltip = "Which version of class configs to Load",
+        Type = "Custom",
+        Default = 1,
+        ConfigType = "Advanced",
+        FAQ = "How do I load configuration file for different servers types?",
+        Answer = "You can change the config type by selecting a different Server Type from the main panel.",
+    },
 
     -- [SPELLS/ABILS] --
     ['ManaToNuke']           = {
