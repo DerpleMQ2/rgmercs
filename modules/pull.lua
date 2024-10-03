@@ -124,6 +124,15 @@ Module.Constants.PullAbilities         = {
             return true
         end,
     },
+    {
+        id = "Staff of Viral Flux",
+        Type = "Item",
+        AbilityRange = 200,
+        DisplayName = "Staff of Viral Flux",
+        cond = function(self)
+            return mq.TLO.FindItemCount("Staff of Viral Flux")() > 0
+        end,
+    },
 }
 
 local PullAbilityIDToName              = {}
@@ -1916,6 +1925,10 @@ function Module:GiveTime(combat_state)
                         local aaName = pullAbility.AbilityName
                         if type(aaName) == 'function' then aaName = aaName() end
                         RGMercUtils.UseAA(aaName, self.TempSettings.PullID)
+                    elseif pullAbility.Type:lower() == "item" then
+                        local itemName = pullAbility.AbilityName
+                        if type(itemName) == 'function' then itemName = itemName() end
+                        RGMercUtils.UseItem(itemName, self.TempSettings.PullID)
                     else
                         RGMercsLogger.log_error("\arInvalid PullAbilityType: %s :: %s", pullAbility.Type, pullAbility.id)
                     end
