@@ -129,6 +129,7 @@ Module.Constants.PullAbilities         = {
         Type = "Item",
         AbilityRange = 200,
         DisplayName = "Staff of Viral Flux",
+        ItemName = "Staff of Viral Flux",
         cond = function(self)
             return mq.TLO.FindItemCount("Staff of Viral Flux")() > 0
         end,
@@ -1926,7 +1927,7 @@ function Module:GiveTime(combat_state)
                         if type(aaName) == 'function' then aaName = aaName() end
                         RGMercUtils.UseAA(aaName, self.TempSettings.PullID)
                     elseif pullAbility.Type:lower() == "item" then
-                        local itemName = pullAbility.AbilityName
+                        local itemName = pullAbility.ItemName
                         if type(itemName) == 'function' then itemName = itemName() end
                         RGMercsLogger.log_debug("Attempting to pull with Item: %s", itemName)
                         RGMercUtils.UseItem(itemName, self.TempSettings.PullID)
