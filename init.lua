@@ -355,7 +355,6 @@ local function RGMercsGUI()
                         ImGui.SameLine()
                         if ImGui.SmallButton(string.format("Set MA to %s", RGMercUtils.GetTargetCleanName())) then
                             RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
-                            DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
                         end
                     end
                     ImGui.Text("Stuck To: " ..
@@ -563,7 +562,6 @@ local function RGInit(...)
 
     if mainAssist:len() > 0 then
         RGMercConfig.Globals.MainAssist = mainAssist
-        DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
         RGMercUtils.PopUp("Targetting %s for Main Assist", RGMercConfig.Globals.MainAssist)
         RGMercUtils.SetTarget(RGMercUtils.GetMainAssistId())
         RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist,
