@@ -943,6 +943,7 @@ function RGMercUtils.UseItem(itemName, targetId)
     end
 
     if not itemName then
+        RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): \arGiven item name is nil!")
         return false
     end
 
@@ -989,10 +990,7 @@ function RGMercUtils.UseItem(itemName, targetId)
     end
 
     local oldTargetId = RGMercUtils.GetTargetID()
-    if targetId > 0 then
-        RGMercUtils.DoCmd("/target id %d", targetId)
-        mq.delay("2s", function() return RGMercUtils.GetTargetID() == targetId end)
-    end
+    RGMercUtils.SetTarget(targetId, true)
 
     RGMercsLogger.log_debug("\awUseItem(\ag%s\aw): Using Item!", itemName)
 

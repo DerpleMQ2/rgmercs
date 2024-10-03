@@ -1928,6 +1928,7 @@ function Module:GiveTime(combat_state)
                     elseif pullAbility.Type:lower() == "item" then
                         local itemName = pullAbility.AbilityName
                         if type(itemName) == 'function' then itemName = itemName() end
+                        RGMercsLogger.log_debug("Attempting to pull with Item: %s", itemName)
                         RGMercUtils.UseItem(itemName, self.TempSettings.PullID)
                     else
                         RGMercsLogger.log_error("\arInvalid PullAbilityType: %s :: %s", pullAbility.Type, pullAbility.id)
