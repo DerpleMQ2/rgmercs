@@ -3849,7 +3849,6 @@ function RGMercUtils.SetControlToon()
                 if assistSpawn() and assistSpawn.ID() ~= RGMercUtils.GetMainAssistId() and not assistSpawn.Dead() then
                     RGMercsLogger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
                     RGMercConfig.Globals.MainAssist = assistSpawn.CleanName()
-                    DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
 
                     RGMercUtils.AddXTByName(2, assistSpawn.DisplayName())
 
@@ -3869,7 +3868,6 @@ function RGMercUtils.SetControlToon()
     else
         if RGMercUtils.GetMainAssistId() ~= RGMercUtils.GetGroupMainAssistID() and RGMercUtils.GetGroupMainAssistID() > 0 then
             RGMercConfig.Globals.MainAssist = RGMercUtils.GetGroupMainAssistName()
-            DanNet.unobserve(RGMercConfig.Globals.MainAssist, "Target.ID")
         end
     end
 end
