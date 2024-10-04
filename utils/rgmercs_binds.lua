@@ -192,6 +192,7 @@ Bind.Handlers     = {
         handler = function()
             RGMercConfig.Globals.PauseMain = true
             RGMercUtils.DoCmd("/squelch /dgge /rgl pause")
+            RGMercsLogger.log_info("\ayAll clients paused!")
         end,
     },
     ['unpause'] = {
@@ -207,6 +208,7 @@ Bind.Handlers     = {
         handler = function()
             RGMercConfig.Globals.PauseMain = false
             RGMercUtils.DoCmd("/squelch /dgge /rgl unpause")
+            RGMercsLogger.log_info("\agAll clients paused!")
         end,
     },
     ['yes'] = {
