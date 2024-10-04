@@ -171,6 +171,28 @@ local function GetMainOpacity()
     return tonumber(RGMercConfig:GetSettings().BgOpacity / 100) or 1.0
 end
 
+local function RenderWindowControls()
+    --local draw_list = ImGui.GetWindowDrawList()
+    local position = ImGui.GetCursorPosVec()
+    local smallButtonSize = 32
+
+    local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 2), smallButtonSize)
+    ImGui.SetCursorPos(windowControlPos)
+
+    if ImGui.SmallButton((RGMercConfig.settings.MainWindowLocked or false) and RGMercIcons.FA_LOCK or RGMercIcons.FA_UNLOCK) then
+        RGMercConfig.settings.MainWindowLocked = not RGMercConfig.settings.MainWindowLocked
+        RGMercConfig:SaveSettings(false)
+    end
+
+    ImGui.SameLine()
+    if ImGui.SmallButton(RGMercIcons.FA_WINDOW_MINIMIZE) then
+        RGMercConfig.Globals.Minimized = true
+    end
+    RGMercUtils.Tooltip("Minimize Main Window")
+
+    ImGui.SetCursorPos(position)
+end
+
 local function DrawConsole()
     if RGMercsConsole then
         local changed
@@ -325,17 +347,7 @@ local function RGMercsGUI()
                 RGMercModules:ExecModule("Class", "GetAuthorString"))
             )
 
-            if ImGui.SmallButton((RGMercConfig.settings.MainWindowLocked or false) and RGMercIcons.FA_LOCK or RGMercIcons.FA_UNLOCK) then
-                RGMercConfig.settings.MainWindowLocked = not RGMercConfig.settings.MainWindowLocked
-                RGMercConfig:SaveSettings(false)
-            end
-
-            ImGui.SameLine()
-            if ImGui.SmallButton(RGMercIcons.FA_WINDOW_MINIMIZE) then
-                RGMercConfig.Globals.Minimized = true
-            end
-            RGMercUtils.Tooltip("Minimize Main Window")
-            ImGui.NewLine()
+            RenderWindowControls()
 
             if not RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
