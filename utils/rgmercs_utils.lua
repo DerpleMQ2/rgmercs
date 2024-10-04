@@ -2789,7 +2789,9 @@ end
 
 function RGMercUtils.ClickModRod()
     local me = mq.TLO.Me
-    if me.PctMana() > RGMercUtils.GetSetting('ModRodManaPct') or me.PctHPs() < 60 then return end
+    if me.PctMana() > RGMercUtils.GetSetting('ModRodManaPct') or me.PctHPs() < 60 or RGMercUtils.Feigning() or mq.TLO.Me.Invis() then
+        return
+    end
 
     for _, itemName in ipairs(RGMercConfig.Constants.ModRods) do
         while mq.TLO.Cursor.Name() == itemName do
