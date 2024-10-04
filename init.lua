@@ -108,6 +108,12 @@ local function RenderConfigSelector()
     if ImGui.SmallButton(RGMercIcons.FA_REFRESH) then
         RGMercUtils.ScanConfigDirs()
     end
+
+    if ImGui.SmallButton('Create Custom Config') then
+        RGMercModules:ExecModule("Class", "WriteCustomConfig")
+    end
+    RGMercUtils.Tooltip("Creates a copy of the current Class Configuration\nthat you can edit to change rotations, spell loadouts, etc.")
+    ImGui.NewLine()
 end
 
 local function RenderTarget()
@@ -294,10 +300,16 @@ local function RGMercsGUI()
         end
         rednerModulesPopped()
         if not RGMercConfig.Globals.Minimized then
-            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI)
+            local flags = ImGuiWindowFlags.None
+
+            if RGMercConfig.settings.MainWindowLocked then
+                flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
+            end
+
+            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
         else
-            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI,
-                bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar))
+            local flags = bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar)
+            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI, flags)
         end
         ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
 
@@ -312,13 +324,18 @@ local function RGMercsGUI()
                 RGMercModules:ExecModule("Class", "GetVersionString"),
                 RGMercModules:ExecModule("Class", "GetAuthorString"))
             )
-            if ImGui.SmallButton('Create Custom Config') then
-                RGMercModules:ExecModule("Class", "WriteCustomConfig")
+
+            if ImGui.SmallButton((RGMercConfig.settings.MainWindowLocked or false) and RGMercIcons.FA_LOCK or RGMercIcons.FA_UNLOCK) then
+                RGMercConfig.settings.MainWindowLocked = not RGMercConfig.settings.MainWindowLocked
+                RGMercConfig:SaveSettings(false)
             end
+
             ImGui.SameLine()
-            if ImGui.SmallButton('Minimize') then
+            if ImGui.SmallButton(RGMercIcons.FA_WINDOW_MINIMIZE) then
                 RGMercConfig.Globals.Minimized = true
             end
+            RGMercUtils.Tooltip("Minimize Main Window")
+            ImGui.NewLine()
 
             if not RGMercConfig.Globals.PauseMain then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)

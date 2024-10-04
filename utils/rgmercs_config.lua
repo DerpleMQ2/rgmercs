@@ -1246,6 +1246,15 @@ Config.DefaultConfig = {
         FAQ = "How do I pop out the Console?",
         Answer = "You can set the [PopOutConsole] option to true to pop out the Debug Console into it's own Window.",
     },
+    ['MainWindowLocked']     = {
+        DisplayName = "Main Window Locked",
+        Category = "UI",
+        Tooltip = "Lock UI",
+        Default = false,
+        Type = "Custom",
+        FAQ = "How do I lock the Main UI Window in place?",
+        Answer = "You can click the Lock Icon on the main UI panel or toggle the [MainWindowLocked] option to true.",
+    },
 
     -- [ Debug ] --
     ['LogLevel']             = {
