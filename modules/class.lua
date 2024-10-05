@@ -24,6 +24,8 @@ Module.Constants.RezSearchGroup              = "pccorpse group radius 100 zradiu
 Module.Constants.RezSearchOutOfGroup         = "pccorpse radius 100 zradius 50"
 
 -- Track the state of rotations between frames
+Module.TempSettings.CurrentRotationStateId   = 0
+Module.TempSettings.CurrentRotationStateType = 0 -- 0 : Invalid, 1 : Combat, 2 : Healing
 Module.TempSettings.RotationStates           = {}
 Module.TempSettings.HealingRotationStates    = {}
 Module.TempSettings.RotationTimers           = {}
@@ -570,7 +572,10 @@ function Module:HealById(id)
 
     local selectedRotation = nil
 
-    for _, rotation in ipairs(self.TempSettings.HealingRotationStates or {}) do
+    for idx, rotation in ipairs(self.TempSettings.HealingRotationStates or {}) do
+        self.TempSettings.CurrentRotationStateType = 2
+        self.TempSettings.CurrentRotationStateId = idx
+
         RGMercsLogger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id,
             rotation.name)
         if RGMercUtils.SafeCallFunc(string.format("Heal Rotation Condition Check for %s", rotation.name), rotation.cond, self, healTarget) then
@@ -611,6 +616,8 @@ function Module:HealById(id)
             rotation.lastCondCheck = false
         end
     end
+
+    self.TempSettings.CurrentRotationStateType = 0
 
     if selectedRotation == nil then
         RGMercsLogger.log_verbose("\ayHealById(%d):: No appropriate heal rotation found. Bailling.", id)
@@ -759,8 +766,10 @@ function Module:GiveTime(combat_state)
     end
 
     -- Downtime rotaiton will just run a full rotation to completion
-    for _, r in ipairs(self.TempSettings.RotationStates) do
+    for idx, r in ipairs(self.TempSettings.RotationStates) do
         RGMercsLogger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
+        self.TempSettings.CurrentRotationStateType = 1
+        self.TempSettings.CurrentRotationStateId = idx
         local timeCheckPassed = true
         if r.timer then
             self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
@@ -793,6 +802,22 @@ function Module:GiveTime(combat_state)
                 RGMercUtils.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
                 RGMercUtils.FormatTime(r.timer - (os.clock() - self.TempSettings.RotationTimers[r.name])))
         end
+    end
+
+    self.TempSettings.CurrentRotationStateType = 0
+end
+
+function Module:SetCurrentRotationState(state)
+    if self.TempSettings.CurrentRotationStateType == 0 then return end
+
+    if self.TempSettings.CurrentRotationStateType == 1 then
+        if not self.TempSettings.RotationStates[self.TempSettings.CurrentRotationStateId] then return end
+        self.TempSettings.RotationStates[self.TempSettings.CurrentRotationStateId].state = state
+    end
+
+    if self.TempSettings.CurrentRotationStateType == 2 then
+        if not self.TempSettings.HealingRotationStates[self.TempSettings.CurrentRotationStateId] then return end
+        self.TempSettings.HealingRotationStates[self.TempSettings.CurrentRotationStateId].state = state
     end
 end
 

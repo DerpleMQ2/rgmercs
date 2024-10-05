@@ -1638,6 +1638,8 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
     if bDoFullRotation then start_step = 1 end
     for idx, entry in ipairs(rotationTable) do
         if idx >= start_step then
+            caller:SetCurrentRotationState(idx)
+
             if RGMercConfig.Globals.PauseMain then
                 break
             end
