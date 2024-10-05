@@ -1401,16 +1401,6 @@ local _ClassConfig = {
         },
         ['Slow Downtime'] = {
             {
-                -- on live this is a group spell but on laz EMU it is self only.
-                name = "Pact of the Wolf",
-                type = "AA",
-                active_cond = function(self, aaName) return mq.TLO.Me.Aura(aaName)() ~= nil end,
-                cond = function(self, aaName)
-                    return not RGMercUtils.OnEMU() and RGMercUtils.GetSetting('DoAura') and not RGMercUtils.SongActiveByName(aaName) and
-                        mq.TLO.Me.Aura(aaName)() == nil
-                end,
-            },
-            {
                 -- this is emu only and lands only on your group but not yourself
                 name = "Pact of the Wolf - Emu",
                 type = "CustomFunc",
