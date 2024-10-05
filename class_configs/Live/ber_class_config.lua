@@ -657,14 +657,6 @@ return {
                 end,
             },
             {
-                name = "Decapitation",
-                type = "AA",
-                cond = function(self, aaName)
-                    -- on emu this is activated on live it is passive.
-                    return RGMercUtils.OnEMU() and RGMercUtils.AAReady(aaName) and not RGMercUtils.SongActive(mq.TLO.Me.AltAbility(aaName).Spell)
-                end,
-            },
-            {
                 name = "Binding Axe",
                 type = "AA",
                 cond = function(self, aaName)
