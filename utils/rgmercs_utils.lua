@@ -4472,7 +4472,7 @@ end
 --- Adds an OA (Outside Assist) with the given name.
 --- @param name string: The name of the OA to be added.
 function RGMercUtils.AddOA(name)
-    for idx, cur_name in ipairs(RGMercUtils.GetSetting('OutsideAssistList') or {}) do
+    for _, cur_name in ipairs(RGMercUtils.GetSetting('OutsideAssistList') or {}) do
         if cur_name == name then
             return
         end
