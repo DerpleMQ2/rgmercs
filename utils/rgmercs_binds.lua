@@ -302,7 +302,11 @@ Bind.Handlers     = {
         usage = "/rgl pop [Module Name]",
         about = "Toggle Popout of Module",
         handler = function(config, value)
-            RGMercModules:ExecModule(config, "Pop")
+            if config == 'debug' or config == 'console' then
+                RGMercUtils.SetSetting("PopOutConsole", not RGMercUtils.GetSetting("PopOutConsole"))
+            else
+                RGMercModules:ExecModule(config, "Pop")
+            end
         end,
     },
     ['faq'] = {
