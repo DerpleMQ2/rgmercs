@@ -36,6 +36,8 @@ local notifyZoning    = true
 local curState        = "Downtime"
 local logFilter       = ""
 local logFilterLocked = true
+local initPctComplete = 0
+local initMsg         = "Initializing RGMercs..."
 
 -- Icon Rendering
 local derpImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
@@ -91,6 +93,23 @@ local function GetClassConfigIDFromName(name)
     end
 
     return 1
+end
+
+local function RenderLoader()
+    ImGui.SetNextWindowSize(ImVec2(400, 80), ImGuiCond.Always)
+    ImGui.SetNextWindowPos(ImVec2(ImGui.GetIO().DisplaySize.x / 2 - 200, ImGui.GetIO().DisplaySize.y / 3 - 75), ImGuiCond.Always)
+
+    ImGui.Begin("RGMercs Loader", nil, bit32.bor(ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoScrollbar))
+    local imgDisplayed = RGMercUtils.LastBurnCheck and burnImg or derpImg
+    ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
+    ImGui.SameLine()
+    ImGui.Text("RGMercs %s: Loading...", RGMercConfig._version)
+    ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 35)
+    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 70)
+    ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 0.2, 0.7, 1 - (initPctComplete / 100), initPctComplete / 100)
+    ImGui.ProgressBar(initPctComplete / 100, ImVec2(310, 0), initMsg)
+    ImGui.PopStyleColor()
+    ImGui.End()
 end
 
 local function RenderConfigSelector()
@@ -283,220 +302,224 @@ local function RGMercsGUI()
     ImGui.SetNextWindowSize(ImVec2(500, 600), ImGuiCond.FirstUseEver)
 
     if openGUI and Alive() then
-        if theme ~= nil then
-            for _, t in pairs(theme) do
-                if t.color then
-                    ImGui.PushStyleColor(t.element, t.color.r, t.color.g, t.color.b, t.color.a)
-                    themeColorPop = themeColorPop + 1
-                elseif t.value then
-                    ImGui.PushStyleVar(t.element, t.value)
-                    themeStylePop = themeStylePop + 1
+        if initPctComplete < 100 then
+            RenderLoader()
+        else
+            if theme ~= nil then
+                for _, t in pairs(theme) do
+                    if t.color then
+                        ImGui.PushStyleColor(t.element, t.color.r, t.color.g, t.color.b, t.color.a)
+                        themeColorPop = themeColorPop + 1
+                    elseif t.value then
+                        ImGui.PushStyleVar(t.element, t.value)
+                        themeStylePop = themeStylePop + 1
+                    end
                 end
             end
-        end
 
-        local imGuiStyle = ImGui.GetStyle()
+            local imGuiStyle = ImGui.GetStyle()
 
-        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
-        ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, RGMercConfig:GetSettings().ScrollBarRounding)
-        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, RGMercConfig:GetSettings().FrameEdgeRounding)
-        if RGMercUtils.GetSetting('PopOutForceTarget') then
-            local openFT, showFT = ImGui.Begin("Force Target", RGMercUtils.GetSetting('PopOutForceTarget'))
-            if showFT then
-                RGMercUtils.RenderForceTargetList()
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
+            ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, RGMercConfig:GetSettings().ScrollBarRounding)
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, RGMercConfig:GetSettings().FrameEdgeRounding)
+            if RGMercUtils.GetSetting('PopOutForceTarget') then
+                local openFT, showFT = ImGui.Begin("Force Target", RGMercUtils.GetSetting('PopOutForceTarget'))
+                if showFT then
+                    RGMercUtils.RenderForceTargetList()
+                end
+                ImGui.End()
+                if not openFT then
+                    RGMercUtils.SetSetting('PopOutForceTarget', false)
+                    showFT = false
+                end
             end
-            ImGui.End()
-            if not openFT then
-                RGMercUtils.SetSetting('PopOutForceTarget', false)
-                showFT = false
+            if RGMercUtils.GetSetting('PopOutConsole') then
+                local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", RGMercUtils.GetSetting('PopOutConsole'))
+                if showConsole then
+                    DrawConsole()
+                end
+                ImGui.End()
+                if not openConsole then
+                    RGMercUtils.SetSetting('PopOutConsole', false)
+                    showConsole = false
+                end
             end
-        end
-        if RGMercUtils.GetSetting('PopOutConsole') then
-            local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", RGMercUtils.GetSetting('PopOutConsole'))
-            if showConsole then
-                DrawConsole()
-            end
-            ImGui.End()
-            if not openConsole then
-                RGMercUtils.SetSetting('PopOutConsole', false)
-                showConsole = false
-            end
-        end
-        renderModulesPopped()
-        if not RGMercConfig.Globals.Minimized then
-            local flags = ImGuiWindowFlags.None
+            renderModulesPopped()
+            if not RGMercConfig.Globals.Minimized then
+                local flags = ImGuiWindowFlags.None
 
-            if RGMercConfig.settings.MainWindowLocked then
-                flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
-            end
+                if RGMercConfig.settings.MainWindowLocked then
+                    flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
+                end
 
-            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
-        else
-            local flags = bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar)
-            openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI, flags)
-        end
-        ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
-
-        if shouldDrawGUI and not RGMercConfig.Globals.Minimized then
-            local pressed
-            local imgDisplayed = RGMercUtils.LastBurnCheck and burnImg or derpImg
-            ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
-            ImGui.SameLine()
-            ImGui.Text(string.format("RGMercs %s [%s]\nClass Config: %s\nAuthor(s): %s",
-                RGMercConfig._version,
-                GitCommit.commitId or "None",
-                RGMercModules:ExecModule("Class", "GetVersionString"),
-                RGMercModules:ExecModule("Class", "GetAuthorString"))
-            )
-
-            RenderWindowControls()
-
-            if not RGMercConfig.Globals.PauseMain then
-                ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
+                openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
             else
-                ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
+                local flags = bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar)
+                openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI, flags)
             end
+            ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
 
-            local pauseLabel = RGMercConfig.Globals.PauseMain and "PAUSED" or "Running"
-            if RGMercConfig.Globals.BackOffFlag then
-                pauseLabel = pauseLabel .. " [Backoff]"
-            end
+            if shouldDrawGUI and not RGMercConfig.Globals.Minimized then
+                local pressed
+                local imgDisplayed = RGMercUtils.LastBurnCheck and burnImg or derpImg
+                ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
+                ImGui.SameLine()
+                ImGui.Text(string.format("RGMercs %s [%s]\nClass Config: %s\nAuthor(s): %s",
+                    RGMercConfig._version,
+                    GitCommit.commitId or "None",
+                    RGMercModules:ExecModule("Class", "GetVersionString"),
+                    RGMercModules:ExecModule("Class", "GetAuthorString"))
+                )
 
-            if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
-                RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
-            end
-            ImGui.PopStyleColor()
+                RenderWindowControls()
 
-            RenderTarget()
+                if not RGMercConfig.Globals.PauseMain then
+                    ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
+                else
+                    ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
+                end
 
-            ImGui.NewLine()
-            ImGui.Separator()
+                local pauseLabel = RGMercConfig.Globals.PauseMain and "PAUSED" or "Running"
+                if RGMercConfig.Globals.BackOffFlag then
+                    pauseLabel = pauseLabel .. " [Backoff]"
+                end
 
-            RenderConfigSelector()
+                if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
+                    RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
+                end
+                ImGui.PopStyleColor()
 
-            if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
-                ImGui.SetItemDefaultFocus()
-                if ImGui.BeginTabItem("RGMercsMain") then
-                    ImGui.Text("Current State: " .. curState)
-                    ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
+                RenderTarget()
 
-                    -- .. tostring(RGMercConfig.Globals.AutoTargetID))
-                    ImGui.Text(string.format("MA: %-25s", (RGMercUtils.GetMainAssistSpawn().CleanName() or "None")))
-                    if mq.TLO.Target.ID() > 0 and RGMercUtils.TargetIsType("pc") and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
-                        ImGui.SameLine()
-                        if ImGui.SmallButton(string.format("Set MA to %s", RGMercUtils.GetTargetCleanName())) then
-                            RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
-                        end
-                    end
-                    ImGui.Text("Stuck To: " ..
-                        (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
-                    if ImGui.CollapsingHeader("Config Options") then
-                        ImGui.Indent()
+                ImGui.NewLine()
+                ImGui.Separator()
 
-                        if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                            local settingsRef = RGMercConfig:GetSettings()
-                            settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig,
-                                RGMercConfig.DefaultCategories, false, true)
-                            if pressed then
-                                RGMercConfig:SaveSettings(false)
+                RenderConfigSelector()
+
+                if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
+                    ImGui.SetItemDefaultFocus()
+                    if ImGui.BeginTabItem("RGMercsMain") then
+                        ImGui.Text("Current State: " .. curState)
+                        ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
+
+                        -- .. tostring(RGMercConfig.Globals.AutoTargetID))
+                        ImGui.Text(string.format("MA: %-25s", (RGMercUtils.GetMainAssistSpawn().CleanName() or "None")))
+                        if mq.TLO.Target.ID() > 0 and RGMercUtils.TargetIsType("pc") and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
+                            ImGui.SameLine()
+                            if ImGui.SmallButton(string.format("Set MA to %s", RGMercUtils.GetTargetCleanName())) then
+                                RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
                             end
                         end
-                        if RGMercUtils.GetSetting('ShowAllOptionsMain') then
-                            if RGMercConfig.Globals.SubmodulesLoaded then
-                                local submoduleSettings = RGMercModules:ExecAll("GetSettings")
-                                local submoduleDefaults = RGMercModules:ExecAll("GetDefaultSettings")
-                                local submoduleCategories = RGMercModules:ExecAll("GetSettingCategories")
-                                for n, s in pairs(submoduleSettings) do
-                                    if RGMercModules:ExecModule(n, "ShouldRender") then
-                                        ImGui.PushID(n .. "_config_hdr")
-                                        if s and submoduleDefaults[n] and submoduleCategories[n] then
-                                            if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                                s, pressed, _ = RGMercUtils.RenderSettings(s, submoduleDefaults[n],
-                                                    submoduleCategories[n], true)
-                                                if pressed then
-                                                    RGMercModules:ExecModule(n, "SaveSettings", true)
+                        ImGui.Text("Stuck To: " ..
+                            (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
+                        if ImGui.CollapsingHeader("Config Options") then
+                            ImGui.Indent()
+
+                            if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
+                                local settingsRef = RGMercConfig:GetSettings()
+                                settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig,
+                                    RGMercConfig.DefaultCategories, false, true)
+                                if pressed then
+                                    RGMercConfig:SaveSettings(false)
+                                end
+                            end
+                            if RGMercUtils.GetSetting('ShowAllOptionsMain') then
+                                if RGMercConfig.Globals.SubmodulesLoaded then
+                                    local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+                                    local submoduleDefaults = RGMercModules:ExecAll("GetDefaultSettings")
+                                    local submoduleCategories = RGMercModules:ExecAll("GetSettingCategories")
+                                    for n, s in pairs(submoduleSettings) do
+                                        if RGMercModules:ExecModule(n, "ShouldRender") then
+                                            ImGui.PushID(n .. "_config_hdr")
+                                            if s and submoduleDefaults[n] and submoduleCategories[n] then
+                                                if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
+                                                    s, pressed, _ = RGMercUtils.RenderSettings(s, submoduleDefaults[n],
+                                                        submoduleCategories[n], true)
+                                                    if pressed then
+                                                        RGMercModules:ExecModule(n, "SaveSettings", true)
+                                                    end
                                                 end
                                             end
+                                            ImGui.PopID()
                                         end
-                                        ImGui.PopID()
                                     end
                                 end
                             end
+                            ImGui.Unindent()
                         end
-                        ImGui.Unindent()
-                    end
 
-                    if ImGui.CollapsingHeader("Outside Assist List") then
-                        RGMercUtils.RenderOAList()
-                    end
-
-                    if RGMercUtils.IAmMA() and not RGMercUtils.GetSetting('PopOutForceTarget') then
-                        if ImGui.CollapsingHeader("Force Target") then
-                            RGMercUtils.RenderForceTargetList(true)
+                        if ImGui.CollapsingHeader("Outside Assist List") then
+                            RGMercUtils.RenderOAList()
                         end
+
+                        if RGMercUtils.IAmMA() and not RGMercUtils.GetSetting('PopOutForceTarget') then
+                            if ImGui.CollapsingHeader("Force Target") then
+                                RGMercUtils.RenderForceTargetList(true)
+                            end
+                        end
+                        ImGui.EndTabItem()
                     end
-                    ImGui.EndTabItem()
-                end
 
-                renderModulesTabs()
+                    renderModulesTabs()
 
 
-                ImGui.EndTabBar();
-            end
+                    ImGui.EndTabBar();
+                end
 
-            ImGui.NewLine()
-            ImGui.NewLine()
-            ImGui.Separator()
-            if not RGMercUtils.GetSetting('PopOutConsole') then
-                DrawConsole()
-            end
-        elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
-            local btnImg = RGMercUtils.LastBurnCheck and burnImg or derpImg
-            if RGMercConfig.Globals.PauseMain then
-                if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
-                    RGMercConfig.Globals.Minimized = false
+                ImGui.NewLine()
+                ImGui.NewLine()
+                ImGui.Separator()
+                if not RGMercUtils.GetSetting('PopOutConsole') then
+                    DrawConsole()
                 end
-                if ImGui.IsItemHovered() then
-                    ImGui.SetTooltip("RGMercs is Paused")
-                end
-            else
-                if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then
-                    RGMercConfig.Globals.Minimized = false
-                end
-                if ImGui.IsItemHovered() then
-                    ImGui.BeginTooltip()
-                    if RGMercUtils.LastBurnCheck then
-                        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
-                            string.format("RGMercs is BURNING!!"))
-                    else
-                        ImGui.Text("RGMercs is Running")
+            elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
+                local btnImg = RGMercUtils.LastBurnCheck and burnImg or derpImg
+                if RGMercConfig.Globals.PauseMain then
+                    if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
+                        RGMercConfig.Globals.Minimized = false
                     end
-                    ImGui.EndTooltip()
+                    if ImGui.IsItemHovered() then
+                        ImGui.SetTooltip("RGMercs is Paused")
+                    end
+                else
+                    if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then
+                        RGMercConfig.Globals.Minimized = false
+                    end
+                    if ImGui.IsItemHovered() then
+                        ImGui.BeginTooltip()
+                        if RGMercUtils.LastBurnCheck then
+                            ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
+                                string.format("RGMercs is BURNING!!"))
+                        else
+                            ImGui.Text("RGMercs is Running")
+                        end
+                        ImGui.EndTooltip()
+                    end
+                end
+                if ImGui.BeginPopupContextWindow() then
+                    local pauseLabel = RGMercConfig.Globals.PauseMain and "Resume" or "Pause"
+                    if ImGui.MenuItem(pauseLabel) then
+                        RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
+                    end
+                    ImGui.EndPopup()
                 end
             end
-            if ImGui.BeginPopupContextWindow() then
-                local pauseLabel = RGMercConfig.Globals.PauseMain and "Resume" or "Pause"
-                if ImGui.MenuItem(pauseLabel) then
-                    RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
-                end
-                ImGui.EndPopup()
-            end
-        end
 
-        ImGui.PopID()
-        ImGui.PopStyleVar(3)
-        if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
-            if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercUtils.GetSetting("EscapeMinimizes") then
-                RGMercConfig.Globals.Minimized = true
+            ImGui.PopID()
+            ImGui.PopStyleVar(3)
+            if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
+                if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercUtils.GetSetting("EscapeMinimizes") then
+                    RGMercConfig.Globals.Minimized = true
+                end
             end
+            if themeColorPop > 0 then
+                ImGui.PopStyleColor(themeColorPop)
+            end
+            if themeStylePop > 0 then
+                ImGui.PopStyleVar(themeStylePop)
+            end
+            ImGui.End()
         end
-        if themeColorPop > 0 then
-            ImGui.PopStyleColor(themeColorPop)
-        end
-        if themeStylePop > 0 then
-            ImGui.PopStyleVar(themeStylePop)
-        end
-        ImGui.End()
     end
 end
 
@@ -515,6 +538,8 @@ local function RGInit(...)
 
     unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", "MQ2Twist", })
 
+    initPctComplete = 0
+    initMsg = "Initializing RGMercs..."
     local args = { ..., }
     -- check mini argument before loading other modules so it minimizes as soon as possible.
     if args and #args > 0 then
@@ -527,13 +552,22 @@ local function RGInit(...)
         end
     end
 
+    initPctComplete = 10
+    initMsg = "Scanning for Configurations..."
     RGMercUtils.ScanConfigDirs()
 
+    initPctComplete = 20
+    initMsg = "Initializing Modules..."
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
     RGMercModules:ExecAll("Init")
     RGMercConfig.Globals.SubmodulesLoaded = true
+
+    initPctComplete = 30
+    initMsg = "Updating Command Handlers..."
     RGMercConfig:UpdateCommandHandlers()
 
+    initPctComplete = 40
+    initMsg = "Setting Assist..."
     local mainAssist = mq.TLO.Me.CleanName()
 
     if mq.TLO.Group() and mq.TLO.Group.MainAssist() then
@@ -559,38 +593,6 @@ local function RGInit(...)
         mainAssist = mq.TLO.Group.MainAssist.DisplayName()
     end
 
-    RGMercUtils.DoCmd("/squelch /rez accept on")
-    RGMercUtils.DoCmd("/squelch /rez pct 90")
-
-    if mq.TLO.Plugin("MQ2DanNet")() then
-        RGMercUtils.DoCmd("/squelch /dnet commandecho off")
-    end
-
-    RGMercUtils.DoCmd("/stick set breakontarget on")
-
-    -- TODO: Chat Begs
-
-    if (mq.TLO.Macro.Name() or ""):find("RGMERC") then
-        RGMercUtils.DoCmd("/macro end")
-    end
-
-    -- RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
-    --     mq.TLO.Me.Class.ShortName())
-    RGMercUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
-
-    if RGMercUtils.CanUseAA("Companion's Discipline") then
-        RGMercUtils.DoCmd("/pet ghold on")
-    else
-        RGMercUtils.DoCmd("/pet hold on")
-    end
-
-    if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
-        RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
-        RGMercUtils.DoCmd("/autoinventory")
-    end
-
-    RGMercUtils.WelcomeMsg()
-
     if mainAssist:len() > 0 then
         RGMercConfig.Globals.MainAssist = mainAssist
         RGMercUtils.PopUp("Targetting %s for Main Assist", RGMercConfig.Globals.MainAssist)
@@ -605,8 +607,55 @@ local function RGInit(...)
             RGMercUtils.GetGroupMainAssistName(), mainAssist))
     end
 
+    initPctComplete = 50
+    initMsg = "Setting up Environment..."
+    RGMercUtils.DoCmd("/squelch /rez accept on")
+    RGMercUtils.DoCmd("/squelch /rez pct 90")
+
+    initPctComplete = 60
+    initMsg = "Setting up MQ2DanNet..."
+    if mq.TLO.Plugin("MQ2DanNet")() then
+        RGMercUtils.DoCmd("/squelch /dnet commandecho off")
+    end
+
+    RGMercUtils.DoCmd("/stick set breakontarget on")
+
+    -- TODO: Chat Begs
+    initPctComplete = 70
+    initMsg = "Closing down Macro..."
+    if (mq.TLO.Macro.Name() or ""):find("RGMERC") then
+        RGMercUtils.DoCmd("/macro end")
+    end
+
+    -- RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
+    --     mq.TLO.Me.Class.ShortName())
+    initMsg = "Pausing the CWTN Plugin..."
+    RGMercUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
+
+    initMsg = "Setting up Pet Hold..."
+    if RGMercUtils.CanUseAA("Companion's Discipline") then
+        RGMercUtils.DoCmd("/pet ghold on")
+    else
+        RGMercUtils.DoCmd("/pet hold on")
+    end
+
+    initPctComplete = 80
+    initMsg = "Clearing Cursor..."
+
+    if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
+        RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
+        RGMercUtils.DoCmd("/autoinventory")
+    end
+
+    RGMercUtils.WelcomeMsg()
+
     -- store initial positioning data.
+    initPctComplete = 90
+    initMsg = "Storing Initial Positioning Data..."
     RGMercConfig:StoreLastMove()
+
+    initMsg = "Done!"
+    initPctComplete = 100
 end
 
 local function Main()
