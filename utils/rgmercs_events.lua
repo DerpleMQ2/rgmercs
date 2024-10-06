@@ -7,6 +7,9 @@ local Set         = require("mq.Set")
 mq.event("CantSee", "You cannot see your target.", function()
     if RGMercConfig.Globals.BackOffFlag then return end
     if RGMercConfig.Globals.PauseMain then return end
+    if not RGMercUtils.GetSetting('HandleCantSeeTarget') then
+        return
+    end
 
     if mq.TLO.Stick.Active() then
         RGMercUtils.DoCmd("/stick off")
@@ -16,13 +19,6 @@ mq.event("CantSee", "You cannot see your target.", function()
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and Cannot see our target!")
         RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
-
-        -- TODO: Do we need this?
-        --while (${Navigation.Active} && ${XAssist.XTFullHaterCount} == 0) {
-        --CALLTRACE In while loop :: Navigation.Active ${Navigation.Active} :: XAssist ${XAssist.XTFullHaterCount}
-        --/doevents
-        --/delay 1 ${XAssist.XTFullHaterCount} > 0
-        --}
     else
         if mq.TLO.Me.Moving() then return end
 
@@ -39,9 +35,13 @@ mq.event("CantSee", "You cannot see your target.", function()
                         RGMercsLogger.log_debug("Can't See target (%s [%d]). Moving back 15.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0)
                         RGMercUtils.DoCmd("/stick 15 moveback")
                     else
-                        RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
-                            (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                        RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+                        local desiredDistance = (mq.TLO.Target.MaxRangeTo() or 0) * 0.9
+                        if not RGMercUtils.GetSetting('DoMelee') then
+                            desiredDistance = RGMercUtils.GetTargetDistance() * .95
+                        end
+
+                        RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID(), desiredDistance)
+                        RGMercUtils.NavInCombat(mq.TLO.Target.ID(), desiredDistance, false)
                     end
                 end
             end
@@ -55,6 +55,9 @@ end)
 -- [ TOO CLOSE HANDLERS] --
 
 mq.event("TooClose", "Your target is too close to use a ranged weapon!", function()
+    if not RGMercUtils.GetSetting('HandleTooClose') then
+        return
+    end
     -- Check if we're in the middle of a pull and use a backup.
     if RGMercUtils.GetSetting('DoPull') and RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         local discSpell = mq.TLO.Spell("Throw Stone")
@@ -92,6 +95,9 @@ end)
 -- [ TOO FAR HANDLERS ] --
 
 local function tooFarHandler()
+    if not RGMercUtils.GetSetting('HandleTooFar') then
+        return
+    end
     RGMercsLogger.log_debug("tooFarHandler()")
     if RGMercConfig.Globals.BackOffFlag then return end
     if RGMercConfig.Globals.PauseMain then return end

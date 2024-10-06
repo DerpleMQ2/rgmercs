@@ -1160,6 +1160,31 @@ Config.DefaultConfig = {
         FAQ = "Why am I not burning the named?",
         Answer = "You can set the [BurnNamed] option to true to automatically burn named mobs.",
     },
+    --[ EVENTS ] --
+    ['HandleCantSeeTarget']  = {
+        DisplayName = "Handle Cannot See Target",
+        Category = "Events",
+        Tooltip = "If you get a cannot see your target message this will try to correct for it.",
+        Default = true,
+        FAQ = "When I cannot see my target my characters [do or do not] move to try to fix it.",
+        Answer = "You can enabled or disable [HandleCantSeeTarget] to tell rgmercs if it should try to handle cannot see target messages.",
+    },
+    ['HandleTooClose']       = {
+        DisplayName = "Handle Too Close",
+        Category = "Events",
+        Tooltip = "If you get a target too close message this will try to correct for it.",
+        Default = true,
+        FAQ = "When my target is too close, my characters [do or do not] move to try to fix it.",
+        Answer = "You can enabled or disable [HandleTooClose] to tell rgmercs if it should try to handle target too close messages.",
+    },
+    ['HandleTooFar']         = {
+        DisplayName = "Handle Too Far",
+        Category = "Events",
+        Tooltip = "If you get a target too far message this will try to correct for it.",
+        Default = true,
+        FAQ = "When my target is too far, my characters [do or do not] move to try to fix it.",
+        Answer = "You can enabled or disable [HandleTooFar] to tell rgmercs if it should try to handle target too far messages.",
+    },
 
     -- [ UI ] --
     ['DisplayManualTarget']  = {
