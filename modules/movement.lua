@@ -627,8 +627,8 @@ end
 function Module:DoClickies()
     if not RGMercUtils.GetSetting('UseClickies') then return end
 
-    -- don't use clickies when we are trying to med.
-    if mq.TLO.Me.Sitting() then return end
+    -- don't use clickies when we are trying to med, feigning, or invisible.
+    if mq.TLO.Me.Sitting() or RGMercUtils.Feigning() or mq.TLO.Me.Invis() then return end
 
     for i = 1, 12 do
         local setting = RGMercUtils.GetSetting(string.format("ClickyItem%d", i))
