@@ -58,7 +58,7 @@ local function renderModulesTabs()
     end
 end
 
-local function rednerModulesPopped()
+local function renderModulesPopped()
     if not RGMercConfig:SettingsLoaded() then return end
 
     for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
@@ -86,7 +86,7 @@ local function GetTheme()
 end
 
 local function GetClassConfigIDFromName(name)
-    for idx, curName in ipairs(RGMercConfig.Globals.ClassConfigDirs) do
+    for idx, curName in ipairs(RGMercConfig.Globals.ClassConfigDirs or {}) do
         if curName == name then return idx end
     end
 
@@ -94,26 +94,28 @@ local function GetClassConfigIDFromName(name)
 end
 
 local function RenderConfigSelector()
-    ImGui.Text("Configuration Type")
-    local newConfigDir, changed = ImGui.Combo("##config_type", GetClassConfigIDFromName(RGMercUtils.GetSetting('ClassConfigDir')), RGMercConfig.Globals.ClassConfigDirs,
-        #RGMercConfig.Globals.ClassConfigDirs)
-    if changed then
-        RGMercUtils.SetSetting('ClassConfigDir', RGMercConfig.Globals.ClassConfigDirs[newConfigDir])
-        RGMercConfig:SaveSettings(false)
-        RGMercConfig:LoadSettings()
-        RGMercModules:ExecAll("LoadSettings")
-    end
+    if RGMercConfig.Globals.ClassConfigDirs ~= nil then
+        ImGui.Text("Configuration Type")
+        local newConfigDir, changed = ImGui.Combo("##config_type", GetClassConfigIDFromName(RGMercUtils.GetSetting('ClassConfigDir')), RGMercConfig.Globals.ClassConfigDirs,
+            #RGMercConfig.Globals.ClassConfigDirs)
+        if changed then
+            RGMercUtils.SetSetting('ClassConfigDir', RGMercConfig.Globals.ClassConfigDirs[newConfigDir])
+            RGMercConfig:SaveSettings(false)
+            RGMercConfig:LoadSettings()
+            RGMercModules:ExecAll("LoadSettings")
+        end
 
-    ImGui.SameLine()
-    if ImGui.SmallButton(RGMercIcons.FA_REFRESH) then
-        RGMercUtils.ScanConfigDirs()
-    end
+        ImGui.SameLine()
+        if ImGui.SmallButton(RGMercIcons.FA_REFRESH) then
+            RGMercUtils.ScanConfigDirs()
+        end
 
-    if ImGui.SmallButton('Create Custom Config') then
-        RGMercModules:ExecModule("Class", "WriteCustomConfig")
+        if ImGui.SmallButton('Create Custom Config') then
+            RGMercModules:ExecModule("Class", "WriteCustomConfig")
+        end
+        RGMercUtils.Tooltip("Creates a copy of the current Class Configuration\nthat you can edit to change rotations, spell loadouts, etc.")
+        ImGui.NewLine()
     end
-    RGMercUtils.Tooltip("Creates a copy of the current Class Configuration\nthat you can edit to change rotations, spell loadouts, etc.")
-    ImGui.NewLine()
 end
 
 local function RenderTarget()
@@ -320,7 +322,7 @@ local function RGMercsGUI()
                 showConsole = false
             end
         end
-        rednerModulesPopped()
+        renderModulesPopped()
         if not RGMercConfig.Globals.Minimized then
             local flags = ImGuiWindowFlags.None
 
