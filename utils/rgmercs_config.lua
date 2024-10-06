@@ -1160,6 +1160,7 @@ Config.DefaultConfig = {
         FAQ = "Why am I not burning the named?",
         Answer = "You can set the [BurnNamed] option to true to automatically burn named mobs.",
     },
+
     --[ EVENTS ] --
     ['HandleCantSeeTarget']  = {
         DisplayName = "Handle Cannot See Target",
