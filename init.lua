@@ -44,7 +44,6 @@ local derpImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/de
 --local burnImg2        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_burn.png") -- DerpDog Burning Ring of Fire
 local burnImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/algar2_60.png") -- Algar
 
-print(derpImg)
 -- Constants
 
 -- UI --
