@@ -89,7 +89,11 @@ Module.Constants.PullAbilities         = {
         id = "AutoAttack",
         Type = "Special",
         DisplayName = "Auto Attack",
-        AbilityRange = 2,
+        AbilityRange = function()
+            if RGMercUtils.GetTargetID() == 0 then return 2 end
+
+            return RGMercUtils.GetTargetMaxRangeTo() * .9
+        end,
         cond = function(self)
             return true
         end,
