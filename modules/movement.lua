@@ -362,7 +362,8 @@ function Module:RunCmd(cmd, ...)
 end
 
 function Module:ChaseOff()
-    RGMercsLogger.log_warn("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
+    if self.settings.ChaseOn == false then return end
+    RGMercsLogger.log_info("\ayNo longer chasing \at%s\ay.", self.settings.ChaseTarget or "None")
     self.settings.ChaseOn = false
     self.settings.ChaseTarget = ""
     self:SaveSettings(false)
