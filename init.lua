@@ -41,9 +41,10 @@ local initMsg         = "Initializing RGMercs..."
 
 -- Icon Rendering
 local derpImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
-local burnImg2        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_burn.png") -- DerpDog Burning Ring of Fire
-local burnImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/algar2.png")       -- Algar
+--local burnImg2        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_burn.png") -- DerpDog Burning Ring of Fire
+local burnImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/algar2_60.png") -- Algar
 
+print(derpImg)
 -- Constants
 
 -- UI --
