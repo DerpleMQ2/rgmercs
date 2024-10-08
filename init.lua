@@ -43,6 +43,17 @@ local initMsg         = "Initializing RGMercs..."
 local derpImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
 --local burnImg2        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_burn.png") -- DerpDog Burning Ring of Fire
 local burnImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/algar2_60.png") -- Algar
+local grimImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/grim_60.png")   -- Grim
+local imgDisplayed
+
+-- Function to randomly pick the image only once
+local function InitLoader()
+    if not imgDisplayed then
+        math.randomseed(os.time())
+        local images = { derpImg, burnImg, grimImg, }
+        imgDisplayed = images[math.random(1, #images)]
+    end
+end
 
 -- Constants
 
@@ -96,11 +107,14 @@ local function GetClassConfigIDFromName(name)
 end
 
 local function RenderLoader()
+    InitLoader()
+
     ImGui.SetNextWindowSize(ImVec2(400, 80), ImGuiCond.Always)
     ImGui.SetNextWindowPos(ImVec2(ImGui.GetIO().DisplaySize.x / 2 - 200, ImGui.GetIO().DisplaySize.y / 3 - 75), ImGuiCond.Always)
 
     ImGui.Begin("RGMercs Loader", nil, bit32.bor(ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoScrollbar))
-    local imgDisplayed = RGMercUtils.LastBurnCheck and burnImg or derpImg
+
+    -- Display the selected image (picked only once)
     ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
     ImGui.SameLine()
     ImGui.Text("RGMercs %s: Loading...", RGMercConfig._version)
