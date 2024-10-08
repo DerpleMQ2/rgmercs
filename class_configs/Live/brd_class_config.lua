@@ -752,6 +752,23 @@ local _ClassConfig = {
             "Jonthan's Provocation",
             "Jonthan's Whistling Warsong",
         },
+        ['CalmSong'] = {
+            -- CalmSong - Level Range 8+ --Included for manual use with /rgl usemap
+            "Kelin's Lugubrious Lament", -- Level 8 (Max Mob Level of 60)
+            "Silent Song of Quellious",  -- Level 61
+            "Luvwen's Aria of Serenity", -- Level 66
+            "Whispersong of Veshma",     -- Level 71
+            "Elddar's Dawnsong",         -- Level 76
+            "Silence of the Void",       -- Level 81
+            "Silence of the Dreamer",    -- Level 86
+            "Silence of the Windsong",   -- Level 91
+            "Silence of the Forsaken",   -- Level 96
+            "Silence of the Silisia",    -- Level 101
+            "Silence of Jembel",         -- Level 106
+            "Silence of Zburator",       -- Level 111
+            "Silence of Quietus",        -- Level 116
+            "Silence of the Forgotten",  -- Level 121
+        },
     },
     ['HelperFunctions'] = {
         SwapInst = function(type)
