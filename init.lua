@@ -51,7 +51,8 @@ local function InitLoader()
     if not imgDisplayed then
         math.randomseed(os.time())
         local images = { derpImg, burnImg, grimImg, }
-        imgDisplayed = images[math.random(1, #images)]
+
+        imgDisplayed = images[math.floor(math.random(1000, ((#images + 1) * 1000) - 1) / 1000)]
     end
 end
 
