@@ -4283,7 +4283,7 @@ return {
 --LS
     ["laurioninn"] = {
         "a brood queen",
-        "a dijinn",
+        "a djinn",
         "a geonid",
         "a lich",
         "a luggald",
