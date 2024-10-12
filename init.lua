@@ -233,8 +233,8 @@ local function DrawConsole()
     if RGMercsConsole then
         local changed
         if ImGui.BeginTable("##debugoptions", 2, ImGuiTableFlags.None) then
-            ImGui.TableSetupColumn("Opt Name", ImGuiTableColumnFlags.NoResize, 100)
-            ImGui.TableSetupColumn("Opt Value", ImGuiTableColumnFlags.WidthStretch, ImGui.GetWindowWidth() - 150)
+            ImGui.TableSetupColumn("Opt Name", bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoResize), 100)
+            ImGui.TableSetupColumn("Opt Value", ImGuiTableColumnFlags.WidthStretch)
             ImGui.TableNextColumn()
             RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file",
                 "", RGMercConfig:GetSettings().LogToFile)
