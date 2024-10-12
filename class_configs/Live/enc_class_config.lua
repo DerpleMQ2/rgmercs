@@ -737,6 +737,8 @@ local _ClassConfig = {
             "Bliss",
             "Sleep",
             "Apathy",
+            "Ancient: Eternal Rapture",
+            "Rapture",
             "Glamour of Kintaz",
             "Enthrall",
             "Mesmerize",
