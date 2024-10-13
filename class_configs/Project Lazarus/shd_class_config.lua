@@ -1511,7 +1511,8 @@ local _ClassConfig = {
                 type = "Ability",
                 -- tooltip = Tooltips.Bash,
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0) and RGMercUtils.ShieldEquipped()
+                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0) and
+                        (RGMercUtils.ShieldEquipped() or RGMercUtils.CanUseAA("Improved Bash"))
                 end,
             },
             {
