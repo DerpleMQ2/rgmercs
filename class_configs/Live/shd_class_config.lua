@@ -1245,6 +1245,15 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Leech Touch",
+                type = "AA",
+                tooltip = Tooltips.ThoughtLeech,
+                cond = function(self, aaName, target)
+                    if RGMercUtils.GetSetting('DoLeechTouch') == 1 then return false end
+                    return RGMercUtils.NPCAAReady(aaName, target.ID())
+                end,
+            },
+            {
                 name = "Spire of the Reavers",
                 type = "AA",
                 tooltip = Tooltips.SpireoftheReavers,
@@ -1392,6 +1401,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.LeechTouch,
                 cond = function(self, aaName, target)
+                    if RGMercUtils.GetSetting('DoLeechTouch') == 2 then return false end
                     return RGMercUtils.NPCAAReady(aaName, target.ID()) and mq.TLO.Me.PctHPs() < 25
                 end,
             },
@@ -2178,10 +2188,24 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not using Dicho on cooldown for more DPS?",
             Answer = "The default HP% to begin using Dicho is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
+        ['DoLeechTouch']      = {
+            DisplayName = "Leech Touch Use:",
+            Category = "Taps",
+            Index = 6,
+            Tooltip = "When to use Leech Touch",
+            Type = "Combo",
+            ComboOptions = { 'On critically low HP', 'As DD during burns', 'For HP or DD', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my Shadow Knight not using Leech Touch?",
+            Answer = "You can choose the conditions under which you will use Leech Touch on the Taps tab.",
+        },
         ['DoThoughtLeech']    = {
             DisplayName = "Thought Leech Use:",
             Category = "Taps",
-            Index = 6,
+            Index = 7,
             Tooltip = "When to use Thought Leech",
             Type = "Combo",
             ComboOptions = { 'On critically low mana', 'As DD during burns', 'For Mana or DD', },
@@ -2189,11 +2213,8 @@ local _ClassConfig = {
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Thought Leech?",
-            Answer = "Make sure you have [DoThoughtLeech] enabled in your class settings.\n" ..
-                "Option: On critically low mana - will Only use when you are Crittically low on Mana,\n" ..
-                "Option: As DD during burns - will use as a DD during burn phases,\n" ..
-                "Option: For Mana or DD - will use for Mana or DD, depending on your current needs.",
+            FAQ = "Why is my Shadow Knight not using Thought Leech?",
+            Answer = "You can choose the conditions under which you will use Thought Leech on the Taps tab.",
         },
 
         --DoTs
