@@ -806,6 +806,15 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = mq.TLO.Me.Inventory("Chest").Name(),
+                type = "Item",
+                cond = function(self)
+                    if not RGMercUtils.GetSetting('DoChestClick') then return false end
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return item() and item.TimerReady() == 0
+                end,
+            },
+            {
                 name = "Call of the Ancients",
                 type = "AA",
                 cond = function(self, aaName)
@@ -1854,6 +1863,15 @@ local _ClassConfig = {
             ConfigType = "Advanced",
             FAQ = "Why does my Shaman randomly use HoTs in downtime?",
             Answer = "Maintaining HoTs prevents emergencies and hopefully allows for better DPS. It also grants Synergy Procs at high level.",
+        },
+        ['DoChestClick']      = {
+            DisplayName = "Do Chest Click",
+            Category = "Heal Mode",
+            Index = 3,
+            Tooltip = "Click your equipped chest.",
+            Default = true,
+            FAQ = "What the heck is a chest click?",
+            Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHM's is generally a healing tool (emergency group heal).",
         },
         ['DoAACanni']         = {
             DisplayName = "Use AA Canni",
