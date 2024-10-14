@@ -745,7 +745,7 @@ local _ClassConfig = {
             DisplayName = "Do Chest Click",
             Category = "Equipment",
             Tooltip = "Click your chest item",
-            Default = true,
+            Default = false,
             FAQ = "How do I use my chest item?",
             Answer = "Enable [DoChestClick] in the settings and you will click your chest item.",
         },

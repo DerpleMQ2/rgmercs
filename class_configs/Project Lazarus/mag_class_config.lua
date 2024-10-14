@@ -2031,7 +2031,7 @@ _ClassConfig      = {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
-            Default = true,
+            Default = false,
             FAQ = "How do I use my chest clicky?",
             Answer = "You can use the [DoChestClick] feature to click your chest item.",
         },
