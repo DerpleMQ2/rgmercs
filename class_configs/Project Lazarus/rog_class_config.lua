@@ -607,7 +607,7 @@ return {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
-            Default = true,
+            Default = false,
             FAQ = "Why would I not want to click my chest item?",
             Answer = "Enable [DoChestClick] if you want to use the chest item.",
         },
