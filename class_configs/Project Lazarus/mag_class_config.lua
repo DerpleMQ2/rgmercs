@@ -1544,6 +1544,14 @@ _ClassConfig      = {
                     return false
                 end,
             },
+            {
+                name = "Dagger of Evil Summons",
+                type = "Item",
+                cond = function(self, itemName)
+                    if not RGMercUtils.GetSetting('DoEvilDagger') then return false end
+                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
         },
         ['DPS'] = {
             {
@@ -2034,6 +2042,14 @@ _ClassConfig      = {
             Default = false,
             FAQ = "How do I use my chest clicky?",
             Answer = "You can use the [DoChestClick] feature to click your chest item.",
+        },
+        ['DoEvilDagger']   = {
+            DisplayName = "Do Evil Dagger",
+            Category = "Utilities",
+            Tooltip = "Use the DD clicky effect on the Dagger of Evil Summons in combat.",
+            Default = false,
+            FAQ = "What is an Evil Dagger lol?",
+            Answer = "The Dagger of Evil Summons is a Laz-specific damage clicky.",
         },
         ['AISelfDelay']    = {
             DisplayName = "Autoinv Delay (Self)",
