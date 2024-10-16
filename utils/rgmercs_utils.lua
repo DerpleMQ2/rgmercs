@@ -5303,4 +5303,11 @@ function RGMercUtils.ShieldEquipped()
     return mq.TLO.InvSlot("Offhand").Item.Type() and mq.TLO.InvSlot("Offhand").Item.Type() == "Shield"
 end
 
+--- Checks if a health is not critically low before a healer performs other actions.
+function RGMercUtils.OkayToNotHeal()
+    if not RGMercUtils.IsHealing() then return true end
+
+    return RGMercUtils.GetMainAssistPctHPs() > RGMercUtils.GetSetting('BigHealPoint')
+end
+
 return RGMercUtils
