@@ -76,7 +76,7 @@ local openConfigGUI, locked, zoom                            = false, false, fal
 local themeFile                                              = mq.configDir .. '/MyThemeZ.lua'
 local configFile                                             = mq.configDir .. '/MyUI_Configs.lua'
 local ZoomLvl                                                = 1.0
-local showReport                                             = false
+local fontSize                                               = 16 -- coming soon adding in the var and table now. usage is commented out for now.
 local ThemeName                                              = 'None'
 local gIcon                                                  = RGMercIcons.MD_SETTINGS
 local globalNewIcon                                          = RGMercIcons.FA_GLOBE
@@ -90,6 +90,7 @@ local defaults                                               = {
 	txtAutoScroll = true,
 	bottomPosition = 0,
 	lastScrollPos = 0,
+	fontSize = 16,
 }
 
 local guiLoot                                                = {
@@ -110,8 +111,19 @@ local guiLoot                                                = {
 	UseActors = true,
 	winFlags = bit32.bor(ImGuiWindowFlags.MenuBar),
 }
+guiLoot.showReport                                           = false
 
 local lootTable                                              = {}
+
+local fontSizes                                              = {}
+for i = 10, 40 do
+	if i % 2 == 0 then
+		table.insert(fontSizes, i)
+		if i == 12 then
+			table.insert(fontSizes, 13) -- this is the default font size so keep it in the list
+		end
+	end
+end
 
 ---@param names boolean
 ---@param links boolean
@@ -146,7 +158,7 @@ end
 
 function guiLoot.ReportLoot()
 	if guiLoot.recordData then
-		showReport = true
+		guiLoot.showReport = true
 		guiLoot.console:AppendText("\ay[Looted]\at[Loot Report]")
 		for item, data in pairs(lootTable) do
 			local itemName = item
@@ -181,6 +193,7 @@ local function loadTheme()
 end
 
 local function loadSettings()
+	local newSetting = false
 	local temp = {}
 	if not RGMercUtils.file_exists(configFile) then
 		mq.pickle(configFile, defaults)
@@ -198,37 +211,18 @@ local function loadSettings()
 
 	loadTheme()
 
-	if settings[script].locked == nil then
-		settings[script].locked = false
+	for k, v in pairs(defaults) do
+		if settings[script][k] == nil then
+			settings[script][k] = v
+			RGMercsLogger.log_info("\ay[LOOT]: \atSetting: \ay%s\ao not found in settings file, adding default value \aw[\ag%s\aw].", k, v)
+		end
 	end
 
-	if settings[script].Scale == nil then
-		settings[script].Scale = 1
-	end
-
-	if settings[script].txtAutoScroll == nil then
-		settings[script].txtAutoScroll = true
-	end
-
-	if settings[script].bottomPosition == nil then
-		settings[script].bottomPosition = 20
-	end
-
-	if settings[script].lastScrollPos == nil then
-		settings[script].lastScrollPos = 20
-	end
-
-	if settings[script].Zoom == nil then
-		settings[script].Zoom = false
-	end
-
-	if not settings[script].LoadTheme then
-		settings[script].LoadTheme = theme.LoadTheme
-	end
-	zoom = settings[script].Zoom
-	locked = settings[script].locked
-	ZoomLvl = settings[script].Scale
-	ThemeName = settings[script].LoadTheme
+	zoom = settings[script].Zoom ~= nil and settings[script].Zoom or false
+	locked = settings[script].locked ~= nil and settings[script].locked or false
+	ZoomLvl = settings[script].Scale or 1.0
+	ThemeName = settings[script].LoadTheme or 'Default'
+	fontSize = settings[script].fontSize or fontSize
 
 	mq.pickle(configFile, settings)
 
@@ -286,7 +280,6 @@ function guiLoot.GUI()
 					activated, guiLoot.console.autoScroll = imgui.MenuItem('Auto-scroll', nil, guiLoot.console.autoScroll)
 					activated, openConfigGUI = imgui.MenuItem('Config', nil, openConfigGUI)
 					activated, guiLoot.hideNames = imgui.MenuItem('Hide Names', nil, guiLoot.hideNames)
-					activated, zoom = imgui.MenuItem('Zoom', nil, zoom)
 					if activated then
 						if guiLoot.hideNames then
 							guiLoot.console:AppendText("\ay[Looted]\ax Hiding Names\ax")
@@ -294,6 +287,8 @@ function guiLoot.GUI()
 							guiLoot.console:AppendText("\ay[Looted]\ax Showing Names\ax")
 						end
 					end
+					activated, zoom = imgui.MenuItem('Zoom', nil, zoom)
+
 					if not guiLoot.UseActors then
 						activated, guiLoot.showLinks = imgui.MenuItem('Show Links', nil, guiLoot.showLinks)
 						if activated then
@@ -318,10 +313,31 @@ function guiLoot.GUI()
 
 					if imgui.MenuItem('View Report') then
 						guiLoot.ReportLoot()
-						showReport = true
+						guiLoot.showReport = true
 					end
 
 					imgui.Separator()
+
+					-- comming soon
+					-- if ImGui.BeginMenu('Font Size##') then
+					-- 	ImGui.SetNextItemWidth(100)
+					-- 	if ImGui.BeginCombo("##FontSize", tostring(fontSize)) then
+					-- 		for k, data in pairs(fontSizes) do
+					-- 			local isSelected = data == fontSize
+					-- 			if ImGui.Selectable(tostring(data), isSelected) then
+					-- 				if fontSize ~= data then
+					-- 					fontSize = data
+					-- 					guiLoot.console.fontSize = data
+					-- 					settings[script].fontSize = data
+					-- 					mq.pickle(configFile, settings)
+					-- 				end
+					-- 			end
+					-- 		end
+					-- 		ImGui.EndCombo()
+					-- 	end
+					-- 	ImGui.EndMenu()
+					-- end
+
 
 					if imgui.MenuItem('Reset Position') then
 						guiLoot.resetPosition = true
@@ -461,7 +477,7 @@ function guiLoot.GUI()
 		ImGui.End()
 	end
 
-	if showReport then
+	if guiLoot.showReport then
 		guiLoot.lootedReport_GUI()
 	end
 
@@ -529,7 +545,7 @@ function guiLoot.lootedReport_GUI()
 	local openRepGUI, showRepGUI = ImGui.Begin("Loot Report##" .. script, true, bit32.bor(ImGuiWindowFlags.NoCollapse))
 
 	if not openRepGUI then
-		showReport = false
+		guiLoot.showReport = false
 	end
 
 	if showRepGUI then
@@ -982,6 +998,8 @@ function guiLoot.init(use_actors, imported, caller)
 		else
 			guiLoot.console = imgui.ConsoleWidget.new("Loot##Console")
 		end
+		-- coming soon
+		-- guiLoot.console.fontSize = fontSize
 	end
 
 	-- load settings
