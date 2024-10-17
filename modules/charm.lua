@@ -15,6 +15,7 @@ Module.TempSettings.CharmImmune  = {}
 Module.TempSettings.CharmTracker = {}
 Module.FAQ                       = {}
 Module.ClassFAQ                  = {}
+Module.ImmuneTable               = {}
 
 Module.DefaultConfig             = {
 	-- [ CHARM ] --
@@ -179,6 +180,12 @@ local function getConfigFileName()
 		Module._name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
 end
 
+local function getImmuneFileName()
+	return mq.configDir ..
+		'/rgmercs/PCConfigs/' ..
+		Module._name .. "_Immune_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+end
+
 function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 
@@ -213,6 +220,17 @@ function Module:LoadSettings()
 
 	if settingsChanged then
 		self:SaveSettings(false)
+	end
+
+	local immune_pickle_path = getImmuneFileName()
+	local immuneConfig, immuneErr = loadfile(immune_pickle_path)
+	if immuneErr or not immuneConfig then
+		RGMercsLogger.log_error("\ay[%s]: Unable to load Immune settings file(%s), creating a new one!",
+			RGMercConfig.Globals.CurLoadedClass, immune_pickle_path)
+		self.ImmuneTable = {}
+		mq.pickle(immune_pickle_path, self.ImmuneTable)
+	else
+		self.ImmuneTable = immuneConfig()
 	end
 end
 
@@ -325,6 +343,16 @@ function Module:Render()
 					ImGui.TableNextColumn()
 					ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", data.reason)
 				end
+				for name, data in pairs(self.ImmuneTable[mq.TLO.Zone.ShortName()] or {}) do
+					ImGui.TableNextColumn()
+					ImGui.Text(tostring('---'))
+					ImGui.TableNextColumn()
+					ImGui.Text(string.format("%s", name))
+					ImGui.TableNextColumn()
+					ImGui.Text(string.format("%s", data.body))
+					ImGui.TableNextColumn()
+					ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", data.reason)
+				end
 				ImGui.EndTable()
 			end
 		end
@@ -349,6 +377,10 @@ function Module:AddImmuneTarget(mobId, mobData)
 	if self.TempSettings.CharmImmune[mobId] ~= nil then return end
 
 	self.TempSettings.CharmImmune[mobId] = mobData
+	if mobData.reason ~= 'HIGH_LVL' then
+		self.ImmuneTable[mq.TLO.Zone.ShortName()][mobData.name] = mobData
+		mq.pickle(getImmuneFileName(), self.ImmuneTable)
+	end
 end
 
 function Module:CharmLvlToHigh(mobLvl)
@@ -363,7 +395,22 @@ function Module:CharmLvlToHigh(mobLvl)
 end
 
 function Module:IsCharmImmune(mobId)
-	return self.TempSettings.CharmImmune[mobId] ~= nil
+	local mobName = mq.TLO.Spawn(mobId).CleanName() or "Unknown"
+	local mobType = mq.TLO.Spawn(mobId).Body() or "Unknown"
+	local zoneShort = mq.TLO.Zone.ShortName()
+
+	if self.ImmuneTable[zoneShort] == nil then
+		self.ImmuneTable[zoneShort] = {}
+	end
+	if self.ImmuneTable[zoneShort][mobName] ~= nil then
+		if self.ImmuneTable[zoneShort][mobName].body == mobType then
+			return true
+		end
+	end
+	if self.TempSettings.CharmImmune[mobId] ~= nil then
+		return true
+	end
+	return false
 end
 
 function Module:ResetCharmStates()
@@ -410,7 +457,7 @@ function Module:CharmNow(charmId, useAA)
 
 	mq.doevents()
 
-	if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS or mq.TLO.Pet.ID() > 0 then
+	if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS and mq.TLO.Pet.ID() > 0 then
 		RGMercUtils.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
 				mq.TLO.Spawn(charmId).CleanName(), charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'),
 			RGMercUtils.GetSetting('CharmAnnounce'))
