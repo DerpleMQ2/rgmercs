@@ -423,7 +423,6 @@ Module.CommandHandlers   = {
 		usage = "/rgl setitem <setting>",
 		about = "Set the Item on your Cursor's Normal loot setting (sell, keep, destroy, ignore, quest, tribute, bank).",
 		handler = function(self, params)
-			printf("Setting Item: %s", params)
 			self:SetItem(params)
 		end,
 	},
@@ -1087,6 +1086,7 @@ end
 function Module:SetItem(params)
 	if LootnScoot ~= nil then
 		LootnScoot.commandHandler(params)
+		mq.delay(2)
 		if params == "destroy" then
 			RGMercUtils.DoCmd("/destroy")
 		else
@@ -1098,7 +1098,7 @@ end
 
 function Module:SetGlobalItem(params)
 	if LootnScoot ~= nil then
-		LootnScoot.commandHandler(params)
+		LootnScoot.setGlobalBind(params)
 		if params == "destroy" then
 			RGMercUtils.DoCmd("/destroy")
 		else

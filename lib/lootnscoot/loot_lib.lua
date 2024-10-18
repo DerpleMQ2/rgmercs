@@ -473,6 +473,7 @@ function loot.addRule(itemName, section, rule)
     if not lootData[section] then
         lootData[section] = {}
     end
+    printf('item %s section %s rule %s', itemName, section, rule)
     lootData[section][itemName] = rule
     if section == 'GlobalItems' then
         loot.GlobalItems[itemName] = rule
@@ -700,8 +701,13 @@ function loot.setNormalItem(item, val)
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
+function loot.setGlobalBind(value)
+    loot.setGlobalItem(mq.TLO.Cursor(), value)
+end
+
 function loot.commandHandler(...)
     local args = { ..., }
+    printf("arg1 %s, arg2 %s, arg3 %s", args[1], args[2], args[3])
     if #args == 1 then
         if args[1] == 'sellstuff' then
             loot.processItems('Sell')
@@ -726,7 +732,7 @@ function loot.commandHandler(...)
             end
             loot.UpdateDB()
             RGMercsLogger.log_info("\ayUpdating the DB from loot.ini \ax and \at Reloading Settings")
-        elseif args[1] == 'bank' then
+        elseif args[1] == 'bankstuff' then
             loot.processItems('Bank')
         elseif args[1] == 'cleanup' then
             loot.processItems('Cleanup')
