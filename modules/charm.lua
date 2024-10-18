@@ -325,10 +325,11 @@ function Module:Render()
 		ImGui.Separator()
 		-- Immune targets
 		if ImGui.CollapsingHeader("Invalid Charm Targets") then
-			if ImGui.BeginTable("Immune", 4, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Hideable)) then
+			if ImGui.BeginTable("Immune", 5, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Hideable)) then
 				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
 				ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 250.0)
+				ImGui.TableSetupColumn('Lvl', ImGuiTableColumnFlags.WidthFixed, 70.0)
 				ImGui.TableSetupColumn('Body', (ImGuiTableColumnFlags.WidthFixed), 90.0)
 				ImGui.TableSetupColumn('Reason', (ImGuiTableColumnFlags.WidthFixed), 90.0)
 				ImGui.PopStyleColor()
@@ -339,19 +340,33 @@ function Module:Render()
 					ImGui.TableNextColumn()
 					ImGui.Text(string.format("%s", data.name))
 					ImGui.TableNextColumn()
+					ImGui.Text(string.format("%s", data.lvl))
+					ImGui.TableNextColumn()
 					ImGui.Text(string.format("%s", data.body))
 					ImGui.TableNextColumn()
 					ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", data.reason)
 				end
 				for name, data in pairs(self.ImmuneTable[mq.TLO.Zone.ShortName()] or {}) do
-					ImGui.TableNextColumn()
-					ImGui.Text(tostring('---'))
-					ImGui.TableNextColumn()
-					ImGui.Text(string.format("%s", name))
-					ImGui.TableNextColumn()
-					ImGui.Text(string.format("%s", data.body))
-					ImGui.TableNextColumn()
-					ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", data.reason)
+					for lvl, body in pairs(data) do
+						for bodyType, reason in pairs(body) do
+							ImGui.TableNextColumn()
+							if ImGui.SmallButton(RGMercIcons.MD_DELETE .. '##' .. name .. lvl .. bodyType) then
+								self.ImmuneTable[mq.TLO.Zone.ShortName()][name][lvl][bodyType] = nil
+								RGMercsLogger.log_debug(
+									"\ayUpdateCharmList: Removing Spawn from our Immune List, \aw(\aoZone \at%s \aoMob \at%s \aoLvl \at%s \ao Body \at%s\aw.)",
+									mq.TLO.Zone.ShortName(), name, lvl, bodyType)
+								mq.pickle(getImmuneFileName(), self.ImmuneTable)
+							end
+							ImGui.TableNextColumn()
+							ImGui.Text(string.format("%s", name))
+							ImGui.TableNextColumn()
+							ImGui.Text(string.format("%s", lvl))
+							ImGui.TableNextColumn()
+							ImGui.Text(string.format("%s", bodyType))
+							ImGui.TableNextColumn()
+							ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", reason)
+						end
+					end
 				end
 				ImGui.EndTable()
 			end
@@ -375,11 +390,27 @@ end
 
 function Module:AddImmuneTarget(mobId, mobData)
 	if self.TempSettings.CharmImmune[mobId] ~= nil then return end
-
+	local zone = mq.TLO.Zone.ShortName()
 	self.TempSettings.CharmImmune[mobId] = mobData
+
 	if mobData.reason ~= 'HIGH_LVL' then
-		self.ImmuneTable[mq.TLO.Zone.ShortName()][mobData.name] = mobData
-		mq.pickle(getImmuneFileName(), self.ImmuneTable)
+		if self.ImmuneTable[zone] == nil then
+			self.ImmuneTable[zone] = {}
+		end
+		if self.ImmuneTable[zone][mobData.name] == nil then
+			self.ImmuneTable[zone][mobData.name] = {}
+		end
+		if self.ImmuneTable[zone][mobData.name][mobData.lvl] == nil then
+			self.ImmuneTable[zone][mobData.name][mobData.lvl] = {}
+		end
+		if self.ImmuneTable[zone][mobData.name][mobData.lvl][mobData.body] == nil then
+			self.ImmuneTable[zone][mobData.name][mobData.lvl][mobData.body] = mobData.reason
+			RGMercsLogger.log_debug(
+				"\ayUpdateCharmList: Adding Spawn to our Immune List, \aw(\aoZone \at%s \aoMob \at%s \aoLvl \at%s \ao Body \at%s\aw.)",
+				zone, mobData.name, mobData.lvl, mobData.body)
+			mq.pickle(getImmuneFileName(), self.ImmuneTable)
+			self:RemoveCCTarget(mobId)
+		end
 	end
 end
 
@@ -398,13 +429,15 @@ function Module:IsCharmImmune(mobId)
 	local mobName = mq.TLO.Spawn(mobId).CleanName() or "Unknown"
 	local mobType = mq.TLO.Spawn(mobId).Body() or "Unknown"
 	local zoneShort = mq.TLO.Zone.ShortName()
-
+	local mobLvl = mq.TLO.Spawn(mobId).Level() or 0
 	if self.ImmuneTable[zoneShort] == nil then
 		self.ImmuneTable[zoneShort] = {}
 	end
 	if self.ImmuneTable[zoneShort][mobName] ~= nil then
-		if self.ImmuneTable[zoneShort][mobName].body == mobType then
-			return true
+		if self.ImmuneTable[zoneShort][mobName][mobLvl] ~= nil then
+			if self.ImmuneTable[zoneShort][mobName][mobLvl][mobType] ~= nil then
+				return true
+			end
 		end
 	end
 	if self.TempSettings.CharmImmune[mobId] ~= nil then
@@ -502,7 +535,7 @@ function Module:IsValidCharmTarget(mobId)
 	-- Is the mob ID in our charm immune list? If so, skip.
 	if self:IsCharmImmune(mobId) then
 		RGMercsLogger.log_debug(
-			"\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d as it is in our immune list.",
+			"\ayUpdateCharmList: Skipping \aoMob ID: \at%d \aoName: \at%s \aoLevel: \at%d \ayas it is in our immune list.",
 			spawn.ID(), spawn.CleanName(), spawn.Level())
 		return false
 	end
