@@ -595,6 +595,9 @@ function Module:LoadSettings()
 	LootnScoot.BuyItems = {}
 	LootnScoot.Settings = self.settings
 	LootnScoot.BuyItems = self.BuyItemsTable
+	LootnScoot.guiLoot.showReport = self.settings.ShowLootReport
+	LootnScoot.guiLoot.openGUI = self.settings.ShowLootUI
+	LootnScoot.guiLoot.recordData = self.settings.RecordData
 
 	self:SortItemTables()
 end
