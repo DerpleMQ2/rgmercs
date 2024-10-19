@@ -166,7 +166,7 @@ local loot         = {
         LootMyCorpse = false,                      -- Loot your own corpse if its nearby (Does not check for REZ)
     },
 }
-
+loot.MyClass       = RGMercConfig.Globals.CurLoadedCharClass:lower()
 -- SQL information
 local ItemsDB      = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
 
@@ -192,7 +192,8 @@ local tmpCmd = loot.GroupChannel or 'dgae'
 loot.BuyItems = {}
 loot.GlobalItems = {}
 loot.NormalItems = {}
-
+loot.NormalItemsClasses = {}
+loot.GlobalItemsClasses = {}
 -- FORWARD DECLARATIONS
 
 -- local loot.eventForage, loot.eventSell, loot.eventCantLoot, loot.eventTribute, loot.eventNoSlot
@@ -342,6 +343,8 @@ end
 function loot.loadSettings()
     loot.NormalItems = {}
     loot.GlobalItems = {}
+    loot.NormalItemsClasses = {}
+    loot.GlobalItemsClasses = {}
     -- SQL setup
     if not RGMercUtils.file_exists(ItemsDB) then
         RGMercsLogger.log_warn("\ayLoot Rules Database \arNOT found\ax, \atCreating it now\ax. Please run \at/rgl lootimport\ax to Import your \atloot.ini \axfile.")
@@ -371,11 +374,13 @@ function loot.loadSettings()
     local stmt = db:prepare("SELECT * FROM Global_Rules")
     for row in stmt:nrows() do
         loot.GlobalItems[row.item_name] = row.item_rule
+        loot.GlobalItemsClasses[row.item_name] = row.item_classes ~= nil and row.item_classes or 'All'
     end
     stmt:finalize()
     stmt = db:prepare("SELECT * FROM Normal_Rules")
     for row in stmt:nrows() do
         loot.NormalItems[row.item_name] = row.item_rule
+        loot.NormalItemsClasses[row.item_name] = row.item_classes ~= nil and row.item_classes or 'All'
     end
     stmt:finalize()
     db:close()
@@ -431,13 +436,12 @@ function loot.navToID(spawnID)
     end
 end
 
-function loot.modifyItem(item, action, tableName)
+function loot.modifyItem(item, action, tableName, classes)
     local db = SQLite3.open(ItemsDB)
     if not db then
         RGMercsLogger.log_warn("Failed to open database.")
         return
     end
-
     if action == 'delete' then
         local stmt, err = db:prepare("DELETE FROM " .. tableName .. " WHERE item_name = ?")
         if not stmt then
@@ -449,38 +453,55 @@ function loot.modifyItem(item, action, tableName)
         stmt:step()
         stmt:finalize()
     else
-        -- Use INSERT OR REPLACE to handle conflicts by replacing existing rows
-        local sql = string.format([[
+        if classes == nil then
+            local sql = string.format(
+                [[
             INSERT OR REPLACE INTO %s (item_name, item_rule)
             VALUES (?, ?)
+            ]], tableName)
+
+            local stmt, err = db:prepare(sql)
+            if not stmt then
+                RGMercsLogger.log_warn("Failed to prepare statement: %s\nSQL: %s", err, sql)
+                db:close()
+                return
+            end
+            stmt:bind_values(item, action)
+            stmt:step()
+            stmt:finalize()
+        else
+            local sql = string.format([[
+            INSERT OR REPLACE INTO %s (item_name, item_rule, item_classes)
+            VALUES (?, ?, ?)
         ]], tableName)
 
-        local stmt, err = db:prepare(sql)
-        if not stmt then
-            RGMercsLogger.log_warn("Failed to prepare statement: %s\nSQL: %s", err, sql)
-            db:close()
-            return
+            local stmt, err = db:prepare(sql)
+            if not stmt then
+                RGMercsLogger.log_warn("Failed to prepare statement: %s\nSQL: %s", err, sql)
+                db:close()
+                return
+            end
+            stmt:bind_values(item, action, classes)
+            stmt:step()
+            stmt:finalize()
         end
-        stmt:bind_values(item, action)
-        stmt:step()
-        stmt:finalize()
     end
 
     db:close()
 end
 
-function loot.addRule(itemName, section, rule)
+function loot.addRule(itemName, section, rule, classes)
     if not lootData[section] then
         lootData[section] = {}
     end
-    printf('item %s section %s rule %s', itemName, section, rule)
+    RGMercsLogger.log_info('item %s section %s rule %s, classes %s', itemName, section, rule, (classes ~= nil and classes or 'All'))
     lootData[section][itemName] = rule
     if section == 'GlobalItems' then
         loot.GlobalItems[itemName] = rule
-        loot.modifyItem(itemName, rule, 'Global_Rules')
+        loot.modifyItem(itemName, rule, 'Global_Rules', classes)
     else
         loot.NormalItems[itemName] = rule
-        loot.modifyItem(itemName, rule, 'Normal_Rules')
+        loot.modifyItem(itemName, rule, 'Normal_Rules', classes)
     end
     loot.lootActor:send({ mailbox = 'lootnscoot', }, { who = RGMercConfig.Globals.CurLoadedChar, action = 'addrule', item = itemName, rule = rule, section = section, })
 
@@ -503,14 +524,16 @@ function loot.lookupLootRule(section, key)
     local stepResult = stmt:step()
 
     local rule = 'NULL'
+    local classes = 'All'
     if stepResult == SQLite3.ROW then
         local row = stmt:get_named_values()
         rule = row.item_rule or 'NULL'
+        classes = row.item_classes or 'All'
     end
 
     stmt:finalize()
     db:close()
-    return rule
+    return rule, classes
 end
 
 -- moved this function up so we can report Quest Items.
@@ -545,7 +568,7 @@ function loot.AreBagsOpen()
 end
 
 ---@return string,number,boolean|nil
-function loot.getRule(item)
+function loot.getRule(item, from)
     local itemName = item.Name()
     local lootDecision = 'Keep'
     local tradeskill = item.Tradeskills()
@@ -558,11 +581,11 @@ function loot.getRule(item)
     local qKeep = '0'
     local globalItem = loot.GlobalItems[itemName] ~= nil and loot.GlobalItems[itemName] or 'NULL'
     globalItem = loot.BuyItems[itemName] ~= nil and 'Keep' or globalItem
+    local globalClasses = loot.GlobalItemsClasses[itemName] ~= nil and loot.GlobalItemsClasses[itemName] or 'All'
     local newRule = false
-
+    local lootClasses = 'All'
     lootData[firstLetter] = lootData[firstLetter] or {}
-    lootData[firstLetter][itemName] = lootData[firstLetter][itemName] or loot.lookupLootRule(firstLetter, itemName)
-
+    lootData[firstLetter][itemName], lootClasses = loot.lookupLootRule(firstLetter, itemName)
     -- Re-Evaluate the settings if AlwaysEval is on. Items that do not meet the Characters settings are reset to NUll and re-evaluated as if they were new items.
     if loot.Settings.AlwaysEval then
         local oldDecision = lootData[firstLetter][itemName] -- whats on file
@@ -591,10 +614,25 @@ function loot.getRule(item)
         end
         newRule = true
     end
+
     -- check this before quest item checks. so we have the proper rule to compare.
     -- Check if item is on global Items list, ignore everything else and use those rules insdead.
+    local globalFound = false
+    local globalClassSkip = false
     if loot.Settings.GlobalLootOn and globalItem ~= 'NULL' then
-        lootData[firstLetter][itemName] = globalItem or lootData[firstLetter][itemName]
+        if globalClasses ~= 'All' and from == 'loot' then
+            if string.find(globalClasses:lower(), loot.MyClass) then
+                lootData[firstLetter][itemName] = globalItem or lootData[firstLetter][itemName]
+                RGMercsLogger.log_info("Item \at%s\ax is \agIN GlobalItem \axclass list \ay%s", itemName, globalClasses)
+            else
+                lootData[firstLetter][itemName] = 'Ignore'
+                RGMercsLogger.log_info("Item \at%s\ax \arNOT in GlobalItem \axclass list \ay%s", itemName, globalClasses)
+                globalClassSkip = true
+            end
+        else
+            lootData[firstLetter][itemName] = globalItem or lootData[firstLetter][itemName]
+        end
+        globalFound = true
     end
     -- Check if item marked Quest
     if string.find(lootData[firstLetter][itemName], 'Quest') then
@@ -617,7 +655,19 @@ function loot.getRule(item)
         return qVal, tonumber(qKeep) or 0
     end
 
-    if loot.Settings.AlwaysDestroy and lootData[firstLetter][itemName] == 'Ignore' then return 'Destroy', 0 end
+    if loot.Settings.AlwaysDestroy and lootData[firstLetter][itemName] == 'Ignore' and not globalClassSkip then return 'Destroy', 0 end
+    -- check Classes
+    if lootClasses ~= 'All' and not globalFound and from == 'loot' then
+        if string.find(lootClasses:lower(), loot.MyClass) then
+            lootDecision = lootData[firstLetter][itemName]
+            RGMercsLogger.log_info("Item \at%s\ax is \agIN \axclass list \ay%s", itemName, lootClasses)
+        else
+            RGMercsLogger.log_info("Item \at%s\ax \arNOT in \axclass list \ay%s", itemName, lootClasses)
+            lootDecision = 'Ignore'
+        end
+        return lootDecision, 0, newRule
+    end
+
 
     return lootData[firstLetter][itemName], 0, newRule
 end
@@ -638,8 +688,10 @@ function loot.RegisterActors()
             local section = lootMessage.section
             if section == 'GlobalItems' then
                 loot.GlobalItems[item] = rule
+                loot.GlobalItemsClasses[item] = nil
             else
                 loot.NormalItems[item] = rule
+                loot.NormalItemsClasses[item] = lootMessage.classes
             end
             RGMercModules:ExecModule("Loot", "ModifyLootSettings")
         elseif action == 'deleteitem' then
@@ -647,8 +699,10 @@ function loot.RegisterActors()
             local section = lootMessage.section
             if section == 'GlobalItems' then
                 loot.GlobalItems[item] = nil
+                loot.GlobalItemsClasses[item] = nil
             else
                 loot.NormalItems[item] = nil
+                loot.NormalItemsClasses[item] = nil
             end
             RGMercModules:ExecModule("Loot", "ModifyLootSettings")
         elseif action == 'modifyitem' then
@@ -657,8 +711,10 @@ function loot.RegisterActors()
             local section = lootMessage.section
             if section == 'GlobalItems' then
                 loot.GlobalItems[item] = rule
+                loot.GlobalItemsClasses[item] = lootMessage.classes
             else
                 loot.NormalItems[item] = rule
+                loot.NormalItemsClasses[item] = lootMessage.classes
             end
             RGMercModules:ExecModule("Loot", "ModifyLootSettings")
         end
@@ -689,15 +745,28 @@ function loot.setBuyItem(item, qty)
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
-function loot.setGlobalItem(item, val)
+function loot.setGlobalItem(item, val, classes)
     loot.GlobalItems[item] = val ~= 'delete' and val or nil
-    loot.modifyItem(item, val, 'Global_Rules')
+    loot.GlobalItemsClasses[item] = classes or 'All'
+    loot.modifyItem(item, val, 'Global_Rules', classes)
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
-function loot.setNormalItem(item, val)
+function loot.ChangeClasses(item, classes, tableName)
+    if tableName == 'GlobalItems' then
+        loot.GlobalItemsClasses[item] = classes
+        loot.modifyItem(item, loot.GlobalItems[item], 'Global_Rules', classes)
+    elseif tableName == 'NormalItems' then
+        loot.NormalItemsClasses[item] = classes
+        loot.modifyItem(item, loot.NormalItems[item], 'Normal_Rules', classes)
+    end
+    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+end
+
+function loot.setNormalItem(item, val, classes)
     loot.NormalItems[item] = val ~= 'delete' and val or nil
-    loot.modifyItem(item, val, 'Normal_Rules')
+    loot.NormalItemsClasses[item] = classes or 'All'
+    loot.modifyItem(item, val, 'Normal_Rules', classes)
     RGMercModules:ExecModule("Loot", "ModifyLootSettings")
 end
 
@@ -707,7 +776,7 @@ end
 
 function loot.commandHandler(...)
     local args = { ..., }
-    printf("arg1 %s, arg2 %s, arg3 %s", args[1], args[2], args[3])
+    RGMercsLogger.log_debug("arg1 %s, arg2 %s, arg3 %s", args[1], args[2], args[3])
     if #args == 1 then
         if args[1] == 'sellstuff' then
             loot.processItems('Sell')
@@ -776,6 +845,10 @@ function loot.commandHandler(...)
             loot.GlobalItems[mq.TLO.Cursor()] = validActions[args[2]]
             loot.addRule(mq.TLO.Cursor(), 'GlobalItems', validActions[args[2]])
             RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", mq.TLO.Cursor(), validActions[args[2]])
+        elseif args[1] == 'classes' and mq.TLO.Cursor() then
+            loot.ChangeClasses(mq.TLO.Cursor(), args[2], 'NormalItems')
+        elseif args[1] == 'gclasses' and mq.TLO.Cursor() then
+            loot.ChangeClasses(mq.TLO.Cursor(), args[2], 'GlobalItems')
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
             loot.addRule(args[2], args[2]:sub(1, 1):upper(), validActions[args[1]])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ay%s\ax", args[2], validActions[args[1]])
@@ -791,6 +864,14 @@ function loot.commandHandler(...)
             loot.BuyItems[args[2]] = args[3]
             RGMercUtils.DoCmd('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, args[2], args[3])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", args[2], args[3])
+        elseif args[1] == 'classes' and args[2] ~= 'NULL' and args[3] ~= 'NULL' then
+            local item = args[2]
+            local classes = args[3]
+            loot.ChangeClasses(item, classes, 'NormalItems')
+        elseif args[1] == 'gclasses' and args[2] ~= 'NULL' and args[3] ~= 'NULL' then
+            local item = args[2]
+            local classes = args[3]
+            loot.ChangeClasses(item, classes, 'GlobalItems')
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
             loot.addRule(args[2], args[2]:sub(1, 1):upper(), validActions[args[1]] .. '|' .. args[3])
             RGMercsLogger.log_info("Setting \ay%s\ax to \ay%s|%s\ax", args[2], validActions[args[1]], args[3])
@@ -920,7 +1001,7 @@ function loot.lootCorpse(corpseID)
             local corpseItem = mq.TLO.Corpse.Item(i)
             local itemLink = corpseItem.ItemLink('CLICKABLE')()
             if corpseItem() then
-                local itemRule, qKeep, newRule = loot.getRule(corpseItem)
+                local itemRule, qKeep, newRule = loot.getRule(corpseItem, 'loot')
                 RGMercsLogger.log_debug("LootCorpse(): item=%s, rule=%s, qKeep=%s, newRule=%s", corpseItem.Name(), itemRule, qKeep, newRule)
                 local stackable = corpseItem.Stackable()
                 local freeStack = corpseItem.FreeStack()
