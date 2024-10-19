@@ -505,7 +505,7 @@ end
 
 function Module:AddCCTarget(mobId)
 	if mobId == 0 then return end
-
+	local spawn = mq.TLO.Spawn(mobId)
 	if self:IsCharmImmune(mobId) then
 		RGMercsLogger.log_debug("\awNOTICE:\ax Unable to charm %d - it is immune", mobId)
 		return false
@@ -514,10 +514,10 @@ function Module:AddCCTarget(mobId)
 	RGMercUtils.SetTarget(mobId)
 
 	self.TempSettings.CharmTracker[mobId] = {
-		name = mq.TLO.Spawn(mobId).CleanName(),
+		name = spawn.CleanName(),
 		duration = mq.TLO.Target.Charmed.Duration() or 0,
-		level = mq.TLO.Spawn(mobId).Level() or 0,
-		body = mq.TLO.Spawn(mobId).Body() or "Unknown",
+		level = spawn.Level() or 0,
+		body = spawn.Body() or "Unknown",
 		last_check = os.clock() * 1000,
 		charm_spell = mq.TLO
 			.Target.Charmed() or "None",
