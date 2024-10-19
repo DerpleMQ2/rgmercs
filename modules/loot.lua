@@ -1058,7 +1058,10 @@ end
 
 function Module:DoSell()
 	if LootnScoot ~= nil then
+		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
+		RGMercUtils.SetSetting('ChaseOn', false)
 		LootnScoot.processItems('Sell')
+		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
@@ -1070,19 +1073,31 @@ end
 
 function Module:DoBuy()
 	if LootnScoot ~= nil then
+		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
+		RGMercUtils.SetSetting('ChaseOn', false)
+
 		LootnScoot.processItems('Buy')
+		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:DoBank()
 	if LootnScoot ~= nil then
+		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
+		RGMercUtils.SetSetting('ChaseOn', false)
+
 		LootnScoot.processItems('Bank')
+		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:DoTribute()
 	if LootnScoot ~= nil then
+		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
+		RGMercUtils.SetSetting('ChaseOn', false)
+
 		LootnScoot.processItems('Tribute')
+		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
