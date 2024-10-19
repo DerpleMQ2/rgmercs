@@ -292,31 +292,23 @@ function Module:Render()
 		ImGui.Separator()
 		-- CCEd targets
 		if ImGui.CollapsingHeader("Charm Target List") then
-			if ImGui.BeginTable("CharmedList", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
+			if ImGui.BeginTable("CharmedList", 4, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Hideable)) then
 				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
 				ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
-				ImGui.TableSetupColumn('Duration', (ImGuiTableColumnFlags.WidthFixed), 150.0)
 				ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), 250.0)
-				ImGui.TableSetupColumn('Spell', (ImGuiTableColumnFlags.WidthStretch), 150.0)
+				ImGui.TableSetupColumn('Level', (ImGuiTableColumnFlags.WidthFixed), 150.0)
+				ImGui.TableSetupColumn('Body', (ImGuiTableColumnFlags.WidthStretch), 150.0)
 				ImGui.PopStyleColor()
 				ImGui.TableHeadersRow()
 				for id, data in pairs(self.TempSettings.CharmTracker) do
 					ImGui.TableNextColumn()
 					ImGui.Text(tostring(id))
 					ImGui.TableNextColumn()
-					if data.duration > 30000 then
-						ImGui.PushStyleColor(ImGuiCol.Text, 0.02, 0.8, 0.02, 1)
-					elseif data.duration > 15000 then
-						ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.8, 0.02, 1)
-					else
-						ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.02, 0.02, 1)
-					end
-					ImGui.Text(string.format("%s", RGMercUtils.FormatTime(math.max(0, data.duration / 1000))))
-					ImGui.PopStyleColor()
+					ImGui.Text("%s", data.name)
 					ImGui.TableNextColumn()
-					ImGui.Text(string.format("%s", data.name))
+					ImGui.Text("%s", data.level)
 					ImGui.TableNextColumn()
-					ImGui.Text(string.format("%s", data.charm_spell))
+					ImGui.Text("%s", data.body)
 				end
 				ImGui.EndTable()
 			end
@@ -336,13 +328,13 @@ function Module:Render()
 				ImGui.TableHeadersRow()
 				for id, data in pairs(self.TempSettings.CharmImmune) do
 					ImGui.TableNextColumn()
-					ImGui.Text(tostring(id))
+					ImGui.Text('%s', id)
 					ImGui.TableNextColumn()
-					ImGui.Text(string.format("%s", data.name))
+					ImGui.Text("%s", data.name)
 					ImGui.TableNextColumn()
-					ImGui.Text(string.format("%s", data.lvl))
+					ImGui.Text("%s", data.lvl)
 					ImGui.TableNextColumn()
-					ImGui.Text(string.format("%s", data.body))
+					ImGui.Text("%s", data.body)
 					ImGui.TableNextColumn()
 					ImGui.TextColored(ImVec4(0.983, 0.729, 0.290, 1.000), "%s", data.reason)
 				end
@@ -426,10 +418,11 @@ function Module:CharmLvlToHigh(mobLvl)
 end
 
 function Module:IsCharmImmune(mobId)
-	local mobName = mq.TLO.Spawn(mobId).CleanName() or "Unknown"
-	local mobType = mq.TLO.Spawn(mobId).Body() or "Unknown"
+	local tmpSpawn = mq.TLO.Spawn(mobId)
+	local mobName = tmpSpawn.CleanName() or "Unknown"
+	local mobType = tmpSpawn.Body() or "Unknown"
 	local zoneShort = mq.TLO.Zone.ShortName()
-	local mobLvl = mq.TLO.Spawn(mobId).Level() or 0
+	local mobLvl = tmpSpawn.Level() or 0
 	if self.ImmuneTable[zoneShort] == nil then
 		self.ImmuneTable[zoneShort] = {}
 	end
@@ -521,8 +514,10 @@ function Module:AddCCTarget(mobId)
 	RGMercUtils.SetTarget(mobId)
 
 	self.TempSettings.CharmTracker[mobId] = {
-		name = mq.TLO.Target.CleanName(),
+		name = mq.TLO.Spawn(mobId).CleanName(),
 		duration = mq.TLO.Target.Charmed.Duration() or 0,
+		level = mq.TLO.Spawn(mobId).Level() or 0,
+		body = mq.TLO.Spawn(mobId).Body() or "Unknown",
 		last_check = os.clock() * 1000,
 		charm_spell = mq.TLO
 			.Target.Charmed() or "None",
