@@ -10,14 +10,14 @@ mq.event("CantSee", "You cannot see your target.", function()
     if not RGMercUtils.GetSetting('HandleCantSeeTarget') then
         return
     end
-
+    local target = mq.TLO.Target
     if mq.TLO.Stick.Active() then
         RGMercUtils.DoCmd("/stick off")
     end
 
     if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and Cannot see our target!")
-        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.5)
+        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         if mq.TLO.Me.Moving() then return end
@@ -29,19 +29,19 @@ mq.event("CantSee", "You cannot see your target.", function()
         else
             RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
             if RGMercUtils.GetSetting('DoAutoEngage') then
-                if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
+                if RGMercUtils.OkToEngage(target.ID() or 0) then
                     RGMercUtils.DoCmd("/squelch /face fast")
                     if RGMercUtils.GetTargetDistance() < 15 then
-                        RGMercsLogger.log_debug("Can't See target (%s [%d]). Moving back 15.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0)
+                        RGMercsLogger.log_debug("Can't See target (%s [%d]). Moving back 15.", target.CleanName() or "", target.ID() or 0)
                         RGMercUtils.DoCmd("/stick 15 moveback")
                     else
-                        local desiredDistance = (mq.TLO.Target.MaxRangeTo() or 0) * 0.9
+                        local desiredDistance = (target.MaxRangeTo() or 0) * 0.9
                         if not RGMercUtils.GetSetting('DoMelee') then
                             desiredDistance = RGMercUtils.GetTargetDistance() * .95
                         end
 
-                        RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID(), desiredDistance)
-                        RGMercUtils.NavInCombat(mq.TLO.Target.ID(), desiredDistance, false)
+                        RGMercsLogger.log_debug("Can't See target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID(), desiredDistance)
+                        RGMercUtils.NavInCombat(target.ID(), desiredDistance, false)
                     end
                 end
             end
@@ -104,13 +104,13 @@ local function tooFarHandler()
     if mq.TLO.Stick.Active() then
         RGMercUtils.DoCmd("/stick off")
     end
+    local target = mq.TLO.Target
 
     if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
             RGMercUtils.GetTargetCleanName(),
             RGMercUtils.GetTargetDistance())
-
-        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", mq.TLO.Target.ID() or 0, (mq.TLO.Target.Distance() or 0) * 0.75)
+        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.75)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
@@ -121,16 +121,16 @@ local function tooFarHandler()
         elseif RGMercUtils.GetSetting('DoMelee') then
             RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
             if RGMercUtils.GetSetting('DoAutoEngage') then
-                if RGMercUtils.OkToEngage(mq.TLO.Target.ID() or 0) then
+                if RGMercUtils.OkToEngage(target.ID() or 0) then
                     RGMercUtils.DoCmd("/squelch /face fast")
 
                     if RGMercUtils.GetTargetDistance() < 15 then
-                        RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Moving back 15.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0)
+                        RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Moving back 15.", target.CleanName() or "", target.ID() or 0)
                         RGMercUtils.DoCmd("/stick 15 moveback")
                     else
-                        RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", mq.TLO.Target.CleanName() or "", mq.TLO.Target.ID() or 0,
-                            (mq.TLO.Target.MaxRangeTo() or 0) * 0.9)
-                        RGMercUtils.NavInCombat(mq.TLO.Target.ID(), (mq.TLO.Target.MaxRangeTo() or 0) * 0.9, false)
+                        RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
+                            (target.MaxRangeTo() or 0) * 0.9)
+                        RGMercUtils.NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.9, false)
                     end
                 end
             end
@@ -368,28 +368,33 @@ end)
 
 mq.event('ImmuneMez', "Your target cannot be mesmerized#*#", function()
     RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_IMMUNE)
-    RGMercModules:ExecModule("Mez", "AddImmuneTarget", mq.TLO.Target.ID(),
-        { id = mq.TLO.Target.ID(), name = mq.TLO.Target.CleanName(), lvl = mq.TLO.Target.Level(), body = mq.TLO.Target.Body(), reason = "IMMUNE", })
+    local target = mq.TLO.Target
+    RGMercModules:ExecModule("Mez", "AddImmuneTarget", target.ID(),
+        { id = target.ID(), name = target.CleanName(), lvl = target.Level(), body = target.Body(), reason = "IMMUNE", })
 end)
 
 mq.event('ImmuneCharm', "Your target cannot be charmed#*#", function()
     RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_IMMUNE)
-    RGMercModules:ExecModule("Charm", "AddImmuneTarget", mq.TLO.Target.ID(),
-        { id = mq.TLO.Target.ID(), name = mq.TLO.Target.CleanName(), lvl = mq.TLO.Target.Level(), body = mq.TLO.Target.Body(), reason = "IMMUNE", })
+    local target = mq.TLO.Target
+    RGMercModules:ExecModule("Charm", "AddImmuneTarget", target.ID(),
+        { id = target.ID(), name = target.CleanName(), lvl = target.Level(), body = target.Body(), reason = "IMMUNE", })
 end)
 
 mq.event('ImmuneCharm2', "This NPC cannot be charmed#*#", function()
     RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_IMMUNE)
-    RGMercModules:ExecModule("Charm", "AddImmuneTarget", mq.TLO.Target.ID(),
-        { id = mq.TLO.Target.ID(), name = mq.TLO.Target.CleanName(), lvl = mq.TLO.Target.Level(), body = mq.TLO.Target.Body(), reason = "IMMUNE", })
+    local target = mq.TLO.Target
+    RGMercModules:ExecModule("Charm", "AddImmuneTarget", target.ID(),
+        { id = target.ID(), name = target.CleanName(), lvl = target.Level(), body = target.Body(), reason = "IMMUNE", })
 end)
 
 mq.event('LvlHighCharm', "Your target is too high of a level for your charm spell.#*#", function()
     RGMercUtils.SetLastCastResult(RGMercConfig.Constants.CastResults.CAST_IMMUNE)
     RGMercsLogger.log_debug("\awNOTICE:\ax Target is to \aoHigh Level\ax to Charm with this spell!")
-    RGMercModules:ExecModule("Charm", "CharmLvlToHigh", mq.TLO.Target.Level())
-    RGMercModules:ExecModule("Charm", "AddImmuneTarget", mq.TLO.Target.ID(),
-        { id = mq.TLO.Target.ID(), name = mq.TLO.Target.CleanName(), lvl = mq.TLO.Target.Level(), body = mq.TLO.Target.Body(), reason = "HIGH_LVL", })
+    local target = mq.TLO.Target
+
+    RGMercModules:ExecModule("Charm", "CharmLvlToHigh", target.Level())
+    RGMercModules:ExecModule("Charm", "AddImmuneTarget", target.ID(),
+        { id = target.ID(), name = target.CleanName(), lvl = target.Level(), body = target.Body(), reason = "HIGH_LVL", })
 end)
 -- [ END CAST RESULT HANDLERS ] --
 
@@ -405,7 +410,7 @@ end)
 
 mq.event('Summoned', "You have been summoned!", function(_)
     if RGMercUtils.GetSetting('DoAutoEngage') and not RGMercUtils.GetSetting('DoMelee') and not RGMercUtils.IAmMA() and RGMercUtils.GetSetting('ReturnToCamp') then
-        RGMercUtils.PrintGroupMessage("%s was just summoned -- returning to camp!", mq.TLO.Me.DisplayName())
+        RGMercUtils.PrintGroupMessage("%s was just summoned -- returning to camp!", RGMercConfig.Globals.CurLoadedChar)
         RGMercModules:ExecModule("Movement", "DoAutoCampCheck")
     end
 end)
