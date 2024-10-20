@@ -31,7 +31,22 @@ Module.DefaultConfig      = {
 		FAQ = "Why are my goobers not looting?",
 		Answer = "You most likely have [DoLoot] turned off.",
 	},
-
+	['ShowLootReport']                         = {
+		DisplayName = "ShowLootReport",
+		Category = "Loot N Scoot",
+		Tooltip = "Remembers the last state of the Loot Report",
+		Default = LootnScoot.guiLoot.showReport,
+		FAQ = "Can i always have the Loot Report show on load?",
+		Answer = "Loot Report window saves its state.",
+	},
+	['ShowLootUI']                             = {
+		DisplayName = "ShowLootUI",
+		Category = "Loot N Scoot",
+		Tooltip = "Remembers the last state of the Loot Report",
+		Default = LootnScoot.guiLoot.openGUI,
+		FAQ = "Can i always have the Loot Console UI show on load?",
+		Answer = "Loot Console UI window saves its state.",
+	},
 	--- Looted Settings
 	['LootFile']                               = {
 		DisplayName = 'Loot File',
@@ -526,6 +541,8 @@ function Module:SaveSettings(doBroadcast)
 	LootnScoot.Settings = {}
 	LootnScoot.Settings = self.settings
 	LootnScoot.BuyItems = self.BuyItemsTable
+	LootnScoot.guiLoot.showReport = self.settings.ShowLootReport
+	LootnScoot.guiLoot.openGUI = self.settings.ShowLootUI
 end
 
 function Module:ModifyLootSettings()
@@ -1256,12 +1273,16 @@ end
 function Module:ReportLoot()
 	if LootnScoot ~= nil then
 		LootnScoot.guiLoot.ReportLoot()
+		RGMercUtils.SetSetting('ShowLootReport', LootnScoot.guiLoot.showReport)
+		self:SaveSettings(false)
 	end
 end
 
 function Module:ShowLootUI()
 	if LootnScoot ~= nil then
 		LootnScoot.guiLoot.openGUI = not LootnScoot.guiLoot.openGUI
+		RGMercUtils.SetSetting('ShowLootUI', LootnScoot.guiLoot.openGUI)
+		self:SaveSettings(false)
 	end
 end
 

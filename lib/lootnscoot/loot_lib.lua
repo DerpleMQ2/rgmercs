@@ -1217,9 +1217,10 @@ end
 function loot.RestockItems()
     local rowNum = 0
     for itemName, qty in pairs(loot.BuyItems) do
+        local tmpVal = tonumber(qty) or 0
         rowNum = mq.TLO.Window("MerchantWnd/MW_ItemList").List(itemName, 2)() or 0
         mq.delay(20)
-        local tmpQty = qty - mq.TLO.FindItemCount(itemName)()
+        local tmpQty = tmpVal - mq.TLO.FindItemCount(itemName)()
         if rowNum ~= 0 and tmpQty > 0 then
             mq.TLO.Window("MerchantWnd/MW_ItemList").Select(rowNum)()
             mq.delay(100)
