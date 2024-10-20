@@ -416,7 +416,7 @@ local function RGMercsGUI()
                         ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
 
                         -- .. tostring(RGMercConfig.Globals.AutoTargetID))
-                        ImGui.Text(string.format("MA: %-25s", (RGMercUtils.GetMainAssistSpawn().CleanName() or "None")))
+                        ImGui.Text("MA: %-25s", (RGMercUtils.GetMainAssistSpawn().CleanName() or "None"))
                         if mq.TLO.Target.ID() > 0 and RGMercUtils.TargetIsType("pc") and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
                             ImGui.SameLine()
                             if ImGui.SmallButton(string.format("Set MA to %s", RGMercUtils.GetTargetCleanName())) then
