@@ -1,26 +1,28 @@
 -- Sample Basic Class Module
-local mq                 = require('mq')
-local RGMercUtils        = require("utils.rgmercs_utils")
-local Set                = require("mq.Set")
+local mq                  = require('mq')
+local RGMercUtils         = require("utils.rgmercs_utils")
+local Set                 = require("mq.Set")
 
-local LootnScoot         = require('lib.lootnscoot.loot_lib')
-local sNameStripped      = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
+local LootnScoot          = require('lib.lootnscoot.loot_lib')
+local sNameStripped       = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 
-local Module             = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier, Aquietone (lootnscoot lua)', }
-Module.__index           = Module
-Module.settings          = {}
-Module.DefaultCategories = {}
+local Module              = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier, Aquietone (lootnscoot lua)', }
+Module.__index            = Module
+Module.settings           = {}
+Module.DefaultCategories  = {}
 
-Module.ModuleLoaded      = false
+Module.ModuleLoaded       = false
 
-Module.TempSettings      = {}
-Module.BuyItemsTable     = {}
-Module.GlobalItemsTable  = {}
-Module.NormalItemsTable  = {}
-Module.FAQ               = {}
-Module.ClassFAQ          = {}
+Module.TempSettings       = {}
+Module.BuyItemsTable      = {}
+Module.GlobalItemsTable   = {}
+Module.GlobalItemsClasses = {}
+Module.NormalItemsTable   = {}
+Module.NormalItemsClasses = {}
+Module.FAQ                = {}
+Module.ClassFAQ           = {}
 
-Module.DefaultConfig     = {
+Module.DefaultConfig      = {
 	['DoLoot']                                 = {
 		DisplayName = "DoLoot",
 		Category = "Loot N Scoot",
@@ -380,7 +382,7 @@ Module.DefaultConfig     = {
 	},
 }
 
-Module.FAQ               = {
+Module.FAQ                = {
 	[1] = {
 		Questions = "How can I set the same settings on all of my characters?",
 		Answer = "You can copy your Loot_Server_Name_CharName_CLASS.lua and rename them for the other characters.\n\n" ..
@@ -398,7 +400,7 @@ Module.FAQ               = {
 	},
 }
 
-Module.CommandHandlers   = {
+Module.CommandHandlers    = {
 	sell = {
 		usage = "/rgl sell",
 		about = "Use lootnscoot to sell stuff to your Target.",
@@ -438,7 +440,6 @@ Module.CommandHandlers   = {
 		usage = "/rgl setitem <setting>",
 		about = "Set the Item on your Cursor's Normal loot setting (sell, keep, destroy, ignore, quest, tribute, bank).",
 		handler = function(self, params)
-			printf("Setting Item: %s", params)
 			self:SetItem(params)
 		end,
 	},
@@ -486,10 +487,24 @@ Module.CommandHandlers   = {
 			self:LootUpdate()
 		end,
 	},
+	setclasses = {
+		usage = "/rgl setclasses",
+		about = "Set the Class Rules for the current class.",
+		handler = function(self, params)
+			self:SetClasses(mq.TLO.Cursor(), params)
+		end,
+	},
+	setgclasses = {
+		usage = "/rgl setgclasses",
+		about = "Set the Global Class Rules for the current class.",
+		handler = function(self, params)
+			self:SetGlobalClasses(mq.TLO.Cursor(), params)
+		end,
+	},
 
 }
 
-Module.DefaultCategories = Set.new({})
+Module.DefaultCategories  = Set.new({})
 for k, v in pairs(Module.DefaultConfig or {}) do
 	if v.Type ~= "Custom" then
 		Module.DefaultCategories:add(v.Category)
@@ -547,6 +562,16 @@ function Module:ModifyLootSettings()
 		self.NormalItemsTable = {}
 		self.NormalItemsTable = LootnScoot.NormalItems
 	end
+	if LootnScoot.NormalItemsClasses ~= nil then
+		self.NormalItemsClasses = {}
+		self.NormalItemsClasses = LootnScoot.NormalItemsClasses
+		self.TempSettings.NormalItemsClasses = self.NormalItemsClasses
+	end
+	if LootnScoot.GlobalItemsClasses ~= nil then
+		self.GlobalItemsClasses = {}
+		self.GlobalItemsClasses = LootnScoot.GlobalItemsClasses
+		self.TempSettings.GlobalItemsClasses = self.GlobalItemsClasses
+	end
 	self:SaveSettings(false)
 end
 
@@ -584,7 +609,12 @@ function Module:LoadSettings()
 	if LootnScoot.NormalItems ~= nil then
 		self.NormalItemsTable = LootnScoot.NormalItems
 	end
-
+	if LootnScoot.NormalItemsClasses ~= nil then
+		self.NormalItemsClasses = LootnScoot.NormalItemsClasses
+	end
+	if LootnScoot.GlobalItemsClasses ~= nil then
+		self.GlobalItemsClasses = LootnScoot.GlobalItemsClasses
+	end
 	-- lootnscoot tables
 	local buyItems_pickle_path = getLootItemsConfigFileName('buy')
 	local buyItemsLoad, err = loadfile(buyItems_pickle_path)
@@ -615,6 +645,7 @@ function Module:LoadSettings()
 	LootnScoot.BuyItems = self.BuyItemsTable
 	LootnScoot.guiLoot.showReport = self.settings.ShowLootReport
 	LootnScoot.guiLoot.openGUI = self.settings.ShowLootUI
+	LootnScoot.guiLoot.recordData = self.settings.RecordData
 
 	self:SortItemTables()
 end
@@ -821,13 +852,16 @@ function Module:Render()
 				if self.TempSettings.GlobalItems == nil then
 					self.TempSettings.GlobalItems = {}
 				end
+				if self.TempSettings.GlobalItemsClasses == nil then
+					self.TempSettings.GlobalItemsClasses = {}
+				end
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
 				if ImGui.SmallButton("Save Changes##GlobalItems") then
 					for k, v in pairs(self.TempSettings.UpdatedGlobalItems) do
-						if k ~= "" then
+						if k ~= "" or self.TempSettings.UpdateGlobalClasses[k] ~= nil then
 							self.GlobalItemsTable[k] = v
-							LootnScoot.setGlobalItem(k, v)
+							LootnScoot.setGlobalItem(k, v, self.TempSettings.UpdateGlobalClasses[k])
 							LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
 								{
 									who = RGMercConfig.Globals.CurLoadedChar,
@@ -836,6 +870,7 @@ function Module:Render()
 									"GlobalItems",
 									item = k,
 									rule = v,
+									classes = self.TempSettings.UpdateGlobalClasses[k],
 								})
 						end
 					end
@@ -854,16 +889,24 @@ function Module:Render()
 					end
 					self.TempSettings.UpdatedGlobalItems = {}
 					self.TempSettings.DeletedGlobalKeys = {}
+					self.TempSettings.UpdateGlobalClasses = {}
 
 					self:SortItemTables()
 				end
 
 				self.TempSettings.SearchGlobalItems = ImGui.InputText("Search Items##NormalItems",
 					self.TempSettings.SearchGlobalItems) or nil
+				if ImGui.IsItemHovered() and mq.TLO.Cursor() then
+					if ImGui.IsMouseClicked(0) then
+						self.TempSettings.SearchGlobalItems = mq.TLO.Cursor()
+						RGMercUtils.DoCmd("/autoinv")
+					end
+				end
 				ImGui.SeparatorText("Add New Item##GlobalItems")
-				if ImGui.BeginTable("AddItem##GlobalItems", 3, ImGuiTableFlags.Borders) then
+				if ImGui.BeginTable("AddItem##GlobalItems", 4, ImGuiTableFlags.Borders) then
 					ImGui.TableSetupColumn("Item")
 					ImGui.TableSetupColumn("Value")
+					ImGui.TableSetupColumn("Classes")
 					ImGui.TableSetupColumn("Add")
 					ImGui.TableHeadersRow()
 					ImGui.TableNextColumn()
@@ -885,11 +928,16 @@ function Module:Render()
 						self.TempSettings.NewGlobalValue) or nil
 
 					ImGui.TableNextColumn()
+					ImGui.SetNextItemWidth(120)
+					self.TempSettings.NewGlobalClasses = ImGui.InputText("New Classes##GlobalItems",
+						self.TempSettings.NewGlobalClasses) or 'All'
+
+					ImGui.TableNextColumn()
 
 					if ImGui.Button("Add Item##GlobalItems") then
 						if self.TempSettings.NewGlobalValue ~= "" and self.TempSettings.NewGlobalValue ~= "" then
 							self.GlobalItemsTable[self.TempSettings.NewGlobalItem] = self.TempSettings.NewGlobalValue
-							LootnScoot.setGlobalItem(self.TempSettings.NewGlobalItem, self.TempSettings.NewGlobalValue)
+							LootnScoot.setGlobalItem(self.TempSettings.NewGlobalItem, self.TempSettings.NewGlobalValue, self.TempSettings.NewGlobalClasses)
 							LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
 								{
 									who = RGMercConfig.Globals.CurLoadedChar,
@@ -897,28 +945,41 @@ function Module:Render()
 									section = "GlobalItems",
 									item = self.TempSettings.NewGlobalItem,
 									rule = self.TempSettings.NewGlobalValue,
+									classes = self.TempSettings.NewGlobalClasses,
 								})
 
 							self.TempSettings.NewGlobalItem = ""
 							self.TempSettings.NewGlobalValue = ""
+							self.TempSettings.NewGlobalClasses = "All"
 						end
 					end
 					ImGui.EndTable()
 				end
+				col = math.max(3, math.floor(ImGui.GetContentRegionAvail() / 150))
+				local colCount = col + (col % 3)
+				if colCount % 3 ~= 0 then
+					if (colCount - 1) % 3 == 0 then
+						colCount = colCount - 1
+					else
+						colCount = colCount - 2
+					end
+				end
 				ImGui.SeparatorText("Global Items Table")
-				if ImGui.BeginTable("GlobalItems", col, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY), ImVec2(0.0, 0.0)) then
+				if ImGui.BeginTable("GlobalItems", colCount, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY), ImVec2(0.0, 0.0)) then
 					ImGui.TableSetupScrollFreeze(col, 1)
-					for i = 1, col / 2 do
+					for i = 1, colCount / 3 do
 						ImGui.TableSetupColumn("Item")
 						ImGui.TableSetupColumn("Setting")
+						ImGui.TableSetupColumn('Classes')
 					end
 					ImGui.TableHeadersRow()
 
-					local numDisplayColumns = col / 2
+					local numDisplayColumns = colCount / 3
 
 					if self.GlobalItemsTable ~= nil and self.TempSettings.SortedGlobalItemKeys ~= nil then
-						self.TempSettings.UpdatedGlobalItems = {}
-						self.TempSettings.DeletedGlobalKeys = {}
+						self.TempSettings.UpdatedGlobalItems = self.TempSettings.UpdatedGlobalItems or {}
+						self.TempSettings.UpdateGlobalClasses = self.TempSettings.UpdateGlobalClasses or {}
+						self.TempSettings.DeletedGlobalKeys = self.TempSettings.DeletedGlobalKeys or {}
 
 						local numItems = #self.TempSettings.SortedGlobalItemKeys
 						local numRows = math.ceil(numItems / numDisplayColumns)
@@ -932,7 +993,8 @@ function Module:Render()
 									if self:SearchLootTable(self.TempSettings.SearchGlobalItems, k, v) then
 										self.TempSettings.GlobalItems[k] = self.TempSettings.GlobalItems[k] or
 											{ Key = k, Value = v, }
-
+										self.TempSettings.GlobalItemsClasses[k] = self.TempSettings.GlobalItemsClasses[k] ~= nil and self.TempSettings.GlobalItemsClasses[k] or
+											self.GlobalItemsClasses[k] ~= nil and self.GlobalItemsClasses[k] or "All"
 										ImGui.TableNextColumn()
 										ImGui.SetNextItemWidth(140)
 										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.GlobalItems[k].Key)
@@ -940,6 +1002,11 @@ function Module:Render()
 										ImGui.TableNextColumn()
 										local newValue = ImGui.InputText("##Value" .. k,
 											self.TempSettings.GlobalItems[k].Value)
+
+										ImGui.TableNextColumn()
+										ImGui.SetNextItemWidth(140)
+										local newGlClasses = ImGui.InputText("##Class" .. k,
+											self.TempSettings.GlobalItemsClasses[k])
 
 										if newValue ~= v and newKey == k then
 											if newValue == "" then newValue = "NULL" end
@@ -951,7 +1018,11 @@ function Module:Render()
 										elseif newKey ~= k and newKey == "" then
 											self.TempSettings.DeletedGlobalKeys[k] = true
 										end
-
+										if newGlClasses ~= self.TempSettings.GlobalItemsClasses[k] then
+											self.TempSettings.UpdateGlobalClasses[newKey] = newGlClasses
+											self.TempSettings.UpdatedGlobalItems[newKey] = newValue ~= '' and newValue or k
+										end
+										self.TempSettings.GlobalItemsClasses[newKey] = newGlClasses
 										self.TempSettings.GlobalItems[k].Key = newKey
 										self.TempSettings.GlobalItems[k].Value = newValue
 									end
@@ -971,23 +1042,28 @@ function Module:Render()
 				if self.TempSettings.NormalItems == nil then
 					self.TempSettings.NormalItems = {}
 				end
+				if self.TempSettings.NormalItemsClasses == nil then
+					self.TempSettings.NormalItemsClasses = {}
+				end
 				ImGui.Text("Delete the Item Name to remove it from the table")
 
 				if ImGui.SmallButton("Save Changes##NormalItems") then
 					for k, v in pairs(self.TempSettings.UpdatedNormalItems) do
 						self.NormalItemsTable[k] = v
-						LootnScoot.setNormalItem(k, v)
+						LootnScoot.setNormalItem(k, v, self.TempSettings.UpdateItemClasses[k])
 						LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
 							{
 								who = RGMercConfig.Globals.CurLoadedChar,
 								action = 'modifyitem',
 								section = "NormalItems",
-								item =
-									k,
+								item = k,
 								rule = v,
+								classes = self.TempSettings.UpdateItemClasses[k] or "All",
 							})
 					end
+
 					self.TempSettings.UpdatedNormalItems = {}
+					self.TempSettings.UpdateItemClasses = {}
 
 					for k in pairs(self.TempSettings.DeletedNormalKeys) do
 						self.NormalItemsTable[k] = nil
@@ -997,8 +1073,7 @@ function Module:Render()
 								who = RGMercConfig.Globals.CurLoadedChar,
 								action = 'deleteitem',
 								section = "NormalItems",
-								item =
-									k,
+								item = k,
 							})
 					end
 					self.TempSettings.DeletedNormalKeys = {}
@@ -1007,21 +1082,37 @@ function Module:Render()
 
 				self.TempSettings.SearchItems = ImGui.InputText("Search Items##NormalItems",
 					self.TempSettings.SearchItems) or nil
+				if ImGui.IsItemHovered() and mq.TLO.Cursor() then
+					if ImGui.IsMouseClicked(0) then
+						self.TempSettings.SearchItems = mq.TLO.Cursor()
+						RGMercUtils.DoCmd("/autoinv")
+					end
+				end
+				col = math.max(3, math.floor(ImGui.GetContentRegionAvail() / 150))
+				local colCount = col + (col % 3)
+				if colCount % 3 ~= 0 then
+					if (colCount - 1) % 3 == 0 then
+						colCount = colCount - 1
+					else
+						colCount = colCount - 2
+					end
+				end
 
-				if ImGui.BeginTable("NormalItems", col, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY), ImVec2(0.0, 0.0)) then
-					ImGui.TableSetupScrollFreeze(col, 1)
-					for i = 1, col / 2 do
+				if ImGui.BeginTable("NormalItems", colCount, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollY), ImVec2(0.0, 0.0)) then
+					ImGui.TableSetupScrollFreeze(colCount, 1)
+					for i = 1, colCount / 3 do
 						ImGui.TableSetupColumn("Item")
 						ImGui.TableSetupColumn("Setting")
+						ImGui.TableSetupColumn('Classes')
 					end
 					ImGui.TableHeadersRow()
 
-					local numDisplayColumns = col / 2
+					local numDisplayColumns = colCount / 3
 
 					if self.NormalItemsTable ~= nil and self.TempSettings.SortedNormalItemKeys ~= nil then
-						self.TempSettings.UpdatedNormalItems = {}
-						self.TempSettings.DeletedNormalKeys = {}
-
+						self.TempSettings.UpdatedNormalItems = self.TempSettings.UpdatedNormalItems or {}
+						self.TempSettings.DeletedNormalKeys = self.TempSettings.DeletedNormalKeys or {}
+						self.TempSettings.UpdateItemClasses = self.TempSettings.UpdateItemClasses or {}
 						local numItems = #self.TempSettings.SortedNormalItemKeys
 						local numRows = math.ceil(numItems / numDisplayColumns)
 
@@ -1034,15 +1125,22 @@ function Module:Render()
 									if self:SearchLootTable(self.TempSettings.SearchItems, k, v) then
 										self.TempSettings.NormalItems[k] = self.TempSettings.NormalItems[k] or
 											{ Key = k, Value = v, }
-
+										self.TempSettings.NormalItemsClasses[k] = self.TempSettings.NormalItemsClasses[k] ~= nil and self.TempSettings.NormalItemsClasses[k] or
+											self.NormalItemsClasses[k] ~= nil and self.NormalItemsClasses[k] or "All"
 										ImGui.TableNextColumn()
 										ImGui.SetNextItemWidth(140)
-										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.NormalItems[k]
-											.Key)
+										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.NormalItems[k].Key)
+										if ImGui.IsItemHovered() then
+											ImGui.SetTooltip(self.TempSettings.NormalItems[k].Key)
+										end
 
 										ImGui.TableNextColumn()
 										local newValue = ImGui.InputText("##Value" .. k,
 											self.TempSettings.NormalItems[k].Value)
+
+										ImGui.TableNextColumn()
+										local newClasses = ImGui.InputText("##Class" .. k,
+											self.TempSettings.NormalItemsClasses[k])
 
 										if newValue ~= v and newKey == k then
 											if newValue == "" then newValue = "NULL" end
@@ -1054,7 +1152,12 @@ function Module:Render()
 										elseif newKey ~= k and newKey == "" then
 											self.TempSettings.DeletedNormalKeys[k] = true
 										end
+										if newClasses ~= self.TempSettings.NormalItemsClasses[k] then
+											self.TempSettings.UpdateItemClasses[newKey] = newClasses
+											self.TempSettings.UpdatedNormalItems[newKey] = newValue
+										end
 
+										self.TempSettings.NormalItemsClasses[newKey] = newClasses
 										self.TempSettings.NormalItems[k].Key = newKey
 										self.TempSettings.NormalItems[k].Value = newValue
 									end
@@ -1075,7 +1178,10 @@ end
 
 function Module:DoSell()
 	if LootnScoot ~= nil then
+		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
+		RGMercUtils.SetSetting('ChaseOn', false)
 		LootnScoot.processItems('Sell')
+		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
@@ -1087,25 +1193,38 @@ end
 
 function Module:DoBuy()
 	if LootnScoot ~= nil then
+		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
+		RGMercUtils.SetSetting('ChaseOn', false)
+
 		LootnScoot.processItems('Buy')
+		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:DoBank()
 	if LootnScoot ~= nil then
+		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
+		RGMercUtils.SetSetting('ChaseOn', false)
+
 		LootnScoot.processItems('Bank')
+		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:DoTribute()
 	if LootnScoot ~= nil then
+		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
+		RGMercUtils.SetSetting('ChaseOn', false)
+
 		LootnScoot.processItems('Tribute')
+		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:SetItem(params)
 	if LootnScoot ~= nil then
 		LootnScoot.commandHandler(params)
+		mq.delay(2)
 		if params == "destroy" then
 			RGMercUtils.DoCmd("/destroy")
 		else
@@ -1117,13 +1236,31 @@ end
 
 function Module:SetGlobalItem(params)
 	if LootnScoot ~= nil then
-		LootnScoot.commandHandler(params)
+		LootnScoot.setGlobalBind(params)
 		if params == "destroy" then
 			RGMercUtils.DoCmd("/destroy")
 		else
 			RGMercUtils.DoCmd("/autoinv")
 		end
 		-- self.GlobalItemsTable = LootnScoot.GlobalItems
+	end
+end
+
+function Module:SetClasses(itemName, params)
+	itemName = itemName or mq.TLO.Cursor()
+	if LootnScoot ~= nil then
+		LootnScoot.ChangeClasses(itemName, params, "NormalItems")
+		mq.delay(2)
+		RGMercUtils.DoCmd("/autoinv")
+	end
+end
+
+function Module:SetGlobalClasses(itemName, params)
+	if itemName == nil then return end
+	if LootnScoot ~= nil then
+		LootnScoot.ChangeClasses(itemName, params, "GlobalItems")
+		mq.delay(2)
+		RGMercUtils.DoCmd("/autoinv")
 	end
 end
 
