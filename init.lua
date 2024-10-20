@@ -261,13 +261,11 @@ local function DrawConsole()
                 logFilterLocked = not logFilterLocked
             end
             ImGui.TableNextColumn()
-            if logFilterLocked then
-                ImGui.BeginDisabled()
-            end
+            ImGui.BeginDisabled(logFilterLocked)
+
             logFilter, changed = ImGui.InputText("##logfilter", logFilter)
-            if logFilterLocked then
-                ImGui.EndDisabled()
-            end
+
+            ImGui.EndDisabled()
 
             if changed then
                 if logFilter:len() == 0 then
