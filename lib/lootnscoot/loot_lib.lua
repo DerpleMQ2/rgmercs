@@ -166,7 +166,7 @@ local loot         = {
         LootMyCorpse = false,                      -- Loot your own corpse if its nearby (Does not check for REZ)
     },
 }
-loot.MyClass       = RGMercConfig.Globals.CurLoadedCharClass:lower()
+loot.MyClass       = RGMercConfig.Globals.CurLoadedClass:lower()
 -- SQL information
 local ItemsDB      = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
 
