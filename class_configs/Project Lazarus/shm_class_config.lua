@@ -1038,7 +1038,7 @@ local _ClassConfig = {
 
     },
     ['Rotations']         = {
-        ['Twin Heal'] = {
+        ['TwinHeal'] = {
             {
                 name = "TwinHealNuke",
                 type = "Spell",
