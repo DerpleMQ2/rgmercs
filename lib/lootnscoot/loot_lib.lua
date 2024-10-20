@@ -620,7 +620,7 @@ function loot.getRule(item, from)
     local globalFound = false
     local globalClassSkip = false
     if loot.Settings.GlobalLootOn and globalItem ~= 'NULL' then
-        if globalClasses ~= 'All' and from == 'loot' then
+        if globalClasses:lower() ~= 'all' and from == 'loot' then
             if string.find(globalClasses:lower(), loot.MyClass) then
                 lootData[firstLetter][itemName] = globalItem or lootData[firstLetter][itemName]
                 RGMercsLogger.log_info("Item \at%s\ax is \agIN GlobalItem \axclass list \ay%s", itemName, globalClasses)
@@ -657,8 +657,8 @@ function loot.getRule(item, from)
 
     if loot.Settings.AlwaysDestroy and lootData[firstLetter][itemName] == 'Ignore' and not globalClassSkip then return 'Destroy', 0 end
     -- check Classes
-    if lootClasses ~= 'All' and not globalFound and from == 'loot' then
-        if string.find(lootClasses:lower(), loot.MyClass) then
+    if loot.Classes:lower() ~= 'all' and not globalFound and from == 'loot' then
+        if string.find(loot.Classes:lower(), loot.MyClass) then
             lootDecision = lootData[firstLetter][itemName]
             RGMercsLogger.log_info("Item \at%s\ax is \agIN \axclass list \ay%s", itemName, lootClasses)
         else
