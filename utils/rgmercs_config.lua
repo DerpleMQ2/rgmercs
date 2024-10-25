@@ -1,5 +1,6 @@
 local mq                             = require('mq')
 local RGMercUtils                    = require("utils.rgmercs_utils")
+local RGMercsLogger                  = require("utils.rgmercs_logger")
 local Set                            = require("mq.Set")
 
 local Config                         = {

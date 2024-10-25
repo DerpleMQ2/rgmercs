@@ -1,9 +1,10 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-local Bind        = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
+local Bind          = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
 
-Bind.MainHandler  = function(cmd, ...)
+Bind.MainHandler    = function(cmd, ...)
     if not cmd or cmd:len() == 0 then cmd = "help" end
 
     if RGMercsBinds.Handlers[cmd] then
@@ -20,7 +21,7 @@ Bind.MainHandler  = function(cmd, ...)
     end
 end
 
-Bind.Handlers     = {
+Bind.Handlers       = {
     ['set'] = {
         usage = "/rgl set [show | <setting> <value>]",
         about = "Show All Settings or Set a specific RGMercs setting",

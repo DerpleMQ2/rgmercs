@@ -1,7 +1,12 @@
 -- Sample Basic Class Module
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
-local Set         = require("mq.Set")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local StringUtils   = require("utils.string_utils")
+local TableUtils    = require("utils.table_utils")
+local RGMercsLogger = require("utils.rgmercs_logger")
+local Set           = require("mq.Set")
+local Icons         = require('mq.ICONS')
+
 require('utils.rgmercs_datatypes')
 
 local Module                       = { _version = '0.1a', _name = "Mez", _author = 'Derple', }
@@ -226,7 +231,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
         self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
         self:SaveSettings(false)
     end
@@ -267,7 +272,7 @@ function Module:Render()
                     else
                         ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.02, 0.02, 1)
                     end
-                    ImGui.Text(tostring(RGMercUtils.FormatTime(math.max(0, data.duration / 1000))))
+                    ImGui.Text(tostring(StringUtils.FormatTime(math.max(0, data.duration / 1000))))
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
                     ImGui.Text(data.name)
@@ -639,7 +644,7 @@ function Module:ProcessMezList()
 
     if not mezSpell or not mezSpell() then return end
 
-    if RGMercUtils.GetTableSize(self.TempSettings.MezTracker) <= 1 then
+    if TableUtils.GetTableSize(self.TempSettings.MezTracker) <= 1 then
         -- If we have only one spawn we're tracking, we don't need to be mezzing
         RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Only 1 Spawn - let it break")
         return
@@ -671,9 +676,9 @@ function Module:ProcessMezList()
                 local spell = mezSpell
                 if data.duration > (spell.MyCastTime() / 100) or spawn.Distance() > self.settings.MezRadius or not spawn.LineOfSight() then
                     RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Timer(%s > %s) Distance(%d) LOS(%s)", id,
-                        RGMercUtils.FormatTime(data.duration / 1000),
-                        RGMercUtils.FormatTime(spell.MyCastTime() / 100), spawn.Distance(),
-                        RGMercUtils.BoolToColorString(spawn.LineOfSight()))
+                        StringUtils.FormatTime(data.duration / 1000),
+                        StringUtils.FormatTime(spell.MyCastTime() / 100), spawn.Distance(),
+                        StringUtils.BoolToColorString(spawn.LineOfSight()))
                 else
                     if id == RGMercConfig.Globals.AutoTargetID then
                         RGMercsLogger.log_debug("\ayProcessMezList(%d) :: Mob is MA's target skipping", id)
@@ -734,12 +739,13 @@ function Module:DoMez()
         self:UpdateMezList()
     end
 
-    if mezSpell and mezSpell() and (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()) and RGMercUtils.GetTableSize(self.TempSettings.MezTracker) >= 1 then
+    local tableSize = TableUtils.GetTableSize(self.TempSettings.MezTracker)
+    if mezSpell and mezSpell() and (RGMercUtils.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()) and tableSize >= 1 then
         self:ProcessMezList()
     else
         RGMercsLogger.log_verbose("DoMez() : Skipping Mez list processing: Spell(%s) Ready(%s) TableSize(%d)", mezSpell and mezSpell() or "None",
             mezSpell and mezSpell() and RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()) or "NoSpell",
-            RGMercUtils.GetTableSize(self.TempSettings.MezTracker))
+            tableSize)
     end
 end
 

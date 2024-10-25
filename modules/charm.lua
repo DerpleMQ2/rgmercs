@@ -1,7 +1,11 @@
 -- Sample Basic Class Module
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
-local Set         = require("mq.Set")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local TableUtils    = require("utils.table_utils")
+local RGMercsLogger = require("utils.rgmercs_logger")
+local Set           = require("mq.Set")
+local Icons         = require('mq.ICONS')
+
 require('utils.rgmercs_datatypes')
 
 local Module                     = { _version = '0.1a', _name = "Charm", _author = 'Grimmier', }
@@ -270,7 +274,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-	if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+	if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
 		self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
 		self:SaveSettings(false)
 	end
@@ -342,7 +346,7 @@ function Module:Render()
 					for lvl, body in pairs(data) do
 						for bodyType, reason in pairs(body) do
 							ImGui.TableNextColumn()
-							if ImGui.SmallButton(RGMercIcons.MD_DELETE .. '##' .. name .. lvl .. bodyType) then
+							if ImGui.SmallButton(Icons.MD_DELETE .. '##' .. name .. lvl .. bodyType) then
 								self.ImmuneTable[mq.TLO.Zone.ShortName()][name][lvl][bodyType] = nil
 								RGMercsLogger.log_debug(
 									"\ayUpdateCharmList: Removing Spawn from our Immune List, \aw(\aoZone \at%s \aoMob \at%s \aoLvl \at%s \ao Body \at%s\aw.)",
@@ -702,30 +706,30 @@ function Module:DoCharm()
 	local charmSpell = self:GetCharmSpell()
 	self:UpdateTimings()
 
-	if RGMercUtils.GetXTHaterCount() >= self.settings.CharmStartCount then
+	if TableUtils.GetXTHaterCount() >= self.settings.CharmStartCount then
 		self:UpdateCharmList()
 	end
-	if not RGMercUtils.MyClassIs("BRD") then
+	if not TableUtils.MyClassIs("BRD") then
 		if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or (RGMercUtils.GetSetting("DireCharm", true) == true)) and
-			RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
+			TableUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 			self:ProcessCharmList()
 		else
 			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
 				charmSpell and charmSpell() or "None",
 				charmSpell and charmSpell() and
 				RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
-				RGMercUtils.GetTableSize(self.TempSettings.CharmTracker))
+				TableUtils.GetTableSize(self.TempSettings.CharmTracker))
 		end
 	else
 		if (charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) and
-			RGMercUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
+			TableUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 			self:ProcessCharmList()
 		else
 			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
 				charmSpell and charmSpell() or "None",
 				charmSpell and charmSpell() and
 				RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
-				RGMercUtils.GetTableSize(self.TempSettings.CharmTracker))
+				TableUtils.GetTableSize(self.TempSettings.CharmTracker))
 		end
 	end
 end

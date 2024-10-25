@@ -1,6 +1,7 @@
 -- Sample Basic Class Module
 local mq                  = require('mq')
 local RGMercUtils         = require("utils.rgmercs_utils")
+local RGMercsLogger       = require("utils.rgmercs_logger")
 local Set                 = require("mq.Set")
 
 local LootnScoot          = require('lib.lootnscoot.loot_lib')

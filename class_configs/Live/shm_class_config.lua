@@ -1,7 +1,8 @@
-local mq           = require('mq')
-local RGMercUtils  = require("utils.rgmercs_utils")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-local _ClassConfig = {
+local _ClassConfig  = {
     _version              = "1.2 - Live",
     _author               = "Algar, Derple",
     ['ModeChecks']        = {

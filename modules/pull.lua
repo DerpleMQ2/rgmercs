@@ -1,7 +1,10 @@
 -- Sample Pull Class Module
 local mq                                  = require('mq')
 local RGMercUtils                         = require("utils.rgmercs_utils")
+local StringUtils                         = require("utils.string_utils")
+local RGMercsLogger                       = require("utils.rgmercs_logger")
 local Set                                 = require("mq.Set")
+local Icons                               = require('mq.ICONS')
 
 local Module                              = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
 Module.__index                            = Module
@@ -38,16 +41,16 @@ local PullStates                          = {
 }
 
 local PullStateDisplayStrings             = {
-    ['PULL_IDLE']               = { Display = RGMercIcons.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
-    ['PULL_GROUPWATCH_WAIT']    = { Display = RGMercIcons.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_NAV_INTERRUPT']      = { Display = RGMercIcons.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation Interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
-    ['PULL_SCAN']               = { Display = RGMercIcons.FA_EYE, Text = "Scanning for Targets", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_PULLING']            = { Display = RGMercIcons.FA_BULLSEYE, Text = "Pulling", Color = { r = 0.8, g = 0.03, b = 0.02, a = 1.0, }, },
-    ['PULL_MOVING_TO_WP']       = { Display = RGMercIcons.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_NAV_TO_TARGET']      = { Display = RGMercIcons.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_RETURN_TO_CAMP']     = { Display = RGMercIcons.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_WAITING_ON_MOB']     = { Display = RGMercIcons.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
-    ['PULL_WAITING_SHOULDPULL'] = { Display = RGMercIcons.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
+    ['PULL_IDLE']               = { Display = Icons.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
+    ['PULL_GROUPWATCH_WAIT']    = { Display = Icons.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_NAV_INTERRUPT']      = { Display = Icons.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation Interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
+    ['PULL_SCAN']               = { Display = Icons.FA_EYE, Text = "Scanning for Targets", Color = { r = 0.02, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_PULLING']            = { Display = Icons.FA_BULLSEYE, Text = "Pulling", Color = { r = 0.8, g = 0.03, b = 0.02, a = 1.0, }, },
+    ['PULL_MOVING_TO_WP']       = { Display = Icons.MD_DIRECTIONS_RUN, Text = "Moving to Next WP", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_NAV_TO_TARGET']      = { Display = Icons.MD_DIRECTIONS_RUN, Text = "Naving to Target", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_RETURN_TO_CAMP']     = { Display = Icons.FA_FREE_CODE_CAMP, Text = "Returning to Camp", Color = { r = 0.08, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_WAITING_ON_MOB']     = { Display = Icons.FA_CLOCK_O, Text = "Waiting on Mob", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
+    ['PULL_WAITING_SHOULDPULL'] = { Display = Icons.FA_CLOCK_O, Text = "Waiting for Should Pull", Color = { r = 0.8, g = 0.04, b = 0.02, a = 1.0, }, },
 }
 
 local PullStatesIDToName                  = {}
@@ -655,7 +658,7 @@ function Module:RenderMobList(displayName, settingName)
                 ImGui.Text(mobName)
                 ImGui.TableNextColumn()
                 ImGui.PushID("##_small_btn_delete_mob_" .. settingName .. tostring(idx))
-                if ImGui.SmallButton(RGMercIcons.FA_TRASH) then
+                if ImGui.SmallButton(Icons.FA_TRASH) then
                     self:DeleteMobFromList(settingName, idx)
                 end
                 ImGui.PopID()
@@ -708,7 +711,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
         self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
         self:SaveSettings(false)
     end
@@ -749,7 +752,7 @@ function Module:Render()
 
         if mq.TLO.Target() and RGMercUtils.TargetIsType("NPC") then
             ImGui.SameLine()
-            if ImGui.Button("Pull Target " .. RGMercIcons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
+            if ImGui.Button("Pull Target " .. Icons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
                 self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
                 table.insert(self.TempSettings.PullTargets, { spawn = mq.TLO.Target, distance = mq.TLO.Target.Distance(), })
             end
@@ -816,15 +819,15 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text("Pull Delay")
             ImGui.TableNextColumn()
-            ImGui.Text(RGMercUtils.FormatTime(self.settings.PullDelay))
+            ImGui.Text(StringUtils.FormatTime(self.settings.PullDelay))
             ImGui.TableNextColumn()
             ImGui.Text("Last Pull Attempt")
             ImGui.TableNextColumn()
-            ImGui.Text(RGMercUtils.FormatTime((os.clock() - self.TempSettings.LastPullOrCombatEnded)))
+            ImGui.Text(StringUtils.FormatTime((os.clock() - self.TempSettings.LastPullOrCombatEnded)))
             ImGui.TableNextColumn()
             ImGui.Text("Next Pull Attempt")
             ImGui.TableNextColumn()
-            ImGui.Text(RGMercUtils.FormatTime(nextPull))
+            ImGui.Text(StringUtils.FormatTime(nextPull))
             ImGui.TableNextColumn()
             ImGui.Text("Pull Ability Range")
             ImGui.TableNextColumn()
@@ -908,16 +911,16 @@ function Module:Render()
                     ImGui.Text("[y: %0.2f, x: %0.2f, z: %0.2f]", wpData.y, wpData.x, wpData.z)
                     ImGui.TableNextColumn()
                     ImGui.PushID("##_small_btn_delete_wp_" .. tostring(idx))
-                    if ImGui.SmallButton(RGMercIcons.FA_TRASH) then
+                    if ImGui.SmallButton(Icons.FA_TRASH) then
                         self:DeleteWayPoint(idx)
                     end
                     ImGui.PopID()
                     ImGui.SameLine()
                     ImGui.PushID("##_small_btn_up_wp_" .. tostring(idx))
                     if idx == 1 then
-                        ImGui.InvisibleButton(RGMercIcons.FA_CHEVRON_UP, ImVec2(22, 1))
+                        ImGui.InvisibleButton(Icons.FA_CHEVRON_UP, ImVec2(22, 1))
                     else
-                        if ImGui.SmallButton(RGMercIcons.FA_CHEVRON_UP) then
+                        if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
                             self:MoveWayPointUp(idx)
                         end
                     end
@@ -925,9 +928,9 @@ function Module:Render()
                     ImGui.SameLine()
                     ImGui.PushID("##_small_btn_dn_wp_" .. tostring(idx))
                     if idx == #waypointList then
-                        ImGui.InvisibleButton(RGMercIcons.FA_CHEVRON_DOWN, ImVec2(22, 1))
+                        ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
                     else
-                        if ImGui.SmallButton(RGMercIcons.FA_CHEVRON_DOWN) then
+                        if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
                             self:MoveWayPointDown(idx)
                         end
                     end

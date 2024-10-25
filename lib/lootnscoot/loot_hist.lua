@@ -68,6 +68,9 @@
 local mq                                                     = require('mq')
 local imgui                                                  = require('ImGui')
 local RGMercUtils                                            = require("utils.rgmercs_utils")
+local FileUtils                                              = require("utils.file_utils")
+local RGMercsLogger                                          = require("utils.rgmercs_logger")
+local Icons                                                  = require('mq.ICONS')
 local theme, settings                                        = {}, {}
 local script                                                 = 'Looted'
 local ColorCount, ColorCountConf, StyleCount, StyleCountConf = 0, 0, 0, 0
@@ -78,9 +81,9 @@ local configFile                                             = mq.configDir .. '
 local ZoomLvl                                                = 1.0
 local fontSize                                               = 16 -- coming soon adding in the var and table now. usage is commented out for now.
 local ThemeName                                              = 'None'
-local gIcon                                                  = RGMercIcons.MD_SETTINGS
-local globalNewIcon                                          = RGMercIcons.FA_GLOBE
-local globeIcon                                              = RGMercIcons.FA_GLOBE
+local gIcon                                                  = Icons.MD_SETTINGS
+local globalNewIcon                                          = Icons.FA_GLOBE
+local globeIcon                                              = Icons.FA_GLOBE
 local changed                                                = false
 local txtBuffer                                              = {}
 local defaults                                               = {
@@ -184,7 +187,7 @@ local function getSortedKeys(t)
 end
 
 local function loadTheme()
-	if RGMercUtils.file_exists(themeFile) then
+	if FileUtils.file_exists(themeFile) then
 		theme = dofile(themeFile)
 	else
 		theme = require('lib.lootnscoot.themes')
@@ -195,7 +198,7 @@ end
 local function loadSettings()
 	local newSetting = false
 	local temp = {}
-	if not RGMercUtils.file_exists(configFile) then
+	if not FileUtils.file_exists(configFile) then
 		mq.pickle(configFile, defaults)
 		loadSettings()
 	else
@@ -488,42 +491,42 @@ end
 
 local function evalRule(item)
 	if string.find(item, 'Destroy') then
-		ImGui.TextColored(0.860, 0.104, 0.104, 1.000, RGMercIcons.MD_DELETE)
+		ImGui.TextColored(0.860, 0.104, 0.104, 1.000, Icons.MD_DELETE)
 		if ImGui.IsItemHovered() then
 			ImGui.BeginTooltip()
 			ImGui.Text("Destroy Item")
 			ImGui.EndTooltip()
 		end
 	elseif string.find(item, 'Quest') then
-		ImGui.TextColored(1.000, 0.914, 0.200, 1.000, RGMercIcons.MD_SEARCH)
+		ImGui.TextColored(1.000, 0.914, 0.200, 1.000, Icons.MD_SEARCH)
 		if ImGui.IsItemHovered() then
 			ImGui.BeginTooltip()
 			ImGui.Text("Quest Item")
 			ImGui.EndTooltip()
 		end
 	elseif string.find(item, "Tribute") then
-		ImGui.TextColored(0.991, 0.506, 0.230, 1.000, RGMercIcons.FA_GIFT)
+		ImGui.TextColored(0.991, 0.506, 0.230, 1.000, Icons.FA_GIFT)
 		if ImGui.IsItemHovered() then
 			ImGui.BeginTooltip()
 			ImGui.Text("Tribute Item")
 			ImGui.EndTooltip()
 		end
 	elseif string.find(item, 'Sell') then
-		ImGui.TextColored(0, 1, 0, 1, RGMercIcons.MD_ATTACH_MONEY)
+		ImGui.TextColored(0, 1, 0, 1, Icons.MD_ATTACH_MONEY)
 		if ImGui.IsItemHovered() then
 			ImGui.BeginTooltip()
 			ImGui.Text("Sell Item")
 			ImGui.EndTooltip()
 		end
 	elseif string.find(item, 'Keep') then
-		ImGui.TextColored(0.916, 0.094, 0.736, 1.000, RGMercIcons.MD_FAVORITE_BORDER)
+		ImGui.TextColored(0.916, 0.094, 0.736, 1.000, Icons.MD_FAVORITE_BORDER)
 		if ImGui.IsItemHovered() then
 			ImGui.BeginTooltip()
 			ImGui.Text("Keep Item")
 			ImGui.EndTooltip()
 		end
 	elseif string.find(item, 'Unknown') then
-		ImGui.TextColored(0.5, 0.5, 0.5, 1.000, RGMercIcons.FA_QUESTION)
+		ImGui.TextColored(0.5, 0.5, 0.5, 1.000, Icons.FA_QUESTION)
 		if ImGui.IsItemHovered() then
 			ImGui.BeginTooltip()
 			ImGui.Text("Not Set")
@@ -565,25 +568,25 @@ function guiLoot.lootedReport_GUI()
 			ImGui.TextColored(0.523, 0.797, 0.944, 1.000, globeIcon)
 			ImGui.SameLine()
 			ImGui.Text('Global Item')
-			ImGui.TextColored(0.898, 0.777, 0.000, 1.000, RGMercIcons.MD_STAR)
+			ImGui.TextColored(0.898, 0.777, 0.000, 1.000, Icons.MD_STAR)
 			ImGui.SameLine()
 			ImGui.Text('Changed Rule')
-			ImGui.TextColored(0.860, 0.104, 0.104, 1.000, RGMercIcons.MD_DELETE)
+			ImGui.TextColored(0.860, 0.104, 0.104, 1.000, Icons.MD_DELETE)
 			ImGui.SameLine()
 			ImGui.Text("Destroy")
-			ImGui.TextColored(1.000, 0.914, 0.200, 1.000, RGMercIcons.MD_SEARCH)
+			ImGui.TextColored(1.000, 0.914, 0.200, 1.000, Icons.MD_SEARCH)
 			ImGui.SameLine()
 			ImGui.Text("Quest")
-			ImGui.TextColored(0.991, 0.506, 0.230, 1.000, RGMercIcons.FA_GIFT)
+			ImGui.TextColored(0.991, 0.506, 0.230, 1.000, Icons.FA_GIFT)
 			ImGui.SameLine()
 			ImGui.Text("Tribute")
-			ImGui.TextColored(0, 1, 0, 1, RGMercIcons.MD_ATTACH_MONEY)
+			ImGui.TextColored(0, 1, 0, 1, Icons.MD_ATTACH_MONEY)
 			ImGui.SameLine()
 			ImGui.Text("Sell")
-			ImGui.TextColored(0.916, 0.094, 0.736, 1.000, RGMercIcons.MD_FAVORITE_BORDER)
+			ImGui.TextColored(0.916, 0.094, 0.736, 1.000, Icons.MD_FAVORITE_BORDER)
 			ImGui.SameLine()
 			ImGui.Text("Keep")
-			ImGui.TextColored(0.5, 0.5, 0.5, 1.000, RGMercIcons.FA_QUESTION)
+			ImGui.TextColored(0.5, 0.5, 0.5, 1.000, Icons.FA_QUESTION)
 			ImGui.SameLine()
 			ImGui.Text("Unknown")
 			ImGui.EndPopup()
@@ -727,7 +730,7 @@ function guiLoot.lootedReport_GUI()
 			ImGui.TableSetColumnIndex(3)
 			if itemEval == itemNewEval then itemNewEval = 'NONE' end
 			if itemNewEval ~= 'NONE' then
-				ImGui.TextColored(0.898, 0.777, 0.000, 1.000, RGMercIcons.MD_STAR)
+				ImGui.TextColored(0.898, 0.777, 0.000, 1.000, Icons.MD_STAR)
 				if ImGui.IsItemHovered() then
 					ImGui.BeginTooltip()
 					ImGui.SetWindowFontScale(ZoomLvl)

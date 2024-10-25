@@ -1,6 +1,7 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
-local Set         = require("mq.Set")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local RGMercsLogger = require("utils.rgmercs_logger")
+
 
 -- [ CANT SEE HANDLERS ] --
 

@@ -1,7 +1,9 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local DanNet        = require('lib.dannet.helpers')
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-_ClassConfig      = {
+_ClassConfig        = {
     _version              = "1.0 - Live",
     _author               = "Derple, Morisato",
     ['ModeChecks']        = {

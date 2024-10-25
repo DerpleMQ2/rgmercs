@@ -1,6 +1,10 @@
 --- RGMerc Utils Functions.
 local mq                       = require('mq')
+local RGMercsLogger            = require("utils.rgmercs_logger")
 local Set                      = require('mq.set')
+local DanNet                   = require('lib.dannet.helpers')
+local Icons                    = require('mq.ICONS')
+
 local animSpellGems            = mq.FindTextureAnimation('A_SpellGems')
 local ICON_SIZE                = 20
 
@@ -22,44 +26,6 @@ RGMercUtils.LastBurnCheck      = false
 RGMercUtils.UseGem             = mq.TLO.Me.NumGems()
 RGMercUtils.ConfigFilter       = ""
 RGMercUtils.SafeTargetCache    = {}
-
---- Checks if a file exists at the given path.
---- @param path string: The path to the file.
---- @return boolean: True if the file exists, false otherwise.
-function RGMercUtils.file_exists(path)
-    local f = io.open(path, "r")
-    if f ~= nil then
-        io.close(f)
-        return true
-    else
-        return false
-    end
-end
-
---- Copies a file from one path to another.
---- @param from_path string The source file path.
---- @param to_path string The destination file path.
---- @return boolean success True if the file was copied successfully, false otherwise.
-function RGMercUtils.copy_file(from_path, to_path)
-    if RGMercUtils.file_exists(from_path) then
-        local file = io.open(from_path, "r")
-        if file ~= nil then
-            local content = file:read("*all")
-            file:close()
-            local fileNew = io.open(to_path, "w")
-            if fileNew ~= nil then
-                fileNew:write(content)
-                fileNew:close()
-                return true
-            else
-                RGMercsLogger.log_error("\arFailed to create new file: %s", to_path)
-                return false
-            end
-        end
-    end
-
-    return false
-end
 
 --- Scans for updates in the class_configs folder.
 function RGMercUtils.ScanConfigDirs()
@@ -90,83 +56,6 @@ function RGMercUtils.BroadcastUpdate(module, event, data)
             event,
         data = data,
     })
-end
-
---- Gets the size of a table.
---- @param t table The table whose size is to be determined.
---- @return number The size of the table.
-function RGMercUtils.GetTableSize(t)
-    local i = 0
-    for _, _ in pairs(t) do i = i + 1 end
-    return i
-end
-
---- Checks if a table contains a specific value.
---- @param t table The table to search.
---- @param value any The value to search for in the table.
---- @return boolean True if the value is found in the table, false otherwise.
-function RGMercUtils.TableContains(t, value)
-    for _, v in pairs(t) do
-        if v == value then
-            return true
-        end
-    end
-    return false
-end
-
---- Formats a given time according to the specified format string.
----
---- @param time number The time value to format.
---- @param formatString string? The format string to use for formatting the time.
---- @return string The formatted time as a string.
-function RGMercUtils.FormatTime(time, formatString)
-    local days = math.floor(time / 86400)
-    local hours = math.floor((time % 86400) / 3600)
-    local minutes = math.floor((time % 3600) / 60)
-    local seconds = math.floor((time % 60))
-    return string.format(formatString and formatString or "%d:%02d:%02d:%02d", days, hours, minutes, seconds)
-end
-
-function RGMercUtils.gsplit(text, pattern, plain)
-    local splitStart, length = 1, #text
-    return function()
-        if splitStart > 0 then
-            local sepStart, sepEnd = string.find(text, pattern, splitStart, plain)
-            local ret
-            if not sepStart then
-                ret = string.sub(text, splitStart)
-                splitStart = 0
-            elseif sepEnd < sepStart then
-                -- Empty separator!
-                ret = string.sub(text, splitStart, sepStart)
-                if sepStart < length then
-                    splitStart = sepStart + 1
-                else
-                    splitStart = 0
-                end
-            else
-                ret = sepStart > splitStart and string.sub(text, splitStart, sepStart - 1) or ''
-                splitStart = sepEnd + 1
-            end
-            return ret
-        end
-    end
-end
-
---- Splits a given text into a table of substrings based on a specified pattern.
----
---- @param text string: The text to be split.
---- @param pattern string: The pattern to split the text by.
---- @param plain boolean?: If true, the pattern is treated as a plain string.
---- @return table: A table containing the substrings.
-function RGMercUtils.split(text, pattern, plain)
-    local ret = {}
-    if text ~= nil then
-        for match in RGMercUtils.gsplit(text, pattern, plain) do
-            table.insert(ret, match)
-        end
-    end
-    return ret
 end
 
 --- Prints a group message with the given format and arguments.
@@ -4581,16 +4470,16 @@ function RGMercUtils.RenderOAList()
             end
             ImGui.TableNextColumn()
             ImGui.PushID("##_small_btn_delete_oa_" .. tostring(idx))
-            if ImGui.SmallButton(RGMercIcons.FA_TRASH) then
+            if ImGui.SmallButton(Icons.FA_TRASH) then
                 RGMercUtils.DeleteOA(idx)
             end
             ImGui.PopID()
             ImGui.SameLine()
             ImGui.PushID("##_small_btn_up_oa_" .. tostring(idx))
             if idx == 1 then
-                ImGui.InvisibleButton(RGMercIcons.FA_CHEVRON_UP, ImVec2(22, 1))
+                ImGui.InvisibleButton(Icons.FA_CHEVRON_UP, ImVec2(22, 1))
             else
-                if ImGui.SmallButton(RGMercIcons.FA_CHEVRON_UP) then
+                if ImGui.SmallButton(Icons.FA_CHEVRON_UP) then
                     RGMercUtils.MoveOAUp(idx)
                 end
             end
@@ -4598,9 +4487,9 @@ function RGMercUtils.RenderOAList()
             ImGui.SameLine()
             ImGui.PushID("##_small_btn_dn_oa_" .. tostring(idx))
             if idx == #RGMercUtils.GetSetting('OutsideAssistList') then
-                ImGui.InvisibleButton(RGMercIcons.FA_CHEVRON_DOWN, ImVec2(22, 1))
+                ImGui.InvisibleButton(Icons.FA_CHEVRON_DOWN, ImVec2(22, 1))
             else
-                if ImGui.SmallButton(RGMercIcons.FA_CHEVRON_DOWN) then
+                if ImGui.SmallButton(Icons.FA_CHEVRON_DOWN) then
                     RGMercUtils.MoveOADown(idx)
                 end
             end
@@ -4632,7 +4521,7 @@ end
 
 function RGMercUtils.RenderForceTargetList(showPopout)
     if showPopout then
-        if ImGui.Button(RGMercIcons.MD_OPEN_IN_NEW, 0, 18) then
+        if ImGui.Button(Icons.MD_OPEN_IN_NEW, 0, 18) then
             RGMercUtils.SetSetting('PopOutForceTarget', true)
         end
     end
@@ -4659,7 +4548,7 @@ function RGMercUtils.RenderForceTargetList(showPopout)
                 ImGui.TableNextColumn()
                 if RGMercConfig.Globals.ForceTargetID > 0 and RGMercConfig.Globals.ForceTargetID == xtarg.ID() then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
-                    ImGui.Text(RGMercIcons.MD_STAR)
+                    ImGui.Text(Icons.MD_STAR)
                     ImGui.PopStyleColor(1)
                 else
                     ImGui.Text("")
@@ -4733,13 +4622,13 @@ function RGMercUtils.RenderZoneNamed()
                 ImGui.TableNextColumn()
                 if named.Spawn() and named.Spawn.PctHPs() > 0 then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 1.0)
-                    ImGui.Text(RGMercIcons.FA_SMILE_O)
+                    ImGui.Text(Icons.FA_SMILE_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(math.ceil(named.Distance)))
                 else
                     ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-                    ImGui.Text(RGMercIcons.FA_FROWN_O)
+                    ImGui.Text(Icons.FA_FROWN_O)
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
                     ImGui.Text("0")
@@ -4818,25 +4707,25 @@ function RGMercUtils.RenderRotationTableKey()
     if ImGui.BeginTable("Rotation_keys", 2, ImGuiTableFlags.Borders) then
         ImGui.TableNextColumn()
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(RGMercIcons.FA_SMILE_O .. ": Active")
+        ImGui.Text(Icons.FA_SMILE_O .. ": Active")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(RGMercIcons.MD_CHECK .. ": Will Cast (Coditions Met)")
+        ImGui.Text(Icons.MD_CHECK .. ": Will Cast (Coditions Met)")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-        ImGui.Text(RGMercIcons.FA_EXCLAMATION .. ": Cannot Cast")
+        ImGui.Text(Icons.FA_EXCLAMATION .. ": Cannot Cast")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
-        ImGui.Text(RGMercIcons.MD_CHECK .. ": Will Cast (No Conditions)")
+        ImGui.Text(Icons.MD_CHECK .. ": Will Cast (No Conditions)")
 
         ImGui.PopStyleColor()
         ImGui.EndTable()
@@ -4873,7 +4762,7 @@ function RGMercUtils.RenderRotationTable(name, rotationTable, resolvedActionMap,
                 ImGui.TableNextColumn()
                 ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
                 if idx == rotationState then
-                    ImGui.Text(RGMercIcons.FA_DOT_CIRCLE_O)
+                    ImGui.Text(Icons.FA_DOT_CIRCLE_O)
                 else
                     ImGui.Text("")
                 end
@@ -4889,17 +4778,17 @@ function RGMercUtils.RenderRotationTable(name, rotationTable, resolvedActionMap,
 
                 if active == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-                    ImGui.Text(RGMercIcons.FA_SMILE_O)
+                    ImGui.Text(Icons.FA_SMILE_O)
                 elseif pass == true then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-                    ImGui.Text(RGMercIcons.MD_CHECK)
+                    ImGui.Text(Icons.MD_CHECK)
                 else
                     ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 1.0)
-                    ImGui.Text(RGMercIcons.FA_EXCLAMATION)
+                    ImGui.Text(Icons.FA_EXCLAMATION)
                 end
             else
                 ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 1.0, 1.0)
-                ImGui.Text(RGMercIcons.MD_CHECK)
+                ImGui.Text(Icons.MD_CHECK)
             end
             ImGui.PopStyleColor()
             if entry.tooltip then
@@ -4986,13 +4875,13 @@ function RGMercUtils.RenderOptionToggle(id, text, on)
 
     if on then
         ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.9)
-        if ImGui.Button(RGMercIcons.FA_TOGGLE_ON) then
+        if ImGui.Button(Icons.FA_TOGGLE_ON) then
             toggled = true
             state   = false
         end
     else
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
-        if ImGui.Button(RGMercIcons.FA_TOGGLE_OFF) then
+        if ImGui.Button(Icons.FA_TOGGLE_OFF) then
             toggled = true
             state   = true
         end
@@ -5138,7 +5027,7 @@ function RGMercUtils.RenderSettingsTable(settings, settingNames, defaults, categ
 
                             ImGui.SameLine()
                             ImGui.PushID(k .. "__clear_btn")
-                            if ImGui.SmallButton(RGMercIcons.MD_CLEAR) then
+                            if ImGui.SmallButton(Icons.MD_CLEAR) then
                                 settings[k] = ""
                                 pressed = true
                             end

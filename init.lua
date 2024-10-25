@@ -1,24 +1,25 @@
-local mq         = require('mq')
-local ImGui      = require('ImGui')
-local GitCommit  = require('extras.version')
-RGMercIcons      = require('mq.ICONS')
-DanNet           = require('lib.dannet.helpers')
+local mq            = require('mq')
+local ImGui         = require('ImGui')
+local GitCommit     = require('extras.version')
+local Icons         = require('mq.ICONS')
 
-local PackageMan = require('mq/PackageMan')
-SQLite3          = PackageMan.Require('lsqlite3')
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-LuaFS            = PackageMan.Require('luafilesystem', 'lfs')
-
-RGMercsBinds     = require('utils.rgmercs_binds')
-RGMercsEvents    = require('utils.rgmercs_events')
-RGMercsLogger    = require("utils.rgmercs_logger")
-RGMercConfig     = require('utils.rgmercs_config')
+RGMercConfig        = require('utils.rgmercs_config')
 RGMercConfig:LoadSettings()
-
-RGMercsConsole = nil
 
 RGMercsLogger.set_log_level(RGMercConfig:GetSettings().LogLevel)
 RGMercsLogger.set_log_to_file(RGMercConfig:GetSettings().LogToFile)
+
+local PackageMan  = require('mq/PackageMan')
+SQLite3           = PackageMan.Require('lsqlite3')
+
+LuaFS             = PackageMan.Require('luafilesystem', 'lfs')
+
+RGMercsBinds      = require('utils.rgmercs_binds')
+RGMercsEvents     = require('utils.rgmercs_events')
+
+RGMercsConsole    = nil
 
 local RGMercUtils = require("utils.rgmercs_utils")
 
@@ -140,7 +141,7 @@ local function RenderConfigSelector()
         end
 
         ImGui.SameLine()
-        if ImGui.SmallButton(RGMercIcons.FA_REFRESH) then
+        if ImGui.SmallButton(Icons.FA_REFRESH) then
             RGMercUtils.ScanConfigDirs()
         end
 
@@ -215,13 +216,13 @@ local function RenderWindowControls()
     local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 2), smallButtonSize)
     ImGui.SetCursorPos(windowControlPos)
 
-    if ImGui.SmallButton((RGMercConfig.settings.MainWindowLocked or false) and RGMercIcons.FA_LOCK or RGMercIcons.FA_UNLOCK) then
+    if ImGui.SmallButton((RGMercConfig.settings.MainWindowLocked or false) and Icons.FA_LOCK or Icons.FA_UNLOCK) then
         RGMercConfig.settings.MainWindowLocked = not RGMercConfig.settings.MainWindowLocked
         RGMercConfig:SaveSettings(false)
     end
 
     ImGui.SameLine()
-    if ImGui.SmallButton(RGMercIcons.FA_WINDOW_MINIMIZE) then
+    if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
         RGMercConfig.Globals.Minimized = true
     end
     RGMercUtils.Tooltip("Minimize Main Window")
@@ -257,7 +258,7 @@ local function DrawConsole()
             ImGui.TableNextColumn()
             ImGui.Text("Log Filter")
             ImGui.SameLine()
-            if ImGui.Button(logFilterLocked and RGMercIcons.FA_LOCK or RGMercIcons.FA_UNLOCK, 22, 22) then
+            if ImGui.Button(logFilterLocked and Icons.FA_LOCK or Icons.FA_UNLOCK, 22, 22) then
                 logFilterLocked = not logFilterLocked
             end
             ImGui.TableNextColumn()

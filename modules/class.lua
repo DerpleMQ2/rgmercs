@@ -1,8 +1,15 @@
 -- Sample Basic Class Module
 local mq                 = require('mq')
 local RGMercUtils        = require("utils.rgmercs_utils")
+local StringUtils        = require("utils.string_utils")
+local TableUtils         = require("utils.table_utils")
+local FileUtils          = require("utils.file_utils")
+local RGMercsLogger      = require("utils.rgmercs_logger")
 local Set                = require("mq.Set")
 local RGMercsClassLoader = require('utils.rgmercs_classloader')
+local DanNet             = require('lib.dannet.helpers')
+local Icons              = require('mq.ICONS')
+
 require('utils.rgmercs_datatypes')
 
 local Module                                 = { _version = '0.1a', _name = "Class", _author = 'Derple', }
@@ -91,11 +98,11 @@ local function getConfigFileName()
         '/rgmercs/PCConfigs/' ..
         Module._name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. "_" .. RGMercConfig.Globals.CurLoadedClass:lower() .. '.lua'
 
-    if RGMercUtils.file_exists(newFile) then
+    if FileUtils.file_exists(newFile) then
         return newFile
     end
 
-    RGMercUtils.copy_file(oldFile, newFile)
+    FileUtils.copy_file(oldFile, newFile)
 
     return newFile
 end
@@ -291,7 +298,7 @@ function Module:Render()
                 self:RescanLoadout()
             end
 
-            if RGMercUtils.GetTableSize(self.SpellLoadOut) > 0 then
+            if TableUtils.GetTableSize(self.SpellLoadOut) > 0 then
                 RGMercUtils.RenderLoadoutTable(self.SpellLoadOut)
             end
             ImGui.Unindent()
@@ -322,7 +329,7 @@ function Module:Render()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
                     local rotationName = r.name
-                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and RGMercIcons.MD_CHECK or RGMercIcons.MD_CLOSE) .. "] " .. rotationName) then
+                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(r.name,
                             self.ClassConfig.Rotations[r.name],
@@ -341,7 +348,7 @@ function Module:Render()
 
                 for _, r in pairs(self.TempSettings.HealingRotationStates) do
                     local rotationName = r.name
-                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and RGMercIcons.MD_CHECK or RGMercIcons.MD_CLOSE) .. "] " .. rotationName) then
+                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
                         self.TempSettings.ShowFailedSpells = RGMercUtils.RenderRotationTable(r.name,
                             self.ClassConfig.HealRotations[r.name],
@@ -799,8 +806,8 @@ function Module:GiveTime(combat_state)
         else
             RGMercsLogger.log_verbose(
                 "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
-                RGMercUtils.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
-                RGMercUtils.FormatTime(r.timer - (os.clock() - self.TempSettings.RotationTimers[r.name])))
+                StringUtils.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
+                StringUtils.FormatTime(r.timer - (os.clock() - self.TempSettings.RotationTimers[r.name])))
         end
     end
 

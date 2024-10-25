@@ -1,7 +1,9 @@
 -- Sample Basic Class Module
 local mq                           = require('mq')
 local RGMercUtils                  = require("utils.rgmercs_utils")
+local RGMercsLogger                = require("utils.rgmercs_logger")
 local Set                          = require("mq.Set")
+local Icons                        = require('mq.ICONS')
 
 local Module                       = { _version = '0.1a', _name = "Movement", _author = 'Derple', }
 Module.__index                     = Module
@@ -507,7 +509,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
         self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
         self:SaveSettings(false)
     end
@@ -549,7 +551,7 @@ function Module:Render()
             else
                 ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
             end
-            ImGui.Text(self.settings.ChaseTarget:len() > 0 and (chaseSpawn.LineOfSight() and RGMercIcons.FA_EYE or RGMercIcons.FA_EYE_SLASH) or "N/A")
+            ImGui.Text(self.settings.ChaseTarget:len() > 0 and (chaseSpawn.LineOfSight() and Icons.FA_EYE or Icons.FA_EYE_SLASH) or "N/A")
             ImGui.PopStyleColor(1)
             ImGui.TableNextColumn()
             ImGui.Text("Loc")
@@ -583,10 +585,10 @@ function Module:Render()
             ImGui.TableNextColumn()
             if RGMercUtils.GetSetting('ReturnToCamp') then
                 ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.8)
-                ImGui.Text(RGMercIcons.FA_FREE_CODE_CAMP)
+                ImGui.Text(Icons.FA_FREE_CODE_CAMP)
             else
                 ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.3, 0.3, 0.8)
-                ImGui.Text(RGMercIcons.MD_NOT_INTERESTED)
+                ImGui.Text(Icons.MD_NOT_INTERESTED)
             end
             ImGui.PopStyleColor(1)
 

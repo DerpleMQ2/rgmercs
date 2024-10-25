@@ -8,10 +8,11 @@
 -- in order by default so always put the first thing you want checked
 -- towards the top of the list.
 
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-local Tooltips    = {
+local Tooltips      = {
     ArrowOpener         = "Spell Line: Archery Attack with High Crit Chance when not in Combat. Consumes a 50 range CLASS 3 Wood Silver Tip Arrow when cast.",
     PullOpener          = "Spell Line: Archery Attack when not in Combat. Consumes a 50 range CLASS 3 Wood Silver Tip Arrow when cast.",
     CalledShotsArrow    = "Spell Line: Quad Archery Attack + Increase Archery Dmg Against Target",

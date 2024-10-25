@@ -110,18 +110,20 @@ There is also no flag for combat looting. It will only loot if no mobs are withi
 
 ]]
 
-local mq           = require 'mq'
+local mq            = require 'mq'
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-local eqServer     = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
+local eqServer      = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 -- Check for looted module, if found use that. else fall back on our copy, which may be outdated.
 
-local RGMercUtils  = require("utils.rgmercs_utils")
-local SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. RGMercConfig.Globals.CurLoadedChar .. '.ini'
-local LootFile     = mq.configDir .. '/Loot.ini'
-local version      = 1.9
-local imported     = true
+local RGMercUtils   = require("utils.rgmercs_utils")
+local FileUtils     = require("utils.file_utils")
+local SettingsFile  = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. RGMercConfig.Globals.CurLoadedChar .. '.ini'
+local LootFile      = mq.configDir .. '/Loot.ini'
+local version       = 1.9
+local imported      = true
 -- Public default settings, also read in from Loot.ini [Settings] section
-local loot         = {
+local loot          = {
     Settings = {
         Version = '"' .. tostring(version) .. '"',
         LootFile = mq.configDir .. '/Loot.ini',
@@ -166,11 +168,11 @@ local loot         = {
         LootMyCorpse = false,                      -- Loot your own corpse if its nearby (Does not check for REZ)
     },
 }
-loot.MyClass       = RGMercConfig.Globals.CurLoadedClass:lower()
+loot.MyClass        = RGMercConfig.Globals.CurLoadedClass:lower()
 -- SQL information
-local ItemsDB      = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
+local ItemsDB       = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
 
-loot.guiLoot       = require('lib.lootnscoot.loot_hist')
+loot.guiLoot        = require('lib.lootnscoot.loot_hist')
 if loot.guiLoot ~= nil then
     loot.UseActors = true
     loot.guiLoot.GetSettings(loot.HideNames, loot.LookupLinks, loot.RecordData, true, loot.UseActors, 'lootnscoot')
@@ -346,7 +348,7 @@ function loot.loadSettings()
     loot.NormalItemsClasses = {}
     loot.GlobalItemsClasses = {}
     -- SQL setup
-    if not RGMercUtils.file_exists(ItemsDB) then
+    if not FileUtils.file_exists(ItemsDB) then
         RGMercsLogger.log_warn("\ayLoot Rules Database \arNOT found\ax, \atCreating it now\ax. Please run \at/rgl lootimport\ax to Import your \atloot.ini \axfile.")
         RGMercsLogger.log_warn("\arOnly run this one One Character\ax. use \at/rgl lootreload\ax to update the data on the other characters.")
     else
@@ -510,14 +512,14 @@ function loot.addRule(itemName, section, rule, classes)
 end
 
 function loot.lookupLootRule(section, key)
-    if key == nil then return 'NULL' end
+    if key == nil then return 'NULL', 'All' end
     local db = SQLite3.open(ItemsDB)
     local sql = "SELECT item_rule FROM Normal_Rules WHERE item_name = ?"
     local stmt = db:prepare(sql)
 
     if not stmt then
         db:close()
-        return 'NULL'
+        return 'NULL', 'All'
     end
 
     stmt:bind_values(key)

@@ -1,7 +1,9 @@
 -- Sample Basic Class Module
 local mq                           = require('mq')
 local RGMercUtils                  = require("utils.rgmercs_utils")
+local RGMercsLogger                = require("utils.rgmercs_logger")
 local Set                          = require("mq.Set")
+local Icons                        = require('mq.ICONS')
 
 local Module                       = { _version = '0.1a', _name = "Travel", _author = 'Derple', }
 Module.__index                     = Module
@@ -231,7 +233,7 @@ function Module:Render()
     local width = ImGui.GetWindowWidth()
     local buttonsPerRow = math.max(1, math.floor(width / self.ButtonWidth))
     local changed
-    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
         self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
         self:SaveSettings(false)
     end

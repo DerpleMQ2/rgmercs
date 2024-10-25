@@ -1,8 +1,9 @@
-local mq           = require('mq')
-local RGMercUtils  = require("utils.rgmercs_utils")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local RGMercsLogger = require("utils.rgmercs_logger")
 
 --todo: add a LOT of tooltips or scrap them entirely. Hopefully the former.
-local Tooltips     = {
+local Tooltips      = {
     Mantle              = "Spell Line: Melee Absorb Proc",
     Carapace            = "Spell Line: Melee Absorb Proc",
     CombatEndRegen      = "Discipline Line: Endurance Regen (In-Combat Useable)",
@@ -65,7 +66,7 @@ local Tooltips     = {
     Slam                = "Use Slam Ability",
 }
 
-local _ClassConfig = {
+local _ClassConfig  = {
     _version            = "1.5 - Live",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {

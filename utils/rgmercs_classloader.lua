@@ -1,7 +1,9 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq            = require('mq')
+local RGMercUtils   = require("utils.rgmercs_utils")
+local FileUtils     = require("utils.file_utils")
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple', }
+local ClassLoader   = { _version = '0.1', _name = "ClassLoader", _author = 'Derple', }
 
 function ClassLoader.getClassConfigFileName(class)
     local info = debug.getinfo(6, "S")
@@ -14,7 +16,7 @@ function ClassLoader.getClassConfigFileName(class)
 
     local configFile = customConfig and customConfigFile or string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
 
-    if not RGMercUtils.file_exists(configFile) then
+    if not FileUtils.file_exists(configFile) then
         -- Fall back to live.
         local oldConfig = configFile
         customConfig = false
@@ -30,7 +32,7 @@ function ClassLoader.load(class)
     local classConfigFile, customConfig = ClassLoader.getClassConfigFileName(class)
     RGMercsLogger.log_info("Loading Base Config: %s", classConfigFile)
 
-    if RGMercUtils.file_exists(classConfigFile) then
+    if FileUtils.file_exists(classConfigFile) then
         local config, err = loadfile(classConfigFile)
         if not config or err then
             RGMercsLogger.log_error("Failed to Load Custom Core Class Config: %s", classConfigFile)

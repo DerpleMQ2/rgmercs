@@ -1,7 +1,9 @@
-local Module       = { _version = '0.1a', _author = 'Derple', }
-Module.__index     = Module
+local RGMercsLogger = require("utils.rgmercs_logger")
 
-local module_order = {
+local Module        = { _version = '0.1a', _author = 'Derple', }
+Module.__index      = Module
+
+local module_order  = {
     "Class",
     "Movement",
     "Pull",

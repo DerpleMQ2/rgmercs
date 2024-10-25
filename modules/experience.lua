@@ -1,6 +1,8 @@
 -- Sample Performance Monitor Class Module
 local mq                  = require('mq')
 local RGMercUtils         = require("utils.rgmercs_utils")
+local StringUtils         = require("utils.string_utils")
+local RGMercsLogger       = require("utils.rgmercs_logger")
 local ImPlot              = require('ImPlot')
 local Set                 = require('mq.Set')
 local ScrollingPlotBuffer = require('utils.scrolling_plot_buffer')
@@ -199,7 +201,7 @@ function Module:Render()
         ImGui.TableNextColumn()
         ImGui.Text("Exp Session Time")
         ImGui.TableNextColumn()
-        ImGui.Text(RGMercUtils.FormatTime(os.clock() - self.TrackXP.StartTime))
+        ImGui.Text(StringUtils.FormatTime(os.clock() - self.TrackXP.StartTime))
         ImGui.TableNextColumn()
         ImGui.Text("Exp Gained")
         ImGui.TableNextColumn()
@@ -338,7 +340,7 @@ function Module:GiveTime(combat_state)
         self.XPPerSecond    = (self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider) / (os.clock() - self.TrackXP.StartTime)
         self.XPToNextLevel  = self.TrackXP.XPTotalPerLevel - mq.TLO.Me.Exp()
         self.SecondsToLevel = self.XPToNextLevel / (self.XPPerSecond * self.TrackXP.XPTotalDivider)
-        self.TimeToLevel    = self.XPPerSecond <= 0 and "<Unknown>" or RGMercUtils.FormatTime(self.SecondsToLevel, "%d Days %d Hours %d Mins")
+        self.TimeToLevel    = self.XPPerSecond <= 0 and "<Unknown>" or StringUtils.FormatTime(self.SecondsToLevel, "%d Days %d Hours %d Mins")
 
         if mq.TLO.Me.PctAAExp() > 0 and self:CheckAAExpChanged() then
             RGMercsLogger.log_debug("\ayAA Gained: \ag%2.2f%% \aw|| \ayAA Total: \ag%2.2f%%", self.TrackXP.AAExperience.Gained / self.TrackXP.XPTotalDivider,

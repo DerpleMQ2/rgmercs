@@ -1,4 +1,5 @@
 local mq = require('mq')
+local RGMercsLogger = require("utils.rgmercs_logger")
 
 local helpers = {}
 
