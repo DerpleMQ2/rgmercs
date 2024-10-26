@@ -926,16 +926,15 @@ local _ClassConfig = {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and
-                    (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.OkayToNotHeal()) and
-                    RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                return combat_state == "Downtime" and (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.OkayToNotHeal()) and RGMercUtils.DoBuffCheck() and
+                    RGMercUtils.AmIBuffable()
             end,
         },
         { --Summon pet even when buffs are off on emu
             name = 'PetSummon',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.DoPetCheck()
+                return combat_state == "Downtime" and (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.OkayToNotHeal()) and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.DoPetCheck()
             end,
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
@@ -943,7 +942,7 @@ local _ClassConfig = {
             timer = 60,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.DoPetCheck()
+                return combat_state == "Downtime" and (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.OkayToNotHeal()) and mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.DoPetCheck()
             end,
         },
         { --Downtime buffs that don't need constant checks
@@ -970,8 +969,7 @@ local _ClassConfig = {
                 return groupIds
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and
-                    (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.OkayToNotHeal()) and RGMercUtils.DoBuffCheck()
+                return combat_state == "Downtime" and (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.OkayToNotHeal()) and RGMercUtils.DoBuffCheck()
             end,
         },
         {
@@ -1040,7 +1038,7 @@ local _ClassConfig = {
 
     },
     ['Rotations']         = {
-        ['Twin Heal'] = {
+        ['TwinHeal'] = {
             {
                 name = "TwinHealNuke",
                 type = "Spell",

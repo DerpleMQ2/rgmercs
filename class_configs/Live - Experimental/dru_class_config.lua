@@ -845,7 +845,7 @@ local _ClassConfig = {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                return combat_state == "Downtime" and RGMercUtils.OkayToNotHeal() and RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
             end,
         },
         {
@@ -855,7 +855,7 @@ local _ClassConfig = {
                 return RGMercUtils.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
+                return combat_state == "Downtime" and RGMercUtils.OkayToNotHeal() and RGMercUtils.DoBuffCheck()
             end,
         },
         {
@@ -864,8 +864,7 @@ local _ClassConfig = {
             steps = 2,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning() and
-                    not (RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint'))
+                return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.OkayToNotHeal()
             end,
         },
         {
@@ -875,7 +874,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and not RGMercUtils.Feigning() and RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')
+                    RGMercUtils.BurnCheck() and not RGMercUtils.Feigning() and RGMercUtils.OkayToNotHeal()
             end,
         },
         {
@@ -884,8 +883,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { RGMercUtils.GetMainAssistId(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('DoTwinHeal') and RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')
-                    and RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('AutoAssistAt') and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and RGMercUtils.GetSetting('DoTwinHeal') and RGMercUtils.OkayToNotHeal() and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -894,7 +892,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.GetMainAssistPctHPs() >= RGMercUtils.GetSetting('MainHealPoint')
+                return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.OkayToNotHeal()
             end,
         },
 

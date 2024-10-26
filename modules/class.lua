@@ -353,8 +353,8 @@ function Module:Render()
             end
         end
 
-        ImGui.Text(string.format("Combat State: %s", self.CombatState))
-        ImGui.Text(string.format("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state))
+        ImGui.Text("Combat State: %s", self.CombatState)
+        ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
     end
 end
 

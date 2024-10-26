@@ -267,12 +267,12 @@ function Module:Render()
                     else
                         ImGui.PushStyleColor(ImGuiCol.Text, 0.8, 0.02, 0.02, 1)
                     end
-                    ImGui.Text(string.format("%s", RGMercUtils.FormatTime(math.max(0, data.duration / 1000))))
+                    ImGui.Text(tostring(RGMercUtils.FormatTime(math.max(0, data.duration / 1000))))
                     ImGui.PopStyleColor()
                     ImGui.TableNextColumn()
-                    ImGui.Text(string.format("%s", data.name))
+                    ImGui.Text(data.name)
                     ImGui.TableNextColumn()
-                    ImGui.Text(string.format("%s", data.mez_spell))
+                    ImGui.Text(data.mez_spell)
                 end
                 ImGui.EndTable()
             end
@@ -291,7 +291,7 @@ function Module:Render()
                     ImGui.TableNextColumn()
                     ImGui.Text(tostring(id))
                     ImGui.TableNextColumn()
-                    ImGui.Text(string.format("%s", data.name))
+                    ImGui.Text(data.name)
                 end
                 ImGui.EndTable()
             end
