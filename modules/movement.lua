@@ -618,6 +618,9 @@ function Module:Render()
 
         ImGui.Text("Last Movement Command: %s", self.TempSettings.LastCmd)
     end
+    if RGMercUtils.GetSetting('EscapeMinimizes') and ImGui.IsKeyPressed(ImGuiKey.Escape) then
+        self:Pop()
+    end
 end
 
 function Module:Pop()
