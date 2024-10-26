@@ -1,5 +1,6 @@
 local mq                             = require('mq')
 local RGMercUtils                    = require("utils.rgmercs_utils")
+local TableUtils                     = require("utils.table_utils")
 local RGMercsLogger                  = require("utils.rgmercs_logger")
 local Set                            = require("mq.Set")
 
@@ -1580,7 +1581,7 @@ function Config:HandleBind(config, value)
         local sortedCategories = {}
         for c, d in pairs(self.CommandHandlers or {}) do
             sortedCategories[d.subModule] = sortedCategories[d.subModule] or {}
-            if not RGMercUtils.TableContains(sortedCategories[d.subModule], d.category) then
+            if not TableUtils.TableContains(sortedCategories[d.subModule], d.category) then
                 table.insert(sortedCategories[d.subModule], d.category)
             end
         end

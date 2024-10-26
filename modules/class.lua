@@ -230,7 +230,7 @@ function Module:RescanLoadout()
 end
 
 function Module:SetCombatMode(mode)
-    if not RGMercUtils.TableContains(self.ClassConfig.Modes, mode) then
+    if not TableUtils.TableContains(self.ClassConfig.Modes, mode) then
         RGMercsLogger.log_error("\ayInvalid Mode: \am%s", mode)
         return false
     end
