@@ -1846,8 +1846,13 @@ function RGMercUtils.MakeValidSetting(module, setting, value)
 
     if type(defaultConfig[setting].Default) == 'number' then
         value = tonumber(value)
+        if value == nil then
+            RGMercsLogger.log_info("\arError: \ayValue given was not of type number.")
+            return nil
+        end
+
         if value > (defaultConfig[setting].Max or 999) or value < (defaultConfig[setting].Min or 0) then
-            RGMercsLogger.log_info("\ayError: %s is not a valid setting for %s.", value, setting)
+            RGMercsLogger.log_info("\arError: \ay%s is not a valid setting for %s.", value, setting)
             local _, update = RGMercConfig:GetUsageText(setting, true, defaultConfig[setting])
             RGMercsLogger.log_info(update)
             return nil
@@ -1898,6 +1903,7 @@ function RGMercUtils.SetSetting(setting, value)
 
     if settingModuleName == "Core" then
         local cleanValue = RGMercUtils.MakeValidSetting("Core", setting, value)
+        if not cleanValue then return end
         _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
         if cleanValue ~= nil then
             RGMercConfig:GetSettings()[setting] = cleanValue
@@ -1909,6 +1915,7 @@ function RGMercUtils.SetSetting(setting, value)
             defaultConfig = RGMercModules:ExecModule(settingModuleName, "GetDefaultSettings")
             _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
             local cleanValue = RGMercUtils.MakeValidSetting(settingModuleName, setting, value)
+            if not cleanValue then return end
             if cleanValue ~= nil then
                 settings[setting] = cleanValue
                 RGMercModules:ExecModule(settingModuleName, "SaveSettings", false)
