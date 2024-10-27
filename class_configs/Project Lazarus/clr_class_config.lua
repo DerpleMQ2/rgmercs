@@ -368,7 +368,7 @@ local _ClassConfig = {
             "Valor",
             -- [] = "Resolution",
             "Temperance",
-            "]Blessing of Temperance",
+            "Blessing of Temperance",
             -- [] = "Heroic Bond",
             "Blessing of Aegolism",
             "Hand of Virtue",
@@ -455,6 +455,7 @@ local _ClassConfig = {
             "Unified Hand of the Diabo",
             "Unified Hand of Helmsbane",
         },
+        --[[ UNUSED
         ['HPBuff'] = {
             ----Single Target HP Buffs
             "Courage",
@@ -478,7 +479,7 @@ local _ClassConfig = {
             "Unified Righteousness",
             "Unified Persistence",
             "Unified Commitment",
-        },
+        }, ]] --
         ['aurabuff1'] = {
             ----Aura Buffs - Aura Name is seperate than the buff name
             "Aura of the Pious",
@@ -1198,7 +1199,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
                     RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercUtils.GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.BuffActive(spell)
+                    return not RGMercUtils.GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.BuffActive(spell)
                 end,
             },
         },
