@@ -947,9 +947,6 @@ function Module:Render()
             end
         end
     end
-    if RGMercUtils.GetSetting('EscapeMinimizes') and ImGui.IsKeyPressed(ImGuiKey.Escape) then
-        self:Pop()
-    end
 end
 
 ---@return integer

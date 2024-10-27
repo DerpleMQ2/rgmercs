@@ -1174,9 +1174,6 @@ function Module:Render()
 			ImGui.EndTabBar()
 		end
 	end
-	if RGMercUtils.GetSetting('EscapeMinimizes') and ImGui.IsKeyPressed(ImGuiKey.Escape) then
-		self:Pop()
-	end
 end
 
 function Module:DoSell()

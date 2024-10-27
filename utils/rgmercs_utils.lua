@@ -1846,8 +1846,13 @@ function RGMercUtils.MakeValidSetting(module, setting, value)
 
     if type(defaultConfig[setting].Default) == 'number' then
         value = tonumber(value)
+        if value == nil then
+            RGMercsLogger.log_info("\arError: \ayValue given was not of type number.")
+            return nil
+        end
+
         if value > (defaultConfig[setting].Max or 999) or value < (defaultConfig[setting].Min or 0) then
-            RGMercsLogger.log_info("\ayError: %s is not a valid setting for %s.", value, setting)
+            RGMercsLogger.log_info("\arError: \ay%s is not a valid setting for %s.", value, setting)
             local _, update = RGMercConfig:GetUsageText(setting, true, defaultConfig[setting])
             RGMercsLogger.log_info(update)
             return nil
@@ -1898,6 +1903,7 @@ function RGMercUtils.SetSetting(setting, value)
 
     if settingModuleName == "Core" then
         local cleanValue = RGMercUtils.MakeValidSetting("Core", setting, value)
+        if not cleanValue then return end
         _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
         if cleanValue ~= nil then
             RGMercConfig:GetSettings()[setting] = cleanValue
@@ -1909,6 +1915,7 @@ function RGMercUtils.SetSetting(setting, value)
             defaultConfig = RGMercModules:ExecModule(settingModuleName, "GetDefaultSettings")
             _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
             local cleanValue = RGMercUtils.MakeValidSetting(settingModuleName, setting, value)
+            if not cleanValue then return end
             if cleanValue ~= nil then
                 settings[setting] = cleanValue
                 RGMercModules:ExecModule(settingModuleName, "SaveSettings", false)
@@ -2668,7 +2675,7 @@ function RGMercUtils.ShouldMount()
 
     local passBasicChecks = RGMercUtils.GetSetting('MountItem'):len() > 0 and mq.TLO.Zone.Outdoor()
 
-    local passCheckMountOne = ((RGMercUtils.GetSetting('DoMount') == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0)) --not RGMercUtils.GetSetting('DoMelee') and
+    local passCheckMountOne = (not RGMercUtils.GetSetting('DoMelee') and (RGMercUtils.GetSetting('DoMount') == 2 and (mq.TLO.Me.Mount.ID() or 0) == 0))
     local passCheckMountTwo = ((RGMercUtils.GetSetting('DoMount') == 3 and (mq.TLO.Me.Buff("Mount Blessing").ID() or 0) == 0))
     local passMountItemGivesBlessing = false
 
@@ -5276,11 +5283,12 @@ function RGMercUtils.LoadSpellLoadOut(spellLoadOut)
     local selectedRank = ""
 
     for gem, loadoutData in pairs(spellLoadOut) do
-        if mq.TLO.Me.SpellRankCap() > 1 then
-            selectedRank = loadoutData.spell.RankName()
-        else
-            selectedRank = loadoutData.spell.BaseName()
-        end
+        -- Removing this because using basename doesnt seem to work at all.
+        --if mq.TLO.Me.SpellRankCap() > 1 then
+        selectedRank = loadoutData.spell.RankName()
+        --else
+        --    selectedRank = loadoutData.spell.BaseName()
+        --end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
             RGMercUtils.MemorizeSpell(gem, selectedRank, false, 15000)
