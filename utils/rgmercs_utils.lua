@@ -5276,11 +5276,12 @@ function RGMercUtils.LoadSpellLoadOut(spellLoadOut)
     local selectedRank = ""
 
     for gem, loadoutData in pairs(spellLoadOut) do
-        if mq.TLO.Me.SpellRankCap() > 1 then
-            selectedRank = loadoutData.spell.RankName()
-        else
-            selectedRank = loadoutData.spell.BaseName()
-        end
+        -- Removing this because using basename doesnt seem to work at all.
+        --if mq.TLO.Me.SpellRankCap() > 1 then
+        selectedRank = loadoutData.spell.RankName()
+        --else
+        --    selectedRank = loadoutData.spell.BaseName()
+        --end
 
         if mq.TLO.Me.Gem(gem)() ~= selectedRank then
             RGMercUtils.MemorizeSpell(gem, selectedRank, false, 15000)
