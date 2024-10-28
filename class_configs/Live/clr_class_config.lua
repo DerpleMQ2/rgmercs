@@ -1,5 +1,6 @@
 local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
+local GameUtils    = require("utils.game_utils")
 
 local _ClassConfig = {
     _version              = "1.0 - Live",
@@ -7,7 +8,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
-        IsRezing = function() return RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        IsRezing = function() return RGMercConfig:GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Heal',
@@ -741,7 +742,7 @@ local _ClassConfig = {
     ['HelperFunctions']   = {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         DoRez = function(self, corpseId)
-            if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
+            if RGMercConfig:GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
                 RGMercUtils.SetTarget(corpseId, true)
 
                 local target = mq.TLO.Target
@@ -749,7 +750,7 @@ local _ClassConfig = {
                 if not target or not target() then return false end
 
                 if mq.TLO.Target.Distance() > 25 then
-                    RGMercUtils.DoCmd("/corpse")
+                    GameUtils.DoCmd("/corpse")
                 end
 
                 if RGMercUtils.AAReady("Blessing of Resurrection") then
@@ -774,25 +775,25 @@ local _ClassConfig = {
             name = 'LowLevelHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return mq.TLO.Me.Level() < 85 and (target.PctHPs() or 999) < RGMercUtils.GetSetting('LightHealPoint') end,
+            cond = function(self, target) return mq.TLO.Me.Level() < 85 and (target.PctHPs() or 999) < RGMercConfig:GetSetting('LightHealPoint') end,
         },
         {
             name  = 'BigHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint') end,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('BigHealPoint') end,
         },
         {
             name = 'GroupHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt') end,
+            cond = function(self, target) return (mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() or 0) > RGMercConfig:GetSetting('GroupInjureCnt') end,
         },
         {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('MainHealPoint') end,
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('MainHealPoint') end,
         },
     }, -- end HealRotationOrder
     ['HealRotations']     = {
@@ -802,7 +803,7 @@ local _ClassConfig = {
             {
                 name = "Divine Arbitration",
                 type = "AA",
-                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('LightHealPoint') end,
+                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSetting('LightHealPoint') end,
             },
             -- To Do: next in rotation is the epic
             -- To Do: next in rotation is the tacvihammer, but it didnt work in rgmercs mac
@@ -815,9 +816,9 @@ local _ClassConfig = {
                     -- force the target for StacksTarget to work.
                     RGMercUtils.SetTarget(target.ID() or 0)
                     local spell = mq.TLO.AltAbility(aaName).Spell
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSetting('GroupHealPoint') and RGMercConfig:GetSetting('DoHOT') and
                         RGMercUtils.SpellStacksOnTarget(spell) and
-                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
+                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() or 0) > RGMercConfig:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -827,9 +828,9 @@ local _ClassConfig = {
                     -- force the target for StacksTarget to work.
                     RGMercUtils.SetTarget(target.ID() or 0)
                     local spell = mq.TLO.AltAbility(aaName).Spell
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSetting('GroupHealPoint') and RGMercConfig:GetSetting('DoHOT') and
                         RGMercUtils.SpellStacksOnTarget(spell) and
-                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
+                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() or 0) > RGMercConfig:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -838,38 +839,38 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
                     RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSetting('GroupHealPoint') and RGMercConfig:GetSetting('DoHOT') and
                         RGMercUtils.SpellStacksOnTarget(spell) and
-                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
+                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() or 0) > RGMercConfig:GetSetting('GroupInjureCnt')
                 end,
             },
             {
                 name = "patchheal1",
                 type = "spell",
-                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('LightHealPoint') end,
+                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercConfig:GetSetting('LightHealPoint') end,
             },
             {
                 name = "remedyheal1",
                 type = "spell",
-                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('RemedyHealPoint') end,
+                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercConfig:GetSetting('RemedyHealPoint') end,
             },
             {
                 name = "remedyheal2",
                 type = "spell",
-                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('RemedyHealPoint') end,
+                cond = function(self, _, target) return (target.PctHPs() or 999) <= RGMercConfig:GetSetting('RemedyHealPoint') end,
             },
             {
                 name = "CompHeal",
                 type = "spell",
-                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('CompHealPoint') end,
+                cond = function(self, _) return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSetting('CompHealPoint') end,
             },
             {
                 name = "wardspell",
                 type = "spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('GroupHealPoint') and RGMercUtils.GetSetting('DoHOT') and
+                    return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSetting('GroupHealPoint') and RGMercConfig:GetSetting('DoHOT') and
                         RGMercUtils.SpellStacksOnTarget(spell) and
-                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) > RGMercUtils.GetSetting('GroupInjureCnt')
+                        not RGMercUtils.TargetHasBuff(spell) and (mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() or 0) > RGMercConfig:GetSetting('GroupInjureCnt')
                 end,
             },
         },
@@ -936,7 +937,7 @@ local _ClassConfig = {
                 name = "ClutchHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.GetSetting('DoClutchHeal') and ((mq.TLO.Me.Level() <= 87 and RGMercUtils.GetTargetPctHPs() < 45) or RGMercUtils.GetTargetPctHPs() < 35)
+                    return RGMercConfig:GetSetting('DoClutchHeal') and ((mq.TLO.Me.Level() <= 87 and RGMercUtils.GetTargetPctHPs() < 45) or RGMercUtils.GetTargetPctHPs() < 35)
                 end,
             },
             {
@@ -952,28 +953,28 @@ local _ClassConfig = {
                 name = "Focused Celestial Regeneration",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.AAReady(aaName) and (RGMercUtils.GetTargetDistance() < RGMercUtils.GetSetting('AssistRange'))
+                    return RGMercUtils.AAReady(aaName) and (RGMercUtils.GetTargetDistance() < RGMercConfig:GetSetting('AssistRange'))
                 end,
             },
             {
                 name = "SingleHot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.GetSetting('DoHOT') and not target.CachedBuff(spell.RankName())()
+                    return RGMercConfig:GetSetting('DoHOT') and not target.CachedBuff(spell.RankName())()
                 end,
             },
             {
                 name = "healnuke1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.GetSetting('DoNuke') and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct')
+                    return RGMercConfig:GetSetting('DoNuke') and RGMercUtils.GetTargetPctHPs() < RGMercConfig:GetSetting('NukePct')
                 end,
             },
             {
                 name = "healnuke2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.GetSetting('DoNuke') and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct')
+                    return RGMercConfig:GetSetting('DoNuke') and RGMercUtils.GetTargetPctHPs() < RGMercConfig:GetSetting('NukePct')
                 end,
             },
             {
@@ -1050,9 +1051,9 @@ local _ClassConfig = {
                 type = "Spell",
                 retries = 0,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() < RGMercUtils.GetSetting('AssistRange') and
+                    return RGMercUtils.GetTargetDistance() < RGMercConfig:GetSetting('AssistRange') and
                         not RGMercUtils.SongActiveByName("Healing Twincast") and
-                        RGMercUtils.GetTargetPctHPs() <= RGMercUtils.GetSetting('AutoAssistAt')
+                        RGMercUtils.GetTargetPctHPs() <= RGMercConfig:GetSetting('AutoAssistAt')
                 end,
             },
         },
@@ -1075,21 +1076,21 @@ local _ClassConfig = {
                 name = "Spire of the Vicar",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             {
                 name = "Divine Avatar",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             {
                 name = "Divine Retribution",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
         },
@@ -1105,35 +1106,35 @@ local _ClassConfig = {
                 name = "nukeheal1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive('Hybrid') and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct') and RGMercUtils.GetSetting('DoNuke')
+                    return RGMercUtils.IsModeActive('Hybrid') and RGMercUtils.GetTargetPctHPs() < RGMercConfig:GetSetting('NukePct') and RGMercConfig:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "nukeheal2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive('Hybrid') and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct') and RGMercUtils.GetSetting('DoNuke')
+                    return RGMercUtils.IsModeActive('Hybrid') and RGMercUtils.GetTargetPctHPs() < RGMercConfig:GetSetting('NukePct') and RGMercConfig:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "twincastnuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive('Hybrid') and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct') and RGMercUtils.GetSetting('DoNuke')
+                    return RGMercUtils.IsModeActive('Hybrid') and RGMercUtils.GetTargetPctHPs() < RGMercConfig:GetSetting('NukePct') and RGMercConfig:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "yaulpspell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive('Heal') and RGMercUtils.GetSetting('DoMount') == 2 and mq.TLO.Zone.Indoor()
+                    return RGMercUtils.IsModeActive('Heal') and RGMercConfig:GetSetting('DoMount') == 2 and mq.TLO.Zone.Indoor()
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive('Heal') and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('NukePct') and RGMercUtils.GetSetting('DoNuke')
+                    return RGMercUtils.IsModeActive('Heal') and RGMercUtils.GetTargetPctHPs() < RGMercConfig:GetSetting('NukePct') and RGMercConfig:GetSetting('DoNuke')
                 end,
             },
         },
@@ -1170,7 +1171,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     local aaSpell = mq.TLO.Spell(mq.TLO.Me.AltAbility("Saint's Unity").Spell.Trigger(1).BaseName() or "")
                     local aaLevel = aaSpell and aaSpell.Level() or 0
-                    return aaLevel < (spell.Level() or 0) and RGMercUtils.GetSetting('DoDruid') and spell.Stacks() and RGMercUtils.CanUseAA('Spirit Mastery') and
+                    return aaLevel < (spell.Level() or 0) and RGMercConfig:GetSetting('DoDruid') and spell.Stacks() and RGMercUtils.CanUseAA('Spirit Mastery') and
                         not RGMercUtils.BuffActive(spell)
                 end,
             },
@@ -1189,7 +1190,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
                     RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercUtils.GetSetting('DoSymbol') and RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", }, target) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return RGMercConfig:GetSetting('DoSymbol') and RGMercUtils.TargetClassIs({ "WAR", "PAL", "SHD", }, target) and RGMercUtils.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1198,7 +1199,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
                     RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercUtils.GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.BuffActive(spell)
+                    return RGMercConfig:GetSetting('DoDruid') and RGMercUtils.SpellStacksOnTarget(spell) and not RGMercUtils.BuffActive(spell)
                 end,
             },
         },
@@ -1223,12 +1224,12 @@ local _ClassConfig = {
             gem = 3,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "DivineBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DivineBuffOn') end, },
+                { name = "DivineBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DivineBuffOn') end, },
                 {
                     name = "SingleHot",
                     cond = function(self)
-                        return RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DivineBuffOn') and
-                            not RGMercUtils.GetSetting('DoClutchHeal') and RGMercUtils.GetSetting('DoHOT')
+                        return RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DivineBuffOn') and
+                            not RGMercConfig:GetSetting('DoClutchHeal') and RGMercConfig:GetSetting('DoHOT')
                     end,
                 },
                 { name = "ClutchHeal", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
@@ -1274,7 +1275,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "GroupHot",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoHOT') end, },
+                { name = "GroupHot",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DoHOT') end, },
                 { name = "groupheal",     cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 { name = "groupfastheal", cond = function(self) return true end, },
             },
@@ -1312,7 +1313,7 @@ local _ClassConfig = {
             spells = {
                 -- [ HEAL MODE ] --
                 { name = "ReverseDS", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
-                { name = "SingleHot", cond = function(self) return RGMercUtils.GetSetting('DoHOT') end, },
+                { name = "SingleHot", cond = function(self) return RGMercConfig:GetSetting('DoHOT') end, },
                 { name = "healnuke2", cond = function(self) return true end, },
             },
         },

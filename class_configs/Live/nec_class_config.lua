@@ -10,6 +10,8 @@
 
 local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
+local CommUtils    = require("utils.comm_utils")
+local GameUtils    = require("utils.game_utils")
 
 local _ClassConfig = {
     _version            = "1.0 - Live",
@@ -19,9 +21,9 @@ local _ClassConfig = {
     },
     ['ModeChecks']      = {
         -- necro can AA Rez
-        IsRezing   = function() return RGMercUtils.GetSetting('BattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        IsRezing   = function() return RGMercConfig:GetSetting('BattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
         CanCharm   = function() return true end,
-        IsCharming = function() return (RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
+        IsCharming = function() return (RGMercConfig:GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
     },
     ['Themes']          = {
         ['DPS'] = {
@@ -50,7 +52,7 @@ local _ClassConfig = {
             about = "Start your Lich Spell [Note: This will enabled DoLich if it is not already]",
             handler =
                 function(self)
-                    RGMercUtils.SetSetting('DoLich', true)
+                    RGMercConfig:SetSetting('DoLich', true)
                     RGMercUtils.SafeCallFunc("Start Necro Lich", self.ClassConfig.HelperFunctions.StartLich, self)
 
                     return true
@@ -742,7 +744,7 @@ local _ClassConfig = {
             name = 'Safety',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (RGMercUtils.IHaveAggro(RGMercUtils.GetSetting('StartFDPct')) or RGMercUtils.Feigning())
+                return combat_state == "Combat" and (RGMercUtils.IHaveAggro(RGMercConfig:GetSetting('StartFDPct')) or RGMercUtils.Feigning())
             end,
         },
         {
@@ -772,9 +774,9 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoLich') and RGMercUtils.SelfBuffCheck(spell) and
-                        (not RGMercUtils.GetSetting('DoUnity') or not RGMercUtils.AAReady("Mortifier's Unity")) and
-                        mq.TLO.Me.PctHPs() > RGMercUtils.GetSetting('StopLichHP') and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('StopLichMana')
+                    return RGMercConfig:GetSetting('DoLich') and RGMercUtils.SelfBuffCheck(spell) and
+                        (not RGMercConfig:GetSetting('DoUnity') or not RGMercUtils.AAReady("Mortifier's Unity")) and
+                        mq.TLO.Me.PctHPs() > RGMercConfig:GetSetting('StopLichHP') and mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('StopLichMana')
                 end,
             },
             {
@@ -785,7 +787,7 @@ local _ClassConfig = {
                     local lichSpell = RGMercUtils.GetResolvedActionMapItem('LichSpell')
 
                     return lichSpell and lichSpell() and RGMercUtils.BuffActive(lichSpell) and
-                        (mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('StopLichHP') or mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting('StopLichMana'))
+                        (mq.TLO.Me.PctHPs() <= RGMercConfig:GetSetting('StopLichHP') or mq.TLO.Me.PctMana() >= RGMercConfig:GetSetting('StopLichMana'))
                 end,
                 custom_func = function(self)
                     RGMercUtils.SafeCallFunc("Stop Necro Lich", self.ClassConfig.HelperFunctions.CancelLich, self)
@@ -811,10 +813,10 @@ local _ClassConfig = {
                 name = "Stand Back Up",
                 type = "CustomFunc",
                 cond = function(self)
-                    return RGMercUtils.Feigning() and RGMercUtils.GetHighestAggroPct() <= RGMercUtils.GetSetting('StopFDPct')
+                    return RGMercUtils.Feigning() and RGMercUtils.GetHighestAggroPct() <= RGMercConfig:GetSetting('StopFDPct')
                 end,
                 custom_func = function(_)
-                    RGMercUtils.DoCmd("/stand")
+                    GameUtils.DoCmd("/stand")
                     return true
                 end,
             },
@@ -824,14 +826,14 @@ local _ClassConfig = {
                 name = "Wake the Dead",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.SpawnCount("corpse radius 100")() >= RGMercUtils.GetSetting('WakeDeadCorpseCnt')
+                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.SpawnCount("corpse radius 100")() >= RGMercConfig:GetSetting('WakeDeadCorpseCnt')
                 end,
             },
             {
                 name = "Death Bloom",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('DeathBloomPercent') and mq.TLO.Me.PctHPs() > 50
+                    return RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('DeathBloomPercent') and mq.TLO.Me.PctHPs() > 50
                 end,
             },
             {
@@ -866,7 +868,7 @@ local _ClassConfig = {
                 name = "Life Burn",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoLifeBurn') and RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctAggro() <= 25
+                    return RGMercConfig:GetSetting('DoLifeBurn') and RGMercUtils.SelfBuffAACheck(aaName) and mq.TLO.Me.PctAggro() <= 25
                 end,
             },
             {
@@ -901,7 +903,7 @@ local _ClassConfig = {
             {
                 name = "SnareDOT",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) and RGMercUtils.GetSetting('DoSnare') end,
+                cond = function(self, spell) return RGMercUtils.DotSpellCheck(spell) and RGMercConfig:GetSetting('DoSnare') end,
             },
             {
                 name = "Disease3",
@@ -1114,7 +1116,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.State():lower() == "feign" and (mq.TLO.Me.PctAggro() < 90 or mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID())
                 end,
                 custom_func = function(_)
-                    RGMercUtils.DoCmd("/stand")
+                    GameUtils.DoCmd("/stand")
                     return true
                 end,
             },
@@ -1123,7 +1125,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self) return RGMercUtils.BuffActiveByName("Shield of Darkness") and RGMercUtils.BuffActiveByName("Otherside") end,
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoUnity') and RGMercUtils.SelfBuffAACheck(aaName)
+                    return RGMercConfig:GetSetting('DoUnity') and RGMercUtils.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1148,7 +1150,7 @@ local _ClassConfig = {
                 name = "Death Bloom",
                 type = "AA",
                 active_cond = function(self, aaName) return RGMercUtils.SongActiveByName(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
-                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('DeathBloomPercent') end,
+                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('DeathBloomPercent') end,
             },
         },
         ['PetSummon'] = { --TODO: Double check these lists to ensure someone leveling doesn't have to change options to keep pets current at lower levels
@@ -1157,12 +1159,12 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == ("war" or "mnk") end,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('PetType') == 1 and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell)
+                    return RGMercConfig:GetSetting('PetType') == 1 and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell)
                 end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
                     if success and pet.ID() > 0 then
-                        RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
+                        CommUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
                     end
                 end,
             },
@@ -1171,12 +1173,12 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 and mq.TLO.Me.Pet.Class.ShortName():lower() == "rog" end,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('PetType') == 2 and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell)
+                    return RGMercConfig:GetSetting('PetType') == 2 and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.ReagentCheck(spell)
                 end,
                 post_activate = function(self, spell, success)
                     local pet = mq.TLO.Me.Pet
                     if success and pet.ID() > 0 then
-                        RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
+                        CommUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
                     end
                 end,
             },
@@ -1202,7 +1204,7 @@ local _ClassConfig = {
             -- detspa means detremental spell affect
             -- spa is positive spell affect
             local lichName = mq.TLO.Me.FindBuff("detspa hp and spa mana")()
-            RGMercUtils.DoCmd("/removebuff %s", lichName)
+            GameUtils.DoCmd("/removebuff %s", lichName)
         end,
 
         StartLich = function(self)
@@ -1214,7 +1216,7 @@ local _ClassConfig = {
         end,
 
         DoRez = function(self, corpseId)
-            if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
+            if RGMercConfig:GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
                 RGMercUtils.SetTarget(corpseId)
 
                 local target = mq.TLO.Target
@@ -1222,7 +1224,7 @@ local _ClassConfig = {
                 if not target or not target() then return false end
 
                 if mq.TLO.Target.Distance() > 25 then
-                    RGMercUtils.DoCmd("/corpse")
+                    GameUtils.DoCmd("/corpse")
                 end
 
                 if RGMercUtils.AAReady("Convergence") and mq.TLO.FindItemCount(mq.TLO.AltAbility("Convergence").Spell.ReagentID(1)())() > 0 then
@@ -1283,7 +1285,7 @@ local _ClassConfig = {
             gem = 7,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "CharmSpell",  cond = function(self) return RGMercUtils.GetSetting('CharmOn') end, },
+                { name = "CharmSpell",  cond = function(self) return RGMercConfig:GetSetting('CharmOn') end, },
                 { name = "ScentDebuff", cond = function(self) return mq.TLO.Me.Level() < 89 end, },
                 { name = "Disease3", },
                 { name = "Disease1", },
@@ -1294,7 +1296,7 @@ local _ClassConfig = {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SnareDOT",   cond = function(self) return RGMercUtils.GetSetting('DoSnare') end, },
+                { name = "SnareDOT",   cond = function(self) return RGMercConfig:GetSetting('DoSnare') end, },
                 { name = "Magic1",     cond = function(self) return mq.TLO.Me.Level() > 70 and mq.TLO.Me.Level() < 87 end, },
                 { name = "Magic3", },
                 { name = "HealthTaps", },
@@ -1336,7 +1338,7 @@ local _ClassConfig = {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "AllianceSpell", cond = function(self) return RGMercUtils.GetSetting('DoAlliance') end, },
+                { name = "AllianceSpell", cond = function(self) return RGMercConfig:GetSetting('DoAlliance') end, },
             },
         },
     },

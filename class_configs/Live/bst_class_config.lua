@@ -612,7 +612,7 @@ return {
             name  = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return RGMercUtils.GetSetting('DoHeals') and (target.PctHPs() or 999) < RGMercUtils.GetSetting('MainHealPoint') end,
+            cond  = function(self, target) return RGMercConfig:GetSetting('DoHeals') and (target.PctHPs() or 999) < RGMercConfig:GetSetting('MainHealPoint') end,
         },
     },
     ['HealRotations']     = {
@@ -620,12 +620,12 @@ return {
             {
                 name = "Mend Companion",
                 type = "AA",
-                cond = function(self, aaName, target) return mq.TLO.Me.Pet.PctHPs() <= RGMercUtils.GetSetting('BigHealPoint') and RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName, target) return mq.TLO.Me.Pet.PctHPs() <= RGMercConfig:GetSetting('BigHealPoint') and RGMercUtils.AAReady(aaName) end,
             },
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.GetSetting('DoPetHeals') and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell) return RGMercConfig:GetSetting('DoPetHeals') and RGMercUtils.PCSpellReady(spell) end,
             },
         },
         ["MainHealPoint"] = {
@@ -678,7 +678,7 @@ return {
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return RGMercUtils.GetXTHaterCount() > 0 and not RGMercUtils.Feigning() and
-                    (mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EmergencyStart') or (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
+                    (mq.TLO.Me.PctHPs() <= RGMercConfig:GetSetting('EmergencyStart') or (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
@@ -686,12 +686,12 @@ return {
             state = 1,
             steps = 1,
             targetId = function(self)
-                return { RGMercUtils.FindWorstHurtManaGroupMember(RGMercUtils.GetSetting('FParaPct')),
-                    RGMercUtils.FindWorstHurtManaXT(RGMercUtils.GetSetting('FParaPct')), }
+                return { RGMercUtils.FindWorstHurtManaGroupMember(RGMercConfig:GetSetting('FParaPct')),
+                    RGMercUtils.FindWorstHurtManaXT(RGMercConfig:GetSetting('FParaPct')), }
             end,
             cond = function(self, combat_state)
-                if not RGMercUtils.GetSetting('DoParagon') then return false end
-                local downtime = combat_state == "Downtime" and RGMercUtils.GetSetting('DowntimeFP') and RGMercUtils.DoBuffCheck()
+                if not RGMercConfig:GetSetting('DoParagon') then return false end
+                local downtime = combat_state == "Downtime" and RGMercConfig:GetSetting('DowntimeFP') and RGMercUtils.DoBuffCheck()
                 local combat = combat_state == "Combat" and not RGMercUtils.Feigning()
                 return (downtime or combat) and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
             end,
@@ -806,7 +806,7 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and RGMercUtils.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
+                    return RGMercConfig:GetSetting('DoChestClick') and item() and RGMercUtils.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
                 end,
             },
             {
@@ -872,7 +872,7 @@ return {
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
                     RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuff(spell) and
+                    return RGMercConfig:GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuff(spell) and
                         RGMercUtils.SpellStacksOnTarget(spell) and spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
@@ -880,7 +880,7 @@ return {
                 name = "Sha's Reprisal",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.TargetHasBuffByName(aaName) and
+                    return RGMercConfig:GetSetting('DoSlow') and not RGMercUtils.TargetHasBuffByName(aaName) and
                         (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (RGMercUtils.GetTargetSlowedPct()) and RGMercUtils.NPCAAReady(aaName, target.ID())
                 end,
             },
@@ -890,7 +890,7 @@ return {
                 name = "Falsified Death",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('AggroFeign') then return false end
+                    if not RGMercConfig:GetSetting('AggroFeign') then return false end
                     return (mq.TLO.Me.PctHPs() <= 40 and RGMercUtils.IHaveAggro(100)) or (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
                         and RGMercUtils.PCAAReady(aaName) and not RGMercUtils.IAmMA
                 end,
@@ -931,8 +931,8 @@ return {
                 name = "Paragon of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('DoParagon') then return false end
-                    return (mq.TLO.Group.LowMana(RGMercUtils.GetSetting('ParaPct'))() or -1) > 0 and RGMercUtils.AAReady(aaName)
+                    if not RGMercConfig:GetSetting('DoParagon') then return false end
+                    return (mq.TLO.Group.LowMana(RGMercConfig:GetSetting('ParaPct'))() or -1) > 0 and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
@@ -946,7 +946,7 @@ return {
                 name = "Feralgia",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoFeralgia') then return false end
+                    if not RGMercConfig:GetSetting('DoFeralgia') then return false end
                     --This checks to see if the Growl portion is up on the pet (or about to expire) before using this, those who prefer the swarm pets can use the actual swarm pet spell in conjunction with this for mana savings.
                     --There are some instances where the Growl isn't needed, but that is a giant TODO and of minor benefit.
                     ---@diagnostic disable-next-line: undefined-field
@@ -958,7 +958,7 @@ return {
                 name = "Blooddot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoDot') then return false end
+                    if not RGMercConfig:GetSetting('DoDot') then return false end
                     return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
@@ -966,7 +966,7 @@ return {
                 name = "Colddot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoDot') then return false end
+                    if not RGMercConfig:GetSetting('DoDot') then return false end
                     return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
@@ -974,7 +974,7 @@ return {
                 name = "EndemicDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoDot') then return false end
+                    if not RGMercConfig:GetSetting('DoDot') then return false end
                     return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
@@ -1017,7 +1017,7 @@ return {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoSwarmPet') then return false end
+                    if not RGMercConfig:GetSetting('DoSwarmPet') then return false end
                     --We will let Feralgia apply swarm pets if our pet currently doesn't have its Growl Effect.
                     local feralgia = self.ResolvedActionMap['Feralgia']
                     return (feralgia and feralgia() and mq.TLO.Me.PetBuff(mq.TLO.Spell(feralgia).RankName.Trigger(2).ID()))
@@ -1059,7 +1059,7 @@ return {
                 name = "EndRegenProcDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return mq.TLO.Me.PctEndurance() < RGMercUtils.GetSetting('ParaPct') and RGMercUtils.NPCDiscReady(discSpell)
+                    return mq.TLO.Me.PctEndurance() < RGMercConfig:GetSetting('ParaPct') and RGMercUtils.NPCDiscReady(discSpell)
                 end,
             },
             {
@@ -1073,14 +1073,14 @@ return {
                 name = "SingleClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not RGMercUtils.GetSetting('DoAoe') and RGMercUtils.NPCDiscReady(discSpell, target.ID())
+                    return not RGMercConfig:GetSetting('DoAoe') and RGMercUtils.NPCDiscReady(discSpell, target.ID())
                 end,
             },
             {
                 name = "AEClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.GetSetting('DoAoe') and RGMercUtils.NPCDiscReady(discSpell, target.ID())
+                    return RGMercConfig:GetSetting('DoAoe') and RGMercUtils.NPCDiscReady(discSpell, target.ID())
                 end,
             },
             {
@@ -1118,7 +1118,7 @@ return {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoRunSpeed') then return false end
+                    if not RGMercConfig:GetSetting('DoRunSpeed') then return false end
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1126,7 +1126,7 @@ return {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoAvatar') or not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+                    if not RGMercConfig:GetSetting('DoAvatar') or not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1230,7 +1230,7 @@ return {
             --    name = "VerifyFerocity",
             --    type = "CustomFunc",
             --    custom_func = function(self, targetId)
-            --        if not RGMercUtils.GetSetting('DoCombatFero') or not RGMercUtils.NPCSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
+            --        if not RGMercConfig:GetSetting('DoCombatFero') or not RGMercUtils.NPCSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
             --        -- TODO: Ferocity List?
             --        return false
             --    end,
@@ -1241,7 +1241,7 @@ return {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return RGMercUtils.GetSetting('DoEpic') and
+                    return RGMercConfig:GetSetting('DoEpic') and
                         mq.TLO.FindItem(itemName)() and mq.TLO.Me.ItemReady(itemName)() and
                         (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil and mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
                 end,
@@ -1251,7 +1251,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     local slowProc = self.ResolvedActionMap['PetSlowProc']
-                    return RGMercUtils.GetSetting('DoPetSnare') and (slowProc and slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
+                    return RGMercConfig:GetSetting('DoPetSnare') and (slowProc and slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
                         mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name())() == nil
                 end,
             },
@@ -1259,35 +1259,35 @@ return {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoAvatar') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercConfig:GetSetting('DoAvatar') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoRunSpeed') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercConfig:GetSetting('DoRunSpeed') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetOffenseBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not RGMercUtils.GetSetting('DoTankPet')) and RGMercUtils.SelfBuffPetCheck(spell)
+                    return (not RGMercConfig:GetSetting('DoTankPet')) and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetDefenseBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoTankPet') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercConfig:GetSetting('DoTankPet') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetSlowProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoPetSlow') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercConfig:GetSetting('DoPetSlow') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1301,7 +1301,7 @@ return {
                 name = "PetDamageProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not RGMercUtils.GetSetting('DoTankPet')) and RGMercUtils.SelfBuffPetCheck(spell)
+                    return (not RGMercConfig:GetSetting('DoTankPet')) and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1315,14 +1315,14 @@ return {
                 name = "PetSpellGuard",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoSpellGuard') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return RGMercConfig:GetSetting('DoSpellGuard') and RGMercUtils.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetGrowl",
                 type = "Spell",
                 cond = function(self, spell)
-                    if RGMercUtils.GetSetting('DoFeralgia') then return false end
+                    if RGMercConfig:GetSetting('DoFeralgia') then return false end
                     return not RGMercUtils.SongActive(spell)
                 end,
             },
@@ -1339,8 +1339,8 @@ return {
         {
             gem = 1,
             spells = {
-                { name = "HealSpell",    cond = function(self) return RGMercUtils.GetSetting('DoHeals') end, },
-                { name = "PetHealSpell", cond = function(self) return RGMercUtils.GetSetting('DoPetHeals') end, },
+                { name = "HealSpell",    cond = function(self) return RGMercConfig:GetSetting('DoHeals') end, },
+                { name = "PetHealSpell", cond = function(self) return RGMercConfig:GetSetting('DoPetHeals') end, },
                 { name = "Icelance1", },
 
             },
@@ -1348,7 +1348,7 @@ return {
         {
             gem = 2,
             spells = {
-                { name = "PetHealSpell", cond = function(self) return RGMercUtils.GetSetting('DoPetHeals') end, },
+                { name = "PetHealSpell", cond = function(self) return RGMercConfig:GetSetting('DoPetHeals') end, },
                 { name = "Icelance1", },
                 { name = "Icelance2", },
             },
@@ -1366,15 +1366,15 @@ return {
             spells = {
                 { name = "Icelance2", },
                 { name = "Blooddot", },
-                { name = "Colddot",   cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "Colddot",   cond = function(self) return RGMercConfig:GetSetting('DoDot') end, },
             },
         },
         {
             gem = 5,
             spells = {
                 { name = "Blooddot", },
-                { name = "Colddot",    cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
-                { name = "EndemicDot", cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "Colddot",    cond = function(self) return RGMercConfig:GetSetting('DoDot') end, },
+                { name = "EndemicDot", cond = function(self) return RGMercConfig:GetSetting('DoDot') end, },
             },
         },
         {
@@ -1387,17 +1387,17 @@ return {
         {
             gem = 7,
             spells = {
-                { name = "SlowSpell",  cond = function(self) return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") end, },
+                { name = "SlowSpell",  cond = function(self) return RGMercConfig:GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") end, },
                 { name = "DichoSpell", },
-                { name = "EndemicDot", cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "EndemicDot", cond = function(self) return RGMercConfig:GetSetting('DoDot') end, },
             },
         },
         {
             gem = 8,
             spells = {
-                { name = "Feralgia",   cond = function(self) return RGMercUtils.GetSetting('DoFeralgia') end, },
+                { name = "Feralgia",   cond = function(self) return RGMercConfig:GetSetting('DoFeralgia') end, },
                 { name = "PetGrowl", },
-                { name = "EndemicDot", cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "EndemicDot", cond = function(self) return RGMercConfig:GetSetting('DoDot') end, },
             },
         },
         {
@@ -1425,7 +1425,7 @@ return {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Colddot",     cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "Colddot",     cond = function(self) return RGMercConfig:GetSetting('DoDot') end, },
                 { name = "PetHealProc", },
 
             },
@@ -1435,8 +1435,8 @@ return {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "PetHealProc", },
-                { name = "EndemicDot",  cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
-                { name = "SwarmPet",    cond = function(self) return RGMercUtils.GetSetting('DoSwarmPet') end, },
+                { name = "EndemicDot",  cond = function(self) return RGMercConfig:GetSetting('DoDot') end, },
+                { name = "SwarmPet",    cond = function(self) return RGMercConfig:GetSetting('DoSwarmPet') end, },
             },
         },
     },

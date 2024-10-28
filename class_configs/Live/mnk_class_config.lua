@@ -465,7 +465,7 @@ local _ClassConfig = {
                 name = "Alliance",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and not RGMercUtils.TargetHasBuffByName("Firewalker's Covenant Trigger") and
+                    return RGMercConfig:GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and not RGMercUtils.TargetHasBuffByName("Firewalker's Covenant Trigger") and
                         not RGMercUtils.TargetHasBuffByName("Doomwalker's Alliance Trigger")
                 end,
             },
@@ -592,7 +592,7 @@ local _ClassConfig = {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercUtils.GetSetting('DoIntimidation')
+                    return RGMercConfig:GetSetting('DoIntimidation')
                         and RGMercUtils.AbilityReady(abilityName)
                 end,
             },

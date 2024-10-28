@@ -1,5 +1,6 @@
 local mq                             = require('mq')
 local RGMercUtils                    = require("utils.rgmercs_utils")
+local CommUtils                      = require("utils.comm_utils")
 local TableUtils                     = require("utils.table_utils")
 local RGMercsLogger                  = require("utils.rgmercs_logger")
 local Set                            = require("mq.Set")
@@ -1423,11 +1424,11 @@ end
 
 function Config:SaveSettings(doBroadcast)
     mq.pickle(self:GetConfigFileName(), self.settings)
-    RGMercsLogger.set_log_level(RGMercUtils.GetSetting('LogLevel'))
-    RGMercsLogger.set_log_to_file(RGMercUtils.GetSetting('LogToFile'))
+    RGMercsLogger.set_log_level(RGMercConfig:GetSetting('LogLevel'))
+    RGMercsLogger.set_log_to_file(RGMercConfig:GetSetting('LogToFile'))
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate("main", "LoadSettings")
+        CommUtils.BroadcastUpdate("main", "LoadSettings")
     end
 end
 
@@ -1511,18 +1512,18 @@ function Config:GetUsageText(config, showUsageText, defaults)
     if type(configData.Default) == 'number' then
         rangeText = string.format("\aw<\a-y%d\aw-\a-y%d\ax>", configData.Min or 0, configData.Max or 999)
         defaultText = string.format("[\a-tDefault: %d\ax]", configData.Default)
-        currentText = string.format("[\a-gCurrent: %d\ax]", RGMercUtils.GetSetting(config))
+        currentText = string.format("[\a-gCurrent: %d\ax]", RGMercConfig:GetSetting(config))
         handledType = true
     elseif type(configData.Default) == 'boolean' then
         rangeText = string.format("\aw<\a-yon\aw|\a-yoff\ax>")
         ---@diagnostic disable-next-line: param-type-mismatch
         defaultText = string.format("[\a-tDefault: %s\ax]", RGMercUtils.BoolToString(configData.Default))
-        currentText = string.format("[\a-gCurrent: %s\ax]", RGMercUtils.BoolToString(RGMercUtils.GetSetting(config)))
+        currentText = string.format("[\a-gCurrent: %s\ax]", RGMercUtils.BoolToString(RGMercConfig:GetSetting(config)))
         handledType = true
     elseif type(configData.Default) == 'string' then
         rangeText = string.format("\aw<\"str\">")
         defaultText = string.format("[\a-tDefault: \"%s\"\ax]", configData.Default)
-        currentText = string.format("[\a-gCurrent: \"%s\"\ax]", RGMercUtils.GetSetting(config))
+        currentText = string.format("[\a-gCurrent: \"%s\"\ax]", RGMercConfig:GetSetting(config))
         handledType = true
     end
 
@@ -1540,6 +1541,135 @@ end
 
 function Config:SettingsLoaded()
     return self.settings ~= nil
+end
+
+--- Retrieves a specified setting.
+--- @param setting string The name of the setting to retrieve.
+--- @param failOk boolean? If true, the function will not raise an error if the setting is not found.
+--- @return any The value of the setting, or nil if the setting is not found and failOk is true.
+function Config:GetSetting(setting, failOk)
+    local ret = { module = "Base", value = self:GetSettings()[setting], }
+
+    -- if we found it in the Global table we should alert if it is duplicated anywhere
+    -- else as that could get confusing.
+    if RGMercModules then -- this could be run before we are fully done loading.
+        local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+        for name, settings in pairs(submoduleSettings) do
+            if settings[setting] ~= nil then
+                if not ret.value then
+                    ret = { module = name, value = settings[setting], }
+                else
+                    RGMercsLogger.log_error(
+                        "\ay[Setting] \arError: Key %s exists in multiple settings tables: \aw%s \arand \aw%s! Returning first but this should be fixed!",
+                        setting,
+                        ret.module, name)
+                end
+            end
+        end
+    end
+
+
+    if ret.value ~= nil then
+        RGMercsLogger.log_super_verbose("\ag[Setting] \at'%s' \agfound in module \am%s", setting, ret.module)
+    else
+        if not failOk then
+            RGMercsLogger.log_error("\ag[Setting] \at'%s' \aywas requested but not found in any module!", setting)
+        end
+    end
+
+    return ret.value
+end
+
+--- Validates and sets a configuration setting for a specified module.
+--- @param module string: The name of the module for which the setting is being configured.
+--- @param setting string: The name of the setting to be validated and set.
+--- @param value any: The value to be assigned to the setting.
+--- @return boolean|string|number|nil: Returns a valid value for the setting.
+function Config.MakeValidSetting(module, setting, value)
+    local defaultConfig = Config.DefaultConfig
+
+    if module ~= "Core" then
+        defaultConfig = RGMercModules:ExecModule(module, "GetDefaultSettings")
+    end
+
+    if type(defaultConfig[setting].Default) == 'number' then
+        value = tonumber(value)
+        if value > (defaultConfig[setting].Max or 999) or value < (defaultConfig[setting].Min or 0) then
+            RGMercsLogger.log_info("\ayError: %s is not a valid setting for %s.", value, setting)
+            local _, update = RGMercConfig:GetUsageText(setting, true, defaultConfig[setting])
+            RGMercsLogger.log_info(update)
+            return nil
+        end
+
+        return value
+    elseif type(defaultConfig[setting].Default) == 'boolean' then
+        local boolValue = false
+        if value == true or value == "true" or value == "on" or (tonumber(value) or 0) >= 1 then
+            boolValue = true
+        end
+
+        return boolValue
+    elseif type(defaultConfig[setting].Default) == 'string' then
+        return value
+    end
+
+    return nil
+end
+
+--- Converts a given setting name into a valid format and module name
+--- This function ensures that the setting name adheres to the required format for further processing.
+--- @param setting string The original setting name that needs to be validated and formatted.
+--- @return string, string The module of the setting and The validated and formatted setting name.
+function Config:MakeValidSettingName(setting)
+    for s, _ in pairs(self:GetSettings()) do
+        if s:lower() == setting:lower() then return "Core", s end
+    end
+
+    local submoduleSettings = RGMercModules:ExecAll("GetSettings")
+    for moduleName, settings in pairs(submoduleSettings) do
+        for s, _ in pairs(settings) do
+            if s:lower() == setting:lower() then return moduleName, s end
+        end
+    end
+    return "None", "None"
+end
+
+---Sets a setting from either in global or a module setting table.
+--- @param setting string: The name of the setting to be updated.
+--- @param value any: The new value to assign to the setting.
+function Config:SetSetting(setting, value)
+    local defaultConfig = RGMercConfig.DefaultConfig
+    local settingModuleName = "Core"
+    local beforeUpdate = ""
+
+    settingModuleName, setting = self:MakeValidSettingName(setting)
+
+    if settingModuleName == "Core" then
+        local cleanValue = Config.MakeValidSetting("Core", setting, value)
+        _, beforeUpdate = self:GetUsageText(setting, false, defaultConfig)
+        if cleanValue ~= nil then
+            self:GetSettings()[setting] = cleanValue
+            self:SaveSettings(false)
+        end
+    elseif settingModuleName ~= "None" then
+        local settings = RGMercModules:ExecModule(settingModuleName, "GetSettings")
+        if settings[setting] ~= nil then
+            defaultConfig = RGMercModules:ExecModule(settingModuleName, "GetDefaultSettings")
+            _, beforeUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
+            local cleanValue = RGMercUtils.MakeValidSetting(settingModuleName, setting, value)
+            if cleanValue ~= nil then
+                settings[setting] = cleanValue
+                RGMercModules:ExecModule(settingModuleName, "SaveSettings", false)
+            end
+        end
+    else
+        RGMercsLogger.log_error("Setting %s was not found!", setting)
+        return
+    end
+
+    local _, afterUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
+    RGMercsLogger.log_info("[%s] \ag%s :: Before :: %-5s", settingModuleName, setting, beforeUpdate)
+    RGMercsLogger.log_info("[%s] \ag%s :: After  :: %-5s", settingModuleName, setting, afterUpdate)
 end
 
 function Config:GetTimeSinceLastMove()
@@ -1614,7 +1744,7 @@ function Config:HandleBind(config, value)
     end
 
     if self.CommandHandlers[config:lower()] ~= nil then
-        RGMercUtils.SetSetting(config, value)
+        RGMercConfig:SetSetting(config, value)
         handled = true
     else
         RGMercsLogger.log_error("\at%s\aw - \arNot a valid config setting!\ax", config)

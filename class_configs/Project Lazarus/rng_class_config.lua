@@ -10,6 +10,7 @@
 
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local GameUtils     = require("utils.game_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local Tooltips      = {
@@ -149,9 +150,9 @@ local _ClassConfig = {
                     -- Ensure a kit was found then open it and enter Experimentation mode
                     -- To Do: Find a way to see if container is open
                     if fletchKit ~= '' then
-                        RGMercUtils.DoCmd('/timed %d /itemnotify "%s" rightmouseup', delay, fletchKit)
+                        GameUtils.DoCmd('/timed %d /itemnotify "%s" rightmouseup', delay, fletchKit)
                         delay = delay + 5
-                        RGMercUtils.DoCmd('/timed %d /notify TradeskillWnd COMBW_ExperimentButton leftmouseup', delay)
+                        GameUtils.DoCmd('/timed %d /notify TradeskillWnd COMBW_ExperimentButton leftmouseup', delay)
                         delay = delay + 5
                     end
 
@@ -162,16 +163,16 @@ local _ClassConfig = {
                         for i = 1, toMake do
                             local matName = matTable[i]
 
-                            RGMercUtils.DoCmd('/timed %d /nomodkey /ctrl /itemnotify "%s" leftmouseup', delay, matName)
+                            GameUtils.DoCmd('/timed %d /nomodkey /ctrl /itemnotify "%s" leftmouseup', delay, matName)
                             delay = delay + 5
-                            RGMercUtils.DoCmd('/timed %d /itemnotify in %s %d leftmouseup', delay, kitSlot, i)
+                            GameUtils.DoCmd('/timed %d /itemnotify in %s %d leftmouseup', delay, kitSlot, i)
                             delay = delay + 5
                             if i == #matTable then
-                                RGMercUtils.DoCmd('/timed %d /combine %s', delay, kitSlot)
+                                GameUtils.DoCmd('/timed %d /combine %s', delay, kitSlot)
                                 delay = delay + 7
-                                RGMercUtils.DoCmd('/timed %d /autoinventory', delay)
+                                GameUtils.DoCmd('/timed %d /autoinventory', delay)
                                 delay = delay + 5
-                                RGMercUtils.DoCmd('/timed %d /echo Combine #%d', delay, j)
+                                GameUtils.DoCmd('/timed %d /echo Combine #%d', delay, j)
                                 delay = delay + 13
                             end
                         end
@@ -823,20 +824,20 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             cond  = function(self, target)
-                return mq.TLO.Me.Level() >= 89 and RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint')
+                return mq.TLO.Me.Level() >= 89 and RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSetting('MainHealPoint')
             end,
         },
         {
             name = 'MainHealPoint', -- Heal
             state = 1,
             steps = 1,
-            cond = function(self, target) return RGMercUtils.GetMainAssistPctHPs() <= RGMercUtils.GetSetting('MainHealPoint') end,
+            cond = function(self, target) return RGMercUtils.GetMainAssistPctHPs() <= RGMercConfig:GetSetting('MainHealPoint') end,
         },
         {
             name = 'GroupHealPoint', -- TotHeal
             state = 1,
             steps = 1,
-            cond = function(self, target) return mq.TLO.Group() and mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') end,
+            cond = function(self, target) return mq.TLO.Group() and mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt') end,
         },
     },
     ['HealRotations']     = {
@@ -845,7 +846,7 @@ local _ClassConfig = {
                 name = "Fastheal",
                 type = "Spell",
                 cond = function(self, _, target)
-                    return RGMercUtils.GetSetting('DoHeals')
+                    return RGMercConfig:GetSetting('DoHeals')
                 end,
             },
 
@@ -855,7 +856,7 @@ local _ClassConfig = {
                 name = "Heal",
                 type = "Spell",
                 cond = function(self, _, target)
-                    return RGMercUtils.GetSetting('DoHeals')
+                    return RGMercConfig:GetSetting('DoHeals')
                 end,
             },
         },
@@ -864,7 +865,7 @@ local _ClassConfig = {
                 name = "Heal",
                 type = "Spell",
                 cond = function(self, _, target)
-                    return RGMercUtils.GetSetting('DoHeals')
+                    return RGMercConfig:GetSetting('DoHeals')
                 end,
             },
         },
@@ -905,7 +906,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.GetSetting('DoMelee') and not RGMercUtils.IsModeActive("Healer")
+                return combat_state == "Combat" and not RGMercConfig:GetSetting('DoMelee') and not RGMercUtils.IsModeActive("Healer")
             end,
         },
         {
@@ -990,7 +991,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Eyes,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return not castWSU() and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.BuffActiveByID(spell.ID()) and not RGMercUtils.GetSetting('DoMask')
+                    return not castWSU() and RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.BuffActiveByID(spell.ID()) and not RGMercConfig:GetSetting('DoMask')
                 end,
             },
             {
@@ -1053,7 +1054,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Mask,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.GetSetting('DoMask') and RGMercUtils.SpellStacksOnMe(spell)
+                    return RGMercUtils.SelfBuffCheck(spell) and RGMercConfig:GetSetting('DoMask') and RGMercUtils.SpellStacksOnMe(spell)
                 end,
             },
             {
@@ -1062,7 +1063,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.FireFist,
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoFireFist')
+                    return RGMercConfig:GetSetting('DoFireFist')
                         and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
@@ -1088,7 +1089,7 @@ local _ClassConfig = {
                 name = "MoveSpells",
                 type = "Spell",
                 tooltip = Tooltips.MoveSpells,
-                active_cond = function(self, spell) return RGMercUtils.GetSetting('DoRunSpeed') and RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return RGMercConfig:GetSetting('DoRunSpeed') and RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -1126,7 +1127,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.AgroReducerBuff,
                 active_cond = function(self, spell) return not RGMercUtils.IsTanking() end,
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoAgroReducerBuff') and RGMercUtils.SelfBuffCheck(spell)
+                    return RGMercConfig:GetSetting('DoAgroReducerBuff') and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1135,14 +1136,14 @@ local _ClassConfig = {
                 tooltip = Tooltips.AgroBuff,
                 active_cond = function(self, spell) return RGMercUtils.IsTanking() end,
                 cond = function(self, spell)
-                    return not RGMercUtils.GetSetting('DoAgroReducerBuff') and RGMercUtils.SelfBuffCheck(spell)
+                    return not RGMercConfig:GetSetting('DoAgroReducerBuff') and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "RegenSpells",
                 type = "Spell",
                 tooltip = Tooltips.RegenSpells,
-                active_cond = function(self, spell) return RGMercUtils.GetSetting('DoRegen') end,
+                active_cond = function(self, spell) return RGMercConfig:GetSetting('DoRegen') end,
                 cond = function(self, spell)
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
@@ -1153,7 +1154,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.PoisonArrow,
                 active_cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetAACheck(927) and RGMercUtils.GetSetting('DoPoisonArrow')
+                    return RGMercUtils.DetAACheck(927) and RGMercConfig:GetSetting('DoPoisonArrow')
                 end,
             },
             {
@@ -1162,7 +1163,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.FlamingArrow,
                 active_cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) end,
                 cond = function(self, spell)
-                    return RGMercUtils.DetAACheck(289) and (mq.TLO.Me.Level() < 86 or not RGMercUtils.GetSetting('DoPoisonArrow'))
+                    return RGMercUtils.DetAACheck(289) and (mq.TLO.Me.Level() < 86 or not RGMercConfig:GetSetting('DoPoisonArrow'))
                 end,
             },
         },
@@ -1232,7 +1233,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.BowDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercUtils.GetSetting('DoMelee')
+                    return not mq.TLO.Me.ActiveDisc.ID() and not RGMercConfig:GetSetting('DoMelee')
                 end,
             },
             {
@@ -1240,7 +1241,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.MeleeDisc,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.GetSetting('DoMelee')
+                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercConfig:GetSetting('DoMelee')
                 end,
             },
         },
@@ -1278,7 +1279,7 @@ local _ClassConfig = {
                 name = "Ranged Mode",
                 type = "CustomFunc",
                 tooltip = Tooltips.RangedMode,
-                cond = function(self, combat_state) return not RGMercUtils.GetSetting('DoMelee') end,
+                cond = function(self, combat_state) return not RGMercConfig:GetSetting('DoMelee') end,
                 custom_func = function(self)
                     RGMercUtils.SafeCallFunc("Ranger Custom Nav", self.ClassConfig.HelperFunctions.combatNav, false)
                 end,
@@ -1290,7 +1291,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.ArrowOpener,
                 cond = function(self, spell)
-                    return RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoOpener') and RGMercUtils.GetSetting('DoReagentArrow')
+                    return RGMercUtils.DetSpellCheck(spell) and RGMercConfig:GetSetting('DoOpener') and RGMercConfig:GetSetting('DoReagentArrow')
                 end,
             },
             {
@@ -1298,7 +1299,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.PullOpener,
                 cond = function(self, spell)
-                    return RGMercUtils.DetSpellCheck(spell) and RGMercUtils.GetSetting('DoReagentArrow')
+                    return RGMercUtils.DetSpellCheck(spell) and RGMercConfig:GetSetting('DoReagentArrow')
                 end,
             },
             {
@@ -1354,7 +1355,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Entrap,
                 type = "AA",
                 cond = function(self)
-                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetAACheck(219)
+                    return RGMercConfig:GetSetting('DoSnare') and RGMercUtils.DetAACheck(219)
                 end,
             },
             {
@@ -1363,7 +1364,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SnareSpells,
 
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoSnare') and RGMercUtils.DetSpellCheck(spell)
+                    return RGMercConfig:GetSetting('DoSnare') and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1371,7 +1372,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.AEArrows,
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck() and RGMercUtils.GetSetting('DoAoE')
+                    return RGMercUtils.ManaCheck() and RGMercConfig:GetSetting('DoAoE')
                 end,
             },
             {
@@ -1379,7 +1380,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.SwarmDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(spell) and RGMercUtils.GetSetting('DoDot')
+                    return RGMercUtils.DotSpellCheck(spell) and RGMercConfig:GetSetting('DoDot')
                 end,
             },
             {
@@ -1387,7 +1388,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.ShortSwarmDot,
                 cond = function(self, spell)
-                    return RGMercUtils.DotSpellCheck(spell) and RGMercUtils.GetSetting('DoDot')
+                    return RGMercUtils.DotSpellCheck(spell) and RGMercConfig:GetSetting('DoDot')
                 end,
             },
             {
@@ -1419,7 +1420,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.AEBlades,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('DoAoE') and RGMercUtils.GetTargetDistance() < 50 and RGMercUtils.GetSetting('DoMelee')
+                    return RGMercConfig:GetSetting('DoAoE') and RGMercUtils.GetTargetDistance() < 50 and RGMercConfig:GetSetting('DoMelee')
                 end,
             },
             {
@@ -1427,7 +1428,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.FocusedBlades,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() < 50 and RGMercUtils.GetSetting('DoMelee')
+                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig:GetSetting('DoMelee')
                 end,
             },
             {
@@ -1435,7 +1436,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.ReflexSlashHeal,
                 cond = function(self)
-                    return RGMercUtils.GetTargetDistance() < 50 and RGMercUtils.GetSetting('DoMelee')
+                    return RGMercUtils.GetTargetDistance() < 50 and RGMercConfig:GetSetting('DoMelee')
                 end,
             },
             {
@@ -1588,8 +1589,8 @@ local _ClassConfig = {
             gem = 4,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "ArrowOpener", cond = function(self) return RGMercUtils.GetSetting('DoOpener') end, },
-                { name = "SnareSpells", cond = function(self) return not RGMercUtils.DetAACheck(219) and RGMercUtils.GetSetting('DoSnare') end, },
+                { name = "ArrowOpener", cond = function(self) return RGMercConfig:GetSetting('DoOpener') end, },
+                { name = "SnareSpells", cond = function(self) return not RGMercUtils.DetAACheck(219) and RGMercConfig:GetSetting('DoSnare') end, },
             },
         },
         {
@@ -1626,7 +1627,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "SummerNuke", },
-                { name = "AEArrows",   cond = function(self) return RGMercUtils.GetSetting('DoAoE') end, },
+                { name = "AEArrows",   cond = function(self) return RGMercConfig:GetSetting('DoAoE') end, },
                 { name = "Veil", },
             },
         },
@@ -1663,20 +1664,20 @@ local _ClassConfig = {
     ['HelperFunctions']   = {
         combatNav = function(forceMove)
             if not mq.TLO.Me.AutoFire() then
-                RGMercUtils.DoCmd('/squelch face')
-                RGMercUtils.DoCmd('/autofire on')
+                GameUtils.DoCmd('/squelch face')
+                GameUtils.DoCmd('/autofire on')
             end
 
-            if RGMercUtils.GetSetting('NavCircle') and ((RGMercUtils.GetTargetDistance() <= 30 or RGMercUtils.GetTargetDistance() >= 75) or forceMove) then
-                RGMercUtils.NavAroundCircle(mq.TLO.Target, RGMercUtils.GetSetting('NavCircleDist'))
+            if RGMercConfig:GetSetting('NavCircle') and ((RGMercUtils.GetTargetDistance() <= 30 or RGMercUtils.GetTargetDistance() >= 75) or forceMove) then
+                RGMercUtils.NavAroundCircle(mq.TLO.Target, RGMercConfig:GetSetting('NavCircleDist'))
             end
 
-            if not RGMercUtils.GetSetting('NavCircle') and RGMercUtils.GetTargetDistance() <= 30 then
-                RGMercUtils.DoCmd("/stick %d moveback", RGMercUtils.GetSetting('NavCircleDist'))
+            if not RGMercConfig:GetSetting('NavCircle') and RGMercUtils.GetTargetDistance() <= 30 then
+                GameUtils.DoCmd("/stick %d moveback", RGMercConfig:GetSetting('NavCircleDist'))
             end
 
-            if not RGMercUtils.GetSetting('NavCircle') and (RGMercUtils.GetTargetDistance() >= 75 or forceMove) then
-                RGMercUtils.DoCmd("/squelch /nav id %d facing=backward distance=%d", RGMercConfig.Globals.AutoTargetID, RGMercUtils.GetSetting('NavCircleDist'))
+            if not RGMercConfig:GetSetting('NavCircle') and (RGMercUtils.GetTargetDistance() >= 75 or forceMove) then
+                GameUtils.DoCmd("/squelch /nav id %d facing=backward distance=%d", RGMercConfig.Globals.AutoTargetID, RGMercConfig:GetSetting('NavCircleDist'))
             end
         end,
 
@@ -1687,13 +1688,13 @@ local _ClassConfig = {
 
             RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility.RankName.Name() or "None")
 
-            if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= RGMercUtils.GetSetting("ManaToNuke") and RGMercUtils.NPCSpellReady(openerAbility, target.ID(), false) then
-                RGMercUtils.DoCmd("/squelch /face")
+            if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= RGMercConfig:GetSetting("ManaToNuke") and RGMercUtils.NPCSpellReady(openerAbility, target.ID(), false) then
+                GameUtils.DoCmd("/squelch /face")
                 RGMercUtils.UseSpell(openerAbility.RankName.Name(), target.ID(), false)
                 RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility.RankName.Name() or "None")
             else
                 RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %sd", openerAbility.RankName.Name() or "None",
-                    RGMercUtils.BoolToColorString(RGMercUtils.GetSetting("DoOpener")))
+                    RGMercUtils.BoolToColorString(RGMercConfig:GetSetting("DoOpener")))
             end
         end,
     },

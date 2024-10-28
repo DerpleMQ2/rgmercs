@@ -1,6 +1,8 @@
 -- Sample Basic Class Module
 local mq                 = require('mq')
 local RGMercUtils        = require("utils.rgmercs_utils")
+local CommUtils          = require("utils.comm_utils")
+local GameUtils          = require("utils.game_utils")
 local RGMercsLogger      = require("utils.rgmercs_logger")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
@@ -67,7 +69,7 @@ function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        CommUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
@@ -141,7 +143,7 @@ function Module:Render()
     ImGui.Text("Drag Module")
     local pressed
     if self.ModuleLoaded then
-        if ImGui.Button(RGMercUtils.GetSetting('DoDrag') and "Stop Dragging" or "Start Dragging", ImGui.GetWindowWidth() * .3, 25) then
+        if ImGui.Button(RGMercConfig:GetSetting('DoDrag') and "Stop Dragging" or "Start Dragging", ImGui.GetWindowWidth() * .3, 25) then
             self.settings.DoDrag = not self.settings.DoDrag
             self:SaveSettings(false)
         end
@@ -165,7 +167,7 @@ function Module:Drag(corpse)
     if corpse and corpse() and corpse.Distance() > 10 then
         RGMercsLogger.log_debug("Dragging: %s (%d)", corpse.DisplayName(), corpse.ID())
         RGMercUtils.SetTarget(corpse.ID())
-        RGMercUtils.DoCmd("/corpse")
+        GameUtils.DoCmd("/corpse")
     end
 end
 
@@ -173,21 +175,21 @@ function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
 
     local corpseSearch = "pccorpse %s's radius 60"
-    if RGMercUtils.GetSetting('DoDrag') then
+    if RGMercConfig:GetSetting('DoDrag') then
         local myCorpse = mq.TLO.Spawn(string.format(corpseSearch, mq.TLO.Me.DisplayName()))
 
         self:Drag(myCorpse)
 
-        if RGMercUtils.GetSetting('DoSearchDrag') then
-            local numCorpses = mq.TLO.SpawnCount(RGMercUtils.GetSetting('SearchDrag'))()
+        if RGMercConfig:GetSetting('DoSearchDrag') then
+            local numCorpses = mq.TLO.SpawnCount(RGMercConfig:GetSetting('SearchDrag'))()
 
             for i = numCorpses, 1, -1 do
-                local corpse = mq.TLO.NearestSpawn(i, RGMercUtils.GetSetting('SearchDrag'))
+                local corpse = mq.TLO.NearestSpawn(i, RGMercConfig:GetSetting('SearchDrag'))
                 self:Drag(corpse)
             end
         end
 
-        if RGMercUtils.GetSetting('DoDanNetDrag') then
+        if RGMercConfig:GetSetting('DoDanNetDrag') then
             local dannetPeers = mq.TLO.DanNet.PeerCount()
             for i = 1, dannetPeers do
                 ---@diagnostic disable-next-line: redundant-parameter

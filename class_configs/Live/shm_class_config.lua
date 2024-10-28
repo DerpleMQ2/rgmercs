@@ -1,5 +1,7 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local GameUtils     = require("utils.game_utils")
+local CommUtils     = require("utils.comm_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local _ClassConfig  = {
@@ -8,7 +10,7 @@ local _ClassConfig  = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
-        IsRezing = function() return RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        IsRezing = function() return RGMercConfig:GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Heal',
@@ -687,12 +689,12 @@ local _ClassConfig  = {
             if not target or not target() then return false end
 
             if mq.TLO.Target.Distance() > 25 then
-                RGMercUtils.DoCmd("/corpse")
+                GameUtils.DoCmd("/corpse")
             end
 
             local targetClass = target.Class.ShortName()
 
-            if RGMercUtils.GetXTHaterCount() > 0 and (targetClass == "dru" or targetClass == "clr" or RGMercUtils.GetSetting('DoBattleRez')) then
+            if RGMercUtils.GetXTHaterCount() > 0 and (targetClass == "dru" or targetClass == "clr" or RGMercConfig:GetSetting('DoBattleRez')) then
                 RGMercsLogger.log_debug("DoRez(): Doing Battle Rez!")
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
                     return RGMercUtils.UseItem("Staff of Forbidden Rites", corpseId)
@@ -728,7 +730,7 @@ local _ClassConfig  = {
             state = 1,
             steps = 1,
             cond = function(self, target)
-                return mq.TLO.Me.Level() < 65 and (target.PctHPs() or 999) <= RGMercUtils.GetSetting('MainHealPoint')
+                return mq.TLO.Me.Level() < 65 and (target.PctHPs() or 999) <= RGMercConfig:GetSetting('MainHealPoint')
             end,
         },
         {
@@ -736,20 +738,20 @@ local _ClassConfig  = {
             state = 1,
             steps = 1,
             cond = function(self, target)
-                return (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) >= RGMercUtils.GetSetting('GroupInjureCnt')
+                return (mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() or 0) >= RGMercConfig:GetSetting('GroupInjureCnt')
             end,
         },
         {
             name  = 'BigHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint') end,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('BigHealPoint') end,
         },
         {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('MainHealPoint') end,
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('MainHealPoint') end,
         },
     },
     ['HealRotations']     = {
@@ -758,7 +760,7 @@ local _ClassConfig  = {
                 name = "Call of the Ancients",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.PCAAReady(aaName) and (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint')
+                    return RGMercUtils.PCAAReady(aaName) and (target.PctHPs() or 999) < RGMercConfig:GetSetting('BigHealPoint')
                 end,
             },
             {
@@ -770,7 +772,7 @@ local _ClassConfig  = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoHealOverTime') then return false end
+                    if not RGMercConfig:GetSetting('DoHealOverTime') then return false end
                     return RGMercUtils.CastReady(spell.RankName) and RGMercUtils.NPCSpellReady(spell, target.ID(), true)
                         and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
@@ -781,7 +783,7 @@ local _ClassConfig  = {
                 name = "InterventionHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('BigHealPoint') and RGMercUtils.CastReady(spell.RankName) and
+                    return (target.PctHPs() or 999) <= RGMercConfig:GetSetting('BigHealPoint') and RGMercUtils.CastReady(spell.RankName) and
                         RGMercUtils.NPCSpellReady(spell, target.ID(), true)
                 end,
             },
@@ -789,7 +791,7 @@ local _ClassConfig  = {
                 name = "Soothsayer's Intervention",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return (target.PctHPs() or 999) <= RGMercUtils.GetSetting('BigHealPoint') and RGMercUtils.NPCAAReady(aaName, target.ID(), true)
+                    return (target.PctHPs() or 999) <= RGMercConfig:GetSetting('BigHealPoint') and RGMercUtils.NPCAAReady(aaName, target.ID(), true)
                 end,
             },
             {
@@ -810,7 +812,7 @@ local _ClassConfig  = {
                 name = mq.TLO.Me.Inventory("Chest").Name(),
                 type = "Item",
                 cond = function(self)
-                    if not RGMercUtils.GetSetting('DoChestClick') then return false end
+                    if not RGMercConfig:GetSetting('DoChestClick') then return false end
                     local item = mq.TLO.Me.Inventory("Chest")
                     return item() and item.TimerReady() == 0
                 end,
@@ -826,7 +828,7 @@ local _ClassConfig  = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoHealOverTime') then return false end
+                    if not RGMercConfig:GetSetting('DoHealOverTime') then return false end
                     return RGMercUtils.CastReady(spell.RankName) and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -969,7 +971,7 @@ local _ClassConfig  = {
                 local count = mq.TLO.Group.Members()
                 for i = 1, count do
                     local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
-                    if RGMercUtils.GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
+                    if RGMercConfig:GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
                         table.insert(groupIds, mq.TLO.Group.Member(i).ID())
                     end
                 end
@@ -985,7 +987,7 @@ local _ClassConfig  = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not (RGMercUtils.GetSetting('DoSTMalo') or RGMercUtils.GetSetting('DoAEMalo')) then return false end
+                if not (RGMercConfig:GetSetting('DoSTMalo') or RGMercConfig:GetSetting('DoAEMalo')) then return false end
                 return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.DebuffConCheck() and
                     (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.OkayToNotHeal())
             end,
@@ -996,7 +998,7 @@ local _ClassConfig  = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not (RGMercUtils.GetSetting('DoSTSlow') or RGMercUtils.GetSetting('DoAESlow')) then return false end
+                if not (RGMercConfig:GetSetting('DoSTSlow') or RGMercConfig:GetSetting('DoAESlow')) then return false end
                 return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.DebuffConCheck() and
                     (not RGMercUtils.IsModeActive('Heal') or RGMercUtils.OkayToNotHeal())
             end,
@@ -1038,7 +1040,7 @@ local _ClassConfig  = {
             steps = 1,
             targetId = function(self) return { RGMercUtils.GetMainAssistId(), } end,
             cond = function(self, combat_state)
-                if not (RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoTwinHeal')) then return false end
+                if not (RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DoTwinHeal')) then return false end
                 return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.OkayToNotHeal()
             end,
         },
@@ -1113,14 +1115,14 @@ local _ClassConfig  = {
                 name = "Rabid Bear",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoMelee') and mq.TLO.Me.Combat()
+                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('DoVetAA') then return false end
+                    if not RGMercConfig:GetSetting('DoVetAA') then return false end
                     return RGMercUtils.AAReady(aaName)
                 end,
             },
@@ -1130,8 +1132,8 @@ local _ClassConfig  = {
                 name = "Wind of Malaise",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not RGMercUtils.GetSetting('DoAEMalo') then return false end
-                    return RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AEMaloCount') and RGMercUtils.NPCAAReady(aaName, target.ID()) and
+                    if not RGMercConfig:GetSetting('DoAEMalo') then return false end
+                    return RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('AEMaloCount') and RGMercUtils.NPCAAReady(aaName, target.ID()) and
                         RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
@@ -1139,8 +1141,8 @@ local _ClassConfig  = {
                 name = "AEMaloSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoAEMalo') or RGMercUtils.CanUseAA("Wind of Malaise") then return false end
-                    return RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AEMaloCount') and RGMercUtils.NPCSpellReady(spell, target.ID()) and
+                    if not RGMercConfig:GetSetting('DoAEMalo') or RGMercUtils.CanUseAA("Wind of Malaise") then return false end
+                    return RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('AEMaloCount') and RGMercUtils.NPCSpellReady(spell, target.ID()) and
                         RGMercUtils.DetSpellCheck(spell)
                 end,
             },
@@ -1148,7 +1150,7 @@ local _ClassConfig  = {
                 name = "Malaise",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not RGMercUtils.GetSetting('DoSTMalo') then return false end
+                    if not RGMercConfig:GetSetting('DoSTMalo') then return false end
                     return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
@@ -1156,7 +1158,7 @@ local _ClassConfig  = {
                 name = "MaloSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoSTMalo') or RGMercUtils.CanUseAA("Malaise") then return false end
+                    if not RGMercConfig:GetSetting('DoSTMalo') or RGMercUtils.CanUseAA("Malaise") then return false end
                     return RGMercUtils.NPCSpellReady(spell, target.ID()) and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
@@ -1166,8 +1168,8 @@ local _ClassConfig  = {
                 name = "Turgur's Virulent Swarm",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not RGMercUtils.GetSetting('DoAESlow') then return false end
-                    return RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AESlowCount') and RGMercUtils.NPCAAReady(aaName, target.ID()) and
+                    if not RGMercConfig:GetSetting('DoAESlow') then return false end
+                    return RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('AESlowCount') and RGMercUtils.NPCAAReady(aaName, target.ID()) and
                         RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
@@ -1175,8 +1177,8 @@ local _ClassConfig  = {
                 name = "AESlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoAESlow') or RGMercUtils.CanUseAA("Turgur's Virulent Swarm") then return false end
-                    return RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('AESlowCount') and RGMercUtils.NPCSpellReady(spell, target.ID()) and
+                    if not RGMercConfig:GetSetting('DoAESlow') or RGMercUtils.CanUseAA("Turgur's Virulent Swarm") then return false end
+                    return RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('AESlowCount') and RGMercUtils.NPCSpellReady(spell, target.ID()) and
                         RGMercUtils.DetSpellCheck(spell)
                 end,
             },
@@ -1184,7 +1186,7 @@ local _ClassConfig  = {
                 name = "Turgur's Swarm",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not RGMercUtils.GetSetting('DoSTSlow') then return false end
+                    if not RGMercConfig:GetSetting('DoSTSlow') then return false end
                     return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
@@ -1192,7 +1194,7 @@ local _ClassConfig  = {
                 name = "SlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoSTSlow') or RGMercUtils.CanUseAA("Turgur's Swarm") then return false end
+                    if not RGMercConfig:GetSetting('DoSTSlow') or RGMercUtils.CanUseAA("Turgur's Swarm") then return false end
                     return RGMercUtils.NPCSpellReady(spell, target.ID()) and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
@@ -1200,7 +1202,7 @@ local _ClassConfig  = {
                 name = "DieaseSlow",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not (RGMercUtils.GetSetting('DoDiseaseSlow') and RGMercUtils.GetSetting('DoSTSlow')) or RGMercUtils.CanUseAA("Turgur's Swarm") then return false end
+                    if not (RGMercConfig:GetSetting('DoDiseaseSlow') and RGMercConfig:GetSetting('DoSTSlow')) or RGMercUtils.CanUseAA("Turgur's Swarm") then return false end
                     return RGMercUtils.NPCSpellReady(spell, target.ID()) and RGMercUtils.DetSpellCheck(spell)
                 end,
             },
@@ -1217,7 +1219,7 @@ local _ClassConfig  = {
                 name = "ChaoticDoT",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS') then return false end
+                    if RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS') then return false end
                     return RGMercUtils.CastReady(spell.RankName) and RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and
                         RGMercUtils.NPCSpellReady(spell)
                 end,
@@ -1226,7 +1228,7 @@ local _ClassConfig  = {
                 name = "CurseDoT2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS') then return false end
+                    if RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS') then return false end
                     return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
@@ -1234,7 +1236,7 @@ local _ClassConfig  = {
                 name = "PandemicDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS') then return false end
+                    if RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS') then return false end
                     return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
@@ -1242,7 +1244,7 @@ local _ClassConfig  = {
                 name = "CurseDoT1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (RGMercUtils.IsModeActive("Heal") and (RGMercUtils.GetResolvedActionMapItem('CurseDoT2') or not RGMercUtils.GetSetting('DoHealDPS'))) then return false end
+                    if (RGMercUtils.IsModeActive("Heal") and (RGMercUtils.GetResolvedActionMapItem('CurseDoT2') or not RGMercConfig:GetSetting('DoHealDPS'))) then return false end
                     return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
@@ -1250,7 +1252,7 @@ local _ClassConfig  = {
                 name = "SaryrnDoT",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (RGMercUtils.IsModeActive("Heal") and (RGMercUtils.GetResolvedActionMapItem('ChaoticDoT') or not RGMercUtils.GetSetting('DoHealDPS'))) then return false end
+                    if (RGMercUtils.IsModeActive("Heal") and (RGMercUtils.GetResolvedActionMapItem('ChaoticDoT') or not RGMercConfig:GetSetting('DoHealDPS'))) then return false end
                     return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
                 end,
             },
@@ -1274,25 +1276,25 @@ local _ClassConfig  = {
                 name = "Cannibalization",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not (RGMercUtils.GetSetting('DoAACanni') and RGMercUtils.GetSetting('DoCombatCanni')) then return false end
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('AACanniManaPct') and
-                        mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('AACanniMinHP')
+                    if not (RGMercConfig:GetSetting('DoAACanni') and RGMercConfig:GetSetting('DoCombatCanni')) then return false end
+                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('AACanniManaPct') and
+                        mq.TLO.Me.PctHPs() >= RGMercConfig:GetSetting('AACanniMinHP')
                 end,
             },
             {
                 name = "CanniSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not (RGMercUtils.GetSetting('DoSpellCanni') and RGMercUtils.GetSetting('DoCombatCanni')) then return false end
-                    return RGMercUtils.CastReady(spell.RankName()) and RGMercUtils.PCSpellReady(spell) and mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('SpellCanniManaPct') and
-                        mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('SpellCanniMinHP')
+                    if not (RGMercConfig:GetSetting('DoSpellCanni') and RGMercConfig:GetSetting('DoCombatCanni')) then return false end
+                    return RGMercUtils.CastReady(spell.RankName()) and RGMercUtils.PCSpellReady(spell) and mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('SpellCanniManaPct') and
+                        mq.TLO.Me.PctHPs() >= RGMercConfig:GetSetting('SpellCanniMinHP')
                 end,
             },
             {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not RGMercUtils.CanUseAA("Luminary's Synergy") and RGMercUtils.GetSetting('DoHealOverTime') then return false end
+                    if not RGMercUtils.CanUseAA("Luminary's Synergy") and RGMercConfig:GetSetting('DoHealOverTime') then return false end
                     return not RGMercUtils.DotSpellCheck(spell) and RGMercUtils.SpellStacksOnMe(spell)
                         and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 30
                 end,
@@ -1326,11 +1328,11 @@ local _ClassConfig  = {
                 name = "PetSpell",
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
-                cond = function(self, _) return RGMercUtils.GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
+                cond = function(self, _) return RGMercConfig:GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
                 post_activate = function(self, spell)
                     local pet = mq.TLO.Me.Pet
                     if pet.ID() > 0 then
-                        RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
+                        CommUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
                             pet.Class.Name(), pet.CleanName(), spell.RankName())
                     end
                 end,
@@ -1341,18 +1343,18 @@ local _ClassConfig  = {
                 name = "Cannibalization",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoAACanni') and RGMercUtils.AAReady(aaName) and
-                        mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('AACanniManaPct') and
-                        mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('AACanniMinHP')
+                    return RGMercConfig:GetSetting('DoAACanni') and RGMercUtils.AAReady(aaName) and
+                        mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('AACanniManaPct') and
+                        mq.TLO.Me.PctHPs() >= RGMercConfig:GetSetting('AACanniMinHP')
                 end,
             },
             {
                 name = "CanniSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoSpellCanni') and RGMercUtils.CastReady(spell.RankName()) and
-                        mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('SpellCanniManaPct') and
-                        mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('SpellCanniMinHP')
+                    return RGMercConfig:GetSetting('DoSpellCanni') and RGMercUtils.CastReady(spell.RankName()) and
+                        mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('SpellCanniManaPct') and
+                        mq.TLO.Me.PctHPs() >= RGMercConfig:GetSetting('SpellCanniMinHP')
                 end,
             },
             {
@@ -1367,7 +1369,7 @@ local _ClassConfig  = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not RGMercUtils.CanUseAA("Luminary's Synergy") and RGMercUtils.GetSetting('DoHealOverTime') then return false end
+                    if not RGMercUtils.CanUseAA("Luminary's Synergy") and RGMercConfig:GetSetting('DoHealOverTime') then return false end
                     return RGMercUtils.SpellStacksOnMe(spell) and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
@@ -1404,7 +1406,7 @@ local _ClassConfig  = {
                 type = "AA",
                 active_cond = function(self, aaName) return mq.TLO.Me.Aura(aaName)() ~= nil end,
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoAura') and not RGMercUtils.SongActiveByName(aaName) and
+                    return RGMercConfig:GetSetting('DoAura') and not RGMercUtils.SongActiveByName(aaName) and
                         mq.TLO.Me.Aura(aaName)() == nil
                 end,
             },
@@ -1434,7 +1436,7 @@ local _ClassConfig  = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell)
-                    if not RGMercUtils.GetSetting('DoSelfWard') then return false end
+                    if not RGMercConfig:GetSetting('DoSelfWard') then return false end
                     return RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
@@ -1452,7 +1454,7 @@ local _ClassConfig  = {
                 name = "TempHPBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoTempHP') then return false end
+                    if not RGMercConfig:GetSetting('DoTempHP') then return false end
                     return RGMercUtils.TargetClassIs("WAR", target) and RGMercUtils.CastReady(spell.RankName) and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1460,7 +1462,7 @@ local _ClassConfig  = {
                 name = "Group Shrink",
                 type = "AA",
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
-                cond = function(self) return RGMercUtils.GetSetting('DoGroupShrink') and mq.TLO.Me.Height() > 2.2 end,
+                cond = function(self) return RGMercConfig:GetSetting('DoGroupShrink') and mq.TLO.Me.Height() > 2.2 end,
             },
             {
                 name = "SlowProcBuff",
@@ -1496,7 +1498,7 @@ local _ClassConfig  = {
                 type = "AA",
                 active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
                 cond = function(self, aaName, target)
-                    if not RGMercUtils.GetSetting('DoHaste') then return false end
+                    if not RGMercConfig:GetSetting('DoHaste') then return false end
                     return mq.TLO.Me.Level() < 111 and RGMercUtils.GroupBuffCheck(mq.TLO.AltAbility(aaName).Spell, target)
                 end,
             },
@@ -1505,7 +1507,7 @@ local _ClassConfig  = {
                 type = "Spell",
                 active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoHaste') or RGMercUtils.CanUseAA("Talisman of Celerity") then return false end
+                    if not RGMercConfig:GetSetting('DoHaste') or RGMercUtils.CanUseAA("Talisman of Celerity") then return false end
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1534,7 +1536,7 @@ local _ClassConfig  = {
                     return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
                 end,
                 cond = function(self, aaName, target) --check ranks because this won't use Tala'Tak between 74 and 90
-                    if not RGMercUtils.GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility(aaName).Rank() or 0) < 4 then return false end
+                    if not RGMercConfig:GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility(aaName).Rank() or 0) < 4 then return false end
 
                     local speedSpell = mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)
                     if not speedSpell or not speedSpell() then return false end
@@ -1546,7 +1548,7 @@ local _ClassConfig  = {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell, target) --We get Tala'tak at 74, but don't get the AA version until 90
-                    if not RGMercUtils.GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility("Lupine Spirit").Rank() or -1) > 3 then return false end
+                    if not RGMercConfig:GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility("Lupine Spirit").Rank() or -1) > 3 then return false end
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1554,7 +1556,7 @@ local _ClassConfig  = {
                 name = "LowLvlHPBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoLLHPBuff') then return false end
+                    if not RGMercConfig:GetSetting('DoLLHPBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1562,7 +1564,7 @@ local _ClassConfig  = {
                 name = "LowLvlAgiBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoLLAgiBuff') then return false end
+                    if not RGMercConfig:GetSetting('DoLLAgiBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1570,7 +1572,7 @@ local _ClassConfig  = {
                 name = "LowLvlStaBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoLLStaBuff') then return false end
+                    if not RGMercConfig:GetSetting('DoLLStaBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and RGMercConfig.Constants.RGTank:contains(target.Class.ShortName()) and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1578,7 +1580,7 @@ local _ClassConfig  = {
                 name = "LowLvlStrBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoLLStrBuff') then return false end
+                    if not RGMercConfig:GetSetting('DoLLStrBuff') then return false end
                     return mq.TLO.Me.Level() < 71 and RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1598,13 +1600,13 @@ local _ClassConfig  = {
                 {
                     name = "AESlowSpell",
                     cond = function(self)
-                        return not RGMercUtils.CanUseAA("Turgur's Virulent Swarm") and RGMercUtils.GetSetting('DoAESlow')
+                        return not RGMercUtils.CanUseAA("Turgur's Virulent Swarm") and RGMercConfig:GetSetting('DoAESlow')
                     end,
                 }, -- 58-79
                 {
                     name = "CanniSpell",
                     cond = function(self)
-                        return RGMercUtils.GetSetting('DoSpellCanni')
+                        return RGMercConfig:GetSetting('DoSpellCanni')
                     end,
                 }, -- 23 - ???
             },
@@ -1616,14 +1618,14 @@ local _ClassConfig  = {
                 {
                     name = "DiseaseSlow",
                     cond = function(self)
-                        return not RGMercUtils.CanUseAA("Turgur's Swarm") and RGMercUtils.GetSetting('DoSTSlow')
-                            and RGMercUtils.GetSetting('DoDiseaseSlow')
+                        return not RGMercUtils.CanUseAA("Turgur's Swarm") and RGMercConfig:GetSetting('DoSTSlow')
+                            and RGMercConfig:GetSetting('DoDiseaseSlow')
                     end,
                 }, -- 54-77
                 {
                     name = "SlowSpell",
                     cond = function(self)
-                        return not RGMercUtils.CanUseAA("Turgur's Swarm") and RGMercUtils.GetSetting('DoSTSlow')
+                        return not RGMercUtils.CanUseAA("Turgur's Swarm") and RGMercConfig:GetSetting('DoSTSlow')
                     end,
                 }, -- 27-77
             },
@@ -1636,13 +1638,13 @@ local _ClassConfig  = {
                     name = "AEMaloSpell",
                     cond = function(self)
                         return not RGMercUtils.CanUseAA("Wind of Malaise")
-                            and RGMercUtils.GetSetting('DoAEMalo')
+                            and RGMercConfig:GetSetting('DoAEMalo')
                     end,
                 }, -- 84-94
                 {
                     name = "MaloSpell",
                     cond = function(self)
-                        return not RGMercUtils.CanUseAA("Malaise") and RGMercUtils.GetSetting('DoSTMalo')
+                        return not RGMercUtils.CanUseAA("Malaise") and RGMercConfig:GetSetting('DoSTMalo')
                     end,
                 }, -- 47-74
             },
@@ -1650,18 +1652,18 @@ local _ClassConfig  = {
         {
             gem = 5,
             spells = {
-                { name = "RecklessHeal2",  cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 90-125
-                { name = "FastPoisonNuke", cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 73-125
+                { name = "RecklessHeal2",  cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 90-125
+                { name = "FastPoisonNuke", cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 73-125
                 {
                     name = "PoisonNuke",
                     cond = function(self)
-                        return mq.TLO.Me.Level() > 33 and mq.TLO.Me.Level < 73 and not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS'))
+                        return mq.TLO.Me.Level() > 33 and mq.TLO.Me.Level < 73 and not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS'))
                     end,
                 }, -- 34-72
                 {
                     name = "IceNuke",
                     cond = function(self)
-                        return mq.TLO.Me.Level() < 34 and not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS'))
+                        return mq.TLO.Me.Level() < 34 and not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS'))
                     end,
                 }, -- 4-33
             },
@@ -1669,24 +1671,24 @@ local _ClassConfig  = {
         {
             gem = 6,
             spells = {
-                { name = "DichoSpell", },                                                                                                                         -- 101-125
-                { name = "MeleeProcBuff", },                                                                                                                      -- 50-101
-                { name = "CurseDoT1",     cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",     cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "UltorDot",      cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                      -- 4-91 Hybrid (Boss Only)
+                { name = "DichoSpell", },                                                                                                                          -- 101-125
+                { name = "MeleeProcBuff", },                                                                                                                       -- 50-101
+                { name = "CurseDoT1",     cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "SaryrnDot",     cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "UltorDot",      cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                       -- 4-91 Hybrid (Boss Only)
 
             },
         },
         {
             gem = 7,
             spells = {
-                { name = "GroupRenewalHoT", cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoHealOverTime') end, },      -- 44-125 Heal
-                { name = "SingleRegenBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 22-55 Convenience
-                { name = "AfflictionDot",   cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                 -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",        cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                      -- 4-91 Hybrid (Boss Only)
-                { name = "FastPoisonNuke",  cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "CurseDoT1",       cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",       cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "GroupRenewalHoT", cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DoHealOverTime') end, },      -- 44-125 Heal
+                { name = "SingleRegenBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 22-55 Convenience
+                { name = "AfflictionDot",   cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                  -- 92-125 Hybrid (Boss Only)
+                { name = "UltorDot",        cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                       -- 4-91 Hybrid (Boss Only)
+                { name = "FastPoisonNuke",  cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 73-125
+                { name = "CurseDoT1",       cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "SaryrnDot",       cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
             },
         },
         { --We will leave this gem open for buffing until we have 9
@@ -1694,16 +1696,16 @@ local _ClassConfig  = {
             cond = function(self) return mq.TLO.Me.NumGems() >= 9 end,
             spells = {
                 --Harnessing of Spirit won't be full-time memmed, but will still be used as needed.
-                { name = "LowLvlAtkBuff",     cond = function(self) return mq.TLO.Me.Level() < 86 end, },                                                             -- 60-85
-                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TempHPBuff",        cond = function(self) return RGMercUtils.GetSetting('DoTempHP') end, },                                                 -- 81-125
-                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                 -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                      -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 101-125,
+                { name = "LowLvlAtkBuff",     cond = function(self) return mq.TLO.Me.Level() < 86 end, },                                                              -- 60-85
+                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DoTwinHeal') end, },          -- 85-125
+                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 73-125
+                { name = "TempHPBuff",        cond = function(self) return RGMercConfig:GetSetting('DoTempHP') end, },                                                 -- 81-125
+                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 52-125 Heal
+                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                  -- 92-125 Hybrid (Boss Only)
+                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                       -- 4-91 Hybrid (Boss Only)
+                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 101-125,
                 { name = "RecklessHeal3",     cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 { name = "SlowProcBuff", },
             },
@@ -1712,15 +1714,15 @@ local _ClassConfig  = {
             gem = 9,
             cond = function(self) return mq.TLO.Me.NumGems() >= 10 end,
             spells = {
-                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "TempHPBuff",        cond = function(self) return RGMercUtils.GetSetting('DoTempHP') end, },                                                 -- 81-125
-                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                 -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                      -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 101-125,
+                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 73-125
+                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DoTwinHeal') end, },          -- 85-125
+                { name = "TempHPBuff",        cond = function(self) return RGMercConfig:GetSetting('DoTempHP') end, },                                                 -- 81-125
+                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 52-125 Heal
+                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                  -- 92-125 Hybrid (Boss Only)
+                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                       -- 4-91 Hybrid (Boss Only)
+                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 101-125,
                 { name = "RecklessHeal3",     cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 { name = "SlowProcBuff", },
             },
@@ -1729,16 +1731,16 @@ local _ClassConfig  = {
             gem = 10,
             cond = function(self) return mq.TLO.Me.NumGems() >= 11 end,
             spells = {
-                { name = "CurseDoT2",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 100-125
-                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TempHPBuff",        cond = function(self) return RGMercUtils.GetSetting('DoTempHP') end, },                                                 -- 81-125
-                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                 -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                      -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 101-125,
+                { name = "CurseDoT2",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 100-125
+                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DoTwinHeal') end, },          -- 85-125
+                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 73-125
+                { name = "TempHPBuff",        cond = function(self) return RGMercConfig:GetSetting('DoTempHP') end, },                                                 -- 81-125
+                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 52-125 Heal
+                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                  -- 92-125 Hybrid (Boss Only)
+                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                       -- 4-91 Hybrid (Boss Only)
+                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 101-125,
                 { name = "RecklessHeal3",     cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 { name = "SlowProcBuff", },
             },
@@ -1747,16 +1749,16 @@ local _ClassConfig  = {
             gem = 11,
             cond = function(self) return mq.TLO.Me.NumGems() >= 12 end,
             spells = {
-                { name = "PandemicDot",       cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 103-125
-                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TempHPBuff",        cond = function(self) return RGMercUtils.GetSetting('DoTempHP') end, },                                                 -- 81-125
-                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                 -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                      -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 101-125,
+                { name = "PandemicDot",       cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 103-125
+                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DoTwinHeal') end, },          -- 85-125
+                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 73-125
+                { name = "TempHPBuff",        cond = function(self) return RGMercConfig:GetSetting('DoTempHP') end, },                                                 -- 81-125
+                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 52-125 Heal
+                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                  -- 92-125 Hybrid (Boss Only)
+                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                       -- 4-91 Hybrid (Boss Only)
+                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 101-125,
                 { name = "RecklessHeal3",     cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 { name = "SlowProcBuff", },
             },
@@ -1765,16 +1767,16 @@ local _ClassConfig  = {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "ChaoticDoT",        cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 104-125
-                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercUtils.GetSetting('DoTwinHeal') end, },          -- 85-125
-                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "TempHPBuff",        cond = function(self) return RGMercUtils.GetSetting('DoTempHP') end, },                                                 -- 81-125
-                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
-                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
-                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                 -- 92-125 Hybrid (Boss Only)
-                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                      -- 4-91 Hybrid (Boss Only)
-                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                   -- 101-125,
+                { name = "ChaoticDoT",        cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 104-125
+                { name = "TwinHealNuke",      cond = function(self) return RGMercUtils.IsModeActive("Heal") and RGMercConfig:GetSetting('DoTwinHeal') end, },          -- 85-125
+                { name = "FastPoisonNuke",    cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 73-125
+                { name = "TempHPBuff",        cond = function(self) return RGMercConfig:GetSetting('DoTempHP') end, },                                                 -- 81-125
+                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 52-125 Heal
+                { name = "CurseDoT1",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "SaryrnDot",         cond = function(self) return not (RGMercUtils.IsModeActive("Heal") and not RGMercConfig:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
+                { name = "AfflictionDot",     cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },                                                  -- 92-125 Hybrid (Boss Only)
+                { name = "UltorDot",          cond = function(self) return RGMercUtils.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                       -- 4-91 Hybrid (Boss Only)
+                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },                                                    -- 101-125,
                 { name = "RecklessHeal3",     cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },
                 { name = "SlowProcBuff", },
             },
@@ -1783,11 +1785,11 @@ local _ClassConfig  = {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "TempHPBuff",        cond = function(self) return RGMercUtils.GetSetting('DoTempHP') end, }, -- 81-125
-                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },   -- 52-125 Heal
-                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },   -- 101-125
-                { name = "PoisonNuke",        cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, }, -- Hey, why not?
-                { name = "SlowProcBuff", },                                                                           --fallback
+                { name = "TempHPBuff",        cond = function(self) return RGMercConfig:GetSetting('DoTempHP') end, }, -- 81-125
+                { name = "CureSpell",         cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },    -- 52-125 Heal
+                { name = "GroupHealProcBuff", cond = function(self) return RGMercUtils.IsModeActive("Heal") end, },    -- 101-125
+                { name = "PoisonNuke",        cond = function(self) return RGMercUtils.IsModeActive("Hybrid") end, },  -- Hey, why not?
+                { name = "SlowProcBuff", },                                                                            --fallback
 
             },
         },

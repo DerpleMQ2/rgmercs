@@ -1,5 +1,6 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local GameUtils     = require("utils.game_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local Bind          = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
@@ -42,13 +43,13 @@ Bind.Handlers       = {
                     RGMercUtils.ForceCombat = false
                     return
                 end
-                RGMercUtils.DoCmd("/xtarget set 1 currenttarget")
+                GameUtils.DoCmd("/xtarget set 1 currenttarget")
                 mq.delay("5s", function() return mq.TLO.Me.XTarget(1).ID() == mq.TLO.Target.ID() end)
                 RGMercsLogger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
             else
                 RGMercUtils.ResetXTSlot(1)
                 RGMercUtils.ForceNamed = false
-                RGMercUtils.DoCmd("/attack off")
+                GameUtils.DoCmd("/attack off")
             end
         end,
     },
@@ -130,9 +131,9 @@ Bind.Handlers       = {
             for _, t in ipairs(allText) do
                 text = (text and text .. " " or "") .. t
             end
-            RGMercUtils.DoCmd("/squelch /dggaexecute /target id %d", RGMercUtils.GetTargetID())
+            GameUtils.DoCmd("/squelch /dggaexecute /target id %d", RGMercUtils.GetTargetID())
             mq.delay(5)
-            RGMercUtils.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)
+            GameUtils.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)
         end,
     },
     ['cast'] = {
@@ -220,7 +221,7 @@ Bind.Handlers       = {
         about = "Will pause all of your Group RGMercs' Main Loop",
         handler = function()
             RGMercConfig.Globals.PauseMain = true
-            RGMercUtils.DoCmd("/squelch /dgge /rgl pause")
+            GameUtils.DoCmd("/squelch /dgge /rgl pause")
             RGMercsLogger.log_info("\ayAll clients paused!")
         end,
     },
@@ -236,7 +237,7 @@ Bind.Handlers       = {
         about = "Will unpause all of your Group RGMercs' Main Loop",
         handler = function()
             RGMercConfig.Globals.PauseMain = false
-            RGMercUtils.DoCmd("/squelch /dgge /rgl unpause")
+            GameUtils.DoCmd("/squelch /dgge /rgl unpause")
             RGMercsLogger.log_info("\agAll clients paused!")
         end,
     },
@@ -244,14 +245,14 @@ Bind.Handlers       = {
         usage = "/rgl yes",
         about = "Will cause all of your Group RGMercs to click on every possible 'Yes' Dialogue they have up.",
         handler = function()
-            RGMercUtils.DoCmd("/dgga /notify LargeDialogWindow LDW_YesButton leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify LargeDialogWindow LDW_OkButton leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify TradeWND TRDW_Trade_Button leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify GiveWnd GVW_Give_Button leftmouseup ")
-            RGMercUtils.DoCmd("/dgga /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify RaidWindow RAID_AcceptButton leftmouseup")
+            GameUtils.DoCmd("/dgga /notify LargeDialogWindow LDW_YesButton leftmouseup")
+            GameUtils.DoCmd("/dgga /notify LargeDialogWindow LDW_OkButton leftmouseup")
+            GameUtils.DoCmd("/dgga /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
+            GameUtils.DoCmd("/dgga /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
+            GameUtils.DoCmd("/dgga /notify TradeWND TRDW_Trade_Button leftmouseup")
+            GameUtils.DoCmd("/dgga /notify GiveWnd GVW_Give_Button leftmouseup ")
+            GameUtils.DoCmd("/dgga /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
+            GameUtils.DoCmd("/dgga /notify RaidWindow RAID_AcceptButton leftmouseup")
         end,
     },
     ['circle'] = {
@@ -286,8 +287,8 @@ Bind.Handlers       = {
                     local xOff = mq.TLO.Me.X() + math.floor(radius * xMove)
                     local yOff = mq.TLO.Me.Y() + math.floor(radius * yMove)
 
-                    RGMercUtils.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", member.DisplayName(), yOff, xOff, mq.TLO.Me.Z())
-                    RGMercUtils.DoCmd("/dex %s /timed 50 /face %s", member.DisplayName(), mq.TLO.Me.DisplayName())
+                    GameUtils.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", member.DisplayName(), yOff, xOff, mq.TLO.Me.Z())
+                    GameUtils.DoCmd("/dex %s /timed 50 /face %s", member.DisplayName(), mq.TLO.Me.DisplayName())
                 end
             end
         end,
@@ -332,7 +333,7 @@ Bind.Handlers       = {
         about = "Toggle Popout of Module",
         handler = function(config, value)
             if config == 'debug' or config == 'console' then
-                RGMercUtils.SetSetting("PopOutConsole", not RGMercUtils.GetSetting("PopOutConsole"))
+                RGMercConfig:SetSetting("PopOutConsole", not RGMercConfig:GetSetting("PopOutConsole"))
             else
                 RGMercModules:ExecModule(config, "Pop")
             end

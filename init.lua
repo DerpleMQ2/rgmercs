@@ -22,6 +22,8 @@ RGMercsEvents     = require('utils.rgmercs_events')
 RGMercsConsole    = nil
 
 local RGMercUtils = require("utils.rgmercs_utils")
+local CommUtils   = require("utils.comm_utils")
+local GameUtils   = require("utils.game_utils")
 
 RGMercNameds      = require("utils.rgmercs_named")
 
@@ -64,7 +66,7 @@ local function renderModulesTabs()
     if not RGMercConfig:SettingsLoaded() then return end
 
     for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
-        if RGMercModules:ExecModule(name, "ShouldRender") and not RGMercUtils.GetSetting(name .. "_Popped", true) then
+        if RGMercModules:ExecModule(name, "ShouldRender") and not RGMercConfig:GetSetting(name .. "_Popped", true) then
             if ImGui.BeginTabItem(name) then
                 RGMercModules:ExecModule(name, "Render")
                 ImGui.EndTabItem()
@@ -77,7 +79,7 @@ local function renderModulesPopped()
     if not RGMercConfig:SettingsLoaded() then return end
 
     for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
-        if RGMercUtils.GetSetting(name .. "_Popped", true) then
+        if RGMercConfig:GetSetting(name .. "_Popped", true) then
             if RGMercModules:ExecModule(name, "ShouldRender") then
                 local open, show = ImGui.Begin(name, true)
                 if show then
@@ -85,7 +87,7 @@ local function renderModulesPopped()
                 end
                 ImGui.End()
                 if not open then
-                    RGMercUtils.SetSetting(name .. "_Popped", false)
+                    RGMercConfig:SetSetting(name .. "_Popped", false)
                 end
             end
         end
@@ -131,10 +133,10 @@ end
 local function RenderConfigSelector()
     if RGMercConfig.Globals.ClassConfigDirs ~= nil then
         ImGui.Text("Configuration Type")
-        local newConfigDir, changed = ImGui.Combo("##config_type", GetClassConfigIDFromName(RGMercUtils.GetSetting('ClassConfigDir')), RGMercConfig.Globals.ClassConfigDirs,
+        local newConfigDir, changed = ImGui.Combo("##config_type", GetClassConfigIDFromName(RGMercConfig:GetSetting('ClassConfigDir')), RGMercConfig.Globals.ClassConfigDirs,
             #RGMercConfig.Globals.ClassConfigDirs)
         if changed then
-            RGMercUtils.SetSetting('ClassConfigDir', RGMercConfig.Globals.ClassConfigDirs[newConfigDir])
+            RGMercConfig:SetSetting('ClassConfigDir', RGMercConfig.Globals.ClassConfigDirs[newConfigDir])
             RGMercConfig:SaveSettings(false)
             RGMercConfig:LoadSettings()
             RGMercModules:ExecAll("LoadSettings")
@@ -161,7 +163,7 @@ local function RenderTarget()
 
     local assistSpawn = RGMercUtils.GetAutoTarget()
 
-    if RGMercUtils.GetSetting('DisplayManualTarget') and (not assistSpawn or not assistSpawn() or assistSpawn.ID() == 0) then
+    if RGMercConfig:GetSetting('DisplayManualTarget') and (not assistSpawn or not assistSpawn() or assistSpawn.ID() == 0) then
         assistSpawn = mq.TLO.Target
     end
 
@@ -336,25 +338,25 @@ local function RGMercsGUI()
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
             ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, RGMercConfig:GetSettings().ScrollBarRounding)
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, RGMercConfig:GetSettings().FrameEdgeRounding)
-            if RGMercUtils.GetSetting('PopOutForceTarget') then
-                local openFT, showFT = ImGui.Begin("Force Target", RGMercUtils.GetSetting('PopOutForceTarget'))
+            if RGMercConfig:GetSetting('PopOutForceTarget') then
+                local openFT, showFT = ImGui.Begin("Force Target", RGMercConfig:GetSetting('PopOutForceTarget'))
                 if showFT then
                     RGMercUtils.RenderForceTargetList()
                 end
                 ImGui.End()
                 if not openFT then
-                    RGMercUtils.SetSetting('PopOutForceTarget', false)
+                    RGMercConfig:SetSetting('PopOutForceTarget', false)
                     showFT = false
                 end
             end
-            if RGMercUtils.GetSetting('PopOutConsole') then
-                local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", RGMercUtils.GetSetting('PopOutConsole'))
+            if RGMercConfig:GetSetting('PopOutConsole') then
+                local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", RGMercConfig:GetSetting('PopOutConsole'))
                 if showConsole then
                     DrawConsole()
                 end
                 ImGui.End()
                 if not openConsole then
-                    RGMercUtils.SetSetting('PopOutConsole', false)
+                    RGMercConfig:SetSetting('PopOutConsole', false)
                     showConsole = false
                 end
             end
@@ -437,7 +439,7 @@ local function RGMercsGUI()
                                     RGMercConfig:SaveSettings(false)
                                 end
                             end
-                            if RGMercUtils.GetSetting('ShowAllOptionsMain') then
+                            if RGMercConfig:GetSetting('ShowAllOptionsMain') then
                                 if RGMercConfig.Globals.SubmodulesLoaded then
                                     local submoduleSettings = RGMercModules:ExecAll("GetSettings")
                                     local submoduleDefaults = RGMercModules:ExecAll("GetDefaultSettings")
@@ -466,7 +468,7 @@ local function RGMercsGUI()
                             RGMercUtils.RenderOAList()
                         end
 
-                        if RGMercUtils.IAmMA() and not RGMercUtils.GetSetting('PopOutForceTarget') then
+                        if RGMercUtils.IAmMA() and not RGMercConfig:GetSetting('PopOutForceTarget') then
                             if ImGui.CollapsingHeader("Force Target") then
                                 RGMercUtils.RenderForceTargetList(true)
                             end
@@ -483,7 +485,7 @@ local function RGMercsGUI()
                 ImGui.NewLine()
                 ImGui.NewLine()
                 ImGui.Separator()
-                if not RGMercUtils.GetSetting('PopOutConsole') then
+                if not RGMercConfig:GetSetting('PopOutConsole') then
                     DrawConsole()
                 end
             elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
@@ -522,7 +524,7 @@ local function RGMercsGUI()
             ImGui.PopID()
             ImGui.PopStyleVar(3)
             if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
-                if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercUtils.GetSetting("EscapeMinimizes") then
+                if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercConfig:GetSetting("EscapeMinimizes") then
                     RGMercConfig.Globals.Minimized = true
                 end
             end
@@ -543,14 +545,14 @@ mq.imgui.init('RGMercsUI', RGMercsGUI)
 local unloadedPlugins = {}
 
 local function RGInit(...)
-    RGMercUtils.CheckPlugins({
+    GameUtils.CheckPlugins({
         "MQ2Rez",
         "MQ2AdvPath",
         "MQ2MoveUtils",
         "MQ2Nav",
         "MQ2DanNet", })
 
-    unloadedPlugins = RGMercUtils.UnCheckPlugins({ "MQ2Melee", "MQ2Twist", })
+    unloadedPlugins = GameUtils.UnCheckPlugins({ "MQ2Melee", "MQ2Twist", })
 
     initPctComplete = 0
     initMsg = "Initializing RGMercs..."
@@ -609,48 +611,48 @@ local function RGInit(...)
 
     if mainAssist:len() > 0 then
         RGMercConfig.Globals.MainAssist = mainAssist
-        RGMercUtils.PopUp("Targetting %s for Main Assist", RGMercConfig.Globals.MainAssist)
+        CommUtils.PopUp("Targetting %s for Main Assist", RGMercConfig.Globals.MainAssist)
         RGMercUtils.SetTarget(RGMercUtils.GetMainAssistId())
         RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist,
-            RGMercUtils.GetSetting('AutoAssistAt'))
+            RGMercConfig:GetSetting('AutoAssistAt'))
     end
 
     if RGMercUtils.GetGroupMainAssistName() ~= mainAssist then
-        RGMercUtils.PopUp(string.format(
+        CommUtils.PopUp(string.format(
             "Assisting: %s NOTICE: Group MainAssist [%s] != Your Assist Target [%s]. Is This On Purpose?", mainAssist,
             RGMercUtils.GetGroupMainAssistName(), mainAssist))
     end
 
     initPctComplete = 50
     initMsg = "Setting up Environment..."
-    RGMercUtils.DoCmd("/squelch /rez accept on")
-    RGMercUtils.DoCmd("/squelch /rez pct 90")
+    GameUtils.DoCmd("/squelch /rez accept on")
+    GameUtils.DoCmd("/squelch /rez pct 90")
 
     initPctComplete = 60
     initMsg = "Setting up MQ2DanNet..."
     if mq.TLO.Plugin("MQ2DanNet")() then
-        RGMercUtils.DoCmd("/squelch /dnet commandecho off")
+        GameUtils.DoCmd("/squelch /dnet commandecho off")
     end
 
-    RGMercUtils.DoCmd("/stick set breakontarget on")
+    GameUtils.DoCmd("/stick set breakontarget on")
 
     -- TODO: Chat Begs
     initPctComplete = 70
     initMsg = "Closing down Macro..."
     if (mq.TLO.Macro.Name() or ""):find("RGMERC") then
-        RGMercUtils.DoCmd("/macro end")
+        GameUtils.DoCmd("/macro end")
     end
 
-    -- RGMercUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
+    -- CommUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
     --     mq.TLO.Me.Class.ShortName())
     initMsg = "Pausing the CWTN Plugin..."
-    RGMercUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
+    GameUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
 
     initMsg = "Setting up Pet Hold..."
     if RGMercUtils.CanUseAA("Companion's Discipline") then
-        RGMercUtils.DoCmd("/pet ghold on")
+        GameUtils.DoCmd("/pet ghold on")
     else
-        RGMercUtils.DoCmd("/pet hold on")
+        GameUtils.DoCmd("/pet hold on")
     end
 
     initPctComplete = 80
@@ -658,10 +660,15 @@ local function RGInit(...)
 
     if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
         RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
-        RGMercUtils.DoCmd("/autoinventory")
+        GameUtils.DoCmd("/autoinventory")
     end
 
-    RGMercUtils.WelcomeMsg()
+    RGMercsLogger.log_info("\aw****************************")
+    RGMercsLogger.log_info("\aw\awWelcome to \ag%s", RGMercConfig._name)
+    RGMercsLogger.log_info("\aw\awVersion \ag%s \aw(\at%s\aw)", RGMercConfig._version, RGMercConfig._subVersion)
+    RGMercsLogger.log_info("\aw\awBy \ag%s", RGMercConfig._author)
+    RGMercsLogger.log_info("\aw****************************")
+    RGMercsLogger.log_info("\aw use \ag /rg \aw for a list of commands")
 
     -- store initial positioning data.
     initPctComplete = 90
@@ -694,7 +701,7 @@ local function Main()
     if RGMercConfig.Globals.PauseMain then
         mq.delay(100)
         mq.doevents()
-        if RGMercUtils.GetSetting('RunMovePaused') then
+        if RGMercConfig:GetSetting('RunMovePaused') then
             RGMercModules:ExecModule("Movement", "GiveTime", curState)
         end
         RGMercModules:ExecModule("Drag", "GiveTime", curState)
@@ -704,7 +711,7 @@ local function Main()
 
     -- sometimes nav gets interupted this will try to reset it.
     if RGMercConfig:GetTimeSinceLastMove() > 5 and mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() == 0 then
-        RGMercUtils.DoCmd("/nav stop")
+        GameUtils.DoCmd("/nav stop")
     end
 
     if RGMercUtils.GetXTHaterCount() > 0 then
@@ -715,12 +722,12 @@ local function Main()
 
         curState = "Combat"
         --if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
-        if RGMercUtils.GetSetting('FaceTarget') and not RGMercUtils.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
+        if RGMercConfig:GetSetting('FaceTarget') and not RGMercUtils.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
             --RGMercConfig.Globals.LastFaceTime = os.clock()
-            RGMercUtils.DoCmd("/squelch /face")
+            GameUtils.DoCmd("/squelch /face")
         end
 
-        if RGMercUtils.GetSetting('DoMed') == 3 then
+        if RGMercConfig:GetSetting('DoMed') == 3 then
             RGMercUtils.AutoMed()
         end
     else
@@ -734,7 +741,7 @@ local function Main()
 
         curState = "Downtime"
 
-        if RGMercUtils.GetSetting('DoMed') == 2 then
+        if RGMercConfig:GetSetting('DoMed') == 2 then
             RGMercUtils.AutoMed()
         end
     end
@@ -770,7 +777,7 @@ local function Main()
         -- IsHealing or IsMezzing should re-determine their target as this point because they may
         -- have switched off to mez or heal after the initial find target check and the target
         -- may have changed by this point.
-        if not RGMercUtils.GetSetting('PriorityHealing') then
+        if not RGMercConfig:GetSetting('PriorityHealing') then
             if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing() or not RGMercUtils.IsCharming()) then
                 RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
             end
@@ -778,28 +785,28 @@ local function Main()
 
         if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
             RGMercConfig.Globals.LastPetCmd = os.clock()
-            if ((RGMercUtils.GetSetting('DoPet') or RGMercUtils.GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (RGMercUtils.GetTargetPctHPs(RGMercUtils.GetAutoTarget()) <= RGMercUtils.GetSetting('PetEngagePct')) then
+            if ((RGMercConfig:GetSetting('DoPet') or RGMercConfig:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (RGMercUtils.GetTargetPctHPs(RGMercUtils.GetAutoTarget()) <= RGMercConfig:GetSetting('PetEngagePct')) then
                 RGMercUtils.PetAttack(RGMercConfig.Globals.AutoTargetID, true)
             end
         end
 
-        if RGMercUtils.GetSetting('DoMercenary') then
+        if RGMercConfig:GetSetting('DoMercenary') then
             local merc = mq.TLO.Me.Mercenary
 
             if merc() and merc.ID() then
                 if RGMercUtils.MercEngage() then
                     if merc.Class.ShortName():lower() == "war" and merc.Stance():lower() ~= "aggressive" then
-                        RGMercUtils.DoCmd("/squelch /stance aggressive")
+                        GameUtils.DoCmd("/squelch /stance aggressive")
                     end
 
                     if merc.Class.ShortName():lower() ~= "war" and merc.Stance():lower() ~= "balanced" then
-                        RGMercUtils.DoCmd("/squelch /stance balanced")
+                        GameUtils.DoCmd("/squelch /stance balanced")
                     end
 
                     RGMercUtils.MercAssist()
                 else
                     if merc.Class.ShortName():lower() ~= "clr" and merc.Stance():lower() ~= "passive" then
-                        RGMercUtils.DoCmd("/squelch /stance passive")
+                        GameUtils.DoCmd("/squelch /stance passive")
                     end
                 end
             end
@@ -807,12 +814,12 @@ local function Main()
     end
 
     if RGMercUtils.DoCamp() then
-        if RGMercUtils.GetSetting('DoMercenary') and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
-            RGMercUtils.DoCmd("/squelch /stance passive")
+        if RGMercConfig:GetSetting('DoMercenary') and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
+            GameUtils.DoCmd("/squelch /stance passive")
         end
     end
 
-    if RGMercUtils.GetSetting('DoModRod') then
+    if RGMercConfig:GetSetting('DoModRod') then
         RGMercUtils.ClickModRod()
     end
 
@@ -829,11 +836,11 @@ local function Main()
             "\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
             RGMercUtils.BoolToColorString(mq.TLO.Me.Combat()), RGMercUtils.BoolToColorString(pcCheck),
             RGMercUtils.BoolToColorString(mercCheck))
-        RGMercUtils.DoCmd("/attack off")
+        GameUtils.DoCmd("/attack off")
     end
 
     -- Revive our mercenary if they're dead and we're using a mercenary
-    if RGMercUtils.GetSetting('DoMercenary') then
+    if RGMercConfig:GetSetting('DoMercenary') then
         if mq.TLO.Me.Mercenary.State():lower() == "dead" then
             if mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_SuspendButton").Text():lower() == "revive" then
                 mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_SuspendButton").LeftMouseUp()
@@ -853,10 +860,10 @@ end
 
 -- Global Messaging callback
 ---@diagnostic disable-next-line: unused-local
-local script_actor = RGMercUtils.Actors.register(function(message)
+local script_actor = CommUtils.Actors.register(function(message)
     local msg = message()
     if msg.from == RGMercConfig.Globals.CurLoadedChar then return end
-    if msg.script ~= RGMercUtils.ScriptName then return end
+    if msg.script ~= CommUtils.ScriptName then return end
 
     RGMercsLogger.log_verbose("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", msg.from,
         msg.module,
@@ -882,5 +889,7 @@ while openGUI do
     mq.doevents()
     mq.delay(10)
 end
+
+GameUtils.CheckPlugins(unloadedPlugins)
 
 RGMercModules:ExecAll("Shutdown")

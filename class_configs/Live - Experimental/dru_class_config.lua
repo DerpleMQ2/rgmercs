@@ -1,6 +1,6 @@
 local mq           = require('mq')
 local RGMercUtils  = require("utils.rgmercs_utils")
-local Set          = require('mq.Set')
+local GameUtils    = require("utils.game_utils")
 
 local _ClassConfig = {
     _version              = "(EXPERIMENTAL) 1.2 - Live HealMode only, Heal/DPS Improvements",
@@ -8,7 +8,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return RGMercUtils.IsModeActive("Heal") end,
-        IsRezing = function() return RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
+        IsRezing = function() return RGMercConfig:GetSetting('DoBattleRez') or RGMercUtils.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Heal',
@@ -720,22 +720,22 @@ local _ClassConfig = {
             name  = 'BigHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint') end,
+            cond  = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('BigHealPoint') end,
         },
         {
             name = 'GroupHealPoint',
             state = 1,
             steps = 1,
             cond = function(self, target)
-                return (mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() or 0) >
-                    RGMercUtils.GetSetting('GroupInjureCnt')
+                return (mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() or 0) >
+                    RGMercConfig:GetSetting('GroupInjureCnt')
             end,
         },
         {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('MainHealPoint') end,
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('MainHealPoint') end,
         },
     },
     ['HealRotations']     = {
@@ -795,7 +795,7 @@ local _ClassConfig = {
                 name = "Blessing of Tunare",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.AAReady(aaName) and (target.PctHPs() or 999) < RGMercUtils.GetSetting('BigHealPoint')
+                    return RGMercUtils.AAReady(aaName) and (target.PctHPs() or 999) < RGMercConfig:GetSetting('BigHealPoint')
                 end,
             },
             {
@@ -883,7 +883,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { RGMercUtils.GetMainAssistId(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('DoTwinHeal') and RGMercUtils.OkayToNotHeal() and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and RGMercConfig:GetSetting('DoTwinHeal') and RGMercUtils.OkayToNotHeal() and not RGMercUtils.Feigning()
             end,
         },
         {
@@ -926,14 +926,14 @@ local _ClassConfig = {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.NPCSpellReady(spell) and RGMercUtils.ManaCheck() and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= RGMercUtils.GetSetting('LightHealPoint')
+                    return RGMercUtils.NPCSpellReady(spell) and RGMercUtils.ManaCheck() and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= RGMercConfig:GetSetting('LightHealPoint')
                 end,
             },
             {
                 name = "RemoteSunDD",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.NPCSpellReady(spell) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= RGMercUtils.GetSetting('LightHealPoint')
+                    return RGMercUtils.NPCSpellReady(spell) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= RGMercConfig:GetSetting('LightHealPoint')
                 end,
             },
             {
@@ -964,7 +964,7 @@ local _ClassConfig = {
                 type = "Item",
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and
+                    return RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and
                         item.TimerReady() == 0
                 end,
             },
@@ -1097,7 +1097,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    return RGMercUtils.GetSetting("DoRunSpeed") and RGMercUtils.GroupBuffCheck(spell, target)
+                    return RGMercConfig:GetSetting("DoRunSpeed") and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1113,7 +1113,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoTempHP') then return false end
+                    if not RGMercConfig:GetSetting('DoTempHP') then return false end
                     return RGMercUtils.TargetClassIs("WAR", target) and RGMercUtils.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
                 end,
             },
@@ -1122,7 +1122,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoHPBuff') then return false end
+                    if not RGMercConfig:GetSetting('DoHPBuff') then return false end
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1257,13 +1257,13 @@ local _ClassConfig = {
                 {
                     name = "RemoteSunDD",
                     cond = function(self)
-                        return mq.TLO.Me.Level() >= 83 and RGMercUtils.GetSetting('DoFire')
+                        return mq.TLO.Me.Level() >= 83 and RGMercConfig:GetSetting('DoFire')
                     end,
                 },
                 {
                     name = "RemoteMoonDD",
                     cond = function(self)
-                        return mq.TLO.Me.Level() >= 83 and not RGMercUtils.GetSetting('DoFire')
+                        return mq.TLO.Me.Level() >= 83 and not RGMercConfig:GetSetting('DoFire')
                     end,
                 },
 
@@ -1273,7 +1273,7 @@ local _ClassConfig = {
             gem = 7,
             spells = {
 
-                { name = "FrostDebuff", cond = function(self) return mq.TLO.Me.Level() >= 74 and not RGMercUtils.GetSetting('DoFire') end, },
+                { name = "FrostDebuff", cond = function(self) return mq.TLO.Me.Level() >= 74 and not RGMercConfig:GetSetting('DoFire') end, },
                 { name = "HordeDOT",    cond = function(self) return RGMercUtils.CanUseAA("Blessing of Ro") end, },
                 { name = "RoDebuff",    cond = function(self) return true end, },
 
@@ -1283,7 +1283,7 @@ local _ClassConfig = {
             gem = 8,
             spells = {
 
-                { name = "TwinHealNuke",        cond = function(self) return RGMercUtils.GetSetting("DoTwinHeal") end, },
+                { name = "TwinHealNuke",        cond = function(self) return RGMercConfig:GetSetting("DoTwinHeal") end, },
                 { name = "ReptileCombatInnate", cond = function(self) return true end, },
                 { name = "GroupCure",           cond = function(self) return true end, },
             },
@@ -1293,7 +1293,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
 
-                { name = "SunDOT",          cond = function(self) return RGMercUtils.GetSetting("DoFire") end, },
+                { name = "SunDOT",          cond = function(self) return RGMercConfig:GetSetting("DoFire") end, },
                 { name = "IceBreathDebuff", cond = function(self) return true end, },
             },
         },
@@ -1348,12 +1348,12 @@ local _ClassConfig = {
             if not target or not target() then return false end
 
             if mq.TLO.Target.Distance() > 25 then
-                RGMercUtils.DoCmd("/corpse")
+                GameUtils.DoCmd("/corpse")
             end
 
             local targetClass = target.Class.ShortName()
 
-            if mq.TLO.Me.CombatState():lower() == "combat" and (targetClass == "dru" or targetClass == "clr" or RGMercUtils.GetSetting('DoBattleRez')) then
+            if mq.TLO.Me.CombatState():lower() == "combat" and (targetClass == "dru" or targetClass == "clr" or RGMercConfig:GetSetting('DoBattleRez')) then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
                     return RGMercUtils.UseItem("Staff of Forbidden Rites", corpseId)
                 end

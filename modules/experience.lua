@@ -2,6 +2,7 @@
 local mq                  = require('mq')
 local RGMercUtils         = require("utils.rgmercs_utils")
 local StringUtils         = require("utils.string_utils")
+local CommUtils           = require("utils.comm_utils")
 local RGMercsLogger       = require("utils.rgmercs_logger")
 local ImPlot              = require('ImPlot')
 local Set                 = require('mq.Set')
@@ -69,7 +70,7 @@ function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        CommUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
@@ -154,7 +155,7 @@ function Module:RenderShaded(type, currentData, otherData, multiplier)
         local offset = currentData.expEvents.Offset - 1
         local count = #currentData.expEvents.DataY
 
-        if RGMercUtils.GetSetting('ExpPlotFillLines') then
+        if RGMercConfig:GetSetting('ExpPlotFillLines') then
             ImPlot.PlotShaded(type,
                 function(n)
                     local pos = ((offset + n) % count) + 1

@@ -1,5 +1,6 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local GameUtils     = require("utils.game_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local _ClassConfig  = {
@@ -14,7 +15,7 @@ local _ClassConfig  = {
 
                 if discSpell and discSpell() and RGMercUtils.PCDiscReady(discSpell) then
                     if RGMercUtils.BuffActiveByName('Night\'s Endless Terror') then
-                        RGMercUtils.DoCmd('/docommand /removebuff "Night\'s Endless Terror"')
+                        GameUtils.DoCmd('/docommand /removebuff "Night\'s Endless Terror"')
                         mq.delay(5)
                     end
                     RGMercUtils.UseDisc(discSpell, RGMercUtils.GetTargetID())
@@ -388,24 +389,24 @@ local _ClassConfig  = {
                 name = "aeroar",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('BurnMobCount') and
-                        RGMercUtils.GetSetting('DoAEAgro')
+                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('BurnMobCount') and
+                        RGMercConfig:GetSetting('DoAEAgro')
                 end,
             },
             {
                 name = "aehitall",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('BurnMobCount') and
-                        RGMercUtils.GetSetting('DoAEAgro')
+                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('BurnMobCount') and
+                        RGMercConfig:GetSetting('DoAEAgro')
                 end,
             },
             {
                 name = "Area Taunt",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.NPCAAReady(aaName) and RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('BurnMobCount') and
-                        RGMercUtils.GetSetting('DoAEAgro')
+                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.NPCAAReady(aaName) and RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('BurnMobCount') and
+                        RGMercConfig:GetSetting('DoAEAgro')
                 end,
             },
             {
@@ -420,11 +421,11 @@ local _ClassConfig  = {
                 name = "ActivateShield",
                 type = "CustomFunc",
                 cond = function(self)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Shield").Active() and
+                    return RGMercUtils.IsModeActive("Tank") and RGMercConfig:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Shield").Active() and
                         mq.TLO.Me.Bandolier("Shield").Index() and RGMercUtils.BurnCheck()
                 end,
                 custom_func = function(_)
-                    RGMercUtils.DoCmd("/bandolier activate Shield")
+                    GameUtils.DoCmd("/bandolier activate Shield")
                     return true
                 end,
 
@@ -433,11 +434,11 @@ local _ClassConfig  = {
                 name = "ActivateAgro",
                 type = "CustomFunc",
                 cond = function(self)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Agro").Active() and
-                        mq.TLO.Me.Bandolier("Agro").Index() and RGMercUtils.GetXTHaterCount() < RGMercUtils.GetSetting('BurnMobCount') and not RGMercUtils.IsNamed(mq.TLO.Target)
+                    return RGMercUtils.IsModeActive("Tank") and RGMercConfig:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Agro").Active() and
+                        mq.TLO.Me.Bandolier("Agro").Index() and RGMercUtils.GetXTHaterCount() < RGMercConfig:GetSetting('BurnMobCount') and not RGMercUtils.IsNamed(mq.TLO.Target)
                 end,
                 custom_func = function(_)
-                    RGMercUtils.DoCmd("/bandolier activate Agro")
+                    GameUtils.DoCmd("/bandolier activate Agro")
                     return true
                 end,
             },
@@ -492,7 +493,7 @@ local _ClassConfig  = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     local stHate = RGMercUtils.GetResolvedActionMapItem('singlehealhate')
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.GetSetting('DoAEHate') and RGMercUtils.PCDiscReady(discSpell) and
+                    return RGMercUtils.IsModeActive("Tank") and RGMercConfig:GetSetting('DoAEHate') and RGMercUtils.PCDiscReady(discSpell) and
                         not RGMercUtils.BuffActiveByID(discSpell.ID()) and (stHate and not RGMercUtils.BuffActiveByID(stHate.ID()))
                 end,
             },
@@ -530,23 +531,23 @@ local _ClassConfig  = {
                 type = "Item",
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercUtils.IsModeActive("Tank") and RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
                 name = "Brace for Impact",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCAAReady(aaName) and not RGMercUtils.BuffActiveByName(aaName) and RGMercUtils.GetSetting('DoBuffs') and
-                        not RGMercUtils.GetSetting('DoDefense')
+                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCAAReady(aaName) and not RGMercUtils.BuffActiveByName(aaName) and RGMercConfig:GetSetting('DoBuffs') and
+                        not RGMercConfig:GetSetting('DoDefense')
                 end,
             },
             {
                 name = "Blade Guardian",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCAAReady(aaName) and not RGMercUtils.SongActiveByName(aaName) and RGMercUtils.GetSetting('DoBuffs') and
-                        not RGMercUtils.GetSetting('DoDefense')
+                    return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCAAReady(aaName) and not RGMercUtils.SongActiveByName(aaName) and RGMercConfig:GetSetting('DoBuffs') and
+                        not RGMercConfig:GetSetting('DoDefense')
                 end,
             },
             {
@@ -555,15 +556,15 @@ local _ClassConfig  = {
                 cond = function(self, aaName)
                     return RGMercUtils.IsModeActive("Tank") and RGMercUtils.NPCAAReady(aaName) and not RGMercUtils.SongActiveByName(aaName)
                         and not RGMercUtils.SongActiveByName('Group Bestial Alignment') and RGMercUtils.GetTargetMaxRangeTo() >= RGMercUtils.GetTargetDistance() and
-                        RGMercUtils.GetSetting('DoBuffs') and
-                        RGMercUtils.GetSetting('DoBattleLeap')
+                        RGMercConfig:GetSetting('DoBuffs') and
+                        RGMercConfig:GetSetting('DoBattleLeap')
                 end,
             },
             {
                 name = "Rampage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoAEAgro') and RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('BurnMobCount')
+                    return RGMercConfig:GetSetting('DoAEAgro') and RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('BurnMobCount')
                 end,
             },
             {
@@ -609,7 +610,7 @@ local _ClassConfig  = {
                 name = "Call of Challenge",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoSnare') and
+                    return RGMercConfig:GetSetting('DoSnare') and
                         RGMercUtils.NPCAAReady(aaName) and
                         RGMercUtils.GetTargetDistance() < RGMercUtils.GetTargetMaxRangeTo()
                 end,
@@ -690,7 +691,7 @@ local _ClassConfig  = {
                 type = "Item",
                 active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
+                    return RGMercConfig:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
                         mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
                 end,
             },

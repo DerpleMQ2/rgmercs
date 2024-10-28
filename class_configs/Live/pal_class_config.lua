@@ -1,5 +1,6 @@
 local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
+local GameUtils   = require("utils.game_utils")
 
 return {
     _version              = "1.0 - Live",
@@ -7,8 +8,8 @@ return {
     ['ModeChecks']        = {
         IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
         IsHealing = function() return true end,
-        IsCuring = function() return RGMercUtils.GetSetting('DoCures') end,
-        IsRezing = function() return (RGMercUtils.GetSetting('DoBattleRez') and not RGMercUtils.IsTanking()) or RGMercUtils.GetXTHaterCount() == 0 end,
+        IsCuring = function() return RGMercConfig:GetSetting('DoCures') end,
+        IsRezing = function() return (RGMercConfig:GetSetting('DoBattleRez') and not RGMercUtils.IsTanking()) or RGMercUtils.GetXTHaterCount() == 0 end,
         --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
     },
     ['Modes']             = {
@@ -706,7 +707,7 @@ return {
         end,
         --Did not include Staff of Forbidden Rites, GoR refresh is very fast and rez is 96%
         DoRez = function(self, corpseId)
-            if RGMercUtils.GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
+            if RGMercConfig:GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
                 RGMercUtils.SetTarget(corpseId)
 
                 local target = mq.TLO.Target
@@ -714,7 +715,7 @@ return {
                 if not target or not target() then return false end
 
                 if mq.TLO.Target.Distance() > 25 then
-                    RGMercUtils.DoCmd("/corpse")
+                    GameUtils.DoCmd("/corpse")
                 end
 
                 if RGMercUtils.AAReady("Gift of Resurrection") then
@@ -728,13 +729,13 @@ return {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('MainHealPoint') end,
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('MainHealPoint') end,
         },
         {
             name = 'LightHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercUtils.GetSetting('LightHealPoint') end,
+            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('LightHealPoint') end,
         },
     },
     ['HealRotations']     = {
@@ -751,7 +752,7 @@ return {
                 type = "Spell",
                 cond = function(self, _)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
+                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -759,7 +760,7 @@ return {
                 type = "Spell",
                 cond = function(self, _)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
+                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -767,7 +768,7 @@ return {
                 type = "Spell",
                 cond = function(self, _)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt')
+                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -775,7 +776,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') and
+                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt') and
                         RGMercUtils.AAReady(aaName)
                 end,
             },
@@ -784,7 +785,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercUtils.GetSetting('GroupHealPoint'))() > RGMercUtils.GetSetting('GroupInjureCnt') and
+                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt') and
                         RGMercUtils.AAReady(aaName)
                 end,
             },
@@ -792,7 +793,7 @@ return {
                 name = "Lay on Hands",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName) and RGMercUtils.GetTargetPctHPs() < RGMercUtils.GetSetting('LayHandsPct')
+                    return RGMercUtils.PCAAReady(aaName) and RGMercUtils.GetTargetPctHPs() < RGMercConfig:GetSetting('LayHandsPct')
                 end,
             },
         },
@@ -874,7 +875,7 @@ return {
                 name = "Thunder of Karana",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetSetting('DoNuke')
+                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSetting('DoNuke')
                 end,
             },
             {
@@ -911,11 +912,11 @@ return {
                 name = "ActivateShield",
                 type = "CustomFunc",
                 cond = function(self)
-                    return RGMercUtils.GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Shield").Active() and
+                    return RGMercConfig:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Shield").Active() and
                         mq.TLO.Me.Bandolier("Shield").Index() and RGMercUtils.IsTanking()
                 end,
                 custom_func = function(_)
-                    RGMercUtils.DoCmd("/bandolier activate Shield")
+                    GameUtils.DoCmd("/bandolier activate Shield")
                     return true
                 end,
 
@@ -924,11 +925,11 @@ return {
                 name = "Activate2HS",
                 type = "CustomFunc",
                 cond = function(self)
-                    return RGMercUtils.GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("2HS").Active() and
+                    return RGMercConfig:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("2HS").Active() and
                         mq.TLO.Me.Bandolier("2HS").Index() and not RGMercUtils.IsTanking()
                 end,
                 custom_func = function(_)
-                    RGMercUtils.DoCmd("/bandolier activate 2HS")
+                    GameUtils.DoCmd("/bandolier activate 2HS")
                     return true
                 end,
             },
@@ -936,7 +937,7 @@ return {
                 name = "Shield Flash",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('FlashHP')
+                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < RGMercConfig:GetSetting('FlashHP')
                 end,
             },
             {
@@ -987,7 +988,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.PCSpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercUtils.GetSetting('TotHealPoint')
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercConfig:GetSetting('TotHealPoint')
                 end,
             },
             {
@@ -995,7 +996,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.PCSpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercUtils.GetSetting('TotHealPoint')
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercConfig:GetSetting('TotHealPoint')
                 end,
             },
             {
@@ -1144,7 +1145,7 @@ return {
                 type = "Item",
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
         },
@@ -1182,7 +1183,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.PCSpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercUtils.GetSetting('TotHealPoint')
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercConfig:GetSetting('TotHealPoint')
                 end,
             },
             {
@@ -1190,7 +1191,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.PCSpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercUtils.GetSetting('TotHealPoint')
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercConfig:GetSetting('TotHealPoint')
                 end,
             },
             {
@@ -1198,7 +1199,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.PCSpellReady(spell) and
-                        ((RGMercUtils.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not RGMercUtils.TargetHasBuff(spell) and RGMercUtils.GetSetting('DoNuke'))
+                        ((RGMercUtils.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not RGMercUtils.TargetHasBuff(spell) and RGMercConfig:GetSetting('DoNuke'))
                 end,
             },
             {
@@ -1212,21 +1213,21 @@ return {
                 name = "Reverseds",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.TargetHasBuff(spell) and RGMercUtils.GetSetting('DoReverseDS')
+                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.TargetHasBuff(spell) and RGMercConfig:GetSetting('DoReverseDS')
                 end,
             },
             {
                 name = "Lowaggronuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.GetSetting('DoNuke')
+                    return RGMercUtils.PCSpellReady(spell) and RGMercConfig:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "CrushTimer6",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.GetSetting('DoNuke') and (mq.TLO.Me.SecondaryPctAggro() or 0) > 60
+                    return RGMercUtils.PCSpellReady(spell) and RGMercConfig:GetSetting('DoNuke') and (mq.TLO.Me.SecondaryPctAggro() or 0) > 60
                 end,
             },
             {
@@ -1255,7 +1256,7 @@ return {
                 type = "Item",
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
         },
@@ -1292,7 +1293,7 @@ return {
                 name = "UndeadProc",
                 type = "Spell",
                 cond = function(self, spell) --use this always until we have a Fury proc, and optionally after that, up until the point that Fury is rolled into DPU
-                    if (mq.TLO.Me.AltAbility("Divine Protector's Unity").Rank() or 0) > 1 or (self:GetResolvedActionMapItem("FuryProc") and not RGMercUtils.GetSetting('DoUndeadProc')) then return false end
+                    if (mq.TLO.Me.AltAbility("Divine Protector's Unity").Rank() or 0) > 1 or (self:GetResolvedActionMapItem("FuryProc") and not RGMercConfig:GetSetting('DoUndeadProc')) then return false end
                     return RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
                 end,
             },
@@ -1336,7 +1337,7 @@ return {
                 type = "Item",
                 active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
+                    return RGMercConfig:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
                         mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
                 end,
             },
@@ -1346,19 +1347,19 @@ return {
                 name = "Brells",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.GetSetting('DoBrells') end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and RGMercConfig:GetSetting('DoBrells') end,
             },
             {
                 name = "Aego",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.GetSetting('DoDruid') end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and not RGMercConfig:GetSetting('DoDruid') end,
             },
             {
                 name = "Symbol",
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.GetSetting('DoDruid') end,
+                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and RGMercConfig:GetSetting('DoDruid') end,
             },
         },
     },

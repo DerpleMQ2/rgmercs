@@ -1,6 +1,8 @@
 -- Sample Basic Class Module
 local mq                           = require('mq')
 local RGMercUtils                  = require("utils.rgmercs_utils")
+local CommUtils                    = require("utils.comm_utils")
+local GameUtils                    = require("utils.game_utils")
 local RGMercsLogger                = require("utils.rgmercs_logger")
 local Set                          = require("mq.Set")
 local Icons                        = require('mq.ICONS')
@@ -247,16 +249,16 @@ end
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
-    if RGMercUtils.GetSetting('ReturnToCamp') then
-        RGMercUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
-        RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))
+    if RGMercConfig:GetSetting('ReturnToCamp') then
+        GameUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercConfig:GetSetting('AutoCampRadius'))
+        GameUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercConfig:GetSetting('PullRadius'))
     else
-        RGMercUtils.DoCmd("/squelch /mapfilter campradius off")
-        RGMercUtils.DoCmd("/squelch /mapfilter pullradius off")
+        GameUtils.DoCmd("/squelch /mapfilter campradius off")
+        GameUtils.DoCmd("/squelch /mapfilter pullradius off")
     end
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        CommUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
@@ -360,7 +362,7 @@ function Module:RunCmd(cmd, ...)
     end
 
     self.TempSettings.LastCmd = formattedCmd
-    RGMercUtils.DoCmd(formattedCmd)
+    GameUtils.DoCmd(formattedCmd)
 end
 
 function Module:ChaseOff()
@@ -378,8 +380,8 @@ function Module:CampOn()
     self.TempSettings.AutoCampY  = mq.TLO.Me.Y()
     self.TempSettings.AutoCampZ  = mq.TLO.Me.Z()
     self.TempSettings.CampZoneId = mq.TLO.Zone.ID()
-    RGMercUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercUtils.GetSetting('AutoCampRadius'))
-    RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadius'))
+    GameUtils.DoCmd("/squelch /mapfilter campradius %d", RGMercConfig:GetSetting('AutoCampRadius'))
+    GameUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercConfig:GetSetting('PullRadius'))
     RGMercsLogger.log_info("\ayCamping On: (X: \at%d\ay ; Y: \at%d\ay)", self.TempSettings.AutoCampX, self.TempSettings.AutoCampY)
 end
 
@@ -396,8 +398,8 @@ end
 function Module:CampOff()
     self.settings.ReturnToCamp = false
     self:SaveSettings(false)
-    RGMercUtils.DoCmd("/squelch /mapfilter campradius off")
-    RGMercUtils.DoCmd("/squelch /mapfilter pullradius off")
+    GameUtils.DoCmd("/squelch /mapfilter campradius off")
+    GameUtils.DoCmd("/squelch /mapfilter pullradius off")
 end
 
 function Module:DestoryCampfire()
@@ -526,8 +528,8 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if ImGui.Button(RGMercUtils.GetSetting('ChaseOn') and "Chase Off" or "Chase On", ImGui.GetWindowWidth() * .3, 25) then
-            self:RunCmd("/rgl chase%s", RGMercUtils.GetSetting('ChaseOn') and "off" or "on")
+        if ImGui.Button(RGMercConfig:GetSetting('ChaseOn') and "Chase Off" or "Chase On", ImGui.GetWindowWidth() * .3, 25) then
+            self:RunCmd("/rgl chase%s", RGMercConfig:GetSetting('ChaseOn') and "off" or "on")
         end
 
         if ImGui.BeginTable("ChaseInfoTable", 2, bit32.bor(ImGuiTableFlags.Borders)) then
@@ -562,7 +564,7 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if RGMercUtils.GetSetting('ReturnToCamp') then
+        if RGMercConfig:GetSetting('ReturnToCamp') then
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImGui.GetStyle().FramePadding.x, 0)
             if ImGui.Button("Break Camp", ImGui.GetWindowWidth() * .3, 25) then
                 self:CampOff()
@@ -583,7 +585,7 @@ function Module:Render()
             ImGui.Text("Camp Set")
 
             ImGui.TableNextColumn()
-            if RGMercUtils.GetSetting('ReturnToCamp') then
+            if RGMercConfig:GetSetting('ReturnToCamp') then
                 ImGui.PushStyleColor(ImGuiCol.Text, 0.3, 1.0, 0.3, 0.8)
                 ImGui.Text(Icons.FA_FREE_CODE_CAMP)
             else
@@ -603,7 +605,7 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text("Camp Radius")
             ImGui.TableNextColumn()
-            ImGui.Text("%d", self.TempSettings.CampZoneId == mq.TLO.Zone.ID() and RGMercUtils.GetSetting("AutoCampRadius") or 0)
+            ImGui.Text("%d", self.TempSettings.CampZoneId == mq.TLO.Zone.ID() and RGMercConfig:GetSetting("AutoCampRadius") or 0)
             ImGui.EndTable()
         end
 
@@ -628,13 +630,13 @@ function Module:Pop()
 end
 
 function Module:DoClickies()
-    if not RGMercUtils.GetSetting('UseClickies') then return end
+    if not RGMercConfig:GetSetting('UseClickies') then return end
 
     -- don't use clickies when we are trying to med, feigning, or invisible.
     if mq.TLO.Me.Sitting() or RGMercUtils.Feigning() or mq.TLO.Me.Invis() then return end
 
     for i = 1, 12 do
-        local setting = RGMercUtils.GetSetting(string.format("ClickyItem%d", i))
+        local setting = RGMercConfig:GetSetting(string.format("ClickyItem%d", i))
         if setting and setting:len() > 0 then
             local item = mq.TLO.FindItem(setting)
             RGMercsLogger.log_verbose("Looking for clicky item: %s found: %s", setting, RGMercUtils.BoolToColorString(item() ~= nil))
@@ -660,7 +662,7 @@ function Module:DoClickies()
 end
 
 function Module:OnDeath()
-    if not RGMercUtils.GetSetting('BreakOnDeath') then return end
+    if not RGMercConfig:GetSetting('BreakOnDeath') then return end
     if self.settings.ChaseTarget then
         RGMercsLogger.log_info("\awNOTICE:\ax You're dead. I'm not chasing %s anymore.", self.settings.ChaseTarget)
     end
@@ -699,7 +701,7 @@ end
 
 function Module:GiveTime(combat_state)
     if mq.TLO.Me.Hovering() and self.settings.ChaseOn then
-        if RGMercUtils.GetSetting('BreakOnDeath') then
+        if RGMercConfig:GetSetting('BreakOnDeath') then
             RGMercsLogger.log_warn("\awNOTICE:\ax You're dead. I'm not chasing \am%s\ax anymore.",
                 self.settings.ChaseTarget)
             self.settings.ChaseOn = false
@@ -739,16 +741,16 @@ function Module:GiveTime(combat_state)
 
     if combat_state == "Downtime" then
         if RGMercUtils.ShouldShrink() then
-            RGMercUtils.UseItem(RGMercUtils.GetSetting('ShrinkItem'), mq.TLO.Me.ID())
+            RGMercUtils.UseItem(RGMercConfig:GetSetting('ShrinkItem'), mq.TLO.Me.ID())
         end
 
         if RGMercUtils.ShouldShrinkPet() then
-            RGMercUtils.UseItem(RGMercUtils.GetSetting('ShrinkPetItem'), mq.TLO.Me.Pet.ID())
+            RGMercUtils.UseItem(RGMercConfig:GetSetting('ShrinkPetItem'), mq.TLO.Me.Pet.ID())
         end
 
         if RGMercUtils.ShouldMount() then
             RGMercsLogger.log_debug("\ayMounting...")
-            RGMercUtils.UseItem(RGMercUtils.GetSetting('MountItem'), mq.TLO.Me.ID())
+            RGMercUtils.UseItem(RGMercConfig:GetSetting('MountItem'), mq.TLO.Me.ID())
         end
 
         if RGMercUtils.ShouldDismount() then
@@ -763,11 +765,11 @@ function Module:GiveTime(combat_state)
         self:DoAutoCampCheck()
     end
 
-    if (RGMercUtils.IsTanking() and RGMercUtils.GetSetting('MovebackWhenBehind')) and RGMercUtils.IHaveAggro(100) then
+    if (RGMercUtils.IsTanking() and RGMercConfig:GetSetting('MovebackWhenBehind')) and RGMercUtils.IHaveAggro(100) then
         self:DoCombatCampCheck()
     end
 
-    if RGMercUtils.DoBuffCheck() and not RGMercUtils.GetSetting('PriorityHealing') then
+    if RGMercUtils.DoBuffCheck() and not RGMercConfig:GetSetting('PriorityHealing') then
         if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and self.settings.MaintainCampfire > 1 then
             --RGMercsLogger.log_debug("Doing campfire maintainance")
             self:Campfire()

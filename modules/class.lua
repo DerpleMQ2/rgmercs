@@ -1,6 +1,8 @@
 -- Sample Basic Class Module
 local mq                 = require('mq')
 local RGMercUtils        = require("utils.rgmercs_utils")
+local CommUtils          = require("utils.comm_utils")
+local GameUtils          = require("utils.game_utils")
 local StringUtils        = require("utils.string_utils")
 local TableUtils         = require("utils.table_utils")
 local FileUtils          = require("utils.file_utils")
@@ -114,7 +116,7 @@ function Module:SaveSettings(doBroadcast)
     self:SetDynamicNames()
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        CommUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
@@ -511,7 +513,7 @@ function Module:SelfCheckAndRez()
         if rezSpawn() then
             RGMercsLogger.log_debug("\atSelfCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
             if self.ClassConfig.HelperFunctions and self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSetting('RetryRezDelay') then
                     RGMercUtils.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
@@ -530,7 +532,7 @@ function Module:IGCheckAndRez()
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
                 RGMercsLogger.log_debug("\atIGCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSetting('RetryRezDelay') then
                     RGMercsLogger.log_debug("\atIGCheckAndRez(): Attempting to Res: %s", rezSpawn.CleanName())
                     RGMercUtils.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
@@ -548,7 +550,7 @@ function Module:OOGCheckAndRez()
 
         if rezSpawn() and (RGMercUtils.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercUtils.GetSetting('RetryRezDelay') then
+                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= RGMercConfig:GetSetting('RetryRezDelay') then
                     RGMercUtils.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                 end
@@ -607,9 +609,9 @@ function Module:HealById(id)
                 RGMercsLogger.log_verbose(
                     "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \agSuccessful\aw!", id,
                     rotation.name)
-                RGMercUtils.HandleAnnounce(string.format('Healed %s :: %s', healTarget.CleanName() or "Target", RGMercUtils.GetLastUsedSpell()),
-                    RGMercUtils.GetSetting('HealAnnounceGroup'),
-                    RGMercUtils.GetSetting('HealAnnounce'))
+                CommUtils.HandleAnnounce(string.format('Healed %s :: %s', healTarget.CleanName() or "Target", RGMercUtils.GetLastUsedSpell()),
+                    RGMercConfig:GetSetting('HealAnnounceGroup'),
+                    RGMercConfig:GetSetting('HealAnnounce'))
                 break
             else
                 RGMercsLogger.log_verbose(
@@ -634,29 +636,29 @@ end
 
 function Module:RunHealRotation()
     RGMercsLogger.log_verbose("\ao[Heals] Checking MA (HPs = %d)...", RGMercUtils.GetMainAssistPctHPs())
-    if RGMercUtils.GetMainAssistPctHPs() < RGMercUtils.GetSetting('MaxHealPoint') then
+    if RGMercUtils.GetMainAssistPctHPs() < RGMercConfig:GetSetting('MaxHealPoint') then
         self:HealById(RGMercUtils.GetMainAssistId())
         RGMercsLogger.log_verbose("\ao[Heals] Checked MA...")
     end
 
     RGMercsLogger.log_verbose("\ao[Heals] Checking for injured friends...")
-    self:HealById(RGMercUtils.FindWorstHurtGroupMember(RGMercUtils.GetSetting('MaxHealPoint')))
+    self:HealById(RGMercUtils.FindWorstHurtGroupMember(RGMercConfig:GetSetting('MaxHealPoint')))
 
-    if RGMercUtils.GetSetting('AssistOutside') then
-        self:HealById(RGMercUtils.FindWorstHurtXT(RGMercUtils.GetSetting('MaxHealPoint')))
+    if RGMercConfig:GetSetting('AssistOutside') then
+        self:HealById(RGMercUtils.FindWorstHurtXT(RGMercConfig:GetSetting('MaxHealPoint')))
     end
 
-    if mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('MaxHealPoint') then
+    if mq.TLO.Me.PctHPs() < RGMercConfig:GetSetting('MaxHealPoint') then
         self:HealById(mq.TLO.Me.ID())
     end
 
-    if RGMercUtils.GetSetting('DoPetHeals') and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.PctHPs() < RGMercUtils.GetSetting('PetHealPoint') then
+    if RGMercConfig:GetSetting('DoPetHeals') and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.PctHPs() < RGMercConfig:GetSetting('PetHealPoint') then
         self:HealById(mq.TLO.Me.Pet.ID())
     end
 end
 
 function Module:RunCureRotation()
-    if (os.clock() - self.TempSettings.CureCheckTimer) < RGMercUtils.GetSetting('CureInterval') then return end
+    if (os.clock() - self.TempSettings.CureCheckTimer) < RGMercConfig:GetSetting('CureInterval') then return end
 
     self.TempSettings.CureCheckTimer = os.clock()
 
@@ -687,10 +689,10 @@ function Module:RunCureRotation()
                             if cureTarget and cureTarget() then
                                 -- Cure it!
                                 if self.ClassConfig.Cures and self.ClassConfig.Cures.CureNow then
-                                    RGMercUtils.HandleAnnounce(
+                                    CommUtils.HandleAnnounce(
                                         string.format('Attempting to cure %s of %s', cureTarget.CleanName() or "Target", data.type),
-                                        RGMercUtils.GetSetting('CureAnnounceGroup'),
-                                        RGMercUtils.GetSetting('CureAnnounce'))
+                                        RGMercConfig:GetSetting('CureAnnounceGroup'),
+                                        RGMercConfig:GetSetting('CureAnnounce'))
                                     RGMercUtils.SafeCallFunc("CureNow", self.ClassConfig.Cures.CureNow, self, data.type, cureTarget.ID())
                                 end
                             end
@@ -730,32 +732,32 @@ function Module:GiveTime(combat_state)
 
     -- Healing happens first and anytime we aren't in downtime while invis and set not to break it.
     if self:IsHealing() then
-        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercUtils.GetSetting('BreakInvis')) then
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercConfig:GetSetting('BreakInvis')) then
             self:RunHealRotation()
         end
     end
 
     if self:IsRezing() then
         -- Check Rezes
-        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercUtils.GetSetting('BreakInvis')) then
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercConfig:GetSetting('BreakInvis')) then
             self:IGCheckAndRez()
 
             self:SelfCheckAndRez()
 
-            if RGMercUtils.GetSetting('AssistOutside') then
+            if RGMercConfig:GetSetting('AssistOutside') then
                 self:OOGCheckAndRez()
             end
         end
     end
 
     if self:IsCuring() then
-        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercUtils.GetSetting('BreakInvis')) then
+        if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not RGMercConfig:GetSetting('BreakInvis')) then
             RGMercsLogger.log_verbose("\ao[Cures] Checking for curables...")
             self:RunCureRotation()
         end
     end
 
-    if self:IsTanking() and RGMercUtils.GetSetting('MovebackWhenBehind') then
+    if self:IsTanking() and RGMercConfig:GetSetting('MovebackWhenBehind') then
         -- make sure nothing is behind us when tanking.
         -- Maybe spawn search is failing us -- look through the xtarget list
         local xtCount = mq.TLO.Me.XTarget()
@@ -766,7 +768,7 @@ function Module:GiveTime(combat_state)
                 RGMercsLogger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(),
                     (xtSpawn.Heading.Degrees() or 0))
-                RGMercUtils.DoCmd("/stick moveback %s", RGMercUtils.GetSetting('MovebackDistance'))
+                GameUtils.DoCmd("/stick moveback %s", RGMercConfig:GetSetting('MovebackDistance'))
                 mq.delay(500)
             end
         end
@@ -829,8 +831,8 @@ function Module:SetCurrentRotationState(state)
 end
 
 function Module:OnDeath()
-    RGMercUtils.DoCmd("/nav stop")
-    RGMercUtils.DoCmd("/stick off")
+    GameUtils.DoCmd("/nav stop")
+    GameUtils.DoCmd("/stick off")
 end
 
 function Module:OnZone()

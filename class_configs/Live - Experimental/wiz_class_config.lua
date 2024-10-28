@@ -585,7 +585,7 @@ return {
         -- steps = 1,
         -- targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
         -- cond = function(self, combat_state)
-        -- return combat_state == "Combat" and (not RGMercUtils.GetSetting('DoGOMCheck') or RGMercUtils.DetGOMCheck())
+        -- return combat_state == "Combat" and (not RGMercConfig:GetSetting('DoGOMCheck') or RGMercUtils.DetGOMCheck())
         -- end,
         -- },
         {
@@ -659,21 +659,21 @@ return {
                 name = "Mana Burn",
                 type = "AA",
                 cond = function(self)
-                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and RGMercUtils.GetSetting('DoManaBurn') and RGMercUtils.ManaCheck()
+                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and RGMercConfig:GetSetting('DoManaBurn') and RGMercUtils.ManaCheck()
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
         },
@@ -697,14 +697,14 @@ return {
                 name = "Concussion",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
+                    return mq.TLO.Me.PctAggro() > RGMercConfig:GetSetting('JoltAggro')
                 end,
             },
             {
                 name = "JoltSpell",
                 type = "Spell",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
+                    return mq.TLO.Me.PctAggro() > RGMercConfig:GetSetting('JoltAggro')
                 end,
             },
 
@@ -732,21 +732,21 @@ return {
                 name = "GambitSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct')
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('ModRodManaPct')
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
         },
@@ -1004,14 +1004,14 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
                 end,
             },
             {
@@ -1023,15 +1023,15 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    if not RGMercUtils.GetSetting('DoChestClick') or not item or not item() then return false end
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and item.TimerReady() == 0 and RGMercUtils.SelfBuffCheck(item.Spell)
+                    if not RGMercConfig:GetSetting('DoChestClick') or not item or not item() then return false end
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and item.TimerReady() == 0 and RGMercUtils.SelfBuffCheck(item.Spell)
                 end,
             },
             {
-                name = RGMercUtils.GetSetting('ClarityPotion'),
+                name = RGMercConfig:GetSetting('ClarityPotion'),
                 type = "Item",
                 cond = function(self)
-                    local item = mq.TLO.FindItem(RGMercUtils.GetSetting('ClarityPotion'))
+                    local item = mq.TLO.FindItem(RGMercConfig:GetSetting('ClarityPotion'))
                     return item() and item.Spell.Stacks() and item.TimerReady()
                 end,
             },

@@ -1,5 +1,6 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local GameUtils     = require("utils.game_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 return {
@@ -322,7 +323,7 @@ return {
                 name = "Summon Axes",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    if not RGMercUtils.GetSetting('SummonAxes') then return false end
+                    if not RGMercConfig:GetSetting('SummonAxes') then return false end
 
                     local AxeSkills = {
                         "Corroded Axe",
@@ -392,7 +393,7 @@ return {
                                     local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
                                     if summonSkill then
                                         RGMercsLogger.log_verbose("\ayReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
-                                        summonNeededItem(summonSkill, requiredItemID, RGMercUtils.GetSetting(ability.count_name))
+                                        summonNeededItem(summonSkill, requiredItemID, RGMercConfig:GetSetting(ability.count_name))
                                     end
                                 end
                             end
@@ -402,7 +403,7 @@ return {
                                     local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
                                     if summonSkill then
                                         RGMercsLogger.log_verbose("\ayNoExpendReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
-                                        summonNeededItem(summonSkill, requiredItemID, RGMercUtils.GetSetting(ability.count_name))
+                                        summonNeededItem(summonSkill, requiredItemID, RGMercConfig:GetSetting(ability.count_name))
                                     end
                                 end
                             end
@@ -590,7 +591,7 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     local epicItem = mq.TLO.FindItem(itemName)
-                    return RGMercUtils.GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and
+                    return RGMercConfig:GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and
                         epicItem.TimerReady() == 0
                 end,
             },
@@ -647,7 +648,7 @@ return {
                 name = "Phantom",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.GetSetting('DoPet')
+                    return RGMercUtils.PCDiscReady(discSpell) and RGMercConfig:GetSetting('DoPet')
                 end,
             },
             {
@@ -668,21 +669,21 @@ return {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercUtils.GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
+                    return RGMercConfig:GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
                 end,
             },
             {
                 name = "AESlice",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.GetSetting('DoAoe') and RGMercUtils.PCDiscReady(discSpell)
+                    return RGMercConfig:GetSetting('DoAoe') and RGMercUtils.PCDiscReady(discSpell)
                 end,
             },
             {
                 name = "Alliance",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and
+                    return RGMercConfig:GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and
                         not RGMercUtils.TargetHasBuff(mq.TLO.AltAbility(aaName).Spell)
                 end,
             },
@@ -702,7 +703,7 @@ return {
                 name = "DisconDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if not RGMercUtils.GetSetting('DoDisconDisc') then return false end
+                    if not RGMercConfig:GetSetting('DoDisconDisc') then return false end
                     return RGMercUtils.PCDiscReady(discSpell) and not mq.TLO.Me.ActiveDisc()
                 end,
             },
@@ -756,7 +757,7 @@ return {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercUtils.GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
+                    return RGMercConfig:GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
                 end,
             },
         },
@@ -765,7 +766,7 @@ return {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActiveByName("Battle Leap Warcry") and
+                    return RGMercConfig:GetSetting('DoBattleLeap') and not RGMercUtils.SongActiveByName("Battle Leap Warcry") and
                         not RGMercUtils.SongActiveByName("Group Bestial Alignment")
                 end,
             },
@@ -793,19 +794,19 @@ return {
             RGMercsLogger.log_verbose("\aySummonAxe(): Checking if %s is ready.", axeDisc.Name())
             if not RGMercUtils.PCDiscReady(axeDisc) then return false end
             RGMercsLogger.log_verbose("\aySummonAxe(): Checking AutoAxeAcount")
-            if RGMercUtils.GetSetting('AutoAxeCount') == 0 then return false end
-            if mq.TLO.FindItemCount(axeDisc)() > RGMercUtils.GetSetting('AutoAxeCount') then return false end
+            if RGMercConfig:GetSetting('AutoAxeCount') == 0 then return false end
+            if mq.TLO.FindItemCount(axeDisc)() > RGMercConfig:GetSetting('AutoAxeCount') then return false end
 
             RGMercsLogger.log_verbose("\aySummonAxe(): Checking For Reagents")
             if mq.TLO.FindItemCount(axeDisc.ReagentID(1)())() == 0 then return false end
 
-            if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
+            if mq.TLO.Cursor.ID() ~= nil then GameUtils.DoCmd("/autoinv") end
             local ret = RGMercUtils.UseDisc(axeDisc, mq.TLO.Me.ID())
             RGMercsLogger.log_verbose("\aySummonAxe(): Waiting for Summon to Finish")
             RGMercUtils.WaitCastFinish(mq.TLO.Me, false)
             RGMercsLogger.log_verbose("\agSummonAxe(): Done!")
             mq.delay(500, function() return mq.TLO.Cursor.ID() ~= nil end)
-            while mq.TLO.Cursor.ID() ~= nil do RGMercUtils.DoCmd("/autoinv") end
+            while mq.TLO.Cursor.ID() ~= nil do GameUtils.DoCmd("/autoinv") end
             return ret
         end,
         PreEngage = function(target)
@@ -815,12 +816,12 @@ return {
 
             RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
-            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.PctEndurance() >= 5 and RGMercUtils.GetSetting("DoOpener") and RGMercUtils.GetTargetDistance() < 50 then
+            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.PctEndurance() >= 5 and RGMercConfig:GetSetting("DoOpener") and RGMercUtils.GetTargetDistance() < 50 then
                 RGMercUtils.UseDisc(openerAbility, target)
                 RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
                 RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Distance to Target = %d, Endurance = %d", openerAbility or "None",
-                    RGMercUtils.BoolToColorString(RGMercUtils.GetSetting("DoOpener")), RGMercUtils.GetTargetDistance(), mq.TLO.Me.PctEndurance() or 0)
+                    RGMercUtils.BoolToColorString(RGMercConfig:GetSetting("DoOpener")), RGMercUtils.GetTargetDistance(), mq.TLO.Me.PctEndurance() or 0)
             end
         end,
     },

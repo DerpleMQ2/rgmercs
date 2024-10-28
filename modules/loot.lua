@@ -1,6 +1,8 @@
 -- Sample Basic Class Module
 local mq                  = require('mq')
 local RGMercUtils         = require("utils.rgmercs_utils")
+local GameUtils           = require("utils.game_utils")
+local CommUtils           = require("utils.comm_utils")
 local RGMercsLogger       = require("utils.rgmercs_logger")
 local Set                 = require("mq.Set")
 
@@ -536,7 +538,7 @@ function Module:SaveSettings(doBroadcast)
 	mq.pickle(getLootItemsConfigFileName('buy'), self.BuyItemsTable)
 	self:SortItemTables()
 	if doBroadcast == true then
-		RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+		CommUtils.BroadcastUpdate(self._name, "LoadSettings")
 	end
 	LootnScoot.BuyItems = {}
 	LootnScoot.Settings = {}
@@ -768,7 +770,7 @@ function Module:Render()
 					if ImGui.IsItemHovered() and mq.TLO.Cursor() ~= nil then
 						if ImGui.IsMouseClicked(0) then
 							self.TempSettings.NewBuyItem = mq.TLO.Cursor()
-							RGMercUtils.DoCmd("/autoinv")
+							GameUtils.DoCmd("/autoinv")
 						end
 					end
 					ImGui.TableNextColumn()
@@ -900,7 +902,7 @@ function Module:Render()
 				if ImGui.IsItemHovered() and mq.TLO.Cursor() then
 					if ImGui.IsMouseClicked(0) then
 						self.TempSettings.SearchGlobalItems = mq.TLO.Cursor()
-						RGMercUtils.DoCmd("/autoinv")
+						GameUtils.DoCmd("/autoinv")
 					end
 				end
 				ImGui.SeparatorText("Add New Item##GlobalItems")
@@ -918,7 +920,7 @@ function Module:Render()
 					if ImGui.IsItemHovered() and mq.TLO.Cursor() ~= nil then
 						if ImGui.IsMouseClicked(0) then
 							self.TempSettings.NewGlobalItem = mq.TLO.Cursor()
-							RGMercUtils.DoCmd("/autoinv")
+							GameUtils.DoCmd("/autoinv")
 						end
 					end
 					ImGui.TableNextColumn()
@@ -1086,7 +1088,7 @@ function Module:Render()
 				if ImGui.IsItemHovered() and mq.TLO.Cursor() then
 					if ImGui.IsMouseClicked(0) then
 						self.TempSettings.SearchItems = mq.TLO.Cursor()
-						RGMercUtils.DoCmd("/autoinv")
+						GameUtils.DoCmd("/autoinv")
 					end
 				end
 				col = math.max(3, math.floor(ImGui.GetContentRegionAvail() / 150))
@@ -1179,10 +1181,10 @@ end
 
 function Module:DoSell()
 	if LootnScoot ~= nil then
-		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
-		RGMercUtils.SetSetting('ChaseOn', false)
+		local tmpSetting = RGMercConfig:GetSetting('ChaseOn')
+		RGMercConfig:SetSetting('ChaseOn', false)
 		LootnScoot.processItems('Sell')
-		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
+		RGMercConfig:SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
@@ -1194,31 +1196,31 @@ end
 
 function Module:DoBuy()
 	if LootnScoot ~= nil then
-		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
-		RGMercUtils.SetSetting('ChaseOn', false)
+		local tmpSetting = RGMercConfig:GetSetting('ChaseOn')
+		RGMercConfig:SetSetting('ChaseOn', false)
 
 		LootnScoot.processItems('Buy')
-		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
+		RGMercConfig:SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:DoBank()
 	if LootnScoot ~= nil then
-		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
-		RGMercUtils.SetSetting('ChaseOn', false)
+		local tmpSetting = RGMercConfig:GetSetting('ChaseOn')
+		RGMercConfig:SetSetting('ChaseOn', false)
 
 		LootnScoot.processItems('Bank')
-		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
+		RGMercConfig:SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:DoTribute()
 	if LootnScoot ~= nil then
-		local tmpSetting = RGMercUtils.GetSetting('ChaseOn')
-		RGMercUtils.SetSetting('ChaseOn', false)
+		local tmpSetting = RGMercConfig:GetSetting('ChaseOn')
+		RGMercConfig:SetSetting('ChaseOn', false)
 
 		LootnScoot.processItems('Tribute')
-		RGMercUtils.SetSetting('ChaseOn', tmpSetting)
+		RGMercConfig:SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
@@ -1227,9 +1229,9 @@ function Module:SetItem(params)
 		LootnScoot.commandHandler(params)
 		mq.delay(2)
 		if params == "destroy" then
-			RGMercUtils.DoCmd("/destroy")
+			GameUtils.DoCmd("/destroy")
 		else
-			RGMercUtils.DoCmd("/autoinv")
+			GameUtils.DoCmd("/autoinv")
 		end
 		-- self.NormalItemsTable = LootnScoot.NormalItems
 	end
@@ -1239,9 +1241,9 @@ function Module:SetGlobalItem(params)
 	if LootnScoot ~= nil then
 		LootnScoot.setGlobalBind(params)
 		if params == "destroy" then
-			RGMercUtils.DoCmd("/destroy")
+			GameUtils.DoCmd("/destroy")
 		else
-			RGMercUtils.DoCmd("/autoinv")
+			GameUtils.DoCmd("/autoinv")
 		end
 		-- self.GlobalItemsTable = LootnScoot.GlobalItems
 	end
@@ -1252,7 +1254,7 @@ function Module:SetClasses(itemName, params)
 	if LootnScoot ~= nil then
 		LootnScoot.ChangeClasses(itemName, params, "NormalItems")
 		mq.delay(2)
-		RGMercUtils.DoCmd("/autoinv")
+		GameUtils.DoCmd("/autoinv")
 	end
 end
 
@@ -1261,7 +1263,7 @@ function Module:SetGlobalClasses(itemName, params)
 	if LootnScoot ~= nil then
 		LootnScoot.ChangeClasses(itemName, params, "GlobalItems")
 		mq.delay(2)
-		RGMercUtils.DoCmd("/autoinv")
+		GameUtils.DoCmd("/autoinv")
 	end
 end
 
@@ -1274,7 +1276,7 @@ end
 function Module:ReportLoot()
 	if LootnScoot ~= nil then
 		LootnScoot.guiLoot.ReportLoot()
-		RGMercUtils.SetSetting('ShowLootReport', LootnScoot.guiLoot.showReport)
+		RGMercConfig:SetSetting('ShowLootReport', LootnScoot.guiLoot.showReport)
 		self:SaveSettings(false)
 	end
 end
@@ -1282,7 +1284,7 @@ end
 function Module:ShowLootUI()
 	if LootnScoot ~= nil then
 		LootnScoot.guiLoot.openGUI = not LootnScoot.guiLoot.openGUI
-		RGMercUtils.SetSetting('ShowLootUI', LootnScoot.guiLoot.openGUI)
+		RGMercConfig:SetSetting('ShowLootUI', LootnScoot.guiLoot.openGUI)
 		self:SaveSettings(false)
 	end
 end
@@ -1312,7 +1314,7 @@ end
 
 function Module:GiveTime(combat_state)
 	if not LootnScoot then return end
-	if not RGMercUtils.GetSetting('DoLoot') then return end
+	if not RGMercConfig:GetSetting('DoLoot') then return end
 
 	if self.TempSettings.NeedSave then
 		self:SaveSettings(false)
@@ -1320,7 +1322,7 @@ function Module:GiveTime(combat_state)
 		self:SortItemTables()
 	end
 	-- Main Module logic goes here.
-	if RGMercUtils.GetXTHaterCount() == 0 or RGMercUtils.GetSetting('CombatLooting') then
+	if RGMercUtils.GetXTHaterCount() == 0 or RGMercConfig:GetSetting('CombatLooting') then
 		if LootnScoot ~= nil and self.settings.DoLoot then
 			LootnScoot.lootMobs()
 		end

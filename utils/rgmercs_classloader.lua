@@ -11,7 +11,7 @@ function ClassLoader.getClassConfigFileName(class)
 
     local customConfigFile = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
 
-    local classConfigDir = RGMercUtils.GetSetting('ClassConfigDir')
+    local classConfigDir = RGMercConfig:GetSetting('ClassConfigDir')
     local customConfig = (classConfigDir == "Custom")
 
     local configFile = customConfig and customConfigFile or string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())

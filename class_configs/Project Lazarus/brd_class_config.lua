@@ -1,6 +1,7 @@
 --- @type Mq
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local GameUtils     = require("utils.game_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local Tooltips      = {
@@ -53,7 +54,7 @@ local Tooltips      = {
 
 local function generateSongList()
     if mq.TLO.Plugin('MQ2Medley').IsLoaded() then
-        RGMercUtils.DoCmd("/plugin medley unload")
+        GameUtils.DoCmd("/plugin medley unload")
     end
     RGMercsLogger.log_info(
         "Bard Gem List being calculated. *** PLEASE NOTE: Click-happy behavior when selecting songs in the configuration may lead to low uptime or songs not being gemmed at all! YOU HAVE BEEN WARNED. ***")
@@ -75,9 +76,9 @@ local function generateSongList()
     local function ConditionallyAddSong(settingToCheck, songToAdd, minLevel, configType)
         if myLevel < minLevel then return false end
         if configType == "combo" then
-            if RGMercUtils.GetSetting(settingToCheck) > 1 then addSong(songToAdd) end
+            if RGMercConfig:GetSetting(settingToCheck) > 1 then addSong(songToAdd) end
         else --if a third category is ever needed this can become "toggle" or somesuch
-            if RGMercUtils.GetSetting(settingToCheck) then addSong(songToAdd) end
+            if RGMercConfig:GetSetting(settingToCheck) then addSong(songToAdd) end
         end
     end
 
@@ -86,9 +87,9 @@ local function generateSongList()
         ConditionallyAddSong("UseSingleTgtMez", "MezSong", 15)
         ConditionallyAddSong("DoSTSlow", "SlowSong", 23)
         ConditionallyAddSong("DoAESlow", "AESlowSong", 20)
-        if RGMercUtils.GetSetting('UseRunBuff') == 2 and myLevel >= 49 then
+        if RGMercConfig:GetSetting('UseRunBuff') == 2 and myLevel >= 49 then
             addSong("LongRunBuff")
-        elseif RGMercUtils.GetSetting('UseRunBuff') == 3 then
+        elseif RGMercConfig:GetSetting('UseRunBuff') == 3 then
             addSong("ShortRunBuff")
         end
         ConditionallyAddSong("UseEndBreath", "EndBreathSong", 16)
@@ -98,20 +99,20 @@ local function generateSongList()
 
     local function AddMainGroupDPSSongs()
         if myLevel >= 10 then addSong('WarMarchSong') end --leaving this mandatory but may revisit pending feedback
-        if myLevel >= 64 or (myLevel >= 45 and RGMercUtils.GetSetting('AriaBeforeOverhaste')) then addSong('MainAriaSong') end
+        if myLevel >= 64 or (myLevel >= 45 and RGMercConfig:GetSetting('AriaBeforeOverhaste')) then addSong('MainAriaSong') end
         ConditionallyAddSong("UseArcane", "ArcaneSong", 70, "combo")
         ConditionallyAddSong('UseDicho', 'DichoSong', 101, "combo")
     end
 
     local function AddSelfDPSSongs()
         ConditionallyAddSong("UseAlliance", "AllianceSong", 102)
-        if RGMercUtils.GetSetting('UseInsult') > 1 and myLevel >= 85 then addSong("InsultSong") end
+        if RGMercConfig:GetSetting('UseInsult') > 1 and myLevel >= 85 then addSong("InsultSong") end
         ConditionallyAddSong("UseFireDots", "FireDotSong", 30)
         ConditionallyAddSong("UseIceDots", "IceDotSong", 30)
         ConditionallyAddSong("UseDiseaseDots", "DiseaseDotSong", 30)
         ConditionallyAddSong("UsePoisonDots", "PoisonDotSong", 30)
         ConditionallyAddSong("UseJonthan", "Jonthan", 7, "combo")
-        if RGMercUtils.GetSetting('UseInsult') == 3 and myLevel >= 90 then addSong("InsultSong2") end
+        if RGMercConfig:GetSetting('UseInsult') == 3 and myLevel >= 90 then addSong("InsultSong2") end
     end
 
     local function AddMeleeDPSSongs()
@@ -135,10 +136,10 @@ local function generateSongList()
     end
 
     local function AddRegenSongs()
-        if RGMercUtils.GetSetting('RegenSong') == 2
+        if RGMercConfig:GetSetting('RegenSong') == 2
         then
             addSong("GroupRegenSong")
-        elseif RGMercUtils.GetSetting('RegenSong') == 3 and myLevel >= 58
+        elseif RGMercConfig:GetSetting('RegenSong') == 3 and myLevel >= 58
         then
             addSong("AreaRegenSong")
         end
@@ -204,9 +205,9 @@ local _ClassConfig = {
     ['ModeChecks']      = {
         CanMez     = function() return true end,
         CanCharm   = function() return true end,
-        IsMezzing  = function() return RGMercUtils.GetSetting('UseSingleTgtMez') or RGMercUtils.GetSetting('UseAEAAMez') end,
-        IsCuring   = function() return RGMercUtils.GetSetting('UseCure') end,
-        IsCharming = function() return RGMercUtils.GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 end,
+        IsMezzing  = function() return RGMercConfig:GetSetting('UseSingleTgtMez') or RGMercConfig:GetSetting('UseAEAAMez') end,
+        IsCuring   = function() return RGMercConfig:GetSetting('UseCure') end,
+        IsCharming = function() return RGMercConfig:GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 end,
     },
     ['Cures']           = {
         CureNow = function(self, type, targetId)
@@ -761,25 +762,25 @@ local _ClassConfig = {
     },
     ['HelperFunctions'] = {
         SwapInst = function(type)
-            if not RGMercUtils.GetSetting('SwapInstruments') then return end
+            if not RGMercConfig:GetSetting('SwapInstruments') then return end
             RGMercsLogger.log_verbose("\ayBard SwapInst(): Swapping to Instrument Type: %s", type)
             if type == "Percussion Instruments" then
-                RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('PercInst'))
+                RGMercUtils.SwapItemToSlot("offhand", RGMercConfig:GetSetting('PercInst'))
                 return
             elseif type == "Wind Instruments" then
-                RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('WindInst'))
+                RGMercUtils.SwapItemToSlot("offhand", RGMercConfig:GetSetting('WindInst'))
                 return
             elseif type == "Brass Instruments" then
-                RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('BrassInst'))
+                RGMercUtils.SwapItemToSlot("offhand", RGMercConfig:GetSetting('BrassInst'))
                 return
             elseif type == "Stringed Instruments" then
-                RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('StringedInst'))
+                RGMercUtils.SwapItemToSlot("offhand", RGMercConfig:GetSetting('StringedInst'))
                 return
             end
-            RGMercUtils.SwapItemToSlot("offhand", RGMercUtils.GetSetting('Offhand'))
+            RGMercUtils.SwapItemToSlot("offhand", RGMercConfig:GetSetting('Offhand'))
         end,
         CheckSongStateUse = function(self, config)     --determine whether a song should be song by comparing combat state to settings
-            local usestate = RGMercUtils.GetSetting(config)
+            local usestate = RGMercConfig:GetSetting(config)
             if RGMercUtils.GetXTHaterCount() == 0 then --I have tried this with combat_state nand XTHater, and both have their ups and downs. Keep an eye on this.
                 return usestate > 2                    --I think XTHater will work better if the bard autoassists at 99 or 100.
             else
@@ -789,9 +790,9 @@ local _ClassConfig = {
         RefreshBuffSong = function(songSpell) --determine how close to a buff's expiration we will resing to maintain full uptime
             if not songSpell or not songSpell() then return false end
             local me = mq.TLO.Me
-            local threshold = RGMercUtils.GetSetting('RefreshCombat')
+            local threshold = RGMercConfig:GetSetting('RefreshCombat')
             --an earlier version of this function checked your cast speed to add to this value, but cast speed TLO is always rounded down and is virtually always "2"
-            if RGMercUtils.GetXTHaterCount() == 0 then threshold = RGMercUtils.GetSetting('RefreshDT') end
+            if RGMercUtils.GetXTHaterCount() == 0 then threshold = RGMercConfig:GetSetting('RefreshDT') end
 
             local res = RGMercUtils.SongMemed(songSpell) and
                 ((me.Buff(songSpell.Name()).Duration.TotalSeconds() or 999) <= threshold or
@@ -814,8 +815,8 @@ local _ClassConfig = {
             local named = RGMercUtils.IsNamed(mq.TLO.Target)
             local targethp = RGMercUtils.GetTargetPctHPs()
 
-            return RGMercUtils.SpellStacksOnTarget(songSpell) and ((named and (RGMercUtils.GetSetting('NamedStopDOT') < targethp)) or
-                (not named and RGMercUtils.GetSetting('HPStopDOT') < targethp))
+            return RGMercUtils.SpellStacksOnTarget(songSpell) and ((named and (RGMercConfig:GetSetting('NamedStopDOT') < targethp)) or
+                (not named and RGMercConfig:GetSetting('HPStopDOT') < targethp))
         end,
         GetDetSongDuration = function(songSpell) -- Checks target for duration remaining on dot songs
             local duration = mq.TLO.Target.FindBuff("name " .. songSpell.Name()).Duration.TotalSeconds() or 0
@@ -851,7 +852,7 @@ local _ClassConfig = {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return RGMercUtils.GetXTHaterCount() > 0 and not RGMercUtils.Feigning() and
-                    (mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EmergencyStart') or self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self))
+                    (mq.TLO.Me.PctHPs() <= RGMercConfig:GetSetting('EmergencyStart') or self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self))
             end,
         },
         {
@@ -897,7 +898,7 @@ local _ClassConfig = {
                 name = "Funeral Dirge",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) -- and RGMercUtils.GetSetting('UseFuneralDirge') --see note in config settings
+                    return RGMercUtils.AAReady(aaName) -- and RGMercConfig:GetSetting('UseFuneralDirge') --see note in config settings
                 end,
             },
             {
@@ -951,7 +952,7 @@ local _ClassConfig = {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
@@ -972,7 +973,7 @@ local _ClassConfig = {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('DoVetAA') then return false end
+                    if not RGMercConfig:GetSetting('DoVetAA') then return false end
                     return RGMercUtils.AAReady(aaName)
                 end,
             },
@@ -982,29 +983,29 @@ local _ClassConfig = {
                 name = "MezAESong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not (RGMercUtils.GetSetting('MezOn') and RGMercUtils.GetSetting('UseAEAAMez') and RGMercUtils.SongMemed(songSpell)) then return false end
-                    return RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
+                    if not (RGMercConfig:GetSetting('MezOn') and RGMercConfig:GetSetting('UseAEAAMez') and RGMercUtils.SongMemed(songSpell)) then return false end
+                    return RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
                 end,
             },
             {
                 name = "AESlowSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return RGMercUtils.GetSetting("DoAESlow") and RGMercUtils.DetSpellCheck(songSpell) and RGMercUtils.GetXTHaterCount() > 2 and not mq.TLO.Target.Slowed()
+                    return RGMercConfig:GetSetting("DoAESlow") and RGMercUtils.DetSpellCheck(songSpell) and RGMercUtils.GetXTHaterCount() > 2 and not mq.TLO.Target.Slowed()
                 end,
             },
             {
                 name = "SlowSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return RGMercUtils.GetSetting("DoSTSlow") and RGMercUtils.DetSpellCheck(songSpell) and not mq.TLO.Target.Slowed()
+                    return RGMercConfig:GetSetting("DoSTSlow") and RGMercUtils.DetSpellCheck(songSpell) and not mq.TLO.Target.Slowed()
                 end,
             },
             {
                 name = "DispelSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return RGMercUtils.GetSetting('DoDispel') and mq.TLO.Target.Beneficial()
+                    return RGMercConfig:GetSetting('DoDispel') and mq.TLO.Target.Beneficial()
                 end,
             },
         },
@@ -1019,7 +1020,7 @@ local _ClassConfig = {
                 cond = function(self, itemName)
                     local mytar = mq.TLO.Target
                     if not mq.TLO.Me.Combat() and mytar() and mytar.Distance() < 50 then
-                        RGMercUtils.DoCmd("/keypress AUTOPRIM")
+                        GameUtils.DoCmd("/keypress AUTOPRIM")
                     end
                 end,
             },]]
@@ -1027,8 +1028,8 @@ local _ClassConfig = {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    if RGMercUtils.GetSetting('UseEpic') == 1 then return false end
-                    return (RGMercUtils.GetSetting('UseEpic') == 3 or (RGMercUtils.GetSetting('UseEpic') == 2 and RGMercUtils.BurnCheck())) and mq.TLO.FindItem(itemName)() and
+                    if RGMercConfig:GetSetting('UseEpic') == 1 then return false end
+                    return (RGMercConfig:GetSetting('UseEpic') == 3 or (RGMercConfig:GetSetting('UseEpic') == 2 and RGMercUtils.BurnCheck())) and mq.TLO.FindItem(itemName)() and
                         mq.TLO.FindItem(itemName).TimerReady() == 0
                 end,
             },
@@ -1036,8 +1037,8 @@ local _ClassConfig = {
                 name = "Fierce Eye",
                 type = "AA",
                 cond = function(self, aaName)
-                    if RGMercUtils.GetSetting('UseFierceEye') == 1 then return false end
-                    return (RGMercUtils.GetSetting('UseFierceEye') == 3 or (RGMercUtils.GetSetting('UseFierceEye') == 2 and RGMercUtils.BurnCheck())) and
+                    if RGMercConfig:GetSetting('UseFierceEye') == 1 then return false end
+                    return (RGMercConfig:GetSetting('UseFierceEye') == 3 or (RGMercConfig:GetSetting('UseFierceEye') == 2 and RGMercUtils.BurnCheck())) and
                         RGMercUtils.PCAAReady(aaName)
                 end,
             },
@@ -1046,7 +1047,7 @@ local _ClassConfig = {
                 type = "Item",
                 cond = function(self, itemName)
                     -- This item is instant cast for free with almost no CD, just mash it forever when it's available
-                    if not RGMercUtils.GetSetting('UseDreadstone') then return false end
+                    if not RGMercConfig:GetSetting('UseDreadstone') then return false end
                     return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
                 end,
             },
@@ -1055,16 +1056,16 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.ReflexStrike,
                 cond = function(self, discSpell)
-                    local pct = RGMercUtils.GetSetting('GroupManaPct')
-                    return RGMercUtils.NPCDiscReady(discSpell) and (mq.TLO.Group.LowMana(pct)() or -1) >= RGMercUtils.GetSetting('GroupManaCt')
+                    local pct = RGMercConfig:GetSetting('GroupManaPct')
+                    return RGMercUtils.NPCDiscReady(discSpell) and (mq.TLO.Group.LowMana(pct)() or -1) >= RGMercConfig:GetSetting('GroupManaCt')
                 end,
             },
             {
                 name = "Boastful Bellow",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if RGMercUtils.GetSetting('UseBellow') == 1 then return false end
-                    return ((RGMercUtils.GetSetting('UseBellow') == 3 and mq.TLO.Me.PctEndurance() > RGMercUtils.GetSetting('SelfEndPct')) or (RGMercUtils.GetSetting('UseBellow') == 2 and RGMercUtils.BurnCheck())) and
+                    if RGMercConfig:GetSetting('UseBellow') == 1 then return false end
+                    return ((RGMercConfig:GetSetting('UseBellow') == 3 and mq.TLO.Me.PctEndurance() > RGMercConfig:GetSetting('SelfEndPct')) or (RGMercConfig:GetSetting('UseBellow') == 2 and RGMercUtils.BurnCheck())) and
                         RGMercUtils.DetSpellCheck(mq.TLO.AltAbility(aaName).Spell) and RGMercUtils.NPCAAReady(aaName, target.ID())
                 end,
             },
@@ -1072,24 +1073,24 @@ local _ClassConfig = {
                 name = "DichoSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseDicho') == 1 then return false end
-                    return (RGMercUtils.GetSetting('UseDicho') == 3 and (mq.TLO.Me.PctEndurance() > RGMercUtils.GetSetting('SelfEndPct') or RGMercUtils.BurnCheck()))
-                        or (RGMercUtils.GetSetting('UseDicho') == 2 and RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility("Quick Time").Spell.ID()))
+                    if RGMercConfig:GetSetting('UseDicho') == 1 then return false end
+                    return (RGMercConfig:GetSetting('UseDicho') == 3 and (mq.TLO.Me.PctEndurance() > RGMercConfig:GetSetting('SelfEndPct') or RGMercUtils.BurnCheck()))
+                        or (RGMercConfig:GetSetting('UseDicho') == 2 and RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility("Quick Time").Spell.ID()))
                 end,
             },
             {
                 name = "InsultSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseInsult') then return false end
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Me.PctMana() > RGMercUtils.GetSetting('SelfManaPct') or RGMercUtils.BurnCheck())
+                    if not RGMercConfig:GetSetting('UseInsult') then return false end
+                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Me.PctMana() > RGMercConfig:GetSetting('SelfManaPct') or RGMercUtils.BurnCheck())
                 end,
             },
             {
                 name = "FireDotSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseFireDots') and RGMercUtils.SongMemed(songSpell) then return false end
+                    if not RGMercConfig:GetSetting('UseFireDots') and RGMercUtils.SongMemed(songSpell) then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1099,7 +1100,7 @@ local _ClassConfig = {
                 name = "IceDotSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseIceDots') and RGMercUtils.SongMemed(songSpell) then return false end
+                    if not RGMercConfig:GetSetting('UseIceDots') and RGMercUtils.SongMemed(songSpell) then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1109,7 +1110,7 @@ local _ClassConfig = {
                 name = "PoisonDotSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UsePoisonDots') and RGMercUtils.SongMemed(songSpell) then return false end
+                    if not RGMercConfig:GetSetting('UsePoisonDots') and RGMercUtils.SongMemed(songSpell) then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1119,7 +1120,7 @@ local _ClassConfig = {
                 name = "DiseaseDotSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseDiseaseDots') and RGMercUtils.SongMemed(songSpell) then return false end
+                    if not RGMercConfig:GetSetting('UseDiseaseDots') and RGMercUtils.SongMemed(songSpell) then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1129,16 +1130,16 @@ local _ClassConfig = {
                 name = "InsultSong2",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseInsult') then return false end
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Me.PctMana() > RGMercUtils.GetSetting('SelfManaPct') or RGMercUtils.BurnCheck())
+                    if not RGMercConfig:GetSetting('UseInsult') then return false end
+                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Me.PctMana() > RGMercConfig:GetSetting('SelfManaPct') or RGMercUtils.BurnCheck())
                 end,
             },
             {
                 name = "AllianceSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return RGMercUtils.SongMemed(songSpell) and RGMercUtils.GetSetting('UseAlliance') and
-                        (mq.TLO.Me.PctMana() > RGMercUtils.GetSetting('SelfManaPct') or RGMercUtils.BurnCheck()) and RGMercUtils.DetSpellCheck(songSpell)
+                    return RGMercUtils.SongMemed(songSpell) and RGMercConfig:GetSetting('UseAlliance') and
+                        (mq.TLO.Me.PctMana() > RGMercConfig:GetSetting('SelfManaPct') or RGMercUtils.BurnCheck()) and RGMercUtils.DetSpellCheck(songSpell)
                 end,
             },
             --used in combat when we have nothing else to refresh rather than standing there. Initial testing good, need more to ensure this doesn't interfere with Melody.
@@ -1162,7 +1163,7 @@ local _ClassConfig = {
                 name = "EndBreathSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not (RGMercUtils.GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
+                    if not (RGMercConfig:GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1184,7 +1185,7 @@ local _ClassConfig = {
                 name = "Jonthan",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseJonthan') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseJonthan') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseJonthan") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1192,7 +1193,7 @@ local _ClassConfig = {
                 name = "ArcaneSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseArcane') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseArcane') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseArcane") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1200,37 +1201,37 @@ local _ClassConfig = {
                 name = "CrescendoSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not RGMercUtils.GetSetting('UseCrescendo') then return false end
-                    local pct = RGMercUtils.GetSetting('GroupManaPct')
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Group.LowMana(pct)() or -1) >= RGMercUtils.GetSetting('GroupManaCt')
+                    if not RGMercConfig:GetSetting('UseCrescendo') then return false end
+                    local pct = RGMercConfig:GetSetting('GroupManaPct')
+                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Group.LowMana(pct)() or -1) >= RGMercConfig:GetSetting('GroupManaCt')
                 end,
             },
             {
                 name = "GroupRegenSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('RegenSong') ~= 2 then return false end
-                    local pct = RGMercUtils.GetSetting('GroupManaPct')
+                    if RGMercConfig:GetSetting('RegenSong') ~= 2 then return false end
+                    local pct = RGMercConfig:GetSetting('GroupManaPct')
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell) and
-                        ((RGMercUtils.GetSetting('UseRegen') == 1 and (mq.TLO.Group.LowMana(pct)() or 999) >= RGMercUtils.GetSetting('GroupManaCt'))
-                            or (RGMercUtils.GetSetting('UseRegen') > 1 and self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseRegen")))
+                        ((RGMercConfig:GetSetting('UseRegen') == 1 and (mq.TLO.Group.LowMana(pct)() or 999) >= RGMercConfig:GetSetting('GroupManaCt'))
+                            or (RGMercConfig:GetSetting('UseRegen') > 1 and self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseRegen")))
                 end,
             },
             {
                 name = "AreaRegenSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('RegenSong') ~= 3 then return false end
-                    local pct = RGMercUtils.GetSetting('GroupManaPct')
+                    if RGMercConfig:GetSetting('RegenSong') ~= 3 then return false end
+                    local pct = RGMercConfig:GetSetting('GroupManaPct')
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell) and
-                        not (mq.TLO.Me.Combat() and (mq.TLO.Group.LowMana(pct)() or 999) < RGMercUtils.GetSetting('GroupManaCt'))
+                        not (mq.TLO.Me.Combat() and (mq.TLO.Group.LowMana(pct)() or 999) < RGMercConfig:GetSetting('GroupManaCt'))
                 end,
             },
             {
                 name = "AmpSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseAmp') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseAmp') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAmp") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1238,7 +1239,7 @@ local _ClassConfig = {
                 name = "SufferingSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseSuffering') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseSuffering') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseSuffering") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1246,7 +1247,7 @@ local _ClassConfig = {
                 name = "SpitefulSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseSpiteful') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseSpiteful') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseSpiteful") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1254,7 +1255,7 @@ local _ClassConfig = {
                 name = "SprySonataSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseSpry') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseSpry') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseSpry") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1262,7 +1263,7 @@ local _ClassConfig = {
                 name = "ResistSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseResist') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseResist') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseResist") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1270,7 +1271,7 @@ local _ClassConfig = {
                 name = "RecklessSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseReckless') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseReckless') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseReckless") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1278,7 +1279,7 @@ local _ClassConfig = {
                 name = "AccelerandoSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseAccelerando') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseAccelerando') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseAccelerando") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1286,7 +1287,7 @@ local _ClassConfig = {
                 name = "FireBuffSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseFireBuff') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseFireBuff') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseFireBuff") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1294,7 +1295,7 @@ local _ClassConfig = {
                 name = "ColdBuffSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseColdBuff') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseColdBuff') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseColdBuff") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1302,7 +1303,7 @@ local _ClassConfig = {
                 name = "DotBuffSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseDotBuff') == 1 then return false end
+                    if RGMercConfig:GetSetting('UseDotBuff') == 1 then return false end
                     return self.ClassConfig.HelperFunctions.CheckSongStateUse(self, "UseDotBuff") and self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1313,7 +1314,7 @@ local _ClassConfig = {
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseRunBuff') ~= 3 then return false end
+                    if RGMercConfig:GetSetting('UseRunBuff') ~= 3 then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1322,7 +1323,7 @@ local _ClassConfig = {
                 type = "Song",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, songSpell)
-                    if RGMercUtils.GetSetting('UseRunBuff') ~= 2 then return false end
+                    if RGMercConfig:GetSetting('UseRunBuff') ~= 2 then return false end
                     return (mq.TLO.Me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0) <= 15
                 end,
             },
@@ -1331,7 +1332,7 @@ local _ClassConfig = {
                 type = "AA",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, aaName)
-                    if RGMercUtils.GetSetting('UseRunBuff') ~= 1 then return false end
+                    if RGMercConfig:GetSetting('UseRunBuff') ~= 1 then return false end
                     --refreshes slightly before expiry for better uptime
                     return RGMercUtils.AAReady(aaName) and (mq.TLO.Me.Buff(mq.TLO.AltAbility(aaName).Spell.Trigger(1)).Duration.TotalSeconds() or 0) < 30
                 end,
@@ -1351,7 +1352,7 @@ local _ClassConfig = {
                     if not RGMercUtils.AuraActiveByName(songSpell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
                 end,
                 cond = function(self, songSpell)
-                    return not RGMercUtils.AuraActiveByName(songSpell.BaseName()) and RGMercUtils.GetSetting('UseAura') == 1
+                    return not RGMercUtils.AuraActiveByName(songSpell.BaseName()) and RGMercConfig:GetSetting('UseAura') == 1
                 end,
             },
             {
@@ -1362,7 +1363,7 @@ local _ClassConfig = {
                     if not RGMercUtils.AuraActiveByName(songSpell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
                 end,
                 cond = function(self, songSpell)
-                    return not RGMercUtils.AuraActiveByName(songSpell.BaseName()) and RGMercUtils.GetSetting('UseAura') == 2
+                    return not RGMercUtils.AuraActiveByName(songSpell.BaseName()) and RGMercConfig:GetSetting('UseAura') == 2
                 end,
             },
             {
@@ -1370,7 +1371,7 @@ local _ClassConfig = {
                 type = "Item",
                 targetId = function(self) return { mq.TLO.Me.ID(), } end,
                 cond = function(self, itemName)
-                    if not RGMercUtils.GetSetting('UseSoBItems') then return false end
+                    if not RGMercConfig:GetSetting('UseSoBItems') then return false end
                     return RGMercUtils.SelfBuffCheck("Symphony of Battle") and mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
                 end,
             },
@@ -1378,7 +1379,7 @@ local _ClassConfig = {
                 name = "EndBreathSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not (RGMercUtils.GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
+                    if not (RGMercConfig:GetSetting('UseEndBreath') and (mq.TLO.Me.FeetWet() or mq.TLO.Zone.ShortName() == 'thegrey')) then return false end
                     return self.ClassConfig.HelperFunctions.RefreshBuffSong(songSpell)
                 end,
             },
@@ -1388,7 +1389,7 @@ local _ClassConfig = {
                 name = "Armor of Experience",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('DoVetAA') then return false end
+                    if not RGMercConfig:GetSetting('DoVetAA') then return false end
                     return mq.TLO.Me.PctHPs() < 35 and RGMercUtils.AAReady(aaName)
                 end,
             },
@@ -1396,7 +1397,7 @@ local _ClassConfig = {
                 name = "Fading Memories",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('UseFading') then return false end
+                    if not RGMercConfig:GetSetting('UseFading') then return false end
                     return RGMercUtils.PCAAReady(aaName) and self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self)
                     --I wanted to use XTAggroCount here but it doesn't include your current target in the number it returns and I don't see a good workaround. For Loop it is.
                 end,
@@ -1405,14 +1406,14 @@ local _ClassConfig = {
                 name = "Hymn of the Last Stand",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EmergencyStart') and RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() <= RGMercConfig:GetSetting('EmergencyStart') and RGMercUtils.AAReady(aaName)
                 end,
             },
             {
                 name = "Shield of Notes",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EmergencyStart') and RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() <= RGMercConfig:GetSetting('EmergencyStart') and RGMercUtils.AAReady(aaName)
                 end,
             },
         },

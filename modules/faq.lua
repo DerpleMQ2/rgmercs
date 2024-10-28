@@ -1,6 +1,7 @@
 -- Sample FAQ Class Module
 local mq                 = require('mq')
 local RGMercUtils        = require("utils.rgmercs_utils")
+local CommUtils          = require("utils.comm_utils")
 local RGMercsLogger      = require("utils.rgmercs_logger")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
@@ -56,7 +57,7 @@ function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 
 	if doBroadcast == true then
-		RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+		CommUtils.BroadcastUpdate(self._name, "LoadSettings")
 	end
 end
 

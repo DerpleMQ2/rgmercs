@@ -68,6 +68,7 @@
 local mq                                                     = require('mq')
 local imgui                                                  = require('ImGui')
 local RGMercUtils                                            = require("utils.rgmercs_utils")
+local GameUtils                                              = require("utils.game_utils")
 local FileUtils                                              = require("utils.file_utils")
 local RGMercsLogger                                          = require("utils.rgmercs_logger")
 local Icons                                                  = require('mq.ICONS')
@@ -148,7 +149,7 @@ function guiLoot.loadLDB()
 	local sWarn = "MQ2LinkDB not loaded, Can't lookup links.\n Attempting to Load MQ2LinkDB"
 	guiLoot.console:AppendText(sWarn)
 	print(sWarn)
-	RGMercUtils.DoCmd("/plugin mq2linkdb noauto")
+	GameUtils.DoCmd("/plugin mq2linkdb noauto")
 	guiLoot.linkdb = mq.TLO.Plugin('mq2linkdb').IsLoaded()
 end
 
@@ -378,16 +379,16 @@ function guiLoot.GUI()
 				end
 				if imgui.BeginMenu('Hide Corpse') then
 					if imgui.MenuItem('alwaysnpc') then
-						RGMercUtils.DoCmd('/hidecorpse alwaysnpc')
+						GameUtils.DoCmd('/hidecorpse alwaysnpc')
 					end
 					if imgui.MenuItem('looted') then
-						RGMercUtils.DoCmd('/hidecorpse looted')
+						GameUtils.DoCmd('/hidecorpse looted')
 					end
 					if imgui.MenuItem('all') then
-						RGMercUtils.DoCmd('/hidecorpse all')
+						GameUtils.DoCmd('/hidecorpse all')
 					end
 					if imgui.MenuItem('none') then
-						RGMercUtils.DoCmd('/hidecorpse none')
+						GameUtils.DoCmd('/hidecorpse none')
 					end
 					imgui.EndMenu()
 				end
@@ -542,7 +543,7 @@ function guiLoot.lootedReport_GUI()
 	ColorCountRep, StyleCountRep = DrawTheme(ThemeName)
 	ImGui.SetNextWindowSize(300, 200, ImGuiCond.Appearing)
 	if changed and mq.TLO.Plugin('mq2dannet').IsLoaded() and guiLoot.caller == 'lootnscoot' then
-		RGMercUtils.DoCmd('/dgae /lootutils reload')
+		GameUtils.DoCmd('/dgae /lootutils reload')
 		changed = false
 	end
 	local openRepGUI, showRepGUI = ImGui.Begin("Loot Report##" .. script, true, bit32.bor(ImGuiWindowFlags.NoCollapse))
@@ -625,7 +626,7 @@ function guiLoot.lootedReport_GUI()
 			end
 
 			if ImGui.Selectable(itemName .. "##" .. rowID, false, ImGuiSelectableFlags.SpanAllColumns) then
-				RGMercUtils.DoCmd('/executelink %s', itemLink)
+				GameUtils.DoCmd('/executelink %s', itemLink)
 			end
 
 			if guiLoot.imported then
@@ -641,27 +642,27 @@ function guiLoot.lootedReport_GUI()
 						ImGui.SetWindowFontScale(ZoomLvl)
 						local tmpName = string.gsub(itemName, "*", "")
 						if ImGui.Selectable('Keep##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils keep "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils keep "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Keep'
 							changed = true
 						end
 						if ImGui.Selectable('Quest##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils quest "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils quest "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Quest'
 							changed = true
 						end
 						if ImGui.Selectable('Sell##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils sell "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils sell "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Sell'
 							changed = true
 						end
 						if ImGui.Selectable('Tribute##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils tribute "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils tribute "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Tribute'
 							changed = true
 						end
 						if ImGui.Selectable('Destroy##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils destroy "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils destroy "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Destroy'
 							changed = true
 						end
@@ -673,27 +674,27 @@ function guiLoot.lootedReport_GUI()
 						ImGui.SetWindowFontScale(ZoomLvl)
 						local tmpName = string.gsub(itemName, "*", "")
 						if ImGui.Selectable('Global Keep##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils globalitem keep "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils globalitem keep "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Keep'
 							changed = true
 						end
 						if ImGui.Selectable('Global Quest##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils globalitem quest "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils globalitem quest "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Quest'
 							changed = true
 						end
 						if ImGui.Selectable('Global Sell##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils globalitem sell "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils globalitem sell "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Sell'
 							changed = true
 						end
 						if ImGui.Selectable('Global Tribute##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils globalitem tribute "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils globalitem tribute "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Tribute'
 							changed = true
 						end
 						if ImGui.Selectable('Global Destroy##' .. rowID) then
-							RGMercUtils.DoCmd('/lootutils globalitem destroy "%s"', tmpName)
+							GameUtils.DoCmd('/lootutils globalitem destroy "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Destroy'
 							changed = true
 						end

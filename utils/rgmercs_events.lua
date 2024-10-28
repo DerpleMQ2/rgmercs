@@ -1,5 +1,7 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local GameUtils     = require("utils.game_utils")
+local CommUtils     = require("utils.comm_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 
@@ -8,17 +10,17 @@ local RGMercsLogger = require("utils.rgmercs_logger")
 mq.event("CantSee", "You cannot see your target.", function()
     if RGMercConfig.Globals.BackOffFlag then return end
     if RGMercConfig.Globals.PauseMain then return end
-    if not RGMercUtils.GetSetting('HandleCantSeeTarget') then
+    if not RGMercConfig:GetSetting('HandleCantSeeTarget') then
         return
     end
     local target = mq.TLO.Target
     if mq.TLO.Stick.Active() then
-        RGMercUtils.DoCmd("/stick off")
+        GameUtils.DoCmd("/stick off")
     end
 
     if RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and Cannot see our target!")
-        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.5)
+        GameUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         if mq.TLO.Me.Moving() then return end
@@ -29,15 +31,15 @@ mq.event("CantSee", "You cannot see your target.", function()
             RGMercUtils.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, true)
         else
             RGMercsLogger.log_info("\ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
-            if RGMercUtils.GetSetting('DoAutoEngage') then
+            if RGMercConfig:GetSetting('DoAutoEngage') then
                 if RGMercUtils.OkToEngage(target.ID() or 0) then
-                    RGMercUtils.DoCmd("/squelch /face fast")
+                    GameUtils.DoCmd("/squelch /face fast")
                     if RGMercUtils.GetTargetDistance() < 15 then
                         RGMercsLogger.log_debug("Can't See target (%s [%d]). Moving back 15.", target.CleanName() or "", target.ID() or 0)
-                        RGMercUtils.DoCmd("/stick 15 moveback")
+                        GameUtils.DoCmd("/stick 15 moveback")
                     else
                         local desiredDistance = (target.MaxRangeTo() or 0) * 0.9
-                        if not RGMercUtils.GetSetting('DoMelee') then
+                        if not RGMercConfig:GetSetting('DoMelee') then
                             desiredDistance = RGMercUtils.GetTargetDistance() * .95
                         end
 
@@ -56,22 +58,22 @@ end)
 -- [ TOO CLOSE HANDLERS] --
 
 mq.event("TooClose", "Your target is too close to use a ranged weapon!", function()
-    if not RGMercUtils.GetSetting('HandleTooClose') then
+    if not RGMercConfig:GetSetting('HandleTooClose') then
         return
     end
     -- Check if we're in the middle of a pull and use a backup.
-    if RGMercUtils.GetSetting('DoPull') and RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
+    if RGMercConfig:GetSetting('DoPull') and RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         local discSpell = mq.TLO.Spell("Throw Stone")
         if RGMercUtils.NPCDiscReady(discSpell) then
             RGMercUtils.UseDisc(discSpell, mq.TLO.Target.ID())
         else
             if RGMercUtils.AbilityReady("Taunt") then
-                RGMercUtils.DoCmd("/nav id %d distance=%d lineofsite=on log=off", RGMercUtils.GetTargetID(), RGMercUtils.GetTargetMaxRangeTo())
+                GameUtils.DoCmd("/nav id %d distance=%d lineofsite=on log=off", RGMercUtils.GetTargetID(), RGMercUtils.GetTargetMaxRangeTo())
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 RGMercUtils.UseAbility("Taunt")
             end
             if RGMercUtils.AbilityReady("Kick") then
-                RGMercUtils.DoCmd("/nav id %d distance=%d lineofsite=on log=off", RGMercUtils.GetTargetID(), RGMercUtils.GetTargetMaxRangeTo())
+                GameUtils.DoCmd("/nav id %d distance=%d lineofsite=on log=off", RGMercUtils.GetTargetID(), RGMercUtils.GetTargetMaxRangeTo())
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 RGMercUtils.UseAbility("Kick")
             end
@@ -79,7 +81,7 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
     end
 
     -- Only do non-pull code if autoengage is on
-    if RGMercUtils.GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() then
+    if RGMercConfig:GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() then
         if not RGMercModules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
             local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
             if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
@@ -96,14 +98,14 @@ end)
 -- [ TOO FAR HANDLERS ] --
 
 local function tooFarHandler()
-    if not RGMercUtils.GetSetting('HandleTooFar') then
+    if not RGMercConfig:GetSetting('HandleTooFar') then
         return
     end
     RGMercsLogger.log_debug("tooFarHandler()")
     if RGMercConfig.Globals.BackOffFlag then return end
     if RGMercConfig.Globals.PauseMain then return end
     if mq.TLO.Stick.Active() then
-        RGMercUtils.DoCmd("/stick off")
+        GameUtils.DoCmd("/stick off")
     end
     local target = mq.TLO.Target
 
@@ -111,7 +113,7 @@ local function tooFarHandler()
         RGMercsLogger.log_info("\ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
             RGMercUtils.GetTargetCleanName(),
             RGMercUtils.GetTargetDistance())
-        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.75)
+        GameUtils.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.75)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         local classConfig = RGMercModules:ExecModule("Class", "GetClassConfig")
@@ -119,15 +121,15 @@ local function tooFarHandler()
 
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
             RGMercUtils.SafeCallFunc("Custom Nav", classConfig.HelperFunctions.combatNav)
-        elseif RGMercUtils.GetSetting('DoMelee') then
+        elseif RGMercConfig:GetSetting('DoMelee') then
             RGMercsLogger.log_info("\ayWe are in COMBAT and too far from our target!")
-            if RGMercUtils.GetSetting('DoAutoEngage') then
+            if RGMercConfig:GetSetting('DoAutoEngage') then
                 if RGMercUtils.OkToEngage(target.ID() or 0) then
-                    RGMercUtils.DoCmd("/squelch /face fast")
+                    GameUtils.DoCmd("/squelch /face fast")
 
                     if RGMercUtils.GetTargetDistance() < 15 then
                         RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Moving back 15.", target.CleanName() or "", target.ID() or 0)
-                        RGMercUtils.DoCmd("/stick 15 moveback")
+                        GameUtils.DoCmd("/stick 15 moveback")
                     else
                         RGMercsLogger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
                             (target.MaxRangeTo() or 0) * 0.9)
@@ -410,8 +412,8 @@ end)
 -- [ SUMMONED HANDLERS ] --
 
 mq.event('Summoned', "You have been summoned!", function(_)
-    if RGMercUtils.GetSetting('DoAutoEngage') and not RGMercUtils.GetSetting('DoMelee') and not RGMercUtils.IAmMA() and RGMercUtils.GetSetting('ReturnToCamp') then
-        RGMercUtils.PrintGroupMessage("%s was just summoned -- returning to camp!", RGMercConfig.Globals.CurLoadedChar)
+    if RGMercConfig:GetSetting('DoAutoEngage') and not RGMercConfig:GetSetting('DoMelee') and not RGMercUtils.IAmMA() and RGMercConfig:GetSetting('ReturnToCamp') then
+        CommUtils.PrintGroupMessage("%s was just summoned -- returning to camp!", RGMercConfig.Globals.CurLoadedChar)
         RGMercModules:ExecModule("Movement", "DoAutoCampCheck")
     end
 end)
@@ -429,8 +431,8 @@ end)
 -- [ FD EVENT HANDLERS ] --
 
 mq.event('FallToGround', "#1# has fallen to the ground#*#", function(_, who)
-    if who == mq.TLO.Me.DisplayName() and RGMercUtils.GetSetting('StandFailedFD') then
-        RGMercUtils.DoCmd("/stand")
+    if who == mq.TLO.Me.DisplayName() and RGMercConfig:GetSetting('StandFailedFD') then
+        GameUtils.DoCmd("/stand")
     end
 end)
 

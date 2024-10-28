@@ -1,3 +1,5 @@
+local mq            = require('mq')
+
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local FileUtils     = { _version = '1.0', _name = "FileUtils", _author = 'Derple', }

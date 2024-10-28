@@ -1,6 +1,8 @@
 -- Sample Basic Class Module
 local mq                           = require('mq')
 local RGMercUtils                  = require("utils.rgmercs_utils")
+local CommUtils                    = require("utils.comm_utils")
+local GameUtils                    = require("utils.game_utils")
 local RGMercsLogger                = require("utils.rgmercs_logger")
 local Set                          = require("mq.Set")
 local Icons                        = require('mq.ICONS')
@@ -76,7 +78,7 @@ function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        CommUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
@@ -133,11 +135,11 @@ end
 
 function Module:SendPorterInfo()
     RGMercsLogger.log_debug("\atBroadcasting TravelerUpdate")
-    RGMercUtils.BroadcastUpdate(self._name, "TravelerUpdate", self.TransportSpells[RGMercConfig.Globals.CurLoadedChar])
+    CommUtils.BroadcastUpdate(self._name, "TravelerUpdate", self.TransportSpells[RGMercConfig.Globals.CurLoadedChar])
 end
 
 function Module:RequestPorterInfo()
-    RGMercUtils.BroadcastUpdate(self._name, "SendPorterInfo")
+    CommUtils.BroadcastUpdate(self._name, "SendPorterInfo")
 end
 
 function Module.New()
@@ -286,7 +288,7 @@ function Module:Render()
                                 cmd = string.format("/dex %s %s", selectedPorter, cmd)
                             end
 
-                            RGMercUtils.DoCmd(cmd)
+                            GameUtils.DoCmd(cmd)
                         end
                         ImGui.PopStyleColor(2)
                         RGMercUtils.Tooltip(sv.Name)

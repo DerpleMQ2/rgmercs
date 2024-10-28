@@ -1,5 +1,6 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local GameUtils     = require("utils.game_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 return {
@@ -286,7 +287,7 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
@@ -294,7 +295,7 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     local item = mq.TLO.FindItem(itemName)
-                    return item and item() and RGMercUtils.GetSetting('DoEpic') and item.Spell.Stacks() and item.TimerReady()
+                    return item and item() and RGMercConfig:GetSetting('DoEpic') and item.Spell.Stacks() and item.TimerReady()
                 end,
             },
             {
@@ -444,7 +445,7 @@ return {
                 name = "PoisonName",
                 type = "ClickyItem",
                 cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
+                    local poisonItem = mq.TLO.FindItem(RGMercConfig:GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
                         not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
                 end,
@@ -480,23 +481,23 @@ return {
                 name = "PoisonClicky",
                 type = "ClickyItem",
                 active_cond = function(self, _)
-                    return (mq.TLO.FindItemCount(RGMercUtils.GetSetting('PoisonName'))() or 0) >= RGMercUtils.GetSetting('PoisonItemCount')
+                    return (mq.TLO.FindItemCount(RGMercConfig:GetSetting('PoisonName'))() or 0) >= RGMercConfig:GetSetting('PoisonItemCount')
                 end,
                 cond = function(self, _)
-                    return (mq.TLO.FindItemCount(RGMercUtils.GetSetting('PoisonName'))() or 0) < RGMercUtils.GetSetting('PoisonItemCount') and
-                        mq.TLO.Me.ItemReady(RGMercUtils.GetSetting('PoisonClicky'))()
+                    return (mq.TLO.FindItemCount(RGMercConfig:GetSetting('PoisonName'))() or 0) < RGMercConfig:GetSetting('PoisonItemCount') and
+                        mq.TLO.Me.ItemReady(RGMercConfig:GetSetting('PoisonClicky'))()
                 end,
             },
             {
                 name = "PoisonName",
                 type = "ClickyItem",
                 active_cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
+                    local poisonItem = mq.TLO.FindItem(RGMercConfig:GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and RGMercUtils.BuffActiveByID(poisonItem.Spell.ID() or 0)
                 end,
                 cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
-                    return mq.TLO.Me.ItemReady(RGMercUtils.GetSetting('PoisonName'))() and
+                    local poisonItem = mq.TLO.FindItem(RGMercConfig:GetSetting('PoisonName'))
+                    return mq.TLO.Me.ItemReady(RGMercConfig:GetSetting('PoisonName'))() and
                         not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
                 end,
             },
@@ -507,16 +508,16 @@ return {
                     return mq.TLO.Me.Invis() and mq.TLO.Me.Sneaking()
                 end,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('DoHideSneak')
+                    return RGMercConfig:GetSetting('DoHideSneak')
                 end,
                 custom_func = function(_)
-                    if RGMercUtils.GetSetting('ChaseOn') then
+                    if RGMercConfig:GetSetting('ChaseOn') then
                         if mq.TLO.Me.Sneaking() then
-                            RGMercUtils.DoCmd("/doability sneak")
+                            GameUtils.DoCmd("/doability sneak")
                         end
                     else
-                        if mq.TLO.Me.AbilityReady("hide")() then RGMercUtils.DoCmd("/doability hide") end
-                        if mq.TLO.Me.AbilityReady("sneak")() then RGMercUtils.DoCmd("/doability sneak") end
+                        if mq.TLO.Me.AbilityReady("hide")() then GameUtils.DoCmd("/doability hide") end
+                        if mq.TLO.Me.AbilityReady("sneak")() then GameUtils.DoCmd("/doability sneak") end
                     end
                     return true
                 end,
@@ -543,12 +544,12 @@ return {
 
             RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
-            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.AbilityReady("Hide")() and RGMercUtils.GetSetting("DoOpener") and mq.TLO.Me.Invis() then
+            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.AbilityReady("Hide")() and RGMercConfig:GetSetting("DoOpener") and mq.TLO.Me.Invis() then
                 RGMercUtils.UseDisc(openerAbility, target)
                 RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
                 RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Hide Ready = %s, Invis = %s", openerAbility or "None",
-                    RGMercUtils.BoolToColorString(RGMercUtils.GetSetting("DoOpener")), RGMercUtils.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
+                    RGMercUtils.BoolToColorString(RGMercConfig:GetSetting("DoOpener")), RGMercUtils.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
                     RGMercUtils.BoolToColorString(mq.TLO.Me.Invis()))
             end
         end,

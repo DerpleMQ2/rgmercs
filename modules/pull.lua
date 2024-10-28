@@ -1,6 +1,8 @@
 -- Sample Pull Class Module
 local mq                                  = require('mq')
 local RGMercUtils                         = require("utils.rgmercs_utils")
+local CommUtils                           = require("utils.comm_utils")
+local GameUtils                           = require("utils.game_utils")
 local StringUtils                         = require("utils.string_utils")
 local RGMercsLogger                       = require("utils.rgmercs_logger")
 local Set                                 = require("mq.Set")
@@ -532,7 +534,7 @@ function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        CommUtils.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
@@ -690,7 +692,7 @@ function Module:RenderPullTargets()
             local _, clicked = ImGui.Selectable(spawn.CleanName() or "Unknown")
             if clicked then
                 RGMercsLogger.log_debug("Targetting: %d", spawn.ID() or 0)
-                RGMercUtils.DoCmd("/target id %d", spawn.ID() or 0)
+                GameUtils.DoCmd("/target id %d", spawn.ID() or 0)
             end
             ImGui.PopID()
             ImGui.TableNextColumn()
@@ -725,21 +727,21 @@ function Module:Render()
 
     if self.ModuleLoaded and RGMercConfig.Globals.SubmodulesLoaded then
         if mq.TLO.Navigation.MeshLoaded() then
-            if RGMercUtils.GetSetting('DoPull') then
+            if RGMercConfig:GetSetting('DoPull') then
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, 1)
             else
                 ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, 1)
             end
 
-            if ImGui.Button(RGMercUtils.GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
+            if ImGui.Button(RGMercConfig:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
                 self.settings.DoPull = not self.settings.DoPull
-                if RGMercUtils.GetSetting('AutoSetRoles') and mq.TLO.Group.Leader() == mq.TLO.Me.DisplayName() then
+                if RGMercConfig:GetSetting('AutoSetRoles') and mq.TLO.Group.Leader() == mq.TLO.Me.DisplayName() then
                     -- in hunt mode we follow around.
 
                     if self.Constants.PullModes[self.settings.PullMode] ~= "Hunt" then
-                        RGMercUtils.DoCmd("/grouproles %s %s 3", RGMercUtils.GetSetting('DoPull') and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
+                        GameUtils.DoCmd("/grouproles %s %s 3", RGMercConfig:GetSetting('DoPull') and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
                     end
-                    RGMercUtils.DoCmd("/grouproles set %s 2", RGMercConfig.Globals.MainAssist)                                                   -- set MA
+                    GameUtils.DoCmd("/grouproles set %s 2", RGMercConfig.Globals.MainAssist)                                                    -- set MA
                 end
                 self:SaveSettings(false)
             end
@@ -773,11 +775,11 @@ function Module:Render()
         ImGui.SameLine()
         if campData.returnToCamp then
             if ImGui.Button("Break My Camp", ImGui.GetWindowWidth() * .3, 18) then
-                RGMercUtils.DoCmd("/rgl campoff")
+                GameUtils.DoCmd("/rgl campoff")
             end
         else
             if ImGui.Button("Set My Camp Here", ImGui.GetWindowWidth() * .3, 18) then
-                RGMercUtils.DoCmd("/rgl campon")
+                GameUtils.DoCmd("/rgl campon")
             end
         end
         ImGui.PopStyleVar(1)
@@ -996,8 +998,8 @@ function Module:AddMobToList(list, mobName)
     self:SaveSettings(false)
 
     -- if we are pulling start over.
-    if RGMercUtils.GetSetting('DoPull') then
-        RGMercUtils.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
+    if RGMercConfig:GetSetting('DoPull') then
+        GameUtils.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
     end
 end
 
@@ -1009,8 +1011,8 @@ function Module:DeleteMobFromList(list, idx)
     self:SaveSettings(false)
 
     -- if we are pulling start over.
-    if RGMercUtils.GetSetting('DoPull') then
-        RGMercUtils.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
+    if RGMercConfig:GetSetting('DoPull') then
+        GameUtils.DoCmd("/multiline ; /rgl set DoPull false ; /timed 10 /rgl set DoPull true")
     end
 end
 
@@ -1099,7 +1101,7 @@ function Module:ShouldPull(campData)
         return false, string.format("Rooted")
     end
 
-    if not RGMercUtils.GetSetting('PullDebuffed') then
+    if not RGMercConfig:GetSetting('PullDebuffed') then
         if RGMercUtils.SongActiveByName("Restless Ice") then
             RGMercsLogger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
             return false, string.format("Restless Ice")
@@ -1141,8 +1143,8 @@ function Module:ShouldPull(campData)
         return false, string.format("XTargetCount(%d) > 0", RGMercUtils.GetXTHaterCount())
     end
 
-    if campData.returnToCamp and RGMercUtils.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > math.max(RGMercUtils.GetSetting('AutoCampRadius') ^ 2, 200 ^ 2) then
-        RGMercUtils.PrintGroupMessage("I am too far away from camp - Holding pulls!")
+    if campData.returnToCamp and RGMercUtils.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > math.max(RGMercConfig:GetSetting('AutoCampRadius') ^ 2, 200 ^ 2) then
+        CommUtils.PrintGroupMessage("I am too far away from camp - Holding pulls!")
         return false,
             string.format("I am Too Far (%d) (%d,%d) (%d,%d)", RGMercUtils.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY),
                 me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY)
@@ -1168,7 +1170,7 @@ function Module:FarmFullInvActions()
 
     RGMercsLogger.log_error("\arStopping Pulls - Bags are full!")
     self.settings.DoPull = false
-    RGMercUtils.DoCmd("/beep")
+    GameUtils.DoCmd("/beep")
 end
 
 ---comment
@@ -1181,7 +1183,7 @@ function Module:CheckGroupForPull(classes, resourceResumePct, resourcePausePct, 
     local groupCount = mq.TLO.Group.Members()
 
     if not groupCount or groupCount == 0 then return true, "" end
-    local maxDist = math.max(RGMercUtils.GetSetting('AutoCampRadius') ^ 2, 200 ^ 2)
+    local maxDist = math.max(RGMercConfig:GetSetting('AutoCampRadius') ^ 2, 200 ^ 2)
 
     for i = 1, groupCount do
         local member = mq.TLO.Group.Member(i)
@@ -1190,19 +1192,19 @@ function Module:CheckGroupForPull(classes, resourceResumePct, resourcePausePct, 
             if not classes or classes:contains(member.Class.ShortName()) then
                 local resourcePct = self.TempSettings.PullState == PullStates.PULL_GROUPWATCH_WAIT and resourceResumePct or resourcePausePct
                 if member.PctHPs() < resourcePct then
-                    RGMercUtils.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
+                    CommUtils.PrintGroupMessage("%s is low on hp - Holding pulls!", member.CleanName())
                     RGMercsLogger.log_verbose("\arMember is low on Health - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
                         resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
                     return false, string.format("%s Low HP", member.CleanName())
                 end
                 if member.Class.CanCast() and member.Class.ShortName() ~= "BRD" and member.PctMana() < resourcePct then
-                    RGMercUtils.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
+                    CommUtils.PrintGroupMessage("%s is low on mana - Holding pulls!", member.CleanName())
                     RGMercsLogger.log_verbose("\arMember is low on Mana - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d",
                         resourcePct, resourcePausePct, resourceResumePct, self.TempSettings.PullState)
                     return false, string.format("%s Low Mana", member.CleanName())
                 end
-                if RGMercUtils.GetSetting('GroupWatchEnd') and member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
-                    RGMercUtils.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
+                if RGMercConfig:GetSetting('GroupWatchEnd') and member.Class.ShortName() ~= "BRD" and member.PctEndurance() < resourcePct then
+                    CommUtils.PrintGroupMessage("%s is low on endurance - Holding pulls!", member.CleanName())
                     RGMercsLogger.log_verbose(
                         "\arMember is low on Endurance - \ayHolding pulls!\ax\ag ResourcePCT:\ax \at%d \aoStopPct: \at%d \ayStartPct: \at%d \aoPullState: \at%d", resourcePct,
                         resourcePausePct, resourceResumePct, self.TempSettings.PullState)
@@ -1210,26 +1212,26 @@ function Module:CheckGroupForPull(classes, resourceResumePct, resourcePausePct, 
                 end
 
                 if member.Hovering() then
-                    RGMercUtils.PrintGroupMessage("%s is dead - Holding pulls!", member.CleanName())
+                    CommUtils.PrintGroupMessage("%s is dead - Holding pulls!", member.CleanName())
                     return false, string.format("%s Dead", member.CleanName())
                 end
 
                 if member.OtherZone() then
-                    RGMercUtils.PrintGroupMessage("%s is in another zone - Holding pulls!", member.CleanName())
+                    CommUtils.PrintGroupMessage("%s is in another zone - Holding pulls!", member.CleanName())
                     return false, string.format("%s Out of Zone", member.CleanName())
                 end
 
                 if campData.returnToCamp then
                     if RGMercUtils.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
-                        RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
+                        CommUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
                                 RGMercUtils.GetDistance(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY), member.X(), member.Y(),
                                 campData.campSettings.AutoCampX, campData.campSettings.AutoCampY)
                     end
                 else
-                    if (member.Distance() or 0) > math.max(RGMercUtils.GetSetting('AutoCampRadius'), 200) then
-                        RGMercUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
+                    if (member.Distance() or 0) > math.max(RGMercConfig:GetSetting('AutoCampRadius'), 200) then
+                        CommUtils.PrintGroupMessage("%s is too far away - Holding pulls!", member.CleanName())
                         return false,
                             string.format("%s Too Far (%d) (%d,%d) (%d,%d)", member.CleanName(),
                                 RGMercUtils.GetDistance(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY), member.X(), member.Y(),
@@ -1241,15 +1243,15 @@ function Module:CheckGroupForPull(classes, resourceResumePct, resourcePausePct, 
                 if self.Constants.PullModes[self.settings.PullMode] == "Chain" then
                     if member.ID() == RGMercUtils.GetMainAssistId() then
                         if campData.returnToCamp and RGMercUtils.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
-                            RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(),
+                            CommUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(),
                                 campData.campSettings.AutoCampY,
-                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, RGMercUtils.GetSetting('AutoCampRadius'))
+                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, RGMercConfig:GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     else
                         if RGMercUtils.GetDistanceSquared(member.X(), member.Y(), mq.TLO.Me.X(), mq.TLO.Me.Y()) > maxDist then
-                            RGMercUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
-                                RGMercUtils.GetSetting('AutoCampRadius'))
+                            CommUtils.PrintGroupMessage("%s (assist target) is beyond AutoCampRadius from me : %d. Holding pulls.", member.CleanName(),
+                                RGMercConfig:GetSetting('AutoCampRadius'))
                             return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                         end
                     end
@@ -1274,22 +1276,22 @@ function Module:FixPullerMerc()
 
         ---@diagnostic disable-next-line: param-type-mismatch
         if merc and merc() and RGMercUtils.TargetIsType("Mercenary", merc) and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
-            if (merc.Distance() or 0) > RGMercUtils.GetSetting('AutoCampRadius') and (merc.Owner.Distance() or 0) < RGMercUtils.GetSetting('AutoCampRadius') then
-                RGMercUtils.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
-                mq.delay("10s", function() return (merc.Distance() or 0) < RGMercUtils.GetSetting('AutoCampRadius') end)
-                RGMercUtils.DoCmd("/grouproles set %s 3", mq.TLO.Me.DisplayName())
+            if (merc.Distance() or 0) > RGMercConfig:GetSetting('AutoCampRadius') and (merc.Owner.Distance() or 0) < RGMercConfig:GetSetting('AutoCampRadius') then
+                GameUtils.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
+                mq.delay("10s", function() return (merc.Distance() or 0) < RGMercConfig:GetSetting('AutoCampRadius') end)
+                GameUtils.DoCmd("/grouproles set %s 3", mq.TLO.Me.DisplayName())
             end
         end
     end
 end
 
 function Module:FindTarget()
-    local pullRadius = RGMercUtils.GetSetting('PullRadius')
+    local pullRadius = RGMercConfig:GetSetting('PullRadius')
 
     if self:IsPullMode("Farm") then
-        pullRadius = RGMercUtils.GetSetting('PullRadiusFarm')
+        pullRadius = RGMercConfig:GetSetting('PullRadiusFarm')
     elseif self:IsPullMode("Hunt") then
-        pullRadius = RGMercUtils.GetSetting('PullRadiusHunt')
+        pullRadius = RGMercConfig:GetSetting('PullRadiusHunt')
     end
 
     local pullSearchString = string.format("npc radius %d targetable zradius %d range %d %d playerstate 0",
@@ -1369,7 +1371,7 @@ function Module:FindTarget()
                             RGMercsLogger.log_debug("\atPULL::FindTarget \ayNo Allow/Deny List to Check!")
                         end
 
-                        if spawn.FeetWet() and not RGMercUtils.GetSetting('PullMobsInWater') then
+                        if spawn.FeetWet() and not RGMercConfig:GetSetting('PullMobsInWater') then
                             RGMercsLogger.log_debug("\atPULL::FindTarget \agIgnoring mob in water water: %s", spawn.CleanName())
                             doInsert = false
                         end
@@ -1412,7 +1414,7 @@ function Module:CheckForAbort(pullID)
         return true
     end
 
-    if (not RGMercUtils.GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0) or RGMercConfig.Globals.PauseMain then
+    if (not RGMercConfig:GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0) or RGMercConfig.Globals.PauseMain then
         RGMercsLogger.log_debug("\ar ALERT: Pulling Disabled at user request. \ax")
         return true
     end
@@ -1440,7 +1442,7 @@ function Module:CheckForAbort(pullID)
             return true
         end
 
-        if RGMercUtils.GetSetting('SafeTargeting') and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
+        if RGMercConfig:GetSetting('SafeTargeting') and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
             RGMercsLogger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targetting is enabled! \ax")
             return true
         end
@@ -1480,7 +1482,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
     mq.TLO.Me.Stand()
 
-    RGMercUtils.DoCmd("/nav locyxz %s, log=off", loc)
+    GameUtils.DoCmd("/nav locyxz %s, log=off", loc)
     mq.delay("2s")
 
     while mq.TLO.Navigation.Active() do
@@ -1488,7 +1490,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
 
         if RGMercUtils.GetXTHaterCount() > 0 and not ignoreAggro then
             if mq.TLO.Navigation.Active() then
-                RGMercUtils.DoCmd("/nav stop log=off")
+                GameUtils.DoCmd("/nav stop log=off")
             end
             return false
         end
@@ -1496,7 +1498,7 @@ function Module:NavToWaypoint(loc, ignoreAggro)
         if mq.TLO.Navigation.Velocity() == 0 then
             RGMercsLogger.log_warn("NavToWaypoint Velocity is 0 - Are we stuck?")
             if mq.TLO.Navigation.Paused() then
-                RGMercUtils.DoCmd("/nav pause log=off")
+                GameUtils.DoCmd("/nav pause log=off")
             end
         end
 
@@ -1524,7 +1526,7 @@ function Module:GiveTime(combat_state)
     RGMercsLogger.log_verbose("PULL:GiveTime() - Enter")
     self:SetValidPullAbilities()
     self:FixPullerMerc()
-    if RGMercUtils.GetSetting('DoPull') then
+    if RGMercConfig:GetSetting('DoPull') then
         for _, v in pairs(self.settings.PullSafeZones) do
             if v == mq.TLO.Zone.ShortName() then
                 local safeZone = mq.TLO.Zone.ShortName()
@@ -1535,21 +1537,21 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    if not RGMercUtils.GetSetting('DoPull') and (self.TempSettings.HuntX ~= 0 or self.TempSettings.HuntY ~= 0 or self.TempSettings.HuntZ ~= 0) then
+    if not RGMercConfig:GetSetting('DoPull') and (self.TempSettings.HuntX ~= 0 or self.TempSettings.HuntY ~= 0 or self.TempSettings.HuntZ ~= 0) then
         self.TempSettings.HuntX = 0
         self.TempSettings.HuntY = 0
         self.TempSettings.HuntZ = 0
-        RGMercUtils.DoCmd("/mapfilter pullradius off")
+        GameUtils.DoCmd("/mapfilter pullradius off")
     end
 
-    RGMercsLogger.log_verbose("PULL:GiveTime() - DoPull: %s", RGMercUtils.BoolToColorString(RGMercUtils.GetSetting('DoPull')))
-    if not RGMercUtils.GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
+    RGMercsLogger.log_verbose("PULL:GiveTime() - DoPull: %s", RGMercUtils.BoolToColorString(RGMercConfig:GetSetting('DoPull')))
+    if not RGMercConfig:GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
-    if RGMercUtils.GetSetting('DoPull') and self:IsPullMode("Hunt") and ((self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) or RGMercUtils.GetSetting('HuntFromPlayer')) then
+    if RGMercConfig:GetSetting('DoPull') and self:IsPullMode("Hunt") and ((self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) or RGMercConfig:GetSetting('HuntFromPlayer')) then
         self.TempSettings.HuntX = mq.TLO.Me.X()
         self.TempSettings.HuntY = mq.TLO.Me.Y()
         self.TempSettings.HuntZ = mq.TLO.Me.Z()
-        RGMercUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercUtils.GetSetting('PullRadiusHunt'))
+        GameUtils.DoCmd("/squelch /mapfilter pullradius %d", RGMercConfig:GetSetting('PullRadiusHunt'))
     end
 
     if not mq.TLO.Navigation.MeshLoaded() then
@@ -1562,7 +1564,7 @@ function Module:GiveTime(combat_state)
     local campData = RGMercModules:ExecModule("Movement", "GetCampData")
 
     if self.settings.PullAbility == PullAbilityIDToName.PetPull and (mq.TLO.Me.Pet.ID() or 0) == 0 then
-        RGMercUtils.PrintGroupMessage("Need to create a new pet to throw as mob fodder.")
+        CommUtils.PrintGroupMessage("Need to create a new pet to throw as mob fodder.")
         return
     end
 
@@ -1576,9 +1578,9 @@ function Module:GiveTime(combat_state)
             self:SetPullState(PullStates.PULL_WAITING_SHOULDPULL, reason)
             if campData.returnToCamp then
                 local distanceToCampSq = RGMercUtils.GetDistanceSquared(mq.TLO.Me.Y(), mq.TLO.Me.X(), campData.campSettings.AutoCampY, campData.campSettings.AutoCampX)
-                if distanceToCampSq > (RGMercUtils.GetSetting('AutoCampRadius') ^ 2) then
-                    RGMercsLogger.log_debug("Distance to camp is %d and radius is %d - going closer.", math.sqrt(distanceToCampSq), RGMercUtils.GetSetting('AutoCampRadius'))
-                    RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
+                if distanceToCampSq > (RGMercConfig:GetSetting('AutoCampRadius') ^ 2) then
+                    RGMercsLogger.log_debug("Distance to camp is %d and radius is %d - going closer.", math.sqrt(distanceToCampSq), RGMercConfig:GetSetting('AutoCampRadius'))
+                    GameUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off", campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ)
                 end
             end
         end
@@ -1733,9 +1735,9 @@ function Module:GiveTime(combat_state)
         requireLOS = "off"
     end
 
-    RGMercUtils.DoCmd("/squelch /attack off")
+    GameUtils.DoCmd("/squelch /attack off")
 
-    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
+    GameUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), requireLOS)
 
     mq.delay(1000)
 
@@ -1782,7 +1784,7 @@ function Module:GiveTime(combat_state)
         abortPull = true
     end
 
-    if RGMercUtils.GetSetting('SafeTargeting') then
+    if RGMercConfig:GetSetting('SafeTargeting') then
         -- Hard coding 500 units as our radius as it's probably twice our effective spell range.
         if RGMercUtils.IsSpawnFightingStranger(mq.TLO.Spawn(self.TempSettings.PullID), 500) then
             abortPull = true
@@ -1819,15 +1821,15 @@ function Module:GiveTime(combat_state)
                 end
 
                 if RGMercUtils.CanUseAA("Companion's Discipline") then
-                    RGMercUtils.DoCmd("/squelch /pet ghold on")
+                    GameUtils.DoCmd("/squelch /pet ghold on")
                 end
-                RGMercUtils.DoCmd("/squelch /pet back off")
+                GameUtils.DoCmd("/squelch /pet back off")
                 mq.delay("1s", function() return (mq.TLO.Pet.PlayerState() or 0) == 0 end)
-                RGMercUtils.DoCmd("/squelch /pet follow")
+                GameUtils.DoCmd("/squelch /pet follow")
             elseif self.settings.PullAbility == PullAbilityIDToName.Face then -- Face pull
                 -- Make sure we're looking straight ahead at our mob and delay
                 -- until we're facing them.
-                RGMercUtils.DoCmd("/look 0")
+                GameUtils.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
 
@@ -1836,7 +1838,7 @@ function Module:GiveTime(combat_state)
                     RGMercsLogger.log_super_verbose("Waiting on face pull to finish...")
                     mq.doevents()
 
-                    RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
+                    GameUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
 
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         RGMercsLogger.log_debug("\arXtargs changed heading back to camp!")
@@ -1851,7 +1853,7 @@ function Module:GiveTime(combat_state)
             elseif self.settings.PullAbility == PullAbilityIDToName.Ranged then -- Ranged pull
                 -- Make sure we're looking straight ahead at our mob and delay
                 -- until we're facing them.
-                RGMercUtils.DoCmd("/look 0")
+                GameUtils.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
 
@@ -1860,11 +1862,11 @@ function Module:GiveTime(combat_state)
                     RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
 
                     if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
-                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        GameUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
                     end
 
-                    RGMercUtils.DoCmd("/ranged %d", self.TempSettings.PullID)
+                    GameUtils.DoCmd("/ranged %d", self.TempSettings.PullID)
                     mq.doevents()
                     if self:IsPullMode("Chain") and RGMercUtils.DiffXTHaterIDs(startingXTargs) then
                         break
@@ -1878,17 +1880,17 @@ function Module:GiveTime(combat_state)
             elseif self.settings.PullAbility == PullAbilityIDToName.AutoAttack then -- Auto Attack pull
                 -- Make sure we're looking straight ahead at our mob and delay
                 -- until we're facing them.
-                RGMercUtils.DoCmd("/look 0")
+                GameUtils.DoCmd("/look 0")
 
                 mq.delay("3s", function() return mq.TLO.Me.Heading.ShortName() == target.HeadingTo.ShortName() end)
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
-                    RGMercUtils.DoCmd("/attack")
+                    GameUtils.DoCmd("/attack")
 
                     if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
-                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        GameUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
                     end
 
@@ -1906,16 +1908,16 @@ function Module:GiveTime(combat_state)
                 mq.delay(5)
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...%s", RGMercUtils.BoolToColorString(successFn()))
-                    RGMercUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
+                    GameUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
                     mq.doevents()
 
                     if mq.TLO.Target.FeetWet() ~= mq.TLO.Me.FeetWet() then
                         RGMercsLogger.log_debug("\ar ALERT: Feet wet mismatch - Moving around\ax")
-                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, RGMercUtils.GetTargetDistance() * 0.9, requireLOS)
+                        GameUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, RGMercUtils.GetTargetDistance() * 0.9, requireLOS)
                     end
 
                     if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
-                        RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        GameUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
                     end
 
@@ -1955,7 +1957,7 @@ function Module:GiveTime(combat_state)
         end
     else
         RGMercsLogger.log_debug("\arNOTICE:\ax Pull Aborted!")
-        RGMercUtils.DoCmd("/nav stop log=off")
+        GameUtils.DoCmd("/nav stop log=off")
         mq.delay("2s", function() return not mq.TLO.Navigation.Active() end)
     end
 
@@ -1963,7 +1965,7 @@ function Module:GiveTime(combat_state)
         -- Nav back to camp.
         self:SetPullState(PullStates.PULL_RETURN_TO_CAMP, string.format("Camp Loc: %0.2f %0.2f %0.2f", start_y, start_x, start_z))
 
-        RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, RGMercUtils.GetSetting('PullBackwards') and "facing=backward" or "")
+        GameUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, RGMercConfig:GetSetting('PullBackwards') and "facing=backward" or "")
         mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
 
         while mq.TLO.Navigation.Active() and (combat_state == "Downtime" or RGMercUtils.GetXTHaterCount() > 0) do
@@ -1971,31 +1973,31 @@ function Module:GiveTime(combat_state)
             if mq.TLO.Me.State():lower() == "feign" or mq.TLO.Me.Sitting() then
                 RGMercsLogger.log_debug("Standing up to Engage Target")
                 mq.TLO.Me.Stand()
-                RGMercUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, RGMercUtils.GetSetting('PullBackwards') and "facing=backward" or "")
+                GameUtils.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, RGMercConfig:GetSetting('PullBackwards') and "facing=backward" or "")
                 mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
             end
 
             if mq.TLO.Navigation.Paused() then
-                RGMercUtils.DoCmd("/nav pause")
+                GameUtils.DoCmd("/nav pause")
             end
             mq.doevents()
             mq.delay(10)
         end
 
-        RGMercUtils.DoCmd("/face id %d", self.TempSettings.PullID)
+        GameUtils.DoCmd("/face id %d", self.TempSettings.PullID)
 
         self:SetPullState(PullStates.PULL_WAITING_ON_MOB, self:GetPullStateTargetInfo())
 
         -- give the mob 2 mins to get to us.
         local maxPullWait = 1000 * 120 -- 2 mins
         -- wait for the mob to reach us.
-        while mq.TLO.Target.ID() == self.TempSettings.PullID and RGMercUtils.GetTargetDistance() > RGMercUtils.GetSetting('AutoCampRadius') and maxPullWait > 0 do
+        while mq.TLO.Target.ID() == self.TempSettings.PullID and RGMercUtils.GetTargetDistance() > RGMercConfig:GetSetting('AutoCampRadius') and maxPullWait > 0 do
             self:SetPullState(PullStates.PULL_WAITING_ON_MOB, self:GetPullStateTargetInfo())
             mq.delay(100)
             if mq.TLO.Me.Pet.Combat() then
-                RGMercUtils.DoCmd("/squelch /pet back off")
+                GameUtils.DoCmd("/squelch /pet back off")
                 mq.delay("1s", function() return (mq.TLO.Pet.PlayerState() or 0) == 0 end)
-                RGMercUtils.DoCmd("/squelch /pet follow")
+                GameUtils.DoCmd("/squelch /pet follow")
             end
             maxPullWait = maxPullWait - 100
 
@@ -2017,7 +2019,7 @@ end
 
 function Module:OnDeath()
     -- Death Handler
-    if RGMercUtils.GetSetting('StopPullAfterDeath') then
+    if RGMercConfig:GetSetting('StopPullAfterDeath') then
         self.settings.DoPull = false
     end
 end
@@ -2029,7 +2031,7 @@ end
 
 function Module:OnZone()
     -- Zone Handler
-    if RGMercUtils.GetSetting('StopPullAfterDeath') then
+    if RGMercConfig:GetSetting('StopPullAfterDeath') then
         self.settings.DoPull = false
     else
         local campData = RGMercModules:ExecModule("Movement", "GetCampData")

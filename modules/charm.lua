@@ -1,6 +1,8 @@
 -- Sample Basic Class Module
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
+local CommUtils     = require("utils.comm_utils")
+local GameUtils     = require("utils.game_utils")
 local TableUtils    = require("utils.table_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 local Set           = require("mq.Set")
@@ -194,7 +196,7 @@ function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 
 	if doBroadcast == true then
-		RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+		CommUtils.BroadcastUpdate(self._name, "LoadSettings")
 	end
 end
 
@@ -379,9 +381,9 @@ end
 
 function Module:HandleCharmBroke(mobName, breakerName)
 	RGMercsLogger.log_debug("%s broke charm on ==> %s", breakerName, mobName)
-	RGMercUtils.HandleAnnounce(
+	CommUtils.HandleAnnounce(
 		string.format("\ar CHARM Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName),
-		RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
+		RGMercConfig:GetSetting('CharmAnnounceGroup'), RGMercConfig:GetSetting('CharmAnnounce'))
 end
 
 function Module:AddImmuneTarget(mobId, mobData)
@@ -412,7 +414,7 @@ end
 
 function Module:CharmLvlToHigh(mobLvl)
 	if RGMercUtils.MyClassIs("BRD") then return false end
-	if RGMercUtils.GetSetting("DireCharm", true) and RGMercUtils.GetSetting("AutoLevelRangeCharm") then
+	if RGMercConfig:GetSetting("DireCharm", true) and RGMercConfig:GetSetting("AutoLevelRangeCharm") then
 		self.settings.DireCharmMaxLvl = mobLvl - 1
 		self:SaveSettings(false)
 		RGMercsLogger.log_debug("\awNOTICE:\ax \aoTarget LVL to High,\ayLowering Max Level for Dire Charm!")
@@ -458,7 +460,7 @@ end
 
 function Module:CharmNow(charmId, useAA)
 	-- First thing we target the mob if we haven't already targeted them.
-	RGMercUtils.DoCmd("/attack off")
+	GameUtils.DoCmd("/attack off")
 	local currentTargetID = mq.TLO.Target.ID()
 	if charmId == RGMercConfig.Globals.AutoTargetID then return end
 	RGMercUtils.SetTarget(charmId)
@@ -467,12 +469,12 @@ function Module:CharmNow(charmId, useAA)
 
 	if not charmSpell or not charmSpell() then return end
 	if not RGMercUtils.MyClassIs("BRD") then
-		local dCharm = RGMercUtils.GetSetting("DireCharm", true) == true
-		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercUtils.GetSetting('DireCharmMaxLvl') then
-			RGMercUtils.HandleAnnounce(
+		local dCharm = RGMercConfig:GetSetting("DireCharm", true) == true
+		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercConfig:GetSetting('DireCharmMaxLvl') then
+			CommUtils.HandleAnnounce(
 				string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"),
-				RGMercUtils.GetSetting('CharmAnnounceGroup'),
-				RGMercUtils.GetSetting('CharmAnnounce'))
+				RGMercConfig:GetSetting('CharmAnnounceGroup'),
+				RGMercConfig:GetSetting('CharmAnnounce'))
 			RGMercUtils.UseAA("Dire Charm", charmId)
 		else
 			-- This may not work for Bards but will work for DRU/NEC/ENCs
@@ -488,13 +490,13 @@ function Module:CharmNow(charmId, useAA)
 	mq.doevents()
 
 	if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS and mq.TLO.Pet.ID() > 0 then
-		RGMercUtils.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
-				mq.TLO.Spawn(charmId).CleanName(), charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'),
-			RGMercUtils.GetSetting('CharmAnnounce'))
+		CommUtils.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
+				mq.TLO.Spawn(charmId).CleanName(), charmId), RGMercConfig:GetSetting('CharmAnnounceGroup'),
+			RGMercConfig:GetSetting('CharmAnnounce'))
 	else
-		RGMercUtils.HandleAnnounce(string.format("\ar CHARM Failed: \ag -> \ay %s \ag <-",
+		CommUtils.HandleAnnounce(string.format("\ar CHARM Failed: \ag -> \ay %s \ag <-",
 			mq.TLO.Spawn(charmId).CleanName(),
-			charmId), RGMercUtils.GetSetting('CharmAnnounceGroup'), RGMercUtils.GetSetting('CharmAnnounce'))
+			charmId), RGMercConfig:GetSetting('CharmAnnounceGroup'), RGMercConfig:GetSetting('CharmAnnounce'))
 	end
 
 	mq.doevents()
@@ -633,7 +635,7 @@ function Module:ProcessCharmList()
 	-- Assume by default we never need to block for charm. We'll set this if-and-only-if
 	-- we need to charm but our ability is on cooldown.
 	if mq.TLO.Me.Pet.ID() ~= 0 then return end
-	RGMercUtils.DoCmd("/attack off")
+	GameUtils.DoCmd("/attack off")
 	RGMercsLogger.log_debug("\ayProcessCharmList() :: Loop")
 	local charmSpell = self:GetCharmSpell()
 
@@ -671,10 +673,10 @@ function Module:ProcessCharmList()
 						if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() then
 							RGMercsLogger.log_debug(
 								" \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start charm.")
-							RGMercUtils.DoCmd("/attack off")
+							GameUtils.DoCmd("/attack off")
 							mq.delay("3s", function() return not mq.TLO.Me.Combat() end)
-							RGMercUtils.DoCmd("/stopcast")
-							RGMercUtils.DoCmd("/stopsong")
+							GameUtils.DoCmd("/stopcast")
+							GameUtils.DoCmd("/stopsong")
 							mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
 						end
 
@@ -710,7 +712,7 @@ function Module:DoCharm()
 		self:UpdateCharmList()
 	end
 	if not TableUtils.MyClassIs("BRD") then
-		if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or (RGMercUtils.GetSetting("DireCharm", true) == true)) and
+		if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or (RGMercConfig:GetSetting("DireCharm", true) == true)) and
 			TableUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 			self:ProcessCharmList()
 		else

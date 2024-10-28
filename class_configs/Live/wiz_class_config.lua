@@ -5,6 +5,7 @@
 
 local mq          = require('mq')
 local RGMercUtils = require("utils.rgmercs_utils")
+local CommUtils   = require("utils.comm_utils")
 
 return {
     _version         = "1.0 - Live",
@@ -607,21 +608,21 @@ return {
                     end
 
                     -- Cast the spell. Will report if need to memorize or don't have the spell
-                    RGMercUtils.DoCmd('/if (${Cast.Ready[exodus]}) /cast "exodus" alt')
-                    RGMercUtils.DoCmd('/timed 1 /if (${Me.Book["%s"]}>0) /cast "%s"', portName, portName)
-                    RGMercUtils.DoCmd('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
+                    GameUtils.DoCmd('/if (${Cast.Ready[exodus]}) /cast "exodus" alt')
+                    GameUtils.DoCmd('/timed 1 /if (${Me.Book["%s"]}>0) /cast "%s"', portName, portName)
+                    GameUtils.DoCmd('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
 
                     -- Have to memorize
-                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Status.Equal[CM]}) /timed 5 /dgt all Memorizing "%s"! Ready in 1.5 seconds', portName)
-                    RGMercUtils.DoCmd('/timed 50 /if (${Cast.Timing}>6000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
-                    RGMercUtils.DoCmd('/timed 90 /if (${Cast.Timing}>4000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
+                    GameUtils.DoCmd('/timed 5 /if (${Cast.Status.Equal[CM]}) /timed 5 /dgt all Memorizing "%s"! Ready in 1.5 seconds', portName)
+                    GameUtils.DoCmd('/timed 50 /if (${Cast.Timing}>6000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
+                    GameUtils.DoCmd('/timed 90 /if (${Cast.Timing}>4000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
 
                     -- Already memorized
-                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Timing}>8000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
-                    RGMercUtils.DoCmd('/timed 40 /if (${Cast.Timing}>5000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
+                    GameUtils.DoCmd('/timed 5 /if (${Cast.Timing}>8000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
+                    GameUtils.DoCmd('/timed 40 /if (${Cast.Timing}>5000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
 
                     -- Out of mana
-                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Status.Equal[CAST_OUTOFMANA]}) /dgt all Out of mana! Can\'t Evac!')
+                    GameUtils.DoCmd('/timed 5 /if (${Cast.Status.Equal[CAST_OUTOFMANA]}) /dgt all Out of mana! Can\'t Evac!')
                 end
         }
     },]]
@@ -672,7 +673,7 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('WeaveAANukes') and mq.TLO.Me.SpellInCooldown()
+                return combat_state == "Combat" and RGMercConfig:GetSetting('WeaveAANukes') and mq.TLO.Me.SpellInCooldown()
             end,
         },
         {
@@ -681,7 +682,7 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (not RGMercUtils.GetSetting('DoGOMCheck') or RGMercUtils.DetGOMCheck())
+                return combat_state == "Combat" and (not RGMercConfig:GetSetting('DoGOMCheck') or RGMercUtils.DetGOMCheck())
             end,
         },
         {
@@ -699,8 +700,8 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetAutoTargetPctHPs() <= RGMercUtils.GetSetting('RainMinTargetHP') and
-                    RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('RainMinHaters')
+                return combat_state == "Combat" and RGMercUtils.GetAutoTargetPctHPs() <= RGMercConfig:GetSetting('RainMinTargetHP') and
+                    RGMercUtils.GetXTHaterCount() >= RGMercConfig:GetSetting('RainMinHaters')
             end,
         },
     },
@@ -753,21 +754,21 @@ return {
                 name = "Mana Burn",
                 type = "AA",
                 cond = function(self)
-                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and RGMercUtils.GetSetting('DoManaBurn')
+                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and RGMercConfig:GetSetting('DoManaBurn')
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
         },
@@ -791,14 +792,14 @@ return {
                 name = "Concussion",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
+                    return mq.TLO.Me.PctAggro() > RGMercConfig:GetSetting('JoltAggro')
                 end,
             },
             {
                 name = "JoltSpell",
                 type = "Spell",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
+                    return mq.TLO.Me.PctAggro() > RGMercConfig:GetSetting('JoltAggro')
                 end,
             },
 
@@ -833,21 +834,21 @@ return {
                 name = "GambitSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct')
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('ModRodManaPct')
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
         },
@@ -909,11 +910,11 @@ return {
                 name = "PetSpell",
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
-                cond = function(self, _) return RGMercUtils.GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
+                cond = function(self, _) return RGMercConfig:GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
                 post_activate = function(self, spell)
                     local pet = mq.TLO.Me.Pet
                     if pet.ID() > 0 then
-                        RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
+                        CommUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
                             pet.Class.Name(), pet.CleanName(), spell.RankName())
                     end
                 end,
@@ -1045,7 +1046,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck() and
-                        RGMercUtils.GetTargetDistance() >= RGMercUtils.GetSetting('RainDist')
+                        RGMercUtils.GetTargetDistance() >= RGMercConfig:GetSetting('RainDist')
                 end,
             },
             {
@@ -1053,7 +1054,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck() and
-                        RGMercUtils.GetTargetDistance() >= RGMercUtils.GetSetting('RainDist')
+                        RGMercUtils.GetTargetDistance() >= RGMercConfig:GetSetting('RainDist')
                 end,
             },
         },
@@ -1113,14 +1114,14 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
             {
@@ -1132,15 +1133,15 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    if not RGMercUtils.GetSetting('DoChestClick') or not item or not item() then return false end
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and item.TimerReady() == 0 and RGMercUtils.SelfBuffCheck(item.Spell)
+                    if not RGMercConfig:GetSetting('DoChestClick') or not item or not item() then return false end
+                    return mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('HarvestManaPct') and item.TimerReady() == 0 and RGMercUtils.SelfBuffCheck(item.Spell)
                 end,
             },
             {
-                name = RGMercUtils.GetSetting('ClarityPotion'),
+                name = RGMercConfig:GetSetting('ClarityPotion'),
                 type = "Item",
                 cond = function(self)
-                    local item = mq.TLO.FindItem(RGMercUtils.GetSetting('ClarityPotion'))
+                    local item = mq.TLO.FindItem(RGMercConfig:GetSetting('ClarityPotion'))
                     return item() and item.Spell.Stacks() and item.TimerReady()
                 end,
             },
