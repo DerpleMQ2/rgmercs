@@ -597,7 +597,7 @@ function Module:LoadSettings()
 
 	local needsSave = false
 	-- Setup Defaults
-	self.settings, needsSave = RGMercUtils.ResolveDefaults(Module.DefaultConfig, self.settings)
+	self.settings, needsSave = RGMercConfig.ResolveDefaults(Module.DefaultConfig, self.settings)
 
 	RGMercsLogger.log_debug("Settings Changes = %s", StringUtils.BoolToColorString(needsSave))
 	if needsSave then

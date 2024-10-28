@@ -1456,7 +1456,7 @@ function Config:LoadSettings()
     local settingsChanged = false
 
     -- Setup Defaults
-    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(Config.DefaultConfig, self.settings)
+    self.settings, settingsChanged = RGMercConfig.ResolveDefaults(Config.DefaultConfig, self.settings)
 
     if needSave or settingsChanged then
         self:SaveSettings(false)
@@ -1671,6 +1671,38 @@ function Config:SetSetting(setting, value)
     local _, afterUpdate = RGMercConfig:GetUsageText(setting, false, defaultConfig)
     RGMercsLogger.log_info("[%s] \ag%s :: Before :: %-5s", settingModuleName, setting, beforeUpdate)
     RGMercsLogger.log_info("[%s] \ag%s :: After  :: %-5s", settingModuleName, setting, afterUpdate)
+end
+
+--- Resolves the default values for a given settings table.
+--- This function takes a table of default values and a table of settings,
+--- and ensures that any missing settings are filled in with the default values.
+---
+--- @param defaults table The table containing default values.
+--- @param settings table The table containing user-defined settings.
+--- @return table, boolean The settings table with defaults applied where necessary. A bool if the table changed and requires saving.
+function Config.ResolveDefaults(defaults, settings)
+    -- Setup Defaults
+    local changed = false
+    for k, v in pairs(defaults) do
+        if settings[k] == nil then settings[k] = v.Default end
+
+        if type(settings[k]) ~= type(v.Default) then
+            RGMercsLogger.log_info("\ayData type of setting [\am%s\ay] has been deprecated -- resetting to default.", k)
+            settings[k] = v.Default
+            changed = true
+        end
+    end
+
+    -- Remove Deprecated options
+    for k, _ in pairs(settings) do
+        if not defaults[k] then
+            settings[k] = nil
+            RGMercsLogger.log_info("\aySetting [\am%s\ay] has been deprecated -- removing from your config.", k)
+            changed = true
+        end
+    end
+
+    return settings, changed
 end
 
 function Config:GetTimeSinceLastMove()

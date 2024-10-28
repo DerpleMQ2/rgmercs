@@ -45,38 +45,6 @@ function RGMercUtils.ScanConfigDirs()
     table.insert(RGMercConfig.Globals.ClassConfigDirs, "Custom")
 end
 
---- Resolves the default values for a given settings table.
---- This function takes a table of default values and a table of settings,
---- and ensures that any missing settings are filled in with the default values.
----
---- @param defaults table The table containing default values.
---- @param settings table The table containing user-defined settings.
---- @return table, boolean The settings table with defaults applied where necessary. A bool if the table changed and requires saving.
-function RGMercUtils.ResolveDefaults(defaults, settings)
-    -- Setup Defaults
-    local changed = false
-    for k, v in pairs(defaults) do
-        if settings[k] == nil then settings[k] = v.Default end
-
-        if type(settings[k]) ~= type(v.Default) then
-            RGMercsLogger.log_info("\ayData type of setting [\am%s\ay] has been deprecated -- resetting to default.", k)
-            settings[k] = v.Default
-            changed = true
-        end
-    end
-
-    -- Remove Deprecated options
-    for k, _ in pairs(settings) do
-        if not defaults[k] then
-            settings[k] = nil
-            RGMercsLogger.log_info("\aySetting [\am%s\ay] has been deprecated -- removing from your config.", k)
-            changed = true
-        end
-    end
-
-    return settings, changed
-end
-
 --- Sets the target for the RGMercUtils.
 --- @param targetId number The ID of the target to be set.
 --- @param ignoreBuffPopulation boolean? Wait to return until buffs are populated Default: false

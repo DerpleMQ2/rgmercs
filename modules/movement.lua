@@ -279,7 +279,7 @@ function Module:LoadSettings()
     local settingsChanged = false
 
     -- Setup Defaults
-    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+    self.settings, settingsChanged = RGMercConfig.ResolveDefaults(self.DefaultConfig, self.settings)
     if RGMercConfig.Globals.BuildType == 'Emu' then
         self.DefaultConfig['DoMercenary'] = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = false, ConfigType = "Normal", }
         self.DefaultConfig['DoFellow'] = {
