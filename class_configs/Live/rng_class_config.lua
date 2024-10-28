@@ -11,6 +11,7 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
 local GameUtils     = require("utils.game_utils")
+local StringUtils   = require("utils.string_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local Tooltips      = {
@@ -1694,7 +1695,7 @@ local _ClassConfig = {
                 RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility.RankName.Name() or "None")
             else
                 RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %sd", openerAbility.RankName.Name() or "None",
-                    RGMercUtils.BoolToColorString(RGMercConfig:GetSetting("DoOpener")))
+                    StringUtils.BoolToColorString(RGMercConfig:GetSetting("DoOpener")))
             end
         end,
     },

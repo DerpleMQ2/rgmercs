@@ -2,6 +2,7 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
 local GameUtils     = require("utils.game_utils")
+local StringUtils   = require("utils.string_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local Tooltips      = {
@@ -810,11 +811,11 @@ local _ClassConfig = {
                     (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= threshold)
             RGMercsLogger.log_verbose("\ayRefreshBuffSong(%s) => memed(%s), song: duration(%0.2f) < reusetime(%0.2f) buff: duration(%0.2f) < reusetime(%0.2f) --> result(%s)",
                 songSpell.Name(),
-                RGMercUtils.BoolToColorString(me.Gem(songSpell.RankName.Name())() ~= nil),
+                StringUtils.BoolToColorString(me.Gem(songSpell.RankName.Name())() ~= nil),
                 me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, threshold,
                 me.Buff(songSpell.Name()).Duration.TotalSeconds() or 0,
                 threshold,
-                RGMercUtils.BoolToColorString(res))
+                StringUtils.BoolToColorString(res))
             return res
         end,
         UnwantedAggroCheck = function(self) --Self-Explanatory. Add isTanking to this if you ever make a mode for bardtanks!

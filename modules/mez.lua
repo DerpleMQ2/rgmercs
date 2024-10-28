@@ -746,7 +746,7 @@ function Module:DoMez()
         self:ProcessMezList()
     else
         RGMercsLogger.log_verbose("DoMez() : Skipping Mez list processing: Spell(%s) Ready(%s) TableSize(%d)", mezSpell and mezSpell() or "None",
-            mezSpell and mezSpell() and RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()) or "NoSpell",
+            mezSpell and mezSpell() and StringUtils.BoolToColorString(mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()) or "NoSpell",
             tableSize)
     end
 end

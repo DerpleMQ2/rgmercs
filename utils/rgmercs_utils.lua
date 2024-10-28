@@ -3,6 +3,7 @@ local mq                       = require('mq')
 local RGMercsLogger            = require("utils.rgmercs_logger")
 local CommUtils                = require("utils.comm_utils")
 local GameUtils                = require("utils.game_utils")
+local StringUtils              = require("utils.string_utils")
 local Set                      = require('mq.set')
 local DanNet                   = require('lib.dannet.helpers')
 local Icons                    = require('mq.ICONS')
@@ -151,8 +152,8 @@ function RGMercUtils.CanUseAA(aaName)
     local haveAbility = mq.TLO.Me.AltAbility(aaName)()
     local levelCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level()
     local rankCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).Rank() > 0
-    RGMercsLogger.log_super_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, RGMercUtils.BoolToColorString(haveAbility),
-        RGMercUtils.BoolToColorString(levelCheck), RGMercUtils.BoolToColorString(rankCheck))
+    RGMercsLogger.log_super_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, StringUtils.BoolToColorString(haveAbility),
+        StringUtils.BoolToColorString(levelCheck), StringUtils.BoolToColorString(rankCheck))
     return haveAbility and levelCheck and rankCheck
 end
 
@@ -168,7 +169,7 @@ end
 function RGMercUtils.AAReady(aaName)
     local canUse = RGMercUtils.CanUseAA(aaName)
     local ready = mq.TLO.Me.AltAbilityReady(aaName)()
-    RGMercsLogger.log_super_verbose("AAReady(%s): ready(%s) canUse(%s)", aaName, RGMercUtils.BoolToColorString(ready), RGMercUtils.BoolToColorString(canUse))
+    RGMercsLogger.log_super_verbose("AAReady(%s): ready(%s) canUse(%s)", aaName, StringUtils.BoolToColorString(ready), StringUtils.BoolToColorString(canUse))
     return ready and canUse
 end
 
@@ -217,7 +218,7 @@ end
 function RGMercUtils.PCDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
     RGMercsLogger.log_super_verbose("PCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
-        RGMercUtils.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
+        StringUtils.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
 
@@ -230,7 +231,7 @@ function RGMercUtils.NPCDiscReady(discSpell)
     local target = mq.TLO.Target
     if not target or not target() then return false end
     RGMercsLogger.log_super_verbose("NPCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
-        RGMercUtils.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
+        StringUtils.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
         mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and not RGMercUtils.TargetIsType("corpse", target) and
         target.LineOfSight() and not target.Hovering()
@@ -433,7 +434,7 @@ function RGMercUtils.FindMissingSpells(varName, spellList, alreadyMissingSpells,
         if not highestOnly then
             for _, data in ipairs(tmpTable) do
                 RGMercsLogger.log_debug("Set[%s] : Spell[%s (%d)] : Have[%s]", data.selectedSpellData.name, data.spell.RankName(), data.spell.Level(),
-                    RGMercUtils.BoolToColorString(not data.missing))
+                    StringUtils.BoolToColorString(not data.missing))
                 if data.missing then
                     table.insert(alreadyMissingSpells, data)
                 end
@@ -442,7 +443,7 @@ function RGMercUtils.FindMissingSpells(varName, spellList, alreadyMissingSpells,
             table.sort(tmpTable, function(a, b) return a.spell.Level() > b.spell.Level() end)
             for _, data in ipairs(tmpTable) do
                 RGMercsLogger.log_debug("Set[%s] : Spell[%s (%d)]: Have[%s]", data.selectedSpellData.name, data.spell.RankName(), data.spell.Level(),
-                    RGMercUtils.BoolToColorString(not data.missing))
+                    StringUtils.BoolToColorString(not data.missing))
             end
             if tmpTable[1].missing then
                 table.insert(alreadyMissingSpells, tmpTable[1])
@@ -538,7 +539,7 @@ function RGMercUtils.WaitCastFinish(target, bAllowDead) --I am not vested in the
         if maxWait <= 0 then
             local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d",
                 (mq.TLO.Me.Casting.ID() or -1), maxWaitOrig,
-                RGMercUtils.BoolToColorString(mq.TLO.Window("CastingWindow").Open()), RGMercConfig.Globals.AutoTargetID)
+                StringUtils.BoolToColorString(mq.TLO.Window("CastingWindow").Open()), RGMercConfig.Globals.AutoTargetID)
 
             RGMercsLogger.log_debug(msg)
             CommUtils.PrintGroupMessage(msg)
@@ -953,7 +954,7 @@ end
 function RGMercUtils.UseSong(songName, targetId, bAllowMem, retryCount)
     if not songName then return false end
     local me = mq.TLO.Me
-    RGMercsLogger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, RGMercUtils.BoolToColorString(bAllowMem))
+    RGMercsLogger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, StringUtils.BoolToColorString(bAllowMem))
 
     if songName then
         local spell = mq.TLO.Spell(songName)
@@ -1096,11 +1097,11 @@ function RGMercUtils.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overri
         return RGMercUtils.UseSong(spellName, targetId, bAllowMem)
     end
 
-    RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, RGMercUtils.BoolToColorString(bAllowMem))
+    RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, StringUtils.BoolToColorString(bAllowMem))
 
     if me.Moving() then
         RGMercsLogger.log_debug("\ayUseSpell(%s, %d, %s) -- Failed because I am moving", spellName, targetId,
-            RGMercUtils.BoolToColorString(bAllowMem))
+            StringUtils.BoolToColorString(bAllowMem))
         return false
     end
 
@@ -1339,7 +1340,7 @@ function RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllo
         else
             ret = false
         end
-        --RGMercsLogger.log_verbose("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, RGMercUtils.BoolToColorString(ret))
+        --RGMercsLogger.log_verbose("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, StringUtils.BoolToColorString(ret))
     end
 
     if entry.type:lower() == "disc" then
@@ -1417,7 +1418,7 @@ function RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, tar
     end
 
     RGMercsLogger.log_verbose("\ay   :: Testing Condition for entry(%s) type(%s) cond(%s, %s) ==> \ao%s",
-        entry.name, entry.type, condArg or "None", condTarg.CleanName() or "None", RGMercUtils.BoolToColorString(pass))
+        entry.name, entry.type, condArg or "None", condTarg.CleanName() or "None", StringUtils.BoolToColorString(pass))
 
     entry.lastRun = { pass = pass, active = active, }
 
@@ -1472,11 +1473,11 @@ function RGMercUtils.RunRotation(caller, rotationTable, targetId, resolvedAction
             if entry.cond then
                 local pass = RGMercUtils.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
                 RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: TestConditionsForEntry() => %s", start_step, steps,
-                    idx, RGMercUtils.BoolToColorString(pass))
+                    idx, StringUtils.BoolToColorString(pass))
                 if pass == true then
                     local res = RGMercUtils.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
                     RGMercsLogger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: ExecEntry() => %s", start_step, steps,
-                        idx, RGMercUtils.BoolToColorString(res))
+                        idx, StringUtils.BoolToColorString(res))
                     if res == true then
                         anySuccess = true
                         stepsThisTime = stepsThisTime + 1
@@ -1536,9 +1537,9 @@ function RGMercUtils.SelfBuffPetCheck(spell)
     end
     RGMercsLogger.log_verbose("\atSelfBuffPetCheck(%s) RankPetBuff(%s) PetBuff(%s) Stacks(%s)",
         spell.RankName.Name(),
-        RGMercUtils.BoolToColorString(not mq.TLO.Me.PetBuff(spell.RankName.Name())()),
-        RGMercUtils.BoolToColorString(not mq.TLO.Me.PetBuff(spell.Name())()),
-        RGMercUtils.BoolToColorString(spell.StacksPet()))
+        StringUtils.BoolToColorString(not mq.TLO.Me.PetBuff(spell.RankName.Name())()),
+        StringUtils.BoolToColorString(not mq.TLO.Me.PetBuff(spell.Name())()),
+        StringUtils.BoolToColorString(spell.StacksPet()))
 
     return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and (not mq.TLO.Me.PetBuff(spell.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
 end
@@ -1561,7 +1562,7 @@ function RGMercUtils.SelfBuffCheck(spell)
 
     RGMercsLogger.log_verbose("\aySelfBuffCheck(\at%s\ay/\am%d\ay) Spell Obj => %s", spell.RankName(),
         spell.RankName.ID(),
-        RGMercUtils.BoolToColorString(res))
+        StringUtils.BoolToColorString(res))
 
     return res
 end
@@ -1590,21 +1591,6 @@ function RGMercUtils.PadString(string, len, padFront, padChar)
     return string
 end
 
---- Converts a boolean value to its string representation.
---- @param b boolean: The boolean value to convert.
---- @return string: "true" if the boolean is true, "false" otherwise.
-function RGMercUtils.BoolToString(b)
-    return b and "true" or "false"
-end
-
---- Converts a boolean value to a color string.
---- If the boolean is true, it returns "green", otherwise "red".
---- @param b boolean: The boolean value to convert.
---- @return string: The color string corresponding to the boolean value.
-function RGMercUtils.BoolToColorString(b)
-    return b and "\agtrue\ax" or "\arfalse\ax"
-end
-
 --- Checks if the specified AA (Alternate Advancement) ability is available for self-buffing.
 --- @param aaName string The name of the AA ability to check.
 --- @return boolean Returns true if the AA ability is available for self-buffing, false otherwise.
@@ -1617,12 +1603,12 @@ function RGMercUtils.SelfBuffAACheck(aaName)
     local triggerStacks = (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
 
     --RGMercsLogger.log_verbose("SelfBuffAACheck(%s) abilityReady(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s) triggerStacks(%s)", aaName,
-    --    RGMercUtils.BoolToColorString(abilityReady),
-    --    RGMercUtils.BoolToColorString(buffNotActive),
-    --    RGMercUtils.BoolToColorString(triggerNotActive),
-    --    RGMercUtils.BoolToColorString(auraNotActive),
-    --    RGMercUtils.BoolToColorString(stacks),
-    --    RGMercUtils.BoolToColorString(triggerStacks))
+    --    StringUtils.BoolToColorString(abilityReady),
+    --    StringUtils.BoolToColorString(buffNotActive),
+    --    StringUtils.BoolToColorString(triggerNotActive),
+    --    StringUtils.BoolToColorString(auraNotActive),
+    --    StringUtils.BoolToColorString(stacks),
+    --    StringUtils.BoolToColorString(triggerStacks))
 
     return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks and triggerStacks
 end
@@ -1723,8 +1709,8 @@ function RGMercUtils.PeerHasBuff(spell, peerName)
     end
 
     local ret = RGMercUtils.DanNetFindBuff(peerName, effectsToCheck)
-    RGMercsLogger.log_verbose("\ayPeerHasBuff() \atSearching for trigger rank spell ID Count: %d on %s :: %s", #effectsToCheck, peerName, RGMercUtils.BoolToColorString(ret))
-    RGMercsLogger.log_verbose("\ayPeerHasBuff() \awFinding spell: %s on %s :: %s", spell.Name(), peerName, RGMercUtils.BoolToColorString(ret))
+    RGMercsLogger.log_verbose("\ayPeerHasBuff() \atSearching for trigger rank spell ID Count: %d on %s :: %s", #effectsToCheck, peerName, StringUtils.BoolToColorString(ret))
+    RGMercsLogger.log_verbose("\ayPeerHasBuff() \awFinding spell: %s on %s :: %s", spell.Name(), peerName, StringUtils.BoolToColorString(ret))
     return ret
 end
 
@@ -1824,29 +1810,29 @@ function RGMercUtils.TargetHasBuff(spell, buffTarget)
         RGMercUtils.SetTarget(target.ID())
     end
 
-    RGMercsLogger.log_verbose("TargetHasBuff(): Target Buffs Populated: %s", RGMercUtils.BoolToColorString(target.BuffsPopulated()))
+    RGMercsLogger.log_verbose("TargetHasBuff(): Target Buffs Populated: %s", StringUtils.BoolToColorString(target.BuffsPopulated()))
 
     local numEffects = spell.NumEffects()
 
     local ret = (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
-    RGMercsLogger.log_verbose("TargetHasBuff() Searching for spell(%s) ID: %d on %s :: %s", spell.Name(), spell.ID(), target.DisplayName(), RGMercUtils.BoolToColorString(ret))
+    RGMercsLogger.log_verbose("TargetHasBuff() Searching for spell(%s) ID: %d on %s :: %s", spell.Name(), spell.ID(), target.DisplayName(), StringUtils.BoolToColorString(ret))
     if ret then return true end
 
     ret = (target.FindBuff("id " .. tostring(spell.RankName.ID())).ID() or 0) > 0
     RGMercsLogger.log_verbose("TargetHasBuff() Searching for rank spell(%s) ID: %d on %s :: %s", spell.RankName.Name(), spell.RankName.ID(), target.DisplayName(),
-        RGMercUtils.BoolToColorString(ret))
+        StringUtils.BoolToColorString(ret))
     if ret then return true end
 
     for i = 1, numEffects do
         local triggerSpell = spell.Trigger(i)
         if triggerSpell and triggerSpell() then
             ret = (target.FindBuff("id " .. tostring(triggerSpell.ID())).ID() or 0) > 0
-            RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger spell ID: %d on %s :: %s", triggerSpell.ID(), target.DisplayName(), RGMercUtils.BoolToColorString(ret))
+            RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger spell ID: %d on %s :: %s", triggerSpell.ID(), target.DisplayName(), StringUtils.BoolToColorString(ret))
             if ret then return true end
 
             ret = (target.FindBuff("id " .. tostring(triggerSpell.RankName.ID())).ID() or 0) > 0
             RGMercsLogger.log_verbose("TargetHasBuff() Searching for trigger rank spell ID: %d on %s :: %s", triggerSpell.ID(), target.DisplayName(),
-                RGMercUtils.BoolToColorString(ret))
+                StringUtils.BoolToColorString(ret))
             if ret then return true end
         end
     end
@@ -2390,9 +2376,9 @@ function RGMercUtils.AutoMed()
     if me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
         RGMercsLogger.log_verbose(
             "Sit check returning early due to movement. Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s)",
-            me.Casting() or "None", RGMercUtils.BoolToColorString(me.Moving()), RGMercUtils.BoolToColorString(mq.TLO.Stick.Active()),
-            RGMercUtils.BoolToColorString(mq.TLO.Navigation.Active()), RGMercUtils.BoolToColorString(mq.TLO.MoveTo.Moving()),
-            RGMercUtils.BoolToColorString(mq.TLO.AdvPath.Following()))
+            me.Casting() or "None", StringUtils.BoolToColorString(me.Moving()), StringUtils.BoolToColorString(mq.TLO.Stick.Active()),
+            StringUtils.BoolToColorString(mq.TLO.Navigation.Active()), StringUtils.BoolToColorString(mq.TLO.MoveTo.Moving()),
+            StringUtils.BoolToColorString(mq.TLO.AdvPath.Following()))
         return
     end
 
@@ -2433,7 +2419,7 @@ function RGMercUtils.AutoMed()
         "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d :: forceSit %s :: forceStand %s",
         me.PctHPs(), RGMercConfig:GetSetting('HPMedPct'), me.PctMana(),
         RGMercConfig:GetSetting('ManaMedPct'), me.PctEndurance(),
-        RGMercConfig:GetSetting('EndMedPct'), RGMercUtils.BoolToColorString(forcesit), RGMercUtils.BoolToColorString(forcestand))
+        RGMercConfig:GetSetting('EndMedPct'), StringUtils.BoolToColorString(forcesit), StringUtils.BoolToColorString(forcestand))
 
     if RGMercUtils.GetXTHaterCount() > 0 and RGMercConfig:GetSetting('DoMed') ~= 2 then
         if RGMercConfig:GetSetting('DoMelee') then
@@ -2502,9 +2488,9 @@ function RGMercUtils.BuffSong(songSpell)
         (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= (songSpell.MyCastTime.Seconds() + 6)
     RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), duration(%0.2f) < casttime(%0.2f) --> result(%s)",
         songSpell.Name(),
-        RGMercUtils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
+        StringUtils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
         me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, songSpell.MyCastTime.Seconds() + 6,
-        RGMercUtils.BoolToColorString(res))
+        StringUtils.BoolToColorString(res))
     return res
 end
 
@@ -2516,8 +2502,8 @@ function RGMercUtils.DebuffSong(songSpell)
     local me = mq.TLO.Me
     local res = me.Gem(songSpell.Name()) and not RGMercUtils.TargetHasBuff(songSpell)
     RGMercsLogger.log_verbose("\ayBuffSong(%s) => memed(%s), targetHas(%s) --> result(%s)", songSpell.Name(),
-        RGMercUtils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
-        RGMercUtils.BoolToColorString(RGMercUtils.TargetHasBuff(songSpell)), RGMercUtils.BoolToColorString(res))
+        StringUtils.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
+        StringUtils.BoolToColorString(RGMercUtils.TargetHasBuff(songSpell)), StringUtils.BoolToColorString(res))
     return res
 end
 
@@ -3229,7 +3215,7 @@ function RGMercUtils.FindTarget(validateFn)
             end
 
             RGMercsLogger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", RGMercConfig.Globals.MainAssist,
-                RGMercUtils.BoolToColorString(assistTarget and assistTarget.Aggressive() or false))
+                StringUtils.BoolToColorString(assistTarget and assistTarget.Aggressive() or false))
 
             if assistTarget and assistTarget() and (RGMercUtils.TargetIsType("npc", assistTarget) or RGMercUtils.TargetIsType("npcpet", assistTarget)) then
                 RGMercsLogger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
@@ -3593,8 +3579,8 @@ function RGMercUtils.FindTargetCheck()
     local config = RGMercConfig:GetSettings()
 
     RGMercsLogger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", RGMercUtils.GetXTHaterCount(),
-        RGMercUtils.BoolToColorString(RGMercUtils.IAmMA()), RGMercUtils.BoolToColorString(config.FollowMarkTarget),
-        RGMercUtils.BoolToColorString(RGMercConfig.Globals.BackOffFlag))
+        StringUtils.BoolToColorString(RGMercUtils.IAmMA()), StringUtils.BoolToColorString(config.FollowMarkTarget),
+        StringUtils.BoolToColorString(RGMercConfig.Globals.BackOffFlag))
 
     local OATarget = false
 
@@ -3636,7 +3622,7 @@ function RGMercUtils.OkToEngagePreValidateId(targetId)
         if not mq.TLO.Me.Combat() then
             RGMercsLogger.log_verbose(
                 "\ay[2] Target type check failed \aw[\atpcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay",
-                RGMercUtils.BoolToColorString(pcCheck), RGMercUtils.BoolToColorString(mercCheck))
+                StringUtils.BoolToColorString(pcCheck), StringUtils.BoolToColorString(mercCheck))
         end
         return false
     end
@@ -3664,15 +3650,15 @@ function RGMercUtils.OkToEngagePreValidateId(targetId)
             RGMercsLogger.log_verbose(
                 "\ay  OkToEngageId(%s) AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
                 RGMercUtils.GetTargetCleanName(target),
-                target.CleanName(), target.ID(), RGMercUtils.BoolToColorString(distanceCheck), RGMercUtils.GetTargetDistance(target),
-                RGMercUtils.BoolToColorString(assistCheck))
+                target.CleanName(), target.ID(), StringUtils.BoolToColorString(distanceCheck), RGMercUtils.GetTargetDistance(target),
+                StringUtils.BoolToColorString(assistCheck))
             return false
         end
     end
 
     RGMercsLogger.log_verbose("\ay  OkToEngageId(%s) Okay to Engage Failed with Fall Through!",
         RGMercUtils.GetTargetCleanName(target),
-        RGMercUtils.BoolToColorString(pcCheck), RGMercUtils.BoolToColorString(mercCheck))
+        StringUtils.BoolToColorString(pcCheck), StringUtils.BoolToColorString(mercCheck))
     return false
 end
 
@@ -3693,7 +3679,7 @@ function RGMercUtils.OkToEngage(autoTargetId)
         if not mq.TLO.Me.Combat() then
             RGMercsLogger.log_verbose(
                 "\ay[2] Target type check failed \aw[\atpcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay",
-                RGMercUtils.BoolToColorString(pcCheck), RGMercUtils.BoolToColorString(mercCheck))
+                StringUtils.BoolToColorString(pcCheck), StringUtils.BoolToColorString(mercCheck))
         end
         return false
     end
@@ -3730,14 +3716,14 @@ function RGMercUtils.OkToEngage(autoTargetId)
         else
             RGMercsLogger.log_verbose(
                 "\ay  OkayToEngage() AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
-                target.CleanName(), target.ID(), RGMercUtils.BoolToColorString(distanceCheck), RGMercUtils.GetTargetDistance(),
-                RGMercUtils.BoolToColorString(assistCheck))
+                target.CleanName(), target.ID(), StringUtils.BoolToColorString(distanceCheck), RGMercUtils.GetTargetDistance(),
+                StringUtils.BoolToColorString(assistCheck))
             return false
         end
     end
 
     RGMercsLogger.log_verbose("\ay  OkayToEngage() Okay to Engage Failed with Fall Through!",
-        RGMercUtils.BoolToColorString(pcCheck), RGMercUtils.BoolToColorString(mercCheck))
+        StringUtils.BoolToColorString(pcCheck), StringUtils.BoolToColorString(mercCheck))
     return false
 end
 
@@ -3990,8 +3976,8 @@ function RGMercUtils.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                             RGMercsLogger.log_debug(
                                 "    ==> \ayGem \am%d will \arNOT\ay load \at%s (pass=%s, bestSpell=%s, bookSpell=%d, loadedSpell=%s)",
                                 gem, s.name,
-                                RGMercUtils.BoolToColorString(pass), bestSpell and bestSpell.RankName() or "", bookSpell or -1,
-                                RGMercUtils.BoolToColorString(loadedSpell))
+                                StringUtils.BoolToColorString(pass), bestSpell and bestSpell.RankName() or "", bookSpell or -1,
+                                StringUtils.BoolToColorString(loadedSpell))
                         end
                     else
                         RGMercsLogger.log_debug(

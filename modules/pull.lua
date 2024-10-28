@@ -1544,7 +1544,7 @@ function Module:GiveTime(combat_state)
         GameUtils.DoCmd("/mapfilter pullradius off")
     end
 
-    RGMercsLogger.log_verbose("PULL:GiveTime() - DoPull: %s", RGMercUtils.BoolToColorString(RGMercConfig:GetSetting('DoPull')))
+    RGMercsLogger.log_verbose("PULL:GiveTime() - DoPull: %s", StringUtils.BoolToColorString(RGMercConfig:GetSetting('DoPull')))
     if not RGMercConfig:GetSetting('DoPull') and self.TempSettings.TargetSpawnID == 0 then return end
 
     if RGMercConfig:GetSetting('DoPull') and self:IsPullMode("Hunt") and ((self.TempSettings.HuntX == 0 or self.TempSettings.HuntY == 0 or self.TempSettings.HuntZ == 0) or RGMercConfig:GetSetting('HuntFromPlayer')) then
@@ -1570,7 +1570,7 @@ function Module:GiveTime(combat_state)
 
     local shouldPull, reason = self:ShouldPull(campData)
 
-    RGMercsLogger.log_verbose("PULL:GiveTime() - ShouldPull: %s", RGMercUtils.BoolToColorString(shouldPull))
+    RGMercsLogger.log_verbose("PULL:GiveTime() - ShouldPull: %s", StringUtils.BoolToColorString(shouldPull))
 
     if not shouldPull then
         if not mq.TLO.Navigation.Active() and combat_state == "Downtime" then
@@ -1859,7 +1859,7 @@ function Module:GiveTime(combat_state)
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
-                    RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
+                    RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", StringUtils.BoolToColorString(successFn()))
 
                     if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
                         GameUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
@@ -1886,7 +1886,7 @@ function Module:GiveTime(combat_state)
 
                 -- We will continue to fire arrows until we aggro our target
                 while not successFn() do
-                    RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", RGMercUtils.BoolToColorString(successFn()))
+                    RGMercsLogger.log_super_verbose("Waiting on ranged pull to finish... %s", StringUtils.BoolToColorString(successFn()))
                     GameUtils.DoCmd("/attack")
 
                     if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
@@ -1907,7 +1907,7 @@ function Module:GiveTime(combat_state)
             else -- AA/Spell/Ability pull
                 mq.delay(5)
                 while not successFn() do
-                    RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...%s", RGMercUtils.BoolToColorString(successFn()))
+                    RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...%s", StringUtils.BoolToColorString(successFn()))
                     GameUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
                     mq.doevents()
 

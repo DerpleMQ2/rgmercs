@@ -2,6 +2,7 @@ local mq                             = require('mq')
 local RGMercUtils                    = require("utils.rgmercs_utils")
 local CommUtils                      = require("utils.comm_utils")
 local TableUtils                     = require("utils.table_utils")
+local StringUtils                    = require("utils.string_utils")
 local RGMercsLogger                  = require("utils.rgmercs_logger")
 local Set                            = require("mq.Set")
 
@@ -1517,8 +1518,8 @@ function Config:GetUsageText(config, showUsageText, defaults)
     elseif type(configData.Default) == 'boolean' then
         rangeText = string.format("\aw<\a-yon\aw|\a-yoff\ax>")
         ---@diagnostic disable-next-line: param-type-mismatch
-        defaultText = string.format("[\a-tDefault: %s\ax]", RGMercUtils.BoolToString(configData.Default))
-        currentText = string.format("[\a-gCurrent: %s\ax]", RGMercUtils.BoolToString(RGMercConfig:GetSetting(config)))
+        defaultText = string.format("[\a-tDefault: %s\ax]", StringUtils.BoolToString(configData.Default))
+        currentText = string.format("[\a-gCurrent: %s\ax]", StringUtils.BoolToString(RGMercConfig:GetSetting(config)))
         handledType = true
     elseif type(configData.Default) == 'string' then
         rangeText = string.format("\aw<\"str\">")

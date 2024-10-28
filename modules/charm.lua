@@ -4,6 +4,7 @@ local RGMercUtils   = require("utils.rgmercs_utils")
 local CommUtils     = require("utils.comm_utils")
 local GameUtils     = require("utils.game_utils")
 local TableUtils    = require("utils.table_utils")
+local StringUtils   = require("utils.string_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 local Set           = require("mq.Set")
 local Icons         = require('mq.ICONS')
@@ -663,7 +664,7 @@ function Module:ProcessCharmList()
 			else
 				if spawn.Distance() > self.settings.CharmRadius or not spawn.LineOfSight() then
 					RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Distance(%d) LOS(%s)", id,
-						spawn.Distance(), RGMercUtils.BoolToColorString(spawn.LineOfSight()))
+						spawn.Distance(), StringUtils.BoolToColorString(spawn.LineOfSight()))
 				else
 					if id == RGMercConfig.Globals.AutoTargetID then
 						RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Mob is MA's target skipping", id)
@@ -719,7 +720,7 @@ function Module:DoCharm()
 			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
 				charmSpell and charmSpell() or "None",
 				charmSpell and charmSpell() and
-				RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
+				StringUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
 				TableUtils.GetTableSize(self.TempSettings.CharmTracker))
 		end
 	else
@@ -730,7 +731,7 @@ function Module:DoCharm()
 			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
 				charmSpell and charmSpell() or "None",
 				charmSpell and charmSpell() and
-				RGMercUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
+				StringUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
 				TableUtils.GetTableSize(self.TempSettings.CharmTracker))
 		end
 	end

@@ -3,6 +3,7 @@ local mq                  = require('mq')
 local RGMercUtils         = require("utils.rgmercs_utils")
 local GameUtils           = require("utils.game_utils")
 local CommUtils           = require("utils.comm_utils")
+local StringUtils         = require("utils.string_utils")
 local RGMercsLogger       = require("utils.rgmercs_logger")
 local Set                 = require("mq.Set")
 
@@ -598,7 +599,7 @@ function Module:LoadSettings()
 	-- Setup Defaults
 	self.settings, needsSave = RGMercUtils.ResolveDefaults(Module.DefaultConfig, self.settings)
 
-	RGMercsLogger.log_debug("Settings Changes = %s", RGMercUtils.BoolToColorString(needsSave))
+	RGMercsLogger.log_debug("Settings Changes = %s", StringUtils.BoolToColorString(needsSave))
 	if needsSave then
 		self:SaveSettings(false)
 	end

@@ -24,6 +24,7 @@ RGMercsConsole    = nil
 local RGMercUtils = require("utils.rgmercs_utils")
 local CommUtils   = require("utils.comm_utils")
 local GameUtils   = require("utils.game_utils")
+local StringUtils = require("utils.string_utils")
 
 RGMercNameds      = require("utils.rgmercs_named")
 
@@ -834,8 +835,8 @@ local function Main()
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
         RGMercsLogger.log_debug(
             "\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
-            RGMercUtils.BoolToColorString(mq.TLO.Me.Combat()), RGMercUtils.BoolToColorString(pcCheck),
-            RGMercUtils.BoolToColorString(mercCheck))
+            StringUtils.BoolToColorString(mq.TLO.Me.Combat()), StringUtils.BoolToColorString(pcCheck),
+            StringUtils.BoolToColorString(mercCheck))
         GameUtils.DoCmd("/attack off")
     end
 

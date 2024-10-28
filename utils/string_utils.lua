@@ -56,4 +56,19 @@ function StringUtils.FormatTime(time, formatString)
     return string.format(formatString and formatString or "%d:%02d:%02d:%02d", days, hours, minutes, seconds)
 end
 
+--- Converts a boolean value to its string representation.
+--- @param b boolean: The boolean value to convert.
+--- @return string: "true" if the boolean is true, "false" otherwise.
+function StringUtils.BoolToString(b)
+    return b and "true" or "false"
+end
+
+--- Converts a boolean value to a color string.
+--- If the boolean is true, it returns "green", otherwise "red".
+--- @param b boolean: The boolean value to convert.
+--- @return string: The color string corresponding to the boolean value.
+function StringUtils.BoolToColorString(b)
+    return b and "\agtrue\ax" or "\arfalse\ax"
+end
+
 return StringUtils

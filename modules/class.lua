@@ -617,7 +617,7 @@ function Module:HealById(id)
                 RGMercsLogger.log_verbose(
                     "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \arNOT \awSuccessful! Conditions: wasRun(%s) castResult(%s) \ayGoing to keep trying!",
                     id,
-                    rotation.name, RGMercUtils.BoolToColorString(wasRun), RGMercUtils.GetLastCastResultName())
+                    rotation.name, StringUtils.BoolToColorString(wasRun), RGMercUtils.GetLastCastResultName())
             end
         else
             RGMercsLogger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \aris NOT\aw appropriate to use.", id,

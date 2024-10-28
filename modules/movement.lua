@@ -3,6 +3,7 @@ local mq                           = require('mq')
 local RGMercUtils                  = require("utils.rgmercs_utils")
 local CommUtils                    = require("utils.comm_utils")
 local GameUtils                    = require("utils.game_utils")
+local StringUtils                  = require("utils.string_utils")
 local RGMercsLogger                = require("utils.rgmercs_logger")
 local Set                          = require("mq.Set")
 local Icons                        = require('mq.ICONS')
@@ -639,7 +640,7 @@ function Module:DoClickies()
         local setting = RGMercConfig:GetSetting(string.format("ClickyItem%d", i))
         if setting and setting:len() > 0 then
             local item = mq.TLO.FindItem(setting)
-            RGMercsLogger.log_verbose("Looking for clicky item: %s found: %s", setting, RGMercUtils.BoolToColorString(item() ~= nil))
+            RGMercsLogger.log_verbose("Looking for clicky item: %s found: %s", setting, StringUtils.BoolToColorString(item() ~= nil))
 
             if item then
                 if item.Timer.TotalSeconds() == 0 then

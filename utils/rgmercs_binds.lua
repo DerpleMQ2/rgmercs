@@ -1,6 +1,7 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
 local GameUtils     = require("utils.game_utils")
+local StringUtils   = require("utils.string_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 local Bind          = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
@@ -35,7 +36,7 @@ Bind.Handlers       = {
         about = "Will force combat to be enabled on your XTarget[1]. If you have no XTarget[1] it will use your current target.",
         handler = function()
             RGMercUtils.ForceCombat = not RGMercUtils.ForceCombat
-            RGMercsLogger.log_info("\awForced Combat: %s", RGMercUtils.BoolToColorString(RGMercUtils.ForceCombat))
+            RGMercsLogger.log_info("\awForced Combat: %s", StringUtils.BoolToColorString(RGMercUtils.ForceCombat))
 
             if RGMercUtils.ForceCombat then
                 if mq.TLO.Target.ID() == 0 or (mq.TLO.Target.Type() or "none"):lower() ~= "npc" then
@@ -68,7 +69,7 @@ Bind.Handlers       = {
         about = "Will force the current target to be considered a name mainly for testing purposes.",
         handler = function()
             RGMercUtils.ForceNamed = not RGMercUtils.ForceNamed
-            RGMercsLogger.log_info("\awForced Named: %s", RGMercUtils.BoolToColorString(RGMercUtils.ForceNamed))
+            RGMercsLogger.log_info("\awForced Named: %s", StringUtils.BoolToColorString(RGMercUtils.ForceNamed))
         end,
     },
     ['burnnow'] = {
@@ -119,7 +120,7 @@ Bind.Handlers       = {
                 RGMercConfig.Globals.BackOffFlag = false
             end
 
-            RGMercsLogger.log_info("\ayBackoff \awset to: %s", RGMercUtils.BoolToColorString(RGMercConfig.Globals.BackOffFlag))
+            RGMercsLogger.log_info("\ayBackoff \awset to: %s", StringUtils.BoolToColorString(RGMercConfig.Globals.BackOffFlag))
         end,
     },
     ['qsay'] = {

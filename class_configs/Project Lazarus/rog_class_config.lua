@@ -1,6 +1,7 @@
 local mq            = require('mq')
 local RGMercUtils   = require("utils.rgmercs_utils")
 local GameUtils     = require("utils.game_utils")
+local StringUtils   = require("utils.string_utils")
 local RGMercsLogger = require("utils.rgmercs_logger")
 
 return {
@@ -549,8 +550,8 @@ return {
                 RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
                 RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Hide Ready = %s, Invis = %s", openerAbility or "None",
-                    RGMercUtils.BoolToColorString(RGMercConfig:GetSetting("DoOpener")), RGMercUtils.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
-                    RGMercUtils.BoolToColorString(mq.TLO.Me.Invis()))
+                    StringUtils.BoolToColorString(RGMercConfig:GetSetting("DoOpener")), StringUtils.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
+                    StringUtils.BoolToColorString(mq.TLO.Me.Invis()))
             end
         end,
     },
