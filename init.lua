@@ -78,7 +78,11 @@ local function renderModulesPopped()
     for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
         if RGMercUtils.GetSetting(name .. "_Popped", true) then
             if RGMercModules:ExecModule(name, "ShouldRender") then
-                local open, show = ImGui.Begin(name, true)
+                local open, show = ImGui.Begin(name .. "##RGMERCS_Popped", true)
+                if not open then
+                    show = false
+                    RGMercUtils.SetSetting(name .. "_Popped", false)
+                end
                 if show then
                     RGMercModules:ExecModule(name, "Render")
                 end
@@ -89,11 +93,6 @@ local function renderModulesPopped()
                     end
                 end
                 ImGui.End()
-
-                if not open then
-                    show = false
-                    RGMercUtils.SetSetting(name .. "_Popped", false)
-                end
             end
         end
     end
