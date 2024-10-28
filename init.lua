@@ -85,6 +85,7 @@ local function renderModulesPopped()
                 if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
                     if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercUtils.GetSetting("EscapeMinimizes") then
                         open = false
+                        RGMercUtils.SetSetting(name .. "_Popped", false)
                     end
                 end
                 ImGui.End()
