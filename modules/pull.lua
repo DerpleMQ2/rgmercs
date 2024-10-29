@@ -701,7 +701,7 @@ function Module:RenderPullTargets()
             local _, clicked = ImGui.Selectable(spawn.CleanName() or "Unknown")
             if clicked then
                 RGMercsLogger.log_debug("Targetting: %d", spawn.ID() or 0)
-                GameUtils.DoCmd("/target id %d", spawn.ID() or 0)
+                spawn.DoTarget()
             end
             ImGui.PopID()
             ImGui.TableNextColumn()
@@ -1948,8 +1948,8 @@ function Module:GiveTime(combat_state)
             else -- AA/Spell/Ability pull
                 mq.delay(5)
                 while not successFn() do
-                    RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...%s", StringUtils.BoolToColorString(successFn()))
-                    GameUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
+                    RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...%s", RGMercUtils.BoolToColorString(successFn()))
+                    RGMercUtils.SetTarget(self.TempSettings.PullID)
                     mq.doevents()
 
                     if mq.TLO.Target.FeetWet() ~= mq.TLO.Me.FeetWet() then
