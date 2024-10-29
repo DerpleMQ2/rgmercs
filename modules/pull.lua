@@ -696,7 +696,7 @@ function Module:RenderPullTargets()
             local _, clicked = ImGui.Selectable(spawn.CleanName() or "Unknown")
             if clicked then
                 RGMercsLogger.log_debug("Targetting: %d", spawn.ID() or 0)
-                RGMercUtils.DoCmd("/target id %d", spawn.ID() or 0)
+                spawn.DoTarget()
             end
             ImGui.PopID()
             ImGui.TableNextColumn()
@@ -1944,7 +1944,7 @@ function Module:GiveTime(combat_state)
                 mq.delay(5)
                 while not successFn() do
                     RGMercsLogger.log_super_verbose("Waiting on ability pull to finish...%s", RGMercUtils.BoolToColorString(successFn()))
-                    RGMercUtils.DoCmd("/target ID %d", self.TempSettings.PullID)
+                    RGMercUtils.SetTarget(self.TempSettings.PullID)
                     mq.doevents()
 
                     if mq.TLO.Target.FeetWet() ~= mq.TLO.Me.FeetWet() then

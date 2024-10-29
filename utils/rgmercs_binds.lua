@@ -129,7 +129,7 @@ Bind.Handlers     = {
             for _, t in ipairs(allText) do
                 text = (text and text .. " " or "") .. t
             end
-            RGMercUtils.DoCmd("/squelch /dggaexecute /target id %d", RGMercUtils.GetTargetID())
+            RGMercUtils.DoCmd("/squelch /dggaexecute /mqtarget id %d", RGMercUtils.GetTargetID())
             mq.delay(5)
             RGMercUtils.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)
         end,

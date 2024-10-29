@@ -1025,10 +1025,9 @@ function RGMercUtils.UseItem(itemName, targetId)
     end
 
     if oldTargetId > 0 then
-        RGMercUtils.DoCmd("/target id %d", oldTargetId)
-        mq.delay("2s", function() return RGMercUtils.GetTargetID() == oldTargetId end)
+        RGMercUtils.SetTarget(oldTargetId, true)
     else
-        RGMercUtils.DoCmd("/target clear")
+        RGMercUtils.ClearTarget()
     end
 
     return true
@@ -4570,7 +4569,7 @@ function RGMercUtils.RenderOAList()
             ImGui.TableNextColumn()
             local _, clicked = ImGui.Selectable(name, false)
             if clicked then
-                RGMercUtils.DoCmd("/target id %d", spawn() and spawn.ID() or 0)
+                RGMercUtils.SetTarget(spawn.ID() or 0, false)
             end
             ImGui.TableNextColumn()
             if spawn() and spawn.ID() > 0 then
@@ -4735,7 +4734,7 @@ function RGMercUtils.RenderZoneNamed()
                 ImGui.TableNextColumn()
                 local _, clicked = ImGui.Selectable(named.Name, false)
                 if clicked then
-                    RGMercUtils.DoCmd("/target id %d", named.Spawn() and named.Spawn.ID() or 0)
+                    RGMercUtils.SetTarget(named.Spawn() and named.Spawn.ID() or 0)
                 end
                 ImGui.TableNextColumn()
                 if named.Spawn() and named.Spawn.PctHPs() > 0 then
