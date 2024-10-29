@@ -230,6 +230,16 @@ Module.DefaultConfig                   = {
         FAQ = "I want to adjust the time between pulls so I have time to Manually Loot, how do I do that?",
         Answer = "You can adjust the time between pulls with [PullDelay].",
     },
+    ['MaxPathRange']                           = {
+        DisplayName = "Max Path Range",
+        Category = "Pull Distance",
+        Tooltip = "Maximum distance to pull using navigation pathing distance",
+        Default = 350,
+        Min = 1,
+        Max = 10000,
+        FAQ = "A mob is with in range but the path to get to them is very long, how can I adjust how far I will path to my target?",
+        Answer = "You can adjust the path distance you pull from with [MaxPathRange].",
+    },
     ['PullRadius']                             = {
         DisplayName = "Pull Radius",
         Category = "Pull Distance",
@@ -1280,8 +1290,9 @@ function Module:FixPullerMerc()
     end
 end
 
-function Module:FindTarget()
+function Module:GetPullableSpawns()
     local pullRadius = RGMercUtils.GetSetting('PullRadius')
+    local maxPathRange = RGMercUtils.GetSetting('MaxPathRange')
 
     if self:IsPullMode("Farm") then
         pullRadius = RGMercUtils.GetSetting('PullRadiusFarm')
@@ -1289,106 +1300,137 @@ function Module:FindTarget()
         pullRadius = RGMercUtils.GetSetting('PullRadiusHunt')
     end
 
-    local pullSearchString = string.format("npc radius %d targetable zradius %d range %d %d playerstate 0",
-        pullRadius, self.settings.PullZRadius,
-        (self.settings.UsePullLevels and self.settings.PullMinLevel or 1),
-        (self.settings.UsePullLevels and self.settings.PullMaxLevel or 999))
+    local pullRadiusSqr = pullRadius * pullRadius
 
-    if self:IsPullMode("Farm") then
-        local wpId = self:GetCurrentWpId()
-        local wpData = self:GetWPById(wpId)
-        pullSearchString = pullSearchString .. string.format(" loc  %0.2f, %0.2f, %0.2f", wpData.x, wpData.y, wpData.z)
-        RGMercsLogger.log_debug("\atPULL::FindTarget :: Mode: Farm :: %s", pullSearchString)
-    elseif self:IsPullMode("Hunt") then
-        pullSearchString = pullSearchString .. string.format(" loc  %0.2f, %0.2f, %0.2f", self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ)
-        RGMercsLogger.log_debug("\atPULL::FindTarget :: Mode: Farm :: %s", pullSearchString)
-    else
-        RGMercsLogger.log_debug("\atPULL::FindTarget :: Mode: %s :: %s", self.Constants.PullModes[self.settings.PullMode], pullSearchString)
+    local spawnFilter = function(spawn)
+        if not spawn.Targetable() then return false end
+        if spawn.Type() ~= "NPC" and spawn.Type() ~= "NPCPET" then
+            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
+                spawn.Type())
+            return false
+        end
+
+        if spawn.Master.Type() == 'PC' then
+            if RGMercUtils.IsSpawnXTHater(spawn.ID()) then
+                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
+                return false
+            end
+        elseif self:IsPullMode("Chain") then
+            if RGMercUtils.IsSpawnXTHater(spawn.ID()) then
+                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
+                return false
+            end
+        end
+
+        if self:HaveList("PullAllowList") then
+            RGMercsLogger.log_debug("\atPULL::FindTarget \ayHave Allow List to Check!")
+            if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
+                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
+                return false
+            end
+        elseif self:HaveList("PullDenyList") then
+            RGMercsLogger.log_debug("\atPULL::FindTarget \ayHave Deny List to Check!")
+            if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
+                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
+                return false
+            end
+        end
+
+        if spawn.FeetWet() and not RGMercConfig:GetSetting('PullMobsInWater') then
+            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water water", spawn.CleanName(), spawn.ID())
+            return false
+        end
+
+        -- Level Checks
+        if self.settings.UsePullLevels then
+            if spawn.Level() < self.settings.PullMinLevel then
+                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
+                    spawn.Level())
+                return false
+            end
+            if spawn.Level() > self.settings.PullMaxLevel then
+                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
+                    spawn.Level())
+                return false
+            end
+        else
+            -- check cons.
+            local conLevel = RGMercConfig.Constants.ConColorsNameToId[spawn.ConColor()]
+            if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
+                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
+                    spawn.CleanName(), spawn.ID(),
+                    self.settings.PullMinCon,
+                    self.settings.PullMaxCon, conLevel, spawn.ConColor())
+                return false
+            end
+        end
+
+        local checkX, checkY, checkZ = mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z()
+
+        if self:IsPullMode("Farm") then
+            local wpId = self:GetCurrentWpId()
+            local wpData = self:GetWPById(wpId)
+            checkX, checkY, checkZ = wpData.x, wpData.y, wpData.z
+        elseif self:IsPullMode("Hunt") then
+            checkX, checkY, checkZ = self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ
+        end
+        -- do distance checks.
+        if math.abs(spawn.Z() - checkZ) > self.settings.PullZRadius then
+            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
+                math.abs(spawn.Z() - checkZ),
+                self.settings.PullZRadius)
+            return false
+        end
+
+        local distSqr = RGMercUtils.GetDistanceSquared(spawn.X(), spawn.Y(), checkX, checkY)
+
+        if distSqr > pullRadiusSqr then
+            RGMercsLogger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoDistance too far - distSq(%d) > pullRadiusSq(%d)",
+                spawn.CleanName(), spawn.ID(), distSqr,
+                pullRadiusSqr)
+            return false
+        end
+
+        if RGMercUtils.GetSetting('SafeTargeting') and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
+            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targetting is enabled!",
+                spawn.CleanName(), spawn.ID())
+            return false
+        end
+
+        RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
+
+        return true
     end
 
-    local pullCount = mq.TLO.SpawnCount(pullSearchString)()
-    RGMercsLogger.log_debug("\aw\atPULL::FindTargetSearch (\at%s\aw) Found :: \am%d\ax", pullSearchString, pullCount)
+    local pullableSpawns = mq.getFilteredSpawns(spawnFilter)
 
     local pullTargets = {}
-    local addsSearch = "npc radius 40 targetable zradius 40 loc %0.2f %0.2f %0.2f"
 
-    for i = 1, pullCount do
-        local spawn = mq.TLO.NearestSpawn(i, pullSearchString)
-        local skipSpawn = false
+    for _, spawn in pairs(pullableSpawns) do
+        -- expensive nav checks are done here so we only do them once.
+        local canPath = true
+        local distance = spawn.Distance()
+        if maxPathRange > 0 then
+            distance = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
+        else
+            canPath = mq.TLO.Navigation.PathExists("id " .. spawn.ID())()
+        end
 
-        if spawn and (spawn.ID() or 0) > 0 and spawn.Targetable() then
-            if spawn.Master.Type() == 'PC' then
-                if RGMercUtils.IsSpawnXTHater(spawn.ID()) then
-                    RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) is Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
-                    skipSpawn = true
-                end
-            elseif self:IsPullMode("Chain") then
-                if RGMercUtils.IsSpawnXTHater(spawn.ID()) then
-                    RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) Already on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
-                    skipSpawn = true
-                end
-            end
-
-            if skipSpawn == false then
-                RGMercsLogger.log_debug("\atPULL::FindTarget \aoChecking Nav Pathing to %s (%d)", spawn.CleanName(), spawn.ID())
-                if mq.TLO.Navigation.PathExists("id " .. spawn.ID())() then
-                    local distance = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
-                    RGMercsLogger.log_verbose("\atPULL::FindTarget \agNav Path Exists - Distance :: %d Radius :: %d", distance, pullRadius)
-                    if distance < pullRadius then
-                        RGMercsLogger.log_debug("\atPULL::FindTarget \ayPotential Pull %s --> Distance %d", spawn.CleanName(), distance)
-                        local doInsert = true
-
-                        if not self.settings.UsePullLevels then
-                            -- check cons.
-                            local conLevel = RGMercConfig.Constants.ConColorsNameToId[spawn.ConColor()]
-                            if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
-                                RGMercsLogger.log_debug("\atPULL::FindTarget \ar -> Con Mismatch!")
-                                doInsert = false
-                                RGMercsLogger.log_debug("\atPULL::FindTarget\ay  - Ignoring mob '%s' due to con color. Min = %d, Max = %d, Mob = %d (%s)", spawn.CleanName(),
-                                    self.settings.PullMinCon,
-                                    self.settings.PullMaxCon, conLevel, spawn.ConColor())
-                            end
-                        end
-
-                        if self:HaveList("PullAllowList") then
-                            RGMercsLogger.log_debug("\atPULL::FindTarget \ayHave Allow List to Check!")
-                            if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
-                                RGMercsLogger.log_debug("\atPULL::FindTarget \ar -> Not Found in Allow List!")
-                                doInsert = false
-                            end
-                        elseif self:HaveList("PullDenyList") then
-                            RGMercsLogger.log_debug("\atPULL::FindTarget \ayHave Deny List to Check!")
-                            if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
-                                RGMercsLogger.log_debug("\atPULL::FindTarget \ar -> Found in Deny List!")
-                                doInsert = false
-                            end
-                        else
-                            RGMercsLogger.log_debug("\atPULL::FindTarget \ayNo Allow/Deny List to Check!")
-                        end
-
-                        if spawn.FeetWet() and not RGMercUtils.GetSetting('PullMobsInWater') then
-                            RGMercsLogger.log_debug("\atPULL::FindTarget \agIgnoring mob in water water: %s", spawn.CleanName())
-                            doInsert = false
-                        end
-
-                        local addCount = mq.TLO.SpawnCount(string.format(addsSearch, spawn.X(), spawn.Y(), spawn.Z()))() or 0
-
-                        RGMercsLogger.log_debug("\atPULL::FindTarget \ayPossible Add Count: %d", addCount)
-
-                        RGMercsLogger.log_debug("\atPULL::FindTarget \ayInsert Allowed: %s", doInsert and "\agYes", "\arNo")
-
-                        if doInsert then
-                            table.insert(pullTargets, { spawn = spawn, distance = distance, })
-                        end
-                    else
-                        RGMercsLogger.log_debug("\atPULL::FindTarget \ayPotential Pull %s is OOR --> Distance %d", spawn.CleanName(), distance)
-                    end
-                end
-            end
+        if not canPath or distance < 0 or distance > maxPathRange then
+            RGMercsLogger.log_debug("\atPULL::FindTarget \aoPath check failed for spawn %s (%d) - dist(%d) canPath(%s)", spawn.CleanName(), spawn.ID(), distance,
+                RGMercUtils.BoolToColorString(canPath))
+        else
+            table.insert(pullTargets, { spawn = spawn, distance = distance, })
         end
     end
 
     table.sort(pullTargets, function(a, b) return a.distance < b.distance end)
+
+    return pullTargets
+end
+
+function Module:FindTarget()
+    local pullTargets = self:GetPullableSpawns()
 
     self.TempSettings.PullTargets = pullTargets
 
