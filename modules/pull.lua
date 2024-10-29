@@ -1374,6 +1374,7 @@ function Module:GetPullableSpawns()
         elseif self:IsPullMode("Hunt") then
             checkX, checkY, checkZ = self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ
         end
+
         -- do distance checks.
         if math.abs(spawn.Z() - checkZ) > self.settings.PullZRadius then
             RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
@@ -1415,7 +1416,7 @@ function Module:GetPullableSpawns()
 
         RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
 
-        metaDataCache[spawn.ID()] = { distance = navDist }
+        metaDataCache[spawn.ID()] = { distance = navDist, }
 
         return true
     end
