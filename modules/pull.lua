@@ -1425,17 +1425,18 @@ function Module:GetPullableSpawns()
 
     table.sort(pullTargets, function(a, b) return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance end)
 
-    return pullTargets
+    return pullTargets, metaDataCache
 end
 
 function Module:FindTarget()
-    local pullTargets = self:GetPullableSpawns()
+    local pullTargets, metaData = self:GetPullableSpawns()
 
     self.TempSettings.PullTargets = pullTargets
 
     if #pullTargets > 0 then
-        RGMercsLogger.log_info("\atPULL::FindTarget \agPulling %s [%d]", pullTargets[1].CleanName(), pullTargets[1].ID())
-        return pullTargets[1].ID()
+        local pullTarget = pullTargets[1]
+        RGMercsLogger.log_info("\atPULL::FindTarget \agPulling %s [%d] with Distance: %d", pullTarget.CleanName(), pullTarget.ID(), metaData[pullTarget.ID()].distance)
+        return pullTarget.ID()
     end
 
     return 0
