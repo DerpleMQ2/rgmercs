@@ -1434,8 +1434,8 @@ function Module:FindTarget()
     self.TempSettings.PullTargets = pullTargets
 
     if #pullTargets > 0 then
-        RGMercsLogger.log_info("\atPULL::FindTarget \agPulling %s [%d] --> Distance %d", pullTargets[1].spawn.CleanName(), pullTargets[1].spawn.ID(), pullTargets[1].distance)
-        return pullTargets[1].spawn.ID()
+        RGMercsLogger.log_info("\atPULL::FindTarget \agPulling %s [%d]", pullTargets[1].CleanName(), pullTargets[1].ID())
+        return pullTargets[1].ID()
     end
 
     return 0
