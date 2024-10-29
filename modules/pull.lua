@@ -1294,6 +1294,8 @@ function Module:GetPullableSpawns()
     local pullRadius = RGMercUtils.GetSetting('PullRadius')
     local maxPathRange = RGMercUtils.GetSetting('MaxPathRange')
 
+    local metaDataCache = {}
+
     if self:IsPullMode("Farm") then
         pullRadius = RGMercUtils.GetSetting('PullRadiusFarm')
     elseif self:IsPullMode("Hunt") then
@@ -1311,10 +1313,8 @@ function Module:GetPullableSpawns()
         end
 
         if spawn.Master.Type() == 'PC' then
-            if RGMercUtils.IsSpawnXTHater(spawn.ID()) then
-                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
-                return false
-            end
+            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
+            return false
         elseif self:IsPullMode("Chain") then
             if RGMercUtils.IsSpawnXTHater(spawn.ID()) then
                 RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
@@ -1397,34 +1397,32 @@ function Module:GetPullableSpawns()
             return false
         end
 
-        RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
-
-        return true
-    end
-
-    local pullableSpawns = mq.getFilteredSpawns(spawnFilter)
-
-    local pullTargets = {}
-
-    for _, spawn in pairs(pullableSpawns) do
-        -- expensive nav checks are done here so we only do them once.
+        local navDist = 0
         local canPath = true
-        local distance = spawn.Distance()
+
         if maxPathRange > 0 then
-            distance = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
+            navDist = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
+            canPath = navDist > 0
         else
             canPath = mq.TLO.Navigation.PathExists("id " .. spawn.ID())()
         end
 
-        if not canPath or distance < 0 or distance > maxPathRange then
+        if not canPath or navDist > maxPathRange then
             RGMercsLogger.log_debug("\atPULL::FindTarget \aoPath check failed for spawn %s (%d) - dist(%d) canPath(%s)", spawn.CleanName(), spawn.ID(), distance,
                 RGMercUtils.BoolToColorString(canPath))
-        else
-            table.insert(pullTargets, { spawn = spawn, distance = distance, })
+            return false
         end
+
+        RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
+
+        metaDataCache[spawn.ID()] = { distance = navDist }
+
+        return true
     end
 
-    table.sort(pullTargets, function(a, b) return a.distance < b.distance end)
+    local pullTargets = mq.getFilteredSpawns(spawnFilter)
+
+    table.sort(pullTargets, function(a, b) return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance end)
 
     return pullTargets
 end
