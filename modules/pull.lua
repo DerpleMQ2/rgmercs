@@ -490,9 +490,7 @@ Module.CommandHandlers = {
         usage = "/rgl pulltarget",
         about = "Pulls your current target using your rgmercs pull ability",
         handler = function(self, ...)
-            self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
-            table.insert(self.TempSettings.PullTargets, mq.TLO.Target)
-            self.TempSettings.PullTargetsMetaData[mq.TLO.Target.ID()] = { distance = mq.TLO.Navigation.PathLength("id " .. mq.TLO.Target.ID())(), }
+            self:SetPullTarget()
             return true
         end,
     },
@@ -761,9 +759,7 @@ function Module:Render()
         if mq.TLO.Target() and RGMercUtils.TargetIsType("NPC") then
             ImGui.SameLine()
             if ImGui.Button("Pull Target " .. RGMercIcons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
-                self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
-                table.insert(self.TempSettings.PullTargets, mq.TLO.Target)
-                self.TempSettings.PullTargetsMetaData[mq.TLO.Target.ID()] = { distance = mq.TLO.Navigation.PathLength("id " .. mq.TLO.Target.ID())(), }
+                self:SetPullTarget()
             end
         end
 
@@ -2055,6 +2051,12 @@ function Module:GiveTime(combat_state)
 
     self.TempSettings.TargetSpawnID = 0
     self:SetPullState(PullStates.PULL_IDLE, "")
+end
+
+function Module:SetPullTarget()
+    self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
+    table.insert(self.TempSettings.PullTargets, mq.TLO.Target)
+    self.TempSettings.PullTargetsMetaData[mq.TLO.Target.ID()] = { distance = mq.TLO.Navigation.PathLength("id " .. mq.TLO.Target.ID())(), }
 end
 
 function Module:OnDeath()
