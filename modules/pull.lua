@@ -12,6 +12,7 @@ Module.TempSettings.LastPullOrCombatEnded = os.clock()
 Module.TempSettings.TargetSpawnID         = 0
 Module.TempSettings.CurrentWP             = 1
 Module.TempSettings.PullTargets           = {}
+Module.TempSettings.PullTargetsMetaData   = {}
 Module.TempSettings.AbortPull             = false
 Module.TempSettings.PullID                = 0
 Module.TempSettings.LastPullAbilityCheck  = 0
@@ -490,7 +491,8 @@ Module.CommandHandlers = {
         about = "Pulls your current target using your rgmercs pull ability",
         handler = function(self, ...)
             self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
-            table.insert(self.TempSettings.PullTargets, { spawn = mq.TLO.Target, distance = mq.TLO.Target.Distance(), })
+            table.insert(self.TempSettings.PullTargets, mq.TLO.Target)
+            self.TempSettings.PullTargetsMetaData[mq.TLO.Target.ID()] = { distance = mq.TLO.Navigation.PathLength("id " .. mq.TLO.Target.ID())(), }
             return true
         end,
     },
@@ -687,10 +689,9 @@ function Module:RenderPullTargets()
         ImGui.PopStyleColor()
         ImGui.TableHeadersRow()
 
-        for idx, target in ipairs(self.TempSettings.PullTargets) do
-            local spawn = target.spawn
+        for idx, spawn in ipairs(self.TempSettings.PullTargets) do
             ImGui.TableNextColumn()
-            ImGui.Text(tostring(idx))
+            ImGui.Text("%d", idx)
             ImGui.TableNextColumn()
             ImGui.PushStyleColor(ImGuiCol.Text, RGMercUtils.GetConColorBySpawn(spawn))
             ImGui.PushID(string.format("##select_pull_npc_%d", idx))
@@ -701,10 +702,10 @@ function Module:RenderPullTargets()
             end
             ImGui.PopID()
             ImGui.TableNextColumn()
-            ImGui.Text(tostring(spawn.Level() or 0))
+            ImGui.Text("%d", spawn.Level() or 0)
             ImGui.PopStyleColor()
             ImGui.TableNextColumn()
-            ImGui.Text(tostring(math.ceil(spawn.Distance() or 0)))
+            ImGui.Text("%0.2f", self.TempSettings.PullTargetsMetaData[spawn.ID()].distance)
             ImGui.TableNextColumn()
             RGMercUtils.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
         end
@@ -761,7 +762,8 @@ function Module:Render()
             ImGui.SameLine()
             if ImGui.Button("Pull Target " .. RGMercIcons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
                 self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
-                table.insert(self.TempSettings.PullTargets, { spawn = mq.TLO.Target, distance = mq.TLO.Target.Distance(), })
+                table.insert(self.TempSettings.PullTargets, mq.TLO.Target)
+                self.TempSettings.PullTargetsMetaData[mq.TLO.Target.ID()] = { distance = mq.TLO.Navigation.PathLength("id " .. mq.TLO.Target.ID())(), }
             end
         end
 
@@ -1432,6 +1434,7 @@ function Module:FindTarget()
     local pullTargets, metaData = self:GetPullableSpawns()
 
     self.TempSettings.PullTargets = pullTargets
+    self.TempSettings.PullTargetsMetaData = metaData
 
     if #pullTargets > 0 then
         local pullTarget = pullTargets[1]
