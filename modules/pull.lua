@@ -703,7 +703,7 @@ function Module:RenderPullTargets()
             ImGui.Text("%d", spawn.Level() or 0)
             ImGui.PopStyleColor()
             ImGui.TableNextColumn()
-            ImGui.Text("%0.2f", self.TempSettings.PullTargetsMetaData[spawn.ID()].distance)
+            ImGui.Text("%0.2f", spawn.Distance())
             ImGui.TableNextColumn()
             RGMercUtils.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
         end
@@ -1305,7 +1305,7 @@ function Module:GetPullableSpawns()
     local spawnFilter = function(spawn)
         if not spawn.Targetable() then return false end
         if spawn.Type() ~= "NPC" and spawn.Type() ~= "NPCPET" then
-            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
+            RGMercsLogger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
                 spawn.Type())
             return false
         end
@@ -1342,12 +1342,12 @@ function Module:GetPullableSpawns()
         -- Level Checks
         if self.settings.UsePullLevels then
             if spawn.Level() < self.settings.PullMinLevel then
-                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
+                RGMercsLogger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
                     spawn.Level())
                 return false
             end
             if spawn.Level() > self.settings.PullMaxLevel then
-                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
+                RGMercsLogger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
                     spawn.Level())
                 return false
             end
@@ -1355,7 +1355,7 @@ function Module:GetPullableSpawns()
             -- check cons.
             local conLevel = RGMercConfig.Constants.ConColorsNameToId[spawn.ConColor()]
             if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
-                RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
+                RGMercsLogger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
                     spawn.CleanName(), spawn.ID(),
                     self.settings.PullMinCon,
                     self.settings.PullMaxCon, conLevel, spawn.ConColor())
@@ -1375,7 +1375,7 @@ function Module:GetPullableSpawns()
 
         -- do distance checks.
         if math.abs(spawn.Z() - checkZ) > self.settings.PullZRadius then
-            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
+            RGMercsLogger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
                 math.abs(spawn.Z() - checkZ),
                 self.settings.PullZRadius)
             return false
@@ -1387,12 +1387,6 @@ function Module:GetPullableSpawns()
             RGMercsLogger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoDistance too far - distSq(%d) > pullRadiusSq(%d)",
                 spawn.CleanName(), spawn.ID(), distSqr,
                 pullRadiusSqr)
-            return false
-        end
-
-        if RGMercUtils.GetSetting('SafeTargeting') and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
-            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targetting is enabled!",
-                spawn.CleanName(), spawn.ID())
             return false
         end
 
@@ -1412,6 +1406,12 @@ function Module:GetPullableSpawns()
             return false
         end
 
+        if RGMercUtils.GetSetting('SafeTargeting') and RGMercUtils.IsSpawnFightingStranger(spawn, 500) then
+            RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targetting is enabled!",
+                spawn.CleanName(), spawn.ID())
+            return false
+        end
+
         RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
 
         metaDataCache[spawn.ID()] = { distance = navDist, }
@@ -1421,7 +1421,13 @@ function Module:GetPullableSpawns()
 
     local pullTargets = mq.getFilteredSpawns(spawnFilter)
 
-    table.sort(pullTargets, function(a, b) return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance end)
+    table.sort(pullTargets, function(a, b)
+        -- spawn could be invalid by now so double check
+        if a.ID() == 0 or a.Dead() then return false end
+        if b.ID() == 0 or b.Dead() then return true end
+
+        return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance
+    end)
 
     return pullTargets, metaDataCache
 end
@@ -1954,6 +1960,7 @@ function Module:GiveTime(combat_state)
 
                     if RGMercUtils.GetTargetDistance() > self:GetPullAbilityRange() then
                         RGMercUtils.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
+                        mq.delay(500, function() return mq.TLO.Navigation.Active() end)
                         mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
                     end
 
