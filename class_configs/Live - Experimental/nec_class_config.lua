@@ -1017,7 +1017,7 @@ local _ClassConfig = {
             {
                 name = "Rise of Bones",
                 type = "AA",
-                cond = function(self, aaName) return RGMercUtils.SelfBuffPetCheck(aaName) end,
+                cond = function(self, aaName, target) return RGMercUtils.NPCAAReady(aaName, target.ID()) end,
             },
             {
                 name = "Focus of Arcanum",
