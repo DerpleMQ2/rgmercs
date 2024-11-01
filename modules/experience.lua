@@ -1,9 +1,10 @@
 -- Sample Performance Monitor Class Module
 local mq                  = require('mq')
-local RGMercUtils         = require("utils.rgmercs_utils")
-local StringUtils         = require("utils.string_utils")
-local CommUtils           = require("utils.comm_utils")
-local RGMercsLogger       = require("utils.rgmercs_logger")
+local Config              = require('utils.config')
+local Ui                  = require("utils.ui")
+local Strings             = require("utils.strings")
+local Comms               = require("utils.comms")
+local Logger              = require("utils.logger")
 local ImPlot              = require('ImPlot')
 local Set                 = require('mq.Set')
 local ScrollingPlotBuffer = require('utils.scrolling_plot_buffer')
@@ -63,24 +64,24 @@ local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        CommUtils.BroadcastUpdate(self._name, "LoadSettings")
+        Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_debug("Performance Monitor Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    Logger.log_debug("Performance Monitor Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[Performance Monitor]: Unable to load global settings file(%s), creating a new one!",
+        Logger.log_error("\ay[Performance Monitor]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self:SaveSettings(false)
     else
@@ -89,7 +90,7 @@ function Module:LoadSettings()
 
     local settingsChanged = false
     -- Setup Defaults
-    self.settings, settingsChanged = RGMercConfig.ResolveDefaults(self.DefaultConfig, self.settings)
+    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
 
     if settingsChanged then
         self:SaveSettings(false)
@@ -116,7 +117,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_debug("Performance Monitor Module Loaded.")
+    Logger.log_debug("Performance Monitor Module Loaded.")
     self:LoadSettings()
 
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
@@ -155,7 +156,7 @@ function Module:RenderShaded(type, currentData, otherData, multiplier)
         local offset = currentData.expEvents.Offset - 1
         local count = #currentData.expEvents.DataY
 
-        if RGMercConfig:GetSetting('ExpPlotFillLines') then
+        if Config:GetSetting('ExpPlotFillLines') then
             ImPlot.PlotShaded(type,
                 function(n)
                     local pos = ((offset + n) % count) + 1
@@ -178,7 +179,7 @@ function Module:RenderShaded(type, currentData, otherData, multiplier)
                 local pos = ((offset + n) % count) + 1
 
                 if currentData.expEvents.DataY[pos] == nil then
-                    RGMercsLogger.log_error("Exp Plotter requested a plot point that doesn't exist! This should never happen! (o:%d n:%d c:%d p:%d)", offset, n, count, pos)
+                    Logger.log_error("Exp Plotter requested a plot point that doesn't exist! This should never happen! (o:%d n:%d c:%d p:%d)", offset, n, count, pos)
                     return ImPlotPoint(0, 0)
                 end
 
@@ -202,7 +203,7 @@ function Module:Render()
         ImGui.TableNextColumn()
         ImGui.Text("Exp Session Time")
         ImGui.TableNextColumn()
-        ImGui.Text(StringUtils.FormatTime(os.clock() - self.TrackXP.StartTime))
+        ImGui.Text(Strings.FormatTime(os.clock() - self.TrackXP.StartTime))
         ImGui.TableNextColumn()
         ImGui.Text("Exp Gained")
         ImGui.TableNextColumn()
@@ -264,7 +265,7 @@ function Module:Render()
             self:SaveSettings(false)
         end
 
-        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
+        self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
         if pressed then
             self:SaveSettings(false)
         end
@@ -318,7 +319,7 @@ end
 function Module:GiveTime(combat_state)
     if mq.TLO.EverQuest.GameState() == "INGAME" then
         if self:CheckExpChanged() then
-            RGMercsLogger.log_debug("\ayXP Gained: \ag%02.3f%% \aw|| \ayXP Total: \ag%02.3f%% \aw|| \ayStart: \am%d \ayCur: \am%d \ayExp/Sec: \ag%2.3f%%",
+            Logger.log_debug("\ayXP Gained: \ag%02.3f%% \aw|| \ayXP Total: \ag%02.3f%% \aw|| \ayStart: \am%d \ayCur: \am%d \ayExp/Sec: \ag%2.3f%%",
                 self.TrackXP.Experience.Gained / self.TrackXP.XPTotalDivider,
                 self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider,
                 self.TrackXP.StartTime,
@@ -341,10 +342,10 @@ function Module:GiveTime(combat_state)
         self.XPPerSecond    = (self.TrackXP.Experience.Total / self.TrackXP.XPTotalDivider) / (os.clock() - self.TrackXP.StartTime)
         self.XPToNextLevel  = self.TrackXP.XPTotalPerLevel - mq.TLO.Me.Exp()
         self.SecondsToLevel = self.XPToNextLevel / (self.XPPerSecond * self.TrackXP.XPTotalDivider)
-        self.TimeToLevel    = self.XPPerSecond <= 0 and "<Unknown>" or StringUtils.FormatTime(self.SecondsToLevel, "%d Days %d Hours %d Mins")
+        self.TimeToLevel    = self.XPPerSecond <= 0 and "<Unknown>" or Strings.FormatTime(self.SecondsToLevel, "%d Days %d Hours %d Mins")
 
         if mq.TLO.Me.PctAAExp() > 0 and self:CheckAAExpChanged() then
-            RGMercsLogger.log_debug("\ayAA Gained: \ag%2.2f%% \aw|| \ayAA Total: \ag%2.2f%%", self.TrackXP.AAExperience.Gained / self.TrackXP.XPTotalDivider,
+            Logger.log_debug("\ayAA Gained: \ag%2.2f%% \aw|| \ayAA Total: \ag%2.2f%%", self.TrackXP.AAExperience.Gained / self.TrackXP.XPTotalDivider,
                 self.TrackXP.AAExperience.Total / self.TrackXP.XPTotalDivider)
         end
 
@@ -419,7 +420,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_debug("Experience Monitor Module Unloaded.")
+    Logger.log_debug("Experience Monitor Module Unloaded.")
 end
 
 return Module

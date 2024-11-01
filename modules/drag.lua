@@ -1,9 +1,11 @@
 -- Sample Basic Class Module
 local mq                 = require('mq')
-local RGMercUtils        = require("utils.rgmercs_utils")
-local CommUtils          = require("utils.comm_utils")
-local GameUtils          = require("utils.game_utils")
-local RGMercsLogger      = require("utils.rgmercs_logger")
+local Config             = require('utils.config')
+local Core               = require("utils.core")
+local Targetting         = require("utils.targetting")
+local Ui                 = require("utils.ui")
+local Comms              = require("utils.comms")
+local Logger             = require("utils.logger")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
 
@@ -62,24 +64,24 @@ local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        CommUtils.BroadcastUpdate(self._name, "LoadSettings")
+        Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_debug("Drag Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    Logger.log_debug("Drag Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[Drag]: Unable to load global settings file(%s), creating a new one!",
+        Logger.log_error("\ay[Drag]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self:SaveSettings(false)
     else
@@ -97,7 +99,7 @@ function Module:LoadSettings()
     local settingsChanged = false
 
     -- Setup Defaults
-    self.settings, settingsChanged = RGMercConfig.ResolveDefaults(self.DefaultConfig, self.settings)
+    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
 
     if settingsChanged then
         self:SaveSettings(false)
@@ -122,7 +124,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_debug("Drag Module Loaded.")
+    Logger.log_debug("Drag Module Loaded.")
     self:LoadSettings()
 
     self.ModuleLoaded = true
@@ -143,13 +145,13 @@ function Module:Render()
     ImGui.Text("Drag Module")
     local pressed
     if self.ModuleLoaded then
-        if ImGui.Button(RGMercConfig:GetSetting('DoDrag') and "Stop Dragging" or "Start Dragging", ImGui.GetWindowWidth() * .3, 25) then
+        if ImGui.Button(Config:GetSetting('DoDrag') and "Stop Dragging" or "Start Dragging", ImGui.GetWindowWidth() * .3, 25) then
             self.settings.DoDrag = not self.settings.DoDrag
             self:SaveSettings(false)
         end
 
         if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig,
+            self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
                 self.DefaultCategories)
             if pressed then
                 self:SaveSettings(false)
@@ -165,9 +167,9 @@ end
 
 function Module:Drag(corpse)
     if corpse and corpse() and corpse.Distance() > 10 then
-        RGMercsLogger.log_debug("Dragging: %s (%d)", corpse.DisplayName(), corpse.ID())
-        RGMercUtils.SetTarget(corpse.ID())
-        GameUtils.DoCmd("/corpse")
+        Logger.log_debug("Dragging: %s (%d)", corpse.DisplayName(), corpse.ID())
+        Targetting.SetTarget(corpse.ID())
+        Core.DoCmd("/corpse")
     end
 end
 
@@ -175,27 +177,27 @@ function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
 
     local corpseSearch = "pccorpse %s's radius 60"
-    if RGMercConfig:GetSetting('DoDrag') then
+    if Config:GetSetting('DoDrag') then
         local myCorpse = mq.TLO.Spawn(string.format(corpseSearch, mq.TLO.Me.DisplayName()))
 
         self:Drag(myCorpse)
 
-        if RGMercConfig:GetSetting('DoSearchDrag') then
-            local numCorpses = mq.TLO.SpawnCount(RGMercConfig:GetSetting('SearchDrag'))()
+        if Config:GetSetting('DoSearchDrag') then
+            local numCorpses = mq.TLO.SpawnCount(Config:GetSetting('SearchDrag'))()
 
             for i = numCorpses, 1, -1 do
-                local corpse = mq.TLO.NearestSpawn(i, RGMercConfig:GetSetting('SearchDrag'))
+                local corpse = mq.TLO.NearestSpawn(i, Config:GetSetting('SearchDrag'))
                 self:Drag(corpse)
             end
         end
 
-        if RGMercConfig:GetSetting('DoDanNetDrag') then
+        if Config:GetSetting('DoDanNetDrag') then
             local dannetPeers = mq.TLO.DanNet.PeerCount()
             for i = 1, dannetPeers do
                 ---@diagnostic disable-next-line: redundant-parameter
                 local peer = mq.TLO.DanNet.Peers(i)()
                 if peer and peer:len() > 0 then
-                    RGMercsLogger.log_debug("Searching corpses for: %s", peer)
+                    Logger.log_debug("Searching corpses for: %s", peer)
                     local currentSearch = string.format(corpseSearch, peer)
                     local numCorpses = mq.TLO.SpawnCount(currentSearch)()
 
@@ -248,7 +250,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_debug("Drag Module Unloaded.")
+    Logger.log_debug("Drag Module Unloaded.")
 end
 
 return Module

@@ -1,7 +1,7 @@
-local StringUtils   = { _version = '1.0', _name = "StringUtils", _author = 'Derple', }
-StringUtils.__index = StringUtils
+local Strings   = { _version = '1.0', _name = "Strings", _author = 'Derple', }
+Strings.__index = Strings
 
-function StringUtils.gsplit(text, pattern, plain)
+function Strings.gsplit(text, pattern, plain)
     local splitStart, length = 1, #text
     return function()
         if splitStart > 0 then
@@ -33,10 +33,10 @@ end
 --- @param pattern string: The pattern to split the text by.
 --- @param plain boolean?: If true, the pattern is treated as a plain string.
 --- @return table: A table containing the substrings.
-function StringUtils.split(text, pattern, plain)
+function Strings.split(text, pattern, plain)
     local ret = {}
     if text ~= nil then
-        for match in StringUtils.gsplit(text, pattern, plain) do
+        for match in Strings.gsplit(text, pattern, plain) do
             table.insert(ret, match)
         end
     end
@@ -48,7 +48,7 @@ end
 --- @param time number The time value to format.
 --- @param formatString string? The format string to use for formatting the time.
 --- @return string The formatted time as a string.
-function StringUtils.FormatTime(time, formatString)
+function Strings.FormatTime(time, formatString)
     local days = math.floor(time / 86400)
     local hours = math.floor((time % 86400) / 3600)
     local minutes = math.floor((time % 3600) / 60)
@@ -59,7 +59,7 @@ end
 --- Converts a boolean value to its string representation.
 --- @param b boolean: The boolean value to convert.
 --- @return string: "true" if the boolean is true, "false" otherwise.
-function StringUtils.BoolToString(b)
+function Strings.BoolToString(b)
     return b and "true" or "false"
 end
 
@@ -67,8 +67,32 @@ end
 --- If the boolean is true, it returns "green", otherwise "red".
 --- @param b boolean: The boolean value to convert.
 --- @return string: The color string corresponding to the boolean value.
-function StringUtils.BoolToColorString(b)
+function Strings.BoolToColorString(b)
     return b and "\agtrue\ax" or "\arfalse\ax"
 end
 
-return StringUtils
+--- Pads a string to a specified length with a given character.
+---
+--- @param string string The original string to be padded.
+--- @param len number The desired length of the resulting string.
+--- @param padFront boolean If true, padding is added to the front of the string; otherwise, it is added to the back.
+--- @param padChar string? The character to use for padding. Defaults to a space if not provided.
+--- @return string The padded string.
+function Strings.PadString(string, len, padFront, padChar)
+    if not padChar then padChar = " " end
+    local cleanText = string:gsub("\a[-]?.", "")
+
+    local paddingNeeded = len - cleanText:len()
+
+    for _ = 1, paddingNeeded do
+        if padFront then
+            string = padChar .. string
+        else
+            string = string .. padChar
+        end
+    end
+
+    return string
+end
+
+return Strings

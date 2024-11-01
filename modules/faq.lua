@@ -1,8 +1,10 @@
 -- Sample FAQ Class Module
 local mq                 = require('mq')
-local RGMercUtils        = require("utils.rgmercs_utils")
-local CommUtils          = require("utils.comm_utils")
-local RGMercsLogger      = require("utils.rgmercs_logger")
+local Config             = require('utils.config')
+local Comms              = require("utils.comms")
+local Logger             = require("utils.logger")
+local Binds              = require("utils.binds")
+local Modules            = require("utils.modules")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
 
@@ -50,24 +52,24 @@ local function getConfigFileName()
 	local server = mq.TLO.EverQuest.Server()
 	server = server:gsub(" ", "")
 	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 
 	if doBroadcast == true then
-		CommUtils.BroadcastUpdate(self._name, "LoadSettings")
+		Comms.BroadcastUpdate(self._name, "LoadSettings")
 	end
 end
 
 function Module:LoadSettings()
-	RGMercsLogger.log_debug("FAQ Combat Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+	Logger.log_debug("FAQ Combat Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
-		RGMercsLogger.log_error("\ay[FAQ]: Unable to load global settings file(%s), creating a new one!",
+		Logger.log_error("\ay[FAQ]: Unable to load global settings file(%s), creating a new one!",
 			settings_pickle_path)
 		self.settings.MyCheckbox = false
 		self:SaveSettings(false)
@@ -84,7 +86,7 @@ function Module:LoadSettings()
 
 	local settingsChanged = false
 	-- Setup Defaults
-	self.settings, settingsChanged = RGMercConfig.ResolveDefaults(self.DefaultConfig, self.settings)
+	self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
 
 	if settingsChanged then
 		self:SaveSettings(false)
@@ -109,7 +111,7 @@ function Module.New()
 end
 
 function Module:Init()
-	RGMercsLogger.log_debug("FAQ Combat Module Loaded.")
+	Logger.log_debug("FAQ Combat Module Loaded.")
 	self:LoadSettings()
 
 	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
@@ -131,11 +133,11 @@ end
 
 function Module:ExportFAQToWiki()
 	-- Fetch the FAQs for modules, commands, and class configurations
-	local questions = RGMercModules:ExecAll("GetFAQ")
-	local commandFaq = RGMercModules:ExecAll("GetCommandHandlers")
-	local classFaq = RGMercModules:ExecAll("GetClassFAQ")
+	local questions = Modules:ExecAll("GetFAQ")
+	local commandFaq = Modules:ExecAll("GetCommandHandlers")
+	local classFaq = Modules:ExecAll("GetClassFAQ")
 	local configFaq = {}
-	configFaq.Config = RGMercConfig:GetFAQ()
+	configFaq.Config = Config:GetFAQ()
 
 	if not questions and not commandFaq and not classFaq then
 		print("No FAQ data found.")
@@ -223,7 +225,7 @@ function Module:ExportFAQToWiki()
 	if classFaq then
 		for module, info in pairs(classFaq) do
 			if module:lower() == 'class' and info.FAQ then
-				local title = "RGMercs Lua Edition: FAQ - " .. (RGMercConfig.Globals.CurLoadedClass) .. " Class"
+				local title = "RGMercs Lua Edition: FAQ - " .. (Config.Globals.CurLoadedClass) .. " Class"
 				local fileContent = "[[" .. title .. "]]\n\n"
 				fileContent = fileContent .. "__FORCETOC__\n\n"
 				fileContent = fileContent .. "== " .. title .. " ==\n\n"
@@ -235,13 +237,13 @@ function Module:ExportFAQToWiki()
 					fileContent = fileContent .. "* Settings Used:\n  " .. (data.Settings_Used or "None") .. "\n\n"
 				end
 
-				local classFileName = mq.configDir .. "/WIKI/" .. RGMercConfig.Globals.CurLoadedClass .. "_Class_FAQ.txt"
+				local classFileName = mq.configDir .. "/WIKI/" .. Config.Globals.CurLoadedClass .. "_Class_FAQ.txt"
 				local classFile = io.open(classFileName, "w")
 				if classFile then
 					classFile:write(fileContent)
 					classFile:close()
 				else
-					print("Failed to open file for " .. RGMercConfig.Globals.CurLoadedClass)
+					print("Failed to open file for " .. Config.Globals.CurLoadedClass)
 				end
 			end
 		end
@@ -250,22 +252,22 @@ end
 
 function Module:FaqFind(question)
 	self.TempSettings.Search = question
-	for cmd, data in pairs(RGMercsBinds.Handlers) do
+	for cmd, data in pairs(Binds.Handlers) do
 		if cmd ~= "help" then
 			if self:MatchSearch(data.usage, data.about, cmd) then
-				RGMercsLogger.log_info("\ayCommand: \ax%s \aoUsage:\ax %s\nDescription: \at%s", cmd, data.usage, data.about)
+				Logger.log_info("\ayCommand: \ax%s \aoUsage:\ax %s\nDescription: \at%s", cmd, data.usage, data.about)
 				mq.delay(5) -- Delay to prevent spamming
 			end
 		end
 	end
 
-	local questions = RGMercModules:ExecAll("GetFAQ")
+	local questions = Modules:ExecAll("GetFAQ")
 	if questions ~= nil then
 		for module, info in pairs(questions or {}) do
 			if info.FAQ then
 				for _, data in pairs(info.FAQ or {}) do
 					if self:MatchSearch(data.Question, data.Answer, data.Settings_Used, module) then
-						RGMercsLogger.log_info("\ayModule:\ax %s \aoQuestion: \ax%s\nAnswer: \at%s", module, data.Question, data.Answer)
+						Logger.log_info("\ayModule:\ax %s \aoQuestion: \ax%s\nAnswer: \at%s", module, data.Question, data.Answer)
 						mq.delay(5)
 					end
 				end
@@ -273,13 +275,13 @@ function Module:FaqFind(question)
 		end
 	end
 
-	local classFaq = RGMercModules:ExecAll("GetClassFAQ")
+	local classFaq = Modules:ExecAll("GetClassFAQ")
 	if classFaq ~= nil then
 		for module, info in pairs(classFaq or {}) do
 			if info.FAQ then
 				for _, data in pairs(info.FAQ or {}) do
 					if self:MatchSearch(data.Question, data.Answer, data.Settings_Used, module) then
-						RGMercsLogger.log_info("\ayClass:\ax %s \aoQuestion:\ax %s\nAnswer:\at %s", module, data.Question, data.Answer)
+						Logger.log_info("\ayClass:\ax %s \aoQuestion:\ax %s\nAnswer:\at %s", module, data.Question, data.Answer)
 						mq.delay(5)
 					end
 				end
@@ -311,7 +313,7 @@ function Module:Render()
 		ImGui.EndTooltip()
 	end
 
-	if not RGMercConfig.Globals.SubmodulesLoaded then
+	if not Config.Globals.SubmodulesLoaded then
 		return
 	end
 
@@ -328,7 +330,7 @@ function Module:Render()
 				ImGui.TableSetupColumn("Description", ImGuiTableColumnFlags.WidthStretch)
 				ImGui.TableSetupScrollFreeze(0, 1)
 				ImGui.TableHeadersRow()
-				for cmd, data in pairs(RGMercsBinds.Handlers) do
+				for cmd, data in pairs(Binds.Handlers) do
 					if cmd ~= "help" then
 						if self:MatchSearch(data.usage, data.about, cmd) then
 							ImGui.TableNextColumn()
@@ -342,7 +344,7 @@ function Module:Render()
 					end
 				end
 
-				local moduleCommands = RGMercModules:ExecAll("GetCommandHandlers")
+				local moduleCommands = Modules:ExecAll("GetCommandHandlers")
 
 				for module, info in pairs(moduleCommands) do
 					if info.CommandHandlers then
@@ -364,7 +366,7 @@ function Module:Render()
 		end
 
 		if ImGui.CollapsingHeader("FAQ General") then
-			local questions = RGMercModules:ExecAll("GetFAQ")
+			local questions = Modules:ExecAll("GetFAQ")
 			local configFaq = {}
 
 			if ImGui.BeginTable("FAQ", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
@@ -391,7 +393,7 @@ function Module:Render()
 						end
 					end
 				end
-				configFaq.Config = RGMercConfig:GetFAQ()
+				configFaq.Config = Config:GetFAQ()
 				if configFaq ~= nil then
 					for k, v in pairs(configFaq.Config or {}) do
 						if self:MatchSearch(v.Question, v.Answer, v.Settings_Used, "Config") then
@@ -411,7 +413,7 @@ function Module:Render()
 		end
 
 		if ImGui.CollapsingHeader("FAQ Class Config") then
-			local classFaq = RGMercModules:ExecAll("GetClassFAQ")
+			local classFaq = Modules:ExecAll("GetClassFAQ")
 			if ImGui.BeginTable("FAQClass", 3, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable), ImVec2(ImGui.GetWindowWidth() - 30, 0)) then
 				ImGui.TableSetupColumn("SettingName", ImGuiTableColumnFlags.WidthFixed, 100)
 				ImGui.TableSetupColumn("Question", ImGuiTableColumnFlags.WidthFixed, 200)
@@ -496,7 +498,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-	RGMercsLogger.log_debug("FAQ Combat Module Unloaded.")
+	Logger.log_debug("FAQ Combat Module Unloaded.")
 end
 
 return Module

@@ -110,25 +110,30 @@ There is also no flag for combat looting. It will only loot if no mobs are withi
 
 ]]
 
-local mq            = require 'mq'
-local RGMercsLogger = require("utils.rgmercs_logger")
+local mq           = require 'mq'
+local Logger       = require("utils.logger")
+local PackageMan   = require('mq/PackageMan')
+local SQLite3      = PackageMan.Require('lsqlite3')
 
-local eqServer      = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
+local eqServer     = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 -- Check for looted module, if found use that. else fall back on our copy, which may be outdated.
 
-local RGMercUtils   = require("utils.rgmercs_utils")
-local GameUtils     = require("utils.game_utils")
-local FileUtils     = require("utils.file_utils")
-local SettingsFile  = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. RGMercConfig.Globals.CurLoadedChar .. '.ini'
-local LootFile      = mq.configDir .. '/Loot.ini'
-local version       = 1.9
-local imported      = true
+local Config       = require('utils.config')
+local Core         = require("utils.core")
+local Comms        = require("utils.comms")
+local Targetting   = require("utils.targetting")
+local Files        = require("utils.files")
+local Modules      = require("utils.modules")
+local SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. Config.Globals.CurLoadedChar .. '.ini'
+local LootFile     = mq.configDir .. '/Loot.ini'
+local version      = 1.9
+local imported     = true
 -- Public default settings, also read in from Loot.ini [Settings] section
-local loot          = {
+local loot         = {
     Settings = {
         Version = '"' .. tostring(version) .. '"',
         LootFile = mq.configDir .. '/Loot.ini',
-        SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. RGMercConfig.Globals.CurLoadedChar .. '.ini',
+        SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. Config.Globals.CurLoadedChar .. '.ini',
         GlobalLootOn = true,                       -- Enable Global Loot Items. not implimented yet
         CombatLooting = false,                     -- Enables looting during combat. Not recommended on the MT
         CorpseRadius = 100,                        -- Radius to activly loot corpses
@@ -169,11 +174,11 @@ local loot          = {
         LootMyCorpse = false,                      -- Loot your own corpse if its nearby (Does not check for REZ)
     },
 }
-loot.MyClass        = RGMercConfig.Globals.CurLoadedClass:lower()
+loot.MyClass       = Config.Globals.CurLoadedClass:lower()
 -- SQL information
-local ItemsDB       = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
+local ItemsDB      = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
 
-loot.guiLoot        = require('lib.lootnscoot.loot_hist')
+loot.guiLoot       = require('lib.lootnscoot.loot_hist')
 if loot.guiLoot ~= nil then
     loot.UseActors = true
     loot.guiLoot.GetSettings(loot.HideNames, loot.LookupLinks, loot.RecordData, true, loot.UseActors, 'lootnscoot')
@@ -248,7 +253,7 @@ function loot.load(fileName, sec)
         end
     end
     file:close();
-    RGMercsLogger.log_debug("Loot::load()")
+    Logger.log_debug("Loot::load()")
     return data;
 end
 
@@ -256,27 +261,27 @@ function loot.writeSettings()
     for option, value in pairs(loot.Settings) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
-            GameUtils.DoCmd('/ini "%s" "%s" "%s" "%s"', SettingsFile, 'Settings', option, value)
+            Core.DoCmd('/ini "%s" "%s" "%s" "%s"', SettingsFile, 'Settings', option, value)
             loot.Settings[option] = value
         end
     end
     for option, value in pairs(loot.BuyItems) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
-            GameUtils.DoCmd('/ini "%s" "%s" "%s" "%s"', SettingsFile, 'BuyItems', option, value)
+            Core.DoCmd('/ini "%s" "%s" "%s" "%s"', SettingsFile, 'BuyItems', option, value)
             loot.BuyItems[option] = value
         end
     end
     for option, value in pairs(loot.GlobalItems) do
         local valueType = type(value)
         if saveOptionTypes[valueType] then
-            GameUtils.DoCmd('/ini "%s" "%s" "%s" "%s"', LootFile, 'GlobalItems', option, value)
+            Core.DoCmd('/ini "%s" "%s" "%s" "%s"', LootFile, 'GlobalItems', option, value)
             loot.modifyItem(option, value, 'Global_Rules')
             loot.GlobalItems[option] = value
         end
     end
-    RGMercsLogger.log_debug("Loot::writeSettings()")
-    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+    Logger.log_debug("Loot::writeSettings()")
+    Modules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.split(input, sep)
@@ -309,14 +314,14 @@ function loot.UpdateDB()
 
         count = count + 1
         if count % batchSize == 0 then
-            RGMercsLogger.log_debug("Inserted " .. count .. " NormalItems so far...")
+            Logger.log_debug("Inserted " .. count .. " NormalItems so far...")
             db:exec("COMMIT")
             db:exec("BEGIN TRANSACTION")
         end
     end
 
     db:exec("COMMIT")
-    RGMercsLogger.log_debug("Inserted all " .. count .. " NormalItems.")
+    Logger.log_debug("Inserted all " .. count .. " NormalItems.")
 
     -- Reset counter for GlobalItems
     count = 0
@@ -332,14 +337,14 @@ function loot.UpdateDB()
 
         count = count + 1
         if count % batchSize == 0 then
-            RGMercsLogger.log_debug("Inserted " .. count .. " GlobalItems so far...")
+            Logger.log_debug("Inserted " .. count .. " GlobalItems so far...")
             db:exec("COMMIT")
             db:exec("BEGIN TRANSACTION")
         end
     end
 
     db:exec("COMMIT")
-    RGMercsLogger.log_debug("Inserted all " .. count .. " GlobalItems.")
+    Logger.log_debug("Inserted all " .. count .. " GlobalItems.")
     db:close()
 end
 
@@ -349,11 +354,11 @@ function loot.loadSettings()
     loot.NormalItemsClasses = {}
     loot.GlobalItemsClasses = {}
     -- SQL setup
-    if not FileUtils.file_exists(ItemsDB) then
-        RGMercsLogger.log_warn("\ayLoot Rules Database \arNOT found\ax, \atCreating it now\ax. Please run \at/rgl lootimport\ax to Import your \atloot.ini \axfile.")
-        RGMercsLogger.log_warn("\arOnly run this one One Character\ax. use \at/rgl lootreload\ax to update the data on the other characters.")
+    if not Files.file_exists(ItemsDB) then
+        Logger.log_warn("\ayLoot Rules Database \arNOT found\ax, \atCreating it now\ax. Please run \at/rgl lootimport\ax to Import your \atloot.ini \axfile.")
+        Logger.log_warn("\arOnly run this one One Character\ax. use \at/rgl lootreload\ax to update the data on the other characters.")
     else
-        RGMercsLogger.log_info("Loot Rules Database found, loading it now.")
+        Logger.log_info("Loot Rules Database found, loading it now.")
     end
     -- Create the database and its table if it doesn't exist
     local db = SQLite3.open(ItemsDB)
@@ -415,18 +420,18 @@ function loot.checkCursor()
         -- can't do anything if there's nowhere to put the item, either due to no free inventory space
         -- or no slot of appropriate size
         if mq.TLO.Me.FreeInventory() == 0 or mq.TLO.Cursor() == currentItem then
-            if loot.Settings.SpamLootInfo then RGMercsLogger.log_debug('Inventory full, item stuck on cursor') end
-            GameUtils.DoCmd('/autoinv')
+            if loot.Settings.SpamLootInfo then Logger.log_debug('Inventory full, item stuck on cursor') end
+            Core.DoCmd('/autoinv')
             return
         end
         currentItem = mq.TLO.Cursor()
-        GameUtils.DoCmd('/autoinv')
+        Core.DoCmd('/autoinv')
         mq.delay(100)
     end
 end
 
 function loot.navToID(spawnID)
-    GameUtils.DoCmd('/nav id %d log=off', spawnID)
+    Core.DoCmd('/nav id %d log=off', spawnID)
     mq.delay(50)
     if mq.TLO.Navigation.Active() then
         local startTime = os.time()
@@ -442,13 +447,13 @@ end
 function loot.modifyItem(item, action, tableName, classes)
     local db = SQLite3.open(ItemsDB)
     if not db then
-        RGMercsLogger.log_warn("Failed to open database.")
+        Logger.log_warn("Failed to open database.")
         return
     end
     if action == 'delete' then
         local stmt, err = db:prepare("DELETE FROM " .. tableName .. " WHERE item_name = ?")
         if not stmt then
-            RGMercsLogger.log_warn("Failed to prepare statement: %s", err)
+            Logger.log_warn("Failed to prepare statement: %s", err)
             db:close()
             return
         end
@@ -465,7 +470,7 @@ function loot.modifyItem(item, action, tableName, classes)
 
             local stmt, err = db:prepare(sql)
             if not stmt then
-                RGMercsLogger.log_warn("Failed to prepare statement: %s\nSQL: %s", err, sql)
+                Logger.log_warn("Failed to prepare statement: %s\nSQL: %s", err, sql)
                 db:close()
                 return
             end
@@ -480,7 +485,7 @@ function loot.modifyItem(item, action, tableName, classes)
 
             local stmt, err = db:prepare(sql)
             if not stmt then
-                RGMercsLogger.log_warn("Failed to prepare statement: %s\nSQL: %s", err, sql)
+                Logger.log_warn("Failed to prepare statement: %s\nSQL: %s", err, sql)
                 db:close()
                 return
             end
@@ -497,7 +502,7 @@ function loot.addRule(itemName, section, rule, classes)
     if not lootData[section] then
         lootData[section] = {}
     end
-    RGMercsLogger.log_info('item %s section %s rule %s, classes %s', itemName, section, rule, (classes ~= nil and classes or 'All'))
+    Logger.log_info('item %s section %s rule %s, classes %s', itemName, section, rule, (classes ~= nil and classes or 'All'))
     lootData[section][itemName] = rule
     if section == 'GlobalItems' then
         loot.GlobalItems[itemName] = rule
@@ -506,10 +511,10 @@ function loot.addRule(itemName, section, rule, classes)
         loot.NormalItems[itemName] = rule
         loot.modifyItem(itemName, rule, 'Normal_Rules', classes)
     end
-    loot.lootActor:send({ mailbox = 'lootnscoot', }, { who = RGMercConfig.Globals.CurLoadedChar, action = 'addrule', item = itemName, rule = rule, section = section, })
+    loot.lootActor:send({ mailbox = 'lootnscoot', }, { who = Config.Globals.CurLoadedChar, action = 'addrule', item = itemName, rule = rule, section = section, })
 
-    GameUtils.DoCmd('/ini "%s" "%s" "%s" "%s"', LootFile, section, itemName, rule)
-    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+    Core.DoCmd('/ini "%s" "%s" "%s" "%s"', LootFile, section, itemName, rule)
+    Modules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.lookupLootRule(section, key)
@@ -544,7 +549,7 @@ local reportPrefix = '/%s \a-t[\at%s\a-t][\ax\ayLootUtils\ax\a-t]\ax '
 function loot.report(message, ...)
     if loot.Settings.ReportLoot then
         local prefixWithChannel = reportPrefix:format(loot.Settings.LootChannel, mq.TLO.Time())
-        GameUtils.DoCmd(prefixWithChannel .. message, ...)
+        Core.DoCmd(prefixWithChannel .. message, ...)
     end
 end
 
@@ -626,10 +631,10 @@ function loot.getRule(item, from)
         if globalClasses:lower() ~= 'all' and from == 'loot' then
             if string.find(globalClasses:lower(), loot.MyClass) then
                 lootData[firstLetter][itemName] = globalItem or lootData[firstLetter][itemName]
-                RGMercsLogger.log_info("Item \at%s\ax is \agIN GlobalItem \axclass list \ay%s", itemName, globalClasses)
+                Logger.log_info("Item \at%s\ax is \agIN GlobalItem \axclass list \ay%s", itemName, globalClasses)
             else
                 lootData[firstLetter][itemName] = 'Ignore'
-                RGMercsLogger.log_info("Item \at%s\ax \arNOT in GlobalItem \axclass list \ay%s", itemName, globalClasses)
+                Logger.log_info("Item \at%s\ax \arNOT in GlobalItem \axclass list \ay%s", itemName, globalClasses)
                 globalClassSkip = true
             end
         else
@@ -664,9 +669,9 @@ function loot.getRule(item, from)
     if lootClasses:lower() ~= 'all' and not globalFound and from == 'loot' then
         if string.find(lootClasses:lower(), loot.MyClass) then
             lootDecision = lootData[firstLetter][itemName]
-            RGMercsLogger.log_info("Item \at%s\ax is \agIN \axclass list \ay%s", itemName, lootClasses)
+            Logger.log_info("Item \at%s\ax is \agIN \axclass list \ay%s", itemName, lootClasses)
         else
-            RGMercsLogger.log_info("Item \at%s\ax \arNOT in \axclass list \ay%s", itemName, lootClasses)
+            Logger.log_info("Item \at%s\ax \arNOT in \axclass list \ay%s", itemName, lootClasses)
             lootDecision = 'Ignore'
         end
         return lootDecision, 0, newRule
@@ -678,14 +683,14 @@ end
 
 -- EVENTS
 function loot.RegisterActors()
-    loot.lootActor = RGMercUtils.Actors.register('lootnscoot', function(message)
+    loot.lootActor = Comms.Actors.register('lootnscoot', function(message)
         local lootMessage = message()
         local who = lootMessage.who
         local action = lootMessage.action
         if action == 'lootreload' then
             loot.commandHandler('reload')
         end
-        if who == RGMercConfig.Globals.CurLoadedChar then return end
+        if who == Config.Globals.CurLoadedChar then return end
         if action == 'addrule' then
             local item = lootMessage.item
             local rule = lootMessage.rule
@@ -697,7 +702,7 @@ function loot.RegisterActors()
                 loot.NormalItems[item] = rule
                 loot.NormalItemsClasses[item] = lootMessage.classes
             end
-            RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+            Modules:ExecModule("Loot", "ModifyLootSettings")
         elseif action == 'deleteitem' then
             local item = lootMessage.item
             local section = lootMessage.section
@@ -708,7 +713,7 @@ function loot.RegisterActors()
                 loot.NormalItems[item] = nil
                 loot.NormalItemsClasses[item] = nil
             end
-            RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+            Modules:ExecModule("Loot", "ModifyLootSettings")
         elseif action == 'modifyitem' then
             local item = lootMessage.item
             local rule = lootMessage.rule
@@ -720,7 +725,7 @@ function loot.RegisterActors()
                 loot.NormalItems[item] = rule
                 loot.NormalItemsClasses[item] = lootMessage.classes
             end
-            RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+            Modules:ExecModule("Loot", "ModifyLootSettings")
         end
     end)
 end
@@ -745,15 +750,15 @@ end
 -- BINDS
 function loot.setBuyItem(item, qty)
     loot.BuyItems[item] = qty
-    GameUtils.DoCmd('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, item, qty)
-    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+    Core.DoCmd('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, item, qty)
+    Modules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.setGlobalItem(item, val, classes)
     loot.GlobalItems[item] = val ~= 'delete' and val or nil
     loot.GlobalItemsClasses[item] = classes or 'All'
     loot.modifyItem(item, val, 'Global_Rules', classes)
-    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+    Modules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.ChangeClasses(item, classes, tableName)
@@ -764,14 +769,14 @@ function loot.ChangeClasses(item, classes, tableName)
         loot.NormalItemsClasses[item] = classes
         loot.modifyItem(item, loot.NormalItems[item], 'Normal_Rules', classes)
     end
-    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+    Modules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.setNormalItem(item, val, classes)
     loot.NormalItems[item] = val ~= 'delete' and val or nil
     loot.NormalItemsClasses[item] = classes or 'All'
     loot.modifyItem(item, val, 'Normal_Rules', classes)
-    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+    Modules:ExecModule("Loot", "ModifyLootSettings")
 end
 
 function loot.setGlobalBind(value)
@@ -780,7 +785,7 @@ end
 
 function loot.commandHandler(...)
     local args = { ..., }
-    RGMercsLogger.log_debug("arg1 %s, arg2 %s, arg3 %s", args[1], args[2], args[3])
+    Logger.log_debug("arg1 %s, arg2 %s, arg3 %s", args[1], args[2], args[3])
     if #args == 1 then
         if args[1] == 'sellstuff' then
             loot.processItems('Sell')
@@ -796,7 +801,7 @@ function loot.commandHandler(...)
                 loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors,
                     'lootnscoot')
             end
-            RGMercsLogger.log_info("\ayReloaded Settings \axAnd \atLoot Files")
+            Logger.log_info("\ayReloaded Settings \axAnd \atLoot Files")
         elseif args[1] == 'update' then
             lootData = {}
             if loot.guiLoot ~= nil then
@@ -804,7 +809,7 @@ function loot.commandHandler(...)
                     'lootnscoot')
             end
             loot.UpdateDB()
-            RGMercsLogger.log_info("\ayUpdating the DB from loot.ini \ax and \at Reloading Settings")
+            Logger.log_info("\ayUpdating the DB from loot.ini \ax and \at Reloading Settings")
         elseif args[1] == 'bankstuff' then
             loot.processItems('Bank')
         elseif args[1] == 'cleanup' then
@@ -822,7 +827,7 @@ function loot.commandHandler(...)
                     confReport = confReport .. string.format("\n\at%s\ax = \ag%s\ax", key, tostring(value))
                 end
             end
-            RGMercsLogger.log_info(confReport)
+            Logger.log_info(confReport)
         elseif args[1] == 'tributestuff' then
             loot.processItems('Tribute')
         elseif args[1] == 'loot' then
@@ -831,43 +836,43 @@ function loot.commandHandler(...)
             loot.markTradeSkillAsBank()
         elseif validActions[args[1]] and mq.TLO.Cursor() then
             loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor():sub(1, 1):upper(), validActions[args[1]])
-            RGMercsLogger.log_info(string.format("Setting \ay%s\ax to \ay%s\ax", mq.TLO.Cursor(), validActions[args[1]]))
+            Logger.log_info(string.format("Setting \ay%s\ax to \ay%s\ax", mq.TLO.Cursor(), validActions[args[1]]))
         elseif string.find(args[1], "quest%|") and mq.TLO.Cursor() then
             local val = string.gsub(args[1], "quest", "Quest")
             loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor():sub(1, 1):upper(), val)
-            RGMercsLogger.log_info(string.format("Setting \ay%s\ax to \ay%s\ax", mq.TLO.Cursor(), val))
+            Logger.log_info(string.format("Setting \ay%s\ax to \ay%s\ax", mq.TLO.Cursor(), val))
         end
     elseif #args == 2 then
         if args[1] == 'quest' and mq.TLO.Cursor() then
             loot.addRule(mq.TLO.Cursor(), mq.TLO.Cursor():sub(1, 1):upper(), 'Quest|' .. args[2])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \ayQuest|%s\ax", mq.TLO.Cursor(), args[2])
+            Logger.log_info("Setting \ay%s\ax to \ayQuest|%s\ax", mq.TLO.Cursor(), args[2])
         elseif args[1] == 'buy' and mq.TLO.Cursor() then
             loot.BuyItems[mq.TLO.Cursor()] = args[2]
-            GameUtils.DoCmd('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, mq.TLO.Cursor(), args[2])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", mq.TLO.Cursor(), args[2])
+            Core.DoCmd('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, mq.TLO.Cursor(), args[2])
+            Logger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", mq.TLO.Cursor(), args[2])
         elseif args[1] == 'globalitem' and validActions[args[2]] and mq.TLO.Cursor() then
             loot.GlobalItems[mq.TLO.Cursor()] = validActions[args[2]]
             loot.addRule(mq.TLO.Cursor(), 'GlobalItems', validActions[args[2]])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", mq.TLO.Cursor(), validActions[args[2]])
+            Logger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", mq.TLO.Cursor(), validActions[args[2]])
         elseif args[1] == 'classes' and mq.TLO.Cursor() then
             loot.ChangeClasses(mq.TLO.Cursor(), args[2], 'NormalItems')
         elseif args[1] == 'gclasses' and mq.TLO.Cursor() then
             loot.ChangeClasses(mq.TLO.Cursor(), args[2], 'GlobalItems')
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
             loot.addRule(args[2], args[2]:sub(1, 1):upper(), validActions[args[1]])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \ay%s\ax", args[2], validActions[args[1]])
+            Logger.log_info("Setting \ay%s\ax to \ay%s\ax", args[2], validActions[args[1]])
         end
     elseif #args == 3 then
         if args[1] == 'globalitem' and args[2] == 'quest' and mq.TLO.Cursor() then
             loot.addRule(mq.TLO.Cursor(), 'GlobalItems', 'Quest|' .. args[3])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ayQuest|%s\ax", mq.TLO.Cursor(), args[3])
+            Logger.log_info("Setting \ay%s\ax to \agGlobal Item \ayQuest|%s\ax", mq.TLO.Cursor(), args[3])
         elseif args[1] == 'globalitem' and validActions[args[2]] and args[3] ~= 'NULL' then
             loot.addRule(args[3], 'GlobalItems', validActions[args[2]])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", args[3], validActions[args[2]])
+            Logger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s\ax", args[3], validActions[args[2]])
         elseif args[1] == 'buy' then
             loot.BuyItems[args[2]] = args[3]
-            GameUtils.DoCmd('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, args[2], args[3])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", args[2], args[3])
+            Core.DoCmd('/ini "%s" "BuyItems" "%s" "%s"', SettingsFile, args[2], args[3])
+            Logger.log_info("Setting \ay%s\ax to \ayBuy|%s\ax", args[2], args[3])
         elseif args[1] == 'classes' and args[2] ~= 'NULL' and args[3] ~= 'NULL' then
             local item = args[2]
             local classes = args[3]
@@ -878,12 +883,12 @@ function loot.commandHandler(...)
             loot.ChangeClasses(item, classes, 'GlobalItems')
         elseif validActions[args[1]] and args[2] ~= 'NULL' then
             loot.addRule(args[2], args[2]:sub(1, 1):upper(), validActions[args[1]] .. '|' .. args[3])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \ay%s|%s\ax", args[2], validActions[args[1]], args[3])
+            Logger.log_info("Setting \ay%s\ax to \ay%s|%s\ax", args[2], validActions[args[1]], args[3])
         end
     elseif #args == 4 then
         if args[1] == 'globalitem' and validActions[args[2]] and args[3] ~= 'NULL' then
             loot.addRule(args[3], 'GlobalItems', validActions[args[2]] .. '|' .. args[4])
-            RGMercsLogger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s|%s\ax", args[3], validActions[args[2]], args[4])
+            Logger.log_info("Setting \ay%s\ax to \agGlobal Item \ay%s|%s\ax", args[3], validActions[args[2]], args[4])
         end
     end
     loot.writeSettings()
@@ -906,7 +911,7 @@ end
 function loot.eventNoSlot()
     -- we don't have a slot big enough for the item on cursor. Dropping it to the ground.
     local cantLootItemName = mq.TLO.Cursor()
-    GameUtils.DoCmd('/drop')
+    Core.DoCmd('/drop')
     mq.delay(1)
     loot.report("\ay[WARN]\arI can't loot %s, dropping it on the ground!\ax", cantLootItemName)
 end
@@ -918,7 +923,7 @@ end
 ---@param allItems table @Table of all items seen so far on the corpse, left or looted.
 function loot.lootItem(index, doWhat, button, qKeep, allItems)
     local eval = doWhat
-    RGMercsLogger.log_debug('Enter lootItem')
+    Logger.log_debug('Enter lootItem')
     local corpseItem = mq.TLO.Corpse.Item(index)
     if not shouldLootActions[doWhat] then
         table.insert(allItems, { Name = corpseItem.Name(), Action = 'Left', Link = corpseItem.ItemLink('CLICKABLE')(), Eval = doWhat, })
@@ -929,19 +934,19 @@ function loot.lootItem(index, doWhat, button, qKeep, allItems)
     local itemLink = corpseItem.ItemLink('CLICKABLE')()
     local globalItem = (loot.Settings.GlobalLootOn and (loot.GlobalItems[itemName] ~= nil or loot.BuyItems[itemName] ~= nil)) and true or false
 
-    GameUtils.DoCmd('/nomodkey /shift /itemnotify loot%s %s', index, button)
+    Core.DoCmd('/nomodkey /shift /itemnotify loot%s %s', index, button)
     -- Looting of no drop items is currently disabled with no flag to enable anyways
     -- added check to make sure the cursor isn't empty so we can exit the pause early.-- or not mq.TLO.Corpse.Item(index).NoDrop()
     mq.delay(1) -- for good measure.
     mq.delay(5000, function() return mq.TLO.Window('ConfirmationDialogBox').Open() or mq.TLO.Cursor() == nil end)
-    if mq.TLO.Window('ConfirmationDialogBox').Open() then GameUtils.DoCmd('/nomodkey /notify ConfirmationDialogBox Yes_Button leftmouseup') end
+    if mq.TLO.Window('ConfirmationDialogBox').Open() then Core.DoCmd('/nomodkey /notify ConfirmationDialogBox Yes_Button leftmouseup') end
     mq.delay(5000, function() return mq.TLO.Cursor() ~= nil or not mq.TLO.Window('LootWnd').Open() end)
     mq.delay(1) -- force next frame
     -- The loot window closes if attempting to loot a lore item you already have, but lore should have already been checked for
     if not mq.TLO.Window('LootWnd').Open() then return end
     if doWhat == 'Destroy' and mq.TLO.Cursor.ID() == corpseItemID then
         eval = globalItem and 'Global Destroy' or 'Destroy'
-        GameUtils.DoCmd('/destroy')
+        Core.DoCmd('/destroy')
         table.insert(allItems, { Name = itemName, Action = 'Destroyed', Link = itemLink, Eval = eval, })
     end
     loot.checkCursor()
@@ -964,12 +969,12 @@ function loot.lootItem(index, doWhat, button, qKeep, allItems)
 end
 
 function loot.lootCorpse(corpseID)
-    RGMercsLogger.log_debug('Enter lootCorpse')
+    Logger.log_debug('Enter lootCorpse')
     shouldLootActions.Destroy = loot.Settings.DoDestroy
     shouldLootActions.Tribute = loot.Settings.TributeKeep
     if mq.TLO.Cursor() then loot.checkCursor() end
     for i = 1, 3 do
-        GameUtils.DoCmd('/loot')
+        Core.DoCmd('/loot')
         mq.delay(1000, function() return mq.TLO.Window('LootWnd').Open() end)
         if mq.TLO.Window('LootWnd').Open() then break end
     end
@@ -978,20 +983,20 @@ function loot.lootCorpse(corpseID)
     mq.delay(3000, function() return cantLootID > 0 or mq.TLO.Window('LootWnd').Open() end)
     if not mq.TLO.Window('LootWnd').Open() then
         if mq.TLO.Target.CleanName() ~= nil then
-            RGMercsLogger.log_warn(('\awlootCorpse(): \ayCan\'t loot %s right now'):format(mq.TLO.Target.CleanName()))
+            Logger.log_warn(('\awlootCorpse(): \ayCan\'t loot %s right now'):format(mq.TLO.Target.CleanName()))
             cantLootList[corpseID] = os.time()
         end
         return
     end
     mq.delay(1000, function() return (mq.TLO.Corpse.Items() or 0) > 0 end)
     local items = mq.TLO.Corpse.Items() or 0
-    RGMercsLogger.log_debug('\awlootCorpse(): \ayLoot window open. Items: %s', items)
+    Logger.log_debug('\awlootCorpse(): \ayLoot window open. Items: %s', items)
     local corpseName = mq.TLO.Corpse.Name()
     if mq.TLO.Window('LootWnd').Open() and items > 0 then
         if mq.TLO.Corpse.DisplayName() == mq.TLO.Me.DisplayName() then
             if loot.Settings.LootMyCorpse then
                 -- if its our own corpse and we want to loot our corpses then loot it all.
-                GameUtils.DoCmd('/lootall')
+                Core.DoCmd('/lootall')
                 -- dont return control to other functions until we are done looting.
                 mq.delay("45s", function() return not mq.TLO.Window('LootWnd').Open() end)
             end
@@ -1006,7 +1011,7 @@ function loot.lootCorpse(corpseID)
             local itemLink = corpseItem.ItemLink('CLICKABLE')()
             if corpseItem() then
                 local itemRule, qKeep, newRule = loot.getRule(corpseItem, 'loot')
-                RGMercsLogger.log_debug("LootCorpse(): item=%s, rule=%s, qKeep=%s, newRule=%s", corpseItem.Name(), itemRule, qKeep, newRule)
+                Logger.log_debug("LootCorpse(): item=%s, rule=%s, qKeep=%s, newRule=%s", corpseItem.Name(), itemRule, qKeep, newRule)
                 local stackable = corpseItem.Stackable()
                 local freeStack = corpseItem.FreeStack()
                 if corpseItem.Lore() then
@@ -1053,18 +1058,18 @@ function loot.lootCorpse(corpseID)
             for _, loreItem in ipairs(loreItems) do
                 skippedItems = skippedItems .. ' ' .. loreItem .. ' (lore) '
             end
-            GameUtils.DoCmd(skippedItems, loot.Settings.LootChannel, corpseName, corpseID)
+            Core.DoCmd(skippedItems, loot.Settings.LootChannel, corpseName, corpseID)
         end
         if #allItems > 0 then
             -- send to self and others running lootnscoot
-            loot.lootActor:send({ mailbox = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = RGMercConfig.Globals.CurLoadedChar, })
+            loot.lootActor:send({ mailbox = 'looted', }, { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = Config.Globals.CurLoadedChar, })
             -- send to standalone looted gui
             loot.lootActor:send({ mailbox = 'looted', script = 'looted', },
-                { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = RGMercConfig.Globals.CurLoadedChar, })
+                { ID = corpseID, Items = allItems, LootedAt = mq.TLO.Time(), LootedBy = Config.Globals.CurLoadedChar, })
         end
     end
     if mq.TLO.Cursor() then loot.checkCursor() end
-    GameUtils.DoCmd('/nomodkey /notify LootWnd LW_DoneButton leftmouseup')
+    Core.DoCmd('/nomodkey /notify LootWnd LW_DoneButton leftmouseup')
     mq.delay(3000, function() return not mq.TLO.Window('LootWnd').Open() end)
     -- if the corpse doesn't poof after looting, there may have been something we weren't able to loot or ignored
     -- mark the corpse as not lootable for a bit so we don't keep trying
@@ -1083,10 +1088,10 @@ function loot.corpseLocked(corpseID)
 end
 
 function loot.lootMobs(limit)
-    RGMercsLogger.log_verbose('\awlootMobs(): \ayEnter lootMobs')
+    Logger.log_verbose('\awlootMobs(): \ayEnter lootMobs')
     local deadCount = mq.TLO.SpawnCount(spawnSearch:format('npccorpse', loot.Settings.CorpseRadius))()
-    RGMercsLogger.log_verbose('\awlootMobs(): \ayThere are %s corpses in range.', deadCount)
-    local mobsNearby = RGMercUtils.GetXTHaterCount()
+    Logger.log_verbose('\awlootMobs(): \ayThere are %s corpses in range.', deadCount)
+    local mobsNearby = Targetting.GetXTHaterCount()
     local corpseList = {}
 
     -- check for own corpse
@@ -1096,7 +1101,7 @@ function loot.lootMobs(limit)
         -- if we want to loot our own corpses then add them to the list and loot them first so we have bags to put items into
         for i = 1, (limit or myCorpseCount) do
             local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse %s radius %d zradius 100", i, mq.TLO.Me.CleanName(), loot.Settings.CorpseRadius))
-            RGMercsLogger.log_debug('\awlootMobs(): \ayMy Corpse ID: %d', corpse.ID())
+            Logger.log_debug('\awlootMobs(): \ayMy Corpse ID: %d', corpse.ID())
             table.insert(corpseList, corpse)
         end
     end
@@ -1110,29 +1115,29 @@ function loot.lootMobs(limit)
             table.insert(corpseList, corpse)
         end
     else
-        RGMercsLogger.log_debug('\awlootMobs(): \ayI have my own corpse nearby, not looting other corpses.')
+        Logger.log_debug('\awlootMobs(): \ayI have my own corpse nearby, not looting other corpses.')
     end
 
     local didLoot = false
     if #corpseList > 0 then
-        RGMercsLogger.log_debug('\awlootMobs(): \ayTrying to loot %d corpses.', #corpseList)
+        Logger.log_debug('\awlootMobs(): \ayTrying to loot %d corpses.', #corpseList)
         for i = 1, #corpseList do
-            if RGMercConfig.Globals.PauseMain then break end
+            if Config.Globals.PauseMain then break end
             local corpse = corpseList[i]
             local corpseID = corpse.ID()
             if corpseID and corpseID > 0 and not loot.corpseLocked(corpseID) and (mq.TLO.Navigation.PathLength('spawn id ' .. tostring(corpseID))() or 100) < 60 then
                 -- try to pull our corpse closer if possible.
                 if corpse.DisplayName() == mq.TLO.Me.DisplayName() then
-                    RGMercsLogger.log_debug('\awlootMobs(): \ayPulilng my Corpse ID: %d', corpse.ID())
-                    GameUtils.DoCmd("/corpse")
+                    Logger.log_debug('\awlootMobs(): \ayPulilng my Corpse ID: %d', corpse.ID())
+                    Core.DoCmd("/corpse")
                     mq.delay(10)
                 end
 
-                RGMercsLogger.log_debug('\awlootMobs(): \atMoving to corpse ID=' .. tostring(corpseID))
+                Logger.log_debug('\awlootMobs(): \atMoving to corpse ID=' .. tostring(corpseID))
                 loot.navToID(corpseID)
 
-                if RGMercUtils.GetXTHaterCount() > 0 and not loot.Settings.CombatLooting then
-                    RGMercsLogger.log_debug('\awlootMobs(): \arLooting stopped early due to aggro!')
+                if Targetting.GetXTHaterCount() > 0 and not loot.Settings.CombatLooting then
+                    Logger.log_debug('\awlootMobs(): \arLooting stopped early due to aggro!')
                     return didLoot
                 end
 
@@ -1141,7 +1146,7 @@ function loot.lootMobs(limit)
                 didLoot = true
             end
         end
-        RGMercsLogger.log_debug('\awlootMobs(): \agDone with corpse list.')
+        Logger.log_debug('\awlootMobs(): \agDone with corpse list.')
     end
     return didLoot
 end
@@ -1158,26 +1163,26 @@ function loot.eventSell(_, itemName)
         return
     end
     if loot.Settings.AddNewSales then
-        RGMercsLogger.log_info(string.format('Setting %s to Sell', itemName))
+        Logger.log_info(string.format('Setting %s to Sell', itemName))
         if not lootData[firstLetter] then lootData[firstLetter] = {} end
-        GameUtils.DoCmd('/ini "%s" "%s" "%s" "%s"', LootFile, firstLetter, itemName, 'Sell')
+        Core.DoCmd('/ini "%s" "%s" "%s" "%s"', LootFile, firstLetter, itemName, 'Sell')
         loot.modifyItem(itemName, 'Sell', 'Normal_Rules')
         lootData[firstLetter][itemName] = 'Sell'
         loot.NormalItems[itemName] = 'Sell'
         loot.lootActor:send({ mailbox = 'lootnscoot', },
-            { who = RGMercConfig.Globals.CurLoadedChar, action = 'modifyitem', item = itemName, rule = 'Sell', section = "NormalItems", })
-        RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+            { who = Config.Globals.CurLoadedChar, action = 'modifyitem', item = itemName, rule = 'Sell', section = "NormalItems", })
+        Modules:ExecModule("Loot", "ModifyLootSettings")
     end
 end
 
 function loot.goToVendor()
     if not mq.TLO.Target() then
-        RGMercsLogger.log_warn('Please target a vendor')
+        Logger.log_warn('Please target a vendor')
         return false
     end
     local vendorName = mq.TLO.Target.CleanName()
 
-    RGMercsLogger.log_info('Doing business with ' .. vendorName)
+    Logger.log_info('Doing business with ' .. vendorName)
     if mq.TLO.Target.Distance() > 15 then
         loot.navToID(mq.TLO.Target.ID())
     end
@@ -1185,9 +1190,9 @@ function loot.goToVendor()
 end
 
 function loot.openVendor()
-    RGMercsLogger.log_debug('Opening merchant window')
-    GameUtils.DoCmd('/nomodkey /click right target')
-    RGMercsLogger.log_debug('Waiting for merchant window to populate')
+    Logger.log_debug('Opening merchant window')
+    Core.DoCmd('/nomodkey /click right target')
+    Logger.log_debug('Waiting for merchant window to populate')
     mq.delay(1000, function() return mq.TLO.Window('MerchantWnd').Open() end)
     if not mq.TLO.Window('MerchantWnd').Open() then return false end
     mq.delay(5000, function() return mq.TLO.Merchant.ItemsReceived() end)
@@ -1197,14 +1202,14 @@ end
 function loot.SellToVendor(itemToSell, bag, slot)
     if NEVER_SELL[itemToSell] then return end
     if mq.TLO.Window('MerchantWnd').Open() then
-        RGMercsLogger.log_info('Selling ' .. itemToSell)
+        Logger.log_info('Selling ' .. itemToSell)
         if slot == nil or slot == -1 then
-            GameUtils.DoCmd('/nomodkey /itemnotify %s leftmouseup', bag)
+            Core.DoCmd('/nomodkey /itemnotify %s leftmouseup', bag)
         else
-            GameUtils.DoCmd('/nomodkey /itemnotify in pack%s %s leftmouseup', bag, slot)
+            Core.DoCmd('/nomodkey /itemnotify in pack%s %s leftmouseup', bag, slot)
         end
         mq.delay(1000, function() return mq.TLO.Window('MerchantWnd/MW_SelectedItemLabel').Text() == itemToSell end)
-        GameUtils.DoCmd('/nomodkey /shiftkey /notify merchantwnd MW_Sell_Button leftmouseup')
+        Core.DoCmd('/nomodkey /shiftkey /notify merchantwnd MW_Sell_Button leftmouseup')
         mq.doevents('eventNovalue')
         if itemNoValue == itemToSell then
             loot.addRule(itemToSell, itemToSell:sub(1, 1), 'Ignore')
@@ -1231,7 +1236,7 @@ function loot.RestockItems()
             mq.delay(500, function() return mq.TLO.Window("QuantityWnd").Open() end)
             mq.TLO.Window("QuantityWnd/QTYW_SliderInput").SetText(tostring(tmpQty))()
             mq.delay(100, function() return mq.TLO.Window("QuantityWnd/QTYW_SliderInput").Text() == tostring(tmpQty) end)
-            RGMercsLogger.log_info("\agBuying\ay " .. tmpQty .. "\at " .. itemName)
+            Logger.log_info("\agBuying\ay " .. tmpQty .. "\at " .. itemName)
             mq.TLO.Window("QuantityWnd/QTYW_Accept_Button").LeftMouseUp()
             mq.delay(100)
         end
@@ -1244,9 +1249,9 @@ end
 -- TRIBUTEING
 
 function loot.openTribMaster()
-    RGMercsLogger.log_debug('Opening Tribute Window')
-    GameUtils.DoCmd('/nomodkey /click right target')
-    RGMercsLogger.log_debug('Waiting for Tribute Window to populate')
+    Logger.log_debug('Opening Tribute Window')
+    Core.DoCmd('/nomodkey /click right target')
+    Logger.log_debug('Waiting for Tribute Window to populate')
     mq.delay(1000, function() return mq.TLO.Window('TributeMasterWnd').Open() end)
     if not mq.TLO.Window('TributeMasterWnd').Open() then return false end
     return mq.TLO.Window('TributeMasterWnd').Open()
@@ -1261,25 +1266,25 @@ function loot.eventTribute(line, itemName)
         return
     end
     if loot.Settings.AddNewTributes then
-        RGMercsLogger.log_info(string.format('Setting %s to Tribute', itemName))
+        Logger.log_info(string.format('Setting %s to Tribute', itemName))
         if not lootData[firstLetter] then lootData[firstLetter] = {} end
-        GameUtils.DoCmd('/ini "%s" "%s" "%s" "%s"', LootFile, firstLetter, itemName, 'Tribute')
+        Core.DoCmd('/ini "%s" "%s" "%s" "%s"', LootFile, firstLetter, itemName, 'Tribute')
 
         loot.modifyItem(itemName, 'Tribute', 'Normal_Rules')
         lootData[firstLetter][itemName] = 'Tribute'
         loot.NormalItems[itemName] = 'Tribute'
         loot.lootActor:send({ mailbox = 'lootnscoot', },
-            { who = RGMercConfig.Globals.CurLoadedChar, action = 'modifyitem', item = itemName, rule = 'Tribute', section = "NormalItems", })
-        RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+            { who = Config.Globals.CurLoadedChar, action = 'modifyitem', item = itemName, rule = 'Tribute', section = "NormalItems", })
+        Modules:ExecModule("Loot", "ModifyLootSettings")
     end
 end
 
 function loot.TributeToVendor(itemToTrib, bag, slot)
     if NEVER_SELL[itemToTrib.Name()] then return end
     if mq.TLO.Window('TributeMasterWnd').Open() then
-        RGMercsLogger.log_info('Tributeing ' .. itemToTrib.Name())
+        Logger.log_info('Tributeing ' .. itemToTrib.Name())
         loot.report('\ayTributing \at%s \axfor\ag %s \axpoints!', itemToTrib.Name(), itemToTrib.Tribute())
-        GameUtils.DoCmd('/shift /itemnotify in pack%s %s leftmouseup', bag, slot)
+        Core.DoCmd('/shift /itemnotify in pack%s %s leftmouseup', bag, slot)
         mq.delay(1) -- progress frame
 
         mq.delay(5000, function()
@@ -1302,10 +1307,10 @@ end
 
 function loot.DestroyItem(itemToDestroy, bag, slot)
     if NEVER_SELL[itemToDestroy.Name()] then return end
-    RGMercsLogger.log_info('!!Destroying!! ' .. itemToDestroy.Name())
-    GameUtils.DoCmd('/shift /itemnotify in pack%s %s leftmouseup', bag, slot)
+    Logger.log_info('!!Destroying!! ' .. itemToDestroy.Name())
+    Core.DoCmd('/shift /itemnotify in pack%s %s leftmouseup', bag, slot)
     mq.delay(1) -- progress frame
-    GameUtils.DoCmd('/destroy')
+    Core.DoCmd('/destroy')
     mq.delay(1)
     mq.delay(1000, function() return not mq.TLO.Cursor() end)
     mq.delay(1)
@@ -1322,7 +1327,7 @@ function loot.markTradeSkillAsBank()
                     local itemToMark = bagSlot.Name()
                     loot.NormalItems[itemToMark] = 'Bank'
                     loot.addRule(itemToMark, itemToMark:sub(1, 1), 'Bank')
-                    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+                    Modules:ExecModule("Loot", "ModifyLootSettings")
                 end
             end
         end
@@ -1338,7 +1343,7 @@ function loot.markTradeSkillAsBank()
                     local itemToMark = bagSlot.Item(j).Name()
                     loot.NormalItems[itemToMark] = 'Bank'
                     loot.addRule(itemToMark, itemToMark:sub(1, 1), 'Bank')
-                    RGMercModules:ExecModule("Loot", "ModifyLootSettings")
+                    Modules:ExecModule("Loot", "ModifyLootSettings")
                 end
             end
         end
@@ -1347,12 +1352,12 @@ end
 
 function loot.bankItem(itemName, bag, slot)
     if not slot or slot == -1 then
-        GameUtils.DoCmd('/shift /itemnotify %s leftmouseup', bag)
+        Core.DoCmd('/shift /itemnotify %s leftmouseup', bag)
     else
-        GameUtils.DoCmd('/shift /itemnotify in pack%s %s leftmouseup', bag, slot)
+        Core.DoCmd('/shift /itemnotify in pack%s %s leftmouseup', bag, slot)
     end
     mq.delay(100, function() return mq.TLO.Cursor() end)
-    GameUtils.DoCmd('/notify BigBankWnd BIGB_AutoButton leftmouseup')
+    Core.DoCmd('/notify BigBankWnd BIGB_AutoButton leftmouseup')
     mq.delay(100, function() return not mq.TLO.Cursor() end)
 end
 
@@ -1360,7 +1365,7 @@ end
 
 function loot.eventForage()
     if not loot.Settings.LootForage then return end
-    RGMercsLogger.log_debug('Enter eventForage')
+    Logger.log_debug('Enter eventForage')
     -- allow time for item to be on cursor incase message is faster or something?
     mq.delay(1000, function() return mq.TLO.Cursor() end)
     -- there may be more than one item on cursor so go until its cleared
@@ -1374,17 +1379,17 @@ function loot.eventForage()
         -- >= because .. does finditemcount not count the item on the cursor?
         if not shouldLootActions[ruleAction] or (ruleAction == 'Quest' and currentItemAmount >= ruleAmount) then
             if mq.TLO.Cursor.Name() == foragedItem then
-                if loot.Settings.LootForageSpam then RGMercsLogger.log_info('Destroying foraged item ' .. foragedItem) end
-                GameUtils.DoCmd('/destroy')
+                if loot.Settings.LootForageSpam then Logger.log_info('Destroying foraged item ' .. foragedItem) end
+                Core.DoCmd('/destroy')
                 mq.delay(500)
             end
             -- will a lore item we already have even show up on cursor?
             -- free inventory check won't cover an item too big for any container so may need some extra check related to that?
         elseif (shouldLootActions[ruleAction] or currentItemAmount < ruleAmount) and (not cursorItem.Lore() or currentItemAmount == 0) and (mq.TLO.Me.FreeInventory() or (cursorItem.Stackable() and cursorItem.FreeStack())) then
-            if loot.Settings.LootForageSpam then RGMercsLogger.log_info('Keeping foraged item ' .. foragedItem) end
-            GameUtils.DoCmd('/autoinv')
+            if loot.Settings.LootForageSpam then Logger.log_info('Keeping foraged item ' .. foragedItem) end
+            Core.DoCmd('/autoinv')
         else
-            if loot.Settings.LootForageSpam then RGMercsLogger.log_warn('Unable to process item ' .. foragedItem) end
+            if loot.Settings.LootForageSpam then Logger.log_warn('Unable to process item ' .. foragedItem) end
             break
         end
         mq.delay(50)
@@ -1408,7 +1413,7 @@ function loot.processItems(action)
                 --totalPlat = mq.TLO.Me.Platinum()
                 local sellPrice = item.Value() and item.Value() / 1000 or 0
                 if sellPrice == 0 then
-                    RGMercsLogger.log_warn(string.format('Item \ay%s\ax is set to Sell but has no sell value!', item.Name()))
+                    Logger.log_warn(string.format('Item \ay%s\ax is set to Sell but has no sell value!', item.Name()))
                 else
                     loot.SellToVendor(item.Name(), bag, slot)
                     totalPlat = totalPlat + sellPrice
@@ -1419,7 +1424,7 @@ function loot.processItems(action)
                     if not loot.goToVendor() then return end
                     if not loot.openTribMaster() then return end
                 end
-                GameUtils.DoCmd('/keypress OPEN_INV_BAGS')
+                Core.DoCmd('/keypress OPEN_INV_BAGS')
                 mq.delay(1)
                 -- tributes requires the bags to be open
                 mq.delay(1000, loot.AreBagsOpen)
@@ -1431,7 +1436,7 @@ function loot.processItems(action)
                 mq.delay(1)
             elseif action == 'Bank' then
                 if not mq.TLO.Window('BigBankWnd').Open() then
-                    RGMercsLogger.log_warn('Bank window must be open!')
+                    Logger.log_warn('Bank window must be open!')
                     return
                 end
                 loot.bankItem(item.Name(), bag, slot)
@@ -1486,7 +1491,7 @@ function loot.processItems(action)
             mq.TLO.Window('TributeMasterWnd').DoClose()
             mq.delay(1)
         end
-        GameUtils.DoCmd('/keypress CLOSE_INV_BAGS')
+        Core.DoCmd('/keypress CLOSE_INV_BAGS')
         mq.delay(1)
     elseif action == 'Sell' then
         if mq.TLO.Window('MerchantWnd').Open() then
@@ -1573,57 +1578,57 @@ function loot.guiExport()
             if ImGui.BeginMenu('Group Commands') then
                 -- Add menu items here
                 if ImGui.MenuItem("Sell Stuff##group") then
-                    GameUtils.DoCmd(string.format('/%s /rgl sell', tmpCmd))
+                    Core.DoCmd(string.format('/%s /rgl sell', tmpCmd))
                 end
 
                 if ImGui.MenuItem('Restock Items##group') then
-                    GameUtils.DoCmd(string.format('/%s /rgl buy', tmpCmd))
+                    Core.DoCmd(string.format('/%s /rgl buy', tmpCmd))
                 end
 
                 if ImGui.MenuItem("Tribute Stuff##group") then
-                    GameUtils.DoCmd(string.format('/%s /rgl tribute', tmpCmd))
+                    Core.DoCmd(string.format('/%s /rgl tribute', tmpCmd))
                 end
 
                 if ImGui.MenuItem("Bank##group") then
-                    GameUtils.DoCmd(string.format('/%s /rgl bank', tmpCmd))
+                    Core.DoCmd(string.format('/%s /rgl bank', tmpCmd))
                 end
 
                 if ImGui.MenuItem("Cleanup##group") then
-                    GameUtils.DoCmd(string.format('/%s /rgl cleanbags', tmpCmd))
+                    Core.DoCmd(string.format('/%s /rgl cleanbags', tmpCmd))
                 end
 
                 ImGui.Separator()
 
                 if ImGui.MenuItem("Reload##group") then
-                    GameUtils.DoCmd(string.format('/%s /rgl lootreload', tmpCmd))
+                    Core.DoCmd(string.format('/%s /rgl lootreload', tmpCmd))
                 end
 
                 ImGui.EndMenu()
             end
             if ImGui.MenuItem('Sell Stuff') then
-                GameUtils.DoCmd('/rgl sell')
+                Core.DoCmd('/rgl sell')
             end
 
             if ImGui.MenuItem('Restock') then
-                GameUtils.DoCmd('/rgl buy')
+                Core.DoCmd('/rgl buy')
             end
 
             if ImGui.MenuItem('Tribute Stuff') then
-                GameUtils.DoCmd('/rgl tribute')
+                Core.DoCmd('/rgl tribute')
             end
 
             if ImGui.MenuItem('Bank') then
-                GameUtils.DoCmd('/rgl bank')
+                Core.DoCmd('/rgl bank')
             end
 
             if ImGui.MenuItem('Cleanup') then
-                GameUtils.DoCmd('/rgl cleanbags')
+                Core.DoCmd('/rgl cleanbags')
             end
 
             ImGui.Separator()
 
             if ImGui.MenuItem('Reload') then
-                GameUtils.DoCmd('/rgl lootreload')
+                Core.DoCmd('/rgl lootreload')
             end
 
 
@@ -1648,7 +1653,7 @@ function loot.init()
     loot.setupBinds()
     loot.guiExport()
 
-    RGMercsLogger.log_debug("Loot::init() SaveRequired: %s", needsSave and "TRUE" or "FALSE")
+    Logger.log_debug("Loot::init() SaveRequired: %s", needsSave and "TRUE" or "FALSE")
     return needsSave
 end
 

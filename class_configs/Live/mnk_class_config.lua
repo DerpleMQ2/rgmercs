@@ -1,5 +1,7 @@
 local mq           = require('mq')
-local RGMercUtils  = require("utils.rgmercs_utils")
+local Config       = require('utils.config')
+local Targetting   = require("utils.targetting")
+local Casting      = require("utils.casting")
 
 local _ClassConfig = {
     _version          = "1.0 - Live",
@@ -191,26 +193,26 @@ local _ClassConfig = {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                    Casting.DoBuffCheck() and Casting.AmIBuffable()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
+                    Casting.BurnCheck() and not Casting.Feigning()
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
     },
@@ -227,14 +229,14 @@ local _ClassConfig = {
                 name = "Breaths",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() <= 75
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() <= 75
                 end,
             },
             {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
@@ -251,14 +253,14 @@ local _ClassConfig = {
                 name = "Silent Strikes",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Swift Tails' Chant",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
@@ -458,29 +460,29 @@ local _ClassConfig = {
                 name = "FistsWu",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.SongActive(discSpell)
+                    return not Casting.SongActive(discSpell)
                 end,
             },
             {
                 name = "Alliance",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return RGMercConfig:GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and not RGMercUtils.TargetHasBuffByName("Firewalker's Covenant Trigger") and
-                        not RGMercUtils.TargetHasBuffByName("Doomwalker's Alliance Trigger")
+                    return Config:GetSetting('DoAlliance') and Casting.CanAlliance() and not Casting.TargetHasBuffByName("Firewalker's Covenant Trigger") and
+                        not Casting.TargetHasBuffByName("Doomwalker's Alliance Trigger")
                 end,
             },
             {
                 name = "Vehement Rage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetTargetPctHPs() > 10 and not mq.TLO.Me.ActiveDisc.ID()
+                    return Targetting.GetTargetPctHPs() > 10 and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Iron",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.IsNamed(mq.TLO.Target)
+                    return not mq.TLO.Me.ActiveDisc.ID() and Targetting.IsNamed(mq.TLO.Target)
                 end,
             },
             {
@@ -522,14 +524,14 @@ local _ClassConfig = {
                 name = "Drunken",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() >= 20 and RGMercUtils.GetTargetPctHPs() > 10
+                    return mq.TLO.Me.PctEndurance() >= 20 and Targetting.GetTargetPctHPs() > 10
                 end,
             },
             {
                 name = "Curse",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.GetTargetPctHPs() > 5
+                    return Targetting.GetTargetPctHPs() > 5
                 end,
             },
             {
@@ -592,30 +594,30 @@ local _ClassConfig = {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercConfig:GetSetting('DoIntimidation')
-                        and RGMercUtils.AbilityReady(abilityName)
+                    return Config:GetSetting('DoIntimidation')
+                        and Casting.AbilityReady(abilityName)
                 end,
             },
             {
                 name = "Round Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Kick",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercUtils.AbilityReady(abilityName)
+                    return Casting.AbilityReady(abilityName)
                 end,
             },
             {
                 name = "Disarm",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercUtils.AbilityReady(abilityName) and
-                        RGMercUtils.GetTargetDistance() < 15
+                    return Casting.AbilityReady(abilityName) and
+                        Targetting.GetTargetDistance() < 15
                 end,
             },
         },

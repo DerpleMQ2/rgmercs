@@ -1,15 +1,19 @@
 -- Sample Basic Class Module
-local mq            = require('mq')
-local RGMercUtils   = require("utils.rgmercs_utils")
-local CommUtils     = require("utils.comm_utils")
-local GameUtils     = require("utils.game_utils")
-local TableUtils    = require("utils.table_utils")
-local StringUtils   = require("utils.string_utils")
-local RGMercsLogger = require("utils.rgmercs_logger")
-local Set           = require("mq.Set")
-local Icons         = require('mq.ICONS')
+local mq         = require('mq')
+local Config     = require('utils.config')
+local Core       = require("utils.core")
+local Targetting = require("utils.targetting")
+local Casting    = require("utils.casting")
+local Ui         = require("utils.ui")
+local Comms      = require("utils.comms")
+local Tables     = require("utils.tables")
+local Strings    = require("utils.strings")
+local Logger     = require("utils.logger")
+local Modules    = require("utils.modules")
+local Set        = require("mq.Set")
+local Icons      = require('mq.ICONS')
 
-require('utils.rgmercs_datatypes')
+require('utils.datatypes')
 
 local Module                     = { _version = '0.1a', _name = "Charm", _author = 'Grimmier', }
 Module.__index                   = Module
@@ -184,32 +188,32 @@ end
 local function getConfigFileName()
 	return mq.configDir ..
 		'/rgmercs/PCConfigs/' ..
-		Module._name .. "_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+		Module._name .. "_" .. Config.Globals.CurServer .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
 end
 
 local function getImmuneFileName()
 	return mq.configDir ..
 		'/rgmercs/PCConfigs/' ..
-		Module._name .. "_Immune_" .. RGMercConfig.Globals.CurServer .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+		Module._name .. "_Immune_" .. Config.Globals.CurServer .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 
 	if doBroadcast == true then
-		CommUtils.BroadcastUpdate(self._name, "LoadSettings")
+		Comms.BroadcastUpdate(self._name, "LoadSettings")
 	end
 end
 
 function Module:LoadSettings()
-	RGMercsLogger.log_debug("\ar%s\ao Charm Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedClass,
-		RGMercConfig.Globals.CurLoadedChar)
+	Logger.log_debug("\ar%s\ao Charm Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
+		Config.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
-		RGMercsLogger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
-			RGMercConfig.Globals.CurLoadedClass, settings_pickle_path)
+		Logger.log_error("\ay[%s]: Unable to load module settings file(%s), creating a new one!",
+			Config.Globals.CurLoadedClass, settings_pickle_path)
 		self.settings = {}
 		self:SaveSettings(false)
 	else
@@ -217,13 +221,13 @@ function Module:LoadSettings()
 	end
 
 	if not self.settings or not self.DefaultCategories or not self.DefaultConfig then
-		RGMercsLogger.log_error("\arFailed to Load Charm Config for Classs: %s", RGMercConfig.Globals.CurLoadedClass)
+		Logger.log_error("\arFailed to Load Charm Config for Classs: %s", Config.Globals.CurLoadedClass)
 		return
 	end
 
 	local settingsChanged = false
 	-- Setup Defaults
-	self.settings, settingsChanged = RGMercConfig.ResolveDefaults(self.DefaultConfig, self.settings)
+	self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
 
 	if settingsChanged then
 		self:SaveSettings(false)
@@ -232,8 +236,8 @@ function Module:LoadSettings()
 	local immune_pickle_path = getImmuneFileName()
 	local immuneConfig, immuneErr = loadfile(immune_pickle_path)
 	if immuneErr or not immuneConfig then
-		RGMercsLogger.log_error("\ay[%s]: Unable to load Immune settings file(%s), creating a new one!",
-			RGMercConfig.Globals.CurLoadedClass, immune_pickle_path)
+		Logger.log_error("\ay[%s]: Unable to load Immune settings file(%s), creating a new one!",
+			Config.Globals.CurLoadedClass, immune_pickle_path)
 		self.ImmuneTable = {}
 		mq.pickle(immune_pickle_path, self.ImmuneTable)
 	else
@@ -259,9 +263,9 @@ function Module.New()
 end
 
 function Module:Init()
-	RGMercsLogger.log_debug("\agInitializing Charm Module...")
+	Logger.log_debug("\agInitializing Charm Module...")
 	-- bards don't have DireCharm so hide the settings.
-	if RGMercUtils.MyClassIs("BRD") then
+	if Core.MyClassIs("BRD") then
 		self.DefaultConfig['DireCharm'] = nil
 		self.DefaultConfig['DireCharmMaxLvl'] = nil
 	end
@@ -273,7 +277,7 @@ function Module:Init()
 end
 
 function Module:ShouldRender()
-	return RGMercModules:ExecModule("Class", "CanCharm")
+	return Modules:ExecModule("Class", "CanCharm")
 end
 
 function Module:Render()
@@ -289,7 +293,7 @@ function Module:Render()
 
 	if self.ModuleLoaded then
 		if ImGui.CollapsingHeader("Config Options") then
-			self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig,
+			self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
 				self.DefaultCategories)
 			if pressed then
 				self:SaveSettings(false)
@@ -351,7 +355,7 @@ function Module:Render()
 							ImGui.TableNextColumn()
 							if ImGui.SmallButton(Icons.MD_DELETE .. '##' .. name .. lvl .. bodyType) then
 								self.ImmuneTable[mq.TLO.Zone.ShortName()][name][lvl][bodyType] = nil
-								RGMercsLogger.log_debug(
+								Logger.log_debug(
 									"\ayUpdateCharmList: Removing Spawn from our Immune List, \aw(\aoZone \at%s \aoMob \at%s \aoLvl \at%s \ao Body \at%s\aw.)",
 									mq.TLO.Zone.ShortName(), name, lvl, bodyType)
 								mq.pickle(getImmuneFileName(), self.ImmuneTable)
@@ -381,10 +385,10 @@ function Module:Pop()
 end
 
 function Module:HandleCharmBroke(mobName, breakerName)
-	RGMercsLogger.log_debug("%s broke charm on ==> %s", breakerName, mobName)
-	CommUtils.HandleAnnounce(
+	Logger.log_debug("%s broke charm on ==> %s", breakerName, mobName)
+	Comms.HandleAnnounce(
 		string.format("\ar CHARM Broken: %s woke up \ag -> \ay %s \ag <- \ax", breakerName, mobName),
-		RGMercConfig:GetSetting('CharmAnnounceGroup'), RGMercConfig:GetSetting('CharmAnnounce'))
+		Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'))
 end
 
 function Module:AddImmuneTarget(mobId, mobData)
@@ -404,7 +408,7 @@ function Module:AddImmuneTarget(mobId, mobData)
 		end
 		if self.ImmuneTable[zone][mobData.name][mobData.lvl][mobData.body] == nil then
 			self.ImmuneTable[zone][mobData.name][mobData.lvl][mobData.body] = mobData.reason
-			RGMercsLogger.log_debug(
+			Logger.log_debug(
 				"\ayUpdateCharmList: Adding Spawn to our Immune List, \aw(\aoZone \at%s \aoMob \at%s \aoLvl \at%s \ao Body \at%s\aw.)",
 				zone, mobData.name, mobData.lvl, mobData.body)
 			mq.pickle(getImmuneFileName(), self.ImmuneTable)
@@ -414,11 +418,11 @@ function Module:AddImmuneTarget(mobId, mobData)
 end
 
 function Module:CharmLvlToHigh(mobLvl)
-	if RGMercUtils.MyClassIs("BRD") then return false end
-	if RGMercConfig:GetSetting("DireCharm", true) and RGMercConfig:GetSetting("AutoLevelRangeCharm") then
+	if Core.MyClassIs("BRD") then return false end
+	if Config:GetSetting("DireCharm", true) and Config:GetSetting("AutoLevelRangeCharm") then
 		self.settings.DireCharmMaxLvl = mobLvl - 1
 		self:SaveSettings(false)
-		RGMercsLogger.log_debug("\awNOTICE:\ax \aoTarget LVL to High,\ayLowering Max Level for Dire Charm!")
+		Logger.log_debug("\awNOTICE:\ax \aoTarget LVL to High,\ayLowering Max Level for Dire Charm!")
 		return true
 	end
 	return false
@@ -452,57 +456,57 @@ function Module:ResetCharmStates()
 end
 
 function Module:GetCharmSpell()
-	if RGMercUtils.MyClassIs("BRD") then
-		return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "CharmSong")
+	if Core.MyClassIs("BRD") then
+		return Modules:ExecModule("Class", "GetResolvedActionMapItem", "CharmSong")
 	end
 
-	return RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "CharmSpell")
+	return Modules:ExecModule("Class", "GetResolvedActionMapItem", "CharmSpell")
 end
 
 function Module:CharmNow(charmId, useAA)
 	-- First thing we target the mob if we haven't already targeted them.
-	GameUtils.DoCmd("/attack off")
+	Core.DoCmd("/attack off")
 	local currentTargetID = mq.TLO.Target.ID()
-	if charmId == RGMercConfig.Globals.AutoTargetID then return end
-	RGMercUtils.SetTarget(charmId)
+	if charmId == Config.Globals.AutoTargetID then return end
+	Targetting.SetTarget(charmId)
 
 	local charmSpell = self:GetCharmSpell()
 
 	if not charmSpell or not charmSpell() then return end
-	if not RGMercUtils.MyClassIs("BRD") then
-		local dCharm = RGMercConfig:GetSetting("DireCharm", true) == true
-		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= RGMercConfig:GetSetting('DireCharmMaxLvl') then
-			CommUtils.HandleAnnounce(
+	if not Core.MyClassIs("BRD") then
+		local dCharm = Config:GetSetting("DireCharm", true) == true
+		if dCharm and mq.TLO.Me.AltAbilityReady('Dire Charm') and (mq.TLO.Spawn(charmId).Level() or 0) <= Config:GetSetting('DireCharmMaxLvl') then
+			Comms.HandleAnnounce(
 				string.format("Performing DIRE CHARM --> %s", mq.TLO.Spawn(charmId).CleanName() or "Unknown"),
-				RGMercConfig:GetSetting('CharmAnnounceGroup'),
-				RGMercConfig:GetSetting('CharmAnnounce'))
-			RGMercUtils.UseAA("Dire Charm", charmId)
+				Config:GetSetting('CharmAnnounceGroup'),
+				Config:GetSetting('CharmAnnounce'))
+			Casting.UseAA("Dire Charm", charmId)
 		else
 			-- This may not work for Bards but will work for DRU/NEC/ENCs
-			RGMercUtils.UseSpell(charmSpell.RankName(), charmId, false)
-			RGMercsLogger.log_debug("Performing CHARM --> %d", charmId)
+			Casting.UseSpell(charmSpell.RankName(), charmId, false)
+			Logger.log_debug("Performing CHARM --> %d", charmId)
 		end
 	else
-		RGMercsLogger.log_debug("Performing Bard CHARM --> %d", charmId)
+		Logger.log_debug("Performing Bard CHARM --> %d", charmId)
 		-- TODO SongNow CharmSpell
-		RGMercUtils.UseSong(charmSpell.RankName(), charmId, false, 5)
+		Casting.UseSong(charmSpell.RankName(), charmId, false, 5)
 	end
 
 	mq.doevents()
 
-	if RGMercUtils.GetLastCastResultId() == RGMercConfig.Constants.CastResults.CAST_SUCCESS and mq.TLO.Pet.ID() > 0 then
-		CommUtils.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
-				mq.TLO.Spawn(charmId).CleanName(), charmId), RGMercConfig:GetSetting('CharmAnnounceGroup'),
-			RGMercConfig:GetSetting('CharmAnnounce'))
+	if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS and mq.TLO.Pet.ID() > 0 then
+		Comms.HandleAnnounce(string.format("\ag JUST CHARMED:\aw -> \ay %s <-",
+				mq.TLO.Spawn(charmId).CleanName(), charmId), Config:GetSetting('CharmAnnounceGroup'),
+			Config:GetSetting('CharmAnnounce'))
 	else
-		CommUtils.HandleAnnounce(string.format("\ar CHARM Failed: \ag -> \ay %s \ag <-",
+		Comms.HandleAnnounce(string.format("\ar CHARM Failed: \ag -> \ay %s \ag <-",
 			mq.TLO.Spawn(charmId).CleanName(),
-			charmId), RGMercConfig:GetSetting('CharmAnnounceGroup'), RGMercConfig:GetSetting('CharmAnnounce'))
+			charmId), Config:GetSetting('CharmAnnounceGroup'), Config:GetSetting('CharmAnnounce'))
 	end
 
 	mq.doevents()
 
-	RGMercUtils.SetTarget(currentTargetID)
+	Targetting.SetTarget(currentTargetID)
 end
 
 function Module:RemoveCCTarget(mobId)
@@ -514,11 +518,11 @@ function Module:AddCCTarget(mobId)
 	if mobId == 0 then return end
 	local spawn = mq.TLO.Spawn(mobId)
 	if self:IsCharmImmune(mobId) then
-		RGMercsLogger.log_debug("\awNOTICE:\ax Unable to charm %d - it is immune", mobId)
+		Logger.log_debug("\awNOTICE:\ax Unable to charm %d - it is immune", mobId)
 		return false
 	end
 
-	RGMercUtils.SetTarget(mobId)
+	Targetting.SetTarget(mobId)
 
 	self.TempSettings.CharmTracker[mobId] = {
 		name = spawn.CleanName(),
@@ -536,24 +540,24 @@ function Module:IsValidCharmTarget(mobId)
 
 	-- Is the mob ID in our charm immune list? If so, skip.
 	if self:IsCharmImmune(mobId) then
-		RGMercsLogger.log_debug(
+		Logger.log_debug(
 			"\ayUpdateCharmList: Skipping \aoMob ID: \at%d \aoName: \at%s \aoLevel: \at%d \ayas it is in our immune list.",
 			spawn.ID(), spawn.CleanName(), spawn.Level())
 		return false
 	end
 	-- Here's where we can add a necro check to see if the spawn is undead or not. If it's not
 	-- undead it gets added to the charm immune list.
-	if RGMercUtils.MyClassIs('DRU') then
+	if Core.MyClassIs('DRU') then
 		if spawn.Body.Name() ~= "Animal" then
-			RGMercsLogger.log_debug(
+			Logger.log_debug(
 				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not an animal.",
 				spawn.ID(),
 				spawn.CleanName(), spawn.Level())
 			return false
 		end
-	elseif RGMercUtils.MyClassIs('NEC') then
+	elseif Core.MyClassIs('NEC') then
 		if spawn.Body.Name() ~= "Undead" then
-			RGMercsLogger.log_debug(
+			Logger.log_debug(
 				"\ayUpdateCharmList: Adding ID: %d Name: %s Level: %d to our immune list as it is not undead.",
 				spawn.ID(),
 				spawn.CleanName(), spawn.Level())
@@ -561,19 +565,19 @@ function Module:IsValidCharmTarget(mobId)
 		end
 	end
 	if not spawn.LineOfSight() then
-		RGMercsLogger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - No LOS.", spawn.ID(),
+		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - No LOS.", spawn.ID(),
 			spawn.CleanName(), spawn.Level())
 		return false
 	end
 
 	if (spawn.PctHPs() or 0) < self.settings.CharmStopHPs then
-		RGMercsLogger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID(),
+		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - HPs too low.", spawn.ID(),
 			spawn.CleanName(), spawn.Level())
 		return false
 	end
 
 	if (spawn.Distance() or 999) > self.settings.CharmRadius then
-		RGMercsLogger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - Out of Charm Radius",
+		Logger.log_debug("\ayUpdateCharmList: Skipping Mob ID: %d Name: %s Level: %d - Out of Charm Radius",
 			spawn.ID(), spawn.CleanName(), spawn.Level())
 		return false
 	end
@@ -587,7 +591,7 @@ function Module:UpdateCharmList()
 	local charmSpell = self:GetCharmSpell()
 
 	if not charmSpell or not charmSpell() then
-		RGMercsLogger.log_verbose("\ayayUpdateCharmList: No charm spell - bailing!")
+		Logger.log_verbose("\ayayUpdateCharmList: No charm spell - bailing!")
 		return
 	end
 
@@ -601,27 +605,27 @@ function Module:UpdateCharmList()
 		end
 		-- streamline search by body type for druids/necros this saves work when checking invalid.
 		local npcType = ''
-		if RGMercUtils.MyClassIs("dru") then
+		if Core.MyClassIs("dru") then
 			npcType = ' body Animal'
-		elseif RGMercUtils.MyClassIs("nec") then
+		elseif Core.MyClassIs("nec") then
 			npcType = ' body Undead'
 		end
 		local searchString = string.format("%s radius %d zradius %d range %d %d targetable playerstate 4%s", t,
 			self.settings.CharmRadius * 2, self.settings.CharmZRadius * 2, minLevel, maxLevel, npcType)
 
 		local mobCount = mq.TLO.SpawnCount(searchString)()
-		RGMercsLogger.log_debug("\ayUpdateCharmList: Search String: '\at%s\ay' -- Count :: \am%d", searchString, mobCount)
+		Logger.log_debug("\ayUpdateCharmList: Search String: '\at%s\ay' -- Count :: \am%d", searchString, mobCount)
 		for i = 1, mobCount do
 			local spawn = mq.TLO.NearestSpawn(i, searchString)
 
 			if spawn and spawn() and spawn.ID() > 0 then
-				RGMercsLogger.log_debug(
+				Logger.log_debug(
 					"\ayUpdateCharmList: Processing MobCount %d -- ID: %d Name: %s Level: %d BodyType: %s", i, spawn.ID(),
 					spawn.CleanName(), spawn.Level(),
 					spawn.Body.Name())
 
 				if self:IsValidCharmTarget(spawn.ID()) then
-					RGMercsLogger.log_debug("\agAdding to Charm List: %d -- ID: %d Name: %s Level: %d BodyType: %s", i,
+					Logger.log_debug("\agAdding to Charm List: %d -- ID: %d Name: %s Level: %d BodyType: %s", i,
 						spawn.ID(), spawn.CleanName(), spawn.Level(), spawn.Body.Name())
 					self:AddCCTarget(spawn.ID())
 				end
@@ -636,14 +640,14 @@ function Module:ProcessCharmList()
 	-- Assume by default we never need to block for charm. We'll set this if-and-only-if
 	-- we need to charm but our ability is on cooldown.
 	if mq.TLO.Me.Pet.ID() ~= 0 then return end
-	GameUtils.DoCmd("/attack off")
-	RGMercsLogger.log_debug("\ayProcessCharmList() :: Loop")
+	Core.DoCmd("/attack off")
+	Logger.log_debug("\ayProcessCharmList() :: Loop")
 	local charmSpell = self:GetCharmSpell()
 
 	if not charmSpell or not charmSpell() then return end
 
 	if not self.settings.CharmOn then
-		RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Charming is off...")
+		Logger.log_debug("\ayProcessCharmList(%d) :: Charming is off...")
 		return
 	end
 
@@ -651,42 +655,42 @@ function Module:ProcessCharmList()
 	for id, data in pairs(self.TempSettings.CharmTracker) do
 		if mq.TLO.Pet.ID() > 0 then break end
 		local spawn = mq.TLO.Spawn(id)
-		RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Checking...", id)
+		Logger.log_debug("\ayProcessCharmList(%d) :: Checking...", id)
 
-		if not spawn or not spawn() or spawn.Dead() or RGMercUtils.TargetIsType("corpse", spawn) then
+		if not spawn or not spawn() or spawn.Dead() or Targetting.TargetIsType("corpse", spawn) then
 			table.insert(removeList, id)
-			RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Can't find mob removing...", id)
+			Logger.log_debug("\ayProcessCharmList(%d) :: Can't find mob removing...", id)
 		else
 			if self:IsCharmImmune(id) then
 				-- somehow added an immune mod to our tracker...
-				RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Mob id is in immune list - removing...", id)
+				Logger.log_debug("\ayProcessCharmList(%d) :: Mob id is in immune list - removing...", id)
 				table.insert(removeList, id)
 			else
 				if spawn.Distance() > self.settings.CharmRadius or not spawn.LineOfSight() then
-					RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Distance(%d) LOS(%s)", id,
-						spawn.Distance(), StringUtils.BoolToColorString(spawn.LineOfSight()))
+					Logger.log_debug("\ayProcessCharmList(%d) :: Distance(%d) LOS(%s)", id,
+						spawn.Distance(), Strings.BoolToColorString(spawn.LineOfSight()))
 				else
-					if id == RGMercConfig.Globals.AutoTargetID then
-						RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Mob is MA's target skipping", id)
+					if id == Config.Globals.AutoTargetID then
+						Logger.log_debug("\ayProcessCharmList(%d) :: Mob is MA's target skipping", id)
 						table.insert(removeList, id)
 					else
-						RGMercsLogger.log_debug("\ayProcessCharmList(%d) :: Mob needs charmed.", id)
+						Logger.log_debug("\ayProcessCharmList(%d) :: Mob needs charmed.", id)
 						if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() then
-							RGMercsLogger.log_debug(
+							Logger.log_debug(
 								" \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start charm.")
-							GameUtils.DoCmd("/attack off")
+							Core.DoCmd("/attack off")
 							mq.delay("3s", function() return not mq.TLO.Me.Combat() end)
-							GameUtils.DoCmd("/stopcast")
-							GameUtils.DoCmd("/stopsong")
+							Core.DoCmd("/stopcast")
+							Core.DoCmd("/stopsong")
 							mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
 						end
 
-						RGMercUtils.SetTarget(id)
+						Targetting.SetTarget(id)
 
 						mq.delay(500, function() return mq.TLO.Target.BuffsPopulated() end)
 
 						local maxWait = 5000
-						while not RGMercUtils.NPCSpellReady(charmSpell.RankName.Name()) and maxWait > 0 do
+						while not Casting.TargettedSpellReady(charmSpell.RankName.Name()) and maxWait > 0 do
 							mq.delay(100)
 							maxWait = maxWait - 100
 						end
@@ -709,30 +713,30 @@ function Module:DoCharm()
 	local charmSpell = self:GetCharmSpell()
 	self:UpdateTimings()
 
-	if TableUtils.GetXTHaterCount() >= self.settings.CharmStartCount then
+	if Tables.GetXTHaterCount() >= self.settings.CharmStartCount then
 		self:UpdateCharmList()
 	end
-	if not TableUtils.MyClassIs("BRD") then
-		if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or (RGMercConfig:GetSetting("DireCharm", true) == true)) and
-			TableUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
+	if not Tables.MyClassIs("BRD") then
+		if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or (Config:GetSetting("DireCharm", true) == true)) and
+			Tables.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 			self:ProcessCharmList()
 		else
-			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
+			Logger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
 				charmSpell and charmSpell() or "None",
 				charmSpell and charmSpell() and
-				StringUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
-				TableUtils.GetTableSize(self.TempSettings.CharmTracker))
+				Strings.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
+				Tables.GetTableSize(self.TempSettings.CharmTracker))
 		end
 	else
 		if (charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) and
-			TableUtils.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
+			Tables.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 			self:ProcessCharmList()
 		else
-			RGMercsLogger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
+			Logger.log_verbose("DoCharm() : Skipping Charm list processing: Spell(%s) Ready(%s) TableSize(%d)",
 				charmSpell and charmSpell() or "None",
 				charmSpell and charmSpell() and
-				StringUtils.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
-				TableUtils.GetTableSize(self.TempSettings.CharmTracker))
+				Strings.BoolToColorString(mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or "NoSpell",
+				Tables.GetTableSize(self.TempSettings.CharmTracker))
 		end
 	end
 end
@@ -748,7 +752,7 @@ function Module:UpdateTimings()
 end
 
 function Module:GiveTime(combat_state)
-	if not RGMercUtils.IsCharming() then return end
+	if not Core.IsCharming() then return end
 
 	-- dead... whoops
 	if mq.TLO.Me.Hovering() then return end
@@ -803,11 +807,11 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-	RGMercsLogger.log_debug("Charm Module Unloaded.")
+	Logger.log_debug("Charm Module Unloaded.")
 end
 
 mq.bind("/rgupcharm", function()
-	RGMercModules:ExecModule("Charm", "UpdateCharmList")
+	Modules:ExecModule("Charm", "UpdateCharmList")
 end)
 
 return Module

@@ -1,37 +1,38 @@
-local mq            = require('mq')
-local ImGui         = require('ImGui')
-local GitCommit     = require('extras.version')
-local Icons         = require('mq.ICONS')
+local mq         = require('mq')
+local ImGui      = require('ImGui')
+local GitCommit  = require('extras.version')
+local Icons      = require('mq.ICONS')
 
-local RGMercsLogger = require("utils.rgmercs_logger")
+-- Preload these incase any modules need them.
+local PackageMan = require('mq/PackageMan')
+PackageMan.Require('lsqlite3')
+PackageMan.Require('luafilesystem', 'lfs')
 
-RGMercConfig        = require('utils.rgmercs_config')
-RGMercConfig:LoadSettings()
+local Config = require('utils.config')
+Config:LoadSettings()
 
-RGMercsLogger.set_log_level(RGMercConfig:GetSettings().LogLevel)
-RGMercsLogger.set_log_to_file(RGMercConfig:GetSettings().LogToFile)
+local Logger = require("utils.logger")
+Logger.set_log_level(Config:GetSettings().LogLevel)
+Logger.set_log_to_file(Config:GetSettings().LogToFile)
 
-local PackageMan  = require('mq/PackageMan')
-SQLite3           = PackageMan.Require('lsqlite3')
+local Binds = require('utils.binds')
+require('utils.event_handlers')
 
-LuaFS             = PackageMan.Require('luafilesystem', 'lfs')
-
-RGMercsBinds      = require('utils.rgmercs_binds')
-RGMercsEvents     = require('utils.rgmercs_events')
-
-RGMercsConsole    = nil
-
-local RGMercUtils = require("utils.rgmercs_utils")
-local CommUtils   = require("utils.comm_utils")
-local GameUtils   = require("utils.game_utils")
-local StringUtils = require("utils.string_utils")
-
-RGMercNameds      = require("utils.rgmercs_named")
+local Console    = require('utils.console')
+local Core       = require("utils.core")
+local Targetting = require("utils.targetting")
+local Combat     = require("utils.combat")
+local Casting    = require("utils.casting")
+local Events     = require("utils.events")
+local Ui         = require("utils.ui")
+local Comms      = require("utils.comms")
+local Strings    = require("utils.strings")
 
 -- Initialize class-based moduldes
-RGMercModules     = require("utils.rgmercs_modules").load()
+local Modules    = require("utils.modules")
+Modules:load()
 
-require('utils.rgmercs_datatypes')
+require('utils.datatypes')
 
 -- ImGui Variables
 local openGUI         = true
@@ -64,12 +65,12 @@ end
 
 -- UI --
 local function renderModulesTabs()
-    if not RGMercConfig:SettingsLoaded() then return end
+    if not Config:SettingsLoaded() then return end
 
-    for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
-        if RGMercModules:ExecModule(name, "ShouldRender") and not RGMercConfig:GetSetting(name .. "_Popped", true) then
+    for _, name in ipairs(Modules:GetModuleOrderedNames()) do
+        if Modules:ExecModule(name, "ShouldRender") and not Config:GetSetting(name .. "_Popped", true) then
             if ImGui.BeginTabItem(name) then
-                RGMercModules:ExecModule(name, "Render")
+                Modules:ExecModule(name, "Render")
                 ImGui.EndTabItem()
             end
         end
@@ -77,18 +78,18 @@ local function renderModulesTabs()
 end
 
 local function renderModulesPopped()
-    if not RGMercConfig:SettingsLoaded() then return end
+    if not Config:SettingsLoaded() then return end
 
-    for _, name in ipairs(RGMercModules:GetModuleOrderedNames()) do
-        if RGMercConfig:GetSetting(name .. "_Popped", true) then
-            if RGMercModules:ExecModule(name, "ShouldRender") then
+    for _, name in ipairs(Modules:GetModuleOrderedNames()) do
+        if Config:GetSetting(name .. "_Popped", true) then
+            if Modules:ExecModule(name, "ShouldRender") then
                 local open, show = ImGui.Begin(name, true)
                 if show then
-                    RGMercModules:ExecModule(name, "Render")
+                    Modules:ExecModule(name, "Render")
                 end
                 ImGui.End()
                 if not open then
-                    RGMercConfig:SetSetting(name .. "_Popped", false)
+                    Config:SetSetting(name .. "_Popped", false)
                 end
             end
         end
@@ -100,11 +101,11 @@ local function Alive()
 end
 
 local function GetTheme()
-    return RGMercModules:ExecModule("Class", "GetTheme")
+    return Modules:ExecModule("Class", "GetTheme")
 end
 
 local function GetClassConfigIDFromName(name)
-    for idx, curName in ipairs(RGMercConfig.Globals.ClassConfigDirs or {}) do
+    for idx, curName in ipairs(Config.Globals.ClassConfigDirs or {}) do
         if curName == name then return idx end
     end
 
@@ -122,7 +123,7 @@ local function RenderLoader()
     -- Display the selected image (picked only once)
     ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
     ImGui.SameLine()
-    ImGui.Text("RGMercs %s: Loading...", RGMercConfig._version)
+    ImGui.Text("RGMercs %s: Loading...", Config._version)
     ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 35)
     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 70)
     ImGui.PushStyleColor(ImGuiCol.PlotHistogram, 0.2, 0.7, 1 - (initPctComplete / 100), initPctComplete / 100)
@@ -132,26 +133,26 @@ local function RenderLoader()
 end
 
 local function RenderConfigSelector()
-    if RGMercConfig.Globals.ClassConfigDirs ~= nil then
+    if Config.Globals.ClassConfigDirs ~= nil then
         ImGui.Text("Configuration Type")
-        local newConfigDir, changed = ImGui.Combo("##config_type", GetClassConfigIDFromName(RGMercConfig:GetSetting('ClassConfigDir')), RGMercConfig.Globals.ClassConfigDirs,
-            #RGMercConfig.Globals.ClassConfigDirs)
+        local newConfigDir, changed = ImGui.Combo("##config_type", GetClassConfigIDFromName(Config:GetSetting('ClassConfigDir')), Config.Globals.ClassConfigDirs,
+            #Config.Globals.ClassConfigDirs)
         if changed then
-            RGMercConfig:SetSetting('ClassConfigDir', RGMercConfig.Globals.ClassConfigDirs[newConfigDir])
-            RGMercConfig:SaveSettings(false)
-            RGMercConfig:LoadSettings()
-            RGMercModules:ExecAll("LoadSettings")
+            Config:SetSetting('ClassConfigDir', Config.Globals.ClassConfigDirs[newConfigDir])
+            Config:SaveSettings()
+            Config:LoadSettings()
+            Modules:ExecAll("LoadSettings")
         end
 
         ImGui.SameLine()
         if ImGui.SmallButton(Icons.FA_REFRESH) then
-            RGMercUtils.ScanConfigDirs()
+            Core.ScanConfigDirs()
         end
 
         if ImGui.SmallButton('Create Custom Config') then
-            RGMercModules:ExecModule("Class", "WriteCustomConfig")
+            Modules:ExecModule("Class", "WriteCustomConfig")
         end
-        RGMercUtils.Tooltip("Creates a copy of the current Class Configuration\nthat you can edit to change rotations, spell loadouts, etc.")
+        Ui.Tooltip("Creates a copy of the current Class Configuration\nthat you can edit to change rotations, spell loadouts, etc.")
         ImGui.NewLine()
     end
 end
@@ -162,9 +163,9 @@ local function RenderTarget()
             string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
     end
 
-    local assistSpawn = RGMercUtils.GetAutoTarget()
+    local assistSpawn = Targetting.GetAutoTarget()
 
-    if RGMercConfig:GetSetting('DisplayManualTarget') and (not assistSpawn or not assistSpawn() or assistSpawn.ID() == 0) then
+    if Config:GetSetting('DisplayManualTarget') and (not assistSpawn or not assistSpawn() or assistSpawn.ID() == 0) then
         assistSpawn = mq.TLO.Target
     end
 
@@ -172,7 +173,7 @@ local function RenderTarget()
     ImGui.SameLine()
     if not assistSpawn or assistSpawn.ID() == 0 then
         ImGui.Text("None")
-        RGMercUtils.RenderProgressBar(0, -1, 25)
+        Ui.RenderProgressBar(0, -1, 25)
     else
         local pctHPs = assistSpawn.PctHPs() or 0
         if not pctHPs then pctHPs = 0 end
@@ -186,29 +187,24 @@ local function RenderTarget()
         ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
             assistSpawn.ID() or 0, assistSpawn.Level() or 0,
             assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
-        if RGMercUtils.IsNamed(assistSpawn) then
+        if Targetting.IsNamed(assistSpawn) then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(52, 200, 52, 255),
                 string.format("**Named**"))
         end
-        if assistSpawn.ID() == RGMercConfig.Globals.ForceTargetID then
+        if assistSpawn.ID() == Config.Globals.ForceTargetID then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(52, 200, 200, 255),
                 string.format("**ForcedTarget**"))
         end
-        if RGMercUtils.LastBurnCheck and assistSpawn.ID() > 0 then
+        if Casting.LastBurnCheck and assistSpawn.ID() > 0 then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
                 string.format("**BURNING**"))
         end
-        RGMercUtils.RenderProgressBar(ratioHPs, -1, 25)
+        Ui.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
     end
-end
-
----@return number
-local function GetMainOpacity()
-    return tonumber(RGMercConfig:GetSettings().BgOpacity / 100) or 1.0
 end
 
 local function RenderWindowControls()
@@ -219,45 +215,46 @@ local function RenderWindowControls()
     local windowControlPos = ImVec2(ImGui.GetWindowWidth() - (smallButtonSize * 2), smallButtonSize)
     ImGui.SetCursorPos(windowControlPos)
 
-    if ImGui.SmallButton((RGMercConfig.settings.MainWindowLocked or false) and Icons.FA_LOCK or Icons.FA_UNLOCK) then
-        RGMercConfig.settings.MainWindowLocked = not RGMercConfig.settings.MainWindowLocked
-        RGMercConfig:SaveSettings(false)
+    if ImGui.SmallButton((Config.settings.MainWindowLocked or false) and Icons.FA_LOCK or Icons.FA_UNLOCK) then
+        Config.settings.MainWindowLocked = not Config.settings.MainWindowLocked
+        Config:SaveSettings()
     end
 
     ImGui.SameLine()
     if ImGui.SmallButton(Icons.FA_WINDOW_MINIMIZE) then
-        RGMercConfig.Globals.Minimized = true
+        Config.Globals.Minimized = true
     end
-    RGMercUtils.Tooltip("Minimize Main Window")
+    Ui.Tooltip("Minimize Main Window")
 
     ImGui.SetCursorPos(position)
 end
 
 local function DrawConsole()
+    local RGMercsConsole = Console:GetConsole("##RGMercs", Config:GetMainOpacity())
+
     if RGMercsConsole then
         local changed
         if ImGui.BeginTable("##debugoptions", 2, ImGuiTableFlags.None) then
             ImGui.TableSetupColumn("Opt Name", bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoResize), 100)
             ImGui.TableSetupColumn("Opt Value", ImGuiTableColumnFlags.WidthStretch)
             ImGui.TableNextColumn()
-            RGMercConfig:GetSettings().LogToFile, changed = RGMercUtils.RenderOptionToggle("##log_to_file",
-                "", RGMercConfig:GetSettings().LogToFile)
+            Config:GetSettings().LogToFile, changed = Ui.RenderOptionToggle("##log_to_file",
+                "", Config:GetSettings().LogToFile)
             if changed then
-                RGMercConfig:SaveSettings(false)
+                Config:SaveSettings()
             end
             ImGui.TableNextColumn()
             ImGui.Text("Log to File")
             ImGui.TableNextColumn()
             ImGui.Text("Debug Level")
             ImGui.TableNextColumn()
-            RGMercConfig:GetSettings().LogLevel, changed = ImGui.Combo("##Debug Level",
-                RGMercConfig:GetSettings().LogLevel, RGMercConfig.Constants.LogLevels,
-                #RGMercConfig.Constants.LogLevels)
+            Config:GetSettings().LogLevel, changed = ImGui.Combo("##Debug Level",
+                Config:GetSettings().LogLevel, Config.Constants.LogLevels,
+                #Config.Constants.LogLevels)
 
             if changed then
-                RGMercConfig:SaveSettings(false)
+                Config:SaveSettings()
             end
-
             ImGui.TableNextColumn()
             ImGui.Text("Log Filter")
             ImGui.SameLine()
@@ -273,9 +270,9 @@ local function DrawConsole()
 
             if changed then
                 if logFilter:len() == 0 then
-                    RGMercsLogger.clear_log_filter()
+                    Logger.clear_log_filter()
                 else
-                    RGMercsLogger.set_log_filter(logFilter)
+                    Logger.set_log_filter(logFilter)
                 end
             end
             ImGui.EndTable()
@@ -302,15 +299,6 @@ local function RGMercsGUI()
     local themeColorPop = 0
     local themeStylePop = 0
 
-    if RGMercsConsole == nil then
-        RGMercsConsole = ImGui.ConsoleWidget.new("##RGMercsConsole")
-        RGMercsConsole.maxBufferLines = 100
-        RGMercsConsole.autoScroll = true
-        if RGMercsConsole.opacity then
-            RGMercsConsole.opacity = GetMainOpacity()
-        end
-    end
-
     if mq.TLO.MacroQuest.GameState() == "CHARSELECT" then
         openGUI = false
         return
@@ -336,73 +324,73 @@ local function RGMercsGUI()
 
             local imGuiStyle = ImGui.GetStyle()
 
-            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, GetMainOpacity()) -- Main window opacity.
-            ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, RGMercConfig:GetSettings().ScrollBarRounding)
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, RGMercConfig:GetSettings().FrameEdgeRounding)
-            if RGMercConfig:GetSetting('PopOutForceTarget') then
-                local openFT, showFT = ImGui.Begin("Force Target", RGMercConfig:GetSetting('PopOutForceTarget'))
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, Config:GetMainOpacity()) -- Main window opacity.
+            ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, Config:GetSettings().ScrollBarRounding)
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, Config:GetSettings().FrameEdgeRounding)
+            if Config:GetSetting('PopOutForceTarget') then
+                local openFT, showFT = ImGui.Begin("Force Target", Config:GetSetting('PopOutForceTarget'))
                 if showFT then
-                    RGMercUtils.RenderForceTargetList()
+                    Ui.RenderForceTargetList()
                 end
                 ImGui.End()
                 if not openFT then
-                    RGMercConfig:SetSetting('PopOutForceTarget', false)
+                    Config:SetSetting('PopOutForceTarget', false)
                     showFT = false
                 end
             end
-            if RGMercConfig:GetSetting('PopOutConsole') then
-                local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", RGMercConfig:GetSetting('PopOutConsole'))
+            if Config:GetSetting('PopOutConsole') then
+                local openConsole, showConsole = ImGui.Begin("Debug Console##RGMercs", Config:GetSetting('PopOutConsole'))
                 if showConsole then
                     DrawConsole()
                 end
                 ImGui.End()
                 if not openConsole then
-                    RGMercConfig:SetSetting('PopOutConsole', false)
+                    Config:SetSetting('PopOutConsole', false)
                     showConsole = false
                 end
             end
             renderModulesPopped()
-            if not RGMercConfig.Globals.Minimized then
+            if not Config.Globals.Minimized then
                 local flags = ImGuiWindowFlags.None
 
-                if RGMercConfig.settings.MainWindowLocked then
+                if Config.settings.MainWindowLocked then
                     flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
                 end
 
-                openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(RGMercConfig.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+                openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
             else
                 local flags = bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar)
                 openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI, flags)
             end
-            ImGui.PushID("##RGMercsUI_" .. RGMercConfig.Globals.CurLoadedChar)
+            ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
 
-            if shouldDrawGUI and not RGMercConfig.Globals.Minimized then
+            if shouldDrawGUI and not Config.Globals.Minimized then
                 local pressed
-                local imgDisplayed = RGMercUtils.LastBurnCheck and burnImg or derpImg
+                local imgDisplayed = Casting.LastBurnCheck and burnImg or derpImg
                 ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
                 ImGui.SameLine()
                 ImGui.Text(string.format("RGMercs %s [%s]\nClass Config: %s\nAuthor(s): %s",
-                    RGMercConfig._version,
+                    Config._version,
                     GitCommit.commitId or "None",
-                    RGMercModules:ExecModule("Class", "GetVersionString"),
-                    RGMercModules:ExecModule("Class", "GetAuthorString"))
+                    Modules:ExecModule("Class", "GetVersionString"),
+                    Modules:ExecModule("Class", "GetAuthorString"))
                 )
 
                 RenderWindowControls()
 
-                if not RGMercConfig.Globals.PauseMain then
+                if not Config.Globals.PauseMain then
                     ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
                 else
                     ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
                 end
 
-                local pauseLabel = RGMercConfig.Globals.PauseMain and "PAUSED" or "Running"
-                if RGMercConfig.Globals.BackOffFlag then
+                local pauseLabel = Config.Globals.PauseMain and "PAUSED" or "Running"
+                if Config.Globals.BackOffFlag then
                     pauseLabel = pauseLabel .. " [Backoff]"
                 end
 
                 if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
-                    RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
+                    Config.Globals.PauseMain = not Config.Globals.PauseMain
                 end
                 ImGui.PopStyleColor()
 
@@ -417,14 +405,14 @@ local function RGMercsGUI()
                     ImGui.SetItemDefaultFocus()
                     if ImGui.BeginTabItem("RGMercsMain") then
                         ImGui.Text("Current State: " .. curState)
-                        ImGui.Text("Hater Count: " .. tostring(RGMercUtils.GetXTHaterCount()))
+                        ImGui.Text("Hater Count: " .. tostring(Targetting.GetXTHaterCount()))
 
-                        -- .. tostring(RGMercConfig.Globals.AutoTargetID))
-                        ImGui.Text("MA: %-25s", (RGMercUtils.GetMainAssistSpawn().CleanName() or "None"))
-                        if mq.TLO.Target.ID() > 0 and RGMercUtils.TargetIsType("pc") and RGMercConfig.Globals.MainAssist ~= mq.TLO.Target.ID() then
+                        -- .. tostring(Config.Globals.AutoTargetID))
+                        ImGui.Text("MA: %-25s", (Core.GetMainAssistSpawn().CleanName() or "None"))
+                        if mq.TLO.Target.ID() > 0 and Targetting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
                             ImGui.SameLine()
-                            if ImGui.SmallButton(string.format("Set MA to %s", RGMercUtils.GetTargetCleanName())) then
-                                RGMercConfig.Globals.MainAssist = mq.TLO.Target.CleanName()
+                            if ImGui.SmallButton(string.format("Set MA to %s", Targetting.GetTargetCleanName())) then
+                                Config.Globals.MainAssist = mq.TLO.Target.CleanName()
                             end
                         end
                         ImGui.Text("Stuck To: " ..
@@ -433,27 +421,27 @@ local function RGMercsGUI()
                             ImGui.Indent()
 
                             if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                local settingsRef = RGMercConfig:GetSettings()
-                                settingsRef, pressed, _ = RGMercUtils.RenderSettings(settingsRef, RGMercConfig.DefaultConfig,
-                                    RGMercConfig.DefaultCategories, false, true)
+                                local settingsRef = Config:GetSettings()
+                                settingsRef, pressed, _ = Ui.RenderSettings(settingsRef, Config.DefaultConfig,
+                                    Config.DefaultCategories, false, true)
                                 if pressed then
-                                    RGMercConfig:SaveSettings(false)
+                                    Config:SaveSettings()
                                 end
                             end
-                            if RGMercConfig:GetSetting('ShowAllOptionsMain') then
-                                if RGMercConfig.Globals.SubmodulesLoaded then
-                                    local submoduleSettings = RGMercModules:ExecAll("GetSettings")
-                                    local submoduleDefaults = RGMercModules:ExecAll("GetDefaultSettings")
-                                    local submoduleCategories = RGMercModules:ExecAll("GetSettingCategories")
+                            if Config:GetSetting('ShowAllOptionsMain') then
+                                if Config.Globals.SubmodulesLoaded then
+                                    local submoduleSettings = Modules:ExecAll("GetSettings")
+                                    local submoduleDefaults = Modules:ExecAll("GetDefaultSettings")
+                                    local submoduleCategories = Modules:ExecAll("GetSettingCategories")
                                     for n, s in pairs(submoduleSettings) do
-                                        if RGMercModules:ExecModule(n, "ShouldRender") then
+                                        if Modules:ExecModule(n, "ShouldRender") then
                                             ImGui.PushID(n .. "_config_hdr")
                                             if s and submoduleDefaults[n] and submoduleCategories[n] then
                                                 if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                                    s, pressed, _ = RGMercUtils.RenderSettings(s, submoduleDefaults[n],
+                                                    s, pressed, _ = Ui.RenderSettings(s, submoduleDefaults[n],
                                                         submoduleCategories[n], true)
                                                     if pressed then
-                                                        RGMercModules:ExecModule(n, "SaveSettings", true)
+                                                        Modules:ExecModule(n, "SaveSettings", true)
                                                     end
                                                 end
                                             end
@@ -466,12 +454,12 @@ local function RGMercsGUI()
                         end
 
                         if ImGui.CollapsingHeader("Outside Assist List") then
-                            RGMercUtils.RenderOAList()
+                            Ui.RenderOAList()
                         end
 
-                        if RGMercUtils.IAmMA() and not RGMercConfig:GetSetting('PopOutForceTarget') then
+                        if Core.IAmMA() and not Config:GetSetting('PopOutForceTarget') then
                             if ImGui.CollapsingHeader("Force Target") then
-                                RGMercUtils.RenderForceTargetList(true)
+                                Ui.RenderForceTargetList(true)
                             end
                         end
                         ImGui.EndTabItem()
@@ -486,25 +474,25 @@ local function RGMercsGUI()
                 ImGui.NewLine()
                 ImGui.NewLine()
                 ImGui.Separator()
-                if not RGMercConfig:GetSetting('PopOutConsole') then
+                if not Config:GetSetting('PopOutConsole') then
                     DrawConsole()
                 end
-            elseif shouldDrawGUI and RGMercConfig.Globals.Minimized then
-                local btnImg = RGMercUtils.LastBurnCheck and burnImg or derpImg
-                if RGMercConfig.Globals.PauseMain then
+            elseif shouldDrawGUI and Config.Globals.Minimized then
+                local btnImg = Casting.LastBurnCheck and burnImg or derpImg
+                if Config.Globals.PauseMain then
                     if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
-                        RGMercConfig.Globals.Minimized = false
+                        Config.Globals.Minimized = false
                     end
                     if ImGui.IsItemHovered() then
                         ImGui.SetTooltip("RGMercs is Paused")
                     end
                 else
                     if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then
-                        RGMercConfig.Globals.Minimized = false
+                        Config.Globals.Minimized = false
                     end
                     if ImGui.IsItemHovered() then
                         ImGui.BeginTooltip()
-                        if RGMercUtils.LastBurnCheck then
+                        if Casting.LastBurnCheck then
                             ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
                                 string.format("RGMercs is BURNING!!"))
                         else
@@ -514,9 +502,9 @@ local function RGMercsGUI()
                     end
                 end
                 if ImGui.BeginPopupContextWindow() then
-                    local pauseLabel = RGMercConfig.Globals.PauseMain and "Resume" or "Pause"
+                    local pauseLabel = Config.Globals.PauseMain and "Resume" or "Pause"
                     if ImGui.MenuItem(pauseLabel) then
-                        RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
+                        Config.Globals.PauseMain = not Config.Globals.PauseMain
                     end
                     ImGui.EndPopup()
                 end
@@ -525,8 +513,8 @@ local function RGMercsGUI()
             ImGui.PopID()
             ImGui.PopStyleVar(3)
             if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
-                if ImGui.IsKeyPressed(ImGuiKey.Escape) and RGMercConfig:GetSetting("EscapeMinimizes") then
-                    RGMercConfig.Globals.Minimized = true
+                if ImGui.IsKeyPressed(ImGuiKey.Escape) and Config:GetSetting("EscapeMinimizes") then
+                    Config.Globals.Minimized = true
                 end
             end
             if themeColorPop > 0 then
@@ -546,24 +534,24 @@ mq.imgui.init('RGMercsUI', RGMercsGUI)
 local unloadedPlugins = {}
 
 local function RGInit(...)
-    GameUtils.CheckPlugins({
+    Core.CheckPlugins({
         "MQ2Rez",
         "MQ2AdvPath",
         "MQ2MoveUtils",
         "MQ2Nav",
         "MQ2DanNet", })
 
-    unloadedPlugins = GameUtils.UnCheckPlugins({ "MQ2Melee", "MQ2Twist", })
+    unloadedPlugins = Core.UnCheckPlugins({ "MQ2Melee", "MQ2Twist", })
 
     initPctComplete = 0
     initMsg = "Initializing RGMercs..."
     local args = { ..., }
     -- check mini argument before loading other modules so it minimizes as soon as possible.
     if args and #args > 0 then
-        RGMercsLogger.log_info("Arguments passed to RGMercs: %s", table.concat(args, ", "))
+        Logger.log_info("Arguments passed to RGMercs: %s", table.concat(args, ", "))
         for _, v in ipairs(args) do
             if v == "mini" then
-                RGMercConfig.Globals.Minimized = true
+                Config.Globals.Minimized = true
                 break
             end
         end
@@ -571,17 +559,17 @@ local function RGInit(...)
 
     initPctComplete = 10
     initMsg = "Scanning for Configurations..."
-    RGMercUtils.ScanConfigDirs()
+    Core.ScanConfigDirs()
 
     initPctComplete = 20
     initMsg = "Initializing Modules..."
     -- complex objects are passed by reference so we can just use these without having to pass them back in for saving.
-    RGMercModules:ExecAll("Init")
-    RGMercConfig.Globals.SubmodulesLoaded = true
+    Modules:ExecAll("Init")
+    Config.Globals.SubmodulesLoaded = true
 
     initPctComplete = 30
     initMsg = "Updating Command Handlers..."
-    RGMercConfig:UpdateCommandHandlers()
+    Config:UpdateCommandHandlers()
 
     initPctComplete = 40
     initMsg = "Setting Assist..."
@@ -591,9 +579,9 @@ local function RGInit(...)
         mainAssist = mq.TLO.Group.MainAssist() or ""
     end
 
-    for k, v in ipairs(RGMercConfig.Constants.ExpansionIDToName) do
-        RGMercsLogger.log_debug("\ayExpansion \at%-22s\ao[\am%02d\ao]: %s", v, k,
-            RGMercUtils.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
+    for k, v in ipairs(Config.Constants.ExpansionIDToName) do
+        Logger.log_debug("\ayExpansion \at%-22s\ao[\am%02d\ao]: %s", v, k,
+            Core.HaveExpansion(v) and "\agEnabled" or "\arDisabled")
     end
 
     -- TODO: Can turn this into an options parser later.
@@ -611,237 +599,237 @@ local function RGInit(...)
     end
 
     if mainAssist:len() > 0 then
-        RGMercConfig.Globals.MainAssist = mainAssist
-        CommUtils.PopUp("Targetting %s for Main Assist", RGMercConfig.Globals.MainAssist)
-        RGMercUtils.SetTarget(RGMercUtils.GetMainAssistId())
-        RGMercsLogger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", RGMercConfig.Globals.MainAssist,
-            RGMercConfig:GetSetting('AutoAssistAt'))
+        Config.Globals.MainAssist = mainAssist
+        Comms.PopUp("Targetting %s for Main Assist", Config.Globals.MainAssist)
+        Targetting.SetTarget(Core.GetMainAssistId())
+        Logger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", Config.Globals.MainAssist,
+            Config:GetSetting('AutoAssistAt'))
     end
 
-    if RGMercUtils.GetGroupMainAssistName() ~= mainAssist then
-        CommUtils.PopUp(string.format(
+    if Core.GetGroupMainAssistName() ~= mainAssist then
+        Comms.PopUp(string.format(
             "Assisting: %s NOTICE: Group MainAssist [%s] != Your Assist Target [%s]. Is This On Purpose?", mainAssist,
-            RGMercUtils.GetGroupMainAssistName(), mainAssist))
+            Core.GetGroupMainAssistName(), mainAssist))
     end
 
     initPctComplete = 50
     initMsg = "Setting up Environment..."
-    GameUtils.DoCmd("/squelch /rez accept on")
-    GameUtils.DoCmd("/squelch /rez pct 90")
+    Core.DoCmd("/squelch /rez accept on")
+    Core.DoCmd("/squelch /rez pct 90")
 
     initPctComplete = 60
     initMsg = "Setting up MQ2DanNet..."
     if mq.TLO.Plugin("MQ2DanNet")() then
-        GameUtils.DoCmd("/squelch /dnet commandecho off")
+        Core.DoCmd("/squelch /dnet commandecho off")
     end
 
-    GameUtils.DoCmd("/stick set breakontarget on")
+    Core.DoCmd("/stick set breakontarget on")
 
     -- TODO: Chat Begs
     initPctComplete = 70
     initMsg = "Closing down Macro..."
     if (mq.TLO.Macro.Name() or ""):find("RGMERC") then
-        GameUtils.DoCmd("/macro end")
+        Core.DoCmd("/macro end")
     end
 
-    -- CommUtils.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
+    -- Comms.PrintGroupMessage("Pausing the CWTN Plugin on this host if it exists! (/%s pause on)",
     --     mq.TLO.Me.Class.ShortName())
     initMsg = "Pausing the CWTN Plugin..."
-    GameUtils.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
+    Core.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
 
     initMsg = "Setting up Pet Hold..."
-    if RGMercUtils.CanUseAA("Companion's Discipline") then
-        GameUtils.DoCmd("/pet ghold on")
+    if Casting.CanUseAA("Companion's Discipline") then
+        Core.DoCmd("/pet ghold on")
     else
-        GameUtils.DoCmd("/pet hold on")
+        Core.DoCmd("/pet hold on")
     end
 
     initPctComplete = 80
     initMsg = "Clearing Cursor..."
 
     if mq.TLO.Cursor() and mq.TLO.Cursor.ID() > 0 then
-        RGMercsLogger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
-        GameUtils.DoCmd("/autoinventory")
+        Logger.log_info("Sending Item(%s) on Cursor to Bag", mq.TLO.Cursor())
+        Core.DoCmd("/autoinventory")
     end
 
-    RGMercsLogger.log_info("\aw****************************")
-    RGMercsLogger.log_info("\aw\awWelcome to \ag%s", RGMercConfig._name)
-    RGMercsLogger.log_info("\aw\awVersion \ag%s \aw(\at%s\aw)", RGMercConfig._version, RGMercConfig._subVersion)
-    RGMercsLogger.log_info("\aw\awBy \ag%s", RGMercConfig._author)
-    RGMercsLogger.log_info("\aw****************************")
-    RGMercsLogger.log_info("\aw use \ag /rg \aw for a list of commands")
+    Logger.log_info("\aw****************************")
+    Logger.log_info("\aw\awWelcome to \ag%s", Config._name)
+    Logger.log_info("\aw\awVersion \ag%s \aw(\at%s\aw)", Config._version, Config._subVersion)
+    Logger.log_info("\aw\awBy \ag%s", Config._author)
+    Logger.log_info("\aw****************************")
+    Logger.log_info("\aw use \ag /rg \aw for a list of commands")
 
     -- store initial positioning data.
     initPctComplete = 90
     initMsg = "Storing Initial Positioning Data..."
-    RGMercConfig:StoreLastMove()
+    Config:StoreLastMove()
 
     initMsg = "Done!"
     initPctComplete = 100
 end
 
 local function Main()
-    if mq.TLO.Zone.ID() ~= RGMercConfig.Globals.CurZoneId then
+    if mq.TLO.Zone.ID() ~= Config.Globals.CurZoneId then
         if notifyZoning then
-            RGMercModules:ExecAll("OnZone")
+            Modules:ExecAll("OnZone")
             notifyZoning = false
-            RGMercConfig.Globals.ForceTargetID = 0
+            Config.Globals.ForceTargetID = 0
         end
         mq.delay(100)
-        RGMercConfig.Globals.CurZoneId = mq.TLO.Zone.ID()
+        Config.Globals.CurZoneId = mq.TLO.Zone.ID()
         return
     end
 
     notifyZoning = true
 
-    if mq.TLO.Me.NumGems() ~= RGMercUtils.UseGem then
+    if mq.TLO.Me.NumGems() ~= Casting.UseGem then
         -- sometimes this can get out of sync.
-        RGMercUtils.UseGem = mq.TLO.Me.NumGems()
+        Casting.UseGem = mq.TLO.Me.NumGems()
     end
 
-    if RGMercConfig.Globals.PauseMain then
+    if Config.Globals.PauseMain then
         mq.delay(100)
         mq.doevents()
-        if RGMercConfig:GetSetting('RunMovePaused') then
-            RGMercModules:ExecModule("Movement", "GiveTime", curState)
+        if Config:GetSetting('RunMovePaused') then
+            Modules:ExecModule("Movement", "GiveTime", curState)
         end
-        RGMercModules:ExecModule("Drag", "GiveTime", curState)
-        --RGMercModules:ExecModule("Exp", "GiveTime", curState)
+        Modules:ExecModule("Drag", "GiveTime", curState)
+        --Modules:ExecModule("Exp", "GiveTime", curState)
         return
     end
 
     -- sometimes nav gets interupted this will try to reset it.
-    if RGMercConfig:GetTimeSinceLastMove() > 5 and mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() == 0 then
-        GameUtils.DoCmd("/nav stop")
+    if Config:GetTimeSinceLastMove() > 5 and mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() == 0 then
+        Core.DoCmd("/nav stop")
     end
 
-    if RGMercUtils.GetXTHaterCount() > 0 then
+    if Targetting.GetXTHaterCount() > 0 then
         if curState == "Downtime" and mq.TLO.Me.Sitting() then
             -- if switching into combat state stand up.
             mq.TLO.Me.Stand()
         end
 
         curState = "Combat"
-        --if os.clock() - RGMercConfig.Globals.LastFaceTime > 6 then
-        if RGMercConfig:GetSetting('FaceTarget') and not RGMercUtils.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
-            --RGMercConfig.Globals.LastFaceTime = os.clock()
-            GameUtils.DoCmd("/squelch /face")
+        --if os.clock() - Config.Globals.LastFaceTime > 6 then
+        if Config:GetSetting('FaceTarget') and not Targetting.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
+            --Config.Globals.LastFaceTime = os.clock()
+            Core.DoCmd("/squelch /face")
         end
 
-        if RGMercConfig:GetSetting('DoMed') == 3 then
-            RGMercUtils.AutoMed()
+        if Config:GetSetting('DoMed') == 3 then
+            Casting.AutoMed()
         end
     else
         if curState ~= "Downtime" then
             -- clear the cache during state transition.
-            RGMercUtils.ClearSafeTargetCache()
-            RGMercUtils.ForceBurnTargetID = 0
-            RGMercUtils.LastBurnCheck = false
-            RGMercModules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
+            Targetting.ClearSafeTargetCache()
+            Targetting.ForceBurnTargetID = 0
+            Casting.LastBurnCheck = false
+            Modules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
 
         curState = "Downtime"
 
-        if RGMercConfig:GetSetting('DoMed') == 2 then
-            RGMercUtils.AutoMed()
+        if Config:GetSetting('DoMed') == 2 then
+            Casting.AutoMed()
         end
     end
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
-    if (RGMercConfig.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() or
-            RGMercConfig.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName()) then
-        RGMercConfig:LoadSettings()
-        RGMercModules:ExecAll("LoadSettings")
+    if (Config.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() or
+            Config.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName()) then
+        Config:LoadSettings()
+        Modules:ExecAll("LoadSettings")
     end
 
-    RGMercConfig:StoreLastMove()
+    Config:StoreLastMove()
 
-    if mq.TLO.Me.Hovering() then RGMercUtils.HandleDeath() end
+    if mq.TLO.Me.Hovering() then Events.HandleDeath() end
 
-    RGMercUtils.SetControlToon()
+    Combat.SetControlToon()
 
-    if RGMercUtils.FindTargetCheck() then
-        -- This will find a valid target and set it to : RGMercConfig.Globals.AutoTargetID
-        RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
+    if Combat.FindBestAutoTargetCheck() then
+        -- This will find a valid target and set it to : Config.Globals.AutoTargetID
+        Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
     end
-    if RGMercUtils.OkToEngage(RGMercConfig.Globals.AutoTargetID) then
-        RGMercUtils.EngageTarget(RGMercConfig.Globals.AutoTargetID)
+    if Combat.OkToEngage(Config.Globals.AutoTargetID) then
+        Combat.EngageTarget(Config.Globals.AutoTargetID)
     else
-        if RGMercUtils.GetXTHaterCount(true) > 0 and RGMercUtils.GetTargetID() > 0 and not RGMercUtils.IsMezzing() and not RGMercUtils.IsCharming() then
-            RGMercsLogger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
-            RGMercUtils.ClearTarget()
+        if Targetting.GetXTHaterCount(true) > 0 and Targetting.GetTargetID() > 0 and not Core.IsMezzing() and not Core.IsCharming() then
+            Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
+            Targetting.ClearTarget()
         end
     end
     -- Handles state for when we're in combat
-    if RGMercUtils.DoCombatActions() then
+    if Combat.DoCombatActions() then
         -- IsHealing or IsMezzing should re-determine their target as this point because they may
         -- have switched off to mez or heal after the initial find target check and the target
         -- may have changed by this point.
-        if not RGMercConfig:GetSetting('PriorityHealing') then
-            if RGMercUtils.FindTargetCheck() and (not RGMercUtils.IsHealing() or not RGMercUtils.IsMezzing() or not RGMercUtils.IsCharming()) then
-                RGMercUtils.FindTarget(RGMercUtils.OkToEngagePreValidateId)
+        if not Config:GetSetting('PriorityHealing') then
+            if Combat.FindBestAutoTargetCheck() and (not Core.IsHealing() or not Core.IsMezzing() or not Core.IsCharming()) then
+                Combat.FindBestAutoTarget(Combat.OkToEngagePreValidateId)
             end
         end
 
-        if ((os.clock() - RGMercConfig.Globals.LastPetCmd) > 2) then
-            RGMercConfig.Globals.LastPetCmd = os.clock()
-            if ((RGMercConfig:GetSetting('DoPet') or RGMercConfig:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (RGMercUtils.GetTargetPctHPs(RGMercUtils.GetAutoTarget()) <= RGMercConfig:GetSetting('PetEngagePct')) then
-                RGMercUtils.PetAttack(RGMercConfig.Globals.AutoTargetID, true)
+        if ((os.clock() - Config.Globals.LastPetCmd) > 2) then
+            Config.Globals.LastPetCmd = os.clock()
+            if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targetting.GetTargetPctHPs(Targetting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
+                Combat.PetAttack(Config.Globals.AutoTargetID, true)
             end
         end
 
-        if RGMercConfig:GetSetting('DoMercenary') then
+        if Config:GetSetting('DoMercenary') then
             local merc = mq.TLO.Me.Mercenary
 
             if merc() and merc.ID() then
-                if RGMercUtils.MercEngage() then
+                if Combat.MercEngage() then
                     if merc.Class.ShortName():lower() == "war" and merc.Stance():lower() ~= "aggressive" then
-                        GameUtils.DoCmd("/squelch /stance aggressive")
+                        Core.DoCmd("/squelch /stance aggressive")
                     end
 
                     if merc.Class.ShortName():lower() ~= "war" and merc.Stance():lower() ~= "balanced" then
-                        GameUtils.DoCmd("/squelch /stance balanced")
+                        Core.DoCmd("/squelch /stance balanced")
                     end
 
-                    RGMercUtils.MercAssist()
+                    Combat.MercAssist()
                 else
                     if merc.Class.ShortName():lower() ~= "clr" and merc.Stance():lower() ~= "passive" then
-                        GameUtils.DoCmd("/squelch /stance passive")
+                        Core.DoCmd("/squelch /stance passive")
                     end
                 end
             end
         end
     end
 
-    if RGMercUtils.DoCamp() then
-        if RGMercConfig:GetSetting('DoMercenary') and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
-            GameUtils.DoCmd("/squelch /stance passive")
+    if Combat.ShouldDoCamp() then
+        if Config:GetSetting('DoMercenary') and mq.TLO.Me.Mercenary.ID() and (mq.TLO.Me.Mercenary.Class.ShortName() or "none"):lower() ~= "clr" and mq.TLO.Me.Mercenary.Stance():lower() ~= "passive" then
+            Core.DoCmd("/squelch /stance passive")
         end
     end
 
-    if RGMercConfig:GetSetting('DoModRod') then
-        RGMercUtils.ClickModRod()
+    if Config:GetSetting('DoModRod') then
+        Casting.ClickModRod()
     end
 
-    if RGMercUtils.ShouldKillTargetReset() then
-        RGMercConfig.Globals.AutoTargetID = 0
+    if Combat.ShouldKillTargetReset() then
+        Config.Globals.AutoTargetID = 0
     end
 
     -- If target is not attackable then turn off attack
-    local pcCheck = RGMercUtils.TargetIsType("pc") or
-        (RGMercUtils.TargetIsType("pet") and RGMercUtils.TargetIsType("pc", mq.TLO.Target.Master))
-    local mercCheck = RGMercUtils.TargetIsType("mercenary")
+    local pcCheck = Targetting.TargetIsType("pc") or
+        (Targetting.TargetIsType("pet") and Targetting.TargetIsType("pc", mq.TLO.Target.Master))
+    local mercCheck = Targetting.TargetIsType("mercenary")
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
-        RGMercsLogger.log_debug(
+        Logger.log_debug(
             "\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",
-            StringUtils.BoolToColorString(mq.TLO.Me.Combat()), StringUtils.BoolToColorString(pcCheck),
-            StringUtils.BoolToColorString(mercCheck))
-        GameUtils.DoCmd("/attack off")
+            Strings.BoolToColorString(mq.TLO.Me.Combat()), Strings.BoolToColorString(pcCheck),
+            Strings.BoolToColorString(mercCheck))
+        Core.DoCmd("/attack off")
     end
 
     -- Revive our mercenary if they're dead and we're using a mercenary
-    if RGMercConfig:GetSetting('DoMercenary') then
+    if Config:GetSetting('DoMercenary') then
         if mq.TLO.Me.Mercenary.State():lower() == "dead" then
             if mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_SuspendButton").Text():lower() == "revive" then
                 mq.TLO.Window("MMGW_ManageWnd").Child("MMGW_SuspendButton").LeftMouseUp()
@@ -853,7 +841,7 @@ local function Main()
         end
     end
 
-    RGMercModules:ExecAll("GiveTime", curState)
+    Modules:ExecAll("GiveTime", curState)
 
     mq.doevents()
     mq.delay(10)
@@ -861,27 +849,27 @@ end
 
 -- Global Messaging callback
 ---@diagnostic disable-next-line: unused-local
-local script_actor = CommUtils.Actors.register(function(message)
+local script_actor = Comms.Actors.register(function(message)
     local msg = message()
-    if msg.from == RGMercConfig.Globals.CurLoadedChar then return end
-    if msg.script ~= CommUtils.ScriptName then return end
+    if msg.from == Config.Globals.CurLoadedChar then return end
+    if msg.script ~= Comms.ScriptName then return end
 
-    RGMercsLogger.log_verbose("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", msg.from,
+    Logger.log_verbose("\ayGot Event from(\am%s\ay) module(\at%s\ay) event(\at%s\ay)", msg.from,
         msg.module,
         msg.event)
 
     if msg.module then
         if msg.module == "main" then
-            RGMercConfig:LoadSettings()
+            Config:LoadSettings()
         else
-            RGMercModules:ExecModule(msg.module, msg.event, msg.data)
+            Modules:ExecModule(msg.module, msg.event, msg.data)
         end
     end
 end)
 
 -- Binds
 
-mq.bind("/rglua", RGMercsBinds.MainHandler)
+mq.bind("/rglua", Binds.MainHandler)
 
 RGInit(...)
 
@@ -891,6 +879,6 @@ while openGUI do
     mq.delay(10)
 end
 
-GameUtils.CheckPlugins(unloadedPlugins)
+Core.CheckPlugins(unloadedPlugins)
 
-RGMercModules:ExecAll("Shutdown")
+Modules:ExecAll("Shutdown")

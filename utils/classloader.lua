@@ -1,27 +1,26 @@
-local mq            = require('mq')
-local RGMercUtils   = require("utils.rgmercs_utils")
-local FileUtils     = require("utils.file_utils")
-local RGMercsLogger = require("utils.rgmercs_logger")
+local mq          = require('mq')
+local Config      = require('utils.config')
+local Files       = require("utils.files")
+local Logger      = require("utils.logger")
 
-local ClassLoader   = { _version = '0.1', _name = "ClassLoader", _author = 'Derple', }
+local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple', }
 
 function ClassLoader.getClassConfigFileName(class)
-    local info = debug.getinfo(6, "S")
-    local baseConfigDir = RGMercConfig.Globals.ScriptDir .. "/class_configs"
+    local baseConfigDir = Config.Globals.ScriptDir .. "/class_configs"
 
     local customConfigFile = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
 
-    local classConfigDir = RGMercConfig:GetSetting('ClassConfigDir')
+    local classConfigDir = Config:GetSetting('ClassConfigDir')
     local customConfig = (classConfigDir == "Custom")
 
     local configFile = customConfig and customConfigFile or string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
 
-    if not FileUtils.file_exists(configFile) then
+    if not Files.file_exists(configFile) then
         -- Fall back to live.
         local oldConfig = configFile
         customConfig = false
         configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, "Live", class:lower())
-        RGMercsLogger.log_error("Could not find requested class config %s falling back to %s", oldConfig, configFile)
+        Logger.log_error("Could not find requested class config %s falling back to %s", oldConfig, configFile)
     end
 
     return configFile, customConfig
@@ -30,15 +29,15 @@ end
 ---@param class string # EQ Class ShortName
 function ClassLoader.load(class)
     local classConfigFile, customConfig = ClassLoader.getClassConfigFileName(class)
-    RGMercsLogger.log_info("Loading Base Config: %s", classConfigFile)
+    Logger.log_info("Loading Base Config: %s", classConfigFile)
 
-    if FileUtils.file_exists(classConfigFile) then
+    if Files.file_exists(classConfigFile) then
         local config, err = loadfile(classConfigFile)
         if not config or err then
-            RGMercsLogger.log_error("Failed to Load Custom Core Class Config: %s", classConfigFile)
+            Logger.log_error("Failed to Load Custom Core Class Config: %s", classConfigFile)
         else
             local classConfig
-            RGMercsLogger.log_info("\agFull Config Loaded")
+            Logger.log_info("\agFull Config Loaded")
             classConfig = config()
             classConfig.IsCustom = customConfig
             return classConfig
@@ -63,7 +62,7 @@ function ClassLoader.writeCustomConfig(class)
 
         local fileBackup, err = io.open(backup_config_file, "w")
         if not fileBackup then
-            RGMercsLogger.log_error("Failed to Backup Custom Core Class Config: %s %s", backup_config_file, err)
+            Logger.log_error("Failed to Backup Custom Core Class Config: %s %s", backup_config_file, err)
             return
         end
 
@@ -74,7 +73,7 @@ function ClassLoader.writeCustomConfig(class)
     -- Load the default config file content
     local file = io.open(base_config_file, "r")
     if not file then
-        RGMercsLogger.log_error("Failed to Load Base Class Config: %s", base_config_file)
+        Logger.log_error("Failed to Load Base Class Config: %s", base_config_file)
         return
     end
 
@@ -88,14 +87,14 @@ function ClassLoader.writeCustomConfig(class)
     mq.pickle(custom_config_file, {}) -- incase the path isn't made yet
     local custom_file, err = io.open(custom_config_file, "w")
     if not custom_file then
-        RGMercsLogger.log_error("Failed to Write Custom Core Class Config: %s Error:", custom_config_file)
+        Logger.log_error("Failed to Write Custom Core Class Config: %s Error:", custom_config_file)
         return
     end
 
     custom_file:write(updated_content)
     custom_file:close()
 
-    RGMercsLogger.log_info("Custom Core Class Config Written: %s", custom_config_file)
+    Logger.log_info("Custom Core Class Config Written: %s", custom_config_file)
 end
 
 function ClassLoader.mergeTables(tblA, tblB)

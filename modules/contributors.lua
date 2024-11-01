@@ -1,6 +1,4 @@
--- Sample Basic Class Module
-local mq                 = require('mq')
-local RGMercUtils        = require("utils.rgmercs_utils")
+local Config             = require('utils.config')
 local Set                = require("mq.Set")
 
 local Module             = { _version = '0.1a', _name = "Contributors", _author = 'Derple', }
@@ -23,7 +21,7 @@ function Module:LoadSettings()
     local settingsChanged = false
 
     -- Setup Defaults
-    self.settings, settingsChanged = RGMercConfig.ResolveDefaults(self.DefaultConfig, self.settings)
+    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
 
     if settingsChanged then
         self:SaveSettings(false)

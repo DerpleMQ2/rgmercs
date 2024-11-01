@@ -1,15 +1,17 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
-local GameUtils   = require("utils.game_utils")
+local mq         = require('mq')
+local Config     = require('utils.config')
+local Core       = require("utils.core")
+local Targetting = require("utils.targetting")
+local Casting    = require("utils.casting")
 
 return {
     _version              = "1.0 - Live",
     _author               = "Derple",
     ['ModeChecks']        = {
-        IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
+        IsTanking = function() return Core.IsModeActive("Tank") end,
         IsHealing = function() return true end,
-        IsCuring = function() return RGMercConfig:GetSetting('DoCures') end,
-        IsRezing = function() return (RGMercConfig:GetSetting('DoBattleRez') and not RGMercUtils.IsTanking()) or RGMercUtils.GetXTHaterCount() == 0 end,
+        IsCuring = function() return Config:GetSetting('DoCures') end,
+        IsRezing = function() return (Config:GetSetting('DoBattleRez') and not Core.IsTanking()) or Targetting.GetXTHaterCount() == 0 end,
         --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
     },
     ['Modes']             = {
@@ -18,23 +20,23 @@ return {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if RGMercUtils.AAReady("Radiant Cure") then
-                return RGMercUtils.UseAA("Radiant Cure", targetId)
+            if Casting.AAReady("Radiant Cure") then
+                return Casting.UseAA("Radiant Cure", targetId)
             end
             -- TODO: Consider the impact of memorizing cures outside of combat or increasing number of options in settings
-            -- local cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
+            -- local cureSpell = Core.GetResolvedActionMapItem('Puritycure')
 
             -- if type:lower() == "poison" then
-            -- cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
+            -- cureSpell = Core.GetResolvedActionMapItem('Puritycure')
             -- elseif type:lower() == "curse" then
-            -- cureSpell = RGMercUtils.GetResolvedActionMapItem('Puritycure')
+            -- cureSpell = Core.GetResolvedActionMapItem('Puritycure')
             --TODO: Add Corruption AbilitySets
             -- elseif type:lower() == "corruption" then
-            -- cureSpell = RGMercUtils.GetResolvedActionMapItem('')
+            -- cureSpell = Core.GetResolvedActionMapItem('')
             -- end
 
             -- if not cureSpell or not cureSpell() then return false end
-            -- return RGMercUtils.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            -- return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
         end,
     },
     ['ItemSets']          = {
@@ -700,26 +702,26 @@ return {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         castDPU = function(self)
             if not mq.TLO.Me.AltAbility("Divine Protector's Unity")() then return false end
-            local furyProcLevel = RGMercUtils.GetResolvedActionMapItem('FuryProc') and RGMercUtils.GetResolvedActionMapItem('FuryProc').Level() or 0
+            local furyProcLevel = Core.GetResolvedActionMapItem('FuryProc') and Core.GetResolvedActionMapItem('FuryProc').Level() or 0
             local DPULevel = mq.TLO.Spell(mq.TLO.Me.AltAbility("Divine Protector's Unity").Spell.Trigger(1).BaseName()).Level() or 0
 
             return furyProcLevel <= DPULevel
         end,
         --Did not include Staff of Forbidden Rites, GoR refresh is very fast and rez is 96%
         DoRez = function(self, corpseId)
-            if RGMercConfig:GetSetting('DoBattleRez') or RGMercUtils.DoBuffCheck() then
-                RGMercUtils.SetTarget(corpseId)
+            if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
+                Targetting.SetTarget(corpseId)
 
                 local target = mq.TLO.Target
 
                 if not target or not target() then return false end
 
                 if mq.TLO.Target.Distance() > 25 then
-                    GameUtils.DoCmd("/corpse")
+                    Core.DoCmd("/corpse")
                 end
 
-                if RGMercUtils.AAReady("Gift of Resurrection") then
-                    return RGMercUtils.UseAA("Gift of Resurrection", corpseId)
+                if Casting.AAReady("Gift of Resurrection") then
+                    return Casting.UseAA("Gift of Resurrection", corpseId)
                 end
             end
         end,
@@ -729,13 +731,13 @@ return {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('MainHealPoint') end,
+            cond = function(self, target) return (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint') end,
         },
         {
             name = 'LightHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < RGMercConfig:GetSetting('LightHealPoint') end,
+            cond = function(self, target) return (target.PctHPs() or 999) < Config:GetSetting('LightHealPoint') end,
         },
     },
     ['HealRotations']     = {
@@ -752,7 +754,7 @@ return {
                 type = "Spell",
                 cond = function(self, _)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt')
+                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -760,7 +762,7 @@ return {
                 type = "Spell",
                 cond = function(self, _)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt')
+                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -768,7 +770,7 @@ return {
                 type = "Spell",
                 cond = function(self, _)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt')
+                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -776,8 +778,8 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt') and
-                        RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt') and
+                        Casting.AAReady(aaName)
                 end,
             },
             {
@@ -785,15 +787,15 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(RGMercConfig:GetSetting('GroupHealPoint'))() > RGMercConfig:GetSetting('GroupInjureCnt') and
-                        RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt') and
+                        Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Lay on Hands",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName) and RGMercUtils.GetTargetPctHPs() < RGMercConfig:GetSetting('LayHandsPct')
+                    return Casting.AAReady(aaName) and Targetting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
                 end,
             },
         },
@@ -805,45 +807,45 @@ return {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                    Casting.DoBuffCheck() and Casting.AmIBuffable()
             end,
         },
         {
             name = 'GroupBuff',
             timer = 60, -- only run every 60 seconds top.
             targetId = function(self)
-                return RGMercUtils.GetBuffableGroupIDs()
+                return Casting.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
+                return combat_state == "Downtime" and Casting.DoBuffCheck()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck()
+                    Casting.BurnCheck()
             end,
         },
         {
             name = 'Tank DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.IsModeActive("Tank")
+                return combat_state == "Combat" and Core.IsModeActive("Tank")
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.IsModeActive("DPS")
+                return combat_state == "Combat" and Core.IsModeActive("DPS")
             end,
         },
     },
@@ -853,57 +855,57 @@ return {
                 name = "Spire of Chivalry",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.Level() < 80 and RGMercUtils.AAReady(aaName) and not RGMercUtils.SongActiveByName('Group Armor of the Inquisitor') and
-                        not RGMercUtils.SongActiveByName('Armor of the Inquisitor') and not RGMercUtils.BuffActiveByName('Spire of Chivalry')
+                    return mq.TLO.Me.Level() < 80 and Casting.AAReady(aaName) and not Casting.SongActiveByName('Group Armor of the Inquisitor') and
+                        not Casting.SongActiveByName('Armor of the Inquisitor') and not Casting.BuffActiveByName('Spire of Chivalry')
                 end,
             },
             {
                 name = "Valorous Rage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Inquisitor's Judgment",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Thunder of Karana",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercConfig:GetSetting('DoNuke')
+                    return Casting.AAReady(aaName) and Config:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "Group Armor of The Inquisitor",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Undeadburn",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.NPCDiscReady(discSpell)
+                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.TargettedDiscReady(discSpell)
                 end,
             },
             {
                 name = "Righteousstrike",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.NPCDiscReady(discSpell)
+                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.TargettedDiscReady(discSpell)
                 end,
             },
             {
                 name = "Healproc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not RGMercUtils.IsTanking() and RGMercUtils.PCSpellReady(spell)
+                    return not Core.IsTanking() and Casting.SpellReady(spell)
                 end,
             },
         },
@@ -912,11 +914,11 @@ return {
                 name = "ActivateShield",
                 type = "CustomFunc",
                 cond = function(self)
-                    return RGMercConfig:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Shield").Active() and
-                        mq.TLO.Me.Bandolier("Shield").Index() and RGMercUtils.IsTanking()
+                    return Config:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Shield").Active() and
+                        mq.TLO.Me.Bandolier("Shield").Index() and Core.IsTanking()
                 end,
                 custom_func = function(_)
-                    GameUtils.DoCmd("/bandolier activate Shield")
+                    Core.DoCmd("/bandolier activate Shield")
                     return true
                 end,
 
@@ -925,11 +927,11 @@ return {
                 name = "Activate2HS",
                 type = "CustomFunc",
                 cond = function(self)
-                    return RGMercConfig:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("2HS").Active() and
-                        mq.TLO.Me.Bandolier("2HS").Index() and not RGMercUtils.IsTanking()
+                    return Config:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("2HS").Active() and
+                        mq.TLO.Me.Bandolier("2HS").Index() and not Core.IsTanking()
                 end,
                 custom_func = function(_)
-                    GameUtils.DoCmd("/bandolier activate 2HS")
+                    Core.DoCmd("/bandolier activate 2HS")
                     return true
                 end,
             },
@@ -937,15 +939,15 @@ return {
                 name = "Shield Flash",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < RGMercConfig:GetSetting('FlashHP')
+                    return Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < Config:GetSetting('FlashHP')
                 end,
             },
             {
                 name = "Mantle",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or RGMercUtils.IsNamed(target)) and
+                    return Core.IsModeActive('Tank') and
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targetting.IsNamed(target)) and
                         mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -953,8 +955,8 @@ return {
                 name = "Holyguard",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or RGMercUtils.IsNamed(target)) and
+                    return Core.IsModeActive('Tank') and
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targetting.IsNamed(target)) and
                         mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -962,8 +964,8 @@ return {
                 name = "Armordisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or RGMercUtils.IsNamed(target)) and
+                    return Core.IsModeActive('Tank') and
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targetting.IsNamed(target)) and
                         mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -971,8 +973,8 @@ return {
                 name = "Pentientarmor",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or RGMercUtils.IsNamed(target)) and
+                    return Core.IsModeActive('Tank') and
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targetting.IsNamed(target)) and
                         mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -980,164 +982,164 @@ return {
                 name = "meleemit",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.PCDiscReady(discSpell) and not (discSpell.Level() < 108 and mq.TLO.Me.ActiveDisc.ID())
+                    return Casting.DiscReady(discSpell) and not (discSpell.Level() < 108 and mq.TLO.Me.ActiveDisc.ID())
                 end,
             },
             {
                 name = "TotLightHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercConfig:GetSetting('TotHealPoint')
+                    return Casting.SpellReady(spell) and
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "BurstHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercConfig:GetSetting('TotHealPoint')
+                    return Casting.SpellReady(spell) and
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "Hallowed Lodestar",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetXTHaterCount() > 2
+                    return Casting.AAReady(aaName) and Targetting.GetXTHaterCount() > 2
                 end,
             },
             {
                 name = "Beacon of the Righteous",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetXTHaterCount() > 2
+                    return Casting.AAReady(aaName) and Targetting.GetXTHaterCount() > 2
                 end,
             },
             {
                 name = "Heroic Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetXTHaterCount() > 2
+                    return Casting.AAReady(aaName) and Targetting.GetXTHaterCount() > 2
                 end,
             },
             {
                 name = "Force of Disruption",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (mq.TLO.Me.AltAbility(aaName).Rank() or 0) > 7 and not RGMercUtils.BuffActiveByName("Knight's Yaulp") and
-                        RGMercUtils.GetTargetDistance() < 30 and RGMercUtils.AAReady(aaName)
+                    return (mq.TLO.Me.AltAbility(aaName).Rank() or 0) > 7 and not Casting.BuffActiveByName("Knight's Yaulp") and
+                        Targetting.GetTargetDistance() < 30 and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetDistance() < 30
+                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targetting.GetTargetDistance() < 30
                 end,
             },
             {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Disarm",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Challengetaunt",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.TargetHasBuff(spell)
+                    return Casting.SpellReady(spell) and not Casting.TargetHasBuff(spell)
                 end,
             },
             {
                 name = "StunTimer4",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.DetSpellCheck(spell)
+                    return Casting.SpellReady(spell) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "StunTimer5",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.DetSpellCheck(spell)
+                    return Casting.SpellReady(spell) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "LessonStun",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.DetSpellCheck(spell)
+                    return Casting.SpellReady(spell) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "CrushTimer5",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell)
+                    return Casting.SpellReady(spell)
                 end,
             },
             {
                 name = "CrushTimer6",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell)
+                    return Casting.SpellReady(spell)
                 end,
             },
             {
                 name = "Armor of the Inquisitor",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Healtaunt",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell)
+                    return Casting.SpellReady(spell)
                 end,
             },
             {
                 name = "HealNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell)
+                    return Casting.SpellReady(spell)
                 end,
             },
             {
                 name = "Lowaggronuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell)
+                    return Casting.SpellReady(spell)
                 end,
             },
             {
                 name = "Dicho",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell)
+                    return Casting.SpellReady(spell)
                 end,
             },
             {
                 name = "AntiUndeadNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Casting.SpellReady(spell) and Targetting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
                 name = "Vanquish The Fallen",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Casting.AAReady(aaName) and Targetting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
@@ -1145,7 +1147,7 @@ return {
                 type = "Item",
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
         },
@@ -1154,101 +1156,101 @@ return {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Disarm",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Marr's Gift",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctMana() <= 60
+                    return Casting.AAReady(aaName) and mq.TLO.Me.PctMana() <= 60
                 end,
             },
             {
                 name = "Dicho",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= 35
+                    return Casting.SpellReady(spell) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= 35
                 end,
             },
             {
                 name = "TotLightHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercConfig:GetSetting('TotHealPoint')
+                    return Casting.SpellReady(spell) and
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "BurstHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < RGMercConfig:GetSetting('TotHealPoint')
+                    return Casting.SpellReady(spell) and
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "DebuffNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and
-                        ((RGMercUtils.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not RGMercUtils.TargetHasBuff(spell) and RGMercConfig:GetSetting('DoNuke'))
+                    return Casting.SpellReady(spell) and
+                        ((Targetting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
                 end,
             },
             {
                 name = "AntiUndeadNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Casting.SpellReady(spell) and Targetting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
                 name = "Reverseds",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.TargetHasBuff(spell) and RGMercConfig:GetSetting('DoReverseDS')
+                    return Casting.SpellReady(spell) and Casting.TargetHasBuff(spell) and Config:GetSetting('DoReverseDS')
                 end,
             },
             {
                 name = "Lowaggronuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercConfig:GetSetting('DoNuke')
+                    return Casting.SpellReady(spell) and Config:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "CrushTimer6",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercConfig:GetSetting('DoNuke') and (mq.TLO.Me.SecondaryPctAggro() or 0) > 60
+                    return Casting.SpellReady(spell) and Config:GetSetting('DoNuke') and (mq.TLO.Me.SecondaryPctAggro() or 0) > 60
                 end,
             },
             {
                 name = "HealNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell)
+                    return Casting.SpellReady(spell)
                 end,
             },
             {
                 name = "Vanquish The Fallen",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Casting.AAReady(aaName) and Targetting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
                 name = "Disruptive Persecution",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.AltAbility(aaName).Rank() >= 3 and not RGMercUtils.BuffActiveByName("Knight's Yaulp")
+                    return Casting.AAReady(aaName) and mq.TLO.Me.AltAbility(aaName).Rank() >= 3 and not Casting.BuffActiveByName("Knight's Yaulp")
                 end,
             },
             {
@@ -1256,7 +1258,7 @@ return {
                 type = "Item",
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
         },
@@ -1265,71 +1267,71 @@ return {
                 name = "aurabuff1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and not RGMercUtils.AuraActiveByName(spell.RankName.Name()) and mq.TLO.Me.PctEndurance() > 10
+                    return Casting.SpellReady(spell) and not Casting.AuraActiveByName(spell.RankName.Name()) and mq.TLO.Me.PctEndurance() > 10
                 end,
             },
             {
                 name = "Divine Protector's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName) and self.ClassConfig.HelperFunctions.castDPU(self)
+                    return Casting.SelfBuffAACheck(aaName) and self.ClassConfig.HelperFunctions.castDPU(self)
                 end,
             },
             {
                 name = "ArmorSelfBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU(self) and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "FuryProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU(self) and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "UndeadProc",
                 type = "Spell",
                 cond = function(self, spell) --use this always until we have a Fury proc, and optionally after that, up until the point that Fury is rolled into DPU
-                    if (mq.TLO.Me.AltAbility("Divine Protector's Unity").Rank() or 0) > 1 or (self:GetResolvedActionMapItem("FuryProc") and not RGMercConfig:GetSetting('DoUndeadProc')) then return false end
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    if (mq.TLO.Me.AltAbility("Divine Protector's Unity").Rank() or 0) > 1 or (self:GetResolvedActionMapItem("FuryProc") and not Config:GetSetting('DoUndeadProc')) then return false end
+                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Remorse",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU(self) and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Piety",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU(self) and RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Preservation",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.IsModeActive("Tank")
+                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
                 end,
             },
             {
                 name = "TempHP",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.IsModeActive("Tank")
+                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
                 end,
             },
             {
                 name = "Incoming",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and RGMercUtils.SelfBuffCheck(spell) and RGMercUtils.IsModeActive("Tank")
+                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
                 end,
             },
             {
@@ -1337,7 +1339,7 @@ return {
                 type = "Item",
                 active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return RGMercConfig:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
+                    return Config:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
                         mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
                 end,
             },
@@ -1346,20 +1348,20 @@ return {
             {
                 name = "Brells",
                 type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and RGMercConfig:GetSetting('DoBrells') end,
+                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell) return Casting.SelfBuffCheck(spell) and Config:GetSetting('DoBrells') end,
             },
             {
                 name = "Aego",
                 type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and not RGMercConfig:GetSetting('DoDruid') end,
+                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell) return Casting.SelfBuffCheck(spell) and not Config:GetSetting('DoDruid') end,
             },
             {
                 name = "Symbol",
                 type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and RGMercConfig:GetSetting('DoDruid') end,
+                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell) return Casting.SelfBuffCheck(spell) and Config:GetSetting('DoDruid') end,
             },
         },
     },
@@ -1376,7 +1378,7 @@ return {
         {
             gem = 2,
             spells = {
-                { name = "Lowaggronuke", cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "Lowaggronuke", cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "CrushTimer5", },
                 { name = "StunTimer4", },
             },
@@ -1384,8 +1386,8 @@ return {
         {
             gem = 3,
             spells = {
-                { name = "HealNuke",    cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
-                { name = "LessonStun",  cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "HealNuke",    cond = function(self) return Core.IsModeActive('DPS') end, },
+                { name = "LessonStun",  cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "Healtaunt", },
                 { name = "LessonStun", },
                 { name = "CrushTimer5", },
@@ -1395,7 +1397,7 @@ return {
         {
             gem = 4,
             spells = {
-                { name = "AntiUndeadNuke", cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "AntiUndeadNuke", cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "Lowaggronuke", },
                 { name = "CrushTimer6", },
                 { name = "LessonStun", },
@@ -1405,7 +1407,7 @@ return {
         {
             gem = 5,
             spells = {
-                { name = "WaveHeal",       cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "WaveHeal",       cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "HealNuke", },
                 { name = "AntiUndeadNuke", },
                 { name = "TotLightHeal", },
@@ -1414,7 +1416,7 @@ return {
         {
             gem = 6,
             spells = {
-                { name = "TotLightHeal", cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "TotLightHeal", cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "WaveHeal2", },
                 { name = "BurstHeal", },
             },
@@ -1422,7 +1424,7 @@ return {
         {
             gem = 7,
             spells = {
-                { name = "BurstHeal",    cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "BurstHeal",    cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "TotLightHeal", },
                 { name = "Preservation", },
                 { name = "LightHeal", },
@@ -1431,7 +1433,7 @@ return {
         {
             gem = 8,
             spells = {
-                { name = "Reverseds", cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "Reverseds", cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "BurstHeal", },
                 { name = "TempHP", },
             },
@@ -1440,7 +1442,7 @@ return {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "DebuffNuke",     cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "DebuffNuke",     cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "Challengetaunt", },
                 { name = "Healward", },
             },
@@ -1449,7 +1451,7 @@ return {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Healproc", cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "Healproc", cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "TempHP", },
                 { name = "HealNuke", },
             },
@@ -1458,7 +1460,7 @@ return {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Aurora",         cond = function(self) return RGMercUtils.IsModeActive('DPS') end, },
+                { name = "Aurora",         cond = function(self) return Core.IsModeActive('DPS') end, },
                 { name = "Preservation", },
                 { name = "DebuffNuke", },
                 { name = "AntiUndeadNuke", },
@@ -1483,11 +1485,11 @@ return {
         {
             id = 'Challengetaunt',
             Type = "Spell",
-            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('Challengetaunt').RankName.Name() or "" end,
-            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('Challengetaunt').RankName.Name() or "" end,
+            DisplayName = function() return Core.GetResolvedActionMapItem('Challengetaunt').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('Challengetaunt').RankName.Name() or "" end,
             AbilityRange = 200,
             cond = function(self)
-                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('Challengetaunt')
+                local resolvedSpell = Core.GetResolvedActionMapItem('Challengetaunt')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
@@ -1495,11 +1497,11 @@ return {
         {
             id = 'StunTimer4',
             Type = "Spell",
-            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer4')() or "" end,
-            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer4')() or "" end,
+            DisplayName = function() return Core.GetResolvedActionMapItem('StunTimer4')() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('StunTimer4')() or "" end,
             AbilityRange = 150,
             cond = function(self)
-                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('StunTimer4')
+                local resolvedSpell = Core.GetResolvedActionMapItem('StunTimer4')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
@@ -1507,11 +1509,11 @@ return {
         {
             id = 'StunTimer5',
             Type = "Spell",
-            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer5')() or "" end,
-            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('StunTimer5')() or "" end,
+            DisplayName = function() return Core.GetResolvedActionMapItem('StunTimer5')() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('StunTimer5')() or "" end,
             AbilityRange = 150,
             cond = function(self)
-                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('StunTimer5')
+                local resolvedSpell = Core.GetResolvedActionMapItem('StunTimer5')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,

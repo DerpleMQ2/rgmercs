@@ -67,10 +67,11 @@
 ]]
 local mq                                                     = require('mq')
 local imgui                                                  = require('ImGui')
-local RGMercUtils                                            = require("utils.rgmercs_utils")
-local GameUtils                                              = require("utils.game_utils")
-local FileUtils                                              = require("utils.file_utils")
-local RGMercsLogger                                          = require("utils.rgmercs_logger")
+local Config                                                 = require('utils.config')
+local Core                                                   = require("utils.core")
+local Comms                                                  = require("utils.comms")
+local Files                                                  = require("utils.files")
+local Logger                                                 = require("utils.logger")
 local Icons                                                  = require('mq.ICONS')
 local theme, settings                                        = {}, {}
 local script                                                 = 'Looted'
@@ -149,7 +150,7 @@ function guiLoot.loadLDB()
 	local sWarn = "MQ2LinkDB not loaded, Can't lookup links.\n Attempting to Load MQ2LinkDB"
 	guiLoot.console:AppendText(sWarn)
 	print(sWarn)
-	GameUtils.DoCmd("/plugin mq2linkdb noauto")
+	Core.DoCmd("/plugin mq2linkdb noauto")
 	guiLoot.linkdb = mq.TLO.Plugin('mq2linkdb').IsLoaded()
 end
 
@@ -188,7 +189,7 @@ local function getSortedKeys(t)
 end
 
 local function loadTheme()
-	if FileUtils.file_exists(themeFile) then
+	if Files.file_exists(themeFile) then
 		theme = dofile(themeFile)
 	else
 		theme = require('lib.lootnscoot.themes')
@@ -199,7 +200,7 @@ end
 local function loadSettings()
 	local newSetting = false
 	local temp = {}
-	if not FileUtils.file_exists(configFile) then
+	if not Files.file_exists(configFile) then
 		mq.pickle(configFile, defaults)
 		loadSettings()
 	else
@@ -218,7 +219,7 @@ local function loadSettings()
 	for k, v in pairs(defaults) do
 		if settings[script][k] == nil then
 			settings[script][k] = v
-			RGMercsLogger.log_info("\ay[LOOT]: \atSetting: \ay%s\ao not found in settings file, adding default value \aw[\ag%s\aw].", k, v)
+			Logger.log_info("\ay[LOOT]: \atSetting: \ay%s\ao not found in settings file, adding default value \aw[\ag%s\aw].", k, v)
 		end
 	end
 
@@ -265,11 +266,11 @@ end
 
 function guiLoot.GUI()
 	if guiLoot.openGUI then
-		local windowName = 'Looted Items##' .. RGMercConfig.Globals.CurLoadedChar
+		local windowName = 'Looted Items##' .. Config.Globals.CurLoadedChar
 		ImGui.SetNextWindowSize(260, 300, ImGuiCond.FirstUseEver)
 		--imgui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(1, 0));
 		ColorCount, StyleCount = DrawTheme(ThemeName)
-		if guiLoot.imported then windowName = 'Looted Items Local##Imported_' .. RGMercConfig.Globals.CurLoadedChar end
+		if guiLoot.imported then windowName = 'Looted Items Local##Imported_' .. Config.Globals.CurLoadedChar end
 		local openGui, show = ImGui.Begin(windowName, true, guiLoot.winFlags)
 		if not openGui then
 			guiLoot.openGUI = false
@@ -379,16 +380,16 @@ function guiLoot.GUI()
 				end
 				if imgui.BeginMenu('Hide Corpse') then
 					if imgui.MenuItem('alwaysnpc') then
-						GameUtils.DoCmd('/hidecorpse alwaysnpc')
+						Core.DoCmd('/hidecorpse alwaysnpc')
 					end
 					if imgui.MenuItem('looted') then
-						GameUtils.DoCmd('/hidecorpse looted')
+						Core.DoCmd('/hidecorpse looted')
 					end
 					if imgui.MenuItem('all') then
-						GameUtils.DoCmd('/hidecorpse all')
+						Core.DoCmd('/hidecorpse all')
 					end
 					if imgui.MenuItem('none') then
-						GameUtils.DoCmd('/hidecorpse none')
+						Core.DoCmd('/hidecorpse none')
 					end
 					imgui.EndMenu()
 				end
@@ -543,7 +544,7 @@ function guiLoot.lootedReport_GUI()
 	ColorCountRep, StyleCountRep = DrawTheme(ThemeName)
 	ImGui.SetNextWindowSize(300, 200, ImGuiCond.Appearing)
 	if changed and mq.TLO.Plugin('mq2dannet').IsLoaded() and guiLoot.caller == 'lootnscoot' then
-		GameUtils.DoCmd('/dgae /lootutils reload')
+		Core.DoCmd('/dgae /lootutils reload')
 		changed = false
 	end
 	local openRepGUI, showRepGUI = ImGui.Begin("Loot Report##" .. script, true, bit32.bor(ImGuiWindowFlags.NoCollapse))
@@ -626,7 +627,7 @@ function guiLoot.lootedReport_GUI()
 			end
 
 			if ImGui.Selectable(itemName .. "##" .. rowID, false, ImGuiSelectableFlags.SpanAllColumns) then
-				GameUtils.DoCmd('/executelink %s', itemLink)
+				Core.DoCmd('/executelink %s', itemLink)
 			end
 
 			if guiLoot.imported then
@@ -642,27 +643,27 @@ function guiLoot.lootedReport_GUI()
 						ImGui.SetWindowFontScale(ZoomLvl)
 						local tmpName = string.gsub(itemName, "*", "")
 						if ImGui.Selectable('Keep##' .. rowID) then
-							GameUtils.DoCmd('/lootutils keep "%s"', tmpName)
+							Core.DoCmd('/lootutils keep "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Keep'
 							changed = true
 						end
 						if ImGui.Selectable('Quest##' .. rowID) then
-							GameUtils.DoCmd('/lootutils quest "%s"', tmpName)
+							Core.DoCmd('/lootutils quest "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Quest'
 							changed = true
 						end
 						if ImGui.Selectable('Sell##' .. rowID) then
-							GameUtils.DoCmd('/lootutils sell "%s"', tmpName)
+							Core.DoCmd('/lootutils sell "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Sell'
 							changed = true
 						end
 						if ImGui.Selectable('Tribute##' .. rowID) then
-							GameUtils.DoCmd('/lootutils tribute "%s"', tmpName)
+							Core.DoCmd('/lootutils tribute "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Tribute'
 							changed = true
 						end
 						if ImGui.Selectable('Destroy##' .. rowID) then
-							GameUtils.DoCmd('/lootutils destroy "%s"', tmpName)
+							Core.DoCmd('/lootutils destroy "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Destroy'
 							changed = true
 						end
@@ -674,27 +675,27 @@ function guiLoot.lootedReport_GUI()
 						ImGui.SetWindowFontScale(ZoomLvl)
 						local tmpName = string.gsub(itemName, "*", "")
 						if ImGui.Selectable('Global Keep##' .. rowID) then
-							GameUtils.DoCmd('/lootutils globalitem keep "%s"', tmpName)
+							Core.DoCmd('/lootutils globalitem keep "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Keep'
 							changed = true
 						end
 						if ImGui.Selectable('Global Quest##' .. rowID) then
-							GameUtils.DoCmd('/lootutils globalitem quest "%s"', tmpName)
+							Core.DoCmd('/lootutils globalitem quest "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Quest'
 							changed = true
 						end
 						if ImGui.Selectable('Global Sell##' .. rowID) then
-							GameUtils.DoCmd('/lootutils globalitem sell "%s"', tmpName)
+							Core.DoCmd('/lootutils globalitem sell "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Sell'
 							changed = true
 						end
 						if ImGui.Selectable('Global Tribute##' .. rowID) then
-							GameUtils.DoCmd('/lootutils globalitem tribute "%s"', tmpName)
+							Core.DoCmd('/lootutils globalitem tribute "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Tribute'
 							changed = true
 						end
 						if ImGui.Selectable('Global Destroy##' .. rowID) then
-							GameUtils.DoCmd('/lootutils globalitem destroy "%s"', tmpName)
+							Core.DoCmd('/lootutils globalitem destroy "%s"', tmpName)
 							lootTable[item]["NewEval"] = 'Global Destroy'
 							changed = true
 						end
@@ -874,7 +875,7 @@ local function getNextID(table)
 end
 
 function guiLoot.RegisterActor()
-	guiLoot.actor = RGMercUtils.Actors.register('looted', function(message)
+	guiLoot.actor = Comms.Actors.register('looted', function(message)
 		local lootEntry = message()
 		for _, item in ipairs(lootEntry.Items) do
 			local link = item.Link
@@ -882,7 +883,7 @@ function guiLoot.RegisterActor()
 			local eval = item.Eval
 			local who = lootEntry.LootedBy
 			if guiLoot.hideNames then
-				if who ~= mq.TLO.Me() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = RGMercConfig.Globals.CurLoadedClass end
+				if who ~= mq.TLO.Me() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = Config.Globals.CurLoadedClass end
 			end
 			if guiLoot.recordData and item.Action == 'Looted' then
 				addRule(who, what, link, eval)
@@ -936,7 +937,7 @@ function guiLoot.EventLoot(line, who, what)
 			link = mq.TLO.LinkDB(string.format("=%s", what))() or link
 		end
 		if guiLoot.hideNames then
-			if who ~= 'You' then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = RGMercConfig.Globals.CurLoadedClass end
+			if who ~= 'You' then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = Config.Globals.CurLoadedClass end
 		end
 		local text = string.format('\ao[%s] \at%s \axLooted %s', mq.TLO.Time(), who, link)
 		guiLoot.console:AppendText(text)

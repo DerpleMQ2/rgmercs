@@ -1,4 +1,7 @@
-local mq = require 'mq'
+local Modules           = require("utils.modules")
+local Config            = require('utils.config')
+
+local mq                = require 'mq'
 
 ---@class RGMercsModuleType
 ---@field name string
@@ -27,13 +30,13 @@ local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
 ---@field name string
 
 ---@type DataType
-local rgMercsMainType = mq.DataType.new('RGMercsMain', {
+local rgMercsMainType   = mq.DataType.new('RGMercsMain', {
     Members = {
         Paused = function(_, self)
-            return 'bool', RGMercConfig.Globals.PauseMain
+            return 'bool', Config.Globals.PauseMain
         end,
         State = function(_, self)
-            return 'string', RGMercConfig.Globals.PauseMain and "Paused" or "Running"
+            return 'string', Config.Globals.PauseMain and "Paused" or "Running"
         end,
     },
 
@@ -42,10 +45,10 @@ local rgMercsMainType = mq.DataType.new('RGMercsMain', {
     end,
 })
 
----@return MQType, RGMercsModuleType|string|boolean
+---@return MQType, RGMercsModuleType|string|boolean|nil
 local function RGMercsTLOHandler(param)
     if not param or param:len() == 0 then
-        return rgMercsMainType, RGMercConfig
+        return rgMercsMainType, Config
     end
 
     if param:lower() == "curable" then
@@ -56,7 +59,7 @@ local function RGMercsTLOHandler(param)
             mq.TLO.Me.Corrupted.ID() or 0)
     end
 
-    return rgMercsModuleType, RGMercModules:GetModule(param)
+    return rgMercsModuleType, Modules:GetModule(param)
 end
 -- Register our TLO functions
 mq.AddTopLevelObject('RGMercs', RGMercsTLOHandler)

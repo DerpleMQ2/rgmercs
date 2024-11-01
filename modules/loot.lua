@@ -1,10 +1,12 @@
 -- Sample Basic Class Module
 local mq                  = require('mq')
-local RGMercUtils         = require("utils.rgmercs_utils")
-local GameUtils           = require("utils.game_utils")
-local CommUtils           = require("utils.comm_utils")
-local StringUtils         = require("utils.string_utils")
-local RGMercsLogger       = require("utils.rgmercs_logger")
+local Config              = require('utils.config')
+local Core                = require("utils.core")
+local Targetting          = require("utils.targetting")
+local Ui                  = require("utils.ui")
+local Comms               = require("utils.comms")
+local Strings             = require("utils.strings")
+local Logger              = require("utils.logger")
 local Set                 = require("mq.Set")
 
 local LootnScoot          = require('lib.lootnscoot.loot_lib')
@@ -521,16 +523,16 @@ local function getConfigFileName()
 	local server = mq.TLO.EverQuest.Server()
 	server = server:gsub(" ", "")
 	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar ..
-		"_" .. RGMercConfig.Globals.CurLoadedClass .. '.lua'
+		'/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar ..
+		"_" .. Config.Globals.CurLoadedClass .. '.lua'
 end
 
 local function getLootItemsConfigFileName(type)
 	local server = mq.TLO.EverQuest.Server()
 	server = server:gsub(" ", "")
 	return mq.configDir ..
-		'/rgmercs/PCConfigs/' .. type .. "_ItemsTable_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar ..
-		"_" .. RGMercConfig.Globals.CurLoadedClass .. '.lua'
+		'/rgmercs/PCConfigs/' .. type .. "_ItemsTable_" .. server .. "_" .. Config.Globals.CurLoadedChar ..
+		"_" .. Config.Globals.CurLoadedClass .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
@@ -539,7 +541,7 @@ function Module:SaveSettings(doBroadcast)
 	mq.pickle(getLootItemsConfigFileName('buy'), self.BuyItemsTable)
 	self:SortItemTables()
 	if doBroadcast == true then
-		CommUtils.BroadcastUpdate(self._name, "LoadSettings")
+		Comms.BroadcastUpdate(self._name, "LoadSettings")
 	end
 	LootnScoot.BuyItems = {}
 	LootnScoot.Settings = {}
@@ -581,13 +583,13 @@ end
 
 function Module:LoadSettings()
 	if not LootnScoot then return end
-	RGMercsLogger.log_debug("\ay[LOOT]: \atLootnScoot EMU, Loot Module Loading Settings for: %s.",
-		RGMercConfig.Globals.CurLoadedChar)
+	Logger.log_debug("\ay[LOOT]: \atLootnScoot EMU, Loot Module Loading Settings for: %s.",
+		Config.Globals.CurLoadedChar)
 	local settings_pickle_path = getConfigFileName()
 
 	local config, err = loadfile(settings_pickle_path)
 	if err or not config then
-		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load global settings file(%s), creating a new one!",
+		Logger.log_error("\ay[LOOT]: \aoUnable to load global settings file(%s), creating a new one!",
 			settings_pickle_path)
 		self.settings.MyCheckbox = false
 		self:SaveSettings(false)
@@ -597,9 +599,9 @@ function Module:LoadSettings()
 
 	local needsSave = false
 	-- Setup Defaults
-	self.settings, needsSave = RGMercConfig.ResolveDefaults(Module.DefaultConfig, self.settings)
+	self.settings, needsSave = Config.ResolveDefaults(Module.DefaultConfig, self.settings)
 
-	RGMercsLogger.log_debug("Settings Changes = %s", StringUtils.BoolToColorString(needsSave))
+	Logger.log_debug("Settings Changes = %s", Strings.BoolToColorString(needsSave))
 	if needsSave then
 		self:SaveSettings(false)
 	end
@@ -623,7 +625,7 @@ function Module:LoadSettings()
 	local buyItems_pickle_path = getLootItemsConfigFileName('buy')
 	local buyItemsLoad, err = loadfile(buyItems_pickle_path)
 	if err or not buyItemsLoad then
-		RGMercsLogger.log_error("\ay[LOOT]: \aoUnable to load BUY ITEMS file(%s), creating a new one!",
+		Logger.log_error("\ay[LOOT]: \aoUnable to load BUY ITEMS file(%s), creating a new one!",
 			buyItems_pickle_path)
 		self:SaveSettings(false)
 	else
@@ -696,19 +698,19 @@ function Module:Init()
 	self.TempSettings.NeedSave = LootnScoot.init()
 
 	self:LoadSettings()
-	if not RGMercUtils.OnEMU() then
-		RGMercsLogger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s",
+	if not Core.OnEMU() then
+		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s",
 			mq.TLO.MacroQuest.BuildName())
 		LootnScoot = nil
 	else
-		RGMercsLogger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
+		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	end
 
 	return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
 end
 
 function Module:ShouldRender()
-	return RGMercUtils.OnEMU()
+	return Core.OnEMU()
 end
 
 function Module:SearchLootTable(search, key, value)
@@ -722,7 +724,7 @@ end
 function Module:Render()
 	ImGui.Text("EMU Loot")
 	local pressed
-	self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig,
+	self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
 		self.DefaultCategories)
 	if pressed then
 		self:SaveSettings(false)
@@ -771,7 +773,7 @@ function Module:Render()
 					if ImGui.IsItemHovered() and mq.TLO.Cursor() ~= nil then
 						if ImGui.IsMouseClicked(0) then
 							self.TempSettings.NewBuyItem = mq.TLO.Cursor()
-							GameUtils.DoCmd("/autoinv")
+							Core.DoCmd("/autoinv")
 						end
 					end
 					ImGui.TableNextColumn()
@@ -868,7 +870,7 @@ function Module:Render()
 							LootnScoot.setGlobalItem(k, v, self.TempSettings.UpdateGlobalClasses[k])
 							LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
 								{
-									who = RGMercConfig.Globals.CurLoadedChar,
+									who = Config.Globals.CurLoadedChar,
 									action = 'modifyitem',
 									section =
 									"GlobalItems",
@@ -884,7 +886,7 @@ function Module:Render()
 						LootnScoot.setGlobalItem(k, 'delete')
 						LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
 							{
-								who = RGMercConfig.Globals.CurLoadedChar,
+								who = Config.Globals.CurLoadedChar,
 								section = "GlobalItems",
 								action = 'deleteitem',
 								item =
@@ -903,7 +905,7 @@ function Module:Render()
 				if ImGui.IsItemHovered() and mq.TLO.Cursor() then
 					if ImGui.IsMouseClicked(0) then
 						self.TempSettings.SearchGlobalItems = mq.TLO.Cursor()
-						GameUtils.DoCmd("/autoinv")
+						Core.DoCmd("/autoinv")
 					end
 				end
 				ImGui.SeparatorText("Add New Item##GlobalItems")
@@ -921,7 +923,7 @@ function Module:Render()
 					if ImGui.IsItemHovered() and mq.TLO.Cursor() ~= nil then
 						if ImGui.IsMouseClicked(0) then
 							self.TempSettings.NewGlobalItem = mq.TLO.Cursor()
-							GameUtils.DoCmd("/autoinv")
+							Core.DoCmd("/autoinv")
 						end
 					end
 					ImGui.TableNextColumn()
@@ -944,7 +946,7 @@ function Module:Render()
 							LootnScoot.setGlobalItem(self.TempSettings.NewGlobalItem, self.TempSettings.NewGlobalValue, self.TempSettings.NewGlobalClasses)
 							LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
 								{
-									who = RGMercConfig.Globals.CurLoadedChar,
+									who = Config.Globals.CurLoadedChar,
 									action = 'addrule',
 									section = "GlobalItems",
 									item = self.TempSettings.NewGlobalItem,
@@ -1057,7 +1059,7 @@ function Module:Render()
 						LootnScoot.setNormalItem(k, v, self.TempSettings.UpdateItemClasses[k])
 						LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
 							{
-								who = RGMercConfig.Globals.CurLoadedChar,
+								who = Config.Globals.CurLoadedChar,
 								action = 'modifyitem',
 								section = "NormalItems",
 								item = k,
@@ -1074,7 +1076,7 @@ function Module:Render()
 						LootnScoot.setNormalItem(k, 'delete')
 						LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
 							{
-								who = RGMercConfig.Globals.CurLoadedChar,
+								who = Config.Globals.CurLoadedChar,
 								action = 'deleteitem',
 								section = "NormalItems",
 								item = k,
@@ -1089,7 +1091,7 @@ function Module:Render()
 				if ImGui.IsItemHovered() and mq.TLO.Cursor() then
 					if ImGui.IsMouseClicked(0) then
 						self.TempSettings.SearchItems = mq.TLO.Cursor()
-						GameUtils.DoCmd("/autoinv")
+						Core.DoCmd("/autoinv")
 					end
 				end
 				col = math.max(3, math.floor(ImGui.GetContentRegionAvail() / 150))
@@ -1182,10 +1184,10 @@ end
 
 function Module:DoSell()
 	if LootnScoot ~= nil then
-		local tmpSetting = RGMercConfig:GetSetting('ChaseOn')
-		RGMercConfig:SetSetting('ChaseOn', false)
+		local tmpSetting = Config:GetSetting('ChaseOn')
+		Config:SetSetting('ChaseOn', false)
 		LootnScoot.processItems('Sell')
-		RGMercConfig:SetSetting('ChaseOn', tmpSetting)
+		Config:SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
@@ -1197,31 +1199,31 @@ end
 
 function Module:DoBuy()
 	if LootnScoot ~= nil then
-		local tmpSetting = RGMercConfig:GetSetting('ChaseOn')
-		RGMercConfig:SetSetting('ChaseOn', false)
+		local tmpSetting = Config:GetSetting('ChaseOn')
+		Config:SetSetting('ChaseOn', false)
 
 		LootnScoot.processItems('Buy')
-		RGMercConfig:SetSetting('ChaseOn', tmpSetting)
+		Config:SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:DoBank()
 	if LootnScoot ~= nil then
-		local tmpSetting = RGMercConfig:GetSetting('ChaseOn')
-		RGMercConfig:SetSetting('ChaseOn', false)
+		local tmpSetting = Config:GetSetting('ChaseOn')
+		Config:SetSetting('ChaseOn', false)
 
 		LootnScoot.processItems('Bank')
-		RGMercConfig:SetSetting('ChaseOn', tmpSetting)
+		Config:SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
 function Module:DoTribute()
 	if LootnScoot ~= nil then
-		local tmpSetting = RGMercConfig:GetSetting('ChaseOn')
-		RGMercConfig:SetSetting('ChaseOn', false)
+		local tmpSetting = Config:GetSetting('ChaseOn')
+		Config:SetSetting('ChaseOn', false)
 
 		LootnScoot.processItems('Tribute')
-		RGMercConfig:SetSetting('ChaseOn', tmpSetting)
+		Config:SetSetting('ChaseOn', tmpSetting)
 	end
 end
 
@@ -1230,9 +1232,9 @@ function Module:SetItem(params)
 		LootnScoot.commandHandler(params)
 		mq.delay(2)
 		if params == "destroy" then
-			GameUtils.DoCmd("/destroy")
+			Core.DoCmd("/destroy")
 		else
-			GameUtils.DoCmd("/autoinv")
+			Core.DoCmd("/autoinv")
 		end
 		-- self.NormalItemsTable = LootnScoot.NormalItems
 	end
@@ -1242,9 +1244,9 @@ function Module:SetGlobalItem(params)
 	if LootnScoot ~= nil then
 		LootnScoot.setGlobalBind(params)
 		if params == "destroy" then
-			GameUtils.DoCmd("/destroy")
+			Core.DoCmd("/destroy")
 		else
-			GameUtils.DoCmd("/autoinv")
+			Core.DoCmd("/autoinv")
 		end
 		-- self.GlobalItemsTable = LootnScoot.GlobalItems
 	end
@@ -1255,7 +1257,7 @@ function Module:SetClasses(itemName, params)
 	if LootnScoot ~= nil then
 		LootnScoot.ChangeClasses(itemName, params, "NormalItems")
 		mq.delay(2)
-		GameUtils.DoCmd("/autoinv")
+		Core.DoCmd("/autoinv")
 	end
 end
 
@@ -1264,7 +1266,7 @@ function Module:SetGlobalClasses(itemName, params)
 	if LootnScoot ~= nil then
 		LootnScoot.ChangeClasses(itemName, params, "GlobalItems")
 		mq.delay(2)
-		GameUtils.DoCmd("/autoinv")
+		Core.DoCmd("/autoinv")
 	end
 end
 
@@ -1277,7 +1279,7 @@ end
 function Module:ReportLoot()
 	if LootnScoot ~= nil then
 		LootnScoot.guiLoot.ReportLoot()
-		RGMercConfig:SetSetting('ShowLootReport', LootnScoot.guiLoot.showReport)
+		Config:SetSetting('ShowLootReport', LootnScoot.guiLoot.showReport)
 		self:SaveSettings(false)
 	end
 end
@@ -1285,7 +1287,7 @@ end
 function Module:ShowLootUI()
 	if LootnScoot ~= nil then
 		LootnScoot.guiLoot.openGUI = not LootnScoot.guiLoot.openGUI
-		RGMercConfig:SetSetting('ShowLootUI', LootnScoot.guiLoot.openGUI)
+		Config:SetSetting('ShowLootUI', LootnScoot.guiLoot.openGUI)
 		self:SaveSettings(false)
 	end
 end
@@ -1294,7 +1296,7 @@ function Module:LootReload()
 	if LootnScoot ~= nil then
 		-- LootnScoot.commandHandler('reload')
 		LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
-			{ who = RGMercConfig.Globals.CurLoadedChar, action = 'lootreload', })
+			{ who = Config.Globals.CurLoadedChar, action = 'lootreload', })
 		self:LoadSettings()
 	end
 end
@@ -1315,7 +1317,7 @@ end
 
 function Module:GiveTime(combat_state)
 	if not LootnScoot then return end
-	if not RGMercConfig:GetSetting('DoLoot') then return end
+	if not Config:GetSetting('DoLoot') then return end
 
 	if self.TempSettings.NeedSave then
 		self:SaveSettings(false)
@@ -1323,7 +1325,7 @@ function Module:GiveTime(combat_state)
 		self:SortItemTables()
 	end
 	-- Main Module logic goes here.
-	if RGMercUtils.GetXTHaterCount() == 0 or RGMercConfig:GetSetting('CombatLooting') then
+	if Targetting.GetXTHaterCount() == 0 or Config:GetSetting('CombatLooting') then
 		if LootnScoot ~= nil and self.settings.DoLoot then
 			LootnScoot.lootMobs()
 		end
@@ -1380,7 +1382,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-	RGMercsLogger.log_debug("\ay[LOOT]: \axEMU Loot Module Unloaded.")
+	Logger.log_debug("\ay[LOOT]: \axEMU Loot Module Unloaded.")
 end
 
 return Module

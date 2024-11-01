@@ -1,15 +1,18 @@
-local mq            = require('mq')
-local RGMercUtils   = require("utils.rgmercs_utils")
-local GameUtils     = require("utils.game_utils")
-local CommUtils     = require("utils.comm_utils")
-local DanNet        = require('lib.dannet.helpers')
-local RGMercsLogger = require("utils.rgmercs_logger")
+local mq         = require('mq')
+local Config     = require('utils.config')
+local Core       = require("utils.core")
+local Targetting = require("utils.targetting")
+local Casting    = require("utils.casting")
+local Comms      = require("utils.comms")
+local ItemMrg    = require("utils.itemmanager")
+local DanNet     = require('lib.dannet.helpers')
+local Logger     = require("utils.logger")
 
-_ClassConfig        = {
+_ClassConfig     = {
     _version              = "1.0 - Project Lazarus",
     _author               = "Derple, Morisato",
     ['ModeChecks']        = {
-        IsTanking = function() return RGMercUtils.IsModeActive("PetTank") end,
+        IsTanking = function() return Core.IsModeActive("PetTank") end,
     },
     ['Modes']             = {
         'Fire',
@@ -17,21 +20,21 @@ _ClassConfig        = {
     },
     ['OnModeChange']      = function(self, mode)
         if mode == "PetTank" then
-            GameUtils.DoCmd("/pet taunt on")
-            GameUtils.DoCmd("/pet resume on")
-            RGMercConfig:GetSettings().AutoAssistAt         = 100
-            RGMercConfig:GetSettings().StayOnTarget         = false
-            RGMercConfig:GetSettings().DoAutoEngage         = true
-            RGMercConfig:GetSettings().DoAutoTarget         = true
-            RGMercConfig:GetSettings().AllowMezBreak        = true
-            RGMercConfig:GetSettings().WaitOnGlobalCooldown = false
+            Core.DoCmd("/pet taunt on")
+            Core.DoCmd("/pet resume on")
+            Config:GetSettings().AutoAssistAt         = 100
+            Config:GetSettings().StayOnTarget         = false
+            Config:GetSettings().DoAutoEngage         = true
+            Config:GetSettings().DoAutoTarget         = true
+            Config:GetSettings().AllowMezBreak        = true
+            Config:GetSettings().WaitOnGlobalCooldown = false
         else
-            GameUtils.DoCmd("/pet taunt off")
-            if RGMercConfig:GetSetting('AutoAssistAt') == 100 then
-                RGMercConfig:GetSettings().AutoAssistAt = 98
+            Core.DoCmd("/pet taunt off")
+            if Config:GetSetting('AutoAssistAt') == 100 then
+                Config:GetSettings().AutoAssistAt = 98
             end
-            RGMercConfig:GetSettings().WaitOnGlobalCooldown = false
-            RGMercConfig:GetSettings().StayOnTarget = true
+            Config:GetSettings().WaitOnGlobalCooldown = false
+            Config:GetSettings().StayOnTarget = true
         end
     end,
     ['ItemSets']          = {
@@ -864,7 +867,7 @@ _ClassConfig        = {
             name = 'PetSummon',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoPetCheck() and (mq.TLO.Me.Pet.ID() == 0 or RGMercConfig:GetSetting('DoPocketPet'))
+                return combat_state == "Downtime" and Casting.DoPetCheck() and (mq.TLO.Me.Pet.ID() == 0 or Config:GetSetting('DoPocketPet'))
             end,
         },
         {
@@ -872,13 +875,13 @@ _ClassConfig        = {
             state = 1,
             steps = 1,
             targetId = function(self) return { mq.TLO.Me.Pet.ID(), } end,
-            cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 and (mq.TLO.Me.Pet.PctHPs() or 100) < RGMercConfig:GetSetting('PetHealPct') end,
+            cond = function(self, _) return mq.TLO.Me.Pet.ID() > 0 and (mq.TLO.Me.Pet.PctHPs() or 100) < Config:GetSetting('PetHealPct') end,
         },
         {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                return combat_state == "Downtime" and Casting.DoBuffCheck() and Casting.AmIBuffable()
             end,
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this. Timer lowered for mage due to high volume of actions
@@ -886,35 +889,35 @@ _ClassConfig        = {
             timer = 30,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.DoPetCheck()
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.DoPetCheck()
             end,
         },
         {
             name = 'GroupBuff',
             timer = 60, -- only run every 60 seconds top.
             targetId = function(self)
-                return RGMercUtils.GetBuffableGroupIDs()
+                return Casting.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
+                return combat_state == "Downtime" and Casting.DoBuffCheck()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.Feigning()
             end,
         },
         {
             name = 'Debuff',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
         {
@@ -923,34 +926,34 @@ _ClassConfig        = {
             steps = 1,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
         {
             name = 'DPS PET',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning() and RGMercUtils.IsModeActive("PetTank")
+                return combat_state == "Combat" and not Casting.Feigning() and Core.IsModeActive("PetTank")
             end,
         },
         {
             name = 'Weaves',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.SpellInCooldown() and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and mq.TLO.Me.SpellInCooldown() and not Casting.Feigning()
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
         {
@@ -967,11 +970,11 @@ _ClassConfig        = {
                 return groupIds
             end,
             cond = function(self, combat_state)
-                if not RGMercConfig:GetSetting('SummonModRods') then return false end
-                local downtime = combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
-                local pct = RGMercConfig:GetSetting('GroupManaPct')
-                local combat = combat_state == "Combat" and RGMercConfig:GetSetting('CombatModRod') and (mq.TLO.Group.LowMana(pct)() or -1) >= RGMercConfig:GetSetting('GroupManaCt') and
-                    not RGMercUtils.Feigning()
+                if not Config:GetSetting('SummonModRods') then return false end
+                local downtime = combat_state == "Downtime" and Casting.DoBuffCheck()
+                local pct = Config:GetSetting('GroupManaPct')
+                local combat = combat_state == "Combat" and Config:GetSetting('CombatModRod') and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt') and
+                    not Casting.Feigning()
                 return downtime or combat
             end,
         },
@@ -981,29 +984,29 @@ _ClassConfig        = {
         user_tu_spell = function(self, aaName)
             local shroudSpell = self.ResolvedActionMap['ShroudSpell']
             local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
-            if not shroudSpell or not shroudSpell() or not aaSpell or not aaSpell() or not RGMercUtils.CanUseAA(aaName) then return false end
+            if not shroudSpell or not shroudSpell() or not aaSpell or not aaSpell() or not Casting.CanUseAA(aaName) then return false end
             -- do we need to lookup the spell basename here? I dont think so but if this doesn't fire right take a look.
             if shroudSpell.Level() > aaSpell.Level() then return false end
             return true
         end,
         give_pet_toys = function(self, petId)
-            if RGMercConfig:GetSetting('DoPetWeapons') then
+            if Config:GetSetting('DoPetWeapons') then
                 self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Weapon", petId)
             end
-            if RGMercConfig:GetSetting('DoPetArmor') then
+            if Config:GetSetting('DoPetArmor') then
                 self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Armor", petId)
             end
-            if RGMercConfig:GetSetting('DoPetHeirlooms') then
+            if Config:GetSetting('DoPetHeirlooms') then
                 self.ClassConfig.HelperFunctions.summon_pet_toy(self, "Heirlooms", petId)
             end
         end,
         handle_pet_toys = function(self)
             if mq.TLO.Me.FreeInventory() < 2 or mq.TLO.Me.Level() < 73 then
-                RGMercsLogger.log_debug("handle_pet_toys() ==> \arFailed your level is below 73 or you dont have inv slots open!")
+                Logger.log_debug("handle_pet_toys() ==> \arFailed your level is below 73 or you dont have inv slots open!")
                 return false
             end
             if (mq.TLO.Me.Pet.Equipment("Primary")() or 0) ~= 0 then
-                RGMercsLogger.log_verbose("handle_pet_toys() ==> \arFailed your pet already has weapons!")
+                Logger.log_verbose("handle_pet_toys() ==> \arFailed your pet already has weapons!")
                 return false
             end
 
@@ -1032,18 +1035,18 @@ _ClassConfig        = {
             local petToyResolvedSpell = self.ResolvedActionMap[string.format("Pet%sSummon", type)]
 
             if not petToyResolvedSpell or not petToyResolvedSpell() then
-                RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \arFailed to resolve Pet%sSummon item type!", type)
+                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed to resolve Pet%sSummon item type!", type)
                 return false
             end
 
             if mq.TLO.Me.Level() < petToyResolvedSpell.Level() then
-                RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \arFailed your level is below the pet toy spell(%s) level: %d!", petToyResolvedSpell.RankName(),
+                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed your level is below the pet toy spell(%s) level: %d!", petToyResolvedSpell.RankName(),
                     petToyResolvedSpell.Level())
                 return false
             end
 
-            if not RGMercUtils.PCSpellReady(petToyResolvedSpell) then
-                RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \arFailed PCSpellReady() Check!", type)
+            if not Casting.SpellReady(petToyResolvedSpell) then
+                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed PCSpellReady() Check!", type)
                 return false
             end
 
@@ -1057,13 +1060,13 @@ _ClassConfig        = {
             end
 
             if openSlot == 0 then
-                RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \arFailed to find open top level inv slot!", openSlot)
+                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed to find open top level inv slot!", openSlot)
                 return
             end
 
-            RGMercsLogger.log_super_verbose("summon_pet_toy() ==> \agUsing PackID=%d", openSlot)
+            Logger.log_super_verbose("summon_pet_toy() ==> \agUsing PackID=%d", openSlot)
 
-            RGMercUtils.UseSpell(petToyResolvedSpell.RankName(), mq.TLO.Me.ID(), RGMercUtils.GetXTHaterCount() == 0)
+            Casting.UseSpell(petToyResolvedSpell.RankName(), mq.TLO.Me.ID(), Targetting.GetXTHaterCount() == 0)
 
             mq.delay("5s", function() return (mq.TLO.Cursor.ID() or 0) > 0 end)
 
@@ -1072,25 +1075,25 @@ _ClassConfig        = {
             local packName = string.format("pack%d", openSlot)
 
             while mq.TLO.Cursor.ID() do
-                GameUtils.DoCmd("/shiftkey /itemnotify %s leftmouseup", packName)
+                Core.DoCmd("/shiftkey /itemnotify %s leftmouseup", packName)
                 mq.delay("1s", function() return mq.TLO.Cursor.ID() == nil end)
             end
 
             -- What happens if the bag is a Folded Pack
             while string.find(mq.TLO.InvSlot(packName).Item.Name(), "Folded Pack") ~= nil do
-                GameUtils.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
+                Core.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
                 -- Folded backs end up on our cursor.
                 mq.delay("5s", function() return (mq.TLO.Cursor.ID() or 0) > 0 end)
                 -- Drop the unfolded pack back in our inventory
                 while mq.TLO.Cursor.ID() do
-                    GameUtils.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
+                    Core.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
                     mq.delay("1s", function() return mq.TLO.Cursor.ID() == nil end)
                 end
             end
 
             -- Hand Toy off to the Pet
             -- Open our pack
-            GameUtils.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
+            Core.DoCmd("/nomodkey /itemnotify %s rightmouseup", packName)
 
             -- TODO: Need a condition to check if the pack window has opened
             mq.delay("1s")
@@ -1099,14 +1102,14 @@ _ClassConfig        = {
                 -- Loop through each item in our bag and give it to the pet
                 for i = 1, mq.TLO.InvSlot(packName).Item.Container() do
                     if mq.TLO.InvSlot(packName).Item.Item(i).Name() ~= nil then
-                        RGMercUtils.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
+                        ItemMrg.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
                     end
                 end
             else
                 -- Must be a weapon
                 -- Hand Weapons off to the pet
                 local itemsToGive = { 2, 4, }
-                if RGMercUtils.IsModeActive("PetTank") then
+                if Core.IsModeActive("PetTank") then
                     -- If we're pet tanking, give the pet the hate swords in bag slots
                     -- 7 and 8. At higher levels this only ends up with one aggro swords
                     -- so perhaps there's a way of generalizing later.
@@ -1114,79 +1117,79 @@ _ClassConfig        = {
                 end
 
                 for _, i in ipairs(itemsToGive) do
-                    RGMercsLogger.log_debug("Item Name %s", mq.TLO.InvSlot(packName).Item.Item(i).Name())
-                    RGMercUtils.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
+                    Logger.log_debug("Item Name %s", mq.TLO.InvSlot(packName).Item.Item(i).Name())
+                    ItemMrg.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
                 end
             end
 
             -- Delete the satchel if it's still there
             if mq.TLO.InvSlot(packName).Item.ID() ~= nil then
-                GameUtils.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
+                Core.DoCmd("/nomodkey /itemnotify %s leftmouseup", packName)
                 mq.delay("5s", function() return mq.TLO.Cursor.ID() ~= nil end)
 
                 -- Just double check and make sure it's a temporary
                 if mq.TLO.Cursor.ID() and mq.TLO.Cursor.NoRent() then
-                    GameUtils.DoCmd("/destroy")
+                    Core.DoCmd("/destroy")
                     mq.delay(30, function() return mq.TLO.Cursor.ID() == nil end)
                 end
             end
         end,
         summon_pet = function(self)
-            local petSpellVar = string.format("%sPetSpell", self.ClassConfig.DefaultConfig.PetType.ComboOptions[RGMercConfig:GetSetting('PetType')])
+            local petSpellVar = string.format("%sPetSpell", self.ClassConfig.DefaultConfig.PetType.ComboOptions[Config:GetSetting('PetType')])
             local resolvedPetSpell = self.ResolvedActionMap[petSpellVar]
 
             if not resolvedPetSpell then
-                RGMercsLogger.log_debug("No valid pet spell found for type: %s", petSpellVar)
+                Logger.log_debug("No valid pet spell found for type: %s", petSpellVar)
                 return false
             end
 
             if mq.TLO.FindItemCount("Malachite")() > 0 then
-                return RGMercUtils.UseSpell(resolvedPetSpell.RankName(), mq.TLO.Me.ID(), self.CombatState == "Downtime")
+                return Casting.UseSpell(resolvedPetSpell.RankName(), mq.TLO.Me.ID(), self.CombatState == "Downtime")
             else
-                RGMercsLogger.log_error("\ayYou don't have \agMalachite\ay. And you call yourself a mage?")
-                --RGMercConfig:GetSettings().DoPet = false
+                Logger.log_error("\ayYou don't have \agMalachite\ay. And you call yourself a mage?")
+                --Config:GetSettings().DoPet = false
                 return false
             end
         end,
         pet_management = function(self)
-            if not RGMercConfig:GetSettings().DoPet or (RGMercUtils.CanUseAA("Companion's Suspension") and not RGMercUtils.AAReady("Companion's Suspension")) then
+            if not Config:GetSettings().DoPet or (Casting.CanUseAA("Companion's Suspension") and not Casting.AAReady("Companion's Suspension")) then
                 return false
             end
 
             -- Low Level Check - In 2 cases You're too lowlevel to Know Suspend companion and have no pet or You've Turned off Usepocket pet.
-            if mq.TLO.Me.Pet.ID() == 0 and (not RGMercUtils.CanUseAA("Companion's Suspension") or not RGMercConfig:GetSetting('DoPocketPet')) then
+            if mq.TLO.Me.Pet.ID() == 0 and (not Casting.CanUseAA("Companion's Suspension") or not Config:GetSetting('DoPocketPet')) then
                 if not self.ClassConfig.HelperFunctions.summon_pet(self) then
-                    RGMercsLogger.log_debug("\arPetManagement - Case 0 -> Summon Failed")
+                    Logger.log_debug("\arPetManagement - Case 0 -> Summon Failed")
                     return false
                 end
             end
 
             -- Pocket Pet Stuff Begins. -  Added Check for DoPocketPet to be Positive Rather than Assuming
-            if RGMercConfig:GetSetting('DoPocketPet') then
-                if self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetXTHaterCount() > 0 then
-                    RGMercUtils.UseAA("Companion's Suspension", 0)
+            if Config:GetSetting('DoPocketPet') then
+                if self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and Targetting.GetXTHaterCount() > 0 then
+                    Casting.UseAA("Companion's Suspension", 0)
                     self.TempSettings.PocketPet = false
                     return true
                 end
 
                 -- Case 1 - No pocket pet and no pet up
-                if not self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetXTHaterCount() == 0 then
-                    RGMercsLogger.log_debug("\ayPetManagement - Case 1 no Pocket Pet and no Pet")
+                if not self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and Targetting.GetXTHaterCount() == 0 then
+                    Logger.log_debug("\ayPetManagement - Case 1 no Pocket Pet and no Pet")
                     if not self.ClassConfig.HelperFunctions.summon_pet(self) then
-                        RGMercsLogger.log_debug("\arPetManagement - Case 1 -> Summon Failed")
+                        Logger.log_debug("\arPetManagement - Case 1 -> Summon Failed")
                         return false
                     end
 
-                    if RGMercUtils.AARank("Companion's Suspension") > 2 then
+                    if Casting.AARank("Companion's Suspension") > 2 then
                         -- Need to buff
                         local resolvedPetHasteSpell = self.ResolvedActionMap["PetHaste"]
-                        RGMercUtils.UseSpell(resolvedPetHasteSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
+                        Casting.UseSpell(resolvedPetHasteSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
                         local resolvedPetBuffSpell = self.ResolvedActionMap["PetIceFlame"]
-                        RGMercUtils.UseSpell(resolvedPetBuffSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
+                        Casting.UseSpell(resolvedPetBuffSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
                         if mq.TLO.Me.Pet.ID() then
                             self.ClassConfig.HelperFunctions.handle_pet_toys(self)
                         end
-                        RGMercUtils.UseAA("Companion's Suspension", 0)
+                        Casting.UseAA("Companion's Suspension", 0)
                         self.TempSettings.PocketPet = true
                     end
 
@@ -1194,12 +1197,12 @@ _ClassConfig        = {
                 end
             end
             -- Case 2 - No pocket pet and pet up
-            if not self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) > 0 and RGMercUtils.GetXTHaterCount() == 0 then
-                RGMercsLogger.log_debug("\ayPetManagement - Case 2 no Pocket Pet But Pet is up - pocketing")
-                RGMercUtils.UseAA("Companion's Suspension", 0)
+            if not self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) > 0 and Targetting.GetXTHaterCount() == 0 then
+                Logger.log_debug("\ayPetManagement - Case 2 no Pocket Pet But Pet is up - pocketing")
+                Casting.UseAA("Companion's Suspension", 0)
                 if (mq.TLO.Me.Pet.ID() or 0) == 0 then
                     if not self.ClassConfig.HelperFunctions.summon_pet(self) then
-                        RGMercsLogger.log_debug("\arPetManagement - Case 2 -> Summon Failed")
+                        Logger.log_debug("\arPetManagement - Case 2 -> Summon Failed")
                         return false
                     end
                 end
@@ -1209,10 +1212,10 @@ _ClassConfig        = {
             end
 
             -- Case 3 - Pocket Pet and no pet up
-            if self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) == 0 and RGMercUtils.GetXTHaterCount() == 0 then
-                RGMercsLogger.log_debug("\ayPetManagement - Case 3 Pocket Pet But No Pet is up")
+            if self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) == 0 and Targetting.GetXTHaterCount() == 0 then
+                Logger.log_debug("\ayPetManagement - Case 3 Pocket Pet But No Pet is up")
                 if not self.ClassConfig.HelperFunctions.summon_pet(self) then
-                    RGMercsLogger.log_debug("\arPetManagement - Case 3 -> Summon Failed")
+                    Logger.log_debug("\arPetManagement - Case 3 -> Summon Failed")
                     return false
                 end
 
@@ -1228,23 +1231,23 @@ _ClassConfig        = {
             mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Spell(itemSource).RankName.Base(1)() end)
 
             if not mq.TLO.Cursor() then
-                RGMercsLogger.log_debug("No valid item found on cursor, item handling aborted.")
+                Logger.log_debug("No valid item found on cursor, item handling aborted.")
                 return false
             end
 
-            RGMercsLogger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
+            Logger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
 
             if scope == "group" then
-                local delay = RGMercConfig:GetSetting('AIGroupDelay')
-                CommUtils.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
+                local delay = Config:GetSetting('AIGroupDelay')
+                Comms.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
                 mq.delay(delay)
-                RGMercUtils.DoGroupCmd("/autoinventory")
+                Core.DoGroupCmd("/autoinventory")
             elseif scope == "personal" then
-                local delay = RGMercConfig:GetSetting('AISelfDelay')
+                local delay = Config:GetSetting('AISelfDelay')
                 mq.delay(delay)
-                GameUtils.DoCmd("/autoinventory")
+                Core.DoCmd("/autoinventory")
             else
-                RGMercsLogger.log_debug("Invalid scope sent: (%s). Item handling aborted.", scope)
+                Logger.log_debug("Invalid scope sent: (%s). Item handling aborted.", scope)
                 return false
             end
         end,
@@ -1259,7 +1262,7 @@ _ClassConfig        = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return mq.TLO.Me.Pet.ID() == 0 and RGMercConfig:GetSetting('DoPet')
+                    return mq.TLO.Me.Pet.ID() == 0 and Config:GetSetting('DoPet')
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.summon_pet(self) end,
             },
@@ -1271,7 +1274,7 @@ _ClassConfig        = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return not self.TempSettings.PocketPet and RGMercConfig:GetSetting('DoPocketPet')
+                    return not self.TempSettings.PocketPet and Config:GetSetting('DoPocketPet')
                 end,
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
             },
@@ -1280,7 +1283,7 @@ _ClassConfig        = {
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell) return Casting.SpellReady(spell) end,
             },
         },
         ['PetBuff'] = {
@@ -1298,7 +1301,7 @@ _ClassConfig        = {
                     return mq.TLO.Me.PetBuff(spell.RankName.Name())() ~= nil or mq.TLO.Me.PetBuff(spell.Name())() ~= nil
                 end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell)
+                    return Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1308,7 +1311,7 @@ _ClassConfig        = {
                     return mq.TLO.Me.PetBuff(spell.RankName.Name())() ~= nil or mq.TLO.Me.PetBuff(spell.Name())() ~= nil
                 end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell)
+                    return Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
@@ -1316,7 +1319,7 @@ _ClassConfig        = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not spell or not spell() then return false end
-                    return not mq.TLO.Me.Buff(spell.Name() .. " Recourse")() and RGMercUtils.SpellStacksOnMe(spell)
+                    return not mq.TLO.Me.Buff(spell.Name() .. " Recourse")() and Casting.SpellStacksOnMe(spell)
                 end,
             },
             {
@@ -1331,28 +1334,28 @@ _ClassConfig        = {
                 name = "Second Wind Ward",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and RGMercUtils.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Host in the Shell",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and RGMercUtils.IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Aegis",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and RGMercUtils.IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Intervening Divine Aura",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and RGMercUtils.IsModeActive("PetTank") and RGMercUtils.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
                 end,
             },
         },
@@ -1365,12 +1368,12 @@ _ClassConfig        = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return self.TempSettings.PocketPet and RGMercConfig:GetSetting('DoPocketPet') and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.GetXTHaterCount() > 0
+                    return self.TempSettings.PocketPet and Config:GetSetting('DoPocketPet') and mq.TLO.Me.Pet.ID() == 0 and Targetting.GetXTHaterCount() > 0
                 end,
                 custom_func = function(self)
-                    RGMercsLogger.log_info("\atPocketPet: \arNo pet while in combat! \agPulling out pocket pet")
-                    RGMercUtils.SetTarget(mq.TLO.Me.ID())
-                    RGMercUtils.UseAA("Companion's Suspension", mq.TLO.Me.ID())
+                    Logger.log_info("\atPocketPet: \arNo pet while in combat! \agPulling out pocket pet")
+                    Targetting.SetTarget(mq.TLO.Me.ID())
+                    Casting.UseAA("Companion's Suspension", mq.TLO.Me.ID())
                     self.TempSettings.PocketPet = false
 
                     return true
@@ -1391,7 +1394,7 @@ _ClassConfig        = {
                     local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
                     if mq.TLO.FindItemCount(baseItem)() >= 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
-                        return RGMercUtils.UseItem(invItem.Name(), RGMercConfig.Globals.AutoTargetID)
+                        return Casting.UseItem(invItem.Name(), Config.Globals.AutoTargetID)
                     end
 
                     return false
@@ -1410,7 +1413,7 @@ _ClassConfig        = {
                     local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
                     if mq.TLO.FindItemCount(baseItem)() >= 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
-                        return RGMercUtils.UseItem(invItem.Name(), RGMercConfig.Globals.AutoTargetID)
+                        return Casting.UseItem(invItem.Name(), Config.Globals.AutoTargetID)
                     end
 
                     return false
@@ -1425,51 +1428,51 @@ _ClassConfig        = {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercConfig:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
                 name = "AllianceBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuff(spell) and
-                        RGMercConfig:GetSetting('DoAlliance') and RGMercUtils.CanAlliance()
+                    return Targetting.IsNamed(mq.TLO.Target) and not Casting.TargetHasBuff(spell) and
+                        Config:GetSetting('DoAlliance') and Casting.CanAlliance()
                 end,
             },
             {
                 name = "Companion's Fury",
                 type = "AA",
-                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Host of the Elements",
                 type = "AA",
-                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Spire of Elements",
                 type = "AA",
-                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Heart of Skyfire",
                 type = "AA",
-                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Improved Twincast",
                 type = "AA",
-                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Servant of Ro",
                 type = "AA",
-                cond = function(self, aaName) return RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
         },
         ['DPS PET'] = {
@@ -1477,12 +1480,12 @@ _ClassConfig        = {
                 name = "OowRobeName",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    if not RGMercUtils.IsModeActive("PetTank") then return end
+                    if not Core.IsModeActive("PetTank") then return end
                     local oowItems = { 'Glyphwielder\'s Tunic of the Summoner', 'Runemaster\'s Robe', }
                     for _, item in ipairs(oowItems) do
                         if mq.TLO.FindItemCount(item)() == 1 then
                             self.TempSettings.OowRobeBase = item
-                            return RGMercUtils.UseItem(item, mq.TLO.Me.ID())
+                            return Casting.UseItem(item, mq.TLO.Me.ID())
                         end
                     end
 
@@ -1493,8 +1496,8 @@ _ClassConfig        = {
                 name = "PetStanceSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("PetTank") and self.TempSettings.OowRobeBase ~= nil and RGMercUtils.IsModeActive("PetTank") and
-                        RGMercUtils.SelfBuffPetCheck(spell) and mq.TLO.Me.Pet.PctHPs() <= 95 and
+                    return Core.IsModeActive("PetTank") and self.TempSettings.OowRobeBase ~= nil and Core.IsModeActive("PetTank") and
+                        Casting.SelfBuffPetCheck(spell) and mq.TLO.Me.Pet.PctHPs() <= 95 and
                         (mq.TLO.Me.PetBuff(mq.TLO.Spell(self.TempSettings.OowRobeBase).RankName.Base(1)() or "").ID()) or 0 == 0
                 end,
             },
@@ -1502,28 +1505,28 @@ _ClassConfig        = {
                 name = "SurgeDS1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("PetTank") and not RGMercUtils.SelfBuffPetCheck(spell) and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['SurgeDS1'] or "")() == nil)
+                    return Core.IsModeActive("PetTank") and not Casting.SelfBuffPetCheck(spell) and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['SurgeDS1'] or "")() == nil)
                 end,
             },
             {
                 name = "SurgeDS2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("PetTank") and RGMercUtils.SelfBuffPetCheck(spell) and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['SurgeDS2'] or "")() == nil)
+                    return Core.IsModeActive("PetTank") and Casting.SelfBuffPetCheck(spell) and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['SurgeDS2'] or "")() == nil)
                 end,
             },
             {
                 name = "ShortDurDmgShield",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("PetTank") and RGMercUtils.SelfBuffPetCheck(spell)
+                    return Core.IsModeActive("PetTank") and Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "FireShroud",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("PetTank") and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['PetPromisedSpell'] or "").ID() or 0)
+                    return Core.IsModeActive("PetTank") and (mq.TLO.Me.PetBuff(self.ResolvedActionMap['PetPromisedSpell'] or "").ID() or 0)
                 end,
             },
         },
@@ -1532,7 +1535,7 @@ _ClassConfig        = {
                 name = "Force of Elements",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
@@ -1543,7 +1546,7 @@ _ClassConfig        = {
                     local baseItem = self.ResolvedActionMap['FireOrbSummon'].RankName.Base(1)() or "None"
                     if mq.TLO.FindItemCount(baseItem)() == 1 then
                         local invItem = mq.TLO.FindItem(baseItem)
-                        return RGMercUtils.UseItem(invItem.Name(), RGMercConfig.Globals.AutoTargetID)
+                        return Casting.UseItem(invItem.Name(), Config.Globals.AutoTargetID)
                     end
                     return false
                 end,
@@ -1552,7 +1555,7 @@ _ClassConfig        = {
                 name = "Dagger of Evil Summons",
                 type = "Item",
                 cond = function(self, itemName)
-                    if not RGMercConfig:GetSetting('DoEvilDagger') then return false end
+                    if not Config:GetSetting('DoEvilDagger') then return false end
                     return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
                 end,
             },
@@ -1562,7 +1565,7 @@ _ClassConfig        = {
                 name = "SelfModRod",
                 type = "Item",
                 cond = function(self)
-                    return mq.TLO.FindItemCount(RGMercConfig:GetSetting('SelfModRod'))() == 0 and mq.TLO.Me.PctMana() < RGMercConfig:GetSetting('ModRodManaPct') and
+                    return mq.TLO.FindItemCount(Config:GetSetting('SelfModRod'))() == 0 and mq.TLO.Me.PctMana() < Config:GetSetting('ModRodManaPct') and
                         mq.TLO.Me.PctHPs() >= 60
                 end,
             },
@@ -1570,73 +1573,73 @@ _ClassConfig        = {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("Fire")
+                    return Core.IsModeActive("Fire")
                 end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
                 cond = function(self, _)
-                    return RGMercUtils.IsModeActive("Fire")
+                    return Core.IsModeActive("Fire")
                 end,
             },
             {
                 name = "SpearNuke1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("Fire")
+                    return Core.IsModeActive("Fire")
                 end,
             },
             {
                 name = "VolleyNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.IsModeActive("Fire")
+                    return Core.IsModeActive("Fire")
                 end,
             },
             {
                 name = "FireNuke1",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") end,
             },
             {
                 name = "FireNuke2",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") end,
             },
             {
                 name = "FireBoltNuke",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or RGMercUtils.IsModeActive("PetTank") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") end,
             },
             {
                 name = "MagicNuke1",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 and RGMercUtils.IsModeActive("Fire") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 and Core.IsModeActive("Fire") end,
             },
             {
                 name = "MagicNuke2",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 and RGMercUtils.IsModeActive("Fire") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 and Core.IsModeActive("Fire") end,
             },
             {
                 name = "Turned Summoned",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Target.ID() > 0 and mq.TLO.Target.Body.Name():lower() == "undead pet" and RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Target.ID() > 0 and mq.TLO.Target.Body.Name():lower() == "undead pet" and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "TwinCast",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.SelfBuffCheck(spell) and not RGMercUtils.BuffActiveByName("Improved Twincast") end,
+                cond = function(self, spell) return Casting.SelfBuffCheck(spell) and not Casting.BuffActiveByName("Improved Twincast") end,
             },
             --   {
             --       name = "AllianceBuff",
             --       type = "Spell",
             --      cond = function(self, spell)
-            --           return RGMercUtils.IsNamed(mq.TLO.Target) and not RGMercUtils.TargetHasBuff(spell) and
-            --               RGMercConfig:GetSetting('DoAlliance') and RGMercUtils.CanAlliance()
+            --           return Targetting.IsNamed(mq.TLO.Target) and not Casting.TargetHasBuff(spell) and
+            --               Config:GetSetting('DoAlliance') and Casting.CanAlliance()
             --       end,
             --    },
         },
@@ -1645,21 +1648,21 @@ _ClassConfig        = {
                 name = "Malaise",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercConfig:GetSetting('DoMalo') and RGMercUtils.DetAACheck(aaName) and RGMercUtils.AAReady(aaName)
+                    return Config:GetSetting('DoMalo') and Casting.DetAACheck(aaName) and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "MaloDebuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercConfig:GetSetting('DoMalo') and RGMercUtils.DetSpellCheck(spell)
+                    return Config:GetSetting('DoMalo') and Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "Malaise",
                 type = "Wind of Malaise",
                 cond = function(self, aaName)
-                    return RGMercConfig:GetSetting('DoMalo') and RGMercConfig:GetSetting('DoAEMalo') and RGMercUtils.DetAACheck(aaName)
+                    return Config:GetSetting('DoMalo') and Config:GetSetting('DoAEMalo') and Casting.DetAACheck(aaName)
                 end,
             },
         },
@@ -1668,10 +1671,10 @@ _ClassConfig        = {
                 name = "LongDurDmgShield",
                 type = "Spell",
                 active_cond = function(self, spell)
-                    return RGMercUtils.BuffActive(spell)
+                    return Casting.BuffActive(spell)
                 end,
                 cond = function(self, spell, target)
-                    return not RGMercUtils.TargetHasBuff(spell, target) and RGMercUtils.SpellStacksOnTarget(spell)
+                    return not Casting.TargetHasBuff(spell, target) and Casting.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1687,22 +1690,22 @@ _ClassConfig        = {
                 name = "Elemental Conversion",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctMana() <= RGMercConfig:GetSetting('GatherManaPct') and RGMercUtils.AAReady(aaName) and mq.TLO.Me.Pet.ID() > 0
+                    return mq.TLO.Me.PctMana() <= Config:GetSetting('GatherManaPct') and Casting.AAReady(aaName) and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
                 name = "Forceful Rejuvenation",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctMana() <= RGMercConfig:GetSetting('GatherManaPct') and not mq.TLO.Me.SpellReady(self.ResolvedActionMap['GatherMana'] or "")() and
-                        RGMercUtils.AAReady(aaName) and mq.TLO.Me.Pet.ID() > 0
+                    return mq.TLO.Me.PctMana() <= Config:GetSetting('GatherManaPct') and not mq.TLO.Me.SpellReady(self.ResolvedActionMap['GatherMana'] or "")() and
+                        Casting.AAReady(aaName) and mq.TLO.Me.Pet.ID() > 0
                 end,
             },
             {
                 name = "GatherMana",
                 type = "Spell",
                 cond = function(self, spell)
-                    return spell and spell() and mq.TLO.Me.PctMana() <= RGMercConfig:GetSetting('GatherManaPct') and RGMercUtils.PCSpellReady(spell) and
+                    return spell and spell() and mq.TLO.Me.PctMana() <= Config:GetSetting('GatherManaPct') and Casting.SpellReady(spell) and
                         mq.TLO.Me.SpellReady(spell.Name() or "")
                 end,
             },
@@ -1710,31 +1713,31 @@ _ClassConfig        = {
                 name = "ManaRegenBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "SelfShield",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Thaumaturge's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.AAReady(aaName)
+                    return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "PetAura",
                 type = "Spell",
                 active_cond = function(self, spell)
-                    return RGMercUtils.AuraActiveByName(spell.BaseName()) ~= nil
+                    return Casting.AuraActiveByName(spell.BaseName()) ~= nil
                 end,
                 cond = function(self, spell)
-                    return not RGMercUtils.AuraActiveByName(spell.BaseName())
+                    return not Casting.AuraActiveByName(spell.BaseName())
                 end,
             },
             {
@@ -1745,7 +1748,7 @@ _ClassConfig        = {
                 end,
                 post_activate = function(self, spell, success)
                     if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
                     end
                 end,
             },
@@ -1757,7 +1760,7 @@ _ClassConfig        = {
                 end,
                 post_activate = function(self, spell, success)
                     if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
                     end
                 end,
             },
@@ -1769,7 +1772,7 @@ _ClassConfig        = {
                 end,
                 post_activate = function(self, spell, success)
                     if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
                     end
                 end,
             },
@@ -1777,7 +1780,7 @@ _ClassConfig        = {
                 name = "Elemental Form",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.AAReady(aaName)
+                    return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName)
                 end,
             },
         },
@@ -1786,14 +1789,14 @@ _ClassConfig        = {
                 name = "Summon Modulation Shard",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not RGMercConfig:GetSetting('SummonModRods') or not RGMercUtils.CanUseAA(aaName) then return false end
+                    if not Config:GetSetting('SummonModRods') or not Casting.CanUseAA(aaName) then return false end
                     local modRodItem = mq.TLO.Spell(aaName).RankName.Base(1)()
-                    return modRodItem and RGMercUtils.AAReady(aaName) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
+                    return modRodItem and Casting.AAReady(aaName) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
                         (mq.TLO.Cursor.ID() or 0) == 0
                 end,
                 post_activate = function(self, aaName, success)
                     if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, aaName, "group")
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, aaName, "group")
                     end
                 end,
             },
@@ -1801,14 +1804,14 @@ _ClassConfig        = {
                 name = "ManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if RGMercUtils.CanUseAA("Summon Modulation Shard") or not RGMercConfig:GetSetting('SummonModRods') then return false end
+                    if Casting.CanUseAA("Summon Modulation Shard") or not Config:GetSetting('SummonModRods') then return false end
                     local modRodItem = spell.RankName.Base(1)()
-                    return modRodItem and RGMercUtils.PCSpellReady(spell) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
+                    return modRodItem and Casting.SpellReady(spell) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
                         (mq.TLO.Cursor.ID() or 0) == 0
                 end,
                 post_activate = function(self, spell, success)
                     if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "group")
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "group")
                     end
                 end,
             },
@@ -1818,11 +1821,11 @@ _ClassConfig        = {
                 cond = function(self, spell, target, combat_state)
                     if target.ID() ~= mq.TLO.Me.ID() then return false end
                     return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0 and (mq.TLO.Cursor.ID() or 0) == 0 and
-                        not (combat_state == "Combat" and mq.TLO.Me.PctMana() > RGMercConfig:GetSetting('GroupManaPct'))
+                        not (combat_state == "Combat" and mq.TLO.Me.PctMana() > Config:GetSetting('GroupManaPct'))
                 end,
                 post_activate = function(self, spell, success)
                     if success then
-                        RGMercUtils.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
                     end
                 end,
             },
@@ -1871,7 +1874,7 @@ _ClassConfig        = {
                 {
                     name = "FireOrbSummon",
                     cond = function(self)
-                        return mq.TLO.Me.Level() >= 75 and ((mq.TLO.Me.AltAbility("Malaise").ID() or 0) > 0 or not RGMercConfig:GetSetting('DoMalo'))
+                        return mq.TLO.Me.Level() >= 75 and ((mq.TLO.Me.AltAbility("Malaise").ID() or 0) > 0 or not Config:GetSetting('DoMalo'))
                     end,
                 },
                 { name = "MaloDebuff", cond = function(self) return true end, },
@@ -1884,7 +1887,7 @@ _ClassConfig        = {
                 {
                     name = "AllianceBuff",
                     cond = function(self)
-                        return RGMercConfig:GetSetting('DoAlliance')
+                        return Config:GetSetting('DoAlliance')
                     end,
                 },
                 { name = "SelfManaRodSummon", },
