@@ -769,7 +769,7 @@ function Module:Render()
 
         if mq.TLO.Target() and Targetting.TargetIsType("NPC") then
             ImGui.SameLine()
-            if ImGui.Button("Pull Target " .. RGMercIcons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
+            if ImGui.Button("Pull Target " .. Icons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
                 self:SetPullTarget()
             end
         end
