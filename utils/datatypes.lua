@@ -4,8 +4,8 @@ local Config            = require('utils.config')
 local mq                = require 'mq'
 
 ---@class RGMercsModuleType
----@field name string
-
+---@field Name string
+---@field State string
 ---@type DataType
 local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
     Members = {
@@ -27,8 +27,8 @@ local rgMercsModuleType = mq.DataType.new('RGMercsModule', {
 })
 
 ---@class RGMercsMainType
----@field name string
-
+---@field State string
+---@field Paused boolean
 ---@type DataType
 local rgMercsMainType   = mq.DataType.new('RGMercsMain', {
     Members = {
