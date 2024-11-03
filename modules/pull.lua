@@ -1410,8 +1410,8 @@ function Module:GetPullableSpawns()
         end
 
         if not canPath or navDist > maxPathRange then
-            Logger.log_debug("\atPULL::FindTarget \aoPath check failed for spawn %s (%d) - dist(%d) canPath(%s)", spawn.CleanName(), spawn.ID(), navDist,
-                Strings.BoolToColorString(canPath))
+            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
+                spawn.ID(), navDist, Strings.BoolToColorString(canPath))
             return false
         end
 
