@@ -1653,7 +1653,7 @@ local _ClassConfig = {
                 {
                     name = "PoisonNuke",
                     cond = function(self)
-                        return mq.TLO.Me.Level() > 33 and mq.TLO.Me.Level < 73 and not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS'))
+                        return mq.TLO.Me.Level() > 33 and mq.TLO.Me.Level() < 73 and not (RGMercUtils.IsModeActive("Heal") and not RGMercUtils.GetSetting('DoHealDPS'))
                     end,
                 }, -- 34-72
                 {
