@@ -601,10 +601,10 @@ return {
 
 
                     for _, port in ipairs(evacSpells) do
-                        if me.Class.Name() == 'Wizard' and me.Level >= 57 and port == 'Evacuate' then
+                        if me.Class.Name() == 'Wizard' and me.Level()>= 57 and port == 'Evacuate' then
                             portName = port
                             break
-                        elseif me.Class.Name() == 'Wizard' and me.Level >= 18 and port == 'Lesser Evacuate' then
+                        elseif me.Class.Name() == 'Wizard' and me.Level() >= 18 and port == 'Lesser Evacuate' then
                             portName = port
                             break
                         end
