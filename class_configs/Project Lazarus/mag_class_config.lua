@@ -1,14 +1,14 @@
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Core       = require("utils.core")
-local Targetting = require("utils.targetting")
-local Casting    = require("utils.casting")
-local Comms      = require("utils.comms")
-local ItemMrg    = require("utils.itemmanager")
-local DanNet     = require('lib.dannet.helpers')
-local Logger     = require("utils.logger")
+local mq          = require('mq')
+local Config      = require('utils.config')
+local Core        = require("utils.core")
+local Targetting  = require("utils.targetting")
+local Casting     = require("utils.casting")
+local Comms       = require("utils.comms")
+local ItemManager = require("utils.itemmanager")
+local DanNet      = require('lib.dannet.helpers')
+local Logger      = require("utils.logger")
 
-_ClassConfig     = {
+_ClassConfig      = {
     _version              = "1.0 - Project Lazarus",
     _author               = "Derple, Morisato",
     ['ModeChecks']        = {
@@ -1102,7 +1102,7 @@ _ClassConfig     = {
                 -- Loop through each item in our bag and give it to the pet
                 for i = 1, mq.TLO.InvSlot(packName).Item.Container() do
                     if mq.TLO.InvSlot(packName).Item.Item(i).Name() ~= nil then
-                        ItemMrg.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
+                        ItemManager.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
                     end
                 end
             else
@@ -1118,7 +1118,7 @@ _ClassConfig     = {
 
                 for _, i in ipairs(itemsToGive) do
                     Logger.log_debug("Item Name %s", mq.TLO.InvSlot(packName).Item.Item(i).Name())
-                    ItemMrg.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
+                    ItemManager.GiveTo(targetId, mq.TLO.InvSlot(packName).Item.Item(i).Name(), 1)
                 end
             end
 
