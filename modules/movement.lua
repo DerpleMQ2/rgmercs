@@ -285,16 +285,6 @@ function Module:LoadSettings()
 
     -- Setup Defaults
     self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
-    if Config.Globals.BuildType == 'Emu' then
-        self.DefaultConfig['DoFellow'] = {
-            DisplayName = "Enable Fellowship Insignia",
-            Category = "Fellowship",
-            Tooltip = "Use fellowship insignia automatically.",
-            Default = false,
-            ConfigType =
-            "Advanced",
-        }
-    end
     if settingsChanged then
         self:SaveSettings(false)
     end
