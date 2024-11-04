@@ -1335,7 +1335,7 @@ function Module:GetPullableSpawns()
             end
         end
 
-        if spawn.FeetWet() and not RGMercConfig:GetSetting('PullMobsInWater') then
+        if spawn.FeetWet() and not RGMercUtils.GetSetting('PullMobsInWater') then
             RGMercsLogger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water water", spawn.CleanName(), spawn.ID())
             return false
         end
