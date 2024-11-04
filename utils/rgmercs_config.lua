@@ -486,7 +486,7 @@ Config.DefaultConfig = {
         Category = "Pet/Merc",
         Index = 5,
         Tooltip = "Allow RGMercs to issue mercenary commands.",
-        Default = true,
+        Default = (Config.Globals.BuildType ~= 'Emu'),
         ConfigType = "Normal",
         FAQ = "How do I use Mercenaries in my group?",
         Answer = "You can set the [DoMercenary] option to true to allow RGMercs to issue mercenary commands.",
