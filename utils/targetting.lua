@@ -3,6 +3,7 @@ local Config                 = require('utils.config')
 local Core                   = require('utils.core')
 local Modules                = require("utils.modules")
 local Logger                 = require("utils.logger")
+local Strings                = require("utils.strings")
 local Set                    = require('mq.set')
 
 local Targetting             = { _version = '1.0', _name = "Targetting", _author = 'Derple', }
@@ -22,15 +23,18 @@ end
 function Targetting.SetTarget(targetId, ignoreBuffPopulation)
     if targetId == 0 then return end
 
+    local maxWaitBuffs = ((mq.TLO.EverQuest.Ping() * 20) + 500)
+
     if targetId == mq.TLO.Target.ID() then return end
-    Logger.log_debug("Setting Target: %d", targetId)
+    Logger.log_debug("SetTarget(): Setting Target: %d (buffPopWait: %d)", targetId, ignoreBuffPopulation and 0 or maxWaitBuffs)
     if Config:GetSetting('DoAutoTarget') then
         if Targetting.GetTargetID() ~= targetId then
             mq.TLO.Spawn(targetId).DoTarget()
             mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
-            mq.delay(500, function() return ignoreBuffPopulation or mq.TLO.Target.BuffsPopulated() end)
+            mq.delay(maxWaitBuffs, function() return ignoreBuffPopulation or mq.TLO.Target.BuffsPopulated() end)
         end
     end
+    Logger.log_debug("SetTarget(): Set Target to: %d (buffsPopulated: %s)", targetId, Strings.BoolToColorString(mq.TLO.Target.BuffsPopulated()))
 end
 
 --- Retrieves the current auto-target.
