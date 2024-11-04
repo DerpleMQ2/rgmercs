@@ -286,7 +286,6 @@ function Module:LoadSettings()
     -- Setup Defaults
     self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
     if Config.Globals.BuildType == 'Emu' then
-        self.DefaultConfig['DoMercenary'] = { DisplayName = "Use Mercenary", Category = "Mercenary", Tooltip = "Use Merc during combat.", Default = false, ConfigType = "Normal", }
         self.DefaultConfig['DoFellow'] = {
             DisplayName = "Enable Fellowship Insignia",
             Category = "Fellowship",
