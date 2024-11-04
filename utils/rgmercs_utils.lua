@@ -227,15 +227,18 @@ end
 function RGMercUtils.SetTarget(targetId, ignoreBuffPopulation)
     if targetId == 0 then return end
 
+    local maxWaitBuffs = ((mq.TLO.EverQuest.Ping() * 20) + 500)
+
     if targetId == mq.TLO.Target.ID() then return end
-    RGMercsLogger.log_debug("Setting Target: %d", targetId)
+    RGMercsLogger.log_debug("SetTarget(): Setting Target: %d (buffPopWait: %d)", targetId, ignoreBuffPopulation and 0 or maxWaitBuffs)
     if RGMercUtils.GetSetting('DoAutoTarget') then
         if RGMercUtils.GetTargetID() ~= targetId then
             mq.TLO.Spawn(targetId).DoTarget()
             mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
-            mq.delay(500, function() return ignoreBuffPopulation or mq.TLO.Target.BuffsPopulated() end)
+            mq.delay(maxWaitBuffs, function() return ignoreBuffPopulation or mq.TLO.Target.BuffsPopulated() end)
         end
     end
+    RGMercsLogger.log_debug("SetTarget(): Set Target to: %d (buffsPopulated: %s)", targetId, RGMercUtils.BoolToColorString(mq.TLO.Target.BuffsPopulated()))
 end
 
 --- Clears the current target.
