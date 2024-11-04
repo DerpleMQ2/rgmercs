@@ -1303,6 +1303,7 @@ function Module:GetPullableSpawns()
     local pullRadiusSqr = pullRadius * pullRadius
 
     local spawnFilter = function(spawn)
+        if not spawn() or spawn.ID() == 0 then return false end
         if not spawn.Targetable() then return false end
         if spawn.Type() ~= "NPC" and spawn.Type() ~= "NPCPET" then
             RGMercsLogger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
