@@ -1,13 +1,12 @@
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Modules    = require("utils.modules")
-local DanNet     = require('lib.dannet.helpers')
-local Logger     = require("utils.logger")
-local PackageMan = require('mq/PackageMan')
-local LuaFS      = PackageMan.Require('luafilesystem', 'lfs')
+local mq      = require('mq')
+local Config  = require('utils.config')
+local Modules = require("utils.modules")
+local DanNet  = require('lib.dannet.helpers')
+local Logger  = require("utils.logger")
+local LuaFS   = require('lfs')
 
-local Core       = { _version = '1.0', _name = "Core", _author = 'Derple', }
-Core.__index     = Core
+local Core    = { _version = '1.0', _name = "Core", _author = 'Derple', }
+Core.__index  = Core
 
 --- Scans for updates in the class_configs folder.
 function Core.ScanConfigDirs()

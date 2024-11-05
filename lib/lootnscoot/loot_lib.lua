@@ -112,8 +112,7 @@ There is also no flag for combat looting. It will only loot if no mobs are withi
 
 local mq           = require 'mq'
 local Logger       = require("utils.logger")
-local PackageMan   = require('mq/PackageMan')
-local SQLite3      = PackageMan.Require('lsqlite3')
+local SQLite3      = require('lsqlite3')
 
 local eqServer     = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 -- Check for looted module, if found use that. else fall back on our copy, which may be outdated.
