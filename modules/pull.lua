@@ -699,24 +699,26 @@ function Module:RenderPullTargets()
         ImGui.TableHeadersRow()
 
         for idx, spawn in ipairs(self.TempSettings.PullTargets) do
-            ImGui.TableNextColumn()
-            ImGui.Text("%d", idx)
-            ImGui.TableNextColumn()
-            ImGui.PushStyleColor(ImGuiCol.Text, Ui.GetConColorBySpawn(spawn))
-            ImGui.PushID(string.format("##select_pull_npc_%d", idx))
-            local _, clicked = ImGui.Selectable(spawn.CleanName() or "Unknown")
-            if clicked then
-                Logger.log_debug("Targetting: %d", spawn.ID() or 0)
-                spawn.DoTarget()
+            if spawn.ID() > 0 then
+                ImGui.TableNextColumn()
+                ImGui.Text("%d", idx)
+                ImGui.TableNextColumn()
+                ImGui.PushStyleColor(ImGuiCol.Text, Ui.GetConColorBySpawn(spawn))
+                ImGui.PushID(string.format("##select_pull_npc_%d", idx))
+                local _, clicked = ImGui.Selectable(spawn.CleanName() or "Unknown")
+                if clicked then
+                    Logger.log_debug("Targetting: %d", spawn.ID() or 0)
+                    spawn.DoTarget()
+                end
+                ImGui.PopID()
+                ImGui.TableNextColumn()
+                ImGui.Text("%d", spawn.Level() or 0)
+                ImGui.PopStyleColor()
+                ImGui.TableNextColumn()
+                ImGui.Text("%0.2f", spawn.Distance() or 0)
+                ImGui.TableNextColumn()
+                Ui.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
             end
-            ImGui.PopID()
-            ImGui.TableNextColumn()
-            ImGui.Text("%d", spawn.Level() or 0)
-            ImGui.PopStyleColor()
-            ImGui.TableNextColumn()
-            ImGui.Text("%0.2f", spawn.Distance())
-            ImGui.TableNextColumn()
-            Ui.NavEnabledLoc(spawn.LocYXZ() or "0,0,0")
         end
 
         ImGui.EndTable()
@@ -875,8 +877,10 @@ function Module:Render()
         ImGui.NewLine()
         ImGui.Separator()
 
-        if ImGui.CollapsingHeader("Pull Targets") then
-            self:RenderPullTargets()
+        if Config:GetSetting('DoPull') then
+            if ImGui.CollapsingHeader("Pull Targets") then
+                self:RenderPullTargets()
+            end
         end
 
         if ImGui.CollapsingHeader("Farm Waypoints") then
