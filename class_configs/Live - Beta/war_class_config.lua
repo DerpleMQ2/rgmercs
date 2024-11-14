@@ -440,7 +440,7 @@ local _ClassConfig = {
                 name = "HealHateSingle",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if RGMercUtils.GetSetting('DoAETaunt') and not RGMercUtils('SafeAETaunt') then return false end
+                    if RGMercUtils.GetSetting('DoAETaunt') and not RGMercUtils.GetSetting('SafeAETaunt') then return false end
                     return RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.BuffActiveByID(discSpell.ID())
                 end,
             },
@@ -807,7 +807,7 @@ local _ClassConfig = {
                 name = "SelfBuffSingle",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if RGMercUtils.GetSetting('DoAETaunt') and not RGMercUtils('SafeAETaunt') then return false end
+                    if RGMercUtils.GetSetting('DoAETaunt') and not RGMercUtils.GetSetting('SafeAETaunt') then return false end
                     return RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell)
                 end,
             },
