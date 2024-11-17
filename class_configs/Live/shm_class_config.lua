@@ -1522,7 +1522,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    if RGMercUtils.GetResolvedActionMapItem('DichoSpell') then return false end --Dicho regen overwrites this
+                    if RGMercUtils.GetResolvedActionMapItem('DichoSpell') or not RGMercUtils.GetSetting('DoGroupRegen') then return false end --Dicho regen overwrites this
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1980,10 +1980,19 @@ local _ClassConfig = {
             FAQ = "How do I stop my Aura from turning everything into a Werewolf?",
             Answer = "You can use /blockspell to safely block the illusion without blocking the buff, instructions on its use are given when typed in-game.",
         },
+        ['DoGroupRegen']      = {
+            DisplayName = "Group Regen Buff",
+            Category = "Buffs",
+            Index = 5,
+            Tooltip = "Use your Group Regen buff.",
+            Default = true,
+            FAQ = "Why am I spamming my Group Regen buff?",
+            Answer = "Certain Shaman and Druid group regen buffs report cross-stacking. You should deselect the option on one of the PCs if they are grouped together.",
+        },
         ['DoHaste']           = {
             DisplayName = "Use Haste",
             Category = "Buffs",
-            Index = 5,
+            Index = 6,
             Tooltip = "Do Haste Spells/AAs",
             Default = true,
             ConfigType = "Advanced",
@@ -2002,7 +2011,7 @@ local _ClassConfig = {
         ['DoVetAA']           = {
             DisplayName = "Do Vet AA",
             Category = "Buffs",
-            Index = 6,
+            Index = 7,
             Tooltip = "Use Veteran AA during burns (See FAQ).",
             Default = true,
             ConfigType = "Advanced",

@@ -1376,6 +1376,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
+                    if not RGMercUtils.GetSetting('DoGroupRegen') then return false end
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1804,6 +1805,14 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why isn't my Temp HP Buff being used?",
             Answer = "You either have [DoTempHP] disabled, or you don't have a Warrior in your group (Other tanks have their own Temp HP Buff).",
+        },
+        ['DoGroupRegen'] = {
+            DisplayName = "Group Regen Buff",
+            Category = "Spells and Abilities",
+            Tooltip = "Use your Group Regen buff.",
+            Default = true,
+            FAQ = "Why am I spamming my Group Regen buff?",
+            Answer = "Certain Shaman and Druid group regen buffs report cross-stacking. You should deselect the option on one of the PCs if they are grouped together.",
         },
     },
 }
