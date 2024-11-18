@@ -757,21 +757,28 @@ local _ClassConfig = {
             "Legacy of Spike",
         },
         ['MoveSpells'] = {
-            -- Group Movement Series Spells -- Mix of group target and single target but will require the same dannet checks
-            "Flight of Falcons",
-            "Flight of Eagles",
+            -- Group Movement Series Spells (Non-Lev) -- Mix of group target and single target but will require the same dannet checks
             -- [] = "Spirit of Scale",
-            "Feral Pack",
-            "Share Form of the Great Wolf",
+            -- "Feral Pack",
+            -- "Share Form of the Great Wolf", <-- This is illusion only
             "Pack Shrew",
             "Pack Spirit",
             "Share Wolf Form",
-            "Spirit of Falcons",
-            "Spirit of Eagle",
             "Spirit of the Shrew",
             -- [] = "Scale of Wolf",
             "Spirit of Wolf",
         },
+        ['MoveWithLevSpells'] = {
+            -- Group Movement Series Spells (With Lev) -- Mix of group target and single target but will require the same dannet checks
+            "Flight of Falcons",
+            "Flight of Eagles",
+            "Spirit of Falcons",
+            "Spirit of Eagle",
+        },
+        ['LevitationSpells'] = {
+			"Levitation",
+            "Levitate",
+        },		
         ['ManaBear'] = {
             -- Updated to 125
             --Druid Mana Bear Growth Line
@@ -1329,12 +1336,41 @@ local _ClassConfig = {
                     return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
+			{
+                name = "LevitationSpells",
+                type = "Spell",
+                active_cond = function(self, spell)  return RGMercUtils.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell, target)
+					if not RGMercUtils.GetSetting('DoLevitate') then return false end
+					if (mq.TLO.Me.Book("Flight of Falcons")() or mq.TLO.Me.Book("Flight of Eagles")() or
+						mq.TLO.Me.Book("Spirit of Falcons")() or mq.TLO.Me.Book("Spirit of Eagle")()) and
+						RGMercUtils.GetSetting('DoRunSpeed') then
+						return false
+					end					
+                    return RGMercUtils.GroupBuffCheck(spell, target)
+                end,
+            },
             {
                 name = "MoveSpells",
                 type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.ID()) end,
+                active_cond = function(self, spell)  return RGMercUtils.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    return RGMercUtils.GetSetting("DoRunSpeed") and RGMercUtils.GroupBuffCheck(spell, target)
+					if not RGMercUtils.GetSetting('DoRunSpeed') then return false end
+					if (mq.TLO.Me.Book("Flight of Falcons")() or mq.TLO.Me.Book("Flight of Eagles")() or
+						mq.TLO.Me.Book("Spirit of Falcons")() or mq.TLO.Me.Book("Spirit of Eagle")()) and
+						RGMercUtils.GetSetting('DoLevitate') then
+						return false
+					end					
+                    return RGMercUtils.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "MoveWithLevSpells",
+                type = "Spell",
+                active_cond = function(self, spell)  return RGMercUtils.BuffActiveByID(spell.ID()) end,
+                cond = function(self, spell, target)
+					if not RGMercUtils.GetSetting('DoLevitate') or not RGMercUtils.GetSetting('DoRunSpeed') then return false end
+                    return RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1737,6 +1773,14 @@ local _ClassConfig = {
             FAQ = "Sometimes I group with a bard and don't need to worry about Run Speed, can I disable it?",
             Answer = "Yes, you can disable [DoRunSpeed] to prevent casting Run Speed spells.",
         },
+        ['DoLevitate']   = {
+            DisplayName = "Cast Levitation Spells",
+            Category = "Spells and Abilities",
+            Tooltip = "Cast Levitation Spells",
+            Default = false,
+            FAQ = "Does this work with Run Speed spells?",
+            Answer = "Yes, RGMercs will combine both [DoRunSpeed] and [DoLevitate] into a single cast if possible.",
+        },		
         ['DoNuke']       = {
             DisplayName = "Cast Spells",
             Category = "Spells and Abilities",
