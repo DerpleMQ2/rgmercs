@@ -110,18 +110,19 @@ There is also no flag for combat looting. It will only loot if no mobs are withi
 
 ]]
 
-local mq           = require 'mq'
+local mq               = require 'mq'
 
-local eqServer     = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
+local eqServer         = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 -- Check for looted module, if found use that. else fall back on our copy, which may be outdated.
 
-local RGMercUtils  = require("utils.rgmercs_utils")
-local SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. RGMercConfig.Globals.CurLoadedChar .. '.ini'
-local LootFile     = mq.configDir .. '/Loot.ini'
-local version      = 1.9
-local imported     = true
+local RGMercUtils      = require("utils.rgmercs_utils")
+local SettingsFile     = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. RGMercConfig.Globals.CurLoadedChar .. '.ini'
+local LootFile         = mq.configDir .. '/Loot.ini'
+local version          = 3
+local lootDBUpdateFile = mq.configDir .. '/DB_Updated_' .. eqServer .. '.lua'
+local imported         = true
 -- Public default settings, also read in from Loot.ini [Settings] section
-local loot         = {
+local loot             = {
     Settings = {
         Version = '"' .. tostring(version) .. '"',
         LootFile = mq.configDir .. '/Loot.ini',
@@ -166,11 +167,11 @@ local loot         = {
         LootMyCorpse = false,                      -- Loot your own corpse if its nearby (Does not check for REZ)
     },
 }
-loot.MyClass       = RGMercConfig.Globals.CurLoadedClass:lower()
+loot.MyClass           = RGMercConfig.Globals.CurLoadedClass:lower()
 -- SQL information
-local ItemsDB      = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
+local ItemsDB          = string.format('%s/LootRules_%s.db', mq.configDir, eqServer)
 
-loot.guiLoot       = require('lib.lootnscoot.loot_hist')
+loot.guiLoot           = require('lib.lootnscoot.loot_hist')
 if loot.guiLoot ~= nil then
     loot.UseActors = true
     loot.guiLoot.GetSettings(loot.HideNames, loot.LookupLinks, loot.RecordData, true, loot.UseActors, 'lootnscoot')
@@ -345,31 +346,79 @@ function loot.loadSettings()
     loot.GlobalItems = {}
     loot.NormalItemsClasses = {}
     loot.GlobalItemsClasses = {}
+    local needDBUpdate = false
+    local needSave = false
+    local tmpSettings = loot.load(SettingsFile, 'Settings')
+
+    -- check if the DB structure needs updating
+    if not RGMercUtils.file_exists(lootDBUpdateFile) then
+        needDBUpdate = true
+        tmpSettings.Version = version
+        needSave = true
+    else
+        local tmp = dofile(lootDBUpdateFile)
+        if tmp.version < version then
+            needDBUpdate = true
+            tmpSettings.Version = version
+            needSave = true
+        end
+    end
+
     -- SQL setup
     if not RGMercUtils.file_exists(ItemsDB) then
         RGMercsLogger.log_warn("\ayLoot Rules Database \arNOT found\ax, \atCreating it now\ax. Please run \at/rgl lootimport\ax to Import your \atloot.ini \axfile.")
         RGMercsLogger.log_warn("\arOnly run this one One Character\ax. use \at/rgl lootreload\ax to update the data on the other characters.")
     else
-        RGMercsLogger.log_info("Loot Rules Database found, loading it now.")
+        if not needDBUpdate then RGMercsLogger.log_info("Loot Rules Database found, loading it now.") end
     end
-    -- Create the database and its table if it doesn't exist
-    local db = SQLite3.open(ItemsDB)
-    db:exec([[
-                CREATE TABLE IF NOT EXISTS Global_Rules (
-                "item_name" TEXT NOT NULL UNIQUE,
-                "item_rule" TEXT NOT NULL,
-                "item_classes" TEXT,
-                "id" INTEGER PRIMARY KEY AUTOINCREMENT
-            );
-                CREATE TABLE IF NOT EXISTS Normal_Rules (
-                "item_name" TEXT NOT NULL UNIQUE,
-                "item_rule" TEXT NOT NULL,
-                "item_classes" TEXT,
-                "id" INTEGER PRIMARY KEY AUTOINCREMENT
-            );
-        ]])
-    db:close()
 
+    if not needDBUpdate then
+        -- Create the database and its table if it doesn't exist
+        local db = SQLite3.open(ItemsDB)
+        db:exec([[
+                CREATE TABLE IF NOT EXISTS Global_Rules (
+                    "item_name" TEXT PRIMARY KEY NOT NULL UNIQUE,
+                    "item_rule" TEXT NOT NULL,
+                    "item_classes" TEXT
+                );
+                    CREATE TABLE IF NOT EXISTS Normal_Rules (
+                    "item_name" TEXT PRIMARY KEY NOT NULL UNIQUE,
+                    "item_rule" TEXT NOT NULL,
+                    "item_classes" TEXT
+                );
+            ]])
+        db:close()
+    else -- DB needs to be updated
+        local db = SQLite3.open(ItemsDB)
+        db:exec([[
+                CREATE TABLE IF NOT EXISTS my_table_copy(
+                    "item_name" TEXT PRIMARY KEY NOT NULL UNIQUE,
+                    "item_rule" TEXT NOT NULL,
+                    "item_classes" TEXT
+                );
+                INSERT INTO my_table_copy (item_name,item_rule,item_classes)
+                    SELECT item_name, item_rule, item_classes FROM Global_Rules;
+                DROP TABLE Global_Rules;
+                ALTER TABLE my_table_copy RENAME TO Global_Rules;
+
+                CREATE TABLE IF NOT EXISTS my_table_copy(
+                    "item_name" TEXT PRIMARY KEY NOT NULL UNIQUE,
+                    "item_rule" TEXT NOT NULL,
+                    "item_classes" TEXT
+                );
+                INSERT INTO my_table_copy (item_name,item_rule,item_classes)
+                    SELECT item_name, item_rule, item_classes FROM Global_Rules;
+                DROP TABLE Global_Rules;
+                ALTER TABLE my_table_copy RENAME TO Global_Rules;
+                );
+            ]])
+        db:close()
+        mq.pickle(lootDBUpdateFile, { version = 3, })
+        RGMercsLogger.log_info("DB Version less than %s, Updating it now.", version)
+        needDBUpdate = false
+    end
+
+    -- process the loaded data
     local db = SQLite3.open(ItemsDB)
     local stmt = db:prepare("SELECT * FROM Global_Rules")
     for row in stmt:nrows() do
@@ -385,14 +434,15 @@ function loot.loadSettings()
     stmt:finalize()
     db:close()
 
-    local tmpSettings = loot.load(SettingsFile, 'Settings')
-    local needSave = false
+    -- process settings file
+
     for k, v in pairs(loot.Settings) do
         if tmpSettings[k] == nil then
             tmpSettings[k] = loot.Settings[k]
             needSave = true
         end
     end
+
     tmpCmd = loot.Settings.GroupChannel or 'dgae'
     if tmpCmd == string.find(tmpCmd, 'dg') then
         tmpCmd = '/' .. tmpCmd
