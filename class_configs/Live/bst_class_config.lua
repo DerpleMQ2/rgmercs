@@ -1158,7 +1158,7 @@ return {
                 name = "ManaRegenBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.GroupBuffCheck(spell, target)
+                    return RGMercConfig.Constants.RGCasters:contains(target.Class.ShortName()) and RGMercUtils.GroupBuffCheck(spell, target)
                 end,
             },
             {

@@ -227,15 +227,18 @@ end
 function RGMercUtils.SetTarget(targetId, ignoreBuffPopulation)
     if targetId == 0 then return end
 
+    local maxWaitBuffs = ((mq.TLO.EverQuest.Ping() * 20) + 500)
+
     if targetId == mq.TLO.Target.ID() then return end
-    RGMercsLogger.log_debug("Setting Target: %d", targetId)
+    RGMercsLogger.log_debug("SetTarget(): Setting Target: %d (buffPopWait: %d)", targetId, ignoreBuffPopulation and 0 or maxWaitBuffs)
     if RGMercUtils.GetSetting('DoAutoTarget') then
         if RGMercUtils.GetTargetID() ~= targetId then
             mq.TLO.Spawn(targetId).DoTarget()
             mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
-            mq.delay(500, function() return ignoreBuffPopulation or mq.TLO.Target.BuffsPopulated() end)
+            mq.delay(maxWaitBuffs, function() return ignoreBuffPopulation or mq.TLO.Target.BuffsPopulated() end)
         end
     end
+    RGMercsLogger.log_debug("SetTarget(): Set Target to: %d (buffsPopulated: %s)", targetId, RGMercUtils.BoolToColorString(mq.TLO.Target.BuffsPopulated()))
 end
 
 --- Clears the current target.
@@ -1025,10 +1028,9 @@ function RGMercUtils.UseItem(itemName, targetId)
     end
 
     if oldTargetId > 0 then
-        RGMercUtils.DoCmd("/target id %d", oldTargetId)
-        mq.delay("2s", function() return RGMercUtils.GetTargetID() == oldTargetId end)
+        RGMercUtils.SetTarget(oldTargetId, true)
     else
-        RGMercUtils.DoCmd("/target clear")
+        RGMercUtils.ClearTarget()
     end
 
     return true
@@ -4570,7 +4572,7 @@ function RGMercUtils.RenderOAList()
             ImGui.TableNextColumn()
             local _, clicked = ImGui.Selectable(name, false)
             if clicked then
-                RGMercUtils.DoCmd("/target id %d", spawn() and spawn.ID() or 0)
+                RGMercUtils.SetTarget(spawn.ID() or 0, false)
             end
             ImGui.TableNextColumn()
             if spawn() and spawn.ID() > 0 then
@@ -4735,7 +4737,7 @@ function RGMercUtils.RenderZoneNamed()
                 ImGui.TableNextColumn()
                 local _, clicked = ImGui.Selectable(named.Name, false)
                 if clicked then
-                    RGMercUtils.DoCmd("/target id %d", named.Spawn() and named.Spawn.ID() or 0)
+                    RGMercUtils.SetTarget(named.Spawn() and named.Spawn.ID() or 0)
                 end
                 ImGui.TableNextColumn()
                 if named.Spawn() and named.Spawn.PctHPs() > 0 then

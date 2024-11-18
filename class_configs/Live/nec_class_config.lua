@@ -1074,8 +1074,8 @@ local _ClassConfig = {
             {
                 name = "Rise of Bones",
                 type = "AA",
-                cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName)
+                cond = function(self, aaName, target)
+                    return RGMercUtils.NPCAAReady(aaName, target.ID())
                 end,
             },
             {
