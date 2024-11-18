@@ -457,8 +457,8 @@ local _ClassConfig = {
             "Bite of the Brownie",
             "Sting of the Queen",
         },
-        ["FrostNuke"] = {
-            --- FrostNuke - Level 4+
+        ["IceNuke"] = {
+            --- IceNuke - Level 4+
             "Ice Barrage",
             "Heavy Sleet",
             "Ice Salvo",
