@@ -407,9 +407,9 @@ function loot.loadSettings()
                     "item_classes" TEXT
                 );
                 INSERT INTO my_table_copy (item_name,item_rule,item_classes)
-                    SELECT item_name, item_rule, item_classes FROM Global_Rules;
-                DROP TABLE Global_Rules;
-                ALTER TABLE my_table_copy RENAME TO Global_Rules;
+                    SELECT item_name, item_rule, item_classes FROM Normal_Rules;
+                DROP TABLE Normal_Rules;
+                ALTER TABLE my_table_copy RENAME TO Normal_Rules;
                 );
             ]])
         db:close()
