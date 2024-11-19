@@ -18,18 +18,18 @@ Logger.set_log_to_file(Config:GetSettings().LogToFile)
 local Binds = require('utils.binds')
 require('utils.event_handlers')
 
-local Console    = require('utils.console')
-local Core       = require("utils.core")
-local Targetting = require("utils.targetting")
-local Combat     = require("utils.combat")
-local Casting    = require("utils.casting")
-local Events     = require("utils.events")
-local Ui         = require("utils.ui")
-local Comms      = require("utils.comms")
-local Strings    = require("utils.strings")
+local Console   = require('utils.console')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Combat    = require("utils.combat")
+local Casting   = require("utils.casting")
+local Events    = require("utils.events")
+local Ui        = require("utils.ui")
+local Comms     = require("utils.comms")
+local Strings   = require("utils.strings")
 
 -- Initialize class-based moduldes
-local Modules    = require("utils.modules")
+local Modules   = require("utils.modules")
 Modules:load()
 
 require('utils.datatypes')
@@ -163,7 +163,7 @@ local function RenderTarget()
             string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
     end
 
-    local assistSpawn = Targetting.GetAutoTarget()
+    local assistSpawn = Targeting.GetAutoTarget()
 
     if Config:GetSetting('DisplayManualTarget') and (not assistSpawn or not assistSpawn() or assistSpawn.ID() == 0) then
         assistSpawn = mq.TLO.Target
@@ -187,7 +187,7 @@ local function RenderTarget()
         ImGui.Text(string.format("%s (%s) [%d %s] HP: %d%% Dist: %d", assistSpawn.CleanName() or "",
             assistSpawn.ID() or 0, assistSpawn.Level() or 0,
             assistSpawn.Class.ShortName() or "N/A", assistSpawn.PctHPs() or 0, assistSpawn.Distance() or 0))
-        if Targetting.IsNamed(assistSpawn) then
+        if Targeting.IsNamed(assistSpawn) then
             ImGui.SameLine()
             ImGui.TextColored(IM_COL32(52, 200, 52, 255),
                 string.format("**Named**"))
@@ -405,13 +405,13 @@ local function RGMercsGUI()
                     ImGui.SetItemDefaultFocus()
                     if ImGui.BeginTabItem("RGMercsMain") then
                         ImGui.Text("Current State: " .. curState)
-                        ImGui.Text("Hater Count: " .. tostring(Targetting.GetXTHaterCount()))
+                        ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
 
                         -- .. tostring(Config.Globals.AutoTargetID))
                         ImGui.Text("MA: %-25s", (Core.GetMainAssistSpawn().CleanName() or "None"))
-                        if mq.TLO.Target.ID() > 0 and Targetting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
+                        if mq.TLO.Target.ID() > 0 and Targeting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
                             ImGui.SameLine()
-                            if ImGui.SmallButton(string.format("Set MA to %s", Targetting.GetTargetCleanName())) then
+                            if ImGui.SmallButton(string.format("Set MA to %s", Targeting.GetTargetCleanName())) then
                                 Config.Globals.MainAssist = mq.TLO.Target.CleanName()
                             end
                         end
@@ -600,8 +600,8 @@ local function RGInit(...)
 
     if mainAssist:len() > 0 then
         Config.Globals.MainAssist = mainAssist
-        Comms.PopUp("Targetting %s for Main Assist", Config.Globals.MainAssist)
-        Targetting.SetTarget(Core.GetMainAssistId())
+        Comms.PopUp("Targeting %s for Main Assist", Config.Globals.MainAssist)
+        Targeting.SetTarget(Core.GetMainAssistId())
         Logger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", Config.Globals.MainAssist,
             Config:GetSetting('AutoAssistAt'))
     end
@@ -703,7 +703,7 @@ local function Main()
         Core.DoCmd("/nav stop")
     end
 
-    if Targetting.GetXTHaterCount() > 0 then
+    if Targeting.GetXTHaterCount() > 0 then
         if curState == "Downtime" and mq.TLO.Me.Sitting() then
             -- if switching into combat state stand up.
             mq.TLO.Me.Stand()
@@ -711,7 +711,7 @@ local function Main()
 
         curState = "Combat"
         --if os.clock() - Config.Globals.LastFaceTime > 6 then
-        if Config:GetSetting('FaceTarget') and not Targetting.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
+        if Config:GetSetting('FaceTarget') and not Targeting.FacingTarget() and mq.TLO.Target.ID() ~= mq.TLO.Me.ID() and not mq.TLO.Me.Moving() then
             --Config.Globals.LastFaceTime = os.clock()
             Core.DoCmd("/squelch /face")
         end
@@ -722,8 +722,8 @@ local function Main()
     else
         if curState ~= "Downtime" then
             -- clear the cache during state transition.
-            Targetting.ClearSafeTargetCache()
-            Targetting.ForceBurnTargetID = 0
+            Targeting.ClearSafeTargetCache()
+            Targeting.ForceBurnTargetID = 0
             Casting.LastBurnCheck = false
             Modules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
@@ -756,9 +756,9 @@ local function Main()
     if Combat.OkToEngage(Config.Globals.AutoTargetID) then
         Combat.EngageTarget(Config.Globals.AutoTargetID)
     else
-        if Targetting.GetXTHaterCount(true) > 0 and Targetting.GetTargetID() > 0 and not Core.IsMezzing() and not Core.IsCharming() then
+        if Targeting.GetXTHaterCount(true) > 0 and Targeting.GetTargetID() > 0 and not Core.IsMezzing() and not Core.IsCharming() then
             Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
-            Targetting.ClearTarget()
+            Targeting.ClearTarget()
         end
     end
     -- Handles state for when we're in combat
@@ -774,7 +774,7 @@ local function Main()
 
         if ((os.clock() - Config.Globals.LastPetCmd) > 2) then
             Config.Globals.LastPetCmd = os.clock()
-            if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targetting.GetTargetPctHPs(Targetting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
+            if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
                 Combat.PetAttack(Config.Globals.AutoTargetID, true)
             end
         end
@@ -817,9 +817,9 @@ local function Main()
     end
 
     -- If target is not attackable then turn off attack
-    local pcCheck = Targetting.TargetIsType("pc") or
-        (Targetting.TargetIsType("pet") and Targetting.TargetIsType("pc", mq.TLO.Target.Master))
-    local mercCheck = Targetting.TargetIsType("mercenary")
+    local pcCheck = Targeting.TargetIsType("pc") or
+        (Targeting.TargetIsType("pet") and Targeting.TargetIsType("pc", mq.TLO.Target.Master))
+    local mercCheck = Targeting.TargetIsType("mercenary")
     if mq.TLO.Me.Combat() and (not mq.TLO.Target() or pcCheck or mercCheck) then
         Logger.log_debug(
             "\ay[1] Target type check failed \aw[\atinCombat(%s) pcCheckFailed(%s) mercCheckFailed(%s)\aw]\ay - turning attack off!",

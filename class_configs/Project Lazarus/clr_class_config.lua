@@ -1,7 +1,7 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
 local Core         = require("utils.core")
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
@@ -10,7 +10,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
-        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targetting.GetXTHaterCount() == 0 end,
+        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Heal',
@@ -746,7 +746,7 @@ local _ClassConfig = {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         DoRez = function(self, corpseId)
             if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
-                Targetting.SetTarget(corpseId, true)
+                Targeting.SetTarget(corpseId, true)
 
                 local target = mq.TLO.Target
 
@@ -764,7 +764,7 @@ local _ClassConfig = {
                     Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 end
 
-                if Casting.SpellReady(self.ResolvedActionMap['RezSpell']) and Targetting.GetXTHaterCount() == 0 and not Casting.CanUseAA("Blessing of Resurrection") then
+                if Casting.SpellReady(self.ResolvedActionMap['RezSpell']) and Targeting.GetXTHaterCount() == 0 and not Casting.CanUseAA("Blessing of Resurrection") then
                     Casting.UseSpell(self.ResolvedActionMap['RezSpell'], corpseId, true, true)
                 end
             end
@@ -817,7 +817,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     -- force the target for StacksTarget to work.
-                    Targetting.SetTarget(target.ID() or 0)
+                    Targeting.SetTarget(target.ID() or 0)
                     local spell = mq.TLO.AltAbility(aaName).Spell
                     return Core.GetMainAssistPctHPs() <= Config:GetSetting('GroupHealPoint') and Config:GetSetting('DoHOT') and
                         Casting.SpellStacksOnTarget(spell) and
@@ -829,7 +829,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target) -- note: Is aaName the correct arg here? or should be 'spell'?
                     -- force the target for StacksTarget to work.
-                    Targetting.SetTarget(target.ID() or 0)
+                    Targeting.SetTarget(target.ID() or 0)
                     local spell = mq.TLO.AltAbility(aaName).Spell
                     return Core.GetMainAssistPctHPs() <= Config:GetSetting('GroupHealPoint') and Config:GetSetting('DoHOT') and
                         Casting.SpellStacksOnTarget(spell) and
@@ -841,7 +841,7 @@ local _ClassConfig = {
                 type = "spell",
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    Targetting.SetTarget(target.ID() or 0)
+                    Targeting.SetTarget(target.ID() or 0)
                     return Core.GetMainAssistPctHPs() <= Config:GetSetting('GroupHealPoint') and Config:GetSetting('DoHOT') and
                         Casting.SpellStacksOnTarget(spell) and
                         not Casting.TargetHasBuff(spell) and (mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() or 0) > Config:GetSetting('GroupInjureCnt')
@@ -940,7 +940,7 @@ local _ClassConfig = {
                 name = "ClutchHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoClutchHeal') and ((mq.TLO.Me.Level() <= 87 and Targetting.GetTargetPctHPs() < 45) or Targetting.GetTargetPctHPs() < 35)
+                    return Config:GetSetting('DoClutchHeal') and ((mq.TLO.Me.Level() <= 87 and Targeting.GetTargetPctHPs() < 45) or Targeting.GetTargetPctHPs() < 35)
                 end,
             },
             {
@@ -956,7 +956,7 @@ local _ClassConfig = {
                 name = "Focused Celestial Regeneration",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName) and (Targetting.GetTargetDistance() < Config:GetSetting('AssistRange'))
+                    return Casting.AAReady(aaName) and (Targeting.GetTargetDistance() < Config:GetSetting('AssistRange'))
                 end,
             },
             {
@@ -970,14 +970,14 @@ local _ClassConfig = {
                 name = "healnuke1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoNuke') and Targetting.GetTargetPctHPs() < Config:GetSetting('NukePct')
+                    return Config:GetSetting('DoNuke') and Targeting.GetTargetPctHPs() < Config:GetSetting('NukePct')
                 end,
             },
             {
                 name = "healnuke2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoNuke') and Targetting.GetTargetPctHPs() < Config:GetSetting('NukePct')
+                    return Config:GetSetting('DoNuke') and Targeting.GetTargetPctHPs() < Config:GetSetting('NukePct')
                 end,
             },
             {
@@ -1054,9 +1054,9 @@ local _ClassConfig = {
                 type = "Spell",
                 retries = 0,
                 cond = function(self)
-                    return Targetting.GetTargetDistance() < Config:GetSetting('AssistRange') and
+                    return Targeting.GetTargetDistance() < Config:GetSetting('AssistRange') and
                         not Casting.SongActiveByName("Healing Twincast") and
-                        Targetting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt')
+                        Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt')
                 end,
             },
         },
@@ -1102,28 +1102,28 @@ local _ClassConfig = {
                 name = "Turn Undead",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName) and Targetting.TargetBodyIs(target, "Undead")
+                    return Casting.AAReady(aaName) and Targeting.TargetBodyIs(target, "Undead")
                 end,
             },
             {
                 name = "nukeheal1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive('Hybrid') and Targetting.GetTargetPctHPs() < Config:GetSetting('NukePct') and Config:GetSetting('DoNuke')
+                    return Core.IsModeActive('Hybrid') and Targeting.GetTargetPctHPs() < Config:GetSetting('NukePct') and Config:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "nukeheal2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive('Hybrid') and Targetting.GetTargetPctHPs() < Config:GetSetting('NukePct') and Config:GetSetting('DoNuke')
+                    return Core.IsModeActive('Hybrid') and Targeting.GetTargetPctHPs() < Config:GetSetting('NukePct') and Config:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "twincastnuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive('Hybrid') and Targetting.GetTargetPctHPs() < Config:GetSetting('NukePct') and Config:GetSetting('DoNuke')
+                    return Core.IsModeActive('Hybrid') and Targeting.GetTargetPctHPs() < Config:GetSetting('NukePct') and Config:GetSetting('DoNuke')
                 end,
             },
             {
@@ -1137,7 +1137,7 @@ local _ClassConfig = {
                 name = "MagicNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive('Heal') and Targetting.GetTargetPctHPs() < Config:GetSetting('NukePct') and Config:GetSetting('DoNuke')
+                    return Core.IsModeActive('Heal') and Targeting.GetTargetPctHPs() < Config:GetSetting('NukePct') and Config:GetSetting('DoNuke')
                 end,
             },
         },
@@ -1192,8 +1192,8 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    Targetting.SetTarget(target.ID() or 0)
-                    return Config:GetSetting('DoSymbol') and Targetting.TargetClassIs({ "WAR", "PAL", "SHD", }, target) and Casting.SpellStacksOnTarget(spell)
+                    Targeting.SetTarget(target.ID() or 0)
+                    return Config:GetSetting('DoSymbol') and Targeting.TargetClassIs({ "WAR", "PAL", "SHD", }, target) and Casting.SpellStacksOnTarget(spell)
                 end,
             },
             {
@@ -1201,7 +1201,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    Targetting.SetTarget(target.ID() or 0)
+                    Targeting.SetTarget(target.ID() or 0)
                     return Config:GetSetting('DoDruid') and Casting.SpellStacksOnTarget(spell) and not Casting.BuffActive(spell)
                 end,
             },

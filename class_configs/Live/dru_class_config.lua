@@ -1,7 +1,7 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
 local Core         = require("utils.core")
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
@@ -10,7 +10,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing  = function() return true end,
         IsCuring   = function() return Core.IsModeActive("Heal") end,
-        IsRezing   = function() return Config:GetSetting('DoBattleRez') or Targetting.GetXTHaterCount() == 0 end,
+        IsRezing   = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
         CanCharm   = function() return true end,
         IsCharming = function() return (Config:GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
     },
@@ -981,7 +981,7 @@ local _ClassConfig = {
             targetId = function(self) return { Core.GetMainAssistId(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Config:GetSetting('DoTwinHeal') and Core.IsHealing() and
-                    Targetting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') and not Casting.Feigning()
+                    Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') and not Casting.Feigning()
             end,
         },
         {
@@ -1030,7 +1030,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return Core.IsModeActive("Mana") and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
-                        Targetting.GetTargetPctHPs() > 75
+                        Targeting.GetTargetPctHPs() > 75
                 end,
             },
             {
@@ -1065,7 +1065,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return (Core.IsModeActive("Mana") or Config:GetSetting('DoNuke'))
-                        and Casting.DetSpellCheck(spell) and Targetting.GetTargetPctHPs() > 60 and
+                        and Casting.DetSpellCheck(spell) and Targeting.GetTargetPctHPs() > 60 and
                         mq.TLO.Me.PctMana() > 50
                 end,
             },
@@ -1075,7 +1075,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return Config:GetSetting('DoFire')
                         and Casting.DetSpellCheck(spell) and Config:GetSetting('DoNuke') and
-                        Targetting.GetTargetPctHPs() < Config:GetSetting('NukePct')
+                        Targeting.GetTargetPctHPs() < Config:GetSetting('NukePct')
                 end,
             },
             {
@@ -1084,7 +1084,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return not Config:GetSetting('DoFire')
                         and Casting.DetSpellCheck(spell) and Config:GetSetting('DoNuke') and
-                        Targetting.GetTargetPctHPs() < Config:GetSetting('NukePct')
+                        Targeting.GetTargetPctHPs() < Config:GetSetting('NukePct')
                 end,
             },
             {
@@ -1094,7 +1094,7 @@ local _ClassConfig = {
                     return Core.IsModeActive("Mana")
                         and Casting.DotSpellCheck(spell) and
                         Config:GetSetting('DoDot') and
-                        Targetting.GetTargetLevel() >= mq.TLO.Me.Level()
+                        Targeting.GetTargetLevel() >= mq.TLO.Me.Level()
                 end,
             },
             {
@@ -1270,8 +1270,8 @@ local _ClassConfig = {
                 name = "SkinDebuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell) and not Targetting.TargetBodyIs(target, "Undead") and
-                        not Targetting.TargetBodyIs(target, "Undead Pet")
+                    return Casting.DetSpellCheck(spell) and not Targeting.TargetBodyIs(target, "Undead") and
+                        not Targeting.TargetBodyIs(target, "Undead Pet")
                 end,
             },
             {
@@ -1279,7 +1279,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return not Config:GetSetting('DoFire') and Casting.DetSpellCheck(spell) and
-                        Targetting.GetTargetPctHPs(target) < Config:GetSetting('NukePct') and
+                        Targeting.GetTargetPctHPs(target) < Config:GetSetting('NukePct') and
                         Config:GetSetting('DoNuke')
                 end,
             },
@@ -1288,7 +1288,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return not Config:GetSetting('DoFire') and Casting.DetSpellCheck(spell) and
-                        Targetting.GetTargetPctHPs(target) < Config:GetSetting('NukePct') and
+                        Targeting.GetTargetPctHPs(target) < Config:GetSetting('NukePct') and
                         Config:GetSetting('DoNuke')
                 end,
             },
@@ -1304,7 +1304,7 @@ local _ClassConfig = {
                 name = "SnareSpells",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(spell) and Targetting.GetTargetPctHPs(target) < 50
+                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(spell) and Targeting.GetTargetPctHPs(target) < 50
                 end,
             },
             {
@@ -1353,7 +1353,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoTempHP') then return false end
-                    return Targetting.TargetClassIs("WAR", target) and Casting.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
+                    return Targeting.TargetClassIs("WAR", target) and Casting.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
                 end,
             },
             {
@@ -1370,7 +1370,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
-                    return Targetting.TargetClassIs({ "WAR", "SHD", }, target) and Casting.GroupBuffCheck(spell, target) --does not stack with PAL innate buff
+                    return Targeting.TargetClassIs({ "WAR", "SHD", }, target) and Casting.GroupBuffCheck(spell, target) --does not stack with PAL innate buff
                 end,
             },
             {
@@ -1663,7 +1663,7 @@ local _ClassConfig = {
                 return false
             end
 
-            Targetting.SetTarget(corpseId)
+            Targeting.SetTarget(corpseId)
 
             local target = mq.TLO.Target
 

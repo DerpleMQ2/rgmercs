@@ -1,5 +1,5 @@
 local mq            = require('mq')
-local Targetting    = require("utils.targetting")
+local Targeting     = require("utils.targeting")
 local Config        = require("utils.config")
 local Core          = require("utils.core")
 local Logger        = require("utils.logger")
@@ -14,7 +14,7 @@ ItemManager.__index = ItemManager
 --- @param count number The number of items to give.
 function ItemManager.GiveTo(toId, itemName, count)
     if toId ~= mq.TLO.Target.ID() then
-        Targetting.SetTarget(toId, true)
+        Targeting.SetTarget(toId, true)
     end
 
     if not mq.TLO.Target() then
@@ -40,7 +40,7 @@ function ItemManager.GiveTo(toId, itemName, count)
     end
 
     -- Click OK on trade window and wait for it to go away
-    if Targetting.TargetIsType("pc") then
+    if Targeting.TargetIsType("pc") then
         mq.delay("5s", function() return mq.TLO.Window("TradeWnd").Open() end)
         mq.TLO.Window("TradeWnd").Child("TRDW_Trade_Button").LeftMouseUp()
         mq.delay("5s", function() return not mq.TLO.Window("TradeWnd").Open() end)
@@ -52,7 +52,7 @@ function ItemManager.GiveTo(toId, itemName, count)
 
     -- We're giving something to a pet. In this case if the pet gives it back,
     -- get rid of it.
-    if Targetting.TargetIsType("pet") then
+    if Targeting.TargetIsType("pet") then
         mq.delay("2s")
         if (mq.TLO.Cursor.ID() or 0) > 0 and mq.TLO.Cursor.NoRent() then
             Logger.log_debug("\arGiveTo Pet return item - that ingreat!")

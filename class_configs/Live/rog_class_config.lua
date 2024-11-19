@@ -1,10 +1,10 @@
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Core       = require("utils.core")
-local Targetting = require("utils.targetting")
-local Casting    = require("utils.casting")
-local Strings    = require("utils.strings")
-local Logger     = require("utils.logger")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
+local Strings   = require("utils.strings")
+local Logger    = require("utils.logger")
 
 return {
     _version            = "1.0 - Live",
@@ -393,9 +393,9 @@ return {
                 cond = function(self, discSpell)
                     local discSpell = mq.TLO.Spell(discSpell)
                     return mq.TLO.Me.PctEndurance() >= 5 and
-                        Targetting.GetTargetPctHPs() >= 90 and
-                        Targetting.GetTargetDistance() < 50 and
-                        (discSpell() and Targetting.GetTargetLevel() <= discSpell.Level()) and
+                        Targeting.GetTargetPctHPs() >= 90 and
+                        Targeting.GetTargetDistance() < 50 and
+                        (discSpell() and Targeting.GetTargetLevel() <= discSpell.Level()) and
                         mq.TLO.Me.CombatState():lower() ~= "combat"
                 end,
             },

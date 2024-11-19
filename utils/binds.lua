@@ -3,7 +3,7 @@ local Config      = require('utils.config')
 local Core        = require("utils.core")
 local Modules     = require("utils.modules")
 local Casting     = require("utils.casting")
-local Targetting  = require("utils.targetting")
+local Targeting   = require("utils.targeting")
 local Strings     = require("utils.strings")
 local Logger      = require("utils.logger")
 
@@ -38,21 +38,21 @@ Binds.Handlers    = {
         usage = "/rgl forcecombat",
         about = "Will force combat to be enabled on your XTarget[1]. If you have no XTarget[1] it will use your current target.",
         handler = function()
-            Targetting.ForceCombat = not Targetting.ForceCombat
-            Logger.log_info("\awForced Combat: %s", Strings.BoolToColorString(Targetting.ForceCombat))
+            Targeting.ForceCombat = not Targeting.ForceCombat
+            Logger.log_info("\awForced Combat: %s", Strings.BoolToColorString(Targeting.ForceCombat))
 
-            if Targetting.ForceCombat then
+            if Targeting.ForceCombat then
                 if mq.TLO.Target.ID() == 0 or (mq.TLO.Target.Type() or "none"):lower() ~= "npc" then
                     Logger.log_info("\awForced Combat: Requires a target - Disabling...")
-                    Targetting.ForceCombat = false
+                    Targeting.ForceCombat = false
                     return
                 end
                 Core.DoCmd("/xtarget set 1 currenttarget")
                 mq.delay("5s", function() return mq.TLO.Me.XTarget(1).ID() == mq.TLO.Target.ID() end)
                 Logger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
             else
-                Targetting.ResetXTSlot(1)
-                Targetting.ForceNamed = false
+                Targeting.ResetXTSlot(1)
+                Targeting.ForceNamed = false
                 Core.DoCmd("/attack off")
             end
         end,
@@ -61,7 +61,7 @@ Binds.Handlers    = {
         usage = "/rgl forcetarget",
         about = "Will force the current target to be your autotarget no matter what until it is no longer valid.",
         handler = function()
-            if mq.TLO.Target.ID() > 0 and (Targetting.TargetIsType("npc") or Targetting.TargetIsType("npcpet")) then
+            if mq.TLO.Target.ID() > 0 and (Targeting.TargetIsType("npc") or Targeting.TargetIsType("npcpet")) then
                 Config.Globals.ForceTargetID = mq.TLO.Target.ID()
                 Logger.log_info("\awForced Target: %s", mq.TLO.Target.CleanName() or "None")
             end
@@ -71,18 +71,18 @@ Binds.Handlers    = {
         usage = "/rgl forcenamed",
         about = "Will force the current target to be considered a name mainly for testing purposes.",
         handler = function()
-            Targetting.ForceNamed = not Targetting.ForceNamed
-            Logger.log_info("\awForced Named: %s", Strings.BoolToColorString(Targetting.ForceNamed))
+            Targeting.ForceNamed = not Targeting.ForceNamed
+            Logger.log_info("\awForced Named: %s", Strings.BoolToColorString(Targeting.ForceNamed))
         end,
     },
     ['burnnow'] = {
         usage = "/rgl burnnow <id?>",
         about = "Will force the target <id> or your current target to trigger all burn checks - resets when combat ends.",
         handler = function(targetId)
-            Targetting.ForceBurnTargetID = tonumber(targetId) or mq.TLO.Target.ID()
-            local burnNowSpawn = mq.TLO.Spawn(Targetting.ForceBurnTargetID)
+            Targeting.ForceBurnTargetID = tonumber(targetId) or mq.TLO.Target.ID()
+            local burnNowSpawn = mq.TLO.Spawn(Targeting.ForceBurnTargetID)
             Logger.log_info("\aoForcing Burn Now: \at%s \aw(\am%d\aw)", burnNowSpawn and (burnNowSpawn() and burnNowSpawn.CleanName() or "None") or "None",
-                Targetting.ForceBurnTargetID)
+                Targeting.ForceBurnTargetID)
         end,
     },
     ['addoa'] = {
@@ -135,7 +135,7 @@ Binds.Handlers    = {
             for _, t in ipairs(allText) do
                 text = (text and text .. " " or "") .. t
             end
-            Core.DoCmd("/squelch /dggaexecute /mqtarget id %d", Targetting.GetTargetID())
+            Core.DoCmd("/squelch /dggaexecute /mqtarget id %d", Targeting.GetTargetID())
             mq.delay(5)
             Core.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)
         end,

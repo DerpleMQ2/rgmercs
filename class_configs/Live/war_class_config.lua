@@ -1,7 +1,7 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
 local Core         = require("utils.core")
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 local Logger       = require("utils.logger")
 
@@ -20,7 +20,7 @@ local _ClassConfig = {
                         Core.DoCmd('/docommand /removebuff "Night\'s Endless Terror"')
                         mq.delay(5)
                     end
-                    Casting.UseDisc(discSpell, Targetting.GetTargetID())
+                    Casting.UseDisc(discSpell, Targeting.GetTargetID())
                 else
                     Logger.log_error("\ar COOL DOWN \ag >> \aw meleemit \ag << ")
                 end
@@ -35,7 +35,7 @@ local _ClassConfig = {
                 local discSpell = Core.GetResolvedActionMapItem('missall')
 
                 if discSpell and discSpell() and Casting.DiscReady(discSpell) then
-                    Casting.UseDisc(discSpell, Targetting.GetTargetID())
+                    Casting.UseDisc(discSpell, Targeting.GetTargetID())
                 else
                     Logger.log_error("\ar COOL DOWN \ag >> \aw missall \ag << ")
                 end
@@ -374,14 +374,14 @@ local _ClassConfig = {
                 name = "Warlord's Fury",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.TargettedAAReady(aaName)
+                    return Casting.TargetedAAReady(aaName)
                 end,
             },
             {
                 name = "War Sheol's Heroic Blade",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.TargettedAAReady(aaName)
+                    return Casting.TargetedAAReady(aaName)
                 end,
             },
 
@@ -391,7 +391,7 @@ local _ClassConfig = {
                 name = "aeroar",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and Targetting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
+                    return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
                         Config:GetSetting('DoAEAgro')
                 end,
             },
@@ -399,7 +399,7 @@ local _ClassConfig = {
                 name = "aehitall",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and Targetting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
+                    return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
                         Config:GetSetting('DoAEAgro')
                 end,
             },
@@ -407,7 +407,7 @@ local _ClassConfig = {
                 name = "Area Taunt",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Core.IsModeActive("Tank") and Casting.TargettedAAReady(aaName) and Targetting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
+                    return Core.IsModeActive("Tank") and Casting.TargetedAAReady(aaName) and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
                         Config:GetSetting('DoAEAgro')
                 end,
             },
@@ -437,7 +437,7 @@ local _ClassConfig = {
                 type = "CustomFunc",
                 cond = function(self)
                     return Core.IsModeActive("Tank") and Config:GetSetting('DoBandolier') and not mq.TLO.Me.Bandolier("Agro").Active() and
-                        mq.TLO.Me.Bandolier("Agro").Index() and Targetting.GetXTHaterCount() < Config:GetSetting('BurnMobCount') and not Targetting.IsNamed(mq.TLO.Target)
+                        mq.TLO.Me.Bandolier("Agro").Index() and Targeting.GetXTHaterCount() < Config:GetSetting('BurnMobCount') and not Targeting.IsNamed(mq.TLO.Target)
                 end,
                 custom_func = function(_)
                     Core.DoCmd("/bandolier activate Agro")
@@ -449,7 +449,7 @@ local _ClassConfig = {
                 type = "Ability",
                 cond = function(self, abilityName)
                     return Core.IsModeActive("Tank") and mq.TLO.Me.AbilityReady(abilityName)() and
-                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targetting.GetTargetDistance() < 30
+                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetDistance() < 30
                 end,
             },
             {
@@ -457,7 +457,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and
-                        Targetting.GetTargetDistance() < 30
+                        Targeting.GetTargetDistance() < 30
                 end,
             },
             {
@@ -465,14 +465,14 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and
-                        Targetting.GetTargetDistance() < 30
+                        Targeting.GetTargetDistance() < 30
                 end,
             },
             {
                 name = "Blast of Anger",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Core.IsModeActive("Tank") and Casting.TargettedAAReady(aaName) and mq.TLO.Me.SecondaryPctAggro() > 70 and Targetting.GetTargetDistance() < 80
+                    return Core.IsModeActive("Tank") and Casting.TargetedAAReady(aaName) and mq.TLO.Me.SecondaryPctAggro() > 70 and Targeting.GetTargetDistance() < 80
                 end,
             },
             {
@@ -487,7 +487,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and mq.TLO.Me.SecondaryPctAggro() > 70 and mq.TLO.Me.CurrentEndurance() > 500 and
-                        Targetting.GetTargetDistance() < discSpell.Range()
+                        Targeting.GetTargetDistance() < discSpell.Range()
                 end,
             },
             {
@@ -556,8 +556,8 @@ local _ClassConfig = {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Core.IsModeActive("Tank") and Casting.TargettedAAReady(aaName) and not Casting.SongActiveByName(aaName)
-                        and not Casting.SongActiveByName('Group Bestial Alignment') and Targetting.GetTargetMaxRangeTo() >= Targetting.GetTargetDistance() and
+                    return Core.IsModeActive("Tank") and Casting.TargetedAAReady(aaName) and not Casting.SongActiveByName(aaName)
+                        and not Casting.SongActiveByName('Group Bestial Alignment') and Targeting.GetTargetMaxRangeTo() >= Targeting.GetTargetDistance() and
                         Config:GetSetting('DoBuffs') and
                         Config:GetSetting('DoBattleLeap')
                 end,
@@ -566,7 +566,7 @@ local _ClassConfig = {
                 name = "Rampage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Config:GetSetting('DoAEAgro') and Targetting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount')
+                    return Config:GetSetting('DoAEAgro') and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount')
                 end,
             },
             {
@@ -581,7 +581,7 @@ local _ClassConfig = {
                 type = "Ability",
                 cond = function(self, abilityName)
                     return mq.TLO.Me.AbilityReady(abilityName)() and
-                        Targetting.GetTargetDistance() < Targetting.GetTargetMaxRangeTo() and mq.TLO.Me.Inventory("offhand").Type() == "Shield"
+                        Targeting.GetTargetDistance() < Targeting.GetTargetMaxRangeTo() and mq.TLO.Me.Inventory("offhand").Type() == "Shield"
                 end,
             },
             {
@@ -589,23 +589,23 @@ local _ClassConfig = {
                 type = "Ability",
                 cond = function(self, abilityName)
                     return mq.TLO.Me.AbilityReady(abilityName)() and
-                        Targetting.GetTargetDistance() < Targetting.GetTargetMaxRangeTo()
+                        Targeting.GetTargetDistance() < Targeting.GetTargetMaxRangeTo()
                 end,
             },
             {
                 name = "Knee Strike",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.TargettedAAReady(aaName) and
-                        Targetting.GetTargetDistance() < Targetting.GetTargetMaxRangeTo()
+                    return Casting.TargetedAAReady(aaName) and
+                        Targeting.GetTargetDistance() < Targeting.GetTargetMaxRangeTo()
                 end,
             },
             {
                 name = "Gut Punch",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.TargettedAAReady(aaName) and
-                        Targetting.GetTargetDistance() < Targetting.GetTargetMaxRangeTo()
+                    return Casting.TargetedAAReady(aaName) and
+                        Targeting.GetTargetDistance() < Targeting.GetTargetMaxRangeTo()
                 end,
             },
             {
@@ -613,8 +613,8 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return Config:GetSetting('DoSnare') and
-                        Casting.TargettedAAReady(aaName) and
-                        Targetting.GetTargetDistance() < Targetting.GetTargetMaxRangeTo()
+                        Casting.TargetedAAReady(aaName) and
+                        Targeting.GetTargetDistance() < Targeting.GetTargetMaxRangeTo()
                 end,
             },
             {
@@ -622,7 +622,7 @@ local _ClassConfig = {
                 type = "Ability",
                 cond = function(self, abilityName)
                     return mq.TLO.Me.AbilityReady(abilityName)() and
-                        Targetting.GetTargetDistance() < 15
+                        Targeting.GetTargetDistance() < 15
                 end,
             },
             {
@@ -630,8 +630,8 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.DiscReady(discSpell) and
-                        Targetting.GetTargetDistance() < Targetting.GetTargetMaxRangeTo() and
-                        Targetting.GetTargetPctHPs() <= 20
+                        Targeting.GetTargetDistance() < Targeting.GetTargetMaxRangeTo() and
+                        Targeting.GetTargetPctHPs() <= 20
                 end,
             },
         },

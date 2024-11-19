@@ -1,17 +1,17 @@
 -- Sample Basic Class Module
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Core       = require("utils.core")
-local Targetting = require("utils.targetting")
-local Casting    = require("utils.casting")
-local Ui         = require("utils.ui")
-local Comms      = require("utils.comms")
-local Tables     = require("utils.tables")
-local Strings    = require("utils.strings")
-local Logger     = require("utils.logger")
-local Modules    = require("utils.modules")
-local Set        = require("mq.Set")
-local Icons      = require('mq.ICONS')
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
+local Ui        = require("utils.ui")
+local Comms     = require("utils.comms")
+local Tables    = require("utils.tables")
+local Strings   = require("utils.strings")
+local Logger    = require("utils.logger")
+local Modules   = require("utils.modules")
+local Set       = require("mq.Set")
+local Icons     = require('mq.ICONS')
 
 require('utils.datatypes')
 
@@ -468,7 +468,7 @@ function Module:CharmNow(charmId, useAA)
 	Core.DoCmd("/attack off")
 	local currentTargetID = mq.TLO.Target.ID()
 	if charmId == Config.Globals.AutoTargetID then return end
-	Targetting.SetTarget(charmId)
+	Targeting.SetTarget(charmId)
 
 	local charmSpell = self:GetCharmSpell()
 
@@ -506,7 +506,7 @@ function Module:CharmNow(charmId, useAA)
 
 	mq.doevents()
 
-	Targetting.SetTarget(currentTargetID)
+	Targeting.SetTarget(currentTargetID)
 end
 
 function Module:RemoveCCTarget(mobId)
@@ -522,7 +522,7 @@ function Module:AddCCTarget(mobId)
 		return false
 	end
 
-	Targetting.SetTarget(mobId)
+	Targeting.SetTarget(mobId)
 
 	self.TempSettings.CharmTracker[mobId] = {
 		name = spawn.CleanName(),
@@ -657,7 +657,7 @@ function Module:ProcessCharmList()
 		local spawn = mq.TLO.Spawn(id)
 		Logger.log_debug("\ayProcessCharmList(%d) :: Checking...", id)
 
-		if not spawn or not spawn() or spawn.Dead() or Targetting.TargetIsType("corpse", spawn) then
+		if not spawn or not spawn() or spawn.Dead() or Targeting.TargetIsType("corpse", spawn) then
 			table.insert(removeList, id)
 			Logger.log_debug("\ayProcessCharmList(%d) :: Can't find mob removing...", id)
 		else
@@ -685,12 +685,12 @@ function Module:ProcessCharmList()
 							mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
 						end
 
-						Targetting.SetTarget(id)
+						Targeting.SetTarget(id)
 
 						mq.delay(500, function() return mq.TLO.Target.BuffsPopulated() end)
 
 						local maxWait = 5000
-						while not Casting.TargettedSpellReady(charmSpell.RankName.Name()) and maxWait > 0 do
+						while not Casting.TargetedSpellReady(charmSpell.RankName.Name()) and maxWait > 0 do
 							mq.delay(100)
 							maxWait = maxWait - 100
 						end

@@ -4,7 +4,7 @@ local Config                       = require('utils.config')
 local Math                         = require('utils.math')
 local Combat                       = require('utils.combat')
 local Core                         = require("utils.core")
-local Targetting                   = require("utils.targetting")
+local Targeting                    = require("utils.targeting")
 local Casting                      = require("utils.casting")
 local Ui                           = require("utils.ui")
 local Comms                        = require("utils.comms")
@@ -337,7 +337,7 @@ function Module:ChaseOn(target)
         chaseTarget = mq.TLO.Spawn("pc =" .. target)
     end
 
-    if chaseTarget() and chaseTarget.ID() > 0 and Targetting.TargetIsType("PC", chaseTarget) then
+    if chaseTarget() and chaseTarget.ID() > 0 and Targeting.TargetIsType("PC", chaseTarget) then
         self:CampOff()
         self.settings.ChaseOn = true
         self.settings.ChaseTarget = chaseTarget.CleanName()
@@ -671,7 +671,7 @@ function Module:ShouldFollow()
 
     return not mq.TLO.MoveTo.Moving() and
         (not me.Casting.ID() or Core.MyClassIs("brd")) and
-        (Targetting.GetXTHaterCount() == 0 or (assistSpawn() and (assistSpawn.Distance() or 0) > self.settings.ChaseDistance))
+        (Targeting.GetXTHaterCount() == 0 or (assistSpawn() and (assistSpawn.Distance() or 0) > self.settings.ChaseDistance))
 end
 
 function Module:Go2GGH()
@@ -760,7 +760,7 @@ function Module:GiveTime(combat_state)
         self:DoAutoCampCheck()
     end
 
-    if (Core.IsTanking() and Config:GetSetting('MovebackWhenBehind')) and Targetting.IHaveAggro(100) then
+    if (Core.IsTanking() and Config:GetSetting('MovebackWhenBehind')) and Targeting.IHaveAggro(100) then
         self:DoCombatCampCheck()
     end
 

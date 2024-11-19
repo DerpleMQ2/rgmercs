@@ -1,7 +1,7 @@
 -- Sample Named Class Module
 local mq                 = require('mq')
 local Config             = require('utils.config')
-local Targetting         = require("utils.targetting")
+local Targeting          = require("utils.targeting")
 local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
 local Files              = require("utils.files")
@@ -303,7 +303,7 @@ function Module:IsNamed(spawn)
         return mq.TLO.SpawnMaster.HasSpawn(spawn.ID())()
     end
 
-    return Targetting.ForceNamed
+    return Targeting.ForceNamed
 end
 
 function Module:OnZone()

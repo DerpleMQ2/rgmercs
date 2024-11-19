@@ -1,8 +1,8 @@
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Core       = require("utils.core")
-local Targetting = require("utils.targetting")
-local Casting    = require("utils.casting")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
 
 return {
     _version              = "1.0 - Project Lazarus",
@@ -11,7 +11,7 @@ return {
         IsTanking = function() return Core.IsModeActive("Tank") end,
         IsHealing = function() return true end,
         IsCuring = function() return Config:GetSetting('DoCures') end,
-        IsRezing = function() return (Config:GetSetting('DoBattleRez') and not Core.IsTanking()) or Targetting.GetXTHaterCount() == 0 end,
+        IsRezing = function() return (Config:GetSetting('DoBattleRez') and not Core.IsTanking()) or Targeting.GetXTHaterCount() == 0 end,
         --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
     },
     ['Modes']             = {
@@ -710,7 +710,7 @@ return {
         --Did not include Staff of Forbidden Rites, GoR refresh is very fast and rez is 96%
         DoRez = function(self, corpseId)
             if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
-                Targetting.SetTarget(corpseId)
+                Targeting.SetTarget(corpseId)
 
                 local target = mq.TLO.Target
 
@@ -795,7 +795,7 @@ return {
                 name = "Lay on Hands",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targetting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
+                    return Casting.AAReady(aaName) and Targeting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
                 end,
             },
         },
@@ -891,14 +891,14 @@ return {
                 name = "Undeadburn",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.TargettedDiscReady(discSpell)
+                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
                 name = "Righteousstrike",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.TargettedDiscReady(discSpell)
+                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
@@ -947,7 +947,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targetting.IsNamed(target)) and
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and
                         mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -956,7 +956,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targetting.IsNamed(target)) and
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and
                         mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -965,7 +965,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targetting.IsNamed(target)) and
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and
                         mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -974,7 +974,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targetting.IsNamed(target)) and
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and
                         mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
@@ -1005,21 +1005,21 @@ return {
                 name = "Hallowed Lodestar",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targetting.GetXTHaterCount() > 2
+                    return Casting.AAReady(aaName) and Targeting.GetXTHaterCount() > 2
                 end,
             },
             {
                 name = "Beacon of the Righteous",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targetting.GetXTHaterCount() > 2
+                    return Casting.AAReady(aaName) and Targeting.GetXTHaterCount() > 2
                 end,
             },
             {
                 name = "Heroic Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targetting.GetXTHaterCount() > 2
+                    return Casting.AAReady(aaName) and Targeting.GetXTHaterCount() > 2
                 end,
             },
             {
@@ -1027,28 +1027,28 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     return (mq.TLO.Me.AltAbility(aaName).Rank() or 0) > 7 and not Casting.BuffActiveByName("Knight's Yaulp") and
-                        Targetting.GetTargetDistance() < 30 and Casting.AAReady(aaName)
+                        Targeting.GetTargetDistance() < 30 and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targetting.GetTargetDistance() < 30
+                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetDistance() < 30
                 end,
             },
             {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Disarm",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
@@ -1132,14 +1132,14 @@ return {
                 name = "AntiUndeadNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Targetting.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Casting.SpellReady(spell) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
                 name = "Vanquish The Fallen",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targetting.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Casting.AAReady(aaName) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
@@ -1156,14 +1156,14 @@ return {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Disarm",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
@@ -1201,14 +1201,14 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.SpellReady(spell) and
-                        ((Targetting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
+                        ((Targeting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
                 end,
             },
             {
                 name = "AntiUndeadNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Targetting.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Casting.SpellReady(spell) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
@@ -1243,7 +1243,7 @@ return {
                 name = "Vanquish The Fallen",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targetting.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Casting.AAReady(aaName) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {

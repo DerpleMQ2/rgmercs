@@ -1,7 +1,7 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
 local Core         = require("utils.core")
-local Targetting   = require("utils.Targetting")
+local Targeting    = require("utils.Targeting")
 local Casting      = require("utils.casting")
 local Comms        = require("utils.comms")
 local ItemManager  = require("utils.item_manager")
@@ -267,7 +267,7 @@ local _ClassConfig = {
             local targets = {}
             for i = 1, xtCount do
                 local xtarg = mq.TLO.Me.XTarget(i)
-                --this won't work becuse .Mezzed requires Targetting for cache, left more as a note for others.
+                --this won't work becuse .Mezzed requires Targeting for cache, left more as a note for others.
                 --if Config:GetSetting('SafeAEDamage') and xtarg.Mezzed() then return false end
                 if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and (xtarg.Distance() or 999) <= 50 then
                     if printDebug then
@@ -357,7 +357,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 --need to look at rotation and decide if it should fire during emergencies. leaning towards no
                 return combat_state == "Combat" and Core.IsTanking() and (mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') or
-                    Targetting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
@@ -486,7 +486,7 @@ local _ClassConfig = {
                 name = "Ageless Enmity",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Targetting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
                 end,
             },
             --used to jumpstart hatred on named from the outset and prevent early rips from burns
@@ -494,7 +494,7 @@ local _ClassConfig = {
                 name = "Attention",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargettedDiscReady(discSpell) and Targetting.IsNamed(mq.TLO.Target)
+                    return Casting.TargetedDiscReady(discSpell) and Targeting.IsNamed(mq.TLO.Target)
                 end,
             },
             --used to reinforce hatred after it is initially established
@@ -503,7 +503,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Targetting.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
                 end,
             },
             {
@@ -511,7 +511,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     --if not Config:GetSetting('AETauntAA') then return false end
-                    return Casting.TargettedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
@@ -519,22 +519,22 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Casting.AAReady(aaName) and Targetting.IsNamed(mq.TLO.Target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
             {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targetting.GetTargetID() > 0 and
-                        Targetting.GetTargetDistance() < 30
+                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetID() > 0 and
+                        Targeting.GetTargetDistance() < 30
                 end,
             },
             {
                 name = "AbsorbTaunt",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargettedDiscReady(discSpell)
+                    return Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
@@ -542,35 +542,35 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if not Config:GetSetting('DoAEDamage') then return false end
-                    return Casting.TargettedDiscReady(discSpell) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    return Casting.TargetedDiscReady(discSpell) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
                 name = "AddHate1",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargettedDiscReady(discSpell) and Casting.DetSpellCheck(discSpell)
+                    return Casting.TargetedDiscReady(discSpell) and Casting.DetSpellCheck(discSpell)
                 end,
             },
             {
                 name = "AddHate2",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargettedDiscReady(discSpell)
+                    return Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
                 name = "AgroPet",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargettedDiscReady(discSpell) and Targetting.IsNamed(mq.TLO.Target)
+                    return Casting.TargetedDiscReady(discSpell) and Targeting.IsNamed(mq.TLO.Target)
                 end,
             },
             -- { todo: AE options
             --     name = "AERoar",
             --     type = "Disc",
             --     cond = function(self, discSpell)
-            --         return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and Targetting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
+            --         return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
             --             Config:GetSetting('DoAEAgro')
             --     end,
             -- },
@@ -646,7 +646,7 @@ local _ClassConfig = {
                 end,
                 cond = function(self)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targetting.IsNamed(mq.TLO.Target) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(mq.TLO.Target) and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -658,7 +658,7 @@ local _ClassConfig = {
                 end,
                 cond = function(self)
                     if mq.TLO.Me.Bandolier("DW").Active() then return false end
-                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('EquipDW') and not (Targetting.IsNamed(mq.TLO.Target) and Config:GetSetting('NamedShieldLock'))
+                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('EquipDW') and not (Targeting.IsNamed(mq.TLO.Target) and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("DW") end,
             },
@@ -792,14 +792,14 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     local dichoShield = Core.GetResolvedActionMapItem('DichoShield')
-                    return Core.IsTanking() and Casting.TargettedAAReady(aaName, target.ID()) and not mq.TLO.Me.Buff(dichoShield)
+                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID()) and not mq.TLO.Me.Buff(dichoShield)
                 end,
             },
             {
                 name = "War Sheol's Heroic Blade",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -846,7 +846,7 @@ local _ClassConfig = {
                 name = "ShieldHit",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargettedDiscReady(discSpell)
+                    return Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
@@ -861,21 +861,21 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoBattleLeap') then return false end
-                    return Casting.TargettedAAReady(aaName, target.ID()) and not Casting.SongActiveByName(aaName) and not Casting.SongActiveByName('Group Bestial Alignment')
+                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.SongActiveByName(aaName) and not Casting.SongActiveByName('Group Bestial Alignment')
                 end,
             },
             {
                 name = "Gut Punch",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Core.IsTanking() and Casting.TargettedAAReady(aaName, target.ID())
+                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "Knee Strike",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -883,7 +883,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting("DoAEDamage") then return false end
-                    return Casting.TargettedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
@@ -891,28 +891,28 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSnare') then return false end
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
             {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0) and Core.ShieldEquipped()
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0) and Core.ShieldEquipped()
                 end,
             },
             {
                 name = "Slam",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             -- { --todo:homework
@@ -920,16 +920,16 @@ local _ClassConfig = {
             --     type = "Ability",
             --     cond = function(self, abilityName)
             --         return mq.TLO.Me.AbilityReady(abilityName)() and
-            --             Targetting.GetTargetDistance() < 15
+            --             Targeting.GetTargetDistance() < 15
             --     end,
             -- },
             {
                 name = "StrikeDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargettedDiscReady(discSpell) and
-                        Targetting.GetTargetDistance() < Targetting.GetTargetMaxRangeTo() and
-                        Targetting.GetTargetPctHPs() <= 20
+                    return Casting.TargetedDiscReady(discSpell) and
+                        Targeting.GetTargetDistance() < Targeting.GetTargetMaxRangeTo() and
+                        Targeting.GetTargetPctHPs() <= 20
                 end,
             },
             {
@@ -1037,7 +1037,7 @@ local _ClassConfig = {
             Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targetting. If you are mezzing, consider turning this option off.",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['AETargetCnt']      = {
             DisplayName = "AE Target Count",
@@ -1069,7 +1069,7 @@ local _ClassConfig = {
             Tooltip = "Use AE hatred Discs and AA.",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targetting. If you are mezzing, consider turning this option off.",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['AETauntCnt']       = {
             DisplayName = "AE Taunt Count",

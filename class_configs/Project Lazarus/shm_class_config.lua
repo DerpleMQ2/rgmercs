@@ -2,7 +2,7 @@ local mq           = require('mq')
 local Config       = require('utils.config')
 local Comms        = require("utils.comms")
 local Core         = require("utils.core")
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 local Logger       = require("utils.logger")
 
@@ -12,7 +12,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
-        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targetting.GetXTHaterCount() == 0 end,
+        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Heal',
@@ -687,7 +687,7 @@ local _ClassConfig = {
 
             Logger.log_debug("DoRez(): Found for a valid rez ability.")
 
-            Targetting.SetTarget(corpseId)
+            Targeting.SetTarget(corpseId)
 
             local target = mq.TLO.Target
 
@@ -699,7 +699,7 @@ local _ClassConfig = {
 
             local targetClass = target.Class.ShortName()
 
-            if Targetting.GetXTHaterCount() > 0 and (targetClass == "dru" or targetClass == "clr" or Config:GetSetting('DoBattleRez')) then
+            if Targeting.GetXTHaterCount() > 0 and (targetClass == "dru" or targetClass == "clr" or Config:GetSetting('DoBattleRez')) then
                 Logger.log_debug("DoRez(): Doing Battle Rez!")
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
                     return Casting.UseItem("Staff of Forbidden Rites", corpseId)
@@ -708,7 +708,7 @@ local _ClassConfig = {
                 if Casting.AAReady("Call of the Wild") then
                     return Casting.UseAA("Call of the Wild", corpseId)
                 end
-            elseif Targetting.GetXTHaterCount() == 0 then
+            elseif Targeting.GetXTHaterCount() == 0 then
                 Logger.log_debug("DoRez(): Doing out of combat Rez!")
                 if Casting.CanUseAA("Rejuvenation of Spirit") then
                     Logger.log_debug("DoRez(): Using AA Rez!")
@@ -771,14 +771,14 @@ local _ClassConfig = {
             {
                 name = "RecklessHeal1",
                 type = "Spell",
-                cond = function(self, spell, target) return Casting.TargettedSpellReady(spell, target.ID(), true) end,
+                cond = function(self, spell, target) return Casting.TargetedSpellReady(spell, target.ID(), true) end,
             },
             {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoHealOverTime') then return false end
-                    return Casting.CastReady(spell.RankName) and Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return Casting.CastReady(spell.RankName) and Casting.TargetedSpellReady(spell, target.ID(), true)
                         and Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -789,14 +789,14 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return (target.PctHPs() or 999) <= Config:GetSetting('BigHealPoint') and Casting.CastReady(spell.RankName) and
-                        Casting.TargettedSpellReady(spell, target.ID(), true)
+                        Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
                 name = "Soothsayer's Intervention",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return (target.PctHPs() or 999) <= Config:GetSetting('BigHealPoint') and Casting.TargettedAAReady(aaName, target.ID(), true)
+                    return (target.PctHPs() or 999) <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
                 end,
             },
             {
@@ -841,21 +841,21 @@ local _ClassConfig = {
                 name = "InterventionHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell.RankName) and Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return Casting.CastReady(spell.RankName) and Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
                 name = "Soothsayer's Intervention",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID(), true)
+                    return Casting.TargetedAAReady(aaName, target.ID(), true)
                 end,
             },
             {
                 name = "Union of Spirits",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID(), true)
+                    return Casting.TargetedAAReady(aaName, target.ID(), true)
                 end,
             },
             { --The stuff above is down, lets make mainhealpoint chonkier.
@@ -885,35 +885,35 @@ local _ClassConfig = {
                 name = "RecourseHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
                 name = "AESpiritualHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (target.ID() or 0) == Core.GetMainAssistId() and Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return (target.ID() or 0) == Core.GetMainAssistId() and Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
                 name = "RecklessHeal1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
                 name = "RecklessHeal2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
                 name = "RecklessHeal3",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
@@ -1104,7 +1104,7 @@ local _ClassConfig = {
                 name = "Spirit Call",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1129,7 +1129,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoAEMalo') then return false end
-                    return Targetting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.TargettedAAReady(aaName, target.ID()) and
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.TargetedAAReady(aaName, target.ID()) and
                         Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
@@ -1138,7 +1138,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoAEMalo') or Casting.CanUseAA("Wind of Malaise") then return false end
-                    return Targetting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.TargettedSpellReady(spell, target.ID()) and
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.TargetedSpellReady(spell, target.ID()) and
                         Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1147,7 +1147,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSTMalo') then return false end
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
             {
@@ -1155,7 +1155,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoSTMalo') or Casting.CanUseAA("Malaise") then return false end
-                    return Casting.TargettedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
                 end,
             },
         },
@@ -1165,7 +1165,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoAESlow') then return false end
-                    return Targetting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.TargettedAAReady(aaName, target.ID()) and
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.TargetedAAReady(aaName, target.ID()) and
                         Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
@@ -1174,7 +1174,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoAESlow') or Casting.CanUseAA("Turgur's Virulent Swarm") then return false end
-                    return Targetting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.TargettedSpellReady(spell, target.ID()) and
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.TargetedSpellReady(spell, target.ID()) and
                         Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1183,7 +1183,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSTSlow') then return false end
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
             {
@@ -1191,7 +1191,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoSTSlow') or Casting.CanUseAA("Turgur's Swarm") then return false end
-                    return Casting.TargettedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1199,7 +1199,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not (Config:GetSetting('DoDiseaseSlow') and Config:GetSetting('DoSTSlow')) or Casting.CanUseAA("Turgur's Swarm") then return false end
-                    return Casting.TargettedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
                 end,
             },
         },
@@ -1217,7 +1217,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
                     return Casting.CastReady(spell.RankName) and Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and
-                        Casting.TargettedSpellReady(spell)
+                        Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1225,7 +1225,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1233,7 +1233,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1241,7 +1241,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('CurseDoT2') or not Config:GetSetting('DoHealDPS'))) then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1249,7 +1249,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('ChaoticDoT') or not Config:GetSetting('DoHealDPS'))) then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1257,7 +1257,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Core.IsModeActive("Hybrid") then return false end
-                    return Targetting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargettedSpellReady(spell)
+                    return Targeting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1265,7 +1265,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Core.IsModeActive("Hybrid") or Core.GetResolvedActionMapItem('AfflictionDoT') then return false end
-                    return Targetting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargettedSpellReady(spell)
+                    return Targeting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1299,7 +1299,7 @@ local _ClassConfig = {
                 name = "FastPoisonNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1307,7 +1307,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and Core.GetResolvedActionMapItem('FastPoisonNuke') then return false end
-                    return not Casting.DotSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return not Casting.DotSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1315,7 +1315,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.GetResolvedActionMapItem('PoisonNuke') then return false end
-                    return not Casting.DotSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return not Casting.DotSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
         },
@@ -1456,7 +1456,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoTempHP') then return false end
-                    return Targetting.TargetClassIs("WAR", target) and Casting.CastReady(spell.RankName) and Casting.GroupBuffCheck(spell, target)
+                    return Targeting.TargetClassIs("WAR", target) and Casting.CastReady(spell.RankName) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {

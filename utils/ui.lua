@@ -3,7 +3,7 @@ local Config        = require('utils.config')
 local Modules       = require("utils.modules")
 local Logger        = require("utils.logger")
 local Core          = require("utils.core")
-local Targetting    = require("utils.targetting")
+local Targeting     = require("utils.targeting")
 local Icons         = require('mq.ICONS')
 
 local animSpellGems = mq.FindTextureAnimation('A_SpellGems')
@@ -45,7 +45,7 @@ function Ui.RenderOAList()
             ImGui.TableNextColumn()
             local _, clicked = ImGui.Selectable(name, false)
             if clicked then
-                Targetting.SetTarget(spawn.ID() or 0, false)
+                Targeting.SetTarget(spawn.ID() or 0, false)
             end
             ImGui.TableNextColumn()
             if spawn() and spawn.ID() > 0 then
@@ -118,7 +118,7 @@ function Ui.RenderForceTargetList(showPopout)
 
         for i = 1, xtCount do
             local xtarg = mq.TLO.Me.XTarget(i)
-            if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or Targetting.ForceCombat) then
+            if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or Targeting.ForceCombat) then
                 ImGui.TableNextColumn()
                 if Config.Globals.ForceTargetID > 0 and Config.Globals.ForceTargetID == xtarg.ID() then
                     ImGui.PushStyleColor(ImGuiCol.Text, IM_COL32(52, 200, math.floor(os.clock() % 2) == 1 and 52 or 200, 255))
@@ -172,7 +172,7 @@ function Ui.RenderZoneNamed()
                 ImGui.TableNextColumn()
                 local _, clicked = ImGui.Selectable(named.Name, false)
                 if clicked then
-                    Targetting.SetTarget(named.Spawn() and named.Spawn.ID() or 0)
+                    Targeting.SetTarget(named.Spawn() and named.Spawn.ID() or 0)
                 end
                 ImGui.TableNextColumn()
                 if named.Spawn() and named.Spawn.PctHPs() > 0 then

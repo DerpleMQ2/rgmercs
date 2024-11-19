@@ -2,7 +2,7 @@ local mq           = require('mq')
 local Combat       = require('utils.combat')
 local Config       = require('utils.config')
 local Core         = require("utils.core")
-local Targetting   = require("utils.Targetting")
+local Targeting    = require("utils.Targeting")
 local Casting      = require("utils.casting")
 local ItemManager  = require("utils.item_manager")
 local DanNet       = require('lib.dannet.helpers')
@@ -14,7 +14,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
-        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targetting.GetXTHaterCount() == 0 end,
+        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Heal',
@@ -428,7 +428,7 @@ local _ClassConfig = {
         -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         DoRez = function(self, corpseId)
             if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
-                Targetting.SetTarget(corpseId, true)
+                Targeting.SetTarget(corpseId, true)
 
                 local target = mq.TLO.Target
 
@@ -446,7 +446,7 @@ local _ClassConfig = {
                     Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 end
 
-                if Casting.SpellReady(self.ResolvedActionMap['RezSpell']) and Targetting.GetXTHaterCount() == 0 and not Casting.CanUseAA("Blessing of Resurrection") then
+                if Casting.SpellReady(self.ResolvedActionMap['RezSpell']) and Targeting.GetXTHaterCount() == 0 and not Casting.CanUseAA("Blessing of Resurrection") then
                     Casting.UseSpell(self.ResolvedActionMap['RezSpell'], corpseId, true, true)
                 end
             end
@@ -558,7 +558,7 @@ local _ClassConfig = {
                 name = "ClutchHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell.RankName) and Casting.SpellReady(spell) and Targetting.GetTargetPctHPs() < 35
+                    return Casting.CastReady(spell.RankName) and Casting.SpellReady(spell) and Targeting.GetTargetPctHPs() < 35
                 end,
             },
             {
@@ -579,21 +579,21 @@ local _ClassConfig = {
                 name = "Divine Arbitration",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId
+                    return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId
                 end,
             },
             {
                 name = "Burst of Life",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID(), true)
+                    return Casting.TargetedAAReady(aaName, target.ID(), true)
                 end,
             },
             {
                 name = "Blessing of Sanctuary",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID(), true) and target.ID() == (mq.TLO.Target.AggroHolder.ID() and not Core.GetMainAssistId())
+                    return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == (mq.TLO.Target.AggroHolder.ID() and not Core.GetMainAssistId())
                 end,
             },
             {
@@ -630,28 +630,28 @@ local _ClassConfig = {
                 name = "Focused Celestial Regeneration",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId
+                    return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId
                 end,
             },
             {
                 name = "HealNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargettedSpellReady(spell, target.ID(), true) and mq.TLO.Me.CombatState():lower() == "combat"
+                    return Casting.TargetedSpellReady(spell, target.ID(), true) and mq.TLO.Me.CombatState():lower() == "combat"
                 end,
             },
             {
                 name = "RemedyHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
                 name = "RemedyHeal2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargettedSpellReady(spell, target.ID(), true)
+                    return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             -- {
@@ -752,7 +752,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if target.ID() == mq.TLO.Me.ID() then return false end
                     local rezSearch = string.format("pccorpse %s radius 100 zradius 50", target.DisplayName())
-                    return Casting.TargettedAAReady(aaName, target.ID()) and mq.TLO.SpawnCount(rezSearch)() == 0
+                    return Casting.TargetedAAReady(aaName, target.ID()) and mq.TLO.SpawnCount(rezSearch)() == 0
                 end,
             },
         },
@@ -761,7 +761,7 @@ local _ClassConfig = {
                 name = "ReverseDS",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell.RankName) and Casting.TargettedSpellReady(spell, target.ID(), true) and Casting.GroupBuffCheck(spell, target)
+                    return Casting.CastReady(spell.RankName) and Casting.TargetedSpellReady(spell, target.ID(), true) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -777,7 +777,7 @@ local _ClassConfig = {
                 name = "Celestial Hammer",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -868,14 +868,14 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Core.GetMainAssistPctHPs() < Config:GetSetting('LightHealPoint') and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and
-                        Casting.TargettedSpellReady(spell, target.ID())
+                        Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "Turn Undead",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targetting.TargetBodyIs(target, "Undead") and Casting.TargettedAAReady(aaName, target.ID())
+                    return Targeting.TargetBodyIs(target, "Undead") and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {

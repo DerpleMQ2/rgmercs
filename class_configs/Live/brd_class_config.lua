@@ -2,7 +2,7 @@
 local mq          = require('mq')
 local Config      = require('utils.config')
 local Core        = require("utils.core")
-local Targetting  = require("utils.targetting")
+local Targeting   = require("utils.targeting")
 local Casting     = require("utils.casting")
 local Strings     = require("utils.strings")
 local Logger      = require("utils.logger")
@@ -794,10 +794,10 @@ local _ClassConfig = {
             end
             ItemManager.SwapItemToSlot("offhand", Config:GetSetting('Offhand'))
         end,
-        CheckSongStateUse = function(self, config)    --determine whether a song should be song by comparing combat state to settings
+        CheckSongStateUse = function(self, config)   --determine whether a song should be song by comparing combat state to settings
             local usestate = Config:GetSetting(config)
-            if Targetting.GetXTHaterCount() == 0 then --I have tried this with combat_state nand XTHater, and both have their ups and downs. Keep an eye on this.
-                return usestate > 2                   --I think XTHater will work better if the bard autoassists at 99 or 100.
+            if Targeting.GetXTHaterCount() == 0 then --I have tried this with combat_state nand XTHater, and both have their ups and downs. Keep an eye on this.
+                return usestate > 2                  --I think XTHater will work better if the bard autoassists at 99 or 100.
             else
                 return usestate < 4
             end
@@ -807,7 +807,7 @@ local _ClassConfig = {
             local me = mq.TLO.Me
             local threshold = Config:GetSetting('RefreshCombat')
             --an earlier version of this function checked your cast speed to add to this value, but cast speed TLO is always rounded down and is virtually always "2"
-            if Targetting.GetXTHaterCount() == 0 then threshold = Config:GetSetting('RefreshDT') end
+            if Targeting.GetXTHaterCount() == 0 then threshold = Config:GetSetting('RefreshDT') end
 
             local res = Casting.SongMemed(songSpell) and
                 ((me.Buff(songSpell.Name()).Duration.TotalSeconds() or 999) <= threshold or
@@ -822,13 +822,13 @@ local _ClassConfig = {
             return res
         end,
         UnwantedAggroCheck = function(self) --Self-Explanatory. Add isTanking to this if you ever make a mode for bardtanks!
-            if Targetting.GetXTHaterCount() == 0 or Core.IAmMA() or mq.TLO.Group.Puller.ID() == mq.TLO.Me.ID() then return false end
-            return Targetting.IHaveAggro(100)
+            if Targeting.GetXTHaterCount() == 0 or Core.IAmMA() or mq.TLO.Group.Puller.ID() == mq.TLO.Me.ID() then return false end
+            return Targeting.IHaveAggro(100)
         end,
         DotSongCheck = function(songSpell) --Check dot stacking, stop dotting when HP threshold is reached based on mob type, can't use utils function because we try to refresh just as the dot is ending
             if not songSpell or not songSpell() then return false end
-            local named = Targetting.IsNamed(mq.TLO.Target)
-            local targethp = Targetting.GetTargetPctHPs()
+            local named = Targeting.IsNamed(mq.TLO.Target)
+            local targethp = Targeting.GetTargetPctHPs()
 
             return Casting.SpellStacksOnTarget(songSpell) and ((named and (Config:GetSetting('NamedStopDOT') < targethp)) or
                 (not named and Config:GetSetting('HPStopDOT') < targethp))
@@ -866,7 +866,7 @@ local _ClassConfig = {
             doFullRotation = true,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return Targetting.GetXTHaterCount() > 0 and not Casting.Feigning() and
+                return Targeting.GetXTHaterCount() > 0 and not Casting.Feigning() and
                     (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self))
             end,
         },
@@ -899,7 +899,7 @@ local _ClassConfig = {
             end,
         },
     },
-    --TODO: Triple-check usage of PCAAReady and TargettedAAReady, etc, depending on ability
+    --TODO: Triple-check usage of PCAAReady and TargetedAAReady, etc, depending on ability
     ['Rotations']       = {
         ['Burn'] = {
             {
@@ -927,7 +927,7 @@ local _ClassConfig = {
                 name = "Bladed Song",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -974,14 +974,14 @@ local _ClassConfig = {
                 name = "Cacophony",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "Frenzied Kicks",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -999,14 +999,14 @@ local _ClassConfig = {
                 type = "Song",
                 cond = function(self, songSpell)
                     if not (Config:GetSetting('MezOn') and Config:GetSetting('UseAEAAMez') and Casting.SongMemed(songSpell)) then return false end
-                    return Targetting.GetXTHaterCount() >= Config:GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
+                    return Targeting.GetXTHaterCount() >= Config:GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
                 end,
             },
             {
                 name = "AESlowSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return Config:GetSetting("DoAESlow") and Casting.DetSpellCheck(songSpell) and Targetting.GetXTHaterCount() > 2 and not mq.TLO.Target.Slowed()
+                    return Config:GetSetting("DoAESlow") and Casting.DetSpellCheck(songSpell) and Targeting.GetXTHaterCount() > 2 and not mq.TLO.Target.Slowed()
                 end,
             },
             {
@@ -1072,7 +1072,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ReflexStrike,
                 cond = function(self, discSpell)
                     local pct = Config:GetSetting('GroupManaPct')
-                    return Casting.TargettedDiscReady(discSpell) and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
+                    return Casting.TargetedDiscReady(discSpell) and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
                 end,
             },
             {
@@ -1081,7 +1081,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if Config:GetSetting('UseBellow') == 1 then return false end
                     return ((Config:GetSetting('UseBellow') == 3 and mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct')) or (Config:GetSetting('UseBellow') == 2 and Casting.BurnCheck())) and
-                        Casting.DetSpellCheck(mq.TLO.AltAbility(aaName).Spell) and Casting.TargettedAAReady(aaName, target.ID())
+                        Casting.DetSpellCheck(mq.TLO.AltAbility(aaName).Spell) and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {

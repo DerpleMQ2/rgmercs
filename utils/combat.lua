@@ -1,17 +1,17 @@
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Logger     = require("utils.logger")
-local Modules    = require("utils.modules")
-local Math       = require("utils.math")
-local Comms      = require("utils.comms")
-local Core       = require("utils.core")
-local Targetting = require("utils.targetting")
-local DanNet     = require("lib.dannet.helpers")
-local Strings    = require("utils.strings")
-local Movement   = require("utils.movement")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Logger    = require("utils.logger")
+local Modules   = require("utils.modules")
+local Math      = require("utils.math")
+local Comms     = require("utils.comms")
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local DanNet    = require("lib.dannet.helpers")
+local Strings   = require("utils.strings")
+local Movement  = require("utils.movement")
 
-local Combat     = { _version = '1.0', _name = "Combat", _author = 'Derple', }
-Combat.__index   = Combat
+local Combat    = { _version = '1.0', _name = "Combat", _author = 'Derple', }
+Combat.__index  = Combat
 
 --- Sets the control (Assist) toon for RGMercs
 --- This function is responsible for designating a specific toon as the control toon.
@@ -24,7 +24,7 @@ function Combat.SetControlToon()
 
             if maSpawn.ID() > 0 and not maSpawn.Dead() then
                 -- make sure they are still in our XT.
-                Targetting.AddXTByName(2, maSpawn.DisplayName())
+                Targeting.AddXTByName(2, maSpawn.DisplayName())
                 return
             end
 
@@ -36,11 +36,11 @@ function Combat.SetControlToon()
                     Logger.log_info("Setting new assist to %s [%d]", assistSpawn.CleanName(), assistSpawn.ID())
                     Config.Globals.MainAssist = assistSpawn.CleanName()
 
-                    Targetting.AddXTByName(2, assistSpawn.DisplayName())
+                    Targeting.AddXTByName(2, assistSpawn.DisplayName())
 
                     return
                 elseif assistSpawn() and assistSpawn.ID() == Core.GetMainAssistId() and not assistSpawn.Dead() then
-                    Targetting.AddXTByName(2, assistSpawn.DisplayName())
+                    Targeting.AddXTByName(2, assistSpawn.DisplayName())
                     return
                 end
             end
@@ -69,16 +69,16 @@ function Combat.EngageTarget(autoTargetId)
         mq.TLO.Me.Stand()
     end
 
-    Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Checking for valid Target.", Targetting.GetTargetCleanName())
+    Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Checking for valid Target.", Targeting.GetTargetCleanName())
 
-    if target() and (target.ID() or 0) == autoTargetId and Targetting.GetTargetDistance() <= Config:GetSetting('AssistRange') then
+    if target() and (target.ID() or 0) == autoTargetId and Targeting.GetTargetDistance() <= Config:GetSetting('AssistRange') then
         if Config:GetSetting('DoMelee') then
             if mq.TLO.Me.Sitting() then
                 mq.TLO.Me.Stand()
             end
 
-            if (Targetting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or Core.IAmMA()) and not Targetting.GetTargetDead(target) then
-                if Targetting.GetTargetDistance(target) > Targetting.GetTargetMaxRangeTo(target) then
+            if (Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or Core.IAmMA()) and not Targeting.GetTargetDead(target) then
+                if Targeting.GetTargetDistance(target) > Targeting.GetTargetMaxRangeTo(target) then
                     Logger.log_debug("EngageTarget(): Target is too far! %d>%d attempting to nav to it.", target.Distance(),
                         target.MaxRangeTo())
 
@@ -87,7 +87,7 @@ function Combat.EngageTarget(autoTargetId)
                         classConfig.HelperFunctions.PreEngage(target)
                     end
 
-                    Movement.NavInCombat(autoTargetId, Targetting.GetTargetMaxRangeTo(target), false)
+                    Movement.NavInCombat(autoTargetId, Targeting.GetTargetMaxRangeTo(target), false)
                 else
                     Logger.log_debug("EngageTarget(): Target is in range moving to combat")
                     if mq.TLO.Navigation.Active() then
@@ -99,9 +99,9 @@ function Combat.EngageTarget(autoTargetId)
                 end
 
                 if not mq.TLO.Me.Combat() then
-                    Logger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", Targetting.GetTargetCleanName())
+                    Logger.log_info("\awNOTICE:\ax Engaging %s in mortal combat.", Targeting.GetTargetCleanName())
                     if Core.IAmMA() then
-                        Comms.HandleAnnounce(string.format('TANKING -> %s <-', Targetting.GetTargetCleanName()), Config:GetSetting('AnnounceTargetGroup'),
+                        Comms.HandleAnnounce(string.format('TANKING -> %s <-', Targeting.GetTargetCleanName()), Config:GetSetting('AnnounceTargetGroup'),
                             Config:GetSetting('AnnounceTarget'))
                     end
                     Logger.log_debug("EngageTarget(): Attacking target!")
@@ -111,10 +111,10 @@ function Combat.EngageTarget(autoTargetId)
                 end
             else
                 Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.",
-                    Targetting.GetTargetCleanName())
+                    Targeting.GetTargetCleanName())
             end
         else
-            Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Targetting.GetTargetCleanName())
+            Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Targeting.GetTargetCleanName())
         end
     else
         if not Config:GetSetting('DoMelee') and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
@@ -141,8 +141,8 @@ end
 function Combat.MercEngage()
     local merc = mq.TLO.Me.Mercenary
 
-    if merc() and Targetting.GetTargetID() == Config.Globals.AutoTargetID and Targetting.GetTargetDistance() < Config:GetSetting('AssistRange') then
-        if Targetting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or                        -- Hit Assist HP
+    if merc() and Targeting.GetTargetID() == Config.Globals.AutoTargetID and Targeting.GetTargetDistance() < Config:GetSetting('AssistRange') then
+        if Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or                         -- Hit Assist HP
             merc.Class.ShortName():lower() == "clr" or                                                 -- Cleric can engage right away
             (merc.Class.ShortName():lower() == "war" and mq.TLO.Group.MainTank.ID() == merc.ID()) then -- Merc is our Main Tank
             return true
@@ -174,11 +174,11 @@ end
 function Combat.DoCombatActions()
     if not Config.Globals.LastMove then return false end
     if Config.Globals.AutoTargetID == 0 then return false end
-    if Targetting.GetXTHaterCount() == 0 then return false end
+    if Targeting.GetXTHaterCount() == 0 then return false end
 
     -- We can't assume our target is our autotargetid for where this sub is used.
     local autoSpawn = mq.TLO.Spawn(Config.Globals.AutoTargetID)
-    if autoSpawn() and Targetting.GetTargetDistance(autoSpawn) > Config:GetSetting('AssistRange') then return false end
+    if autoSpawn() and Targeting.GetTargetDistance(autoSpawn) > Config:GetSetting('AssistRange') then return false end
 
     return true
 end
@@ -201,8 +201,8 @@ function Combat.MATargetScan(radius, zradius)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targetting.ForceCombat) then
-            if not Config:GetSetting('SafeTargeting') or not Targetting.IsSpawnFightingStranger(xtSpawn, radius) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
+            if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(xtSpawn, radius) then
                 Logger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(),
                     xtSpawn.Distance())
                 if (xtSpawn.Distance() or 999) <= radius then
@@ -220,7 +220,7 @@ function Combat.MATargetScan(radius, zradius)
                     end
 
                     -- If a name has take priority.
-                    if Targetting.IsNamed(xtSpawn) then
+                    if Targeting.IsNamed(xtSpawn) then
                         Logger.log_verbose("\agFound Named: %s -- returning %d", xtSpawn.CleanName(), xtSpawn.ID())
                         return xtSpawn.ID() or 0
                     end
@@ -260,11 +260,11 @@ function Combat.MATargetScan(radius, zradius)
 
                 if spawn() and (spawn.CleanName() or "None"):find("Guard") == nil then
                     -- If the spawn is already in combat with someone else, we should skip them.
-                    if not Config:GetSetting('SafeTargeting') or not Targetting.IsSpawnFightingStranger(spawn, radius) then
+                    if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(spawn, radius) then
                         -- If a name has pulled in we target the name first and return. Named always
                         -- take priority. Note: More mobs as of ToL are "named" even though they really aren't.
 
-                        if Targetting.IsNamed(spawn) then
+                        if Targeting.IsNamed(spawn) then
                             Logger.log_verbose("DEBUG Found Named: %s -- returning %d", spawn.CleanName(), spawn.ID())
                             return spawn.ID()
                         end
@@ -286,7 +286,7 @@ function Combat.MATargetScan(radius, zradius)
             for i = 1, aggroMobPetCount do
                 local spawn = mq.TLO.NearestSpawn(i, aggroSearchPet)
 
-                if not Config:GetSetting('SafeTargeting') or not Targetting.IsSpawnFightingStranger(spawn, radius) then
+                if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(spawn, radius) then
                     -- Lowest HP
                     if spawn.PctHPs() < lowestHP then
                         lowestHP = spawn.PctHPs()
@@ -324,10 +324,10 @@ function Combat.FindBestAutoTarget(validateFn)
     -- Handle cases where our autotarget is no longer valid because it isn't a valid spawn or is dead.
     if Config.Globals.AutoTargetID ~= 0 then
         local autoSpawn = mq.TLO.Spawn(string.format("id %d", Config.Globals.AutoTargetID))
-        if not autoSpawn or not autoSpawn() or Targetting.TargetIsType("corpse", autoSpawn) then
+        if not autoSpawn or not autoSpawn() or Targeting.TargetIsType("corpse", autoSpawn) then
             Logger.log_debug("\ayFindTarget() : Clearing Target (%d/%s) because it is a corpse or no longer valid.", Config.Globals.AutoTargetID,
                 autoSpawn and (autoSpawn.CleanName() or "Unknown") or "None")
-            Targetting.ClearTarget()
+            Targeting.ClearTarget()
         end
     end
 
@@ -355,12 +355,12 @@ function Combat.FindBestAutoTarget(validateFn)
         else
             -- We need to handle manual targeting and autotargeting seperately
             if not Config:GetSetting('DoAutoTarget') then
-                -- Manual targetting let the manual user target any npc or npcpet.
+                -- Manual targeting let the manual user target any npc or npcpet.
                 if Config.Globals.AutoTargetID ~= target.ID() and
-                    (Targetting.TargetIsType("npc", target) or Targetting.TargetIsType("npcpet", target)) and
-                    Targetting.GetTargetDistance(target) < Config:GetSetting('AssistRange') and
-                    Targetting.GetTargetDistanceZ(target) < 20 and
-                    Targetting.GetTargetAggressive(target) and
+                    (Targeting.TargetIsType("npc", target) or Targeting.TargetIsType("npcpet", target)) and
+                    Targeting.GetTargetDistance(target) < Config:GetSetting('AssistRange') and
+                    Targeting.GetTargetDistanceZ(target) < 20 and
+                    Targeting.GetTargetAggressive(target) and
                     target.Mezzed.ID() == nil and target.Charmed.ID() == nil then
                     Logger.log_info("FindTarget(): Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName() or "None", target.ID())
                     Config.Globals.AutoTargetID = target.ID()
@@ -410,7 +410,7 @@ function Combat.FindBestAutoTarget(validateFn)
             else
                 local assistSpawn = Config.Globals.GetMainAssistSpawn()
                 if assistSpawn and assistSpawn() then
-                    Targetting.SetTarget(assistSpawn.ID(), true)
+                    Targeting.SetTarget(assistSpawn.ID(), true)
                     assistTarget = mq.TLO.Me.TargetOfTarget
                     Logger.log_verbose("\ayFindTargetCheck Assist's Target via TargetOfTarget :: %s ",
                         assistTarget.CleanName() or "None")
@@ -420,11 +420,11 @@ function Combat.FindBestAutoTarget(validateFn)
             Logger.log_verbose("FindTarget Assisting %s -- Target Agressive: %s", Config.Globals.MainAssist,
                 Strings.BoolToColorString(assistTarget and assistTarget.Aggressive() or false))
 
-            if assistTarget and assistTarget() and (Targetting.TargetIsType("npc", assistTarget) or Targetting.TargetIsType("npcpet", assistTarget)) then
+            if assistTarget and assistTarget() and (Targeting.TargetIsType("npc", assistTarget) or Targeting.TargetIsType("npcpet", assistTarget)) then
                 Logger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
                     assistTarget.ID())
                 Config.Globals.AutoTargetID = assistTarget.ID()
-                Targetting.AddXTByName(1, assistTarget.Name())
+                Targeting.AddXTByName(1, assistTarget.Name())
             end
         else
             Combat.SetAutoTargetToGroupOrRaidTarget()
@@ -436,7 +436,7 @@ function Combat.FindBestAutoTarget(validateFn)
 
     if Config.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then
         if not validateFn or validateFn(Config.Globals.AutoTargetID) then
-            Targetting.SetTarget(Config.Globals.AutoTargetID, true)
+            Targeting.SetTarget(Config.Globals.AutoTargetID, true)
         end
     end
 end
@@ -449,7 +449,7 @@ end
 function Combat.FindBestAutoTargetCheck()
     local config = Config:GetSettings()
 
-    Logger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Targetting.GetXTHaterCount(),
+    Logger.log_verbose("FindTargetCheck(%d, %s, %s, %s)", Targeting.GetXTHaterCount(),
         Strings.BoolToColorString(Core.IAmMA()), Strings.BoolToColorString(config.FollowMarkTarget),
         Strings.BoolToColorString(Config.Globals.BackOffFlag))
 
@@ -470,7 +470,7 @@ function Combat.FindBestAutoTargetCheck()
         end
     end
 
-    return (Targetting.GetXTHaterCount() > 0 or Core.IAmMA() or config.FollowMarkTarget or OATarget) and
+    return (Targeting.GetXTHaterCount() > 0 or Core.IAmMA() or config.FollowMarkTarget or OATarget) and
         not Config.Globals.BackOffFlag
 end
 
@@ -486,9 +486,9 @@ function Combat.OkToEngagePreValidateId(targetId)
 
     if not target() or target.Dead() then return false end
 
-    local pcCheck = Targetting.TargetIsType("pc", target) or
-        (Targetting.TargetIsType("pet", target) and Targetting.TargetIsType("pc", target.Master))
-    local mercCheck = Targetting.TargetIsType("mercenary", target)
+    local pcCheck = Targeting.TargetIsType("pc", target) or
+        (Targeting.TargetIsType("pet", target) and Targeting.TargetIsType("pc", target.Master))
+    local mercCheck = Targeting.TargetIsType("mercenary", target)
     if pcCheck or mercCheck then
         if not mq.TLO.Me.Combat() then
             Logger.log_verbose(
@@ -498,21 +498,21 @@ function Combat.OkToEngagePreValidateId(targetId)
         return false
     end
 
-    if Config:GetSetting('SafeTargeting') and Targetting.IsSpawnFightingStranger(target, 100) then
+    if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(target, 100) then
         Logger.log_verbose("\ay  OkToEngageId(%s) is fighting Stranger --> Not Engaging",
-            Targetting.GetTargetCleanName())
+            Targeting.GetTargetCleanName())
         return false
     end
 
-    if not Config.Globals.BackOffFlag then --Targetting.GetXTHaterCount() > 0 and not Config.Globals.BackOffFlag then
-        local distanceCheck = Targetting.GetTargetDistance(target) < Config:GetSetting('AssistRange')
-        local assistCheck = (Targetting.GetTargetPctHPs(target) <= Config:GetSetting('AutoAssistAt') or Core.IsTanking() or Core.IAmMA())
+    if not Config.Globals.BackOffFlag then --Targeting.GetXTHaterCount() > 0 and not Config.Globals.BackOffFlag then
+        local distanceCheck = Targeting.GetTargetDistance(target) < Config:GetSetting('AssistRange')
+        local assistCheck = (Targeting.GetTargetPctHPs(target) <= Config:GetSetting('AutoAssistAt') or Core.IsTanking() or Core.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
                 Logger.log_verbose(
                     "\ag  OkToEngageId(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
-                    Targetting.GetTargetCleanName(target),
-                    Targetting.GetTargetDistance(target), Config:GetSetting('AssistRange'), Targetting.GetTargetPctHPs(target),
+                    Targeting.GetTargetCleanName(target),
+                    Targeting.GetTargetDistance(target), Config:GetSetting('AssistRange'), Targeting.GetTargetPctHPs(target),
                     Config:GetSetting('AutoAssistAt'), assistId,
                     mq.TLO.Me.ID())
             end
@@ -520,15 +520,15 @@ function Combat.OkToEngagePreValidateId(targetId)
         else
             Logger.log_verbose(
                 "\ay  OkToEngageId(%s) AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
-                Targetting.GetTargetCleanName(target),
-                target.CleanName(), target.ID(), Strings.BoolToColorString(distanceCheck), Targetting.GetTargetDistance(target),
+                Targeting.GetTargetCleanName(target),
+                target.CleanName(), target.ID(), Strings.BoolToColorString(distanceCheck), Targeting.GetTargetDistance(target),
                 Strings.BoolToColorString(assistCheck))
             return false
         end
     end
 
     Logger.log_verbose("\ay  OkToEngageId(%s) Okay to Engage Failed with Fall Through!",
-        Targetting.GetTargetCleanName(target),
+        Targeting.GetTargetCleanName(target),
         Strings.BoolToColorString(pcCheck), Strings.BoolToColorString(mercCheck))
     return false
 end
@@ -543,9 +543,9 @@ function Combat.OkToEngage(autoTargetId)
 
     if not target() or target.Dead() then return false end
 
-    local pcCheck = Targetting.TargetIsType("pc", target) or
-        (Targetting.TargetIsType("pet", target) and Targetting.TargetIsType("pc", target.Master))
-    local mercCheck = Targetting.TargetIsType("mercenary", target)
+    local pcCheck = Targeting.TargetIsType("pc", target) or
+        (Targeting.TargetIsType("pet", target) and Targeting.TargetIsType("pc", target.Master))
+    local mercCheck = Targeting.TargetIsType("mercenary", target)
     if pcCheck or mercCheck then
         if not mq.TLO.Me.Combat() then
             Logger.log_verbose(
@@ -555,13 +555,13 @@ function Combat.OkToEngage(autoTargetId)
         return false
     end
 
-    if Config:GetSetting('SafeTargeting') and Targetting.IsSpawnFightingStranger(target, 100) then
+    if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(target, 100) then
         Logger.log_verbose("\ay  OkayToEngage() %s is fighting Stranger --> Not Engaging",
-            Targetting.GetTargetCleanName())
+            Targeting.GetTargetCleanName())
         return false
     end
 
-    if Targetting.GetTargetID() ~= autoTargetId then
+    if Targeting.GetTargetID() ~= autoTargetId then
         Logger.log_verbose("  OkayToEngage() %d != %d --> Not Engaging", target.ID() or 0, autoTargetId)
         return false
     end
@@ -572,22 +572,22 @@ function Combat.OkToEngage(autoTargetId)
         return false
     end
 
-    if not Config.Globals.BackOffFlag then --Targetting.GetXTHaterCount() > 0 and not Config.Globals.BackOffFlag then
-        local distanceCheck = Targetting.GetTargetDistance() < Config:GetSetting('AssistRange')
-        local assistCheck = (Targetting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or Core.IsTanking() or Core.IAmMA())
+    if not Config.Globals.BackOffFlag then --Targeting.GetXTHaterCount() > 0 and not Config.Globals.BackOffFlag then
+        local distanceCheck = Targeting.GetTargetDistance() < Config:GetSetting('AssistRange')
+        local assistCheck = (Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or Core.IsTanking() or Core.IAmMA())
         if distanceCheck and assistCheck then
             if not mq.TLO.Me.Combat() then
                 Logger.log_verbose(
                     "\ag  OkayToEngage(%s) %d < %d and %d < %d or Tanking or %d == %d --> \agOK To Engage!",
-                    Targetting.GetTargetCleanName(),
-                    Targetting.GetTargetDistance(), Config:GetSetting('AssistRange'), Targetting.GetTargetPctHPs(), Config:GetSetting('AutoAssistAt'), assistId,
+                    Targeting.GetTargetCleanName(),
+                    Targeting.GetTargetDistance(), Config:GetSetting('AssistRange'), Targeting.GetTargetPctHPs(), Config:GetSetting('AutoAssistAt'), assistId,
                     mq.TLO.Me.ID())
             end
             return true
         else
             Logger.log_verbose(
                 "\ay  OkayToEngage() AssistCheck failed for: %s / %d distanceCheck(%s/%d), assistCheck(%s)",
-                target.CleanName(), target.ID(), Strings.BoolToColorString(distanceCheck), Targetting.GetTargetDistance(),
+                target.CleanName(), target.ID(), Strings.BoolToColorString(distanceCheck), Targeting.GetTargetDistance(),
                 Strings.BoolToColorString(assistCheck))
             return false
         end
@@ -609,7 +609,7 @@ function Combat.PetAttack(targetId, sendSwarm)
     if not target() then return end
     if pet.ID() == 0 then return end
 
-    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and Targetting.TargetIsType("NPC", target) then
+    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and Targeting.TargetIsType("NPC", target) then
         Core.DoCmd("/squelch /pet attack %d", targetId)
         if sendSwarm then
             Core.DoCmd("/squelch /pet swarm")
@@ -634,8 +634,8 @@ end
 --- @return boolean
 function Combat.ShouldDoCamp()
     return
-        (Targetting.GetXTHaterCount() == 0 and Config.Globals.AutoTargetID == 0) or
-        (not Core.IsTanking() and Targetting.GetAutoTargetPctHPs() > Config:GetSetting('AutoAssistAt'))
+        (Targeting.GetXTHaterCount() == 0 and Config.Globals.AutoTargetID == 0) or
+        (not Core.IsTanking() and Targeting.GetAutoTargetPctHPs() > Config:GetSetting('AutoAssistAt'))
 end
 
 --- Checks if the auto camp feature should be activated based on the provided temporary configuration.
@@ -829,7 +829,7 @@ function Combat.FindWorstHurtManaXT(minMana)
     for i = 1, xtSize do
         local healTarget = mq.TLO.Me.XTarget(i)
 
-        if healTarget and healTarget() and Targetting.TargetIsType("pc", healTarget) then
+        if healTarget and healTarget() and Targeting.TargetIsType("pc", healTarget) then
             if Config.Constants.RGCasters:contains(healTarget.Class.ShortName()) then -- berzerkers have special handing
                 if not healTarget.Dead() and healTarget.PctMana() < worstPct then
                     Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
@@ -862,7 +862,7 @@ function Combat.FindWorstHurtXT(minHPs)
     for i = 1, xtSize do
         local healTarget = mq.TLO.Me.XTarget(i)
 
-        if healTarget and healTarget() and Targetting.TargetIsType("pc", healTarget) then
+        if healTarget and healTarget() and Targeting.TargetIsType("pc", healTarget) then
             if not healTarget.Dead() and healTarget.PctHPs() < worstPct then
                 Logger.log_verbose("\aySo far %s is the worst off.", healTarget.DisplayName())
                 worstPct = healTarget.PctHPs()

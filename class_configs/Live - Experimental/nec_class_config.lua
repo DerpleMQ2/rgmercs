@@ -11,7 +11,7 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
 local Core         = require("utils.core")
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 local Comms        = require("utils.comms")
 
@@ -23,7 +23,7 @@ local _ClassConfig = {
     },
     ['ModeChecks']      = {
         -- necro can AA Rez
-        IsRezing = function() return Config:GetSetting('BattleRez') or Targetting.GetXTHaterCount() == 0 end,
+        IsRezing = function() return Config:GetSetting('BattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Themes']          = {
         ['DPS'] = {
@@ -789,8 +789,8 @@ local _ClassConfig = {
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return Targetting.GetXTHaterCount() > 0 and not Casting.Feigning() and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targetting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
+                return Targeting.GetXTHaterCount() > 0 and not Casting.Feigning() and
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
@@ -859,7 +859,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('AggroFeign') then return false end
-                    return (mq.TLO.Me.PctHPs() <= 40 and Targetting.IHaveAggro(100)) or (Targetting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
+                    return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
                         and Casting.AAReady(aaName)
                 end,
             },
@@ -867,7 +867,7 @@ local _ClassConfig = {
                 name = "Dying Grasp",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.TargettedAAReady(aaName)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.TargetedAAReady(aaName)
                 end,
             },
             {
@@ -881,7 +881,7 @@ local _ClassConfig = {
                 name = "Harm Shield",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Targetting.IHaveAggro(100)) and Casting.AAReady(aaName)
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Targeting.IHaveAggro(100)) and Casting.AAReady(aaName)
                 end,
             },
         },
@@ -897,7 +897,7 @@ local _ClassConfig = {
                 name = "FireDot2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -912,28 +912,28 @@ local _ClassConfig = {
                 name = "Combo",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Poison2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Magic2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "GroupLeech",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -941,7 +941,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return ((not Casting.DotSpellCheck(spell) and Casting.HaveManaToNuke()) or Casting.BurnCheck()) and
-                        Casting.TargettedSpellReady(spell)
+                        Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -949,7 +949,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     return ((not Casting.DotSpellCheck(spell) and Casting.HaveManaToNuke()) or Casting.BurnCheck()) and
-                        Casting.TargettedSpellReady(spell)
+                        Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -973,7 +973,7 @@ local _ClassConfig = {
                 name = "Scent of Thule",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Targetting.IsNamed(mq.TLO.Target) and Casting.TargettedAAReady(aaName)
+                    return Targeting.IsNamed(mq.TLO.Target) and Casting.TargetedAAReady(aaName)
                 end,
             },
             {
@@ -1006,12 +1006,12 @@ local _ClassConfig = {
             {
                 name = "Gathering Dusk",
                 type = "AA",
-                cond = function(self, aaName) return Targetting.IsNamed(mq.TLO.Target) and Casting.AAReady(aaName) end,
+                cond = function(self, aaName) return Targeting.IsNamed(mq.TLO.Target) and Casting.AAReady(aaName) end,
             },
             {
                 name = "Swarm of Decay",
                 type = "AA",
-                cond = function(self, aaName) return Casting.TargettedAAReady(aaName) end,
+                cond = function(self, aaName) return Casting.TargetedAAReady(aaName) end,
             },
             {
                 name = "Companion's Fury",
@@ -1026,7 +1026,7 @@ local _ClassConfig = {
             {
                 name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName) return Targetting.IsNamed(mq.TLO.Target) and Casting.AAReady(aaName) end,
+                cond = function(self, aaName) return Targeting.IsNamed(mq.TLO.Target) and Casting.AAReady(aaName) end,
             },
             {
                 name = "Forceful Rejuvenation",
@@ -1060,14 +1060,14 @@ local _ClassConfig = {
                 name = "Silent Casting",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targetting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 60
+                    return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 60
                 end,
             },
             {
                 name = "Dying Grasp",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.TargettedAAReady(aaName) and Targetting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() <= 50
+                    return Casting.TargetedAAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() <= 50
                 end,
             },
         },
@@ -1185,7 +1185,7 @@ local _ClassConfig = {
 
         DoRez = function(self, corpseId)
             if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
-                Targetting.SetTarget(corpseId)
+                Targeting.SetTarget(corpseId)
 
                 local target = mq.TLO.Target
 

@@ -1,20 +1,20 @@
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Targetting = require("utils.targetting")
-local Core       = require("utils.core")
-local Modules    = require("utils.modules")
-local Logger     = require("utils.logger")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Targeting = require("utils.targeting")
+local Core      = require("utils.core")
+local Modules   = require("utils.modules")
+local Logger    = require("utils.logger")
 
-local Events     = { _version = '1.0', _name = "Events", _author = 'Derple', }
+local Events    = { _version = '1.0', _name = "Events", _author = 'Derple', }
 
-Events.__index   = Events
+Events.__index  = Events
 
 --- Handles the death event for RGMercs.
 --- This function is triggered when a death event occurs and performs necessary operations.
 function Events.HandleDeath()
     Logger.log_warn("You are sleeping with the fishes.")
 
-    Targetting.ClearTarget()
+    Targeting.ClearTarget()
 
     Modules:ExecAll("OnDeath")
 

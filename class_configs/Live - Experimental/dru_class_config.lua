@@ -1,7 +1,7 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
 local Core         = require("utils.core")
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
@@ -10,7 +10,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return Core.IsModeActive("Heal") end,
-        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targetting.GetXTHaterCount() == 0 end,
+        IsRezing = function() return Config:GetSetting('DoBattleRez') or Targeting.GetXTHaterCount() == 0 end,
     },
     ['Modes']             = {
         'Heal',
@@ -905,58 +905,58 @@ local _ClassConfig = {
                 name = "NaturesWrathDOT",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not Casting.DetGOMCheck() or Targetting.IsNamed(mq.TLO.Target) then return false end
-                    return Casting.TargettedSpellReady(spell)
+                    if not Casting.DetGOMCheck() or Targeting.IsNamed(mq.TLO.Target) then return false end
+                    return Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "HordeDOT",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not Casting.DetGOMCheck() or Targetting.IsNamed(mq.TLO.Target) then return false end
-                    return Casting.TargettedSpellReady(spell) and Casting.DotSpellCheck(spell)
+                    if not Casting.DetGOMCheck() or Targeting.IsNamed(mq.TLO.Target) then return false end
+                    return Casting.TargetedSpellReady(spell) and Casting.DotSpellCheck(spell)
                 end,
             },
             {
                 name = "SunDOT",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargettedSpellReady(spell) and Casting.HaveManaToNuke() and Casting.DotSpellCheck(spell)
+                    return Casting.TargetedSpellReady(spell) and Casting.HaveManaToNuke() and Casting.DotSpellCheck(spell)
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargettedSpellReady(spell) and Casting.HaveManaToNuke() and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
+                    return Casting.TargetedSpellReady(spell) and Casting.HaveManaToNuke() and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
                 end,
             },
             {
                 name = "RemoteSunDD",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargettedSpellReady(spell) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
+                    return Casting.TargetedSpellReady(spell) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
                 end,
             },
             {
                 name = "Nature's Frost",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "Nature's Fire",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "Nature's Bolt",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
                 end,
             },
         },
@@ -1065,7 +1065,7 @@ local _ClassConfig = {
                 name = "Blessing of Ro",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID()) and not Casting.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)) and
+                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)) and
                         mq.TLO.FindItemCount(mq.TLO.Me.AltAbility("Blessing of Ro").Spell.Trigger(1).NoExpendReagentID(1)())() >
                         0
                 end,
@@ -1074,7 +1074,7 @@ local _ClassConfig = {
                 name = "Season's Wrath",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
         },
@@ -1116,7 +1116,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoTempHP') then return false end
-                    return Targetting.TargetClassIs("WAR", target) and Casting.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
+                    return Targeting.TargetClassIs("WAR", target) and Casting.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
                 end,
             },
             {
@@ -1133,7 +1133,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return true end,
                 cond = function(self, spell, target)
-                    return Targetting.TargetClassIs({ "WAR", "SHD", }, target) and Casting.GroupBuffCheck(spell, target) --does not stack with PAL innate buff
+                    return Targeting.TargetClassIs({ "WAR", "SHD", }, target) and Casting.GroupBuffCheck(spell, target) --does not stack with PAL innate buff
                 end,
             },
             {
@@ -1343,7 +1343,7 @@ local _ClassConfig = {
                 return false
             end
 
-            Targetting.SetTarget(corpseId)
+            Targeting.SetTarget(corpseId)
 
             local target = mq.TLO.Target
 

@@ -8,17 +8,17 @@
 -- in order by default so always put the first thing you want checked
 -- towards the top of the list.
 
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Core       = require("utils.core")
-local Modules    = require("utils.modules")
-local Targetting = require("utils.targetting")
-local Movement   = require("utils.movement")
-local Casting    = require("utils.casting")
-local Strings    = require("utils.strings")
-local Logger     = require("utils.logger")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Modules   = require("utils.modules")
+local Targeting = require("utils.targeting")
+local Movement  = require("utils.movement")
+local Casting   = require("utils.casting")
+local Strings   = require("utils.strings")
+local Logger    = require("utils.logger")
 
-local Tooltips   = {
+local Tooltips  = {
     ArrowOpener         = "Spell Line: Archery Attack with High Crit Chance when not in Combat. Consumes a 50 range CLASS 3 Wood Silver Tip Arrow when cast.",
     PullOpener          = "Spell Line: Archery Attack when not in Combat. Consumes a 50 range CLASS 3 Wood Silver Tip Arrow when cast.",
     CalledShotsArrow    = "Spell Line: Quad Archery Attack + Increase Archery Dmg Against Target",
@@ -1179,7 +1179,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Rathe,
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell, target)
-                    Targetting.SetTarget(target.ID() or 0)
+                    Targeting.SetTarget(target.ID() or 0)
                     return Casting.SpellStacksOnTarget(spell) and not Casting.TargetHasBuff(spell) and not Casting.TargetHasBuffByName("Shared " .. spell.Name())
                 end,
             },
@@ -1257,8 +1257,8 @@ local _ClassConfig = {
                 tooltip = Tooltips.Taunt,
                 cond = function(self, abilityName)
                     return Core.IsTanking() and mq.TLO.Me.AbilityReady(abilityName)() and
-                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targetting.GetTargetID() > 0 and
-                        Targetting.GetTargetDistance() < 30
+                        mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetID() > 0 and
+                        Targeting.GetTargetDistance() < 30
                 end,
             },
             {
@@ -1266,7 +1266,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.AggroKick,
                 cond = function(self)
-                    return Targetting.GetTargetDistance() <= 50 and mq.TLO.Me.PctAggro() > 50
+                    return Targeting.GetTargetDistance() <= 50 and mq.TLO.Me.PctAggro() > 50
                 end,
             },
             {
@@ -1425,7 +1425,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.AEBlades,
                 cond = function(self)
-                    return Config:GetSetting('DoAoE') and Targetting.GetTargetDistance() < 50 and Config:GetSetting('DoMelee')
+                    return Config:GetSetting('DoAoE') and Targeting.GetTargetDistance() < 50 and Config:GetSetting('DoMelee')
                 end,
             },
             {
@@ -1433,7 +1433,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.FocusedBlades,
                 cond = function(self)
-                    return Targetting.GetTargetDistance() < 50 and Config:GetSetting('DoMelee')
+                    return Targeting.GetTargetDistance() < 50 and Config:GetSetting('DoMelee')
                 end,
             },
             {
@@ -1441,7 +1441,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.ReflexSlashHeal,
                 cond = function(self)
-                    return Targetting.GetTargetDistance() < 50 and Config:GetSetting('DoMelee')
+                    return Targeting.GetTargetDistance() < 50 and Config:GetSetting('DoMelee')
                 end,
             },
             {
@@ -1527,7 +1527,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.JoltingKicks,
                 active_cond = function(self) return not Core.IsTanking() and mq.TLO.Me.PctAggro() > 30 end,
                 cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID() and Targetting.GetTargetDistance() <= 50
+                    return not mq.TLO.Me.ActiveDisc.ID() and Targeting.GetTargetDistance() <= 50
                 end,
             },
             {
@@ -1673,15 +1673,15 @@ local _ClassConfig = {
                 Core.DoCmd('/autofire on')
             end
 
-            if Config:GetSetting('NavCircle') and ((Targetting.GetTargetDistance() <= 30 or Targetting.GetTargetDistance() >= 75) or forceMove) then
+            if Config:GetSetting('NavCircle') and ((Targeting.GetTargetDistance() <= 30 or Targeting.GetTargetDistance() >= 75) or forceMove) then
                 Movement.NavAroundCircle(mq.TLO.Target, Config:GetSetting('NavCircleDist'))
             end
 
-            if not Config:GetSetting('NavCircle') and Targetting.GetTargetDistance() <= 30 then
+            if not Config:GetSetting('NavCircle') and Targeting.GetTargetDistance() <= 30 then
                 Core.DoCmd("/stick %d moveback", Config:GetSetting('NavCircleDist'))
             end
 
-            if not Config:GetSetting('NavCircle') and (Targetting.GetTargetDistance() >= 75 or forceMove) then
+            if not Config:GetSetting('NavCircle') and (Targeting.GetTargetDistance() >= 75 or forceMove) then
                 Core.DoCmd("/squelch /nav id %d facing=backward distance=%d", Config.Globals.AutoTargetID, Config:GetSetting('NavCircleDist'))
             end
         end,
@@ -1693,7 +1693,7 @@ local _ClassConfig = {
 
             Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility.RankName.Name() or "None")
 
-            if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= Config:GetSetting("ManaToNuke") and Casting.TargettedSpellReady(openerAbility, target.ID(), false) then
+            if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= Config:GetSetting("ManaToNuke") and Casting.TargetedSpellReady(openerAbility, target.ID(), false) then
                 Core.DoCmd("/squelch /face")
                 Casting.UseSpell(openerAbility.RankName.Name(), target.ID(), false)
                 Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility.RankName.Name() or "None")

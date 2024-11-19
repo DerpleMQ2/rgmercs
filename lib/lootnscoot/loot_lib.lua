@@ -120,7 +120,7 @@ local eqServer     = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 local Config       = require('utils.config')
 local Core         = require("utils.core")
 local Comms        = require("utils.comms")
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Files        = require("utils.files")
 local Modules      = require("utils.modules")
 local SettingsFile = mq.configDir .. '/LootNScoot_' .. eqServer .. '_' .. Config.Globals.CurLoadedChar .. '.ini'
@@ -1090,7 +1090,7 @@ function loot.lootMobs(limit)
     Logger.log_verbose('\awlootMobs(): \ayEnter lootMobs')
     local deadCount = mq.TLO.SpawnCount(spawnSearch:format('npccorpse', loot.Settings.CorpseRadius))()
     Logger.log_verbose('\awlootMobs(): \ayThere are %s corpses in range.', deadCount)
-    local mobsNearby = Targetting.GetXTHaterCount()
+    local mobsNearby = Targeting.GetXTHaterCount()
     local corpseList = {}
 
     -- check for own corpse
@@ -1135,7 +1135,7 @@ function loot.lootMobs(limit)
                 Logger.log_debug('\awlootMobs(): \atMoving to corpse ID=' .. tostring(corpseID))
                 loot.navToID(corpseID)
 
-                if Targetting.GetXTHaterCount() > 0 and not loot.Settings.CombatLooting then
+                if Targeting.GetXTHaterCount() > 0 and not loot.Settings.CombatLooting then
                     Logger.log_debug('\awlootMobs(): \arLooting stopped early due to aggro!')
                     return didLoot
                 end

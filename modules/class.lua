@@ -4,7 +4,7 @@ local Combat      = require('utils.combat')
 local Config      = require('utils.config')
 local Core        = require("utils.core")
 local Modules     = require("utils.modules")
-local Targetting  = require("utils.targetting")
+local Targeting   = require("utils.targeting")
 local Rotation    = require("utils.rotation")
 local Casting     = require("utils.casting")
 local Ui          = require("utils.ui")
@@ -554,7 +554,7 @@ function Module:OOGCheckAndRez()
     for i = 1, rezCount do
         local rezSpawn = mq.TLO.NearestSpawn(i, self.Constants.RezSearchOutOfGroup)
 
-        if rezSpawn() and (Targetting.IsSafeName("pc", rezSpawn.DisplayName())) then
+        if rezSpawn() and (Targeting.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
@@ -578,7 +578,7 @@ function Module:HealById(id)
         return
     end
 
-    if Targetting.TargetIsType("npc", healTarget) then
+    if Targeting.TargetIsType("npc", healTarget) then
         Logger.log_verbose("\ayHealById(%d):: Target is an NPC bailing", id)
         return
     end

@@ -5,7 +5,7 @@ local Math                                = require('utils.math')
 local Combat                              = require("utils.combat")
 local Casting                             = require("utils.casting")
 local Core                                = require("utils.core")
-local Targetting                          = require("utils.targetting")
+local Targeting                           = require("utils.targeting")
 local Ui                                  = require("utils.ui")
 local Comms                               = require("utils.comms")
 local Modules                             = require("utils.modules")
@@ -102,9 +102,9 @@ Module.Constants.PullAbilities         = {
         Type = "Special",
         DisplayName = "Auto Attack",
         AbilityRange = function()
-            if Targetting.GetTargetID() == 0 then return 2 end
+            if Targeting.GetTargetID() == 0 then return 2 end
 
-            return Targetting.GetTargetMaxRangeTo() * .9
+            return Targeting.GetTargetMaxRangeTo() * .9
         end,
         cond = function(self)
             return true
@@ -652,7 +652,7 @@ end
 
 function Module:RenderMobList(displayName, settingName)
     if ImGui.CollapsingHeader(string.format("Pull %s", displayName)) then
-        if mq.TLO.Target() and Targetting.TargetIsType("NPC") then
+        if mq.TLO.Target() and Targeting.TargetIsType("NPC") then
             ImGui.PushID("##_small_btn_allow_target_" .. settingName)
             if ImGui.SmallButton(string.format("Add Target To %s", displayName)) then
                 self:AddMobToList(settingName, mq.TLO.Target.CleanName())
@@ -707,7 +707,7 @@ function Module:RenderPullTargets()
                 ImGui.PushID(string.format("##select_pull_npc_%d", idx))
                 local _, clicked = ImGui.Selectable(spawn.CleanName() or "Unknown")
                 if clicked then
-                    Logger.log_debug("Targetting: %d", spawn.ID() or 0)
+                    Logger.log_debug("Targeting: %d", spawn.ID() or 0)
                     spawn.DoTarget()
                 end
                 ImGui.PopID()
@@ -769,7 +769,7 @@ function Module:Render()
             ImGui.PopStyleColor()
         end
 
-        if mq.TLO.Target() and Targetting.TargetIsType("NPC") then
+        if mq.TLO.Target() and Targeting.TargetIsType("NPC") then
             ImGui.SameLine()
             if ImGui.Button("Pull Target " .. Icons.FA_BULLSEYE, ImGui.GetWindowWidth() * .3, 25) then
                 self:SetPullTarget()
@@ -1151,14 +1151,14 @@ function Module:ShouldPull(campData)
         end
     end
 
-    if self:IsPullMode("Chain") and Targetting.GetXTHaterCount() >= self.settings.ChainCount then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) >= ChainCount(%d)", Targetting.GetXTHaterCount(), self.settings.ChainCount)
-        return false, string.format("XTargetCount(%d) > ChainCount(%d)", Targetting.GetXTHaterCount(), self.settings.ChainCount)
+    if self:IsPullMode("Chain") and Targeting.GetXTHaterCount() >= self.settings.ChainCount then
+        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) >= ChainCount(%d)", Targeting.GetXTHaterCount(), self.settings.ChainCount)
+        return false, string.format("XTargetCount(%d) > ChainCount(%d)", Targeting.GetXTHaterCount(), self.settings.ChainCount)
     end
 
-    if not self:IsPullMode("Chain") and Targetting.GetXTHaterCount() > 0 then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > 0", Targetting.GetXTHaterCount())
-        return false, string.format("XTargetCount(%d) > 0", Targetting.GetXTHaterCount())
+    if not self:IsPullMode("Chain") and Targeting.GetXTHaterCount() > 0 then
+        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > 0", Targeting.GetXTHaterCount())
+        return false, string.format("XTargetCount(%d) > 0", Targeting.GetXTHaterCount())
     end
 
     if campData.returnToCamp and Math.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > math.max(Config:GetSetting('AutoCampRadius') ^ 2, 200 ^ 2) then
@@ -1293,7 +1293,7 @@ function Module:FixPullerMerc()
         local merc = mq.TLO.Group.Member(i)
 
         ---@diagnostic disable-next-line: param-type-mismatch
-        if merc and merc() and Targetting.TargetIsType("Mercenary", merc) and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
+        if merc and merc() and Targeting.TargetIsType("Mercenary", merc) and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
             if (merc.Distance() or 0) > Config:GetSetting('AutoCampRadius') and (merc.Owner.Distance() or 0) < Config:GetSetting('AutoCampRadius') then
                 Core.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
                 mq.delay("10s", function() return (merc.Distance() or 0) < Config:GetSetting('AutoCampRadius') end)
@@ -1330,7 +1330,7 @@ function Module:GetPullableSpawns()
             Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
             return false
         elseif self:IsPullMode("Chain") then
-            if Targetting.IsSpawnXTHater(spawn.ID()) then
+            if Targeting.IsSpawnXTHater(spawn.ID()) then
                 Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
                 return false
             end
@@ -1420,8 +1420,8 @@ function Module:GetPullableSpawns()
             return false
         end
 
-        if Config:GetSetting('SafeTargeting') and Targetting.IsSpawnFightingStranger(spawn, 500) then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targetting is enabled!",
+        if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
+            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
                 spawn.CleanName(), spawn.ID())
             return false
         end
@@ -1498,8 +1498,8 @@ function Module:CheckForAbort(pullID)
             return true
         end
 
-        if Config:GetSetting('SafeTargeting') and Targetting.IsSpawnFightingStranger(spawn, 500) then
-            Logger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targetting is enabled! \ax")
+        if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
+            Logger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targeting is enabled! \ax")
             return true
         end
     end
@@ -1542,9 +1542,9 @@ function Module:NavToWaypoint(loc, ignoreAggro)
     mq.delay("2s")
 
     while mq.TLO.Navigation.Active() do
-        Logger.log_verbose("NavToWaypoint Aggro Count: %d", Targetting.GetXTHaterCount())
+        Logger.log_verbose("NavToWaypoint Aggro Count: %d", Targeting.GetXTHaterCount())
 
-        if Targetting.GetXTHaterCount() > 0 and not ignoreAggro then
+        if Targeting.GetXTHaterCount() > 0 and not ignoreAggro then
             if mq.TLO.Navigation.Active() then
                 Core.DoCmd("/nav stop log=off")
             end
@@ -1575,7 +1575,7 @@ function Module:GetPullAbilityRange()
 end
 
 function Module:GetPullStateTargetInfo()
-    return string.format("%s(%d) Dist(%d)", Targetting.GetTargetCleanName(), Targetting.GetTargetID(), Targetting.GetTargetDistance())
+    return string.format("%s(%d) Dist(%d)", Targeting.GetTargetCleanName(), Targeting.GetTargetID(), Targeting.GetTargetDistance())
 end
 
 function Module:GiveTime(combat_state)
@@ -1686,7 +1686,7 @@ function Module:GiveTime(combat_state)
 
         if self.TempSettings.PullState == PullStates.PULL_NAV_INTERRUPT then
             -- if we still have haters let combat handle it first.
-            if Targetting.GetXTHaterCount() > 0 then
+            if Targeting.GetXTHaterCount() > 0 then
                 return
             end
 
@@ -1784,7 +1784,7 @@ function Module:GiveTime(combat_state)
     Logger.log_debug("\ayFound Target: %d - Attempting to Nav", self.TempSettings.PullID)
 
     local pullAbility = self.TempSettings.ValidPullAbilities[self.settings.PullAbility]
-    local startingXTargs = Targetting.GetXTHaterIDs()
+    local startingXTargs = Targeting.GetXTHaterIDs()
     local requireLOS = "on"
 
     if pullAbility and pullAbility.LOS == false then
@@ -1802,18 +1802,18 @@ function Module:GiveTime(combat_state)
     while mq.TLO.Navigation.Active() and mq.TLO.Navigation.Velocity() > 0 do
         Logger.log_super_verbose("Pathing to pull id...")
         if self:IsPullMode("Chain") then
-            if Targetting.GetXTHaterCount() >= self.settings.ChainCount then
+            if Targeting.GetXTHaterCount() >= self.settings.ChainCount then
                 Logger.log_info("\awNOTICE:\ax Gained aggro -- aborting chain pull!")
                 abortPull = true
                 break
             end
-            if Targetting.DiffXTHaterIDs(startingXTargs) then
+            if Targeting.DiffXTHaterIDs(startingXTargs) then
                 Logger.log_info("\awNOTICE:\ax XTarget List Changed -- aborting chain pull!")
                 abortPull = true
                 break
             end
         else
-            if Targetting.GetXTHaterCount() > 0 then
+            if Targeting.GetXTHaterCount() > 0 then
                 Logger.log_info("\awNOTICE:\ax Gained aggro -- aborting pull!")
                 abortPull = true
                 break
@@ -1833,7 +1833,7 @@ function Module:GiveTime(combat_state)
 
     -- TODO: PrePullTarget()
 
-    Targetting.SetTarget(self.TempSettings.PullID)
+    Targeting.SetTarget(self.TempSettings.PullID)
 
     if mq.TLO.Target.Master.Type() == 'PC' then
         Logger.log_debug("\atPULL::PullTarget \awPullTarget :: Spawn \am%s\aw (\at%d\aw) is Charmed Pet -- Skipping", mq.TLO.Target.CleanName(), mq.TLO.Target.ID())
@@ -1842,7 +1842,7 @@ function Module:GiveTime(combat_state)
 
     if Config:GetSetting('SafeTargeting') then
         -- Hard coding 500 units as our radius as it's probably twice our effective spell range.
-        if Targetting.IsSpawnFightingStranger(mq.TLO.Spawn(self.TempSettings.PullID), 500) then
+        if Targeting.IsSpawnFightingStranger(mq.TLO.Spawn(self.TempSettings.PullID), 500) then
             abortPull = true
         end
     end
@@ -1854,10 +1854,10 @@ function Module:GiveTime(combat_state)
         if target and target.ID() > 0 then
             Logger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
 
-            local successFn = function() return Targetting.GetXTHaterCount() > 0 end
+            local successFn = function() return Targeting.GetXTHaterCount() > 0 end
 
             if self:IsPullMode("Chain") then
-                successFn = function() return Targetting.GetXTHaterCount() >= self.settings.ChainCount end
+                successFn = function() return Targeting.GetXTHaterCount() >= self.settings.ChainCount end
             end
 
             if self.settings.PullAbility == PullAbilityIDToName.PetPull then -- PetPull
@@ -1866,7 +1866,7 @@ function Module:GiveTime(combat_state)
                     Logger.log_super_verbose("Waiting on pet pull to finish...")
                     Combat.PetAttack(self.TempSettings.PullID, false)
                     mq.doevents()
-                    if self:IsPullMode("Chain") and Targetting.DiffXTHaterIDs(startingXTargs) then
+                    if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
 
@@ -1896,7 +1896,7 @@ function Module:GiveTime(combat_state)
 
                     Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange(), "on")
 
-                    if self:IsPullMode("Chain") and Targetting.DiffXTHaterIDs(startingXTargs) then
+                    if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         Logger.log_debug("\arXtargs changed heading back to camp!")
                         break
                     end
@@ -1917,14 +1917,14 @@ function Module:GiveTime(combat_state)
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on ranged pull to finish... %s", Strings.BoolToColorString(successFn()))
 
-                    if Targetting.GetTargetDistance() > self:GetPullAbilityRange() then
+                    if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     Core.DoCmd("/ranged %d", self.TempSettings.PullID)
                     mq.doevents()
-                    if self:IsPullMode("Chain") and Targetting.DiffXTHaterIDs(startingXTargs) then
+                    if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
 
@@ -1945,13 +1945,13 @@ function Module:GiveTime(combat_state)
                     Logger.log_super_verbose("Waiting on ranged pull to finish... %s", Strings.BoolToColorString(successFn()))
                     Core.DoCmd("/attack")
 
-                    if Targetting.GetTargetDistance() > self:GetPullAbilityRange() then
+                    if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     mq.doevents()
-                    if self:IsPullMode("Chain") and Targetting.DiffXTHaterIDs(startingXTargs) then
+                    if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
 
@@ -1964,15 +1964,15 @@ function Module:GiveTime(combat_state)
                 mq.delay(5)
                 while not successFn() do
                     Logger.log_super_verbose("Waiting on ability pull to finish...%s", Strings.BoolToColorString(successFn()))
-                    Targetting.SetTarget(self.TempSettings.PullID)
+                    Targeting.SetTarget(self.TempSettings.PullID)
                     mq.doevents()
 
                     if mq.TLO.Target.FeetWet() ~= mq.TLO.Me.FeetWet() then
                         Logger.log_debug("\ar ALERT: Feet wet mismatch - Moving around\ax")
-                        Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, Targetting.GetTargetDistance() * 0.9, requireLOS)
+                        Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, Targeting.GetTargetDistance() * 0.9, requireLOS)
                     end
 
-                    if Targetting.GetTargetDistance() > self:GetPullAbilityRange() then
+                    if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay(500, function() return mq.TLO.Navigation.Active() end)
                         mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
@@ -2001,7 +2001,7 @@ function Module:GiveTime(combat_state)
                         Logger.log_error("\arInvalid PullAbilityType: %s :: %s", pullAbility.Type, pullAbility.id)
                     end
 
-                    if self:IsPullMode("Chain") and Targetting.DiffXTHaterIDs(startingXTargs) then
+                    if self:IsPullMode("Chain") and Targeting.DiffXTHaterIDs(startingXTargs) then
                         break
                     end
 
@@ -2025,7 +2025,7 @@ function Module:GiveTime(combat_state)
         Core.DoCmd("/nav locyxz %0.2f %0.2f %0.2f log=off %s", start_y, start_x, start_z, Config:GetSetting('PullBackwards') and "facing=backward" or "")
         mq.delay("5s", function() return mq.TLO.Navigation.Active() end)
 
-        while mq.TLO.Navigation.Active() and (combat_state == "Downtime" or Targetting.GetXTHaterCount() > 0) do
+        while mq.TLO.Navigation.Active() and (combat_state == "Downtime" or Targeting.GetXTHaterCount() > 0) do
             Logger.log_super_verbose("Pathing to camp...")
             if mq.TLO.Me.State():lower() == "feign" or mq.TLO.Me.Sitting() then
                 Logger.log_debug("Standing up to Engage Target")
@@ -2048,7 +2048,7 @@ function Module:GiveTime(combat_state)
         -- give the mob 2 mins to get to us.
         local maxPullWait = 1000 * 120 -- 2 mins
         -- wait for the mob to reach us.
-        while mq.TLO.Target.ID() == self.TempSettings.PullID and Targetting.GetTargetDistance() > Config:GetSetting('AutoCampRadius') and maxPullWait > 0 do
+        while mq.TLO.Target.ID() == self.TempSettings.PullID and Targeting.GetTargetDistance() > Config:GetSetting('AutoCampRadius') and maxPullWait > 0 do
             self:SetPullState(PullStates.PULL_WAITING_ON_MOB, self:GetPullStateTargetInfo())
             mq.delay(100)
             if mq.TLO.Me.Pet.Combat() then
@@ -2063,7 +2063,7 @@ function Module:GiveTime(combat_state)
             end
 
             -- they ain't coming!
-            if not Targetting.IsSpawnXTHater(self.TempSettings.PullID) then
+            if not Targeting.IsSpawnXTHater(self.TempSettings.PullID) then
                 break
             end
         end

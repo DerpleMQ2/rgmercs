@@ -1,9 +1,9 @@
-local mq         = require('mq')
-local Combat     = require('utils.combat')
-local Config     = require('utils.config')
-local Core       = require("utils.core")
-local Targetting = require("utils.targetting")
-local Casting    = require("utils.casting")
+local mq        = require('mq')
+local Combat    = require('utils.combat')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
 
 return {
     _version              = "1.2 - Live",
@@ -681,8 +681,8 @@ return {
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return Targetting.GetXTHaterCount() > 0 and not Casting.Feigning() and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targetting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
+                return Targeting.GetXTHaterCount() > 0 and not Casting.Feigning() and
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
@@ -763,7 +763,7 @@ return {
                 name = "Attack of the Warder",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -826,7 +826,7 @@ return {
                 cond = function(self, spell, target)
                     local vinDisc = self.ResolvedActionMap['VinDisc']
                     if not vinDisc then return false end
-                    return Casting.BuffActive(vinDisc) and Casting.TargettedSpellReady(spell, target.ID())
+                    return Casting.BuffActive(vinDisc) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -875,9 +875,9 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    Targetting.SetTarget(target.ID() or 0)
+                    Targeting.SetTarget(target.ID() or 0)
                     return Config:GetSetting('DoSlow') and not Casting.CanUseAA("Sha's Reprisal") and not Casting.TargetHasBuff(spell) and
-                        Casting.SpellStacksOnTarget(spell) and spell.SlowPct() > (Targetting.GetTargetSlowedPct()) and Casting.TargettedSpellReady(spell)
+                        Casting.SpellStacksOnTarget(spell) and spell.SlowPct() > (Targeting.GetTargetSlowedPct()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -885,7 +885,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Config:GetSetting('DoSlow') and not Casting.TargetHasBuffByName(aaName) and
-                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (Targetting.GetTargetSlowedPct()) and Casting.TargettedAAReady(aaName, target.ID())
+                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
         },
@@ -895,7 +895,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('AggroFeign') then return false end
-                    return (mq.TLO.Me.PctHPs() <= 40 and Targetting.IHaveAggro(100)) or (Targetting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
+                    return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
                         and Casting.AAReady(aaName) and not Core.IAmMA
                 end,
             },
@@ -910,7 +910,7 @@ return {
                 name = "Protection of the Warder",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Targetting.IHaveAggro(100) and Casting.AAReady(aaName)
+                    return Targeting.IHaveAggro(100) and Casting.AAReady(aaName)
                 end,
             },
         },
@@ -954,7 +954,7 @@ return {
                     --This checks to see if the Growl portion is up on the pet (or about to expire) before using this, those who prefer the swarm pets can use the actual swarm pet spell in conjunction with this for mana savings.
                     --There are some instances where the Growl isn't needed, but that is a giant TODO and of minor benefit.
                     ---@diagnostic disable-next-line: undefined-field
-                    return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10 and Casting.TargettedSpellReady(spell)
+                    return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10 and Casting.TargetedSpellReady(spell)
                         and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
@@ -963,7 +963,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -971,7 +971,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -979,42 +979,42 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Maelstrom",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "FrozenPoi",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "PoiBite",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Icelance1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Icelance2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1025,7 +1025,7 @@ return {
                     --We will let Feralgia apply swarm pets if our pet currently doesn't have its Growl Effect.
                     local feralgia = self.ResolvedActionMap['Feralgia']
                     return (feralgia and feralgia() and mq.TLO.Me.PetBuff(mq.TLO.Spell(feralgia).RankName.Trigger(2).ID()))
-                        and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargettedSpellReady(spell)
+                        and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                         and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
@@ -1035,63 +1035,63 @@ return {
                 name = "Round Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return not Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return not Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Tiger Claw",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Enduring Frenzy",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targetting.GetTargetPctHPs() > 90 and Casting.TargettedAAReady(aaName, target.ID())
+                    return Targeting.GetTargetPctHPs() > 90 and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "EndRegenProcDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return mq.TLO.Me.PctEndurance() < Config:GetSetting('ParaPct') and Casting.TargettedDiscReady(discSpell)
+                    return mq.TLO.Me.PctEndurance() < Config:GetSetting('ParaPct') and Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
                 name = "Chameleon Strike",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargettedAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "SingleClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not Config:GetSetting('DoAoe') and Casting.TargettedDiscReady(discSpell, target.ID())
+                    return not Config:GetSetting('DoAoe') and Casting.TargetedDiscReady(discSpell, target.ID())
                 end,
             },
             {
                 name = "AEClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Config:GetSetting('DoAoe') and Casting.TargettedDiscReady(discSpell, target.ID())
+                    return Config:GetSetting('DoAoe') and Casting.TargetedDiscReady(discSpell, target.ID())
                 end,
             },
             {
                 name = "Maul",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Casting.TargettedDiscReady(discSpell)
+                    return Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
@@ -1234,7 +1234,7 @@ return {
             --    name = "VerifyFerocity",
             --    type = "CustomFunc",
             --    custom_func = function(self, targetId)
-            --        if not Config:GetSetting('DoCombatFero') or not Casting.TargettedSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
+            --        if not Config:GetSetting('DoCombatFero') or not Casting.TargetedSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
             --        -- TODO: Ferocity List?
             --        return false
             --    end,

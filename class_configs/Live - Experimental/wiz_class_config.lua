@@ -3,11 +3,11 @@
 -- into your: MacroQuest/configs/rgmercs/class_configs/ directory
 -- so it is not patched over.
 
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Modules    = require("utils.modules")
-local Targetting = require("utils.targetting")
-local Casting    = require("utils.casting")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Modules   = require("utils.modules")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
 
 return {
     _version          = "Experimental - Modern Era DPS (110+) 1.1",
@@ -626,7 +626,7 @@ return {
                 name = "Arcane Whisper",
                 type = "AA",
                 cond = function(self)
-                    return Targetting.GetTargetPctHPs() > 10
+                    return Targeting.GetTargetPctHPs() > 10
                 end,
             },
             {
@@ -686,7 +686,7 @@ return {
                 name = "A Hole in Space",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > 99 and Targetting.IHaveAggro(100)
+                    return mq.TLO.Me.PctAggro() > 99 and Targeting.IHaveAggro(100)
                 end,
             },
             {
@@ -784,42 +784,42 @@ return {
                 name = "CloudburstNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (Casting.DetGambitCheck() or ((mq.TLO.Me.Song("Evoker's Synergy I").ID() or 0) > 0)) and Casting.TargettedSpellReady(spell)
+                    return (Casting.DetGambitCheck() or ((mq.TLO.Me.Song("Evoker's Synergy I").ID() or 0) > 0)) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "VortexNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not Casting.TargetHasBuff(spell) and Casting.TargettedSpellReady(spell)
+                    return not Casting.TargetHasBuff(spell) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "FuseNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargettedSpellReady(spell)
+                    return Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "FireClaw",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID()) and Casting.TargettedSpellReady(spell)
+                    return not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "FireEtherealNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargettedSpellReady(spell)
+                    return Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "IceEtherealNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargettedSpellReady(spell)
+                    return Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -833,21 +833,21 @@ return {
                 name = "FireClaw",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.BuffActiveByID(mq.TLO.Spell("Twincast").RankName.ID()) and Casting.TargettedSpellReady(spell)
+                    return Casting.BuffActiveByID(mq.TLO.Spell("Twincast").RankName.ID()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "WildNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.DetGambitCheck() and Casting.TargettedSpellReady(spell)
+                    return Casting.DetGambitCheck() and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargettedSpellReady(spell)
+                    return Casting.TargetedSpellReady(spell)
                 end,
             },
 
@@ -899,21 +899,21 @@ return {
             -- name = "FireRainNuke",
             -- type = "Spell",
             -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and Targetting.GetXTHaterCount() > 2 and Targetting.GetTargetDistance() > 30
+            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and Targeting.GetXTHaterCount() > 2 and Targeting.GetTargetDistance() > 30
             -- end,
             -- },
             -- {
             -- name = "IceRainNuke",
             -- type = "Spell",
             -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and Targetting.GetXTHaterCount() > 2 and Targetting.GetTargetDistance() > 30
+            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and Targeting.GetXTHaterCount() > 2 and Targeting.GetTargetDistance() > 30
             -- end,
             -- },
             -- {
             -- name = "SnareSpell",
             -- type = "Spell",
             -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and Targetting.GetTargetDistance() > 30 and self.settings.DoSnare
+            -- return Casting.HaveManaToNuke() and Targeting.GetTargetDistance() > 30 and self.settings.DoSnare
             -- end,
             -- },
             -- {

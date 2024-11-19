@@ -4,7 +4,7 @@ local Config                       = require('utils.config')
 local Ui                           = require("utils.ui")
 local Comms                        = require("utils.comms")
 local Core                         = require("utils.core")
-local Targetting                   = require("utils.targetting")
+local Targeting                    = require("utils.targeting")
 local Logger                       = require("utils.logger")
 local Set                          = require("mq.Set")
 local Icons                        = require('mq.ICONS')
@@ -283,7 +283,7 @@ function Module:Render()
                         if ImGui.Button(sv.Name, self.ButtonWidth, self.ButtonHeight) then
                             local cmd = string.format("/rgl cast \"%s\"", sv.Name)
                             if sv.Type == "Single" then
-                                cmd = cmd .. string.format(" %d", Targetting.GetTargetID())
+                                cmd = cmd .. string.format(" %d", Targeting.GetTargetID())
                             end
 
                             if selectedPorter ~= mq.TLO.Me.DisplayName() then

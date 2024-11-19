@@ -3,12 +3,12 @@
 -- into your: MacroQuest/configs/rgmercs/class_configs/ directory
 -- so it is not patched over.
 
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Modules    = require("utils.modules")
-local Comms      = require("utils.comms")
-local Targetting = require("utils.targetting")
-local Casting    = require("utils.casting")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Modules   = require("utils.modules")
+local Comms     = require("utils.comms")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
 
 return {
     _version         = "1.0 - Project Lazarus",
@@ -703,8 +703,8 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Targetting.GetAutoTargetPctHPs() <= Config:GetSetting('RainMinTargetHP') and
-                    Targetting.GetXTHaterCount() >= Config:GetSetting('RainMinHaters')
+                return combat_state == "Combat" and Targeting.GetAutoTargetPctHPs() <= Config:GetSetting('RainMinTargetHP') and
+                    Targeting.GetXTHaterCount() >= Config:GetSetting('RainMinHaters')
             end,
         },
     },
@@ -714,7 +714,7 @@ return {
                 name = "Arcane Whisper",
                 type = "AA",
                 cond = function(self)
-                    return Targetting.GetTargetPctHPs() > 10
+                    return Targeting.GetTargetPctHPs() > 10
                 end,
             },
             {
@@ -781,7 +781,7 @@ return {
                 name = "A Hole in Space",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > 99 and Targetting.IHaveAggro(100)
+                    return mq.TLO.Me.PctAggro() > 99 and Targeting.IHaveAggro(100)
                 end,
             },
             {
@@ -1004,7 +1004,7 @@ return {
                 name = "SnareSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and Targetting.GetTargetDistance() > 30 and self.settings.DoSnare
+                    return Casting.HaveManaToNuke() and Targeting.GetTargetDistance() > 30 and self.settings.DoSnare
                 end,
             },
             {
@@ -1049,7 +1049,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and
-                        Targetting.GetTargetDistance() >= Config:GetSetting('RainDist')
+                        Targeting.GetTargetDistance() >= Config:GetSetting('RainDist')
                 end,
             },
             {
@@ -1057,7 +1057,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and
-                        Targetting.GetTargetDistance() >= Config:GetSetting('RainDist')
+                        Targeting.GetTargetDistance() >= Config:GetSetting('RainDist')
                 end,
             },
         },

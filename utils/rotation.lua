@@ -4,7 +4,7 @@ local Core       = require("utils.core")
 local Logger     = require("utils.logger")
 local Casting    = require("utils.casting")
 local Strings    = require("utils.strings")
-local Targetting = require("utils.targetting")
+local Targeting  = require("utils.targeting")
 
 local Rotation   = { _version = '1.0', _name = "Rotation", _author = 'Derple', }
 Rotation.__index = Rotation
@@ -283,7 +283,7 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
             end
 
             if fnRotationCond then
-                local curState = Targetting.GetXTHaterCount() > 0 and "Combat" or "Downtime"
+                local curState = Targeting.GetXTHaterCount() > 0 and "Combat" or "Downtime"
 
                 if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, curState) then
                     Logger.log_verbose("\arStopping Rotation Due to condition check failure!")
@@ -333,7 +333,7 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
         end
     end
 
-    if Targetting.GetXTHaterCount() == 0 and oldSpellInSlot() and mq.TLO.Me.Gem(Casting.UseGem)() ~= oldSpellInSlot.Name() then
+    if Targeting.GetXTHaterCount() == 0 and oldSpellInSlot() and mq.TLO.Me.Gem(Casting.UseGem)() ~= oldSpellInSlot.Name() then
         Logger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, Casting.UseGem)
         Casting.MemorizeSpell(Casting.UseGem, oldSpellInSlot.Name(), false, 15000)
     end

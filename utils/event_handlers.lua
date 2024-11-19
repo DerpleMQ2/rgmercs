@@ -1,13 +1,13 @@
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Modules    = require("utils.modules")
-local Core       = require("utils.core")
-local Combat     = require("utils.combat")
-local Casting    = require("utils.casting")
-local Targetting = require("utils.targetting")
-local Comms      = require("utils.comms")
-local Logger     = require("utils.logger")
-local Movement   = require("utils.movement")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Modules   = require("utils.modules")
+local Core      = require("utils.core")
+local Combat    = require("utils.combat")
+local Casting   = require("utils.casting")
+local Targeting = require("utils.targeting")
+local Comms     = require("utils.comms")
+local Logger    = require("utils.logger")
+local Movement  = require("utils.movement")
 
 -- [ CANT SEE HANDLERS ] --
 
@@ -38,13 +38,13 @@ mq.event("CantSee", "You cannot see your target.", function()
             if Config:GetSetting('DoAutoEngage') then
                 if Combat.OkToEngage(target.ID() or 0) then
                     Core.DoCmd("/squelch /face fast")
-                    if Targetting.GetTargetDistance() < 15 then
+                    if Targeting.GetTargetDistance() < 15 then
                         Logger.log_debug("Can't See target (%s [%d]). Moving back 15.", target.CleanName() or "", target.ID() or 0)
                         Core.DoCmd("/stick 15 moveback")
                     else
                         local desiredDistance = (target.MaxRangeTo() or 0) * 0.9
                         if not Config:GetSetting('DoMelee') then
-                            desiredDistance = Targetting.GetTargetDistance() * .95
+                            desiredDistance = Targeting.GetTargetDistance() * .95
                         end
 
                         Logger.log_debug("Can't See target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID(), desiredDistance)
@@ -68,16 +68,16 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
     -- Check if we're in the middle of a pull and use a backup.
     if Config:GetSetting('DoPull') and Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         local discSpell = mq.TLO.Spell("Throw Stone")
-        if Casting.TargettedDiscReady(discSpell) then
+        if Casting.TargetedDiscReady(discSpell) then
             Casting.UseDisc(discSpell, mq.TLO.Target.ID())
         else
             if Casting.AbilityReady("Taunt") then
-                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targetting.GetTargetID(), Targetting.GetTargetMaxRangeTo())
+                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targeting.GetTargetID(), Targeting.GetTargetMaxRangeTo())
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Taunt")
             end
             if Casting.AbilityReady("Kick") then
-                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targetting.GetTargetID(), Targetting.GetTargetMaxRangeTo())
+                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targeting.GetTargetID(), Targeting.GetTargetMaxRangeTo())
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Kick")
             end
@@ -115,8 +115,8 @@ local function tooFarHandler()
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         Logger.log_info("\ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
-            Targetting.GetTargetCleanName(),
-            Targetting.GetTargetDistance())
+            Targeting.GetTargetCleanName(),
+            Targeting.GetTargetDistance())
         Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.75)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
@@ -131,7 +131,7 @@ local function tooFarHandler()
                 if Combat.OkToEngage(target.ID() or 0) then
                     Core.DoCmd("/squelch /face fast")
 
-                    if Targetting.GetTargetDistance() < 15 then
+                    if Targeting.GetTargetDistance() < 15 then
                         Logger.log_debug("Too Far from Target (%s [%d]). Moving back 15.", target.CleanName() or "", target.ID() or 0)
                         Core.DoCmd("/stick 15 moveback")
                     else

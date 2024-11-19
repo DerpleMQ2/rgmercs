@@ -2,7 +2,7 @@
 local mq                  = require('mq')
 local Config              = require('utils.config')
 local Core                = require("utils.core")
-local Targetting          = require("utils.targetting")
+local Targeting           = require("utils.targeting")
 local Ui                  = require("utils.ui")
 local Comms               = require("utils.comms")
 local Strings             = require("utils.strings")
@@ -1325,7 +1325,7 @@ function Module:GiveTime(combat_state)
 		self:SortItemTables()
 	end
 	-- Main Module logic goes here.
-	if Targetting.GetXTHaterCount() == 0 or Config:GetSetting('CombatLooting') then
+	if Targeting.GetXTHaterCount() == 0 or Config:GetSetting('CombatLooting') then
 		if LootnScoot ~= nil and self.settings.DoLoot then
 			LootnScoot.lootMobs()
 		end

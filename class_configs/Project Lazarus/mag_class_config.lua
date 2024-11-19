@@ -1,7 +1,7 @@
 local mq          = require('mq')
 local Config      = require('utils.config')
 local Core        = require("utils.core")
-local Targetting  = require("utils.targetting")
+local Targeting   = require("utils.targeting")
 local Casting     = require("utils.casting")
 local Comms       = require("utils.comms")
 local ItemManager = require("utils.itemmanager")
@@ -1066,7 +1066,7 @@ _ClassConfig      = {
 
             Logger.log_super_verbose("summon_pet_toy() ==> \agUsing PackID=%d", openSlot)
 
-            Casting.UseSpell(petToyResolvedSpell.RankName(), mq.TLO.Me.ID(), Targetting.GetXTHaterCount() == 0)
+            Casting.UseSpell(petToyResolvedSpell.RankName(), mq.TLO.Me.ID(), Targeting.GetXTHaterCount() == 0)
 
             mq.delay("5s", function() return (mq.TLO.Cursor.ID() or 0) > 0 end)
 
@@ -1166,14 +1166,14 @@ _ClassConfig      = {
 
             -- Pocket Pet Stuff Begins. -  Added Check for DoPocketPet to be Positive Rather than Assuming
             if Config:GetSetting('DoPocketPet') then
-                if self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and Targetting.GetXTHaterCount() > 0 then
+                if self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and Targeting.GetXTHaterCount() > 0 then
                     Casting.UseAA("Companion's Suspension", 0)
                     self.TempSettings.PocketPet = false
                     return true
                 end
 
                 -- Case 1 - No pocket pet and no pet up
-                if not self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and Targetting.GetXTHaterCount() == 0 then
+                if not self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and Targeting.GetXTHaterCount() == 0 then
                     Logger.log_debug("\ayPetManagement - Case 1 no Pocket Pet and no Pet")
                     if not self.ClassConfig.HelperFunctions.summon_pet(self) then
                         Logger.log_debug("\arPetManagement - Case 1 -> Summon Failed")
@@ -1197,7 +1197,7 @@ _ClassConfig      = {
                 end
             end
             -- Case 2 - No pocket pet and pet up
-            if not self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) > 0 and Targetting.GetXTHaterCount() == 0 then
+            if not self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) > 0 and Targeting.GetXTHaterCount() == 0 then
                 Logger.log_debug("\ayPetManagement - Case 2 no Pocket Pet But Pet is up - pocketing")
                 Casting.UseAA("Companion's Suspension", 0)
                 if (mq.TLO.Me.Pet.ID() or 0) == 0 then
@@ -1212,7 +1212,7 @@ _ClassConfig      = {
             end
 
             -- Case 3 - Pocket Pet and no pet up
-            if self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) == 0 and Targetting.GetXTHaterCount() == 0 then
+            if self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) == 0 and Targeting.GetXTHaterCount() == 0 then
                 Logger.log_debug("\ayPetManagement - Case 3 Pocket Pet But No Pet is up")
                 if not self.ClassConfig.HelperFunctions.summon_pet(self) then
                     Logger.log_debug("\arPetManagement - Case 3 -> Summon Failed")
@@ -1368,11 +1368,11 @@ _ClassConfig      = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return self.TempSettings.PocketPet and Config:GetSetting('DoPocketPet') and mq.TLO.Me.Pet.ID() == 0 and Targetting.GetXTHaterCount() > 0
+                    return self.TempSettings.PocketPet and Config:GetSetting('DoPocketPet') and mq.TLO.Me.Pet.ID() == 0 and Targeting.GetXTHaterCount() > 0
                 end,
                 custom_func = function(self)
                     Logger.log_info("\atPocketPet: \arNo pet while in combat! \agPulling out pocket pet")
-                    Targetting.SetTarget(mq.TLO.Me.ID())
+                    Targeting.SetTarget(mq.TLO.Me.ID())
                     Casting.UseAA("Companion's Suspension", mq.TLO.Me.ID())
                     self.TempSettings.PocketPet = false
 
@@ -1435,7 +1435,7 @@ _ClassConfig      = {
                 name = "AllianceBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Targetting.IsNamed(mq.TLO.Target) and not Casting.TargetHasBuff(spell) and
+                    return Targeting.IsNamed(mq.TLO.Target) and not Casting.TargetHasBuff(spell) and
                         Config:GetSetting('DoAlliance') and Casting.CanAlliance()
                 end,
             },
@@ -1638,7 +1638,7 @@ _ClassConfig      = {
             --       name = "AllianceBuff",
             --       type = "Spell",
             --      cond = function(self, spell)
-            --           return Targetting.IsNamed(mq.TLO.Target) and not Casting.TargetHasBuff(spell) and
+            --           return Targeting.IsNamed(mq.TLO.Target) and not Casting.TargetHasBuff(spell) and
             --               Config:GetSetting('DoAlliance') and Casting.CanAlliance()
             --       end,
             --    },

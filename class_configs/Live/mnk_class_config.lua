@@ -1,6 +1,6 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
@@ -475,14 +475,14 @@ local _ClassConfig = {
                 name = "Vehement Rage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Targetting.GetTargetPctHPs() > 10 and not mq.TLO.Me.ActiveDisc.ID()
+                    return Targeting.GetTargetPctHPs() > 10 and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Iron",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return not mq.TLO.Me.ActiveDisc.ID() and Targetting.IsNamed(mq.TLO.Target)
+                    return not mq.TLO.Me.ActiveDisc.ID() and Targeting.IsNamed(mq.TLO.Target)
                 end,
             },
             {
@@ -524,14 +524,14 @@ local _ClassConfig = {
                 name = "Drunken",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() >= 20 and Targetting.GetTargetPctHPs() > 10
+                    return mq.TLO.Me.PctEndurance() >= 20 and Targeting.GetTargetPctHPs() > 10
                 end,
             },
             {
                 name = "Curse",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Targetting.GetTargetPctHPs() > 5
+                    return Targeting.GetTargetPctHPs() > 5
                 end,
             },
             {
@@ -602,7 +602,7 @@ local _ClassConfig = {
                 name = "Round Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targetting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
@@ -617,7 +617,7 @@ local _ClassConfig = {
                 type = "Ability",
                 cond = function(self, abilityName)
                     return Casting.AbilityReady(abilityName) and
-                        Targetting.GetTargetDistance() < 15
+                        Targeting.GetTargetDistance() < 15
                 end,
             },
         },

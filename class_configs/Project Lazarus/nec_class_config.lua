@@ -12,7 +12,7 @@ local mq           = require('mq')
 local Config       = require('utils.config')
 local Comms        = require("utils.comms")
 local Core         = require("utils.core")
-local Targetting   = require("utils.targetting")
+local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
@@ -23,7 +23,7 @@ local _ClassConfig = {
     },
     ['ModeChecks']      = {
         -- necro can AA Rez
-        IsRezing   = function() return Config:GetSetting('BattleRez') or Targetting.GetXTHaterCount() == 0 end,
+        IsRezing   = function() return Config:GetSetting('BattleRez') or Targeting.GetXTHaterCount() == 0 end,
         CanCharm   = function() return true end,
         IsCharming = function() return (Config:GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0) end,
     },
@@ -746,7 +746,7 @@ local _ClassConfig = {
             name = 'Safety',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (Targetting.IHaveAggro(Config:GetSetting('StartFDPct')) or Casting.Feigning())
+                return combat_state == "Combat" and (Targeting.IHaveAggro(Config:GetSetting('StartFDPct')) or Casting.Feigning())
             end,
         },
         {
@@ -815,7 +815,7 @@ local _ClassConfig = {
                 name = "Stand Back Up",
                 type = "CustomFunc",
                 cond = function(self)
-                    return Casting.Feigning() and Targetting.GetHighestAggroPct() <= Config:GetSetting('StopFDPct')
+                    return Casting.Feigning() and Targeting.GetHighestAggroPct() <= Config:GetSetting('StopFDPct')
                 end,
                 custom_func = function(_)
                     Core.DoCmd("/stand")
@@ -842,14 +842,14 @@ local _ClassConfig = {
                 name = "Scent of Thule",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and Targetting.GetXTHaterCount() > 1
+                    return Casting.SelfBuffAACheck(aaName) and Targeting.GetXTHaterCount() > 1
                 end,
             },
             {
                 name = "Encroaching Darkness",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and Targetting.GetTargetPctHPs() < 50
+                    return Casting.SelfBuffAACheck(aaName) and Targeting.GetTargetPctHPs() < 50
                 end,
             },
             {
@@ -863,7 +863,7 @@ local _ClassConfig = {
                 name = "Silent Casting",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and Targetting.GetXTHaterCount() > 1
+                    return Casting.SelfBuffAACheck(aaName) and Targeting.GetXTHaterCount() > 1
                 end,
             },
             {
@@ -883,7 +883,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    Targetting.SetTarget(target.ID() or 0)
+                    Targeting.SetTarget(target.ID() or 0)
                     return not Casting.TargetHasBuff(spell) and spell.Trigger(2).StacksTarget()
                 end,
             },
@@ -965,7 +965,7 @@ local _ClassConfig = {
             {
                 name = "PoisonNuke2",
                 type = "Spell",
-                cond = function(self, _) return Targetting.GetTargetPctHPs() > 50 and Casting.HaveManaToNuke() end,
+                cond = function(self, _) return Targeting.GetTargetPctHPs() > 50 and Casting.HaveManaToNuke() end,
             },
             {
                 name = "PoisonNuke1",
@@ -1219,7 +1219,7 @@ local _ClassConfig = {
 
         DoRez = function(self, corpseId)
             if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
-                Targetting.SetTarget(corpseId)
+                Targeting.SetTarget(corpseId)
 
                 local target = mq.TLO.Target
 

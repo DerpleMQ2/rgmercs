@@ -1,26 +1,26 @@
-local mq                     = require('mq')
-local Config                 = require('utils.config')
-local Core                   = require('utils.core')
-local Modules                = require("utils.modules")
-local Logger                 = require("utils.logger")
-local Strings                = require("utils.strings")
-local Set                    = require('mq.set')
+local mq                    = require('mq')
+local Config                = require('utils.config')
+local Core                  = require('utils.core')
+local Modules               = require("utils.modules")
+local Logger                = require("utils.logger")
+local Strings               = require("utils.strings")
+local Set                   = require('mq.set')
 
-local Targetting             = { _version = '1.0', _name = "Targetting", _author = 'Derple', }
-Targetting.__index           = Targetting
-Targetting.ForceCombat       = false
-Targetting.ForceNamed        = false
-Targetting.ForceBurnTargetID = 0
-Targetting.SafeTargetCache   = {}
+local Targeting             = { _version = '1.0', _name = "Targeting", _author = 'Derple', }
+Targeting.__index           = Targeting
+Targeting.ForceCombat       = false
+Targeting.ForceNamed        = false
+Targeting.ForceBurnTargetID = 0
+Targeting.SafeTargetCache   = {}
 
-function Targetting.IsNamed(spawn)
+function Targeting.IsNamed(spawn)
     return Modules:ExecModule("Named", "IsNamed", spawn)
 end
 
 --- Sets the target.
 --- @param targetId number The ID of the target to be set.
 --- @param ignoreBuffPopulation boolean? Wait to return until buffs are populated Default: false
-function Targetting.SetTarget(targetId, ignoreBuffPopulation)
+function Targeting.SetTarget(targetId, ignoreBuffPopulation)
     if targetId == 0 then return end
 
     local maxWaitBuffs = ((mq.TLO.EverQuest.Ping() * 20) + 500)
@@ -28,7 +28,7 @@ function Targetting.SetTarget(targetId, ignoreBuffPopulation)
     if targetId == mq.TLO.Target.ID() then return end
     Logger.log_debug("SetTarget(): Setting Target: %d (buffPopWait: %d)", targetId, ignoreBuffPopulation and 0 or maxWaitBuffs)
     if Config:GetSetting('DoAutoTarget') then
-        if Targetting.GetTargetID() ~= targetId then
+        if Targeting.GetTargetID() ~= targetId then
             mq.TLO.Spawn(targetId).DoTarget()
             mq.delay(10, function() return mq.TLO.Target.ID() == targetId end)
             mq.delay(maxWaitBuffs, function() return ignoreBuffPopulation or mq.TLO.Target.BuffsPopulated() end)
@@ -40,14 +40,14 @@ end
 --- Retrieves the current auto-target.
 ---
 --- @return MQSpawn The current auto-target.
-function Targetting.GetAutoTarget()
+function Targeting.GetAutoTarget()
     return mq.TLO.Spawn(string.format("id %d", Config.Globals.AutoTargetID))
 end
 
 --- Clears the current target.
 ---
 --- This function is used to clear any selected target in the game.
-function Targetting.ClearTarget()
+function Targeting.ClearTarget()
     Logger.log_debug("Clearing Target")
     if Config:GetSetting('DoAutoTarget') then
         Config.Globals.AutoTargetID = 0
@@ -60,7 +60,7 @@ end
 --- Retrieves the ID of the given target.
 --- @param target MQTarget? The target whose ID is to be retrieved.
 --- @return number The ID of the target.
-function Targetting.GetTargetID(target)
+function Targeting.GetTargetID(target)
     return (target and target.ID() or (mq.TLO.Target.ID() or 0))
 end
 
@@ -68,7 +68,7 @@ end
 --- @param target MQTarget The target whose body type is to be checked.
 --- @param type string The body type to check against.
 --- @return boolean True if the target's body type matches the specified type, false otherwise.
-function Targetting.TargetBodyIs(target, type)
+function Targeting.TargetBodyIs(target, type)
     if not target then target = mq.TLO.Target end
     if not target or not target() then return false end
 
@@ -81,7 +81,7 @@ end
 --- @param classTable string|table The string or table of strings containing class names to check against.
 --- @param target MQTarget The class name of the target to check.
 --- @return boolean True if the target's class is in the class table, false otherwise.
-function Targetting.TargetClassIs(classTable, target)
+function Targeting.TargetClassIs(classTable, target)
     local classSet = type(classTable) == 'table' and Set.new(classTable) or Set.new({ classTable, })
 
     if not target then target = mq.TLO.Target end
@@ -94,35 +94,35 @@ end
 ---
 --- @param target MQTarget? The target whose level is to be retrieved.
 --- @return number The level of the target.
-function Targetting.GetTargetLevel(target)
+function Targeting.GetTargetLevel(target)
     return (target and target.Level() or (mq.TLO.Target.Level() or 0))
 end
 
 --- Calculates the distance to the specified target.
 --- @param target MQTarget|MQSpawn? The target entity whose distance is to be calculated.
 --- @return number The distance to the target.
-function Targetting.GetTargetDistance(target)
+function Targeting.GetTargetDistance(target)
     return (target and target.Distance() or (mq.TLO.Target.Distance() or 9999))
 end
 
 --- Calculates the vertical distance (Z-axis) to the specified target.
 --- @param target MQTarget|MQSpawn? The target entity to measure the distance to.
 --- @return number The vertical distance to the target.
-function Targetting.GetTargetDistanceZ(target)
+function Targeting.GetTargetDistanceZ(target)
     return (target and target.DistanceZ() or (mq.TLO.Target.DistanceZ() or 9999))
 end
 
 --- Gets the maximum range to the specified target.
 --- @param target MQTarget? The target entity to measure the range to.
 --- @return number The maximum range to the target.
-function Targetting.GetTargetMaxRangeTo(target)
+function Targeting.GetTargetMaxRangeTo(target)
     return (target and target.MaxRangeTo() or (mq.TLO.Target.MaxRangeTo() or 15))
 end
 
 --- Retrieves the percentage of hit points (HP) remaining for the specified target.
 --- @param target MQTarget|MQSpawn? The target entity whose HP percentage is to be retrieved.
 --- @return number The percentage of HP remaining for the target.
-function Targetting.GetTargetPctHPs(target)
+function Targeting.GetTargetPctHPs(target)
     local useTarget = target
     if not useTarget then useTarget = mq.TLO.Target end
     if not useTarget or not useTarget() then return 0 end
@@ -133,8 +133,8 @@ end
 --- Retrieves the percentage of HPs for auto-targeting.
 ---
 --- @return number The percentage of HPs for auto-targeting.
-function Targetting.GetAutoTargetPctHPs()
-    local autoTarget = Targetting.GetAutoTarget()
+function Targeting.GetAutoTargetPctHPs()
+    local autoTarget = Targeting.GetAutoTarget()
     if not autoTarget or not autoTarget() then return 0 end
     return autoTarget.PctHPs() or 0
 end
@@ -142,7 +142,7 @@ end
 --- Checks if the specified target is dead.
 --- @param target MQTarget The name or identifier of the target to check.
 --- @return boolean Returns true if the target is dead, false otherwise.
-function Targetting.GetTargetDead(target)
+function Targeting.GetTargetDead(target)
     local useTarget = target
     if not useTarget then useTarget = mq.TLO.Target end
     if not useTarget or not useTarget() then return true end
@@ -153,27 +153,27 @@ end
 --- Retrieves the name of the given target.
 --- @param target MQTarget? The target whose name is to be retrieved.
 --- @return string The name of the target.
-function Targetting.GetTargetName(target)
+function Targeting.GetTargetName(target)
     return (target and target.Name() or (mq.TLO.Target.Name() or ""))
 end
 
 --- Retrieves the clean name of the given target.
 --- @param target MQTarget|MQSpawn? The target from which to extract the clean name.
 --- @return string The clean name of the target.
-function Targetting.GetTargetCleanName(target)
+function Targeting.GetTargetCleanName(target)
     return (target and target.Name() or (mq.TLO.Target.CleanName() or ""))
 end
 
 --- Retrieves the aggro percentage of the current target.
 --- @return number The aggro percentage of the current target.
-function Targetting.GetTargetAggroPct()
+function Targeting.GetTargetAggroPct()
     return (mq.TLO.Target.PctAggro() or 0)
 end
 
 --- Determines the type of the given target.
 --- @param target MQSpawn|MQTarget|groupmember? The target whose type is to be determined.
 --- @return string The type of the target as a string.
-function Targetting.GetTargetType(target)
+function Targeting.GetTargetType(target)
     local useTarget = target
     if not useTarget then useTarget = mq.TLO.Target end
     if not useTarget or not useTarget() then return "" end
@@ -185,19 +185,19 @@ end
 --- @param type string The type to check against the target.
 --- @param target MQSpawn|groupmember|MQTarget? The target to be checked.
 --- @return boolean Returns true if the target is of the specified type, false otherwise.
-function Targetting.TargetIsType(type, target)
-    return Targetting.GetTargetType(target):lower() == type:lower()
+function Targeting.TargetIsType(type, target)
+    return Targeting.GetTargetType(target):lower() == type:lower()
 end
 
 --- @param target MQTarget|nil
 --- @return boolean
-function Targetting.GetTargetAggressive(target)
+function Targeting.GetTargetAggressive(target)
     return (target and target.Aggressive() or (mq.TLO.Target.Aggressive() or false))
 end
 
 --- Retrieves the percentage by which the target is slowed.
 --- @return number The percentage by which the target is slowed.
-function Targetting.GetTargetSlowedPct()
+function Targeting.GetTargetSlowedPct()
     -- no valid target
     if mq.TLO.Target and not mq.TLO.Target.Slowed() then return 0 end
 
@@ -206,7 +206,7 @@ end
 
 --- Determines if the player is facing the target.
 --- @return boolean True if the player is facing the target, false otherwise.
-function Targetting.FacingTarget()
+function Targeting.FacingTarget()
     if mq.TLO.Target.ID() == 0 then return true end
 
     return math.abs(mq.TLO.Target.HeadingTo.DegreesCCW() - mq.TLO.Me.Heading.DegreesCCW()) <= 20
@@ -215,7 +215,7 @@ end
 --- Retrieves the highest aggro percentage among all players.
 ---
 --- @return number The highest aggro percentage.
-function Targetting.GetHighestAggroPct()
+function Targeting.GetHighestAggroPct()
     local target     = mq.TLO.Target
     local me         = mq.TLO.Me
 
@@ -226,7 +226,7 @@ function Targetting.GetHighestAggroPct()
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targetting.ForceCombat) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
             if xtSpawn.PctAggro() > highestPct then highestPct = xtSpawn.PctAggro() end
         end
     end
@@ -237,7 +237,7 @@ end
 --- Checks if the player has aggro based on a given percentage.
 --- @param pct number The percentage threshold to determine if the player has aggro.
 --- @return boolean Returns true if the player has aggro above the given percentage, false otherwise.
-function Targetting.IHaveAggro(pct)
+function Targeting.IHaveAggro(pct)
     local target = mq.TLO.Target
     local me     = mq.TLO.Me
 
@@ -248,7 +248,7 @@ function Targetting.IHaveAggro(pct)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targetting.ForceCombat) then
+        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
             if xtSpawn.PctAggro() >= pct then return true end
         end
     end
@@ -259,13 +259,13 @@ end
 --- Retrieves the IDs of the top haters.
 --- @param printDebug boolean?: If true, debug information will be printed.
 --- @return table: A table containing the IDs of the top haters.
-function Targetting.GetXTHaterIDs(printDebug)
+function Targeting.GetXTHaterIDs(printDebug)
     local xtCount = mq.TLO.Me.XTarget() or 0
     local haters = {}
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs() or 0)) > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or Targetting.ForceCombat) then
+        if xtarg and xtarg.ID() > 0 and not xtarg.Dead() and (math.ceil(xtarg.PctHPs() or 0)) > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater") or Targeting.ForceCombat) then
             if printDebug then
                 Logger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
             end
@@ -280,8 +280,8 @@ end
 --- Gets the count of XTHaters.
 --- @param printDebug boolean?: If true, debug information will be printed.
 --- @return number: The count of XTHaters.
-function Targetting.GetXTHaterCount(printDebug)
-    return #Targetting.GetXTHaterIDs(printDebug)
+function Targeting.GetXTHaterCount(printDebug)
+    return #Targeting.GetXTHaterIDs(printDebug)
 end
 
 --- Computes the difference in Hater IDs.
@@ -289,9 +289,9 @@ end
 --- @param t table The table containing Hater IDs.
 --- @param printDebug boolean? Whether to print debug information.
 --- @return boolean True if there is a difference, false otherwise
-function Targetting.DiffXTHaterIDs(t, printDebug)
+function Targeting.DiffXTHaterIDs(t, printDebug)
     local oldHaterSet = Set.new(t)
-    local curHaters   = Targetting.GetXTHaterIDs(printDebug)
+    local curHaters   = Targeting.GetXTHaterIDs(printDebug)
 
     for _, xtargID in ipairs(curHaters) do
         if not oldHaterSet:contains(xtargID) then return true end
@@ -303,7 +303,7 @@ end
 --- Checks if the given spawn is an XTHater.
 --- @param spawnId number The ID of the spawn to check.
 --- @return boolean True if the spawn is an XTHater, false otherwise.
-function Targetting.IsSpawnXTHater(spawnId)
+function Targeting.IsSpawnXTHater(spawnId)
     local xtCount = mq.TLO.Me.XTarget() or 0
 
     for i = 1, xtCount do
@@ -317,7 +317,7 @@ end
 --- Adds an XT by its name to the specified slot.
 --- @param slot number The slot number where the XT should be added.
 --- @param name string The name of the XT to be added.
-function Targetting.AddXTByName(slot, name)
+function Targeting.AddXTByName(slot, name)
     local spawnToAdd = mq.TLO.Spawn(name)
     if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
         Core.DoCmd("/xtarget set %d \"%s\"", slot, name)
@@ -327,7 +327,7 @@ end
 --- Adds an item to a slot by its ID.
 --- @param slot number The slot number where the item should be added.
 --- @param id number The ID of the item to be added.
-function Targetting.AddXTByID(slot, id)
+function Targeting.AddXTByID(slot, id)
     local spawnToAdd = mq.TLO.Spawn(id)
     if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
         Core.DoCmd("/xtarget set %d \"%s\"", slot, spawnToAdd.CleanName())
@@ -336,7 +336,7 @@ end
 
 --- Resets the specified XT slot.
 --- @param slot number The slot number to reset.
-function Targetting.ResetXTSlot(slot)
+function Targeting.ResetXTSlot(slot)
     Core.DoCmd("/xtarget set %d autohater", slot)
 end
 
@@ -345,7 +345,7 @@ end
 --- @param spawn MQSpawn The spawn object to check.
 --- @param radius number The radius within which to check for strangers.
 --- @return boolean Returns true if the spawn is fighting a stranger within the specified radius, false otherwise.
-function Targetting.IsSpawnFightingStranger(spawn, radius)
+function Targeting.IsSpawnFightingStranger(spawn, radius)
     local searchTypes = { "PC", "PCPET", "MERCENARY", }
 
     for _, t in ipairs(searchTypes) do
@@ -354,7 +354,7 @@ function Targetting.IsSpawnFightingStranger(spawn, radius)
         for i = 1, count do
             local cur_spawn = mq.TLO.NearestSpawn(i, string.format("%s radius %d zradius %d", t, radius, radius))
 
-            if cur_spawn() and not Targetting.SafeTargetCache[cur_spawn.ID()] then
+            if cur_spawn() and not Targeting.SafeTargetCache[cur_spawn.ID()] then
                 if (cur_spawn.AssistName() or ""):len() > 0 then
                     Logger.log_verbose("My Interest: %s =? Their Interest: %s", spawn.Name(),
                         cur_spawn.AssistName())
@@ -363,10 +363,10 @@ function Targetting.IsSpawnFightingStranger(spawn, radius)
                             cur_spawn.CleanName(), cur_spawn.AssistName(), spawn.Name())
                         local checkName = cur_spawn and cur_spawn() or cur_spawn.CleanName() or "None"
 
-                        if Targetting.TargetIsType("mercenary", cur_spawn) and cur_spawn.Owner() then checkName = cur_spawn.Owner.CleanName() end
-                        if Targetting.TargetIsType("pet", cur_spawn) then checkName = cur_spawn.Master.CleanName() end
+                        if Targeting.TargetIsType("mercenary", cur_spawn) and cur_spawn.Owner() then checkName = cur_spawn.Owner.CleanName() end
+                        if Targeting.TargetIsType("pet", cur_spawn) then checkName = cur_spawn.Master.CleanName() end
 
-                        if not Targetting.IsSafeName("pc", checkName) then
+                        if not Targeting.IsSafeName("pc", checkName) then
                             Logger.log_verbose(
                                 "\ar WARNING: \ax Almost attacked other PCs [%s] mob. Not attacking \aw%s\ax",
                                 checkName, cur_spawn.AssistName())
@@ -376,7 +376,7 @@ function Targetting.IsSpawnFightingStranger(spawn, radius)
                 end
 
                 -- this is pretty expensive to calculate so lets cache it.
-                Targetting.SafeTargetCache[cur_spawn.ID()] = true
+                Targeting.SafeTargetCache[cur_spawn.ID()] = true
             end
         end
     end
@@ -388,7 +388,7 @@ end
 --- @param spawnType string Type of spawn pc/pcpet/merc/etc.
 --- @param name string The name to check for safety.
 --- @return boolean Returns true if the name is safe, false otherwise.
-function Targetting.IsSafeName(spawnType, name)
+function Targeting.IsSafeName(spawnType, name)
     Logger.log_verbose("IsSafeName(%s)", name)
     if mq.TLO.DanNet(name)() then
         Logger.log_verbose("IsSafeName(%s): Dannet Safe", name)
@@ -423,8 +423,8 @@ function Targetting.IsSafeName(spawnType, name)
 end
 
 --- Clears the Safe Target Cache after combat.
-function Targetting.ClearSafeTargetCache()
-    Targetting.SafeTargetCache = {}
+function Targeting.ClearSafeTargetCache()
+    Targeting.SafeTargetCache = {}
 end
 
-return Targetting
+return Targeting

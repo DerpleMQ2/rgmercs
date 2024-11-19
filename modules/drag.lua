@@ -2,7 +2,7 @@
 local mq                 = require('mq')
 local Config             = require('utils.config')
 local Core               = require("utils.core")
-local Targetting         = require("utils.targetting")
+local Targeting          = require("utils.targeting")
 local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
 local Logger             = require("utils.logger")
@@ -168,7 +168,7 @@ end
 function Module:Drag(corpse)
     if corpse and corpse() and corpse.Distance() > 10 then
         Logger.log_debug("Dragging: %s (%d)", corpse.DisplayName(), corpse.ID())
-        Targetting.SetTarget(corpse.ID())
+        Targeting.SetTarget(corpse.ID())
         Core.DoCmd("/corpse")
     end
 end

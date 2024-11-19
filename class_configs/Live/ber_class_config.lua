@@ -1,10 +1,10 @@
-local mq         = require('mq')
-local Config     = require('utils.config')
-local Core       = require("utils.core")
-local Targetting = require("utils.targetting")
-local Casting    = require("utils.casting")
-local Strings    = require("utils.strings")
-local Logger     = require("utils.logger")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
+local Strings   = require("utils.strings")
+local Logger    = require("utils.logger")
 
 return {
     _version            = "1.4 - Live",
@@ -735,7 +735,7 @@ return {
                 name = "Drawn to Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targetting.GetTargetDistance() > 15
+                    return Casting.AAReady(aaName) and Targeting.GetTargetDistance() > 15
                 end,
             },
             {
@@ -819,12 +819,12 @@ return {
 
             Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
-            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.PctEndurance() >= 5 and Config:GetSetting("DoOpener") and Targetting.GetTargetDistance() < 50 then
+            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.PctEndurance() >= 5 and Config:GetSetting("DoOpener") and Targeting.GetTargetDistance() < 50 then
                 Casting.UseDisc(openerAbility, target)
                 Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
                 Logger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Distance to Target = %d, Endurance = %d", openerAbility or "None",
-                    Strings.BoolToColorString(Config:GetSetting("DoOpener")), Targetting.GetTargetDistance(), mq.TLO.Me.PctEndurance() or 0)
+                    Strings.BoolToColorString(Config:GetSetting("DoOpener")), Targeting.GetTargetDistance(), mq.TLO.Me.PctEndurance() or 0)
             end
         end,
     },
