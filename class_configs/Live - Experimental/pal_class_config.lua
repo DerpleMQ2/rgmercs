@@ -1058,7 +1058,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "HealWard", --requires a target, using NPCSpellReady to force a target if needed
+                name = "HealWard", --requires a target, using TargettedSpellReady to force a target if needed
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.TargettedSpellReady(spell) and Casting.SpellStacksOnMe(spell) and Core.IsModeActive("Tank") and

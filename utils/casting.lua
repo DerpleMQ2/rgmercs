@@ -532,7 +532,7 @@ end
 --- @return boolean Returns true if the discipline spell is ready, false otherwise.
 function Casting.DiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
-    Logger.log_super_verbose("PCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
+    Logger.log_super_verbose("DiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
         Strings.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
@@ -545,7 +545,7 @@ function Casting.TargettedDiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
     local target = mq.TLO.Target
     if not target or not target() then return false end
-    Logger.log_super_verbose("NPCDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
+    Logger.log_super_verbose("TargettedDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
         Strings.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
     return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
         mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and not Targetting.TargetIsType("corpse", target) and
@@ -590,46 +590,46 @@ end
 --- @param healingSpell boolean?
 --- @return boolean
 function Casting.TargettedAAReady(aaName, targetId, healingSpell)
-    Logger.log_verbose("NPCAAReady(%s)", aaName)
+    Logger.log_verbose("TargettedAAReady(%s)", aaName)
     local me = mq.TLO.Me
     local ability = mq.TLO.Me.AltAbility(aaName)
 
     if targetId == 0 or not targetId then targetId = mq.TLO.Target.ID() end
 
     if not ability or not ability() then
-        Logger.log_verbose("NPCAAReady(%s) - Don't have ability.", aaName)
+        Logger.log_verbose("TargettedAAReady(%s) - Don't have ability.", aaName)
         return false
     end
 
     if me.Stunned() then
-        Logger.log_verbose("NPCAAReady(%s) - Stunned", aaName)
+        Logger.log_verbose("TargettedAAReady(%s) - Stunned", aaName)
         return false
     end
 
     local target = mq.TLO.Spawn(string.format("id %d", targetId))
 
     if not target or not target() or target.Dead() then
-        Logger.log_verbose("NPCAAReady(%s) - Target Dead", aaName)
+        Logger.log_verbose("TargettedAAReady(%s) - Target Dead", aaName)
         return false
     end
 
     if Casting.AAReady(aaName) and me.CurrentMana() >= ability.Spell.Mana() and me.CurrentEndurance() >= ability.Spell.EnduranceCost() then
         if Core.MyClassIs("brd") or (not me.Moving() and not me.Casting.ID()) then
-            Logger.log_verbose("NPCAAReady(%s) - Check LOS", aaName)
+            Logger.log_verbose("TargettedAAReady(%s) - Check LOS", aaName)
             if target.LineOfSight() then
-                Logger.log_verbose("NPCAAReady(%s) - Success", aaName)
+                Logger.log_verbose("TargettedAAReady(%s) - Success", aaName)
                 return true
             elseif healingSpell == true then
-                Logger.log_verbose("NPCAAReady(%s) - Healing Success", aaName)
+                Logger.log_verbose("TargettedAAReady(%s) - Healing Success", aaName)
                 return true
             end
         end
     else
-        Logger.log_verbose("NPCAAReady(%s) CurrentMana(%d) >= SpellMana(%d) CurrentEnd(%d) >= SpellEnd(%d)", aaName, me.CurrentMana(), ability.Spell.Mana(),
+        Logger.log_verbose("TargettedAAReady(%s) CurrentMana(%d) >= SpellMana(%d) CurrentEnd(%d) >= SpellEnd(%d)", aaName, me.CurrentMana(), ability.Spell.Mana(),
             me.CurrentEndurance(), ability.Spell.EnduranceCost())
     end
 
-    Logger.log_verbose("NPCAAReady(%s) - Failed", aaName)
+    Logger.log_verbose("TargettedAAReady(%s) - Failed", aaName)
     return false
 end
 

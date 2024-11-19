@@ -1046,7 +1046,7 @@ _ClassConfig      = {
             end
 
             if not Casting.SpellReady(petToyResolvedSpell) then
-                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed PCSpellReady() Check!", type)
+                Logger.log_super_verbose("summon_pet_toy() ==> \arFailed SpellReady() Check!", type)
                 return false
             end
 

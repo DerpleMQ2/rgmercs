@@ -888,7 +888,7 @@ local _ClassConfig = {
             end,
         },
     },
-    --TODO: Triple-check usage of PCAAReady and NPCAAReady, etc, depending on ability
+    --TODO: Triple-check usage of PCAAReady and TargettedAAReady, etc, depending on ability
     ['Rotations']       = {
         ['Burn'] = {
             {
