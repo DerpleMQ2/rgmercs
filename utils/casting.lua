@@ -1651,4 +1651,10 @@ function Casting.ShouldShrinkPet()
         (Config:GetSetting('ShrinkPetItem'):len() > 0) and Casting.DoPetCheck()
 end
 
+--- Checks if the target is in range for an ability.
+--- @param target MQTarget? The target entity to measure the range to.
+function Casting.AbilityRangeCheck(target)
+    return Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target)
+end
+
 return Casting

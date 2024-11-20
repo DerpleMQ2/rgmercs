@@ -1035,21 +1035,21 @@ return {
                 name = "Round Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
                 end,
             },
             {
                 name = "Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return not Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return not Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
                 end,
             },
             {
                 name = "Tiger Claw",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
                 end,
             },
             {

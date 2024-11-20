@@ -602,7 +602,7 @@ local _ClassConfig = {
                 name = "Round Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
                 end,
             },
             {
@@ -615,9 +615,8 @@ local _ClassConfig = {
             {
                 name = "Disarm",
                 type = "Ability",
-                cond = function(self, abilityName)
-                    return Casting.AbilityReady(abilityName) and
-                        Targeting.GetTargetDistance() < 15
+                cond = function(self, abilityName, target)
+                    return Casting.AbilityReady(abilityName) and Casting.AbilityRangeCheck(target)
                 end,
             },
         },
