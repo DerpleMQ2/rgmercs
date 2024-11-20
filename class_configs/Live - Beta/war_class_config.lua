@@ -696,7 +696,6 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     local standDisc = Core.GetResolvedActionMapItem('StandDisc')
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName()
                 end,
             },
             { --shares effect with AbsorbDisc, offset from StandDisc for automation flow/coverage
