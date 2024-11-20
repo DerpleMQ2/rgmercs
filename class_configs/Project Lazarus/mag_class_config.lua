@@ -908,7 +908,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.Feigning()
+                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -917,7 +917,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -926,7 +926,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -935,7 +935,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning() and Core.IsModeActive("PetTank")
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.IsModeActive("PetTank")
             end,
         },
         {
@@ -944,7 +944,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.SpellInCooldown() and not Casting.Feigning()
+                return combat_state == "Combat" and mq.TLO.Me.SpellInCooldown() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -953,7 +953,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -974,7 +974,7 @@ _ClassConfig      = {
                 local downtime = combat_state == "Downtime" and Casting.DoBuffCheck()
                 local pct = Config:GetSetting('GroupManaPct')
                 local combat = combat_state == "Combat" and Config:GetSetting('CombatModRod') and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt') and
-                    not Casting.Feigning()
+                    not Casting.IAmFeigning()
                 return downtime or combat
             end,
         },

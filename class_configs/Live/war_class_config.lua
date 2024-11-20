@@ -257,7 +257,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    Casting.BurnCheck() and not Casting.Feigning()
+                    Casting.BurnCheck() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -266,7 +266,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning() and not Casting.BurnCheck()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and not Casting.BurnCheck()
             end,
         },
         {
@@ -275,7 +275,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
     },

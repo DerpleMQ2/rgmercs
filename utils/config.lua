@@ -386,7 +386,7 @@ Config.DefaultConfig = {
         FAQ = "Why am I only Regenerating to 60% Health?",
         Answer = "You can set the [HPMedPctStop] option to the percent health you would like to stop meditating at.",
     },
-    ['AfterMedCombatDelay']  = {
+    ['AfterCombatMedDelay']  = {
         DisplayName = "After Combat Med Delay",
         Category = "Med/Mana",
         Index = 9,
@@ -396,7 +396,7 @@ Config.DefaultConfig = {
         Max = 60,
         ConfigType = "Advanced",
         FAQ = "I keep sitting after combat to med and getting attacked within seconds, how do I fix this?",
-        Answer = "You can set the [AfterMedCombatDelay] option to the number of seconds you would like to wait after combat before sitting to med.",
+        Answer = "You can set the [AfterCombatMedDelay] option to the number of seconds you would like to wait after combat before sitting to med.",
     },
     ['StandWhenDone']        = {
         DisplayName = "Stand When Done Medding",

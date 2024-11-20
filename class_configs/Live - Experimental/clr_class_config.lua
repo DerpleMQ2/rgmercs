@@ -697,7 +697,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.Feigning() and
+                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -711,7 +711,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 if not Config:GetSetting('DoManaRestore') then return false end
                 local downtime = combat_state == "Downtime" and Casting.DoBuffCheck()
-                local combat = combat_state == "Combat" and not Casting.Feigning()
+                local combat = combat_state == "Combat" and not Casting.IAmFeigning()
                 return (downtime or combat) and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -722,7 +722,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning() and
+                return combat_state == "Combat" and not Casting.IAmFeigning() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -732,7 +732,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning() and
+                return combat_state == "Combat" and not Casting.IAmFeigning() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },

@@ -628,7 +628,7 @@ function Module:DoClickies()
     if not Config:GetSetting('UseClickies') then return end
 
     -- don't use clickies when we are trying to med, feigning, or invisible.
-    if mq.TLO.Me.Sitting() or Casting.Feigning() or mq.TLO.Me.Invis() then return end
+    if mq.TLO.Me.Sitting() or Casting.IAmFeigning() or mq.TLO.Me.Invis() then return end
 
     for i = 1, 12 do
         local setting = Config:GetSetting(string.format("ClickyItem%d", i))

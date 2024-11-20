@@ -1338,7 +1338,7 @@ end
 
 --- Checks if the character is currently feigning death.
 --- @return boolean True if the character is feigning death, false otherwise.
-function Casting.Feigning()
+function Casting.IAmFeigning()
     return mq.TLO.Me.State():lower() == "feign"
 end
 
@@ -1507,7 +1507,7 @@ function Casting.AutoMed()
     local forcestand = false
 
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
-    if Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterMedCombatDelay')) and Config:GetSetting('DoMed') ~= 2 then return end
+    if Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) and Config:GetSetting('DoMed') ~= 2 then return end
 
     if Config.Constants.RGHybrid:contains(me.Class.ShortName()) or Config.Constants.RGCasters:contains(me.Class.ShortName()) then
         -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
@@ -1569,7 +1569,7 @@ end
 
 function Casting.ClickModRod()
     local me = mq.TLO.Me
-    if me.PctMana() > Config:GetSetting('ModRodManaPct') or me.PctHPs() < 60 or Casting.Feigning() or mq.TLO.Me.Invis() then
+    if me.PctMana() > Config:GetSetting('ModRodManaPct') or me.PctHPs() < 60 or Casting.IAmFeigning() or mq.TLO.Me.Invis() then
         return
     end
 
