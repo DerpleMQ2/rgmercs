@@ -4,7 +4,7 @@ local Core        = require("utils.core")
 local Targeting   = require("utils.targeting")
 local Casting     = require("utils.casting")
 local Comms       = require("utils.comms")
-local ItemManager = require("utils.itemmanager")
+local ItemManager = require("utils.item_manager")
 local DanNet      = require('lib.dannet.helpers')
 local Logger      = require("utils.logger")
 
