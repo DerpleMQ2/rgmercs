@@ -45,8 +45,6 @@ Config.Constants.RGCasters           = Set.new({ "BRD", "BST", "CLR", "DRU", "EN
 Config.Constants.RGMelee             = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
 Config.Constants.RGHybrid            = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
 Config.Constants.RGTank              = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGModRod            = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG",
-    "SHD", })
 Config.Constants.RGPetClass          = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
 Config.Constants.RGMezAnims          = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
 Config.Constants.ModRods             = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", }
