@@ -1,5 +1,9 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq        = require('mq')
+local Combat    = require('utils.combat')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
 
 return {
     _version              = "1.2 - Project Lazarus",
@@ -612,7 +616,7 @@ return {
             name  = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return RGMercUtils.GetSetting('DoHeals') and (target.PctHPs() or 999) < RGMercUtils.GetSetting('MainHealPoint') end,
+            cond  = function(self, target) return Config:GetSetting('DoHeals') and (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint') end,
         },
     },
     ['HealRotations']     = {
@@ -620,19 +624,19 @@ return {
             {
                 name = "Mend Companion",
                 type = "AA",
-                cond = function(self, aaName, target) return mq.TLO.Me.Pet.PctHPs() <= RGMercUtils.GetSetting('BigHealPoint') and RGMercUtils.AAReady(aaName) end,
+                cond = function(self, aaName, target) return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.AAReady(aaName) end,
             },
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.GetSetting('DoPetHeals') and RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell) return Config:GetSetting('DoPetHeals') and Casting.SpellReady(spell) end,
             },
         },
         ["MainHealPoint"] = {
             {
                 name = "HealSpell",
                 type = "Spell",
-                cond = function(self, spell) return RGMercUtils.PCSpellReady(spell) end,
+                cond = function(self, spell) return Casting.SpellReady(spell) end,
             },
         },
     },
@@ -642,24 +646,24 @@ return {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                return combat_state == "Downtime" and Casting.DoBuffCheck() and Casting.AmIBuffable()
             end,
         },
         {
             name = 'GroupBuff',
             timer = 60, -- only run every 60 seconds top.
             targetId = function(self)
-                return RGMercUtils.GetBuffableGroupIDs()
+                return Casting.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck()
+                return combat_state == "Downtime" and Casting.DoBuffCheck()
             end,
         },
         { --Summon pet even when buffs are off on emu
             name = 'PetSummon',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() == 0 and RGMercUtils.DoPetCheck()
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() == 0 and Casting.DoPetCheck()
             end,
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
@@ -667,7 +671,7 @@ return {
             timer = 30,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and RGMercUtils.DoPetCheck()
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.DoPetCheck()
             end,
         },
         {
@@ -675,10 +679,10 @@ return {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return RGMercUtils.GetXTHaterCount() > 0 and not RGMercUtils.Feigning() and
-                    (mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EmergencyStart') or (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
+                return Targeting.GetXTHaterCount() > 0 and not Casting.Feigning() and
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
@@ -686,50 +690,50 @@ return {
             state = 1,
             steps = 1,
             targetId = function(self)
-                return { RGMercUtils.FindWorstHurtManaGroupMember(RGMercUtils.GetSetting('FParaPct')),
-                    RGMercUtils.FindWorstHurtManaXT(RGMercUtils.GetSetting('FParaPct')), }
+                return { Combat.FindWorstHurtManaGroupMember(Config:GetSetting('FParaPct')),
+                    Combat.FindWorstHurtManaXT(Config:GetSetting('FParaPct')), }
             end,
             cond = function(self, combat_state)
-                if not RGMercUtils.GetSetting('DoParagon') then return false end
-                local downtime = combat_state == "Downtime" and RGMercUtils.GetSetting('DowntimeFP') and RGMercUtils.DoBuffCheck()
-                local combat = combat_state == "Combat" and not RGMercUtils.Feigning()
-                return (downtime or combat) and not RGMercUtils.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
+                if not Config:GetSetting('DoParagon') then return false end
+                local downtime = combat_state == "Downtime" and Config:GetSetting('DowntimeFP') and Casting.DoBuffCheck()
+                local combat = combat_state == "Combat" and not Casting.Feigning()
+                return (downtime or combat) and not Casting.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
             end,
         },
         {
             name = 'Debuff',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.Feigning()
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
         {
             name = 'Weaves',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
     },
@@ -737,13 +741,13 @@ return {
         FlurryActive = function(self)
             local fury = self.ResolvedActionMap['FuryDisc']
             local dicho = self.ResolvedActionMap['DichoSpell']
-            return (dicho and dicho() and RGMercUtils.SongActiveByName(dicho.Name()))
-                or (fury and fury() and RGMercUtils.SongActiveByName(fury.Name()))
+            return (dicho and dicho() and Casting.SongActiveByName(dicho.Name()))
+                or (fury and fury() and Casting.SongActiveByName(fury.Name()))
         end,
         DmgModActive = function(self) --Song active by name will check both Bestial Alignments (Self and Group)
             local disc = self.ResolvedActionMap['DmgModDisc']
-            return RGMercUtils.SongActiveByName("Bestial Alignment") or (disc and disc() and RGMercUtils.SongActiveByName(disc.Name()))
-                or RGMercUtils.BuffActiveByName("Ferociousness")
+            return Casting.SongActiveByName("Bestial Alignment") or (disc and disc() and Casting.SongActiveByName(disc.Name()))
+                or Casting.BuffActiveByName("Ferociousness")
         end,
     },
     ['Rotations']         = {
@@ -752,49 +756,49 @@ return {
                 name = "Group Bestial Alignment",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
             {
                 name = "Attack of the Warder",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "Frenzy of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Bloodlust",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "VinDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Spire of the Savage Lord",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Fury",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
@@ -802,18 +806,18 @@ return {
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and RGMercUtils.TargetHasBuff(item.Spell, mq.TLO.Me)
+                    return item() and Casting.TargetHasBuff(item.Spell, mq.TLO.Me)
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and RGMercUtils.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
+                    return Config:GetSetting('DoChestClick') and item() and Casting.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
                 end,
             },
             {
                 name = "Frenzied Swipes",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
@@ -822,21 +826,21 @@ return {
                 cond = function(self, spell, target)
                     local vinDisc = self.ResolvedActionMap['VinDisc']
                     if not vinDisc then return false end
-                    return RGMercUtils.BuffActive(vinDisc) and RGMercUtils.NPCSpellReady(spell, target.ID())
+                    return Casting.BuffActive(vinDisc) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "FuryDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.PCDiscReady(discSpell) and not self.ClassConfig.HelperFunctions.FlurryActive(self)
+                    return Casting.DiscReady(discSpell) and not self.ClassConfig.HelperFunctions.FlurryActive(self)
                 end,
             },
             {
                 name = "Forceful Rejuvenation",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and not self.ClassConfig.HelperFunctions.FlurryActive(self) and
+                    return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.FlurryActive(self) and
                         (mq.TLO.Me.GemTimer(self.ResolvedActionMap['DichoSpell'])() or -1) > 15
                 end,
             },
@@ -844,14 +848,14 @@ return {
                 name = "DmgModDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return Casting.DiscReady(discSpell) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
             {
                 name = "Ferociousness",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
 
@@ -861,7 +865,7 @@ return {
                 name = "Bestial Alignment",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
         },
@@ -871,17 +875,17 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- force the target for StacksTarget to work.
-                    RGMercUtils.SetTarget(target.ID() or 0)
-                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") and not RGMercUtils.TargetHasBuff(spell) and
-                        RGMercUtils.SpellStacksOnTarget(spell) and spell.SlowPct() > (RGMercUtils.GetTargetSlowedPct()) and RGMercUtils.NPCSpellReady(spell)
+                    Targeting.SetTarget(target.ID() or 0)
+                    return Config:GetSetting('DoSlow') and not Casting.CanUseAA("Sha's Reprisal") and not Casting.TargetHasBuff(spell) and
+                        Casting.SpellStacksOnTarget(spell) and spell.SlowPct() > (Targeting.GetTargetSlowedPct()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Sha's Reprisal",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.TargetHasBuffByName(aaName) and
-                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (RGMercUtils.GetTargetSlowedPct()) and RGMercUtils.NPCAAReady(aaName, target.ID())
+                    return Config:GetSetting('DoSlow') and not Casting.TargetHasBuffByName(aaName) and
+                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
         },
@@ -890,23 +894,23 @@ return {
                 name = "Falsified Death",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('AggroFeign') then return false end
-                    return (mq.TLO.Me.PctHPs() <= 40 and RGMercUtils.IHaveAggro(100)) or (RGMercUtils.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
-                        and RGMercUtils.PCAAReady(aaName) and not RGMercUtils.IAmMA
+                    if not Config:GetSetting('AggroFeign') then return false end
+                    return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
+                        and Casting.AAReady(aaName) and not Core.IAmMA
                 end,
             },
             {
                 name = "Warder's Gift",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.Pet.PctHPs() > 50 and RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Me.Pet.PctHPs() > 50 and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Protection of the Warder",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.IHaveAggro(100) and RGMercUtils.AAReady(aaName)
+                    return Targeting.IHaveAggro(100) and Casting.AAReady(aaName)
                 end,
             },
         },
@@ -915,7 +919,7 @@ return {
                 name = "Focused Paragon of Spirits",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
         },
@@ -931,26 +935,26 @@ return {
                 name = "Paragon of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('DoParagon') then return false end
-                    return (mq.TLO.Group.LowMana(RGMercUtils.GetSetting('ParaPct'))() or -1) > 0 and RGMercUtils.AAReady(aaName)
+                    if not Config:GetSetting('DoParagon') then return false end
+                    return (mq.TLO.Group.LowMana(Config:GetSetting('ParaPct'))() or -1) > 0 and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.PCSpellReady(spell) and not self.ClassConfig.HelperFunctions.FlurryActive(self)
+                    return Casting.SpellReady(spell) and not self.ClassConfig.HelperFunctions.FlurryActive(self)
                 end,
             },
             {
                 name = "Feralgia",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoFeralgia') then return false end
+                    if not Config:GetSetting('DoFeralgia') then return false end
                     --This checks to see if the Growl portion is up on the pet (or about to expire) before using this, those who prefer the swarm pets can use the actual swarm pet spell in conjunction with this for mana savings.
                     --There are some instances where the Growl isn't needed, but that is a giant TODO and of minor benefit.
                     ---@diagnostic disable-next-line: undefined-field
-                    return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10 and RGMercUtils.NPCSpellReady(spell)
+                    return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10 and Casting.TargetedSpellReady(spell)
                         and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
@@ -958,70 +962,70 @@ return {
                 name = "Blooddot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoDot') then return false end
-                    return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                    if not Config:GetSetting('DoDot') then return false end
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Colddot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoDot') then return false end
-                    return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                    if not Config:GetSetting('DoDot') then return false end
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "EndemicDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoDot') then return false end
-                    return RGMercUtils.DotSpellCheck(spell) and (RGMercUtils.DotManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                    if not Config:GetSetting('DoDot') then return false end
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Maelstrom",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "FrozenPoi",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "PoiBite",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Icelance1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "Icelance2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoSwarmPet') then return false end
+                    if not Config:GetSetting('DoSwarmPet') then return false end
                     --We will let Feralgia apply swarm pets if our pet currently doesn't have its Growl Effect.
                     local feralgia = self.ResolvedActionMap['Feralgia']
                     return (feralgia and feralgia() and mq.TLO.Me.PetBuff(mq.TLO.Spell(feralgia).RankName.Trigger(2).ID()))
-                        and (RGMercUtils.ManaCheck() or RGMercUtils.BurnCheck()) and RGMercUtils.NPCSpellReady(spell)
+                        and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                         and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
@@ -1031,77 +1035,77 @@ return {
                 name = "Round Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return RGMercUtils.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return not RGMercUtils.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return not Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Tiger Claw",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Enduring Frenzy",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.GetTargetPctHPs() > 90 and RGMercUtils.NPCAAReady(aaName, target.ID())
+                    return Targeting.GetTargetPctHPs() > 90 and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "EndRegenProcDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return mq.TLO.Me.PctEndurance() < RGMercUtils.GetSetting('ParaPct') and RGMercUtils.NPCDiscReady(discSpell)
+                    return mq.TLO.Me.PctEndurance() < Config:GetSetting('ParaPct') and Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
                 name = "Chameleon Strike",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "SingleClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not RGMercUtils.GetSetting('DoAoe') and RGMercUtils.NPCDiscReady(discSpell, target.ID())
+                    return not Config:GetSetting('DoAoe') and Casting.TargetedDiscReady(discSpell, target.ID())
                 end,
             },
             {
                 name = "AEClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.GetSetting('DoAoe') and RGMercUtils.NPCDiscReady(discSpell, target.ID())
+                    return Config:GetSetting('DoAoe') and Casting.TargetedDiscReady(discSpell, target.ID())
                 end,
             },
             {
                 name = "Maul",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return RGMercUtils.NPCDiscReady(discSpell)
+                    return Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
                 name = "BestialBuffDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not RGMercUtils.BuffActive(discSpell) and RGMercUtils.PCDiscReady(discSpell)
+                    return not Casting.BuffActive(discSpell) and Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Consumption of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (mq.TLO.Me.PctHPs() > 90 and mq.TLO.Me.PctMana() < 60) and RGMercUtils.PCAAReady(aaName)
+                    return (mq.TLO.Me.PctHPs() > 90 and mq.TLO.Me.PctMana() < 60) and Casting.AAReady(aaName)
                 end,
             },
             {
@@ -1109,7 +1113,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     ---@diagnostic disable-next-line: undefined-field
-                    return mq.TLO.Me.TotalCounters() > 0 and RGMercUtils.AAReady(aaName)
+                    return mq.TLO.Me.TotalCounters() > 0 and Casting.AAReady(aaName)
                 end,
             },
         },
@@ -1118,16 +1122,16 @@ return {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoRunSpeed') then return false end
-                    return RGMercUtils.GroupBuffCheck(spell, target)
+                    if not Config:GetSetting('DoRunSpeed') then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not RGMercUtils.GetSetting('DoAvatar') or not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
-                    return RGMercUtils.GroupBuffCheck(spell, target)
+                    if not Config:GetSetting('DoAvatar') or not Config.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1135,11 +1139,11 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- Make sure this is gemmed due to long refresh, and only use the single target versions on classes that need it.
-                    if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2")) and (not RGMercUtils.CastReady(spell.RankName)
-                            or not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName())) then
+                    if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2")) and (not Casting.CastReady(spell.RankName)
+                            or not Config.Constants.RGMelee:contains(target.Class.ShortName())) then
                         return false
                     end
-                    return RGMercUtils.GroupBuffCheck(spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1151,14 +1155,14 @@ return {
                     local triggerone = atkHPBuff and atkHPBuff.Level() or 999
                     local triggertwo = manaRegenBuff and manaRegenBuff.Level() or 999
                     if (spell.Level() or 0) < (triggerone or triggertwo) then return false end
-                    return RGMercUtils.GroupBuffCheck(spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "ManaRegenBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return RGMercUtils.GroupBuffCheck(spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1167,10 +1171,10 @@ return {
                 cond = function(self, spell, target)
                     -- Only use the single target versions on classes that need it
                     if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
-                        and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then
+                        and not Config.Constants.RGMelee:contains(target.Class.ShortName()) then
                         return false
                     end
-                    return RGMercUtils.GroupBuffCheck(spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1179,10 +1183,10 @@ return {
                 cond = function(self, spell, target)
                     -- Only use the single target versions on classes that need it
                     if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
-                        and not RGMercConfig.Constants.RGMelee:contains(target.Class.ShortName()) then
+                        and not Config.Constants.RGMelee:contains(target.Class.ShortName()) then
                         return false
                     end
-                    return RGMercUtils.GroupBuffCheck(spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },
@@ -1200,29 +1204,29 @@ return {
                 name = "Consumption of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (mq.TLO.Me.PctHPs() > 70 and mq.TLO.Me.PctMana() < 80) and RGMercUtils.AAReady(aaName)
+                    return (mq.TLO.Me.PctHPs() > 70 and mq.TLO.Me.PctMana() < 80) and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Feralist's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.PCAAReady(aaName)
+                    return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "KillShotBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    if RGMercUtils.CanUseAA("Feralist's Unity") then return false end
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    if Casting.CanUseAA("Feralist's Unity") then return false end
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Pact of The Wurine",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffAACheck(aaName) and RGMercUtils.AAReady(aaName)
+                    return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName)
                 end,
             },
             -- TODO: Does anyone even want this?
@@ -1230,7 +1234,7 @@ return {
             --    name = "VerifyFerocity",
             --    type = "CustomFunc",
             --    custom_func = function(self, targetId)
-            --        if not RGMercUtils.GetSetting('DoCombatFero') or not RGMercUtils.NPCSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
+            --        if not Config:GetSetting('DoCombatFero') or not Casting.TargetedSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
             --        -- TODO: Ferocity List?
             --        return false
             --    end,
@@ -1241,7 +1245,7 @@ return {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return RGMercUtils.GetSetting('DoEpic') and
+                    return Config:GetSetting('DoEpic') and
                         mq.TLO.FindItem(itemName)() and mq.TLO.Me.ItemReady(itemName)() and
                         (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil and mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
                 end,
@@ -1251,7 +1255,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     local slowProc = self.ResolvedActionMap['PetSlowProc']
-                    return RGMercUtils.GetSetting('DoPetSnare') and (slowProc and slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
+                    return Config:GetSetting('DoPetSnare') and (slowProc and slowProc() and mq.TLO.Me.PetBuff(slowProc.RankName()) == nil) and
                         mq.TLO.Me.PetBuff(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name())() == nil
                 end,
             },
@@ -1259,78 +1263,78 @@ return {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoAvatar') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoAvatar') and Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoRunSpeed') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoRunSpeed') and Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetOffenseBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not RGMercUtils.GetSetting('DoTankPet')) and RGMercUtils.SelfBuffPetCheck(spell)
+                    return (not Config:GetSetting('DoTankPet')) and Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetDefenseBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoTankPet') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoTankPet') and Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetSlowProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoPetSlow') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoPetSlow') and Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetHaste",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell)
+                    return Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetDamageProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not RGMercUtils.GetSetting('DoTankPet')) and RGMercUtils.SelfBuffPetCheck(spell)
+                    return (not Config:GetSetting('DoTankPet')) and Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetHealProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffPetCheck(spell)
+                    return Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetSpellGuard",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.GetSetting('DoSpellGuard') and RGMercUtils.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoSpellGuard') and Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "PetGrowl",
                 type = "Spell",
                 cond = function(self, spell)
-                    if RGMercUtils.GetSetting('DoFeralgia') then return false end
-                    return not RGMercUtils.SongActive(spell)
+                    if Config:GetSetting('DoFeralgia') then return false end
+                    return not Casting.SongActive(spell)
                 end,
             },
             {
                 name = "Companion's Aegis",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and RGMercUtils.PCAAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Casting.AAReady(aaName)
                 end,
             },
         },
@@ -1339,8 +1343,8 @@ return {
         {
             gem = 1,
             spells = {
-                { name = "HealSpell",    cond = function(self) return RGMercUtils.GetSetting('DoHeals') end, },
-                { name = "PetHealSpell", cond = function(self) return RGMercUtils.GetSetting('DoPetHeals') end, },
+                { name = "HealSpell",    cond = function(self) return Config:GetSetting('DoHeals') end, },
+                { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHeals') end, },
                 { name = "Icelance1", },
 
             },
@@ -1348,7 +1352,7 @@ return {
         {
             gem = 2,
             spells = {
-                { name = "PetHealSpell", cond = function(self) return RGMercUtils.GetSetting('DoPetHeals') end, },
+                { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHeals') end, },
                 { name = "Icelance1", },
                 { name = "Icelance2", },
             },
@@ -1366,15 +1370,15 @@ return {
             spells = {
                 { name = "Icelance2", },
                 { name = "Blooddot", },
-                { name = "Colddot",   cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "Colddot",   cond = function(self) return Config:GetSetting('DoDot') end, },
             },
         },
         {
             gem = 5,
             spells = {
                 { name = "Blooddot", },
-                { name = "Colddot",    cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
-                { name = "EndemicDot", cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "Colddot",    cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "EndemicDot", cond = function(self) return Config:GetSetting('DoDot') end, },
             },
         },
         {
@@ -1387,17 +1391,17 @@ return {
         {
             gem = 7,
             spells = {
-                { name = "SlowSpell",  cond = function(self) return RGMercUtils.GetSetting('DoSlow') and not RGMercUtils.CanUseAA("Sha's Reprisal") end, },
+                { name = "SlowSpell",  cond = function(self) return Config:GetSetting('DoSlow') and not Casting.CanUseAA("Sha's Reprisal") end, },
                 { name = "DichoSpell", },
-                { name = "EndemicDot", cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "EndemicDot", cond = function(self) return Config:GetSetting('DoDot') end, },
             },
         },
         {
             gem = 8,
             spells = {
-                { name = "Feralgia",   cond = function(self) return RGMercUtils.GetSetting('DoFeralgia') end, },
+                { name = "Feralgia",   cond = function(self) return Config:GetSetting('DoFeralgia') end, },
                 { name = "PetGrowl", },
-                { name = "EndemicDot", cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "EndemicDot", cond = function(self) return Config:GetSetting('DoDot') end, },
             },
         },
         {
@@ -1425,7 +1429,7 @@ return {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Colddot",     cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
+                { name = "Colddot",     cond = function(self) return Config:GetSetting('DoDot') end, },
                 { name = "PetHealProc", },
 
             },
@@ -1435,8 +1439,8 @@ return {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "PetHealProc", },
-                { name = "EndemicDot",  cond = function(self) return RGMercUtils.GetSetting('DoDot') end, },
-                { name = "SwarmPet",    cond = function(self) return RGMercUtils.GetSetting('DoSwarmPet') end, },
+                { name = "EndemicDot",  cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "SwarmPet",    cond = function(self) return Config:GetSetting('DoSwarmPet') end, },
             },
         },
     },
@@ -1454,11 +1458,11 @@ return {
         {
             id = 'SlowSpell',
             Type = "Spell",
-            DisplayName = function() return RGMercUtils.GetResolvedActionMapItem('SlowSpell')() or "" end,
-            AbilityName = function() return RGMercUtils.GetResolvedActionMapItem('SlowSpell')() or "" end,
+            DisplayName = function() return Core.GetResolvedActionMapItem('SlowSpell')() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('SlowSpell')() or "" end,
             AbilityRange = 150,
             cond = function(self)
-                local resolvedSpell = RGMercUtils.GetResolvedActionMapItem('SlowSpell')
+                local resolvedSpell = Core.GetResolvedActionMapItem('SlowSpell')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,

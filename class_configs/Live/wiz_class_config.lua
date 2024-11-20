@@ -3,8 +3,12 @@
 -- into your: MacroQuest/configs/rgmercs/class_configs/ directory
 -- so it is not patched over.
 
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Modules   = require("utils.modules")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
+local Comms     = require("utils.comms")
 
 return {
     _version         = "1.0 - Live",
@@ -17,7 +21,7 @@ return {
     },
     ['OnModeChange'] = function(self, mode)
         -- if this is enabled the weaves will break.
-        RGMercConfig:GetSettings().WaitOnGlobalCooldown = false
+        Config:GetSettings().WaitOnGlobalCooldown = false
     end,
     ['ItemSets']     = {
         ['Epic'] = {
@@ -607,21 +611,21 @@ return {
                     end
 
                     -- Cast the spell. Will report if need to memorize or don't have the spell
-                    RGMercUtils.DoCmd('/if (${Cast.Ready[exodus]}) /cast "exodus" alt')
-                    RGMercUtils.DoCmd('/timed 1 /if (${Me.Book["%s"]}>0) /cast "%s"', portName, portName)
-                    RGMercUtils.DoCmd('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
+                    Core.DoCmd('/if (${Cast.Ready[exodus]}) /cast "exodus" alt')
+                    Core.DoCmd('/timed 1 /if (${Me.Book["%s"]}>0) /cast "%s"', portName, portName)
+                    Core.DoCmd('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
 
                     -- Have to memorize
-                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Status.Equal[CM]}) /timed 5 /dgt all Memorizing "%s"! Ready in 1.5 seconds', portName)
-                    RGMercUtils.DoCmd('/timed 50 /if (${Cast.Timing}>6000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
-                    RGMercUtils.DoCmd('/timed 90 /if (${Cast.Timing}>4000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
+                    Core.DoCmd('/timed 5 /if (${Cast.Status.Equal[CM]}) /timed 5 /dgt all Memorizing "%s"! Ready in 1.5 seconds', portName)
+                    Core.DoCmd('/timed 50 /if (${Cast.Timing}>6000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
+                    Core.DoCmd('/timed 90 /if (${Cast.Timing}>4000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
 
                     -- Already memorized
-                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Timing}>8000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
-                    RGMercUtils.DoCmd('/timed 40 /if (${Cast.Timing}>5000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
+                    Core.DoCmd('/timed 5 /if (${Cast.Timing}>8000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
+                    Core.DoCmd('/timed 40 /if (${Cast.Timing}>5000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
 
                     -- Out of mana
-                    RGMercUtils.DoCmd('/timed 5 /if (${Cast.Status.Equal[CAST_OUTOFMANA]}) /dgt all Out of mana! Can\'t Evac!')
+                    Core.DoCmd('/timed 5 /if (${Cast.Status.Equal[CAST_OUTOFMANA]}) /dgt all Out of mana! Can\'t Evac!')
                 end
         }
     },]]
@@ -632,17 +636,17 @@ return {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                    Casting.DoBuffCheck() and Casting.AmIBuffable()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck()
+                    Casting.BurnCheck()
             end,
         },
         {
@@ -660,7 +664,7 @@ return {
             name = 'Aggro Management',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state ==
                     "Combat"
@@ -670,25 +674,25 @@ return {
             name = 'Weaves',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('WeaveAANukes') and mq.TLO.Me.SpellInCooldown()
+                return combat_state == "Combat" and Config:GetSetting('WeaveAANukes') and mq.TLO.Me.SpellInCooldown()
             end,
         },
         {
             name = 'Gift of Mana',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (not RGMercUtils.GetSetting('DoGOMCheck') or RGMercUtils.DetGOMCheck())
+                return combat_state == "Combat" and (not Config:GetSetting('DoGOMCheck') or Casting.DetGOMCheck())
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -697,10 +701,10 @@ return {
             name = 'AoE Rain DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetAutoTargetPctHPs() <= RGMercUtils.GetSetting('RainMinTargetHP') and
-                    RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('RainMinHaters')
+                return combat_state == "Combat" and Targeting.GetAutoTargetPctHPs() <= Config:GetSetting('RainMinTargetHP') and
+                    Targeting.GetXTHaterCount() >= Config:GetSetting('RainMinHaters')
             end,
         },
     },
@@ -710,7 +714,7 @@ return {
                 name = "Arcane Whisper",
                 type = "AA",
                 cond = function(self)
-                    return RGMercUtils.GetTargetPctHPs() > 10
+                    return Targeting.GetTargetPctHPs() > 10
                 end,
             },
             {
@@ -731,43 +735,43 @@ return {
                 name = "Arcane Destruction",
                 type = "AA",
                 cond = function(self)
-                    return not RGMercUtils.SongActiveByName("Frenzied Devastation")
+                    return not Casting.SongActiveByName("Frenzied Devastation")
                 end,
             },
             {
                 name = "Arcane Fury",
                 type = "AA",
                 cond = function(self)
-                    return (not RGMercUtils.SongActiveByName("Chromatic Haze")) and (not RGMercUtils.SongActiveByName("Gift of Chromatic Haze")) and
-                        ((RGMercUtils.SongActiveByName("Arcane Destruction")) or (RGMercUtils.SongActiveByName("Frenzied Devastation")))
+                    return (not Casting.SongActiveByName("Chromatic Haze")) and (not Casting.SongActiveByName("Gift of Chromatic Haze")) and
+                        ((Casting.SongActiveByName("Arcane Destruction")) or (Casting.SongActiveByName("Frenzied Devastation")))
                 end,
             },
             {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
-                    return not RGMercUtils.BuffActiveByName("Twincast")
+                    return not Casting.BuffActiveByName("Twincast")
                 end,
             },
             {
                 name = "Mana Burn",
                 type = "AA",
                 cond = function(self)
-                    return not RGMercUtils.TargetHasBuffByName("Mana Burn") and RGMercUtils.GetSetting('DoManaBurn')
+                    return not Casting.TargetHasBuffByName("Mana Burn") and Config:GetSetting('DoManaBurn')
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
         },
@@ -777,7 +781,7 @@ return {
                 name = "A Hole in Space",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > 99 and RGMercUtils.IHaveAggro(100)
+                    return mq.TLO.Me.PctAggro() > 99 and Targeting.IHaveAggro(100)
                 end,
             },
             {
@@ -791,14 +795,14 @@ return {
                 name = "Concussion",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
+                    return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
             },
             {
                 name = "JoltSpell",
                 type = "Spell",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > RGMercUtils.GetSetting('JoltAggro')
+                    return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
             },
 
@@ -808,46 +812,46 @@ return {
             {
                 name = "Etherealist's Unity",
                 type = "AA",
-                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
+                active_cond = function(self, aaName) return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
                 cond = function(self, aaName)
-                    local selfHPBuff = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
+                    local selfHPBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
                     local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and RGMercUtils.SelfBuffAACheck(aaName)
+                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
                 name = "SelfRune1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "MeleeGuard",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "GambitSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('ModRodManaPct')
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('ModRodManaPct')
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
         },
@@ -856,21 +860,21 @@ return {
                 name = "Force of Ice",
                 type = "AA",
                 cond = function(self)
-                    return RGMercUtils.AAReady("Force of Ice")
+                    return Casting.AAReady("Force of Ice")
                 end,
             },
             {
                 name = "Force of Will",
                 type = "AA",
                 cond = function(self)
-                    return RGMercUtils.AAReady("Force of Will")
+                    return Casting.AAReady("Force of Will")
                 end,
             },
             {
                 name = "Force of Flame",
                 type = "AA",
                 cond = function(self)
-                    return RGMercUtils.AAReady("Force of Flame")
+                    return Casting.AAReady("Force of Flame")
                 end,
             },
         },
@@ -909,11 +913,11 @@ return {
                 name = "PetSpell",
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
-                cond = function(self, _) return RGMercUtils.GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
+                cond = function(self, _) return Config:GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
                 post_activate = function(self, spell)
                     local pet = mq.TLO.Me.Pet
                     if pet.ID() > 0 then
-                        RGMercUtils.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
+                        Comms.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
                             pet.Class.Name(), pet.CleanName(), spell.RankName())
                     end
                 end,
@@ -922,21 +926,21 @@ return {
                 name = "CloudburstNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DetGambitCheck() or ((mq.TLO.Me.Song("Evoker's Synergy I").ID() or 0) > 0)
+                    return Casting.DetGambitCheck() or ((mq.TLO.Me.Song("Evoker's Synergy I").ID() or 0) > 0)
                 end,
             },
             {
                 name = "WildNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DetGambitCheck()
+                    return Casting.DetGambitCheck()
                 end,
             },
             {
                 name = "ChaosNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.DetGambitCheck()
+                    return Casting.DetGambitCheck()
                 end,
             },
             {
@@ -950,92 +954,92 @@ return {
                 name = "VortexNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not RGMercUtils.TargetHasBuff(spell)
+                    return not Casting.TargetHasBuff(spell)
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not RGMercUtils.DetGambitCheck() and mq.TLO.Me.Buff("Twincast").ID() == 0 and not RGMercUtils.BuffActiveByName("Improved Twincast")
+                    return not Casting.DetGambitCheck() and mq.TLO.Me.Buff("Twincast").ID() == 0 and not Casting.BuffActiveByName("Improved Twincast")
                 end,
             },
             {
                 name = "FireClaw",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "FuseNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    local fireClaw = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "FireClaw")
-                    return not RGMercUtils.DetGambitCheck() and ((not fireClaw or not fireClaw()) or not mq.TLO.Me.SpellReady(fireClaw.RankName()))
+                    local fireClaw = Modules:ExecModule("Class", "GetResolvedActionMapItem", "FireClaw")
+                    return not Casting.DetGambitCheck() and ((not fireClaw or not fireClaw()) or not mq.TLO.Me.SpellReady(fireClaw.RankName()))
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck()
+                    return Casting.HaveManaToNuke() and not Casting.DetGambitCheck()
                 end,
             },
             {
                 name = "IceNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck()
+                    return Casting.HaveManaToNuke() and not Casting.DetGambitCheck()
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck()
+                    return Casting.HaveManaToNuke() and not Casting.DetGambitCheck()
                 end,
             },
             {
                 name = "SnareSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck() and RGMercUtils.GetTargetDistance() > 30 and self.settings.DoSnare
+                    return Casting.HaveManaToNuke() and Targeting.GetTargetDistance() > 30 and self.settings.DoSnare
                 end,
             },
             {
                 name = "FastMagicNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "FuseNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "FireEtherealNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "IceEtherealNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck()
+                    return Casting.HaveManaToNuke()
                 end,
             },
         },
@@ -1044,16 +1048,16 @@ return {
                 name = "FireRainNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck() and
-                        RGMercUtils.GetTargetDistance() >= RGMercUtils.GetSetting('RainDist')
+                    return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and
+                        Targeting.GetTargetDistance() >= Config:GetSetting('RainDist')
                 end,
             },
             {
                 name = "IceRainNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.ManaCheck() and not RGMercUtils.DetGambitCheck() and
-                        RGMercUtils.GetTargetDistance() >= RGMercUtils.GetSetting('RainDist')
+                    return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and
+                        Targeting.GetTargetDistance() >= Config:GetSetting('RainDist')
                 end,
             },
         },
@@ -1061,66 +1065,66 @@ return {
             {
                 name = "SelfHPBuff",
                 type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return (spell.Level() or 0) > (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) and RGMercUtils.SelfBuffCheck(spell)
+                    return (spell.Level() or 0) > (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Etherealist's Unity",
                 type = "AA",
-                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
+                active_cond = function(self, aaName) return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
                 cond = function(self, aaName)
-                    local selfHPBuff = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
+                    local selfHPBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
                     local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and RGMercUtils.SelfBuffAACheck(aaName)
+                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
                 name = "SelfRune1",
                 type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "MeleeGuard",
                 type = "Spell",
                 cond = function(self, spell)
-                    return RGMercUtils.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "FamiliarBuff",
                 type = "Spell",
-                active_cond = function(self, spell) return RGMercUtils.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return spell.Stacks() and spell.Level() > (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) and not RGMercUtils.BuffActiveByID(spell.RankName.ID())
+                    return spell.Stacks() and spell.Level() > (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) and not Casting.BuffActiveByID(spell.RankName.ID())
                 end,
             },
             {
                 name = "Improved Familiar",
                 type = "AA",
-                active_cond = function(self, aaName) return RGMercUtils.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID()) end,
+                active_cond = function(self, aaName) return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID()) end,
                 cond = function(self, aaName)
-                    local familiarBuff = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
+                    local familiarBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
                     local familiarBuffLevel = familiarBuff and familiarBuff() and familiarBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility(aaName).Spell.Level() or 0) > familiarBuffLevel and RGMercUtils.SelfBuffAACheck(aaName)
+                    return (mq.TLO.Me.AltAbility(aaName).Spell.Level() or 0) > familiarBuffLevel and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and RGMercUtils.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
             {
@@ -1128,19 +1132,19 @@ return {
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.BuffActive(item.Spell)
+                    return Casting.BuffActive(item.Spell)
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    if not RGMercUtils.GetSetting('DoChestClick') or not item or not item() then return false end
-                    return mq.TLO.Me.PctMana() < RGMercUtils.GetSetting('HarvestManaPct') and item.TimerReady() == 0 and RGMercUtils.SelfBuffCheck(item.Spell)
+                    if not Config:GetSetting('DoChestClick') or not item or not item() then return false end
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
                 end,
             },
             {
-                name = RGMercUtils.GetSetting('ClarityPotion'),
+                name = Config:GetSetting('ClarityPotion'),
                 type = "Item",
                 cond = function(self)
-                    local item = mq.TLO.FindItem(RGMercUtils.GetSetting('ClarityPotion'))
+                    local item = mq.TLO.FindItem(Config:GetSetting('ClarityPotion'))
                     return item() and item.Spell.Stacks() and item.TimerReady()
                 end,
             },
@@ -1173,7 +1177,7 @@ return {
                 {
                     name = "MagicNuke",
                     cond = function(self)
-                        return RGMercModules:ExecModule("Class", "GetClassModeName") ~= "Magic" -- Magic mode will put this elsewhere so load an ice nuke.
+                        return Modules:ExecModule("Class", "GetClassModeName") ~= "Magic" -- Magic mode will put this elsewhere so load an ice nuke.
                     end,
                 },
                 { name = "IceNuke", },
@@ -1187,26 +1191,26 @@ return {
                     name = "FireRainNuke",
                     active_cond = function(self) return self.settings.DoRain end,
                     cond = function(self)
-                        return RGMercModules:ExecModule("Class", "GetClassModeName") == "Fire" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Combo"
+                        return Modules:ExecModule("Class", "GetClassModeName") == "Fire" or Modules:ExecModule("Class", "GetClassModeName") == "Combo"
                     end,
                 },
                 {
                     name = "IceRainNuke",
                     active_cond = function(self) return self.settings.DoRain end,
                     cond = function(self)
-                        return RGMercModules:ExecModule("Class", "GetClassModeName") == "Ice" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Magic"
+                        return Modules:ExecModule("Class", "GetClassModeName") == "Ice" or Modules:ExecModule("Class", "GetClassModeName") == "Magic"
                     end,
                 },
                 {
                     name = "IceNuke",
                     cond = function(self)
-                        return RGMercModules:ExecModule("Class", "GetClassModeName") == "Fire" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Combo"
+                        return Modules:ExecModule("Class", "GetClassModeName") == "Fire" or Modules:ExecModule("Class", "GetClassModeName") == "Combo"
                     end,
                 },
                 {
                     name = "FireNuke",
                     cond = function(self)
-                        return RGMercModules:ExecModule("Class", "GetClassModeName") == "Ice" or RGMercModules:ExecModule("Class", "GetClassModeName") == "Magic"
+                        return Modules:ExecModule("Class", "GetClassModeName") == "Ice" or Modules:ExecModule("Class", "GetClassModeName") == "Magic"
                     end,
                 },
             },
@@ -1241,7 +1245,7 @@ return {
                 {
                     name = "IceEtherealNuke",
                     cond = function(self)
-                        return RGMercModules:ExecModule("Class", "GetClassModeName") ~= "Ice" -- Ice will load this elsewhere.
+                        return Modules:ExecModule("Class", "GetClassModeName") ~= "Ice" -- Ice will load this elsewhere.
                     end,
                 },
                 {

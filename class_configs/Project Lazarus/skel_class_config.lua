@@ -1,5 +1,4 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq = require('mq')
 
 return {
     ['Modes'] = {

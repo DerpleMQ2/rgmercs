@@ -1,5 +1,10 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
+local Strings   = require("utils.strings")
+local Logger    = require("utils.logger")
 
 return {
     _version            = "1.4 - Live",
@@ -273,44 +278,44 @@ return {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
-                    RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                    Casting.DoBuffCheck() and Casting.AmIBuffable()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck() and not RGMercUtils.Feigning()
+                    Casting.BurnCheck() and not Casting.Feigning()
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
         {
             name = 'DPS2',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
         {
             name = 'DPS3',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.Feigning()
+                return combat_state == "Combat" and not Casting.Feigning()
             end,
         },
     },
@@ -321,7 +326,7 @@ return {
                 name = "Summon Axes",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    if not RGMercUtils.GetSetting('SummonAxes') then return false end
+                    if not Config:GetSetting('SummonAxes') then return false end
 
                     local AxeSkills = {
                         "Corroded Axe",
@@ -354,12 +359,12 @@ return {
                     }
 
                     if not self.TempSettings.CachedAxeMap then
-                        RGMercsLogger.log_debug("\atCaching Axe Skill to Item Mapping...")
+                        Logger.log_debug("\atCaching Axe Skill to Item Mapping...")
                         self.TempSettings.CachedAxeMap = {}
                         for _, axeSkill in ipairs(AxeSkills) do
-                            local itemID = RGMercUtils.GetSummonedItemIDFromSpell(mq.TLO.Spell(axeSkill))
+                            local itemID = Casting.GetSummonedItemIDFromSpell(mq.TLO.Spell(axeSkill))
                             if itemID > 0 then
-                                RGMercsLogger.log_debug("\ayCached: \at%s\aw summons \am%d", axeSkill, itemID)
+                                Logger.log_debug("\ayCached: \at%s\aw summons \am%d", axeSkill, itemID)
                                 self.TempSettings.CachedAxeMap[itemID] = axeSkill
                             end
                         end
@@ -375,7 +380,7 @@ return {
                     local summonNeededItem = function(summonSkill, itemId, count)
                         local maxLoops = 10
                         while mq.TLO.FindItemCount(itemId)() < count do
-                            RGMercsLogger.log_debug("\ayWe need more %d because we dont have %d - using %s", itemId, count, summonSkill)
+                            Logger.log_debug("\ayWe need more %d because we dont have %d - using %s", itemId, count, summonSkill)
                             self.ClassConfig.HelperFunctions.SummonAxe(mq.TLO.Spell(summonSkill))
                             maxLoops = maxLoops - 1
                             if maxLoops <= 0 then return end
@@ -390,8 +395,8 @@ return {
                                 if requiredItemID > 0 then
                                     local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
                                     if summonSkill then
-                                        RGMercsLogger.log_verbose("\ayReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
-                                        summonNeededItem(summonSkill, requiredItemID, RGMercUtils.GetSetting(ability.count_name))
+                                        Logger.log_verbose("\ayReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
+                                        summonNeededItem(summonSkill, requiredItemID, Config:GetSetting(ability.count_name))
                                     end
                                 end
                             end
@@ -400,8 +405,8 @@ return {
                                 if requiredItemID > 0 then
                                     local summonSkill = self.TempSettings.CachedAxeMap[requiredItemID]
                                     if summonSkill then
-                                        RGMercsLogger.log_verbose("\ayNoExpendReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
-                                        summonNeededItem(summonSkill, requiredItemID, RGMercUtils.GetSetting(ability.count_name))
+                                        Logger.log_verbose("\ayNoExpendReagent(%d) for: \at%s\aw needs to use \am%s", i, ability.name, summonSkill)
+                                        summonNeededItem(summonSkill, requiredItemID, Config:GetSetting(ability.count_name))
                                     end
                                 end
                             end
@@ -413,14 +418,14 @@ return {
                 name = "Communion of Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctEndurance() <= 75
+                    return Casting.AAReady(aaName) and mq.TLO.Me.PctEndurance() <= 75
                 end,
             },
             {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() <= 21 and
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() <= 21 and
                         not mq.TLO.Me.Invis()
                 end,
             },
@@ -447,7 +452,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -455,7 +460,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -463,7 +468,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -471,7 +476,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -479,7 +484,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -487,7 +492,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -495,7 +500,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -503,7 +508,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -511,7 +516,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -526,7 +531,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.PCDiscReady(discSpell) and not mq.TLO.Me.ActiveDisc() and not RGMercUtils.PCDiscReady(burndisc)
+                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc() and not Casting.DiscReady(burndisc)
                 end,
             },
             {
@@ -534,7 +539,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -542,7 +547,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return RGMercUtils.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -552,8 +557,8 @@ return {
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
                     local cleavingdisc = self:GetResolvedActionMapItem('CleavingDisc')
                     local discondisc = self:GetResolvedActionMapItem('DisconDisc')
-                    return RGMercUtils.PCDiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
-                        and not (RGMercUtils.PCDiscReady(burndisc) or RGMercUtils.PCDiscReady(cleavingdisc))
+                    return Casting.DiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
+                        and not (Casting.DiscReady(burndisc) or Casting.DiscReady(cleavingdisc))
                 end,
             },
             {
@@ -564,22 +569,22 @@ return {
                     local cleavingdisc = self:GetResolvedActionMapItem('CleavingDisc')
                     local discondisc = self:GetResolvedActionMapItem('DisconDisc')
                     local resolvedisc = self:GetResolvedActionMapItem('ResolveDisc')
-                    return RGMercUtils.PCDiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
-                        and not (RGMercUtils.PCDiscReady(burndisc) or RGMercUtils.PCDiscReady(cleavingdisc) or RGMercUtils.PCDiscReady(resolvedisc))
+                    return Casting.DiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
+                        and not (Casting.DiscReady(burndisc) or Casting.DiscReady(cleavingdisc) or Casting.DiscReady(resolvedisc))
                 end,
             },
             {
                 name = "War Cry of the Braxi",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.SpellStacksOnMe(mq.TLO.Spell(aaName))
+                    return Casting.AAReady(aaName) and Casting.SpellStacksOnMe(mq.TLO.Spell(aaName))
                 end,
             },
             {
                 name = "HHEBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.AAReady("War Cry of the Braxi") and (not mq.TLO.Me.ActiveDisc.ID()) and RGMercUtils.SpellStacksOnMe(discSpell)
+                    return not Casting.AAReady("War Cry of the Braxi") and (not mq.TLO.Me.ActiveDisc.ID()) and Casting.SpellStacksOnMe(discSpell)
                 end,
             },
         },
@@ -589,7 +594,7 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     local epicItem = mq.TLO.FindItem(itemName)
-                    return RGMercUtils.GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and
+                    return Config:GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and
                         epicItem.TimerReady() == 0
                 end,
             },
@@ -604,95 +609,95 @@ return {
                 name = "Dfrenzy",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Dvolley",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Daxeof",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Daxethrow",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "SharedBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActiveByName(discSpell.RankName())
+                    return Casting.DiscReady(discSpell) and not Casting.SongActiveByName(discSpell.RankName())
                 end,
             },
             {
                 name = "RageStrike",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Phantom",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.GetSetting('DoPet')
+                    return Casting.DiscReady(discSpell) and Config:GetSetting('DoPet')
                 end,
             },
             {
                 name = "SappingStrike",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Binding Axe",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercUtils.GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
+                    return Config:GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
                 end,
             },
             {
                 name = "AESlice",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.GetSetting('DoAoe') and RGMercUtils.PCDiscReady(discSpell)
+                    return Config:GetSetting('DoAoe') and Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Alliance",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoAlliance') and RGMercUtils.CanAlliance() and
-                        not RGMercUtils.TargetHasBuff(mq.TLO.AltAbility(aaName).Spell)
+                    return Config:GetSetting('DoAlliance') and Casting.CanAlliance() and
+                        not Casting.TargetHasBuff(mq.TLO.AltAbility(aaName).Spell)
                 end,
             },
             {
                 name = "BraxiChain",
                 type = "CustomFunc",
                 custom_func = function(self)
-                    if not RGMercUtils.PCAAReady("Braxi's Howl") then return false end
+                    if not Casting.AAReady("Braxi's Howl") then return false end
                     local ret = false
-                    ret = ret or RGMercUtils.UseAA("Braxi's Howl", RGMercConfig.Globals.AutoTargetID)
-                    ret = ret or RGMercUtils.UseDisc(self.ResolvedActionMap['Dicho'], RGMercConfig.Globals.AutoTargetID)
+                    ret = ret or Casting.UseAA("Braxi's Howl", Config.Globals.AutoTargetID)
+                    ret = ret or Casting.UseDisc(self.ResolvedActionMap['Dicho'], Config.Globals.AutoTargetID)
 
                     return ret
                 end,
@@ -701,43 +706,43 @@ return {
                 name = "DisconDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if not RGMercUtils.GetSetting('DoDisconDisc') then return false end
-                    return RGMercUtils.PCDiscReady(discSpell) and not mq.TLO.Me.ActiveDisc()
+                    if not Config:GetSetting('DoDisconDisc') then return false end
+                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc()
                 end,
             },
             {
                 name = "Bloodfury",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCDiscReady(self.ResolvedActionMap['FrenzyBoost']) and mq.TLO.Me.PctHPs() >= 90
+                    return Casting.DiscReady(self.ResolvedActionMap['FrenzyBoost']) and mq.TLO.Me.PctHPs() >= 90
                 end,
             },
             {
                 name = "FrenzyBoost",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.BuffActive(discSpell)
+                    return not Casting.BuffActive(discSpell)
                 end,
             },
             {
                 name = "CryDmg",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.SongActiveByName(discSpell.Name() or "None")
+                    return not Casting.SongActiveByName(discSpell.Name() or "None")
                 end,
             },
             {
                 name = "Drawn to Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.GetTargetDistance() > 15
+                    return Casting.AAReady(aaName) and Targeting.GetTargetDistance() > 15
                 end,
             },
             {
                 name = "Communion of Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctEndurance() <= 75
+                    return Casting.AAReady(aaName) and mq.TLO.Me.PctEndurance() <= 75
                 end,
             },
             {
@@ -748,14 +753,14 @@ return {
                 end,
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return RGMercUtils.GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
+                    return Config:GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
                 end,
             },
         },
@@ -764,8 +769,8 @@ return {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.GetSetting('DoBattleLeap') and not RGMercUtils.SongActiveByName("Battle Leap Warcry") and
-                        not RGMercUtils.SongActiveByName("Group Bestial Alignment")
+                    return Config:GetSetting('DoBattleLeap') and not Casting.SongActiveByName("Battle Leap Warcry") and
+                        not Casting.SongActiveByName("Group Bestial Alignment")
                 end,
             },
         },
@@ -774,14 +779,14 @@ return {
                 name = "Dicho",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Bfrenzy",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
         },
@@ -789,37 +794,37 @@ return {
     ['HelperFunctions'] = {
         SummonAxe = function(axeDisc)
             if not axeDisc or not axeDisc() then return false end
-            RGMercsLogger.log_verbose("\aySummonAxe(): Checking if %s is ready.", axeDisc.Name())
-            if not RGMercUtils.PCDiscReady(axeDisc) then return false end
-            RGMercsLogger.log_verbose("\aySummonAxe(): Checking AutoAxeAcount")
-            if RGMercUtils.GetSetting('AutoAxeCount') == 0 then return false end
-            if mq.TLO.FindItemCount(axeDisc)() > RGMercUtils.GetSetting('AutoAxeCount') then return false end
+            Logger.log_verbose("\aySummonAxe(): Checking if %s is ready.", axeDisc.Name())
+            if not Casting.DiscReady(axeDisc) then return false end
+            Logger.log_verbose("\aySummonAxe(): Checking AutoAxeAcount")
+            if Config:GetSetting('AutoAxeCount') == 0 then return false end
+            if mq.TLO.FindItemCount(axeDisc)() > Config:GetSetting('AutoAxeCount') then return false end
 
-            RGMercsLogger.log_verbose("\aySummonAxe(): Checking For Reagents")
+            Logger.log_verbose("\aySummonAxe(): Checking For Reagents")
             if mq.TLO.FindItemCount(axeDisc.ReagentID(1)())() == 0 then return false end
 
-            if mq.TLO.Cursor.ID() ~= nil then RGMercUtils.DoCmd("/autoinv") end
-            local ret = RGMercUtils.UseDisc(axeDisc, mq.TLO.Me.ID())
-            RGMercsLogger.log_verbose("\aySummonAxe(): Waiting for Summon to Finish")
-            RGMercUtils.WaitCastFinish(mq.TLO.Me, false)
-            RGMercsLogger.log_verbose("\agSummonAxe(): Done!")
+            if mq.TLO.Cursor.ID() ~= nil then Core.DoCmd("/autoinv") end
+            local ret = Casting.UseDisc(axeDisc, mq.TLO.Me.ID())
+            Logger.log_verbose("\aySummonAxe(): Waiting for Summon to Finish")
+            Casting.WaitCastFinish(mq.TLO.Me, false)
+            Logger.log_verbose("\agSummonAxe(): Done!")
             mq.delay(500, function() return mq.TLO.Cursor.ID() ~= nil end)
-            while mq.TLO.Cursor.ID() ~= nil do RGMercUtils.DoCmd("/autoinv") end
+            while mq.TLO.Cursor.ID() ~= nil do Core.DoCmd("/autoinv") end
             return ret
         end,
         PreEngage = function(target)
-            local openerAbility = RGMercUtils.GetResolvedActionMapItem('CheapShot')
+            local openerAbility = Core.GetResolvedActionMapItem('CheapShot')
 
             if not openerAbility then return end
 
-            RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
+            Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
-            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.PctEndurance() >= 5 and RGMercUtils.GetSetting("DoOpener") and RGMercUtils.GetTargetDistance() < 50 then
-                RGMercUtils.UseDisc(openerAbility, target)
-                RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
+            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.PctEndurance() >= 5 and Config:GetSetting("DoOpener") and Targeting.GetTargetDistance() < 50 then
+                Casting.UseDisc(openerAbility, target)
+                Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
-                RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Distance to Target = %d, Endurance = %d", openerAbility or "None",
-                    RGMercUtils.BoolToColorString(RGMercUtils.GetSetting("DoOpener")), RGMercUtils.GetTargetDistance(), mq.TLO.Me.PctEndurance() or 0)
+                Logger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Distance to Target = %d, Endurance = %d", openerAbility or "None",
+                    Strings.BoolToColorString(Config:GetSetting("DoOpener")), Targeting.GetTargetDistance(), mq.TLO.Me.PctEndurance() or 0)
             end
         end,
     },

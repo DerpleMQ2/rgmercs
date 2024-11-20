@@ -1,5 +1,10 @@
-local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local mq        = require('mq')
+local Config    = require('utils.config')
+local Core      = require("utils.core")
+local Targeting = require("utils.targeting")
+local Casting   = require("utils.casting")
+local Strings   = require("utils.strings")
+local Logger    = require("utils.logger")
 
 return {
     _version            = "1.0 - Live",
@@ -224,26 +229,26 @@ return {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    RGMercUtils.BurnCheck()
+                    Casting.BurnCheck()
             end,
         },
         {
             name = 'Evasion',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not RGMercUtils.IAmMA() and RGMercUtils.GetMainAssistPctHPs() > 0 and mq.TLO.Me.PctAggro() > 90
+                return combat_state == "Combat" and not Core.IAmMA() and Core.GetMainAssistPctHPs() > 0 and mq.TLO.Me.PctAggro() > 90
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -252,7 +257,7 @@ return {
             name = 'DPS Buffs',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -285,7 +290,7 @@ return {
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Chest")
-                    return RGMercUtils.GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
                 end,
             },
             {
@@ -293,7 +298,7 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     local item = mq.TLO.FindItem(itemName)
-                    return item and item() and RGMercUtils.GetSetting('DoEpic') and item.Spell.Stacks() and item.TimerReady()
+                    return item and item() and Config:GetSetting('DoEpic') and item.Spell.Stacks() and item.TimerReady()
                 end,
             },
             {
@@ -355,7 +360,7 @@ return {
                 name = "Envenomed Blades",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and not RGMercUtils.BuffActiveByName(aaName)
+                    return Casting.AAReady(aaName) and not Casting.BuffActiveByName(aaName)
                 end,
             },
         },
@@ -364,7 +369,7 @@ return {
                 name = "Backstab",
                 type = "Ability",
                 cond = function(self, _)
-                    return RGMercUtils.CanUseAA("Chaotic Stab")
+                    return Casting.CanUseAA("Chaotic Stab")
                 end,
             },
             -- if we dont have CS then make sure we are behind.
@@ -372,14 +377,14 @@ return {
                 name = "Backstab",
                 type = "Ability",
                 cond = function(self, _)
-                    return not RGMercUtils.CanUseAA("Chaotic Stab") and mq.TLO.Stick.Behind()
+                    return not Casting.CanUseAA("Chaotic Stab") and mq.TLO.Stick.Behind()
                 end,
             },
             {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell) and mq.TLO.Me.PctEndurance() < 21
+                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.DiscReady(discSpell) and not Casting.SongActive(discSpell) and mq.TLO.Me.PctEndurance() < 21
                 end,
             },
             {
@@ -388,9 +393,9 @@ return {
                 cond = function(self, discSpell)
                     local discSpell = mq.TLO.Spell(discSpell)
                     return mq.TLO.Me.PctEndurance() >= 5 and
-                        RGMercUtils.GetTargetPctHPs() >= 90 and
-                        RGMercUtils.GetTargetDistance() < 50 and
-                        (discSpell() and RGMercUtils.GetTargetLevel() <= discSpell.Level()) and
+                        Targeting.GetTargetPctHPs() >= 90 and
+                        Targeting.GetTargetDistance() < 50 and
+                        (discSpell() and Targeting.GetTargetLevel() <= discSpell.Level()) and
                         mq.TLO.Me.CombatState():lower() ~= "combat"
                 end,
             },
@@ -405,7 +410,7 @@ return {
                 name = "Vision",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.SongActiveByName(discSpell.Name())
+                    return Casting.SongActiveByName(discSpell.Name())
                 end,
             },
             {
@@ -443,9 +448,9 @@ return {
                 name = "PoisonName",
                 type = "ClickyItem",
                 cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
+                    local poisonItem = mq.TLO.FindItem(Config:GetSetting('PoisonName'))
                     return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
-                        not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
+                        not Casting.BuffActiveByID(poisonItem.Spell.ID())
                 end,
             },
         },
@@ -472,31 +477,31 @@ return {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 21 and RGMercUtils.PCDiscReady(discSpell)
+                    return mq.TLO.Me.PctEndurance() < 21 and Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "PoisonClicky",
                 type = "ClickyItem",
                 active_cond = function(self, _)
-                    return (mq.TLO.FindItemCount(RGMercUtils.GetSetting('PoisonName'))() or 0) >= RGMercUtils.GetSetting('PoisonItemCount')
+                    return (mq.TLO.FindItemCount(Config:GetSetting('PoisonName'))() or 0) >= Config:GetSetting('PoisonItemCount')
                 end,
                 cond = function(self, _)
-                    return (mq.TLO.FindItemCount(RGMercUtils.GetSetting('PoisonName'))() or 0) < RGMercUtils.GetSetting('PoisonItemCount') and
-                        mq.TLO.Me.ItemReady(RGMercUtils.GetSetting('PoisonClicky'))()
+                    return (mq.TLO.FindItemCount(Config:GetSetting('PoisonName'))() or 0) < Config:GetSetting('PoisonItemCount') and
+                        mq.TLO.Me.ItemReady(Config:GetSetting('PoisonClicky'))()
                 end,
             },
             {
                 name = "PoisonName",
                 type = "ClickyItem",
                 active_cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
-                    return poisonItem and poisonItem() and RGMercUtils.BuffActiveByID(poisonItem.Spell.ID() or 0)
+                    local poisonItem = mq.TLO.FindItem(Config:GetSetting('PoisonName'))
+                    return poisonItem and poisonItem() and Casting.BuffActiveByID(poisonItem.Spell.ID() or 0)
                 end,
                 cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(RGMercUtils.GetSetting('PoisonName'))
-                    return mq.TLO.Me.ItemReady(RGMercUtils.GetSetting('PoisonName'))() and
-                        not RGMercUtils.BuffActiveByID(poisonItem.Spell.ID())
+                    local poisonItem = mq.TLO.FindItem(Config:GetSetting('PoisonName'))
+                    return mq.TLO.Me.ItemReady(Config:GetSetting('PoisonName'))() and
+                        not Casting.BuffActiveByID(poisonItem.Spell.ID())
                 end,
             },
             {
@@ -506,16 +511,16 @@ return {
                     return mq.TLO.Me.Invis() and mq.TLO.Me.Sneaking()
                 end,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('DoHideSneak')
+                    return Config:GetSetting('DoHideSneak')
                 end,
                 custom_func = function(_)
-                    if RGMercUtils.GetSetting('ChaseOn') then
+                    if Config:GetSetting('ChaseOn') then
                         if mq.TLO.Me.Sneaking() then
-                            RGMercUtils.DoCmd("/doability sneak")
+                            Core.DoCmd("/doability sneak")
                         end
                     else
-                        if mq.TLO.Me.AbilityReady("hide")() then RGMercUtils.DoCmd("/doability hide") end
-                        if mq.TLO.Me.AbilityReady("sneak")() then RGMercUtils.DoCmd("/doability sneak") end
+                        if mq.TLO.Me.AbilityReady("hide")() then Core.DoCmd("/doability hide") end
+                        if mq.TLO.Me.AbilityReady("sneak")() then Core.DoCmd("/doability sneak") end
                     end
                     return true
                 end,
@@ -538,17 +543,17 @@ return {
     },
     ['HelperFunctions'] = {
         PreEngage = function(target)
-            local openerAbility = RGMercUtils.GetResolvedActionMapItem('SneakAttack')
+            local openerAbility = Core.GetResolvedActionMapItem('SneakAttack')
 
-            RGMercsLogger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
+            Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
-            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.AbilityReady("Hide")() and RGMercUtils.GetSetting("DoOpener") and mq.TLO.Me.Invis() then
-                RGMercUtils.UseDisc(openerAbility, target)
-                RGMercsLogger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
+            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.AbilityReady("Hide")() and Config:GetSetting("DoOpener") and mq.TLO.Me.Invis() then
+                Casting.UseDisc(openerAbility, target)
+                Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
-                RGMercsLogger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Hide Ready = %s, Invis = %s", openerAbility or "None",
-                    RGMercUtils.BoolToColorString(RGMercUtils.GetSetting("DoOpener")), RGMercUtils.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
-                    RGMercUtils.BoolToColorString(mq.TLO.Me.Invis()))
+                Logger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Hide Ready = %s, Invis = %s", openerAbility or "None",
+                    Strings.BoolToColorString(Config:GetSetting("DoOpener")), Strings.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
+                    Strings.BoolToColorString(mq.TLO.Me.Invis()))
             end
         end,
     },

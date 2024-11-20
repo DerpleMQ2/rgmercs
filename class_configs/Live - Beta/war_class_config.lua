@@ -1,11 +1,18 @@
 local mq           = require('mq')
-local RGMercUtils  = require("utils.rgmercs_utils")
+local Config       = require('utils.config')
+local Core         = require("utils.core")
+local Targeting    = require("utils.Targeting")
+local Casting      = require("utils.casting")
+local Comms        = require("utils.comms")
+local ItemManager  = require("utils.item_manager")
+local DanNet       = require('lib.dannet.helpers')
+local Logger       = require("utils.logger")
 
 local _ClassConfig = {
     _version            = "1.2 - Beta",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
-        IsTanking = function() return RGMercUtils.IsModeActive("Tank") end,
+        IsTanking = function() return Core.IsModeActive("Tank") end,
     },
     ['Modes']           = {
         'Tank',
@@ -235,67 +242,67 @@ local _ClassConfig = {
             local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
             local xtCount = mq.TLO.Me.XTarget() or 0
 
-            if (mobs or xtCount) < RGMercUtils.GetSetting('AETauntCnt') then return false end
+            if (mobs or xtCount) < Config:GetSetting('AETauntCnt') then return false end
 
             local tauntme = {}
             for i = 1, xtCount do
                 local xtarg = mq.TLO.Me.XTarget(i)
                 if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= 50 then
                     if printDebug then
-                        RGMercsLogger.log_verbose("AETauntCheck(): XT(%d) Counting %s(%d) as a hater eligible to AE Taunt.", i, xtarg.CleanName() or "None",
+                        Logger.log_verbose("AETauntCheck(): XT(%d) Counting %s(%d) as a hater eligible to AE Taunt.", i, xtarg.CleanName() or "None",
                             xtarg.ID())
                     end
                     table.insert(tauntme, xtarg.ID())
                 end
             end
-            return #tauntme > 0 and not (RGMercUtils.GetSetting('SafeAETaunt') and #tauntme < mobs)
+            return #tauntme > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme < mobs)
         end,
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
         AETargetCheck = function(printDebug)
             local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
             local xtCount = mq.TLO.Me.XTarget() or 0
 
-            if (mobs or xtCount) < RGMercUtils.GetSetting('AETargetCnt') then return false end
+            if (mobs or xtCount) < Config:GetSetting('AETargetCnt') then return false end
 
             local targets = {}
             for i = 1, xtCount do
                 local xtarg = mq.TLO.Me.XTarget(i)
-                --this won't work becuse .Mezzed requires targeting for cache, left more as a note for others.
-                --if RGMercUtils.GetSetting('SafeAEDamage') and xtarg.Mezzed() then return false end
+                --this won't work becuse .Mezzed requires Targeting for cache, left more as a note for others.
+                --if Config:GetSetting('SafeAEDamage') and xtarg.Mezzed() then return false end
                 if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and (xtarg.Distance() or 999) <= 50 then
                     if printDebug then
-                        RGMercsLogger.log_verbose("AETargetCheck(): XT(%d) Counting %s(%d) as an eligible target.", i, xtarg.CleanName() or "None",
+                        Logger.log_verbose("AETargetCheck(): XT(%d) Counting %s(%d) as an eligible target.", i, xtarg.CleanName() or "None",
                             xtarg.ID())
                     end
                     table.insert(targets, xtarg.ID())
                 end
             end
-            return #targets >= RGMercUtils.GetSetting('AETargetCt') and not (RGMercUtils.GetSetting('SafeAEDamage') and #targets < mobs)
+            return #targets >= Config:GetSetting('AETargetCt') and not (Config:GetSetting('SafeAEDamage') and #targets < mobs)
         end,
 
         --function to determine if we have enough mobs in range to use a defensive disc
         DefensiveDiscCheck = function(printDebug)
             local xtCount = mq.TLO.Me.XTarget() or 0
-            if xtCount < RGMercUtils.GetSetting('DiscCount') then return false end
+            if xtCount < Config:GetSetting('DiscCount') then return false end
             local haters = {}
             for i = 1, xtCount do
                 local xtarg = mq.TLO.Me.XTarget(i)
                 if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and (xtarg.Distance() or 999) <= 30 then
                     if printDebug then
-                        RGMercsLogger.log_verbose("DefensiveDiscCheck(): XT(%d) Counting %s(%d) as a hater in range.", i, xtarg.CleanName() or "None", xtarg.ID())
+                        Logger.log_verbose("DefensiveDiscCheck(): XT(%d) Counting %s(%d) as a hater in range.", i, xtarg.CleanName() or "None", xtarg.ID())
                     end
                     table.insert(haters, xtarg.ID())
                 end
             end
-            return #haters >= RGMercUtils.GetSetting('DiscCount')
+            return #haters >= Config:GetSetting('DiscCount')
         end,
         DiscOverwriteCheck = function(self)
-            local defenseBuff = self:GetResolvedActionMapItem('DefenseACBuff')
+            local defenseBuff = Core.GetResolvedActionMapItem('DefenseACBuff')
             if mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.ActiveDisc.Name() ~= defenseBuff.RankName() then return false end
             return true
         end,
         BurnDiscCheck = function(self)
-            if mq.TLO.Me.ActiveDisc.Name() == "Fortitude Discipline" or mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('EmergencyStart') then return false end
+            if mq.TLO.Me.ActiveDisc.Name() == "Fortitude Discipline" or mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') then return false end
             local burnDisc = { "Onslaught", "MightyStrike", "ChargeDisc", "OffensiveDisc", }
             for _, buffName in ipairs(burnDisc) do
                 local resolvedDisc = self:GetResolvedActionMapItem(burnDisc)
@@ -310,16 +317,16 @@ local _ClassConfig = {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and RGMercUtils.DoBuffCheck() and RGMercUtils.AmIBuffable()
+                return combat_state == "Downtime" and Casting.DoBuffCheck() and Casting.AmIBuffable()
             end,
         },
         { --Actions that establish or maintain hatred
             name = 'HateTools',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.IsTanking() and mq.TLO.Me.PctHPs() > RGMercUtils.GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and Core.IsTanking() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
             end,
         },
         { --Defensive actions triggered by low HP
@@ -327,9 +334,9 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EmergencyStart')
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
             end,
         },
         { --Dynamic weapon swapping if UseBandolier is toggled
@@ -337,38 +344,38 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.GetSetting('UseBandolier')
+                return combat_state == "Combat" and Config:GetSetting('UseBandolier')
             end,
         },
         { --Defensive actions used proactively to prevent emergencies
             name = 'Defenses',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 --need to look at rotation and decide if it should fire during emergencies. leaning towards no
-                return combat_state == "Combat" and RGMercUtils.IsTanking() and (mq.TLO.Me.PctHPs() < RGMercUtils.GetSetting('EmergencyStart') or
-                    RGMercUtils.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                return combat_state == "Combat" and Core.IsTanking() and (mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') or
+                    Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and RGMercUtils.BurnCheck() and mq.TLO.Me.PctHPs() > RGMercUtils.GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
             end,
         },
         { --DPS and Utility discs
             name = 'Combat',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == RGMercConfig.Globals.AutoTargetID and { RGMercConfig.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > RGMercUtils.GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
             end,
         },
     },
@@ -378,37 +385,37 @@ local _ClassConfig = {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "AuraBuff",
                 type = "Disc",
                 active_cond = function(self, discSpell)
-                    return RGMercUtils.AuraActiveByName(discSpell.RankName.Name())
+                    return Casting.AuraActiveByName(discSpell.RankName.Name())
                 end,
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.Aura(1).ID() and RGMercUtils.PCDiscReady(discSpell)
+                    return not mq.TLO.Me.Aura(1).ID() and Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "GroupACBuff",
                 type = "Disc",
                 active_cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell)
+                    return Casting.SongActive(discSpell)
                 end,
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell)
+                    return Casting.DiscReady(discSpell) and not Casting.SongActive(discSpell)
                 end,
             },
             {
                 name = "GroupDodgeBuff",
                 type = "Disc",
                 active_cond = function(self, discSpell)
-                    return RGMercUtils.SongActive(discSpell)
+                    return Casting.SongActive(discSpell)
                 end,
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.SongActive(discSpell)
+                    return Casting.DiscReady(discSpell) and not Casting.SongActive(discSpell)
                 end,
             },
             {
@@ -418,37 +425,37 @@ local _ClassConfig = {
                     return mq.TLO.Me.ActiveDisc.ID() == discSpell.ID()
                 end,
                 cond = function(self, discSpell)
-                    return RGMercUtils.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.PCDiscReady(discSpell)
+                    return Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Brace for Impact",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "HealHateAE",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if not RGMercUtils.GetSetting('DoAETaunt') or RGMercUtils.GetSetting('SafeAETaunt') then return false end
-                    return RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.BuffActiveByID(discSpell.ID())
+                    if not Config:GetSetting('DoAETaunt') or Config:GetSetting('SafeAETaunt') then return false end
+                    return Core.IsTanking() and Casting.DiscReady(discSpell) and not Casting.BuffActiveByID(discSpell.ID())
                 end,
             },
             {
                 name = "HealHateSingle",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if RGMercUtils.GetSetting('DoAETaunt') and not RGMercUtils.GetSetting('SafeAETaunt') then return false end
-                    return RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell) and not RGMercUtils.BuffActiveByID(discSpell.ID())
+                    if Config:GetSetting('DoAETaunt') and not Config:GetSetting('SafeAETaunt') then return false end
+                    return Core.IsTanking() and Casting.DiscReady(discSpell) and not Casting.BuffActiveByID(discSpell.ID())
                 end,
             },
             {
                 name = "Blade Guardian",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName) and not RGMercUtils.SongActiveByName(aaName)
+                    return Casting.AAReady(aaName) and not Casting.SongActiveByName(aaName)
                 end,
             },
             {
@@ -456,11 +463,11 @@ local _ClassConfig = {
                 type = "Item",
                 active_cond = function(self)
                     local item = mq.TLO.Me.Inventory("Charm")
-                    return item() and RGMercUtils.TargetHasBuff(item.Spell, mq.TLO.Me)
+                    return item() and Casting.TargetHasBuff(item.Spell, mq.TLO.Me)
                 end,
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Charm")
-                    return RGMercUtils.GetSetting('DoCharmClick') and item() and RGMercUtils.SelfBuffCheck(item.Spell) and item.TimerReady() == 0
+                    return Config:GetSetting('DoCharmClick') and item() and Casting.SelfBuffCheck(item.Spell) and item.TimerReady() == 0
                 end,
             },
             {
@@ -468,7 +475,7 @@ local _ClassConfig = {
                 type = "Item",
                 active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return RGMercUtils.GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
+                    return Config:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
                         mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
                 end,
             },
@@ -479,7 +486,7 @@ local _ClassConfig = {
                 name = "Ageless Enmity",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
                 end,
             },
             --used to jumpstart hatred on named from the outset and prevent early rips from burns
@@ -487,7 +494,7 @@ local _ClassConfig = {
                 name = "Attention",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.NPCDiscReady(discSpell) and RGMercUtils.IsNamed(mq.TLO.Target)
+                    return Casting.TargetedDiscReady(discSpell) and Targeting.IsNamed(mq.TLO.Target)
                 end,
             },
             --used to reinforce hatred after it is initially established
@@ -496,15 +503,15 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
                 end,
             },
             {
                 name = "Area Taunt",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    --if not RGMercUtils.GetSetting('AETauntAA') then return false end
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    --if not Config:GetSetting('AETauntAA') then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
@@ -512,59 +519,59 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     ---@diagnostic disable-next-line: undefined-field
-                    return RGMercUtils.AAReady(aaName) and RGMercUtils.IsNamed(mq.TLO.Target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
             {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and RGMercUtils.GetTargetID() > 0 and
-                        RGMercUtils.GetTargetDistance() < 30
+                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetID() > 0 and
+                        Targeting.GetTargetDistance() < 30
                 end,
             },
             {
                 name = "AbsorbTaunt",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.NPCDiscReady(discSpell)
+                    return Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
                 name = "AEBlades",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if not RGMercUtils.GetSetting('DoAEDamage') then return false end
-                    return RGMercUtils.NPCDiscReady(discSpell) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    return Casting.TargetedDiscReady(discSpell) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
                 name = "AddHate1",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.NPCDiscReady(discSpell) and RGMercUtils.DetSpellCheck(discSpell)
+                    return Casting.TargetedDiscReady(discSpell) and Casting.DetSpellCheck(discSpell)
                 end,
             },
             {
                 name = "AddHate2",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.NPCDiscReady(discSpell)
+                    return Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
                 name = "AgroPet",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.NPCDiscReady(discSpell) and RGMercUtils.IsNamed(mq.TLO.Target)
+                    return Casting.TargetedDiscReady(discSpell) and Targeting.IsNamed(mq.TLO.Target)
                 end,
             },
             -- { todo: AE options
             --     name = "AERoar",
             --     type = "Disc",
             --     cond = function(self, discSpell)
-            --         return RGMercUtils.IsModeActive("Tank") and RGMercUtils.PCDiscReady(discSpell) and RGMercUtils.GetXTHaterCount() >= RGMercUtils.GetSetting('BurnMobCount') and
-            --             RGMercUtils.GetSetting('DoAEAgro')
+            --         return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
+            --             Config:GetSetting('DoAEAgro')
             --     end,
             -- },
         },
@@ -575,58 +582,58 @@ local _ClassConfig = {
                 name = "Armor of Experience",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName) and mq.TLO.Me.PctHPs() < 25 and RGMercUtils.GetSetting('DoVetAA')
+                    return Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 25 and Config:GetSetting('DoVetAA')
                 end,
             },
             {
                 name = "Fortitude",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EmergencyLockout') and RGMercUtils.PCDiscReady(discSpell) and
-                        not RGMercUtils.SongActiveByName("Flash of Anger") and not RGMercUtils.BuffActiveByID(mq.TLO.AltAbility("Blade Guardian").Spell.Base(1)())
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and Casting.DiscReady(discSpell) and
+                        not Casting.SongActiveByName("Flash of Anger") and not Casting.BuffActiveByID(mq.TLO.AltAbility("Blade Guardian").Spell.Base(1)())
                 end,
             },
             {
                 name = "Flash",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.Name() ~= "Fortitude Discipline" and
-                        not RGMercUtils.BuffActiveByID(mq.TLO.AltAbility("Blade Guardian").Spell.Base(1)())
+                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.Name() ~= "Fortitude Discipline" and
+                        not Casting.BuffActiveByID(mq.TLO.AltAbility("Blade Guardian").Spell.Base(1)())
                 end,
             },
             {
                 name = "Warlord's Tenacity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Warlord's Resurgence",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "RuneShield",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell)
+                    return Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Mark of the Mage Hunter",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             { --here for use in emergencies regarldless of ability staggering below
                 name = "StandDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell) and self.ClassConfig.HelperFunctions.DiscOverwriteCheck(self)
+                    return Core.IsTanking() and Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.DiscOverwriteCheck(self)
                 end,
             },
         },
@@ -639,9 +646,9 @@ local _ClassConfig = {
                 end,
                 cond = function(self)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= RGMercUtils.GetSetting('EquipShield')) or (RGMercUtils.IsNamed(mq.TLO.Target) and RGMercUtils.GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(mq.TLO.Target) and Config:GetSetting('NamedShieldLock'))
                 end,
-                custom_func = function(self) return RGMercUtils.BandolierSwap("Shield") end,
+                custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
             {
                 name = "Equip DW",
@@ -651,9 +658,9 @@ local _ClassConfig = {
                 end,
                 cond = function(self)
                     if mq.TLO.Me.Bandolier("DW").Active() then return false end
-                    return mq.TLO.Me.PctHPs() >= RGMercUtils.GetSetting('EquipDW') and not (RGMercUtils.IsNamed(mq.TLO.Target) and RGMercUtils.GetSetting('NamedShieldLock'))
+                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('EquipDW') and not (Targeting.IsNamed(mq.TLO.Target) and Config:GetSetting('NamedShieldLock'))
                 end,
-                custom_func = function(self) return RGMercUtils.BandolierSwap("DW") end,
+                custom_func = function(self) return ItemManager.BandolierSwap("DW") end,
             },
         },
         ['Defenses'] = {
@@ -663,41 +670,40 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     local itemSpell = mq.TLO.Me.Inventory("Chest").Spell()
-                    return RGMercUtils.PCDiscReady(discSpell) and not (itemSpell and mq.TLO.Me.Buff(itemSpell)())
+                    return Casting.DiscReady(discSpell) and not (itemSpell and mq.TLO.Me.Buff(itemSpell)())
                 end,
             },
             { --shares effect with Dicho Shield
                 name = mq.TLO.Me.Inventory("Chest").Name(),
                 type = "Item",
                 cond = function(self)
-                    if not RGMercUtils.GetSetting('DoChestClick') then return false end
+                    if not Config:GetSetting('DoChestClick') then return false end
                     local item = mq.TLO.Me.Inventory("Chest")
-                    local dichoShield = self:GetResolvedActionMapItem('DichoShield')
-                    return item() and item.TimerReady() == 0 and RGMercUtils.SpellStacksOnMe(item.Spell) and not mq.TLO.Me.Buff(dichoShield)
+                    local dichoShield = Core.GetResolvedActionMapItem('DichoShield')
+                    return item() and item.TimerReady() == 0 and Casting.SpellStacksOnMe(item.Spell) and not mq.TLO.Me.Buff(dichoShield)
                 end,
             },
             { --shares effect with OoW Chest and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
                 name = "StandDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    local absorbDisc = self:GetResolvedActionMapItem('AbsorbDisc')
-                    return RGMercUtils.PCDiscReady(discSpell) and not mq.TLO.Me.Song(absorbDisc) and self.ClassConfig.HelperFunctions.DiscOverwriteCheck(self)
+                    local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
+                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.Song(absorbDisc) and self.ClassConfig.HelperFunctions.DiscOverwriteCheck(self)
                 end,
             },
             { --shares effect with OoW Chest and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
                 name = "AbsorbDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    local standDisc = self:GetResolvedActionMapItem('StandDisc')
-                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName()
+                    local standDisc = Core.GetResolvedActionMapItem('StandDisc')
                 end,
             },
             { --shares effect with AbsorbDisc, offset from StandDisc for automation flow/coverage
                 name = "OoW_Chest",
                 type = "Item",
                 cond = function(self, itemName)
-                    local absorbDisc = self:GetResolvedActionMapItem('AbsorbDisc')
-                    local standDisc = self:GetResolvedActionMapItem('StandDisc')
+                    local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
+                    local standDisc = Core.GetResolvedActionMapItem('StandDisc')
                     return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and
                         mq.TLO.Me.ActiveDisc.Name() ~= absorbDisc.RankName()
                 end,
@@ -706,20 +712,20 @@ local _ClassConfig = {
                 name = "Warlord's Bravery",
                 type = "AA",
                 cond = function(self, aaName)
-                    local absorbDisc = self:GetResolvedActionMapItem('AbsorbDisc')
-                    local standDisc = self:GetResolvedActionMapItem('StandDisc')
-                    return RGMercUtils.PCAAReady(aaName) and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and
-                        mq.TLO.Me.ActiveDisc.Name() ~= absorbDisc.RankName() and not RGMercUtils.BuffActiveByName("Guardian's Boon") and
-                        not RGMercUtils.BuffActiveByName("Guardian's Bravery")
+                    local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
+                    local standDisc = Core.GetResolvedActionMapItem('StandDisc')
+                    return Casting.AAReady(aaName) and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and
+                        mq.TLO.Me.ActiveDisc.Name() ~= absorbDisc.RankName() and not Casting.BuffActiveByName("Guardian's Boon") and
+                        not Casting.BuffActiveByName("Guardian's Bravery")
                 end,
             },
             {
                 name = "Coating",
                 type = "Item",
                 cond = function(self, itemName)
-                    if not RGMercUtils.GetSetting('DoCoating') then return false end
+                    if not Config:GetSetting('DoCoating') then return false end
                     local item = mq.TLO.FindItem(itemName)
-                    return item() and item.TimerReady() == 0 and RGMercUtils.SelfBuffCheck(item.Spell)
+                    return item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
                 end,
             },
             { --incredibly weak at high level, but low opportunity cost for use
@@ -735,102 +741,102 @@ local _ClassConfig = {
                 name = "Spire of the Warlord",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Imperator's Command",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.PCAAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Onslaught",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return not Core.IsTanking() and Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "MightyStrike",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return not Core.IsTanking() and Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "OffensiveDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return not Core.IsTanking() and Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "Vehement Rage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not RGMercUtils.IsTanking() and RGMercUtils.PCAAReady(aaName)
+                    return not Core.IsTanking() and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Rage of Rallos Zek",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.AAReady(aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Warlord's Fury",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    local dichoShield = self:GetResolvedActionMapItem('DichoShield')
-                    return RGMercUtils.IsTanking() and RGMercUtils.NPCAAReady(aaName, target.ID()) and not mq.TLO.Me.Buff(dichoShield)
+                    local dichoShield = Core.GetResolvedActionMapItem('DichoShield')
+                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID()) and not mq.TLO.Me.Buff(dichoShield)
                 end,
             },
             {
                 name = "War Sheol's Heroic Blade",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "SelfBuffAE",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if not RGMercUtils.GetSetting('DoAETaunt') or RGMercUtils.GetSetting('SafeAETaunt') then return false end
-                    return RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell)
+                    if not Config:GetSetting('DoAETaunt') or Config:GetSetting('SafeAETaunt') then return false end
+                    return Core.IsTanking() and Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "SelfBuffSingle",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    if RGMercUtils.GetSetting('DoAETaunt') and not RGMercUtils.GetSetting('SafeAETaunt') then return false end
-                    return RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell)
+                    if Config:GetSetting('DoAETaunt') and not Config:GetSetting('SafeAETaunt') then return false end
+                    return Core.IsTanking() and Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "TongueDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.IsTanking() and RGMercUtils.PCDiscReady(discSpell)
+                    return Core.IsTanking() and Casting.DiscReady(discSpell)
                 end,
             },
             {
                 name = "Resplendent Glory",
                 type = "AA",
                 cond = function(self, aaName)
-                    return RGMercUtils.IsTanking() and RGMercUtils.PCAAReady(aaName)
+                    return Core.IsTanking() and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not RGMercUtils.GetSetting('DoVetAA') then return false end
-                    return RGMercUtils.AAReady(aaName)
+                    if not Config:GetSetting('DoVetAA') then return false end
+                    return Casting.AAReady(aaName)
                 end,
             },
         },
@@ -839,73 +845,73 @@ local _ClassConfig = {
                 name = "ShieldHit",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.NPCDiscReady(discSpell)
+                    return Casting.TargetedDiscReady(discSpell)
                 end,
             },
             {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.PCDiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not RGMercUtils.GetSetting('DoBattleLeap') then return false end
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and not RGMercUtils.SongActiveByName(aaName) and not RGMercUtils.SongActiveByName('Group Bestial Alignment')
+                    if not Config:GetSetting('DoBattleLeap') then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.SongActiveByName(aaName) and not Casting.SongActiveByName('Group Bestial Alignment')
                 end,
             },
             {
                 name = "Gut Punch",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.IsTanking() and RGMercUtils.NPCAAReady(aaName, target.ID())
+                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "Knee Strike",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return RGMercUtils.NPCAAReady(aaName, target.ID())
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "Rampage",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not RGMercUtils.GetSetting("DoAEDamage") then return false end
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    if not Config:GetSetting("DoAEDamage") then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
                 name = "Call of Challenge",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not RGMercUtils.GetSetting('DoSnare') then return false end
-                    return RGMercUtils.NPCAAReady(aaName, target.ID()) and RGMercUtils.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                    if not Config:GetSetting('DoSnare') then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
                 end,
             },
             {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0) and RGMercUtils.ShieldEquipped()
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0) and Core.ShieldEquipped()
                 end,
             },
             {
                 name = "Slam",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             {
                 name = "Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and RGMercUtils.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
                 end,
             },
             -- { --todo:homework
@@ -913,16 +919,16 @@ local _ClassConfig = {
             --     type = "Ability",
             --     cond = function(self, abilityName)
             --         return mq.TLO.Me.AbilityReady(abilityName)() and
-            --             RGMercUtils.GetTargetDistance() < 15
+            --             Targeting.GetTargetDistance() < 15
             --     end,
             -- },
             {
                 name = "StrikeDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return RGMercUtils.NPCDiscReady(discSpell) and
-                        RGMercUtils.GetTargetDistance() < RGMercUtils.GetTargetMaxRangeTo() and
-                        RGMercUtils.GetTargetPctHPs() <= 20
+                    return Casting.TargetedDiscReady(discSpell) and
+                        Targeting.GetTargetDistance() < Targeting.GetTargetMaxRangeTo() and
+                        Targeting.GetTargetPctHPs() <= 20
                 end,
             },
             {
@@ -932,7 +938,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.ActiveDisc.ID() == discSpell.ID()
                 end,
                 cond = function(self, discSpell)
-                    return RGMercUtils.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and RGMercUtils.PCDiscReady(discSpell)
+                    return Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and Casting.DiscReady(discSpell)
                 end,
             },
         },
@@ -1030,7 +1036,7 @@ local _ClassConfig = {
             Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct targeting. If you are mezzing, consider turning this option off.",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['AETargetCnt']      = {
             DisplayName = "AE Target Count",
@@ -1062,7 +1068,7 @@ local _ClassConfig = {
             Tooltip = "Use AE hatred Discs and AA.",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct targeting. If you are mezzing, consider turning this option off.",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
         ['AETauntCnt']       = {
             DisplayName = "AE Taunt Count",

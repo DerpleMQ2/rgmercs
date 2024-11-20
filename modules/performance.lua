@@ -1,9 +1,14 @@
 -- Sample Performance Monitor Class Module
 local mq                  = require('mq')
-local RGMercUtils         = require("utils.rgmercs_utils")
+local Config              = require('utils.config')
+local Ui                  = require("utils.ui")
+local Comms               = require("utils.comms")
+local Modules             = require("utils.modules")
+local Logger              = require("utils.logger")
 local ImPlot              = require('ImPlot')
 local Set                 = require('mq.Set')
 local ScrollingPlotBuffer = require('utils.scrolling_plot_buffer')
+local Icons               = require('mq.ICONS')
 
 local Module              = { _version = '0.1a', _name = "Perf", _author = 'Derple', }
 Module.__index            = Module
@@ -72,24 +77,24 @@ local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_debug("Performance Monitor Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    Logger.log_debug("Performance Monitor Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[Performance Monitor]: Unable to load global settings file(%s), creating a new one!",
+        Logger.log_error("\ay[Performance Monitor]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self:SaveSettings(false)
     else
@@ -99,7 +104,7 @@ function Module:LoadSettings()
     local settingsChanged = false
 
     -- Setup Defaults
-    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
 
     if settingsChanged then
         self:SaveSettings(false)
@@ -126,7 +131,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_debug("Performance Monitor Module Loaded.")
+    Logger.log_debug("Performance Monitor Module Loaded.")
     self:LoadSettings()
 
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
@@ -137,7 +142,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
         self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
         self:SaveSettings(false)
     end
@@ -170,7 +175,7 @@ function Module:Render()
         ImPlot.SetupAxisLimits(ImAxis.X1, os.clock() - self.settings.SecondsToStore, os.clock(), ImGuiCond.Always)
         ImPlot.SetupAxisLimits(ImAxis.Y1, 1, self.CurMaxMaxFrameTime, ImGuiCond.Always)
 
-        for _, module in pairs(RGMercModules:GetModuleOrderedNames()) do
+        for _, module in pairs(Modules:GetModuleOrderedNames()) do
             if self.FrameTimingData[module] and not self.FrameTimingData[module].mutexLock then
                 local framData = self.FrameTimingData[module]
 
@@ -196,7 +201,7 @@ function Module:Render()
             self:SaveSettings(false)
         end
 
-        self.settings, pressed, _ = RGMercUtils.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
+        self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig, self.DefaultCategories)
         if pressed then
             self:SaveSettings(false)
         end
@@ -267,7 +272,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_debug("Performance Monitor Module Unloaded.")
+    Logger.log_debug("Performance Monitor Module Unloaded.")
 end
 
 return Module

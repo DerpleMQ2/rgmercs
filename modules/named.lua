@@ -1,7 +1,14 @@
 -- Sample Named Class Module
 local mq                 = require('mq')
-local RGMercUtils        = require("utils.rgmercs_utils")
+local Config             = require('utils.config')
+local Targeting          = require("utils.targeting")
+local Ui                 = require("utils.ui")
+local Comms              = require("utils.comms")
+local Files              = require("utils.files")
+local Logger             = require("utils.logger")
 local Set                = require("mq.Set")
+local Icons              = require('mq.ICONS')
+local Nameds             = require("utils.nameds")
 
 local Module             = { _version = '0.1a', _name = "Named", _author = 'Grimmier', }
 Module.__index           = Module
@@ -10,14 +17,16 @@ Module.DefaultConfig     = {}
 Module.DefaultCategories = {}
 Module.FAQ               = {}
 Module.ClassFAQ          = {}
+Module.CachedNamedList   = {}
 
 Module.NamedList         = {}
 Module.NamedAM           = {}
 Module.NamedSM           = {}
 Module.CurSelection      = 1
 Module.namesLoaded       = false
+Module.LastNamedCheck    = 0
 
-Module.DefNamed          = RGMercNameds or {}
+Module.DefNamed          = Nameds or {}
 
 Module.DefaultConfig     = {
     ['NamedTable'] = {
@@ -59,25 +68,25 @@ local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
 function Module:LoadSettings()
     self.NamedList = {}
-    RGMercsLogger.log_debug("Named Combat Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    Logger.log_debug("Named Combat Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[Named]: Unable to load Named settings file(%s), creating a new one!",
+        Logger.log_error("\ay[Named]: Unable to load Named settings file(%s), creating a new one!",
             settings_pickle_path)
         self.settings.MyCheckbox = false
         self:SaveSettings(false)
@@ -87,7 +96,7 @@ function Module:LoadSettings()
 
     local settingsChanged = false
     -- Setup Defaults
-    self.settings, settingsChanged = RGMercUtils.ResolveDefaults(self.DefaultConfig, self.settings)
+    self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
 
     if settingsChanged then
         self:SaveSettings(false)
@@ -119,7 +128,7 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_debug("Named Combat Module Loaded.")
+    Logger.log_debug("Named Combat Module Loaded.")
     self:LoadSettings()
 
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
@@ -130,7 +139,7 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
         self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
         self:SaveSettings(false)
     end
@@ -160,7 +169,7 @@ function Module:Render()
     end
 
     ImGui.Separator()
-    RGMercUtils.RenderZoneNamed()
+    Ui.RenderZoneNamed()
 end
 
 ---comment
@@ -178,7 +187,7 @@ function Module:LoadNamed(fileName, forced)
     end
 
     fileName = mq.configDir .. "/" .. fileName
-    if not RGMercUtils.file_exists(fileName) then
+    if not Files.file_exists(fileName) then
         return {}
     end
 
@@ -204,6 +213,10 @@ end
 
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
+    if os.clock() - self.LastNamedCheck > 1 then
+        self.LastNamedCheck = os.clock()
+        self:CheckZoneNamed()
+    end
 end
 
 function Module:OnDeath()
@@ -211,7 +224,7 @@ function Module:OnDeath()
 end
 
 function Module:RefreshNamedTable()
-    RGMercNameds = {}
+    Nameds = {}
     if self.settings['NamedTable'] > 1 then
         if self.settings['NamedTable'] == 2 then
             self.NamedList = self.NamedAM
@@ -222,18 +235,75 @@ function Module:RefreshNamedTable()
         local shortZone = mq.TLO.Zone.ShortName():lower()
         for zone, data in pairs(self.NamedList) do
             if zone:lower() == zoneName or zone:lower() == shortZone then
-                RGMercNameds[shortZone] = {}
+                Nameds[shortZone] = {}
                 for _, spawnName in pairs(data) do
-                    table.insert(RGMercNameds[shortZone], spawnName)
+                    table.insert(Nameds[shortZone], spawnName)
                 end
             end
         end
     else
-        RGMercNameds = self.DefNamed
+        Nameds = self.DefNamed
     end
     -- Force a refresh of the named cache so the UI updates
-    RGMercUtils.LastZoneID = -1
-    RGMercUtils.RefreshNamedCache()
+    self.LastZoneID = -1
+    self:RefreshNamedCache()
+end
+
+--- Caches the named list in the zone
+function Module:RefreshNamedCache()
+    if self.LastZoneID ~= mq.TLO.Zone.ID() then
+        self.LastZoneID = mq.TLO.Zone.ID()
+        self.NamedList = {}
+        local zoneName = mq.TLO.Zone.Name():lower()
+
+        for _, n in ipairs(Nameds[zoneName] or {}) do
+            self.NamedList[n] = true
+        end
+
+        zoneName = mq.TLO.Zone.ShortName():lower()
+
+        for _, n in ipairs(Nameds[zoneName] or {}) do
+            self.NamedList[n] = true
+        end
+    end
+end
+
+function Module:CheckZoneNamed()
+    self:RefreshNamedCache()
+
+    local tmpTbl = {}
+    for name, _ in pairs(self.NamedList) do
+        local spawn = mq.TLO.Spawn(string.format("NPC %s", name))
+        table.insert(tmpTbl, { Name = name, Distance = spawn.Distance() or 9999, Spawn = spawn, })
+    end
+
+    table.sort(tmpTbl, function(a, b)
+        return a.Distance < b.Distance
+    end)
+
+    self.CachedNamedList = tmpTbl
+end
+
+function Module:GetNamedList()
+    return self.CachedNamedList
+end
+
+--- Checks if the given spawn is a named entity.
+--- @param spawn MQSpawn The spawn object to check.
+--- @return boolean True if the spawn is named, false otherwise.
+function Module:IsNamed(spawn)
+    if not spawn() then return false end
+    self:RefreshNamedCache()
+
+    if self.NamedList[spawn.Name()] or self.NamedList[spawn.CleanName()] then return true end
+
+    --- @diagnostic disable-next-line: undefined-field
+    if mq.TLO.Plugin("MQ2SpawnMaster").IsLoaded() and mq.TLO.SpawnMaster.HasSpawn ~= nil then
+        --- @diagnostic disable-next-line: undefined-field
+        return mq.TLO.SpawnMaster.HasSpawn(spawn.ID())()
+    end
+
+    return Targeting.ForceNamed
 end
 
 function Module:OnZone()
@@ -281,7 +351,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_debug("Named Combat Module Unloaded.")
+    Logger.log_debug("Named Combat Module Unloaded.")
 end
 
 return Module

@@ -1,53 +1,59 @@
 local mq          = require('mq')
-local RGMercUtils = require("utils.rgmercs_utils")
+local Config      = require('utils.config')
+local Core        = require("utils.core")
+local Modules     = require("utils.modules")
+local Casting     = require("utils.casting")
+local Targeting   = require("utils.targeting")
+local Strings     = require("utils.strings")
+local Logger      = require("utils.logger")
 
-local Bind        = { _version = '0.1a', _name = "RGMercsBinds", _author = 'Derple', }
+local Binds       = { _version = '0.1a', _name = "Binds", _author = 'Derple', }
 
-Bind.MainHandler  = function(cmd, ...)
+Binds.MainHandler = function(cmd, ...)
     if not cmd or cmd:len() == 0 then cmd = "help" end
 
-    if RGMercsBinds.Handlers[cmd] then
-        return RGMercsBinds.Handlers[cmd].handler(...)
+    if Binds.Handlers[cmd] then
+        return Binds.Handlers[cmd].handler(...)
     end
 
     local processed = false
-    local results = RGMercModules:ExecAll("HandleBind", cmd, ...)
+    local results = Modules:ExecAll("HandleBind", cmd, ...)
 
     for _, r in pairs(results) do processed = processed or r end
 
     if not processed then
-        RGMercsLogger.log_warn("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
+        Logger.log_warn("\ayWarning:\ay '\at%s\ay' is not a valid command", cmd)
     end
 end
 
-Bind.Handlers     = {
+Binds.Handlers    = {
     ['set'] = {
         usage = "/rgl set [show | <setting> <value>]",
         about = "Show All Settings or Set a specific RGMercs setting",
         handler = function(config, value)
-            RGMercConfig:HandleBind(config, value)
+            Config:HandleBind(config, value)
         end,
     },
     ['forcecombat'] = {
         usage = "/rgl forcecombat",
         about = "Will force combat to be enabled on your XTarget[1]. If you have no XTarget[1] it will use your current target.",
         handler = function()
-            RGMercUtils.ForceCombat = not RGMercUtils.ForceCombat
-            RGMercsLogger.log_info("\awForced Combat: %s", RGMercUtils.BoolToColorString(RGMercUtils.ForceCombat))
+            Targeting.ForceCombat = not Targeting.ForceCombat
+            Logger.log_info("\awForced Combat: %s", Strings.BoolToColorString(Targeting.ForceCombat))
 
-            if RGMercUtils.ForceCombat then
+            if Targeting.ForceCombat then
                 if mq.TLO.Target.ID() == 0 or (mq.TLO.Target.Type() or "none"):lower() ~= "npc" then
-                    RGMercsLogger.log_info("\awForced Combat: Requires a target - Disabling...")
-                    RGMercUtils.ForceCombat = false
+                    Logger.log_info("\awForced Combat: Requires a target - Disabling...")
+                    Targeting.ForceCombat = false
                     return
                 end
-                RGMercUtils.DoCmd("/xtarget set 1 currenttarget")
+                Core.DoCmd("/xtarget set 1 currenttarget")
                 mq.delay("5s", function() return mq.TLO.Me.XTarget(1).ID() == mq.TLO.Target.ID() end)
-                RGMercsLogger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
+                Logger.log_info("\awForced Combat Targeting: %s", mq.TLO.Me.XTarget(1).CleanName())
             else
-                RGMercUtils.ResetXTSlot(1)
-                RGMercUtils.ForceNamed = false
-                RGMercUtils.DoCmd("/attack off")
+                Targeting.ResetXTSlot(1)
+                Targeting.ForceNamed = false
+                Core.DoCmd("/attack off")
             end
         end,
     },
@@ -55,9 +61,9 @@ Bind.Handlers     = {
         usage = "/rgl forcetarget",
         about = "Will force the current target to be your autotarget no matter what until it is no longer valid.",
         handler = function()
-            if mq.TLO.Target.ID() > 0 and (RGMercUtils.TargetIsType("npc") or RGMercUtils.TargetIsType("npcpet")) then
-                RGMercConfig.Globals.ForceTargetID = mq.TLO.Target.ID()
-                RGMercsLogger.log_info("\awForced Target: %s", mq.TLO.Target.CleanName() or "None")
+            if mq.TLO.Target.ID() > 0 and (Targeting.TargetIsType("npc") or Targeting.TargetIsType("npcpet")) then
+                Config.Globals.ForceTargetID = mq.TLO.Target.ID()
+                Logger.log_info("\awForced Target: %s", mq.TLO.Target.CleanName() or "None")
             end
         end,
     },
@@ -65,18 +71,18 @@ Bind.Handlers     = {
         usage = "/rgl forcenamed",
         about = "Will force the current target to be considered a name mainly for testing purposes.",
         handler = function()
-            RGMercUtils.ForceNamed = not RGMercUtils.ForceNamed
-            RGMercsLogger.log_info("\awForced Named: %s", RGMercUtils.BoolToColorString(RGMercUtils.ForceNamed))
+            Targeting.ForceNamed = not Targeting.ForceNamed
+            Logger.log_info("\awForced Named: %s", Strings.BoolToColorString(Targeting.ForceNamed))
         end,
     },
     ['burnnow'] = {
         usage = "/rgl burnnow <id?>",
         about = "Will force the target <id> or your current target to trigger all burn checks - resets when combat ends.",
         handler = function(targetId)
-            RGMercUtils.ForceBurnTargetID = tonumber(targetId) or mq.TLO.Target.ID()
-            local burnNowSpawn = mq.TLO.Spawn(RGMercUtils.ForceBurnTargetID)
-            RGMercsLogger.log_info("\aoForcing Burn Now: \at%s \aw(\am%d\aw)", burnNowSpawn and (burnNowSpawn() and burnNowSpawn.CleanName() or "None") or "None",
-                RGMercUtils.ForceBurnTargetID)
+            Targeting.ForceBurnTargetID = tonumber(targetId) or mq.TLO.Target.ID()
+            local burnNowSpawn = mq.TLO.Spawn(Targeting.ForceBurnTargetID)
+            Logger.log_info("\aoForcing Burn Now: \at%s \aw(\am%d\aw)", burnNowSpawn and (burnNowSpawn() and burnNowSpawn.CleanName() or "None") or "None",
+                Targeting.ForceBurnTargetID)
         end,
     },
     ['addoa'] = {
@@ -85,11 +91,11 @@ Bind.Handlers     = {
         handler = function(name)
             if not name then name = mq.TLO.Target.CleanName() end
             if not name then
-                RGMercsLogger.log_error("/rgl addoa - no name given and no valid target exists!")
+                Logger.log_error("/rgl addoa - no name given and no valid target exists!")
                 return
             end
-            RGMercsLogger.log_info("Adding %s to your Outside Assist list!", name)
-            RGMercUtils.AddOA(name)
+            Logger.log_info("Adding %s to your Outside Assist list!", name)
+            Config:AddOA(name)
         end,
     },
     ['deloa'] = {
@@ -98,11 +104,11 @@ Bind.Handlers     = {
         handler = function(name)
             if not name then name = mq.TLO.Target.CleanName() end
             if not name then
-                RGMercsLogger.log_error("/rgl deloa - no name given and no valid target exists!")
+                Logger.log_error("/rgl deloa - no name given and no valid target exists!")
                 return
             end
-            RGMercsLogger.log_info("Adding %s to your Outside Assist list!", name)
-            RGMercUtils.DeleteOAByName(name)
+            Logger.log_info("Adding %s to your Outside Assist list!", name)
+            Config:DeleteOAByName(name)
         end,
     },
     ['backoff'] = {
@@ -110,14 +116,14 @@ Bind.Handlers     = {
         about = "Toggles or sets backoff flag",
         handler = function(value)
             if value == nil then
-                RGMercConfig.Globals.BackOffFlag = not RGMercConfig.Globals.BackOffFlag
+                Config.Globals.BackOffFlag = not Config.Globals.BackOffFlag
             elseif value:lower() == "on" or value == "1" then
-                RGMercConfig.Globals.BackOffFlag = true
+                Config.Globals.BackOffFlag = true
             else
-                RGMercConfig.Globals.BackOffFlag = false
+                Config.Globals.BackOffFlag = false
             end
 
-            RGMercsLogger.log_info("\ayBackoff \awset to: %s", RGMercUtils.BoolToColorString(RGMercConfig.Globals.BackOffFlag))
+            Logger.log_info("\ayBackoff \awset to: %s", Strings.BoolToColorString(Config.Globals.BackOffFlag))
         end,
     },
     ['qsay'] = {
@@ -129,9 +135,9 @@ Bind.Handlers     = {
             for _, t in ipairs(allText) do
                 text = (text and text .. " " or "") .. t
             end
-            RGMercUtils.DoCmd("/squelch /dggaexecute /mqtarget id %d", RGMercUtils.GetTargetID())
+            Core.DoCmd("/squelch /dggaexecute /mqtarget id %d", Targeting.GetTargetID())
             mq.delay(5)
-            RGMercUtils.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)
+            Core.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)
         end,
     },
     ['cast'] = {
@@ -140,10 +146,10 @@ Bind.Handlers     = {
         handler = function(spell, targetId)
             targetId = targetId and tonumber(targetId)
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
-            RGMercsLogger.log_debug("\atCasting: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
+            Logger.log_debug("\atCasting: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
 
-            if not RGMercUtils.UseSpell(spell, targetId, true) then
-                RGMercUtils.UseAA(spell, targetId)
+            if not Casting.UseSpell(spell, targetId, true) then
+                Casting.UseAA(spell, targetId)
             end
         end,
     },
@@ -153,36 +159,36 @@ Bind.Handlers     = {
         handler = function(spell, targetId)
             targetId = targetId and tonumber(targetId)
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
-            RGMercsLogger.log_debug("\atUsing AA: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
+            Logger.log_debug("\atUsing AA: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
 
-            RGMercUtils.UseAA(spell, targetId)
+            Casting.UseAA(spell, targetId)
         end,
     },
     ['usemap'] = {
         usage = "/rgl usemap \"<maptype>\" \"<mapname>\" <targetId?>",
         about = "RGMercs will use the mapped spell, song, AA, disc, or item (using smart targeting, or, if provided, on the specified <targetID>).",
         handler = function(mapType, mapName, targetId)
-            local action = RGMercModules:ExecModule("Class", "GetResolvedActionMapItem", mapName)
+            local action = Modules:ExecModule("Class", "GetResolvedActionMapItem", mapName)
             if not action or not action() then
-                RGMercsLogger.log_debug("\arUseMap: \"\ay%s\ar\" does not appear to be a valid mapped action! \awPlease note this value is case-sensitive.", mapName)
+                Logger.log_debug("\arUseMap: \"\ay%s\ar\" does not appear to be a valid mapped action! \awPlease note this value is case-sensitive.", mapName)
                 return false
             end
             targetId = targetId and tonumber(targetId)
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
 
             local actionHandlers = {
-                spell = function() return RGMercUtils.UseSpell(action.RankName, targetId, true) end,
-                song = function() return RGMercUtils.UseSong(action.RankName, targetId, true) end,
-                aa = function() return RGMercUtils.UseAA(action, targetId) end, --AFAIK we don't have any AA mapped, but, future proof.
-                item = function() return RGMercUtils.UseItem(action, targetId) end,
-                disc = function() return RGMercUtils.UseDisc(action, targetId) end,
+                spell = function() return Casting.UseSpell(action.RankName, targetId, true) end,
+                song = function() return Casting.UseSong(action.RankName, targetId, true) end,
+                aa = function() return Casting.UseAA(action, targetId) end, --AFAIK we don't have any AA mapped, but, future proof.
+                item = function() return Casting.UseItem(action, targetId) end,
+                disc = function() return Casting.UseDisc(action, targetId) end,
             }
 
             local handlerFunc = actionHandlers[mapType:lower()]
             if handlerFunc then
                 handlerFunc()
             else
-                RGMercsLogger.log_debug("\arUseMap: \"\ay%s\ar\" is an invalid maptype. \awValid maptypes are : \agspell \aw| \agsong \aw| \agAA \aw| \agdisc \aw| \agitem", mapType)
+                Logger.log_debug("\arUseMap: \"\ay%s\ar\" is an invalid maptype. \awValid maptypes are : \agspell \aw| \agsong \aw| \agAA \aw| \agdisc \aw| \agitem", mapType)
             end
         end,
     },
@@ -190,67 +196,67 @@ Bind.Handlers     = {
         usage = "/rgl setlogfilter <filter|filter|filter|...>",
         about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging)",
         handler = function(text)
-            RGMercsLogger.set_log_filter(text)
+            Logger.set_log_filter(text)
         end,
     },
     ['clearlogfilter'] = {
         usage = "/rgl clearlogfilter",
         about = "Clear log regex filter.",
         handler = function(...)
-            RGMercsLogger.clear_log_filter()
+            Logger.clear_log_filter()
         end,
     },
     ['togglepause'] = {
         usage = "/rgl togglepause",
         about = "Will toggle the pause state of your RGMerc Main Loop",
         handler = function()
-            RGMercConfig.Globals.PauseMain = not RGMercConfig.Globals.PauseMain
+            Config.Globals.PauseMain = not Config.Globals.PauseMain
         end,
     },
     ['pause'] = {
         usage = "/rgl pause",
         about = "Will pause your RGMerc Main Loop",
         handler = function()
-            RGMercConfig.Globals.PauseMain = true
+            Config.Globals.PauseMain = true
         end,
     },
     ['pauseall'] = {
         usage = "/rgl pauseall",
         about = "Will pause all of your Group RGMercs' Main Loop",
         handler = function()
-            RGMercConfig.Globals.PauseMain = true
-            RGMercUtils.DoCmd("/squelch /dgge /rgl pause")
-            RGMercsLogger.log_info("\ayAll clients paused!")
+            Config.Globals.PauseMain = true
+            Core.DoCmd("/squelch /dgge /rgl pause")
+            Logger.log_info("\ayAll clients paused!")
         end,
     },
     ['unpause'] = {
         usage = "/rgl unpause",
         about = "Will unpause your RGMerc Main Loop",
         handler = function()
-            RGMercConfig.Globals.PauseMain = false
+            Config.Globals.PauseMain = false
         end,
     },
     ['unpauseall'] = {
         usage = "/rgl unpauseall",
         about = "Will unpause all of your Group RGMercs' Main Loop",
         handler = function()
-            RGMercConfig.Globals.PauseMain = false
-            RGMercUtils.DoCmd("/squelch /dgge /rgl unpause")
-            RGMercsLogger.log_info("\agAll clients paused!")
+            Config.Globals.PauseMain = false
+            Core.DoCmd("/squelch /dgge /rgl unpause")
+            Logger.log_info("\agAll clients paused!")
         end,
     },
     ['yes'] = {
         usage = "/rgl yes",
         about = "Will cause all of your Group RGMercs to click on every possible 'Yes' Dialogue they have up.",
         handler = function()
-            RGMercUtils.DoCmd("/dgga /notify LargeDialogWindow LDW_YesButton leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify LargeDialogWindow LDW_OkButton leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify TradeWND TRDW_Trade_Button leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify GiveWnd GVW_Give_Button leftmouseup ")
-            RGMercUtils.DoCmd("/dgga /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
-            RGMercUtils.DoCmd("/dgga /notify RaidWindow RAID_AcceptButton leftmouseup")
+            Core.DoCmd("/dgga /notify LargeDialogWindow LDW_YesButton leftmouseup")
+            Core.DoCmd("/dgga /notify LargeDialogWindow LDW_OkButton leftmouseup")
+            Core.DoCmd("/dgga /notify ConfirmationDialogBox CD_Yes_Button leftmouseup")
+            Core.DoCmd("/dgga /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
+            Core.DoCmd("/dgga /notify TradeWND TRDW_Trade_Button leftmouseup")
+            Core.DoCmd("/dgga /notify GiveWnd GVW_Give_Button leftmouseup ")
+            Core.DoCmd("/dgga /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
+            Core.DoCmd("/dgga /notify RaidWindow RAID_AcceptButton leftmouseup")
         end,
     },
     ['circle'] = {
@@ -285,8 +291,8 @@ Bind.Handlers     = {
                     local xOff = mq.TLO.Me.X() + math.floor(radius * xMove)
                     local yOff = mq.TLO.Me.Y() + math.floor(radius * yMove)
 
-                    RGMercUtils.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", member.DisplayName(), yOff, xOff, mq.TLO.Me.Z())
-                    RGMercUtils.DoCmd("/dex %s /timed 50 /face %s", member.DisplayName(), mq.TLO.Me.DisplayName())
+                    Core.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", member.DisplayName(), yOff, xOff, mq.TLO.Me.Z())
+                    Core.DoCmd("/dex %s /timed 50 /face %s", member.DisplayName(), mq.TLO.Me.DisplayName())
                 end
             end
         end,
@@ -295,22 +301,22 @@ Bind.Handlers     = {
         usage = "/rgl mini",
         about = "Toggle minimizing of the RGMercs window",
         handler = function()
-            RGMercConfig.Globals.Minimized = not RGMercConfig.Globals.Minimized
+            Config.Globals.Minimized = not Config.Globals.Minimized
         end,
     },
     ['help'] = {
         handler = function()
-            printf("RGMercs [%s/%s] by: %s running for %s (%s)", RGMercConfig._version, RGMercConfig._subVersion, RGMercConfig._author,
-                RGMercConfig.Globals.CurLoadedChar,
-                RGMercConfig.Globals.CurLoadedClass)
+            printf("RGMercs [%s/%s] by: %s running for %s (%s)", Config._version, Config._subVersion, Config._author,
+                Config.Globals.CurLoadedChar,
+                Config.Globals.CurLoadedClass)
             printf("\n\agCore \awCommand Help\aw\n------------\n")
-            for c, d in pairs(RGMercsBinds.Handlers) do
+            for c, d in pairs(Binds.Handlers) do
                 if c ~= "help" then
                     printf("\am%-20s\aw - \atUsage: \ay%-30s\aw | %s", c, d.usage, d.about)
                 end
             end
 
-            local moduleCommands = RGMercModules:ExecAll("GetCommandHandlers")
+            local moduleCommands = Modules:ExecAll("GetCommandHandlers")
 
             for _, info in pairs(moduleCommands) do
                 local printHeader = true
@@ -331,9 +337,9 @@ Bind.Handlers     = {
         about = "Toggle Popout of Module",
         handler = function(config, value)
             if config == 'debug' or config == 'console' then
-                RGMercUtils.SetSetting("PopOutConsole", not RGMercUtils.GetSetting("PopOutConsole"))
+                Config:SetSetting("PopOutConsole", not Config:GetSetting("PopOutConsole"))
             else
-                RGMercModules:ExecModule(config, "Pop")
+                Modules:ExecModule(config, "Pop")
             end
         end,
     },
@@ -341,9 +347,9 @@ Bind.Handlers     = {
         usage = "/rgl faq [question]",
         about = "Toggle Popout of Module",
         handler = function(config, value)
-            RGMercModules:ExecModule('FAQ', "FaqFind", config)
+            Modules:ExecModule('FAQ', "FaqFind", config)
         end,
     },
 }
 
-return Bind
+return Binds

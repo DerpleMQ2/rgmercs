@@ -1,9 +1,10 @@
 --- @type Mq
 local mq              = require('mq')
-local RGMercUtils     = require("utils.rgmercs_utils")
+local Strings         = require("utils.strings")
+local Console         = require("utils.console")
 
 local actions         = {}
-local logDir = mq.TLO.MacroQuest.Path("Logs")()
+local logDir          = mq.TLO.MacroQuest.Path("Logs")()
 local logFileOpened   = nil
 local logLeaderStart  = '\ar[\ax\agRGMercs'
 local logLeaderEnd    = '\ar]\ax\aw >>>'
@@ -31,7 +32,7 @@ function actions.set_log_to_file(logToFile)
 end
 
 function actions.set_log_filter(filter)
-	filters = RGMercUtils.split(filter:lower(), "|")
+	filters = Strings.split(filter:lower(), "|")
 end
 
 function actions.clear_log_filter() filters = {} end
@@ -104,6 +105,8 @@ local function log(logLevel, output, ...)
 
 		if not found then return end
 	end
+
+	local RGMercsConsole = Console:GetConsole("##RGMercs")
 
 	if RGMercsConsole ~= nil then
 		local consoleText = string.format('[%s] %s', logLevels[logLevel].header, output)

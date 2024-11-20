@@ -1,7 +1,13 @@
 -- Sample Basic Class Module
 local mq                           = require('mq')
-local RGMercUtils                  = require("utils.rgmercs_utils")
+local Config                       = require('utils.config')
+local Ui                           = require("utils.ui")
+local Comms                        = require("utils.comms")
+local Core                         = require("utils.core")
+local Targeting                    = require("utils.targeting")
+local Logger                       = require("utils.logger")
 local Set                          = require("mq.Set")
+local Icons                        = require('mq.ICONS')
 
 local Module                       = { _version = '0.1a', _name = "Travel", _author = 'Derple', }
 Module.__index                     = Module
@@ -67,24 +73,24 @@ local function getConfigFileName()
     local server = mq.TLO.EverQuest.Server()
     server = server:gsub(" ", "")
     return mq.configDir ..
-        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. RGMercConfig.Globals.CurLoadedChar .. '.lua'
+        '/rgmercs/PCConfigs/' .. Module._name .. "_" .. server .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
 end
 
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
 
     if doBroadcast == true then
-        RGMercUtils.BroadcastUpdate(self._name, "LoadSettings")
+        Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
 end
 
 function Module:LoadSettings()
-    RGMercsLogger.log_debug("Travel Module Loading Settings for: %s.", RGMercConfig.Globals.CurLoadedChar)
+    Logger.log_debug("Travel Module Loading Settings for: %s.", Config.Globals.CurLoadedChar)
     local settings_pickle_path = getConfigFileName()
 
     local config, err = loadfile(settings_pickle_path)
     if err or not config then
-        RGMercsLogger.log_error("\ay[Travel]: Unable to load global settings file(%s), creating a new one!",
+        Logger.log_error("\ay[Travel]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self.settings = {}
         self:SaveSettings(false)
@@ -113,7 +119,7 @@ end
 
 function Module:TravelerUpdate(newData)
     if newData then
-        RGMercsLogger.log_debug("\agGot new Traveler update from: \am%s", newData.Name)
+        Logger.log_debug("\agGot new Traveler update from: \am%s", newData.Name)
 
         self.TransportSpells[newData.Name] = newData
 
@@ -130,12 +136,12 @@ function Module:CreatePorterList()
 end
 
 function Module:SendPorterInfo()
-    RGMercsLogger.log_debug("\atBroadcasting TravelerUpdate")
-    RGMercUtils.BroadcastUpdate(self._name, "TravelerUpdate", self.TransportSpells[RGMercConfig.Globals.CurLoadedChar])
+    Logger.log_debug("\atBroadcasting TravelerUpdate")
+    Comms.BroadcastUpdate(self._name, "TravelerUpdate", self.TransportSpells[Config.Globals.CurLoadedChar])
 end
 
 function Module:RequestPorterInfo()
-    RGMercUtils.BroadcastUpdate(self._name, "SendPorterInfo")
+    Comms.BroadcastUpdate(self._name, "SendPorterInfo")
 end
 
 function Module.New()
@@ -144,27 +150,27 @@ function Module.New()
 end
 
 function Module:Init()
-    RGMercsLogger.log_debug("Travel Module Loaded.")
+    Logger.log_debug("Travel Module Loaded.")
 
     local className = mq.TLO.Me.Class.ShortName():lower()
     self:LoadSettings()
 
-    if RGMercUtils.MyClassIs("wiz") or RGMercUtils.MyClassIs("dru") then
-        self.TransportSpells                                                    = {}
-        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar]                = {}
-        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Class          = className
-        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Name           = RGMercConfig.Globals.CurLoadedChar
-        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs           = {}
-        self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames = {}
+    if Core.MyClassIs("wiz") or Core.MyClassIs("dru") then
+        self.TransportSpells                                              = {}
+        self.TransportSpells[Config.Globals.CurLoadedChar]                = {}
+        self.TransportSpells[Config.Globals.CurLoadedChar].Class          = className
+        self.TransportSpells[Config.Globals.CurLoadedChar].Name           = Config.Globals.CurLoadedChar
+        self.TransportSpells[Config.Globals.CurLoadedChar].Tabs           = {}
+        self.TransportSpells[Config.Globals.CurLoadedChar].SortedTabNames = {}
 
-        for i = 1, RGMercConfig.Constants.SpellBookSlots do
+        for i = 1, Config.Constants.SpellBookSlots do
             local spell = mq.TLO.Me.Book(i)
             if spell.Category() == "Transport" then
-                RGMercsLogger.log_debug("\ayFound Transport Spell: <\ay%-15s\ay> => \at'%s'\ay \ao(%d) \ay[\am%s\ay]", spell.Subcategory(), spell.RankName(), spell.ID(),
+                Logger.log_debug("\ayFound Transport Spell: <\ay%-15s\ay> => \at'%s'\ay \ao(%d) \ay[\am%s\ay]", spell.Subcategory(), spell.RankName(), spell.ID(),
                     spell.TargetType())
                 local subCat = spell.Subcategory()
-                self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat] or {}
-                table.insert(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs[subCat],
+                self.TransportSpells[Config.Globals.CurLoadedChar].Tabs[subCat] = self.TransportSpells[Config.Globals.CurLoadedChar].Tabs[subCat] or {}
+                table.insert(self.TransportSpells[Config.Globals.CurLoadedChar].Tabs[subCat],
                     {
                         Name = spell.RankName(),
                         Type = spell.TargetType(),
@@ -173,11 +179,11 @@ function Module:Init()
             end
         end
 
-        for k in pairs(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].Tabs) do
+        for k in pairs(self.TransportSpells[Config.Globals.CurLoadedChar].Tabs) do
             table.insert(
-                self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames, k)
+                self.TransportSpells[Config.Globals.CurLoadedChar].SortedTabNames, k)
         end
-        table.sort(self.TransportSpells[RGMercConfig.Globals.CurLoadedChar].SortedTabNames)
+        table.sort(self.TransportSpells[Config.Globals.CurLoadedChar].SortedTabNames)
 
         -- notify everyone else of my state...
         self:SendPorterInfo()
@@ -231,7 +237,7 @@ function Module:Render()
     local width = ImGui.GetWindowWidth()
     local buttonsPerRow = math.max(1, math.floor(width / self.ButtonWidth))
     local changed
-    if ImGui.SmallButton(RGMercIcons.MD_OPEN_IN_NEW) then
+    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
         self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
         self:SaveSettings(false)
     end
@@ -277,17 +283,17 @@ function Module:Render()
                         if ImGui.Button(sv.Name, self.ButtonWidth, self.ButtonHeight) then
                             local cmd = string.format("/rgl cast \"%s\"", sv.Name)
                             if sv.Type == "Single" then
-                                cmd = cmd .. string.format(" %d", RGMercUtils.GetTargetID())
+                                cmd = cmd .. string.format(" %d", Targeting.GetTargetID())
                             end
 
                             if selectedPorter ~= mq.TLO.Me.DisplayName() then
                                 cmd = string.format("/dex %s %s", selectedPorter, cmd)
                             end
 
-                            RGMercUtils.DoCmd(cmd)
+                            Core.DoCmd(cmd)
                         end
                         ImGui.PopStyleColor(2)
-                        RGMercUtils.Tooltip(sv.Name)
+                        Ui.Tooltip(sv.Name)
                     end
                     ImGui.EndTable()
                     ImGui.EndTabItem()
@@ -353,7 +359,7 @@ function Module:HandleBind(cmd, ...)
 end
 
 function Module:Shutdown()
-    RGMercsLogger.log_debug("Travel Module Unloaded.")
+    Logger.log_debug("Travel Module Unloaded.")
 end
 
 return Module
