@@ -1071,15 +1071,13 @@ local _ClassConfig = {
             {
                 name = "Companion's Fury",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Rise of Bones",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
