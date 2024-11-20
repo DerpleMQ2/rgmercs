@@ -984,7 +984,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 if not (Config:GetSetting('DoSTMalo') or Config:GetSetting('DoAEMalo')) then return false end
-                return combat_state == "Combat" and not Casting.Feigning() and Casting.DebuffConCheck() and
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -995,7 +995,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 if not (Config:GetSetting('DoSTSlow') or Config:GetSetting('DoAESlow')) then return false end
-                return combat_state == "Combat" and not Casting.Feigning() and Casting.DebuffConCheck() and
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -1005,7 +1005,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.Feigning() and
+                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -1016,7 +1016,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning() and
+                return combat_state == "Combat" and not Casting.IAmFeigning() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -1026,7 +1026,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning() and
+                return combat_state == "Combat" and not Casting.IAmFeigning() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -1037,7 +1037,7 @@ local _ClassConfig = {
             targetId = function(self) return { Core.GetMainAssistId(), } end,
             cond = function(self, combat_state)
                 if not (Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal')) then return false end
-                return combat_state == "Combat" and not Casting.Feigning() and Core.OkayToNotHeal()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal()
             end,
         },
 

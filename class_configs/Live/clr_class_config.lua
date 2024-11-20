@@ -1023,7 +1023,7 @@ local _ClassConfig = {
             targetId = function(self) return { Core.GetMainAssistId(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    Core.IsHealing() and not Casting.Feigning()
+                    Core.IsHealing() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -1033,7 +1033,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    Casting.BurnCheck() and Core.IsModeActive("Hybrid") and not Casting.Feigning()
+                    Casting.BurnCheck() and Core.IsModeActive("Hybrid") and not Casting.IAmFeigning()
             end,
         },
         {
@@ -1042,7 +1042,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.IsModeActive("Hybrid") and not Casting.Feigning()
+                return combat_state == "Combat" and Core.IsModeActive("Hybrid") and not Casting.IAmFeigning()
             end,
         },
 

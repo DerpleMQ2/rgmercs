@@ -681,7 +681,7 @@ return {
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return Targeting.GetXTHaterCount() > 0 and not Casting.Feigning() and
+                return Targeting.GetXTHaterCount() > 0 and not Casting.IAmFeigning() and
                     (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
@@ -696,7 +696,7 @@ return {
             cond = function(self, combat_state)
                 if not Config:GetSetting('DoParagon') then return false end
                 local downtime = combat_state == "Downtime" and Config:GetSetting('DowntimeFP') and Casting.DoBuffCheck()
-                local combat = combat_state == "Combat" and not Casting.Feigning()
+                local combat = combat_state == "Combat" and not Casting.IAmFeigning()
                 return (downtime or combat) and not Casting.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
             end,
         },
@@ -706,7 +706,7 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -715,7 +715,7 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.Feigning()
+                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -724,7 +724,7 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -733,7 +733,7 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
     },

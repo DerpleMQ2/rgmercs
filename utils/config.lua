@@ -45,8 +45,6 @@ Config.Constants.RGCasters           = Set.new({ "BRD", "BST", "CLR", "DRU", "EN
 Config.Constants.RGMelee             = Set.new({ "BRD", "SHD", "PAL", "WAR", "ROG", "BER", "MNK", "RNG", "BST", })
 Config.Constants.RGHybrid            = Set.new({ "SHD", "PAL", "RNG", "BST", "BRD", })
 Config.Constants.RGTank              = Set.new({ "WAR", "PAL", "SHD", })
-Config.Constants.RGModRod            = Set.new({ "BST", "CLR", "DRU", "SHM", "MAG", "ENC", "WIZ", "NEC", "PAL", "RNG",
-    "SHD", })
 Config.Constants.RGPetClass          = Set.new({ "BST", "NEC", "MAG", "SHM", "ENC", "SHD", })
 Config.Constants.RGMezAnims          = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
 Config.Constants.ModRods             = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", }
@@ -386,7 +384,7 @@ Config.DefaultConfig = {
         FAQ = "Why am I only Regenerating to 60% Health?",
         Answer = "You can set the [HPMedPctStop] option to the percent health you would like to stop meditating at.",
     },
-    ['AfterMedCombatDelay']  = {
+    ['AfterCombatMedDelay']  = {
         DisplayName = "After Combat Med Delay",
         Category = "Med/Mana",
         Index = 9,
@@ -396,7 +394,7 @@ Config.DefaultConfig = {
         Max = 60,
         ConfigType = "Advanced",
         FAQ = "I keep sitting after combat to med and getting attacked within seconds, how do I fix this?",
-        Answer = "You can set the [AfterMedCombatDelay] option to the number of seconds you would like to wait after combat before sitting to med.",
+        Answer = "You can set the [AfterCombatMedDelay] option to the number of seconds you would like to wait after combat before sitting to med.",
     },
     ['StandWhenDone']        = {
         DisplayName = "Stand When Done Medding",

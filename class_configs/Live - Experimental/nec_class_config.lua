@@ -789,7 +789,7 @@ local _ClassConfig = {
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return Targeting.GetXTHaterCount() > 0 and not Casting.Feigning() and
+                return Targeting.GetXTHaterCount() > 0 and not Casting.IAmFeigning() and
                     (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
@@ -800,7 +800,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    Casting.BurnCheck() and not Casting.Feigning()
+                    Casting.BurnCheck() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -809,7 +809,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
     },

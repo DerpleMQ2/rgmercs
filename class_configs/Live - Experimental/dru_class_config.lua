@@ -866,7 +866,7 @@ local _ClassConfig = {
             steps = 2,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning() and Core.OkayToNotHeal()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal()
             end,
         },
         {
@@ -876,7 +876,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    Casting.BurnCheck() and not Casting.Feigning() and Core.OkayToNotHeal()
+                    Casting.BurnCheck() and not Casting.IAmFeigning() and Core.OkayToNotHeal()
             end,
         },
         {
@@ -885,7 +885,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { Core.GetMainAssistId(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Config:GetSetting('DoTwinHeal') and Core.OkayToNotHeal() and not Casting.Feigning()
+                return combat_state == "Combat" and Config:GetSetting('DoTwinHeal') and Core.OkayToNotHeal() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -894,7 +894,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning() and Core.OkayToNotHeal()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal()
             end,
         },
 

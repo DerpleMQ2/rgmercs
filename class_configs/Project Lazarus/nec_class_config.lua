@@ -746,7 +746,7 @@ local _ClassConfig = {
             name = 'Safety',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (Targeting.IHaveAggro(Config:GetSetting('StartFDPct')) or Casting.Feigning())
+                return combat_state == "Combat" and (Targeting.IHaveAggro(Config:GetSetting('StartFDPct')) or Casting.IAmFeigning())
             end,
         },
         {
@@ -756,7 +756,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and
-                    Casting.BurnCheck() and not Casting.Feigning()
+                    Casting.BurnCheck() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -765,7 +765,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
     },
@@ -801,21 +801,21 @@ local _ClassConfig = {
                 name = "Death Peace",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not Casting.Feigning() and Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 75
+                    return not Casting.IAmFeigning() and Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 75
                 end,
             },
             {
                 name = "Harm Shield",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not Casting.Feigning() and Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() >= 75
+                    return not Casting.IAmFeigning() and Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() >= 75
                 end,
             },
             {
                 name = "Stand Back Up",
                 type = "CustomFunc",
                 cond = function(self)
-                    return Casting.Feigning() and Targeting.GetHighestAggroPct() <= Config:GetSetting('StopFDPct')
+                    return Casting.IAmFeigning() and Targeting.GetHighestAggroPct() <= Config:GetSetting('StopFDPct')
                 end,
                 custom_func = function(_)
                     Core.DoCmd("/stand")
