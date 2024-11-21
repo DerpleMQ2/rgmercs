@@ -849,7 +849,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 if not Config:GetSetting('DoTash') then return false end
-                return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.Feigning() and
+                return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
                     mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
             end,
         },
@@ -860,7 +860,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 if not Config:GetSetting('DoSlow') or not Config:GetSetting('DoCripple') then return false end
-                return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.Feigning() and
+                return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
                     mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
             end,
         },
@@ -870,7 +870,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.Feigning()
+                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
             end,
         },
         { --AA Stuns, Runes, etc, moved from previous home in DPS
@@ -879,7 +879,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -889,7 +889,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 if not Core.IsModeActive("Default") then return false end
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -899,7 +899,7 @@ local _ClassConfig = {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 if not Core.IsModeActive("ModernEra") then return false end
-                return combat_state == "Combat" and not Casting.Feigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
     },
