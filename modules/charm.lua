@@ -713,10 +713,10 @@ function Module:DoCharm()
 	local charmSpell = self:GetCharmSpell()
 	self:UpdateTimings()
 
-	if Tables.GetXTHaterCount() >= self.settings.CharmStartCount then
+	if Targeting.GetXTHaterCount() >= self.settings.CharmStartCount then
 		self:UpdateCharmList()
 	end
-	if not Tables.MyClassIs("BRD") then
+	if not Core.MyClassIs("BRD") then
 		if ((charmSpell and charmSpell() and mq.TLO.Me.SpellReady(charmSpell.RankName.Name())()) or (Config:GetSetting("DireCharm", true) == true)) and
 			Tables.GetTableSize(self.TempSettings.CharmTracker) >= 1 then
 			self:ProcessCharmList()
