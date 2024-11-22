@@ -1517,7 +1517,7 @@ local _ClassConfig = {
                 type = "Ability",
                 -- tooltip = Tooltips.Bash,
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0) and
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target) and
                         (Core.ShieldEquipped() or Casting.CanUseAA("Improved Bash"))
                 end,
             },
@@ -1526,7 +1526,7 @@ local _ClassConfig = {
                 type = "Ability",
                 tooltip = Tooltips.Slam,
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Targeting.GetTargetDistance() <= (target.MaxRangeTo() or 0)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
                 end,
             },
         },
