@@ -18,6 +18,8 @@ Modules.ModuleOrder = {
     "FAQ",
 }
 
+Modules.ModuleList  = {}
+
 ---@return any
 function Modules:load()
     if (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu" then
