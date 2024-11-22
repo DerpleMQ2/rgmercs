@@ -358,7 +358,7 @@ function loot.loadSettings()
     local tmpSettings = loot.load(SettingsFile, 'Settings')
 
     -- check if the DB structure needs updating
-    if not RGMercUtils.file_exists(lootDBUpdateFile) then
+    if not Files.file_exists(lootDBUpdateFile) then
         needDBUpdate = true
         tmpSettings.Version = version
         needSave = true
