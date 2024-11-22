@@ -26,21 +26,6 @@ function ClassLoader.getClassConfigFileName(class)
     return configFile, customConfig
 end
 
---[[
-    ] >>> Loading Base Config: D:\Projects\openvanilla\build\bin\EMULATOR\release\lua/rgmercs/class_configs/Project Lazarus/clr_class_config.lua
-    [RGMercs:INFO    <324016.964> (classloader.lua::load():40  )] >>> Full Config Loaded
-    [RGMercs:INFO    <324016.978> (class.lua::LoadSettings():148 )] >>> CLR Core Module Loading Settings for: Hollypolly.
-    [RGMercs:INFO    <324016.979> (class.lua::LoadSettings():150 )] >>> Using Class Config by: Pureleaf, Derple (1.0 - Project Lazarus)
-    [RGMercs:INFO    <324018.109> (init.lua::RGInit():605 )] >>>  Assisting  >>  Hollypolly  <<  at  60%
-    [RGMercs:INFO    <324018.130> (init.lua::RGInit():655 )] >>> ****************************
-    [RGMercs:INFO    <324018.137> (init.lua::RGInit():656 )] >>> Welcome to RGMercs Lua Edition
-    [RGMercs:INFO    <324018.138> (init.lua::RGInit():657 )] >>> Version 1.1 (2024 Laurion's Song!)
-    [RGMercs:INFO    <324018.138> (init.lua::RGInit():658 )] >>> By Derple, Morisato, Greyn, Algar, Grimmier
-    [RGMercs:INFO    <324018.139> (init.lua::RGInit():659 )] >>> ****************************
-    [RGMercs:INFO    <324018.139> (init.lua::RGInit():660 )] >>>  use  /rg  for a list of commands
-    [RGMercs:ERROR   <324021.746> (classloader.lua::writeCustomConfig():77  )] >>> Failed to Load Base Class Config: D:\Projects\openvanilla\build\bin\EMULATOR\release\lua/rgmercs/class_configs/clr_class_config.lua
-
-]]
 ---@param class string # EQ Class ShortName
 function ClassLoader.load(class)
     local classConfigFile, customConfig = ClassLoader.getClassConfigFileName(class)
