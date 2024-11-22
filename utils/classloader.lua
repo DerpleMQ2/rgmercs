@@ -8,7 +8,7 @@ local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple
 function ClassLoader.getClassConfigFileName(class)
     local baseConfigDir = Config.Globals.ScriptDir .. "/class_configs"
 
-    local customConfigFile = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
+    local customConfigFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, Config.Globals.BuildType, class:lower())
 
     local classConfigDir = Config:GetSetting('ClassConfigDir')
     local customConfig = (classConfigDir == "Custom")
@@ -19,13 +19,28 @@ function ClassLoader.getClassConfigFileName(class)
         -- Fall back to live.
         local oldConfig = configFile
         customConfig = false
-        configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, "Live", class:lower())
+        configFile = string.format("%s/%s_class_config.lua", baseConfigDir, class:lower())
         Logger.log_error("Could not find requested class config %s falling back to %s", oldConfig, configFile)
     end
 
     return configFile, customConfig
 end
 
+--[[
+    ] >>> Loading Base Config: D:\Projects\openvanilla\build\bin\EMULATOR\release\lua/rgmercs/class_configs/Project Lazarus/clr_class_config.lua
+    [RGMercs:INFO    <324016.964> (classloader.lua::load():40  )] >>> Full Config Loaded
+    [RGMercs:INFO    <324016.978> (class.lua::LoadSettings():148 )] >>> CLR Core Module Loading Settings for: Hollypolly.
+    [RGMercs:INFO    <324016.979> (class.lua::LoadSettings():150 )] >>> Using Class Config by: Pureleaf, Derple (1.0 - Project Lazarus)
+    [RGMercs:INFO    <324018.109> (init.lua::RGInit():605 )] >>>  Assisting  >>  Hollypolly  <<  at  60%
+    [RGMercs:INFO    <324018.130> (init.lua::RGInit():655 )] >>> ****************************
+    [RGMercs:INFO    <324018.137> (init.lua::RGInit():656 )] >>> Welcome to RGMercs Lua Edition
+    [RGMercs:INFO    <324018.138> (init.lua::RGInit():657 )] >>> Version 1.1 (2024 Laurion's Song!)
+    [RGMercs:INFO    <324018.138> (init.lua::RGInit():658 )] >>> By Derple, Morisato, Greyn, Algar, Grimmier
+    [RGMercs:INFO    <324018.139> (init.lua::RGInit():659 )] >>> ****************************
+    [RGMercs:INFO    <324018.139> (init.lua::RGInit():660 )] >>>  use  /rg  for a list of commands
+    [RGMercs:ERROR   <324021.746> (classloader.lua::writeCustomConfig():77  )] >>> Failed to Load Base Class Config: D:\Projects\openvanilla\build\bin\EMULATOR\release\lua/rgmercs/class_configs/clr_class_config.lua
+
+]]
 ---@param class string # EQ Class ShortName
 function ClassLoader.load(class)
     local classConfigFile, customConfig = ClassLoader.getClassConfigFileName(class)
@@ -49,10 +64,17 @@ end
 
 function ClassLoader.writeCustomConfig(class)
     -- Define file paths
-    local base_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.luaDir, class:lower())
-    local custom_config_file = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
-    local backup_config_file = string.format("%s/rgmercs/class_configs/BACKUP/%s_class_config_%s.lua", mq.configDir, class:lower(), os.date("%Y%m%d_%H%M%S"))
+    local base_config_file = Config:GetConfigFileName()
+    local custom_config_old = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
+    local custom_config_file = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, Config.Globals.BuildType, class:lower())
+    local backup_config_file = string.format("%s/rgmercs/class_configs/BACKUP/%s/%s_class_config_%s.lua", mq.configDir, Config.Globals.BuildType, class:lower(),
+        os.date("%Y%m%d_%H%M%S"))
 
+    if not Files.file_exists(custom_config_file) then
+        if not Files.file_exists(custom_config_old) then
+            mq.pickle(custom_config_file, {}) -- build the path so we don't get an error
+        end
+    end
     -- Backup the custom config file if one exists
     local fileCustom = io.open(custom_config_file, "r")
     if fileCustom then
