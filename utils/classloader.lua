@@ -19,7 +19,7 @@ function ClassLoader.getClassConfigFileName(class)
         -- Fall back to live.
         local oldConfig = configFile
         customConfig = false
-        configFile = string.format("%s/%s_class_config.lua", baseConfigDir, class:lower())
+        configFile = string.format("%s/Live/%s_class_config.lua", baseConfigDir, class:lower())
         Logger.log_error("Could not find requested class config %s falling back to %s", oldConfig, configFile)
     end
 
