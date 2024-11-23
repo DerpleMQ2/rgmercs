@@ -988,6 +988,15 @@ local _ClassConfig = {
                     return Casting.SelfBuffAACheck(aaName)
                 end,
             },
+            {
+                name = "Huntsman's Ethereal Quiver",
+                type = "Item",
+                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
+                cond = function(self)
+                    return Config:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
+                        mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
+                end,
+            },
         },
         ['PetSummon'] = {
             {
@@ -2046,7 +2055,6 @@ local _ClassConfig = {
             FAQ = "What do the different Modes do?",
             Answer = "Tank Mode will focus on tanking and aggro, while DPS mode will focus on DPS.",
         },
-
         --Buffs and Debuffs
         ['DoSnare']           = {
             DisplayName = "Use Snares",
@@ -2454,6 +2462,15 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why does my SHD switch to a Shield on puny gray named?",
             Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
+        },
+        ['SummonArrows'] = {
+            DisplayName = "Use Huntsman's Quiver",
+            Category = "Equipment",
+            Index = 7,
+            Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
+            Default = false,
+            FAQ = "How do I summon arrows?",
+            Answer = "If you are at least level 90, keep a Huntsman's Ethereal Quiver in your inventory and enable its use in the options.",
         },
     },
 }
