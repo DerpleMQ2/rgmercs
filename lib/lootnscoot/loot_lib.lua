@@ -421,7 +421,7 @@ function loot.loadSettings()
             ]])
         db:close()
         mq.pickle(lootDBUpdateFile, { version = 3, })
-        RGMercsLogger.log_info("DB Version less than %s, Updating it now.", version)
+        Logger.log_info("DB Version less than %s, Updating it now.", version)
         needDBUpdate = false
     end
 
