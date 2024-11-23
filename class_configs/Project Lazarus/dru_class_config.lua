@@ -759,20 +759,10 @@ local _ClassConfig = {
             "Legacy of Spike",
         },
         ['MoveSpells'] = {
-            -- Group Movement Series Spells -- Mix of group target and single target but will require the same dannet checks
-            "Flight of Falcons",
-            "Flight of Eagles",
-            -- [] = "Spirit of Scale",
-            "Feral Pack",
-            "Share Form of the Great Wolf",
-            "Pack Shrew",
-            "Pack Spirit",
-            "Share Wolf Form",
-            "Spirit of Falcons",
-            "Spirit of Eagle",
-            "Spirit of the Shrew",
-            -- [] = "Scale of Wolf",
             "Spirit of Wolf",
+            "Pack Spirit",
+            "Spirit of Eagle",
+            "Flight of Eagles",
         },
         ['ManaBear'] = {
             -- Updated to 125
