@@ -78,6 +78,15 @@ function Casting.TargetHasBuff(spell, buffTarget)
     return false
 end
 
+--- Checks if the target has a specific buff by name.
+--- @param buffName string The name of the buff to check for.
+--- @param buffTarget MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @return boolean True if the target has the buff, false otherwise.
+function Casting.TargetHasBuffByName(buffName, buffTarget)
+    if buffName == nil then return false end
+    return Casting.TargetHasBuff(mq.TLO.Spell(buffName), buffTarget)
+end
+
 --- Checks if a spell stacks on the target.
 --- @param spell MQSpell The name of the spell to check.
 --- @return boolean True if the spell stacks on the target, false otherwise.
