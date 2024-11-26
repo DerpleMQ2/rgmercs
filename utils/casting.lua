@@ -78,7 +78,6 @@ function Casting.TargetHasBuff(spell, buffTarget)
     return false
 end
 
---- Checks if the target has a specific buff by name.
 --- @param buffName string The name of the buff to check for.
 --- @param buffTarget MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
 --- @return boolean True if the target has the buff, false otherwise.
