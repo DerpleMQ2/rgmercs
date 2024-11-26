@@ -1526,7 +1526,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    if not Core.GetSetting('DoGroupRegen') or Core.GetResolvedActionMapItem('DichoSpell') then return false end --Dicho regen overwrites this
+                    if not Config:GetSetting('DoGroupRegen') or Core.GetResolvedActionMapItem('DichoSpell') then return false end --Dicho regen overwrites this
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
