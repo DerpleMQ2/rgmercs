@@ -277,7 +277,7 @@ local _ClassConfig = {
                     table.insert(targets, xtarg.ID())
                 end
             end
-            return #targets >= Config:GetSetting('AETargetCt') and not (Config:GetSetting('SafeAEDamage') and #targets < mobs)
+            return #targets >= Config:GetSetting('AETargetCnt') and not (Config:GetSetting('SafeAEDamage') and #targets < mobs)
         end,
 
         --function to determine if we have enough mobs in range to use a defensive disc
