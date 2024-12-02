@@ -38,6 +38,7 @@ local _ClassConfig = {
             "Dissident Form",
             "Composite Form",
             "Ecliptic Form",
+            "Reciprocal Form",
         },
         ['Drunken'] = {
             "Drunken Monkey Style",
@@ -48,6 +49,7 @@ local _ClassConfig = {
             "Curse of Fourteen Fists",       -- 108 TBM
             "Curse of Fifteen Strikes",      -- 113 COV
             "Curse of Sixteen Shadows",      -- 118 NOS
+            "Curse of Seventeen Facets",     -- 123 TOB
         },
         ['Fang'] = {
             "Dragon Fang",
@@ -70,18 +72,21 @@ local _ClassConfig = {
             "Firewalker's Precision Strike",
             "Icewalker's Precision Strike",
             "Bloodwalker's Precision Strike",
+            "Fatewalker's Precision Strike",
         },
         ['Precision2'] = {
             "Doomwalker's Precision Strike",
             "Firewalker's Precision Strike",
             "Icewalker's Precision Strike",
             "Bloodwalker's Precision Strike",
+            "Fatewalker's Precision Strike",
         },
         ['Precision3'] = {
             "Doomwalker's Precision Strike",
             "Firewalker's Precision Strike",
             "Icewalker's Precision Strike",
             "Bloodwalker's Precision Strike",
+            "Fatewalker's Precision Strike",
         },
         ['Shuriken'] = {
             "Vigorous Shuriken",
@@ -107,6 +112,7 @@ local _ClassConfig = {
             "Firewalker's Covenant",
             "Icewalker's Coalition",     -- COV
             "Bloodwalker's Conjunction", -- NOS
+            "Fatewalker's Covariance",   -- TOB
         },
         ['Storm'] = {
             "Eye of the Storm",
