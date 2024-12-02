@@ -207,9 +207,10 @@ local _ClassConfig = {
             "Listless Power",  -- Level 29, Definitely not worth
         },
         ["GroupHealProcBuff"] = {
+            "Mindful Spirit",
             "Watchful Spirit",
-            "Responsive Spirit",
             "Attentive Spirit",
+            "Responsive Spirit",
         },
         ["WardBuff"] = {
             -- Self Heal Ward Spells
@@ -225,6 +226,7 @@ local _ClassConfig = {
             "Ward of Rebirth",
         },
         ["DichoSpell"] = {
+            "Reciprocal Roar",
             "Ecliptic Roar",
             "Composite Roar",
             "Dissident Roar",
@@ -280,6 +282,7 @@ local _ClassConfig = {
         ["AllianceBuff"] = {
             "Ancient Alliance",
             "Ancient Coalition",
+            "Ancient Covariance",
         },
         ['RezSpell'] = {
             'Incarnate Anew', -- Level 59
@@ -488,6 +491,7 @@ local _ClassConfig = {
             -- Long Dot(42s) LVL 104+
             -- Two resist types because it throws 2 dots
             -- Stacking: Nectar of Pain - Stacking: Blood of Saryrn
+            "Chaotic Bloodcurse",
             "Chaotic Poison",
             "Chaotic Venom",
             "Chaotic Venin",
@@ -497,6 +501,7 @@ local _ClassConfig = {
             -- Pandemic Dot Long Dot(84s) Level 103+
             -- Two resist types because it throws 2 dots
             -- Stacking: Kralbor's Pandemic  -    Stacking: Breath of Ultor
+            "Hotarion Pandemic",
             "Tegi Pandemic",
             "Bledrek's Pandemic",
             "Elkikatar's Pandemic",
@@ -541,6 +546,7 @@ local _ClassConfig = {
         },
         ["SaryrnDot"] = {
             -- Stacking: Blood of Saryrn - Long Dot(42s) - Level 8+
+            "Caustic Blood",
             "Desperate Vampyre Blood",
             "Restless Blood",
             "Reef Crawler Blood",
