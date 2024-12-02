@@ -129,6 +129,7 @@ local _ClassConfig = {
             "Ward of Bedazzlement",
         },
         ['NdtBuff'] = {
+            "Night's Eternal Terror",
             "Night's Perpetual Terror",
             "Night's Endless Terror",
             "Night's Dark Terror",
@@ -306,6 +307,7 @@ local _ClassConfig = {
             "Deviser's Auspice",
             "Transfixer's Auspice",
             "Enticer's Auspice",
+            "Stupefier's Auspice",
         },
         ['SpellProcBuff'] = {
             "Mana Reproduction",
@@ -320,6 +322,7 @@ local _ClassConfig = {
             "Mana Resurgence",
         },
         ['AllianceSpell'] = {
+            "Chromatic Covariance",
             "Chromatic Conjunction",
             "Chromatic Coalition",
             "Chromatic Covenant",
@@ -381,6 +384,7 @@ local _ClassConfig = {
             "Whirl till you hurl",
         },
         ['CharmSpell'] = {
+            "Stupefier's Demand",
             "Esoteric Command",
             "Marvel's Demand",
             "Marvel's Command",
@@ -487,6 +491,7 @@ local _ClassConfig = {
             "Composite Reinforcement",
             "Dissident Reinforcement",
             "Dichotomic Reinforcement",
+            "Reciprocal Reinforcement",
         },
         ['DoTSpell1'] = {
             ---DoT 1 -- >=LVL1

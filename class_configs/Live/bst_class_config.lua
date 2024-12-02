@@ -175,6 +175,7 @@ return {
             "Dissident Fury",  -- Level 106
             "Composite Fury",  -- Level 111
             "Ecliptic Fury",   -- Level 116
+            "Reciprocal Fury", -- Level 121
         },
         ['HealSpell'] = {
             "Salve",               -- Level 1
@@ -419,6 +420,7 @@ return {
             "Venomous Covenant",    -- Level 108
             "Venomous Coalition",   -- Level 113
             "Venomous Conjunction", -- Level 118
+            "Venomous Covariance",  -- Level 123
         },
         ['PetBlockSpell'] = {
             "Ward of Calliav",       -- Level 49
@@ -445,6 +447,7 @@ return {
             "Auspice of Esianti",    -- Level 107
             "Auspice of Kildrukaun", -- Level 112
             "Auspice of Valia",      -- Level 117
+            "Auspice of Usira",      -- Level 122
         },
         ['PetHotSpell'] = {
             -- Pet Hot Spell
@@ -595,6 +598,7 @@ return {
             "Reflexive Rending",
             "Reflexive Sundering",
             "Reflexive Riving",
+            "Reflexive Slashing", -- Level 124
         },
         ['VinDisc'] = {
             -- Vindication Disc
@@ -603,6 +607,7 @@ return {
             "Ikatiar's Vindication",
             "Kejaan's Vindication",
             "Ikatiar's Vindication",
+            "Xanathan's Vindication", -- Level 125
         },
     },
     ['HealRotationOrder'] = {

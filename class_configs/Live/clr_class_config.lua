@@ -135,6 +135,7 @@ local _ClassConfig = {
             "Dissident Blessing",
             "Composite Blessing",
             "Ecliptic Blessing",
+            "Reciprocal Blessing",
         },
         ['patchheal2'] = {
             -----Patch Heals Slot 4 Dissident Blessing
@@ -159,6 +160,7 @@ local _ClassConfig = {
             "Dissident Blessing",
             "Composite Blessing",
             "Ecliptic Blessing",
+            "Reciprocal Blessing",
         },
         ['groupfastheal'] = {
             -----Group Fast Heal 103+ Only
@@ -335,6 +337,7 @@ local _ClassConfig = {
             "Curate's Retort",
             "Jorlleag's Retort",
             "Axoeviq's Retort",
+            "Hazuri's Retort",
         },
         ['SelfBuffhp'] = {
             --Self Buff for Mana Regen and armor
@@ -361,6 +364,7 @@ local _ClassConfig = {
             "Divine Reaction",
             "Divine Response",
             "Divine Contingency",
+            "Divine Rejoinder",
         },
         ['AegoBuff'] = {
             ----Group Buff All Levels starts at 45 - Group Aego Buff
@@ -691,6 +695,7 @@ local _ClassConfig = {
             "Anticipated Intervention",
             "Anticipated Intercalation",
             "Anticipated Interdiction",
+            "Anticipated Interstition",
         },
         ['GroupHot'] = {
             -- Group Hot Line - Elixirs No Cure

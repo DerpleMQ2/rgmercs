@@ -49,6 +49,7 @@ return {
             "Dissident Rage",
             "Composite Rage",
             "Ecliptic Rage",
+            "Reciprocal Rage",
         },
         ['Dfrenzy'] = {
             "Eviscerating Frenzy",
@@ -120,10 +121,11 @@ return {
             "Phantom Assailant",
         },
         ['Alliance'] = {
-            "Demolisher's,",
+            "Demolisher's Alliance,",
             "Mangler's Covenant",
             "Vindicator's Coalition",
             "Conqueror's Conjunction",
+            "Eviscerator's Covariance",
 
         },
         ['CheapShot'] = {
@@ -141,6 +143,7 @@ return {
             "Arcsteel",
             "Arcslash",
             "Arcshear",
+            "Arcscale",
         },
         ['AEVicious'] = {
             "Vicious Spiral",
@@ -224,6 +227,7 @@ return {
         ['SappingStrike'] = {
             "Sapping Strikes",
             "Shriveling Strikes",
+            "Draining Strikes",
         },
         ['ReflexDisc'] = {
             "Reflexive Retaliation",

@@ -79,7 +79,7 @@ local _ClassConfig = {
             "Deathcaller's Robe",
         },
     },
-    ['AbilitySets']     = {
+    ['AbilitySets']     = { --TODO: Examine new TOB magic4 dot and if it has a place in rotation
         ['SelfHPBuff'] = {
             "Shield of Memories",
             "Shield of Shadow",
@@ -131,6 +131,7 @@ local _ClassConfig = {
         ---DPS
         ['AllianceSpell'] = {
             -- Alliance Spells
+            "Malevolent Covariance",
             "Malevolent Conjunction",
             "Malevolent Coalition",
             "Malevolent Covenant",
@@ -142,6 +143,7 @@ local _ClassConfig = {
             "Composite Paroxysm",
             "Dissident Paroxysm",
             "Dichotomic Paroxysm",
+            "Reciprocal Paroxysm",
         },
         ['SwarmPet'] = {
             ---SwarmPet >= LVL85
@@ -438,6 +440,7 @@ local _ClassConfig = {
         },
         ['Magic4'] = {
             ---Magic4 >=LVL 97 DOT
+            "Scourge of Eternity", -- Level 123 TOB
             "Scourge of Destiny",
             "Scourge of Fates",
         },
@@ -478,6 +481,7 @@ local _ClassConfig = {
         },
         ['Combo'] = {
             ---Combines Disease1 and Disease2
+            "Goremand's Grip of Decay",
             "Fleshrot's Grip of Decay",
             "Danvid's Grip of Decay",
             "Mourgis' Grip of Decay",

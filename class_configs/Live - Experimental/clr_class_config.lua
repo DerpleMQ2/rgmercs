@@ -123,6 +123,7 @@ local _ClassConfig = {
             "Dissident Blessing",
             "Composite Blessing",
             "Ecliptic Blessing",
+            "Reciprocal Blessing",
         },
         ['GroupFastHeal'] = {
             -----Group Fast Heal 98+ Only
@@ -203,6 +204,7 @@ local _ClassConfig = {
             "Curate's Retort",
             "Jorlleag's Retort",
             "Axoeviq's Retort",
+            "Hazuri's Retort",
         },
         ['SelfHPBuff'] = {
             --Self Buff for Mana Regen and armor
@@ -229,6 +231,7 @@ local _ClassConfig = {
             "Divine Reaction",
             "Divine Response",
             "Divine Contingency",
+            "Divine Rejoinder",
         },
         ['AegoBuff'] = {
             ----Group Buff All Levels starts at 45 - Group Aego Buff

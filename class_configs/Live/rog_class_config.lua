@@ -32,6 +32,7 @@ return {
             "Thief's Eyes",   -- Level 68
         },
         ["Shadowhunter"] = {
+            "Queseris' Dagger",       -- Level 122
             "Shadow-Hunter's Dagger", -- Level 102
         },
         ["Slice"] = {
@@ -132,6 +133,7 @@ return {
             "Pinpoint Vulnerability", -- Level 74
         },
         ["Puncture"] = {
+            "Invidious Puncture",      -- Level 124
             "Disorienting Puncture",   -- Level 119
             "Vindictive Puncture",     -- Level 114
             "Vexatious Puncture",      -- Level 109
@@ -204,12 +206,14 @@ return {
             "Holdout Blade",    -- Level 99
         },
         ["DichoSpell"] = {
+            "Reciprocal Weapons", -- Level 121
             "Ecliptic Weapons",   -- Level 116
             "Composite Weapons",  -- Level 111
             "Dissident Weapons",  -- Level 106
             "Dichotomic Weapons", -- Level 101
         },
         ["Alliance"] = {
+            "Poisonous Covariance",  -- Level 123
             "Poisonous Covenant",    -- Level 118
             "Poisonous Alliance",    -- Level 113
             "Poisonous Coalition",   -- Level 108

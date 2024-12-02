@@ -27,13 +27,14 @@ return {
     },
     ['AbilitySets']   = {
         ['AllianceSpell'] = {
-            "Malarian Mantle",
+            "Frostbound Covariance",
             "Frostbound Conjunction",
             "Frostbound Coalition",
             "Frostbound Covenant",
             "Frostbound Alliance",
         },
         ['DichoSpell'] = {
+            "Reciprocal Fire",
             "Ecliptic Fire",
             "Composite Fire",
             "Dissident Fire",
@@ -148,6 +149,7 @@ return {
         },
         ['VortexNuke'] = {
             -- NOTE: ${Spell[${VortexNuke}].ResistType} can be used to determine which resist type is getting debuffed
+            "Chromospheric Vortex",
             "Shadebright Vortex",
             "Thaumaturgic Vortex",
             "Stormjolt Vortex",
@@ -337,6 +339,7 @@ return {
             "Musing Gambit",
             "Quiescent Gambit",
             "Bucolic Gambit",
+            "Contemplative Gambit",
         },
         ['PetSpell'] = {
             "Kindleheart's Pyroblade",

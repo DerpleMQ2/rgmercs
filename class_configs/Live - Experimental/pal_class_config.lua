@@ -125,6 +125,7 @@ local _ClassConfig = {
             "Concordant Blessing",
             "Confluent Blessing",
             "Penumbral Blessing",
+            "Paradoxical Blessing",
         },
         ["DebuffNuke"] = {
             -- Undead DebuffNuke
@@ -296,6 +297,7 @@ local _ClassConfig = {
         },
         ["Healtaunt"] = {
             --- Valiant Taunt With Built in heal.
+            "Valiant Defiance",
             "Valiant Disruption",
             "Valiant Deflection",
             "Valiant Defense",
@@ -550,6 +552,7 @@ local _ClassConfig = {
             "Dissident Force",
             "Composite Force",
             "Ecliptic Force",
+            "Reciprocal Force",
         },
         ["Puritycure"] = {
             --- Purity Cure Poison/Diease Cure Half Power to curse
@@ -611,6 +614,7 @@ local _ClassConfig = {
             -- Pally Alliance Spell
             "Holy Alliance",
             "Stormwall Coalition",
+            "Aureate Covariance",
         },
         ["CurseCure"] = {
             -- Curse Cure Line
@@ -662,7 +666,8 @@ local _ClassConfig = {
             "Holyforge Discipline",
         },
         ["Penitent"] = {
-            -- Pentient Armor Discipline Timer 11
+            -- Penitent Armor Discipline Timer 11
+            "Avowed Penitence",
             "Fervent Penitence",
             "Reverent Penitence",
             "Devout Penitence",
@@ -693,6 +698,7 @@ local _ClassConfig = {
         },
         ["ReflexStrike"] = {
             --- Reflexive Strike Heal
+            "Reflexive Resolution",
             "Reflexive Redemption",
             "Reflexive Righteousness",
             "Reflexive Reverence",

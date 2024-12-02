@@ -140,6 +140,7 @@ local _ClassConfig = {
         ---DPS
         ['AllianceSpell'] = {
             -- Alliance Spells
+            "Malevolent Covariance",
             "Malevolent Conjunction",
             "Malevolent Coalition",
             "Malevolent Covenant",
@@ -151,6 +152,7 @@ local _ClassConfig = {
             "Composite Paroxysm",
             "Dissident Paroxysm",
             "Dichotomic Paroxysm",
+            "Reciprocal Paroxysm",
         },
         ['SwarmPet'] = {
             ---SwarmPet >= LVL85
@@ -407,6 +409,7 @@ local _ClassConfig = {
         },
         ['Magic4'] = {
             ---Magic4 >=LVL 97 DOT
+            "Scourge of Eternity", -- Level 123 TOB
             "Scourge of Destiny",
             "Scourge of Fates",
         },
@@ -429,6 +432,7 @@ local _ClassConfig = {
         },
         ['Disease2'] = {
             ---Grip Line of Disease Spells =LVL1 HAS DEBUFF
+            "Goremand's Grip of Decay",
             "Fleshrot's Grip of Decay",
             "Grip of Quietus",
             "Danvid's Grip of Decay",

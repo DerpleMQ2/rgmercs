@@ -283,6 +283,7 @@ local _ClassConfig = {
     },
     ['AbilitySets']       = {
         ["ArrowOpener"] = {
+            "Concealed Shot",
             "Stealthy Shot",
             "Silent Shot",
         },
@@ -319,6 +320,7 @@ local _ClassConfig = {
             "Dissident Fusillade",
             "Composite Fusillade",
             "Ecliptic Fusillade",
+            "Reciprocal Fusillade",
         },
         ["SummerNuke"] = {
             "Summer's Deluge",
@@ -486,6 +488,7 @@ local _ClassConfig = {
             "Arbor Stalker's Enrichment",
             "Copsestalker's Enrichment",
             "Wildstalker's Enrichment",
+            "Fernstalker's Enrichment",
         },
         ["Rathe"] = {
             "Cloak of Needlespikes",
@@ -750,6 +753,7 @@ local _ClassConfig = {
             "Wildstalker's Covenant",
             "Arbor Stalker's Coalition",
             "Dusksage Stalker's Conjunction",
+            "Fernstalker's Covariance",
         },
         ["AgiBuff"] = {
             "Feet Like Cat",
@@ -796,11 +800,13 @@ local _ClassConfig = {
             "Focused Gale of Blades",
             "Focused Blizzard of Blades",
             "Focused Tempest of Blades",
+            "Focused Maelstrom of Blades",
         },
         ["ReflexSlashHeal"] = {
             "Reflexive Bladespurs",
             "Reflexive Nettlespears",
             "Reflexive Rimespurs",
+            "Reflexive Needlespikes",
         },
         ["AEArrows"] = {
             "Frenzy of Arrows",

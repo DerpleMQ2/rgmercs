@@ -324,6 +324,7 @@ local _ClassConfig = {
             --If we have push and nopush from the same tier active this will lead to issues with InsultSong2/timer stacking.
             --Choosing which to prioritize is problematic, but for now, nopush will be prioritized to potentially help reduce movement in combat.
             --Do to current F2P expansion limits, the ToL push will be chosen over the NoS nopush, I see no good solution for this.
+            --"Yaran's Disdain",   -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
             --"Nord's Disdain",       -- 118 nopush, timer 6, NoS
             "Sogran's Insult",  -- 117 push, timer 6, ToL
@@ -344,6 +345,7 @@ local _ClassConfig = {
             -- "Brusco's Boastful Bellow", --12,
         },
         ['InsultSong2'] = {
+            --"Yaran's Disdain",   -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
             --"Nord's Disdain",       -- 118 nopush, timer 6, NoS
             "Sogran's Insult",  -- 117 push, timer 6, ToL
@@ -360,7 +362,8 @@ local _ClassConfig = {
             "Venimor's Insult", -- 85, nopush, timer 3
         },
         ['DichoSong'] = {
-            -- DichoSong Level Range - 101 - 116
+            -- DichoSong Level Range - 101+
+            "Reciprocal Psalm",
             "Ecliptic Psalm",
             "Composite Psalm",
             "Dissident Psalm",
@@ -644,6 +647,7 @@ local _ClassConfig = {
 
         },
         ['AllianceSong'] = {
+            "Covariance of Sticks and Stones",
             "Conjunction of Sticks and Stones",
             "Alliance of Sticks and Stones",
             "Covenant of Sticks and Stones",

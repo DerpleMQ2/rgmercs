@@ -37,10 +37,10 @@ local _ClassConfig = {
     ['AbilitySets']       = {
         ['Alliance'] = {
             --, Buff >= LVL102
-            "Bosquetender's,",
+            "Bosquetender's Alliance,",
             "Arbor Tender's Coalition",
             "Arboreal Atonement",
-
+            "Ferntender's Covariance",
         },
         ['FireAura'] = {
             -- Spell Series >= 87LVL Minimum
@@ -422,6 +422,7 @@ local _ClassConfig = {
             "Composite Winds",
             "Dissident Winds",
             "Dichotomic Winds",
+            "Reciprocal Winds",
         },
         ['WinterFireDD'] = {
             -- Winters Fire DD Line >= 73LVL -- Using for Low level Fire DD as well
@@ -533,6 +534,7 @@ local _ClassConfig = {
         },
         ['ShroomPet'] = {
             --Druid Mushroom DOT Pet Line >= 84LVL --used for mana savings
+            "Mycelid Assault",
             "Saprophyte Assault",
             "Chytrid Assault",
             "Fungusoid Assault",
