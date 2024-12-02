@@ -92,7 +92,7 @@ Module.DefaultConfig     = {
         DisplayName = "Break On Death",
         Category = "Chase",
         Tooltip = "Stop chasing when you die.",
-        Default = true,
+        Default = false,
         FAQ = "I died and my character started running back to my driver, how do I stop that?",
         Answer = "Enable [BreakOnDeath] and your character will stop chasing when you die.",
     },
@@ -147,7 +147,7 @@ Module.DefaultConfig     = {
         Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;",
         Type = "Combo",
         ComboOptions = Module.Constants.CampfireTypes,
-        Default = 36,
+        Default = 1,
         Min = 1,
         Max = #Module.Constants.CampfireTypes,
         FAQ = "I want to make sure my characters always have a campfire, how do I do that?",
@@ -309,18 +309,6 @@ end
 
 function Module:Init()
     Logger.log_debug("Chase Module Loaded.")
-    if Config.Globals.BuildType == 'Emu' then
-        self.DefaultConfig['MaintainCampfire'] = {
-            DisplayName = "Maintain Campfire",
-            Category = "Camp",
-            Tooltip = "1: Off; 2: Regular Fellowship; [X]: Empowered Fellowship X;",
-            Type = "Combo",
-            ComboOptions = Module.Constants.CampfireTypes,
-            Default = 1,
-            Min = 1,
-            Max = #Module.Constants.CampfireTypes,
-        }
-    end
     self:LoadSettings()
     self.ModuleLoaded = true
     return { self = self, settings = self.settings, defaults = self.DefaultConfig, categories = self.DefaultCategories, }
