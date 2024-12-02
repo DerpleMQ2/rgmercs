@@ -43,7 +43,7 @@ _ClassConfig      = {
             "Staff of Elemental Essence",
         },
     },
-    ['AbilitySets']       = {
+    ['AbilitySets']       = { --TODO: Look into new TOB item summons (Boiling Orb?)
         --- Nukes
         ['SwarmPet'] = {
             -- Swarm Pet* >= LVL 70
@@ -220,6 +220,7 @@ _ClassConfig      = {
         },
         ['MagicBoltNuke1'] = {
             -- Magic Bolt Nukes
+            "Voidstone Bolt",
             "Luclinite Bolt",
             "Komatiite Bolt",
             "Korascian Bolt",
@@ -228,6 +229,7 @@ _ClassConfig      = {
         },
         ['MagicBoltNuke2'] = {
             -- Magic Bolt Nukes
+            "Voidstone Bolt",
             "Luclinite Bolt",
             "Komatiite Bolt",
             "Korascian Bolt",
@@ -413,6 +415,7 @@ _ClassConfig      = {
             "Transon's Phantasmal Protection",
         },
         ['AllianceBuff'] = {
+            "Firebound Covariance",
             "Firebound Conjunction",
             "Firebound Coalition",
             "Firebound Covenant",
@@ -503,6 +506,7 @@ _ClassConfig      = {
         },
         ['DichoSpell'] = {
             -- Dicho Spell*
+            "Reciprocal Companion",
             "Ecliptic Companion",
             "Composite Companion",
             "Dissident Companion",
@@ -720,6 +724,7 @@ _ClassConfig      = {
         },
         ['AegisBuff'] = {
             ---Pet Aegis Shield Buff (Short Duration)*
+            "Auspice of Usira",
             "Aegis of Valorforged",
             "Auspice of Valia",
             "Aegis of Rumblecrush",
@@ -791,6 +796,7 @@ _ClassConfig      = {
             "Summon Wintry Paradox",
         },
         ['FireOrbSummon'] = {
+            "Summon Molten Dacite Orb",
             "Summon Molten Komatiite Orb",
             "Summon Firebound Orb",
             "Summon Blazing Orb",
