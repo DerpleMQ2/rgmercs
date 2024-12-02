@@ -298,6 +298,7 @@ local _ClassConfig = {
             "Concordant Disruption",
             "Confluent Disruption",
             "Penumbral Disruption",
+            "Paradoxical Disruption",
         },
         ['CloakHP'] = {
             "Cloak of the Akheva",
@@ -572,6 +573,7 @@ local _ClassConfig = {
             "Dissident Fang",
             "Composite Fang",
             "Ecliptic Fang",
+            "Reciprocal Fang",
         },
         ['Torrent'] = {
             "Torrent of Hate",  -- Level 54
@@ -616,6 +618,7 @@ local _ClassConfig = {
             "Reflexive Resentment",
             "Reflexive Rancor",
             "Reflexive Revulsion",
+            "Reflexive Retribution",
         },
         ['DireDot'] = {
             "Dire Constriction", -- Level 85
@@ -633,6 +636,7 @@ local _ClassConfig = {
             "Bloodletting Alliance",
             "Bloodletting Covenant",
             "Bloodletting Conjunction",
+            "Bloodletting Covariance",
         },
         ['InfluenceDisc'] = {
             "Insolent Influence",
@@ -640,6 +644,7 @@ local _ClassConfig = {
             "Impenitent Influence",
             "Impertinent Influence",
             "Ignominious Influence",
+            "Incensive Influence",
         },
         ['VisageBuff'] = {       --9 minute reuse makes these somewhat ridiculous to gem on the fly.
             "Voice of Thule",    -- level 60, 12% hate
@@ -2463,7 +2468,7 @@ local _ClassConfig = {
             FAQ = "Why does my SHD switch to a Shield on puny gray named?",
             Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
         },
-        ['SummonArrows'] = {
+        ['SummonArrows']      = {
             DisplayName = "Use Huntsman's Quiver",
             Category = "Equipment",
             Index = 7,
