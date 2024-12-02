@@ -123,6 +123,7 @@ return {
             "Concordant Blessing",
             "Confluent Blessing",
             "Penumbral Blessing",
+            "Paradoxical Blessing",
         },
         ["DebuffNuke"] = {
             -- Undead DebuffNuke
@@ -298,6 +299,7 @@ return {
         },
         ["Healtaunt"] = {
             --- Valiant Taunt With Built in heal.
+            "Valiant Defiance",
             "Valiant Disruption",
             "Valiant Deflection",
             "Valiant Defense",
@@ -552,6 +554,7 @@ return {
             "Dissident Force",
             "Composite Force",
             "Ecliptic Force",
+            "Reciprocal Force",
         },
         ["Puritycure"] = {
             --- Purity Cure Poison/Diease Cure Half Power to curse
@@ -613,6 +616,7 @@ return {
             -- Pally Alliance Spell
             "Holy Alliance",
             "Stormwall Coalition",
+            "Aureate Covariance",
         },
         ["CurseCure"] = {
             -- Curse Cure Line
@@ -662,6 +666,7 @@ return {
         },
         ["Pentientarmor"] = {
             -- Pentient Armor Discipline
+            "Avowed Penitence",
             "Fervent Penitence",
             "Reverent Penitence",
             "Devout Penitence",
@@ -693,6 +698,7 @@ return {
         },
         ["Reflexstrike"] = {
             --- Reflexive Strike Heal
+            "Reflexive Resolution",
             "Reflexive Redemption",
             "Reflexive Righteousness",
             "Reflexive Reverence",
