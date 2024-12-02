@@ -60,6 +60,7 @@ local _ClassConfig = {
             "Shield Topple",
             "Shield Splinter",
             "Shield Rupture",
+            "Shield Split",
         },
         ['GroupACBuff'] = {
             "Field Bulwark",
@@ -87,6 +88,7 @@ local _ClassConfig = {
             "Bracing Defense",
         },
         ['DichoShield'] = {
+            "Reciprocal Shield",
             "Ecliptic Shield",
             "Composite Shield",
             "Dissident Shield",
@@ -104,12 +106,14 @@ local _ClassConfig = {
             "Determined Reprisal",
         },
         ['HealHateAE'] = {
+            "Paradoxical Expanse",
             "Penumbral Expanse",
             "Confluent Expanse",
             "Concordant Expanse",
             "Harmonious Expanse",
         },
         ['HealHateSingle'] = {
+            "Paradoxical Precision",
             "Penumbral Precision",
             "Confluent Precision",
             "Concordant Precision",
