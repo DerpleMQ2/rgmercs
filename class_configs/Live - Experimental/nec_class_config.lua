@@ -79,7 +79,7 @@ local _ClassConfig = {
             "Deathcaller's Robe",
         },
     },
-    ['AbilitySets']     = { --TODO: Examine new TOB magic4 dot and if it has a place in rotation
+    ['AbilitySets']     = {
         ['SelfHPBuff'] = {
             "Shield of Memories",
             "Shield of Shadow",
@@ -127,7 +127,6 @@ local _ClassConfig = {
             -- Fd Spell
             "Death Peace",
         },
-
         ---DPS
         ['AllianceSpell'] = {
             -- Alliance Spells
@@ -946,6 +945,13 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     return ((not Casting.DotSpellCheck(spell) and Casting.HaveManaToNuke()) or Casting.BurnCheck()) and
                         Casting.TargetedSpellReady(spell)
+                end,
+            },
+            {
+                name = "PoisonNuke2",
+                type = "Spell",
+                cond = function(self, spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
