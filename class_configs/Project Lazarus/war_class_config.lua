@@ -863,7 +863,8 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoBattleLeap') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.SongActiveByName(aaName) and not Casting.SongActiveByName('Group Bestial Alignment')
+                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.SongActiveByName(aaName) and not Casting.SongActiveByName('Group Bestial Alignment') and
+                    not mq.TLO.Me.FeetWet()                                                                                                                                                              -- FeetWet check stops reverse cannonball out of the ocean
                 end,
             },
             {
