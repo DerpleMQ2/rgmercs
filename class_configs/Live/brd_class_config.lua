@@ -320,11 +320,10 @@ local _ClassConfig = {
             "Arcane Aria",
         },
         ['InsultSong'] = {
-            --Bard Timers alternate between 6 and 3 every expansion.
-            --If we have push and nopush from the same tier active this will lead to issues with InsultSong2/timer stacking.
-            --Choosing which to prioritize is problematic, but for now, nopush will be prioritized to potentially help reduce movement in combat.
-            --Do to current F2P expansion limits, the ToL push will be chosen over the NoS nopush, I see no good solution for this.
-            --"Yaran's Disdain",   -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
+            --Bard Timers alternate between 6 and 3 every expansion. (Update: TOB has thrown this on its head)
+            --We have to manage selection so we don't have insultsong2 using the same timer.
+            --To circumvent issues with f2p accounts, for now, Sogran's is prioritized over Nord's. The code to distinguish this is excessive IMO.
+            "Yaran's Disdain",  -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
             --"Nord's Disdain",       -- 118 nopush, timer 6, NoS
             "Sogran's Insult",  -- 117 push, timer 6, ToL
@@ -345,7 +344,7 @@ local _ClassConfig = {
             -- "Brusco's Boastful Bellow", --12,
         },
         ['InsultSong2'] = {
-            --"Yaran's Disdain",   -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
+            "Yaran's Disdain",  -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
             --"Nord's Disdain",       -- 118 nopush, timer 6, NoS
             "Sogran's Insult",  -- 117 push, timer 6, ToL
