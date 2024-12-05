@@ -892,7 +892,7 @@ local _ClassConfig = {
                 name = "GroupElixir",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellStacksOnMe(spell) and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
+                    return Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
         },

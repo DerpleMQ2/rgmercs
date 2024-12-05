@@ -1291,7 +1291,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not Casting.CanUseAA("Luminary's Synergy") and Config:GetSetting('DoHealOverTime') then return false end
-                    return not Casting.DotSpellCheck(spell) and Casting.SpellStacksOnMe(spell)
+                    return not Casting.DotSpellCheck(spell) and Casting.SpellStacksOnMe(spell.RankName)
                         and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
@@ -1366,7 +1366,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not Casting.CanUseAA("Luminary's Synergy") and Config:GetSetting('DoHealOverTime') then return false end
-                    return Casting.SpellStacksOnMe(spell) and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 30
+                    return Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
             {
