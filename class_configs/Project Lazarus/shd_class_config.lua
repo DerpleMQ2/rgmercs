@@ -934,7 +934,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Skin,
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 60
+                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 60
                 end,
             },
             {
@@ -944,7 +944,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     if not Config:GetSetting('DoTempHP') or not Casting.CastReady(spell.RankName) then return false end
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
+                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
                 end,
             },
             {
@@ -953,7 +953,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.HealBurn,
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 30
+                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
             {

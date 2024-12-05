@@ -1052,14 +1052,14 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     if not Config:GetSetting('DoTempHP') then return false end
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
+                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
                 end,
             },
             {
                 name = "Incoming",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell) and Core.IsModeActive("Tank") and
+                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and Core.IsModeActive("Tank") and
                         (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
@@ -1067,7 +1067,7 @@ local _ClassConfig = {
                 name = "HealWard", --requires a target, using TargetedSpellReady to force a target if needed
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell) and Casting.SpellStacksOnMe(spell) and Core.IsModeActive("Tank") and
+                    return Casting.TargetedSpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and Core.IsModeActive("Tank") and
                         (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
@@ -1429,7 +1429,7 @@ local _ClassConfig = {
                 name = "HealStun",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Casting.SpellStacksOnMe(spell) and
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Casting.SpellStacksOnMe(spell.RankName) and
                         (mq.TLO.Me.Song(spell.Trigger(1).Name).Duration.TotalSeconds() or 0) < 12
                 end,
             },
