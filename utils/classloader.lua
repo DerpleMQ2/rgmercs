@@ -8,7 +8,7 @@ local ClassLoader = { _version = '0.1', _name = "ClassLoader", _author = 'Derple
 function ClassLoader.getClassConfigFileName(class)
     local baseConfigDir = Config.Globals.ScriptDir .. "/class_configs"
 
-    local customConfigFile = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, Config.Globals.BuildType, class:lower())
+    local customConfigFile = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
 
     local classConfigDir = Config:GetSetting('ClassConfigDir')
     local customConfig = (classConfigDir == "Custom")
