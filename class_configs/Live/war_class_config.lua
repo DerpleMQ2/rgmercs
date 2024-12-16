@@ -690,24 +690,25 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.Song(absorbDisc) and self.ClassConfig.HelperFunctions.DiscOverwriteCheck(self)
+                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.Song(absorbDisc)() and self.ClassConfig.HelperFunctions.DiscOverwriteCheck(self)
                 end,
             },
-            { --shares effect with OoW Chest and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
+            { --offset from StandDisc for automation flow/coverage
                 name = "AbsorbDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    local standDisc = Core.GetResolvedActionMapItem('StandDisc')
+                    local standDisc = self:GetResolvedActionMapItem('StandDisc')
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName()
                 end,
             },
-            { --shares effect with AbsorbDisc, offset from StandDisc for automation flow/coverage
+            { --shares effect with StandDisc and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
                 name = "OoW_Chest",
                 type = "Item",
                 cond = function(self, itemName)
                     local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
                     local standDisc = Core.GetResolvedActionMapItem('StandDisc')
                     return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and
-                        mq.TLO.Me.ActiveDisc.Name() ~= absorbDisc.RankName()
+                        not mq.TLO.Me.Song(absorbDisc)()
                 end,
             },
             { --See above entries for notes
@@ -717,7 +718,7 @@ local _ClassConfig = {
                     local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
                     local standDisc = Core.GetResolvedActionMapItem('StandDisc')
                     return Casting.AAReady(aaName) and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and
-                        mq.TLO.Me.ActiveDisc.Name() ~= absorbDisc.RankName() and not Casting.BuffActiveByName("Guardian's Boon") and
+                        mq.TLO.Me.Song(absorbDisc)() and not Casting.BuffActiveByName("Guardian's Boon") and
                         not Casting.BuffActiveByName("Guardian's Bravery")
                 end,
             },
