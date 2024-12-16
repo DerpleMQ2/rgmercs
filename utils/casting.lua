@@ -514,10 +514,10 @@ end
 ---
 --- @param name string The name to check.
 --- @return boolean True if the name is a discipline, false otherwise.
-function Casting.IsDisc(name)
+function Casting.IsActiveDisc(name)
     local spell = mq.TLO.Spell(name)
 
-    return (spell() and spell.IsSkill() and spell.Duration() and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and
+    return (spell() and spell.IsSkill() and spell.Duration.TotalSeconds() > 0 and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and
         true or false
 end
 
@@ -1028,7 +1028,7 @@ function Casting.UseDisc(discSpell, targetId)
 
             Casting.ActionPrep()
 
-            if Casting.IsDisc(discSpell.RankName.Name()) then
+            if Casting.IsActiveDisc(discSpell.RankName.Name()) then
                 if me.ActiveDisc.ID() then
                     Logger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(),
                         me.ActiveDisc.Name())
@@ -1043,7 +1043,7 @@ function Casting.UseDisc(discSpell, targetId)
                 function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting.ID()) end)
 
             -- Is this even needed?
-            if Casting.IsDisc(discSpell.RankName.Name()) then
+            if Casting.IsActiveDisc(discSpell.RankName.Name()) then
                 mq.delay(20, function() return me.ActiveDisc.ID() end)
             end
 
