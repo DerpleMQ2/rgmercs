@@ -1859,6 +1859,7 @@ local _ClassConfig = {
             Category = "Heal Mode",
             Index = 1,
             Tooltip = "Heal Mode: Use DoTs and Nukes",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "I feel that my Shaman is too concerned with DPS, dots and nukes, what can be done?",
             Answer = "Disabling Use HealDPS will stop the use of these spells and may add extra buffs or heals to their gems.",
