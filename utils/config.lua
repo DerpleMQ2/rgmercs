@@ -897,7 +897,7 @@ Config.DefaultConfig = {
     ['MountItem']            = {
         DisplayName = "Mount Item",
         Category = "Buffs",
-        Index = 5,
+        Index = 6,
         Tooltip = "Item to use to cast mount",
         Type = "ClickyItem",
         Default = "",
@@ -909,7 +909,7 @@ Config.DefaultConfig = {
     ['DoMount']              = {
         DisplayName = "Summon Mount:",
         Category = "Buffs",
-        Index = 4,
+        Index = 5,
         Tooltip = "Choose how/when to use mounts.",
         Type = "Combo",
         ComboOptions = { 'Never', 'For use as mount', 'For buff only', },
@@ -924,7 +924,7 @@ Config.DefaultConfig = {
     ['ShrinkItem']           = {
         DisplayName = "Shrink Item",
         Category = "Buffs",
-        Index = 7,
+        Index = 8,
         Tooltip = "Item to use to Shrink yourself",
         Type = "ClickyItem",
         Default = "",
@@ -935,7 +935,7 @@ Config.DefaultConfig = {
     ['DoShrink']             = {
         DisplayName = "Do Shrink",
         Category = "Buffs",
-        Index = 6,
+        Index = 7,
         Tooltip = "Enable auto shrinking",
         Default = false,
         ConfigType = "Normal",
@@ -954,6 +954,17 @@ Config.DefaultConfig = {
         FAQ = "Why am I buffing the people before they are rezzed?",
         Answer =
         "You can set the [BuffRezables] option to false to skip buffing the people who have corpses nearby, but note they may receive group buffs aimed at those without corpses.",
+    },
+    ['UseCounterActions']    = {
+        DisplayName = "Use Aureate's Bane", --this can be freely changed later if another system is added. Avoiding confusion for now.
+        Category = "Buffs",
+        Index = 4,
+        Tooltip =
+        "Automatically use counter actions (such as the Aureate's Bane AA to counter Curse of Subjugation in TOB zones.",
+        Default = false,
+        FAQ = "How do I get rid of the TOB Debuff, Curse of Subjugation?",
+        Answer =
+        "If you select to Use Aureate's Bane on the Buff Tab of the main config options, you will attempt to clear Curse of Subjugation automatically.",
     },
 
     -- [ HEAL/REZ] --

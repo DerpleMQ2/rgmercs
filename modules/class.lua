@@ -713,6 +713,17 @@ function Module:RunCureRotation()
     end
 end
 
+function Module:RunCounterRotation()
+    --can make this a modular table if more "features" are added. recommend adding a timer akin to cures if so.
+    if Casting.SongActiveByName("Curse of Subjugation") then
+        if Casting.AAReady("Aureate's Bane") then
+            return Casting.UseAA("Aureate's Bane", mq.TLO.Me.ID())
+        else
+            Logger.log_verbose("\ao[CounterActions] \ar***WARNING!***\ay Curse of Subjugation\aw detected, but Aureate's Bane \arNOT\aw available!")
+        end
+    end
+end
+
 function Module:GiveTime(combat_state)
     if not self.ClassConfig then return end
 
@@ -762,6 +773,12 @@ function Module:GiveTime(combat_state)
             Logger.log_verbose("\ao[Cures] Checking for curables...")
             self:RunCureRotation()
         end
+    end
+
+    --Counter TOB Debuff with AA Buff, this can be refactored/expanded if they add other similar systems
+    if Config:GetSetting('UseCounterActions') then
+        Logger.log_verbose("\ao[CounterActions] Checking for debuffs to counter...")
+        self:RunCounterRotation()
     end
 
     if self:IsTanking() and Config:GetSetting('MovebackWhenBehind') then
