@@ -51,6 +51,9 @@ local _ClassConfig = {
             "Harmony of the Soul",
             "Aegis of Superior Divinity",
         },
+        ['VP2Hammer'] = {
+            "Apothic Dragon Spine Hammer",
+        },
     },
     ['AbilitySets']       = {
         ['WardBuff'] = {
@@ -582,6 +585,7 @@ local _ClassConfig = {
                 name = "Divine Arbitration",
                 type = "AA",
                 cond = function(self, aaName, target)
+                    if not Targeting.GroupedWithTarget(target) then return false end
                     return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId
                 end,
             },
@@ -613,13 +617,13 @@ local _ClassConfig = {
                     return Casting.AAReady(aaName)
                 end,
             },
-            -- {
-            --     name = "VP2Hammer",
-            --     type = "Item",
-            --     cond = function(self, itemName)
-            --         return mq.TLO.FindItem(itemName).TimerReady() == 0
-            --     end,
-            -- },
+            {
+                name = "VP2Hammer",
+                type = "Item",
+                cond = function(self, itemName)
+                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
             { --if we hit this we need spells back ASAP
                 name = "Forceful Rejuvenation",
                 type = "AA",
@@ -657,13 +661,13 @@ local _ClassConfig = {
                     return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
-            -- {
-            --     name = "VP2Hammer",
-            --     type = "Item",
-            --     cond = function(self, itemName)
-            --         return mq.TLO.FindItem(itemName).TimerReady() == 0
-            --     end,
-            -- },
+            {
+                name = "VP2Hammer",
+                type = "Item",
+                cond = function(self, itemName)
+                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                end,
+            },
         },
     },
     ['RotationOrder']     = {

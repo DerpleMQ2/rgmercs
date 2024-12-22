@@ -754,6 +754,7 @@ local _ClassConfig = {
                 name = "QuickGroupHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if not Targeting.GroupedWithTarget(target) then return false end
                     return Casting.SpellReady(spell) and (target.ID() or 0) == Core.GetMainAssistId()
                 end,
             },

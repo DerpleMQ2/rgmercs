@@ -427,4 +427,10 @@ function Targeting.ClearSafeTargetCache()
     Targeting.SafeTargetCache = {}
 end
 
+--- Checks if the target is in the same group.
+function Targeting.GroupedWithTarget(target)
+    local targetName = target.CleanName() or "None"
+    return mq.TLO.Group.Member(targetName)()
+end
+
 return Targeting
