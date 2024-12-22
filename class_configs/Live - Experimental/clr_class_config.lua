@@ -684,15 +684,7 @@ local _ClassConfig = {
             name = 'GroupBuff',
             timer = 60,
             targetId = function(self)
-                local groupIds = { mq.TLO.Me.ID(), }
-                local count = mq.TLO.Group.Members()
-                for i = 1, count do
-                    local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
-                    if Config:GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
-                        table.insert(groupIds, mq.TLO.Group.Member(i).ID())
-                    end
-                end
-                return groupIds
+                return Casting.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.DoBuffCheck()
