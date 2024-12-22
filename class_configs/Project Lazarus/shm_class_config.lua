@@ -777,7 +777,7 @@ local _ClassConfig = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHealOverTime') then return false end
+                    if not Config:GetSetting('DoHealOverTime') or not Targeting.GroupedWithTarget(target) then return false end
                     return Casting.CastReady(spell.RankName) and Casting.TargetedSpellReady(spell, target.ID(), true)
                         and Casting.GroupBuffCheck(spell, target)
                 end,

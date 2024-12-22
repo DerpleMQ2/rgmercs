@@ -780,7 +780,7 @@ local _ClassConfig = {
                 name = "GroupRenewalHoT",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHealOverTime') then return false end
+                    if not Config:GetSetting('DoHealOverTime') or not Targeting.GroupedWithTarget(target) then return false end
                     return Casting.CastReady(spell.RankName) and Casting.TargetedSpellReady(spell, target.ID(), true)
                         and Casting.GroupBuffCheck(spell, target)
                 end,
@@ -853,6 +853,7 @@ local _ClassConfig = {
                 name = "InterventionHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if not Targeting.GroupedWithTarget(target) then return false end
                     return Casting.CastReady(spell.RankName) and Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
@@ -860,6 +861,7 @@ local _ClassConfig = {
                 name = "Soothsayer's Intervention",
                 type = "AA",
                 cond = function(self, aaName, target)
+                    if not Targeting.GroupedWithTarget(target) then return false end
                     return Casting.TargetedAAReady(aaName, target.ID(), true)
                 end,
             },
@@ -897,6 +899,7 @@ local _ClassConfig = {
                 name = "RecourseHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if not Targeting.GroupedWithTarget(target) then return false end
                     return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
