@@ -1499,6 +1499,9 @@ function Casting.AutoMed()
         return
     end
 
+    -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
+    if Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) and Config:GetSetting('DoMed') == 2 then return end
+
     Config:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
@@ -1513,9 +1516,6 @@ function Casting.AutoMed()
 
     local forcesit   = false
     local forcestand = false
-
-    -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
-    if Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) and Config:GetSetting('DoMed') ~= 2 then return end
 
     if Config.Constants.RGHybrid:contains(me.Class.ShortName()) or Config.Constants.RGCasters:contains(me.Class.ShortName()) then
         -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
@@ -1550,15 +1550,9 @@ function Casting.AutoMed()
         Config:GetSetting('ManaMedPct'), me.PctEndurance(),
         Config:GetSetting('EndMedPct'), Strings.BoolToColorString(forcesit), Strings.BoolToColorString(forcestand))
 
-    if Targeting.GetXTHaterCount() > 0 and Config:GetSetting('DoMed') ~= 2 then
-        if Config:GetSetting('DoMelee') then
-            forcesit = false
-            forcestand = true
-        end
-        if Config:GetSetting('DoMed') ~= 3 then
-            forcesit = false
-            forcestand = true
-        end
+    if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee')) then
+        forcesit = false
+        forcestand = true
     end
 
     if Config:GetSetting('StandWhenDone') and me.Sitting() and forcestand and not Casting.Memorizing then
