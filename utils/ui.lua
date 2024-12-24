@@ -172,7 +172,9 @@ function Ui.RenderZoneNamed()
                 ImGui.TableNextColumn()
                 local _, clicked = ImGui.Selectable(named.Name, false)
                 if clicked then
-                    Targeting.SetTarget(named.Spawn() and named.Spawn.ID() or 0)
+                    if named.Spawn() and named.Spawn.ID() then
+                        mq.TLO.Spawn(named.Spawn.ID()).DoTarget()
+                    end
                 end
                 ImGui.TableNextColumn()
                 if named.Spawn() and named.Spawn.PctHPs() > 0 then
