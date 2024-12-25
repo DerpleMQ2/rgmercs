@@ -653,12 +653,18 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     Casting.Memorizing = true
 
     while (mq.TLO.Me.Gem(gem)() ~= spell or (waitSpellReady and not mq.TLO.Me.SpellReady(gem)())) and maxWait > 0 do
+        local me = mq.TLO.Me
         Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
-        if mq.TLO.Me.CombatState():lower() == "combat" then
-            Logger.log_verbose("MemorizeSpell() I was interrupted by combat while waiting for spell '%s' to load in slot %d'! Aborting.", spell, gem)
+        if me.CombatState():lower() == "combat" or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+            Logger.log_verbose(
+                "MemorizeSpell() I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s)",
+                spell, gem, me.CombatState(), me.Casting() or "None", Strings.BoolToColorString(me.Moving()), Strings.BoolToColorString(mq.TLO.Stick.Active()),
+                Strings.BoolToColorString(mq.TLO.Navigation.Active()), Strings.BoolToColorString(mq.TLO.MoveTo.Moving()),
+                Strings.BoolToColorString(mq.TLO.AdvPath.Following()))
             break
         end
         mq.delay(100)
+        mq.doevents()
         maxWait = maxWait - 100
     end
 
@@ -1545,10 +1551,10 @@ function Casting.AutoMed()
     end
 
     Logger.log_verbose(
-        "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d :: forceSit %s :: forceStand %s",
+        "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d :: forceSit %s :: forceStand %s :: Memorizing %s",
         me.PctHPs(), Config:GetSetting('HPMedPct'), me.PctMana(),
         Config:GetSetting('ManaMedPct'), me.PctEndurance(),
-        Config:GetSetting('EndMedPct'), Strings.BoolToColorString(forcesit), Strings.BoolToColorString(forcestand))
+        Config:GetSetting('EndMedPct'), Strings.BoolToColorString(forcesit), Strings.BoolToColorString(forcestand), Strings.BoolToColorString(Casting.Memorizing))
 
     if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee')) then
         forcesit = false
