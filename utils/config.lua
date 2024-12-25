@@ -401,10 +401,10 @@ Config.DefaultConfig = {
         DisplayName = "Stand When Done Medding",
         Category = "Med/Mana",
         Index = 8,
-        Tooltip = "Stand when done medding or wait until combat.",
+        Tooltip = "Force a stand when medding thresholds are reached.",
         Default = true,
-        FAQ = "I don't want to stand up after medding, I prefer to stay seated until combat starts, how do I change this?",
-        Answer = "You can set the [StandWhenDone] option to false to stay seated until combat starts.",
+        FAQ = "I don't want to stand up after medding, I prefer to stay seated until combat starts or I take another action, how do I change this?",
+        Answer = "You can set the [StandWhenDone] option to false to stay seated until something else requires you to stand.",
     },
     ['DoModRod']             = {
         DisplayName = "Do Mod Rod",
