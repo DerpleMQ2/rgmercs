@@ -730,7 +730,7 @@ local function Main()
 
         curState = "Downtime"
 
-        if Config:GetSetting('DoMed') == 2 then
+        if Config:GetSetting('DoMed') ~= 1 then
             Casting.AutoMed()
         end
     end
