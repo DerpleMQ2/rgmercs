@@ -1506,7 +1506,7 @@ function Casting.AutoMed()
     end
 
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
-    if Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) and Config:GetSetting('DoMed') == 2 then return end
+    if Targeting.GetXTHaterCount() == 0 and Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) then return end
 
     Config:StoreLastMove()
 
