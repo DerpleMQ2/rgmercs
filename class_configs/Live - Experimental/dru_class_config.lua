@@ -737,25 +737,26 @@ local _ClassConfig = {
     ['HealRotations']     = {
         ["BigHealPoint"] = {
             {
-                name = "QuickHealSurge",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
-            },
-            {
-                name = "VP2Hammer",
-                type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
-            },
-            {
                 name = "QuickGroupHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Targeting.GroupedWithTarget(target) then return false end
                     return Casting.SpellReady(spell) and (target.ID() or 0) == Core.GetMainAssistId()
+                end,
+            },
+            {
+                name = "Wildtender's Survival",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Targeting.GroupedWithTarget(target) then return false end
+                    return Casting.AAReady(aaName) and (target.ID() or 0) == Core.GetMainAssistId()
+                end,
+            },
+            {
+                name = "Convergence of Spirits",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
@@ -766,17 +767,10 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Wildtender's Survival",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName) and (target.ID() or 0) == Core.GetMainAssistId()
-                end,
-            },
-            {
-                name = "Convergence of Spirits",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName)
+                name = "VP2Hammer",
+                type = "Item",
+                cond = function(self, itemName)
+                    return mq.TLO.FindItem(itemName).TimerReady() == 0
                 end,
             },
             {
@@ -822,6 +816,13 @@ local _ClassConfig = {
             doFullRotation = true,
             {
                 name = "QuickHeal",
+                type = "Spell",
+                cond = function(self, spell)
+                    return Casting.SpellReady(spell)
+                end,
+            },
+            {
+                name = "QuickHealSurge",
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.SpellReady(spell)
@@ -900,23 +901,21 @@ local _ClassConfig = {
                 name = "NaturesWrathDOT",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not Casting.DetGOMCheck() or Targeting.IsNamed(mq.TLO.Target) then return false end
-                    return Casting.TargetedSpellReady(spell)
-                end,
-            },
-            {
-                name = "HordeDOT",
-                type = "Spell",
-                cond = function(self, spell)
-                    if not Casting.DetGOMCheck() or Targeting.IsNamed(mq.TLO.Target) then return false end
-                    return Casting.TargetedSpellReady(spell) and Casting.DotSpellCheck(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
                 name = "SunDOT",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell) and Casting.HaveManaToNuke() and Casting.DotSpellCheck(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                end,
+            },
+            {
+                name = "HordeDOT",
+                type = "Spell",
+                cond = function(self, spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DetGOMCheck() or Targeting.IsNamed(mq.TLO.Target)) and Casting.TargetedSpellReady(spell)
                 end,
             },
             {
@@ -1090,13 +1089,37 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Spirit of Eagles",
+                type = "AA",
+                active_cond = function(self, aaName)
+                    return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
+                end,
+                cond = function(self, aaName, target)
+                    local bookSpell = self:GetResolvedActionMapItem('MoveSpells')
+                    local aaSpell = mq.TLO.AltAbility(aaName).Spell.Trigger(1)
+                    if not Config:GetSetting('DoRunSpeed') or (bookSpell() and bookSpell.Level() or 0) > aaSpell.Level() then return false end
+
+                    return Casting.GroupBuffCheck(aaSpell, target)
+                end,
+            },
+            {
                 name = "MoveSpells",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    return Config:GetSetting("DoRunSpeed") and Casting.GroupBuffCheck(spell, target)
+                    local aaSpellLvl = mq.TLO.Me.AltAbility("Spirit of Eagles").Spell.Trigger(1).Level() or 0
+                    if not Config:GetSetting("DoRunSpeed") or aaSpellLvl > spell.Level() then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
+            -- {
+            --     name = "MoveSpells",
+            --     type = "Spell",
+            --     active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
+            --     cond = function(self, spell, target)
+            --         return Config:GetSetting("DoRunSpeed") and Casting.GroupBuffCheck(spell, target)
+            --     end,
+            -- },
             {
                 name = "AtkBuff",
                 type = "Spell",
