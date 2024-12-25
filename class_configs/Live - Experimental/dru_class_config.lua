@@ -922,7 +922,8 @@ local _ClassConfig = {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell) and Casting.HaveManaToNuke() and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
+                    return Casting.TargetedSpellReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and
+                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
                 end,
             },
             {
@@ -936,21 +937,21 @@ local _ClassConfig = {
                 name = "Nature's Frost",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
+                    return Casting.TargetedAAReady(aaName, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "Nature's Fire",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
+                    return Casting.TargetedAAReady(aaName, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "Nature's Bolt",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.HaveManaToNuke()
+                    return Casting.TargetedAAReady(aaName, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
         },
@@ -1131,7 +1132,7 @@ local _ClassConfig = {
             {
                 name = "TempHPBuff",
                 type = "Spell",
-                active_cond = function(self, spell) return true end,
+                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoTempHP') then return false end
                     return Targeting.TargetClassIs("WAR", target) and Casting.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
@@ -1278,15 +1279,15 @@ local _ClassConfig = {
                 {
                     name = "RemoteSunDD",
                     cond = function(self)
-                        return mq.TLO.Me.Level() >= 83 and Config:GetSetting('DoFire')
+                        return mq.TLO.Me.Level() >= 83 --and Config:GetSetting('DoFire')
                     end,
                 },
-                {
-                    name = "RemoteMoonDD",
-                    cond = function(self)
-                        return mq.TLO.Me.Level() >= 83 and not Config:GetSetting('DoFire')
-                    end,
-                },
+                -- {
+                --     name = "RemoteMoonDD",
+                --     cond = function(self)
+                --         return mq.TLO.Me.Level() >= 83 and not Config:GetSetting('DoFire')
+                --     end,
+                -- },
 
             },
         },
@@ -1294,9 +1295,9 @@ local _ClassConfig = {
             gem = 7,
             spells = {
 
-                { name = "FrostDebuff", cond = function(self) return mq.TLO.Me.Level() >= 74 and not Config:GetSetting('DoFire') end, },
-                { name = "HordeDOT",    cond = function(self) return Casting.CanUseAA("Blessing of Ro") end, },
-                { name = "RoDebuff",    cond = function(self) return true end, },
+                --{ name = "FrostDebuff", cond = function(self) return mq.TLO.Me.Level() >= 74 and not Config:GetSetting('DoFire') end, },
+                { name = "HordeDOT", cond = function(self) return Casting.CanUseAA("Blessing of Ro") end, },
+                { name = "RoDebuff", cond = function(self) return true end, },
 
             },
         },
@@ -1314,7 +1315,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
 
-                { name = "SunDOT",          cond = function(self) return Config:GetSetting("DoFire") end, },
+                { name = "SunDOT",          cond = function(self) return true end, }, --Config:GetSetting("DoFire") end, },
                 { name = "IceBreathDebuff", cond = function(self) return true end, },
             },
         },
@@ -1400,15 +1401,14 @@ local _ClassConfig = {
         ['Mode']         = { DisplayName = "Mode", Category = "Combat", Tooltip = "Select the Combat Mode for this Toon", Type = "Custom", RequiresLoadoutChange = true, Default = 1, Min = 1, Max = 3, },
         --TODO: This is confusing because it is actually a choice between fire and ice and should be rewritten (need time to update conditions above)
         ['DoFire']       = {
-            DisplayName = "Cast Fire Spells",
-            Category = "Spells and Abilities",
-            Tooltip = "if Enabled Use Fire Spells, Disabled Use Ice Spells",
-            RequiresLoadoutChange = true,
+            DisplayName = "Orphaned",
+            Type = "Custom",
+            Category = "Orphaned",
+            Tooltip = "Orphaned setting from live, no longer used in this config.",
             Default = true,
-            FAQ = "Can I choose between Fire or Ice based Nukes?",
-            Answer = "Yes, you can choose between Fire and Ice based Nukes by toggling [DoFire].\n" ..
-                "When [DoFire] is enabled, we will use Fire based Nukes.\n" ..
-                "When [DoFire] is disabled, we will use Ice based Nukes.",
+            FAQ = "Why do I see orphaned settings?",
+            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
+                "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoRain']       = {
             DisplayName = "Orphaned",
