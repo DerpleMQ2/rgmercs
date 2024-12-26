@@ -1457,7 +1457,10 @@ function Casting.GetBuffableGroupIDs()
     local count = mq.TLO.Group.Members()
     for i = 1, count do
         local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
-        if Config:GetSetting('BuffRezables') or mq.TLO.SpawnCount(rezSearch)() == 0 then
+        if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
+            groupIds = {}
+            break
+        else
             table.insert(groupIds, mq.TLO.Group.Member(i).ID())
         end
     end
