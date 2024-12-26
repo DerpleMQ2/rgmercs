@@ -168,7 +168,7 @@ Module.DefaultConfig                   = {
     ['PullDebuffed']                           = {
         DisplayName = "Pull While Debuffed",
         Category = "Pulling",
-        Tooltip = "Pull in spite of being debuffed (Not ignored: Rez Sickness, Snare, Root.)",
+        Tooltip = "Pull in spite of being debuffed (Not ignored: Rez Sickness, Root.)",
         Default = false,
         ConfigType = "Advanced",
         FAQ = "I keep stopping pulls while diseased or debuffed, how do I fix this?",
@@ -432,6 +432,14 @@ Module.DefaultConfig                   = {
         Max = 100,
         FAQ = "I keep trying to pull when I have half endurance. I don't want to run out, how do I fix this?",
         Answer = "You can adjust the Endurance % for pulls with [PullEndPct] and you will not pull until you are above that setting.",
+    },
+    ['PullRespectMedState']                    = {
+        DisplayName = "Respect Med State",
+        Category = "Group Watch",
+        Tooltip = "Hold pulls if you are currently meditating.",
+        Default = false,
+        FAQ = "My puller only meds long enough to meet the pull minimums, what can be done?",
+        Answer = "If you turn on Respect Med State in the Group Watch options, your puller will remain medding until those thresholds are reached.",
     },
     ['FarmWayPoints']                          = {
         DisplayName = "Farming Waypoints",
@@ -1107,12 +1115,10 @@ function Module:ShouldPull(campData)
         return false, string.format("PctMana < %d", self.settings.PullManaPct)
     end
 
+    if Config:GetSetting('PullRespectMedState') and Config.Globals.InMedState then return false, string.format("Meditating") end
+
     if Casting.BuffActiveByName("Resurrection Sickness") then return false, string.format("Resurrection Sickness") end
 
-    if (me.Snared.ID() or 0 > 0) then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am snared!")
-        return false, string.format("Snared")
-    end
 
     if (me.Rooted.ID() or 0 > 0) then
         Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am rooted!")
@@ -1120,6 +1126,11 @@ function Module:ShouldPull(campData)
     end
 
     if not Config:GetSetting('PullDebuffed') then
+        if (me.Snared.ID() or 0 > 0) then
+            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am snared!")
+            return false, string.format("Snared")
+        end
+
         if Casting.SongActiveByName("Restless Ice") then
             Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
             return false, string.format("Restless Ice")
