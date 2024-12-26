@@ -1327,11 +1327,27 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Spirit of Eagles",
+                type = "AA",
+                active_cond = function(self, aaName)
+                    return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
+                end,
+                cond = function(self, aaName, target)
+                    local bookSpell = self:GetResolvedActionMapItem('MoveSpells')
+                    local aaSpell = mq.TLO.AltAbility(aaName).Spell.Trigger(1)
+                    if not Config:GetSetting('DoRunSpeed') or (bookSpell() and bookSpell.Level() or 0) > aaSpell.Level() then return false end
+
+                    return Casting.GroupBuffCheck(aaSpell, target)
+                end,
+            },
+            {
                 name = "MoveSpells",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    return Config:GetSetting("DoRunSpeed") and Casting.GroupBuffCheck(spell, target)
+                    local aaSpellLvl = mq.TLO.Me.AltAbility("Spirit of Eagles").Spell.Trigger(1).Level() or 0
+                    if not Config:GetSetting("DoRunSpeed") or aaSpellLvl > spell.Level() then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1727,9 +1743,9 @@ local _ClassConfig = {
             Answer = "Yes, you can enable [DoRain] to use Rain spells.",
         },
         ['DoRunSpeed']   = {
-            DisplayName = "Cast Run Speed",
+            DisplayName = "Use Movement Buffs",
             Category = "Spells and Abilities",
-            Tooltip = "Cast Run Speed Spells",
+            Tooltip = "Use Run/Lev buffs.",
             Default = true,
             FAQ = "Sometimes I group with a bard and don't need to worry about Run Speed, can I disable it?",
             Answer = "Yes, you can disable [DoRunSpeed] to prevent casting Run Speed spells.",

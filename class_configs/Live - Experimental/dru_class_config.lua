@@ -1098,7 +1098,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     local bookSpell = self:GetResolvedActionMapItem('MoveSpells')
                     local aaSpell = mq.TLO.AltAbility(aaName).Spell.Trigger(1)
-                    if not Config:GetSetting('DoRunSpeed') or (bookSpell() and bookSpell.Level() or 0) > aaSpell.Level() then return false end
+                    if not Config:GetSetting('DoMoveBuffs') or (bookSpell() and bookSpell.Level() or 0) > aaSpell.Level() then return false end
 
                     return Casting.GroupBuffCheck(aaSpell, target)
                 end,
@@ -1109,18 +1109,10 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
                     local aaSpellLvl = mq.TLO.Me.AltAbility("Spirit of Eagles").Spell.Trigger(1).Level() or 0
-                    if not Config:GetSetting("DoRunSpeed") or aaSpellLvl > spell.Level() then return false end
+                    if not Config:GetSetting("DoMoveBuffs") or aaSpellLvl > spell.Level() then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
-            -- {
-            --     name = "MoveSpells",
-            --     type = "Spell",
-            --     active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
-            --     cond = function(self, spell, target)
-            --         return Config:GetSetting("DoRunSpeed") and Casting.GroupBuffCheck(spell, target)
-            --     end,
-            -- },
             {
                 name = "AtkBuff",
                 type = "Spell",
@@ -1420,13 +1412,14 @@ local _ClassConfig = {
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
-        ['DoRunSpeed']   = {
-            DisplayName = "Cast Run Speed",
+        ['DoMoveBuffs']  = {
+            DisplayName = "Do Movement Buffs",
             Category = "Spells and Abilities",
-            Tooltip = "Cast Run Speed Spells",
-            Default = true,
-            FAQ = "Sometimes I group with a bard and don't need to worry about Run Speed, can I disable it?",
-            Answer = "Yes, you can disable [DoRunSpeed] to prevent casting Run Speed spells.",
+            Tooltip = "Cast Movement Spells/AA.",
+            Default = false,
+            FAQ = "Why am I spamming movement buffs?",
+            Answer = "Some move spells freely overwrite those of other classes, so if multiple movebuffs are being used, a buff loop may occur.\n" ..
+                "Simply turn off movement buffs for the undesired class in their class options.",
         },
         ['DoNuke']       = {
             DisplayName = "Orphaned",
@@ -1509,6 +1502,16 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why am I spamming my Group Regen buff?",
             Answer = "Certain Shaman and Druid group regen buffs report cross-stacking. You should deselect the option on one of the PCs if they are grouped together.",
+        },
+        ['DoRunSpeed']   = {
+            DisplayName = "Orphaned",
+            Type = "Custom",
+            Category = "Orphaned",
+            Tooltip = "Orphaned setting from live, no longer used in this config.",
+            Default = true,
+            FAQ = "Why do I see orphaned settings?",
+            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
+                "These tabs or settings will be removed if and when the config is made the default.",
         },
     },
 }
