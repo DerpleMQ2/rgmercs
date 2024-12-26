@@ -22,9 +22,9 @@ function Movement.DoStick(targetId)
         Core.DoCmd("/stick %s", Config:GetSetting('StickHow'))
     else
         if Core.IAmMA() then
-            Core.DoCmd("/stick 20 id %d %s uw", targetId, Config:GetSetting('MovebackWhenTank') and "moveback" or "")
+            Core.DoCmd("/stick 10 id %d %s uw", targetId, Config:GetSetting('MovebackWhenTank') and "moveback" or "")
         else
-            Core.DoCmd("/stick 20 id %d behindonce moveback uw", targetId)
+            Core.DoCmd("/stick 10 id %d behindonce moveback uw", targetId)
         end
     end
 end
