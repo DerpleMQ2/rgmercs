@@ -696,6 +696,9 @@ local _ClassConfig = {
         ["Spellblock"] = {
             "Sanctification Discipline",
         },
+        ['Deflection'] = {
+            'Deflection Discipline',
+        },
         ["ReflexStrike"] = {
             --- Reflexive Strike Heal
             "Reflexive Resolution",

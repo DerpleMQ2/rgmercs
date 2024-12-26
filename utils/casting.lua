@@ -464,7 +464,7 @@ function Casting.ReagentCheck(spell)
         if spell.NoExpendReagentID(1)() > 0 and mq.TLO.FindItemCount(spell.NoExpendReagentID(1)())() == 0 then
             Logger.log_verbose("Missing NoExpendReagent: (%d)", spell.NoExpendReagentID(1)())
             Comms.HandleAnnounce(
-                string.format('I want to cast %s, but I am missing a non-expended reagent(%d)!', spell(), spell.ReagentID(1)()),
+                string.format('I want to cast %s, but I am missing a non-expended reagent(%d)!', spell(), spell.NoExpendReagentID(1)()),
                 Config:GetSetting('ReagentAnnounceGroup'),
                 Config:GetSetting('ReagentAnnounce'))
             return false
@@ -1459,6 +1459,7 @@ function Casting.GetBuffableGroupIDs()
         local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
         if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
             groupIds = {}
+            Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
             break
         else
             table.insert(groupIds, mq.TLO.Group.Member(i).ID())
