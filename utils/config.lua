@@ -1414,6 +1414,25 @@ Config.DefaultConfig = {
         FAQ = "Why am I not announcing Cure casts to the group?",
         Answer = "You can set the [CureAnnounceGroup] option to true to announce Cure casts in group.",
     },
+    ['ReagentAnnounce']      = {
+        DisplayName = "Reagent Announce",
+        Category = "Announcements",
+        Default = false,
+        Tooltip = "Set to announce a failed Reagent check in dannet.",
+        ConfigType = "Advanced",
+        FAQ = "What is a Reagent check?",
+        Answer = "A reagent is a required material spell component (bone chips, peridots, etc).\n" ..
+            "We check to ensure we have reagents before we will cast spells requiring them.",
+    },
+    ['ReagentAnnounceGroup'] = {
+        DisplayName = "Reagent Announce to Group",
+        Category = "Announcements",
+        Default = false,
+        Tooltip = "Set to announce a failed Reagent check in group. (Warning: Not recommended due to message spam!)",
+        ConfigType = "Advanced",
+        FAQ = "What is a Reagent Announce?",
+        Answer = "When a PC attempts to cast a spell he doesn't have a reagent for, he will announce this if the setting is enabled.",
+    },
 
 }
 
