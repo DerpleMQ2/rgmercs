@@ -653,12 +653,18 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     Casting.Memorizing = true
 
     while (mq.TLO.Me.Gem(gem)() ~= spell or (waitSpellReady and not mq.TLO.Me.SpellReady(gem)())) and maxWait > 0 do
+        local me = mq.TLO.Me
         Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
-        if mq.TLO.Me.CombatState():lower() == "combat" then
-            Logger.log_verbose("MemorizeSpell() I was interrupted by combat while waiting for spell '%s' to load in slot %d'! Aborting.", spell, gem)
+        if me.CombatState():lower() == "combat" or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
+            Logger.log_verbose(
+                "I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s)",
+                spell, gem, me.CombatState(), me.Casting() or "None", Strings.BoolToColorString(me.Moving()), Strings.BoolToColorString(mq.TLO.Stick.Active()),
+                Strings.BoolToColorString(mq.TLO.Navigation.Active()), Strings.BoolToColorString(mq.TLO.MoveTo.Moving()),
+                Strings.BoolToColorString(mq.TLO.AdvPath.Following()))
             break
         end
         mq.delay(100)
+        mq.doevents()
         maxWait = maxWait - 100
     end
 
@@ -1499,6 +1505,9 @@ function Casting.AutoMed()
         return
     end
 
+    -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
+    if Targeting.GetXTHaterCount() == 0 and Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) then return end
+
     Config:StoreLastMove()
 
     --If we're moving/following/navigating/sticking, don't med.
@@ -1513,9 +1522,6 @@ function Casting.AutoMed()
 
     local forcesit   = false
     local forcestand = false
-
-    -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
-    if Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) and Config:GetSetting('DoMed') ~= 2 then return end
 
     if Config.Constants.RGHybrid:contains(me.Class.ShortName()) or Config.Constants.RGCasters:contains(me.Class.ShortName()) then
         -- Handle the case where we're a Hybrid. We need to check mana and endurance. Needs to be done after
@@ -1545,20 +1551,14 @@ function Casting.AutoMed()
     end
 
     Logger.log_verbose(
-        "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d :: forceSit %s :: forceStand %s",
+        "MED MAIN STATS CHECK :: HP %d :: HPMedPct %d :: Mana %d :: ManaMedPct %d :: Endurance %d :: EndPct %d :: forceSit %s :: forceStand %s :: Memorizing %s",
         me.PctHPs(), Config:GetSetting('HPMedPct'), me.PctMana(),
         Config:GetSetting('ManaMedPct'), me.PctEndurance(),
-        Config:GetSetting('EndMedPct'), Strings.BoolToColorString(forcesit), Strings.BoolToColorString(forcestand))
+        Config:GetSetting('EndMedPct'), Strings.BoolToColorString(forcesit), Strings.BoolToColorString(forcestand), Strings.BoolToColorString(Casting.Memorizing))
 
-    if Targeting.GetXTHaterCount() > 0 and Config:GetSetting('DoMed') ~= 2 then
-        if Config:GetSetting('DoMelee') then
-            forcesit = false
-            forcestand = true
-        end
-        if Config:GetSetting('DoMed') ~= 3 then
-            forcesit = false
-            forcestand = true
-        end
+    if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee')) then
+        forcesit = false
+        forcestand = true
     end
 
     if Config:GetSetting('StandWhenDone') and me.Sitting() and forcestand and not Casting.Memorizing then

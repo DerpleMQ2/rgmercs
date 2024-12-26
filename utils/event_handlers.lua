@@ -161,11 +161,11 @@ end)
 -- [ END TOO FAR HANDLERS ] --
 
 -- [ MEM SPELL HANDLERS ] --
-mq.event('Being Memo', "Beginning to memorize #1#...", function(spell)
+mq.event('Begin Memo', "Beginning to memorize#*#", function()
     Casting.Memorizing = true
 end)
 
-mq.event('End Memo', "You have finished memorizing #1#.", function(spell)
+mq.event('End Memo', "You have finished memorizing#*#", function()
     Casting.Memorizing = false
 end)
 
@@ -176,11 +176,11 @@ end)
 -- [ END MEM SPELL HANDLERS ] --
 
 -- [ SCRIBE SPELL HANDLERS ] --
-mq.event('Begin Scribe', "Beginning to scribe #1#...", function(spell)
+mq.event('Begin Scribe', "Beginning to scribe#*#.", function()
     Casting.Memorizing = true
 end)
 
-mq.event('End Scribe', "You have finished scribing #1#.", function(spell)
+mq.event('End Scribe', "You have finished scribing#*#", function()
     Casting.Memorizing = false
     -- Rescan spell list
     Modules:ExecModule("Class", "RescanLoadout")
