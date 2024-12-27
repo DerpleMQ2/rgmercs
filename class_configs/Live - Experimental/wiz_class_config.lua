@@ -658,7 +658,7 @@ return {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not Casting.BuffActivebyName("Twincast")
+                    return Casting.AAReady(aaName) and not Casting.BuffActiveByName("Twincast")
                 end,
             },
             {
