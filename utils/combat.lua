@@ -81,7 +81,7 @@ function Combat.EngageTarget(autoTargetId)
 
             if (Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or Core.IAmMA()) and not Targeting.GetTargetDead(target) then
                 if Targeting.GetTargetDistance(target) > Targeting.GetTargetMaxRangeTo(target) then
-                    Logger.log_debug("EngageTarget(): Target is too far! %d>%d attempting to nav to it.", target.Distance(),
+                    Logger.log_debug("EngageTarget(): Target is too far! %d>%d attempting to nav to it.", target.Distance3D(),
                         target.MaxRangeTo())
 
                     local classConfig = Modules:ExecModule("Class", "GetClassConfig")

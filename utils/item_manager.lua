@@ -22,7 +22,7 @@ function ItemManager.GiveTo(toId, itemName, count)
         return
     end
 
-    if mq.TLO.Target.Distance() >= 25 then
+    if mq.TLO.Target.Distance3D() >= 25 then
         Logger.log_debug("\arGiveTo but Target is too far away - moving closer!")
         Core.DoCmd("/nav id %d |log=off dist=10")
 
