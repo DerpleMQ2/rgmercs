@@ -768,6 +768,8 @@ return {
                 cond = function(self, aaName)
                     return Config:GetSetting('DoBattleLeap') and not Casting.SongActiveByName("Battle Leap Warcry") and
                         not Casting.SongActiveByName("Group Bestial Alignment")
+                        ---@diagnostic disable-next-line: undefined-field --Defs are not updated with HeadWet
+                        and not mq.TLO.Me.HeadWet() --Stops Leap from launching us above the water's surface
                 end,
             },
             {
