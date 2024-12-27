@@ -736,13 +736,6 @@ return {
                 end,
             },
             {
-                name = "Drawn to Blood",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.GetTargetDistance() > 15
-                end,
-            },
-            {
                 name = "Communion of Blood",
                 type = "AA",
                 cond = function(self, aaName)
@@ -775,6 +768,13 @@ return {
                 cond = function(self, aaName)
                     return Config:GetSetting('DoBattleLeap') and not Casting.SongActiveByName("Battle Leap Warcry") and
                         not Casting.SongActiveByName("Group Bestial Alignment")
+                end,
+            },
+            {
+                name = "Drawn to Blood",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName) and Targeting.GetTargetDistance() > 15
                 end,
             },
         },
