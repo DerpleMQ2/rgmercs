@@ -1569,7 +1569,7 @@ function Casting.AutoMed()
         forcestand = true
     end
 
-    if Config:GetSetting('StandWhenDone') and me.Sitting() and forcestand and not Casting.Memorizing then
+    if (Config:GetSetting('StandWhenDone') or Config:GetSetting('DoPull')) and me.Sitting() and forcestand and not Casting.Memorizing then
         Config.Globals.InMedState = false
         Logger.log_debug("Forcing stand - all conditions met.")
         me.Stand()
