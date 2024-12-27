@@ -699,7 +699,7 @@ return {
         },
     },
     ['HelperFunctions']   = {
-        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
+        -- helper function for advanced logic to see if we want to use Divine Protector's Unity
         castDPU = function(self)
             if not mq.TLO.Me.AltAbility("Divine Protector's Unity")() then return false end
             local furyProcLevel = Core.GetResolvedActionMapItem('FuryProc') and Core.GetResolvedActionMapItem('FuryProc').Level() or 0

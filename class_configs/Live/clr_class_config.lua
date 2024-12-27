@@ -748,7 +748,6 @@ local _ClassConfig = {
 
     }, -- end AbilitySets
     ['HelperFunctions']   = {
-        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         DoRez = function(self, corpseId)
             if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
                 Targeting.SetTarget(corpseId, true)

@@ -1203,7 +1203,6 @@ local _ClassConfig = {
         },
     },
     ['HelperFunctions'] = {
-        -- helper function for advanced logic to see if we want to use Dark Lord's Unity
         CancelLich = function(self)
             -- detspa means detremental spell affect
             -- spa is positive spell affect

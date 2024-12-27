@@ -864,7 +864,9 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoBattleLeap') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and not mq.TLO.Me.FeetWet() -- FeetWet check stops reverse cannonball out of the ocean
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                        ---@diagnostic disable-next-line: undefined-field --Defs are not updated with HeadWet
+                        and not mq.TLO.Me.HeadWet() --Stops Leap from launching us above the water's surface
                 end,
             },
             {
