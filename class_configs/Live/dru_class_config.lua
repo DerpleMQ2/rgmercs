@@ -1335,7 +1335,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     local bookSpell = self:GetResolvedActionMapItem('MoveSpells')
                     local aaSpell = mq.TLO.AltAbility(aaName).Spell.Trigger(1)
-                    if not Config:GetSetting('DoRunSpeed') or (bookSpell() and bookSpell.Level() or 0) > aaSpell.Level() then return false end
+                    if not Config:GetSetting('DoRunSpeed') or (bookSpell and bookSpell.Level() or 999) > (aaSpell.Level() or 0) then return false end
 
                     return Casting.GroupBuffCheck(aaSpell, target)
                 end,
@@ -1346,7 +1346,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
                     local aaSpellLvl = mq.TLO.Me.AltAbility("Spirit of Eagles").Spell.Trigger(1).Level() or 0
-                    if not Config:GetSetting("DoRunSpeed") or aaSpellLvl > spell.Level() then return false end
+                    if not Config:GetSetting("DoRunSpeed") or aaSpellLvl >= (spell.Level() or 0) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
