@@ -102,7 +102,7 @@ end
 --- @param target MQTarget|MQSpawn? The target entity whose distance is to be calculated.
 --- @return number The distance to the target.
 function Targeting.GetTargetDistance(target)
-    return (target and target.Distance() or (mq.TLO.Target.Distance() or 9999))
+    return (target and target.Distance3D() or (mq.TLO.Target.Distance3D() or 9999))
 end
 
 --- Calculates the vertical distance (Z-axis) to the specified target.

@@ -24,7 +24,7 @@ mq.event("CantSee", "You cannot see your target.", function()
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         Logger.log_info("\ayWe are in Pull_State PULLING and Cannot see our target!")
-        Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.5)
+        Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         if mq.TLO.Me.Moving() then return end
@@ -40,9 +40,9 @@ mq.event("CantSee", "You cannot see your target.", function()
                     Core.DoCmd("/squelch /face fast")
                     if Targeting.GetTargetDistance() < 15 then
                         Logger.log_debug("Can't See target (%s [%d]). Moving back 15.", target.CleanName() or "", target.ID() or 0)
-                        Core.DoCmd("/stick 15 moveback")
+                        Core.DoCmd("/stick 15 moveback uw")
                     else
-                        local desiredDistance = (target.MaxRangeTo() or 0) * 0.9
+                        local desiredDistance = (target.MaxRangeTo() or 0) * 0.7
                         if not Config:GetSetting('DoMelee') then
                             desiredDistance = Targeting.GetTargetDistance() * .95
                         end
@@ -117,7 +117,7 @@ local function tooFarHandler()
         Logger.log_info("\ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
             Targeting.GetTargetCleanName(),
             Targeting.GetTargetDistance())
-        Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance() or 0) * 0.75)
+        Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.7)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
         local classConfig = Modules:ExecModule("Class", "GetClassConfig")
@@ -133,11 +133,11 @@ local function tooFarHandler()
 
                     if Targeting.GetTargetDistance() < 15 then
                         Logger.log_debug("Too Far from Target (%s [%d]). Moving back 15.", target.CleanName() or "", target.ID() or 0)
-                        Core.DoCmd("/stick 15 moveback")
+                        Core.DoCmd("/stick 15 moveback uw")
                     else
                         Logger.log_debug("Too Far from Target (%s [%d]). Naving to %d away.", target.CleanName() or "", target.ID() or 0,
-                            (target.MaxRangeTo() or 0) * 0.9)
-                        Movement.NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.9, false)
+                            (target.MaxRangeTo() or 0) * 0.7)
+                        Movement.NavInCombat(target.ID(), (target.MaxRangeTo() or 0) * 0.7, false)
                     end
                 end
             end
