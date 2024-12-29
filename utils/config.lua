@@ -402,7 +402,7 @@ Config.DefaultConfig = {
         Category = "Med/Mana",
         Index = 8,
         Tooltip = "Force a stand when medding thresholds are reached.",
-        Default = true,
+        Default = false,
         FAQ = "I don't want to stand up after medding, I prefer to stay seated until combat starts or I take another action, how do I change this?",
         Answer = "You can set the [StandWhenDone] option to false to stay seated until something else requires you to stand.",
     },
