@@ -18,7 +18,6 @@ Module.__index                     = Module
 Module.ModuleLoaded                = false
 Module.TempSettings                = {}
 Module.TempSettings.CampZoneId     = 0
-Module.TempSettings.Go2GGH         = 0
 Module.TempSettings.LastCmd        = ""
 Module.FAQ                         = {}
 Module.ClassFAQ                    = {}
@@ -226,13 +225,6 @@ Module.CommandHandlers   = {
         about = "Clear your camp",
         handler = function(self, _)
             self:CampOff()
-        end,
-    },
-    go2ggh = {
-        usage = "/rgl go2ggh",
-        about = "Go to Guild Hall",
-        handler = function(self, _)
-            self:Go2GGH()
         end,
     },
 }
@@ -662,14 +654,6 @@ function Module:ShouldFollow()
         (Targeting.GetXTHaterCount() == 0 or (assistSpawn() and (assistSpawn.Distance() or 0) > self.settings.ChaseDistance))
 end
 
-function Module:Go2GGH()
-    if not mq.TLO.Me.GuildID() or mq.TLO.Me.GuildID() == 0 then
-        Logger.log_warn("\awNOTICE:\ax You're not in a guild!")
-        return
-    end
-    self.TempSettings.Go2GGH = 1
-end
-
 function Module:OnZone()
     self:CampOff()
 end
@@ -691,35 +675,6 @@ function Module:GiveTime(combat_state)
             self:SaveSettings()
         end
         return
-    end
-
-    if self.TempSettings.Go2GGH >= 1 then
-        if self.TempSettings.Go2GGH == 1 then
-            if not self.Constants.GGHZones:contains(mq.TLO.Zone.ShortName():lower()) then
-                if not Casting.UseOrigin() then
-                    Logger.log_warn("\awNOTICE:\ax Go2GGH Failed.")
-                    self.TempSettings.Go2GGH = 0
-                else
-                    self.TempSettings.Go2GGH = 2
-                end
-            else
-                -- in a known zone.
-                self.TempSettings.Go2GGH = 2
-            end
-        end
-
-        if self.TempSettings.Go2GGH == 2 then
-            if mq.TLO.Zone.ShortName():lower() == "guildhalllrg_int" or mq.TLO.Zone.ShortName():lower() == "guildhall" then
-                Logger.log_debug("\a\ag--\atGoing to Pool \ag--")
-                self:RunCmd("/squelch /moveto loc 1 1 3")
-                Logger.log_debug("\ag --> \atYou made it \ag<--")
-                self.TempSettings.Go2GGH = 0
-            elseif mq.TLO.Zone.ShortName():lower() ~= "guildlobby" and not mq.TLO.Navigation.Active() then
-                self:RunCmd("/squelch /travelto guildlobby")
-            elseif mq.TLO.Zone.ShortName():lower() == "guildlobby" and not mq.TLO.Navigation.Active() then
-                self:RunCmd("/squelch /nav door id 1 click")
-            end
-        end
     end
 
     if combat_state == "Downtime" then

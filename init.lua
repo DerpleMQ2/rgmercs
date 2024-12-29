@@ -652,12 +652,14 @@ local function RGInit(...)
         Core.DoCmd("/autoinventory")
     end
 
-    Logger.log_info("\aw****************************")
-    Logger.log_info("\aw\awWelcome to \ag%s", Config._name)
-    Logger.log_info("\aw\awVersion \ag%s \aw(\at%s\aw)", Config._version, Config._subVersion)
-    Logger.log_info("\aw\awBy \ag%s", Config._author)
-    Logger.log_info("\aw****************************")
-    Logger.log_info("\aw use \ag /rg \aw for a list of commands")
+    printf("\aw****************************")
+    printf("\aw\awWelcome to \ag%s", Config._name)
+    printf("\aw\awVersion \ag%s \aw(\at%s\aw)", Config._version, Config._subVersion)
+    printf("\aw\awBy \ag%s", Config._author)
+    printf("\aw****************************")
+    printf("\agBeta and Experimental Configs have been added!")
+    printf("\awPlease visit us on the RG forums for the most recent news and updates.")
+    printf("\aw use \ag /rg \aw for a list of commands")
 
     -- store initial positioning data.
     initPctComplete = 90

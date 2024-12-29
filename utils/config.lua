@@ -1525,9 +1525,9 @@ end
 ---@param defaults table
 ---@return boolean
 ---@return string
-function Config:GetUsageText(config, showUsageText, defaults)
+function Config:GetUsageText(config, showUsageText, defaults, valueOnly)
     local handledType = false
-    local usageString = showUsageText and string.format("/rgl set %s ", Strings.PadString(config, 25, false)) or ""
+    local usageString = showUsageText and string.format("/rgl set %s ", Strings.PadString(config, 5, false)) or ""
     local configData = defaults[config]
 
     local rangeText = ""
@@ -1535,27 +1535,33 @@ function Config:GetUsageText(config, showUsageText, defaults)
     local currentText = ""
 
     if type(configData.Default) == 'number' then
-        rangeText = string.format("\aw<\a-y%d\aw-\a-y%d\ax>", configData.Min or 0, configData.Max or 999)
+        rangeText = string.format("\aw[\a-yRange:\a-y%d\aw-\a-y%d\ax]", configData.Min or 0, configData.Max or 999)
         defaultText = string.format("[\a-tDefault: %d\ax]", configData.Default)
-        currentText = string.format("[\a-gCurrent: %d\ax]", Config:GetSetting(config))
+        currentText = string.format("%d", Config:GetSetting(config))
         handledType = true
     elseif type(configData.Default) == 'boolean' then
-        rangeText = string.format("\aw<\a-yon\aw|\a-yoff\ax>")
+        rangeText = string.format("\aw[\a-yType:\a-yon\aw|\a-yoff\ax]")
         ---@diagnostic disable-next-line: param-type-mismatch
         defaultText = string.format("[\a-tDefault: %s\ax]", Strings.BoolToString(configData.Default))
-        currentText = string.format("[\a-gCurrent: %s\ax]", Strings.BoolToString(Config:GetSetting(config)))
+        currentText = (string.format("%s", Strings.BoolToString(Config:GetSetting(config))))
         handledType = true
     elseif type(configData.Default) == 'string' then
         rangeText = string.format("\aw<\"str\">")
         defaultText = string.format("[\a-tDefault: \"%s\"\ax]", configData.Default)
-        currentText = string.format("[\a-gCurrent: \"%s\"\ax]", Config:GetSetting(config))
+        currentText = string.format("%s", Config:GetSetting(config))
         handledType = true
     end
 
-    usageString = usageString ..
-        string.format("%s %s %s", Strings.PadString(rangeText, 20, false),
-            Strings.PadString(currentText, 20, false), Strings.PadString(defaultText, 20, false)
-        )
+    if valueOnly then
+        usageString = usageString ..
+            string.format("%s",
+                Strings.PadString(currentText, 5, false)
+            )
+    else
+        usageString = usageString ..
+            string.format("  %s   %s %s", Strings.PadString(currentText, 5, false), Strings.PadString(rangeText, 5, false), Strings.PadString(defaultText, 5, false)
+            )
+    end
 
     return handledType, usageString
 end
@@ -1619,9 +1625,9 @@ function Config.MakeValidSetting(module, setting, value)
 
     if type(defaultConfig[setting].Default) == 'number' then
         value = tonumber(value)
-        if value > (defaultConfig[setting].Max or 999) or value < (defaultConfig[setting].Min or 0) then
-            Logger.log_info("\ayError: %s is not a valid setting for %s.", value, setting)
-            local _, update = Config:GetUsageText(setting, true, defaultConfig[setting])
+        if not value or value > (defaultConfig[setting].Max or 999) or value < (defaultConfig[setting].Min or 0) then
+            Logger.log_info("\ayError: Invalid or out-of-range value supplied for %s, falling back to previous value.", setting)
+            local _, update = Config:GetUsageText(setting, true, defaultConfig)
             Logger.log_info(update)
             return nil
         end
@@ -1671,7 +1677,7 @@ function Config:SetSetting(setting, value)
 
     if settingModuleName == "Core" then
         local cleanValue = Config.MakeValidSetting("Core", setting, value)
-        _, beforeUpdate = self:GetUsageText(setting, false, defaultConfig)
+        _, beforeUpdate = Config:GetUsageText(setting, false, defaultConfig, true)
         if cleanValue ~= nil then
             self:GetSettings()[setting] = cleanValue
             self:SaveSettings()
@@ -1680,7 +1686,7 @@ function Config:SetSetting(setting, value)
         local settings = Modules:ExecModule(settingModuleName, "GetSettings")
         if settings[setting] ~= nil then
             defaultConfig = Modules:ExecModule(settingModuleName, "GetDefaultSettings")
-            _, beforeUpdate = Config:GetUsageText(setting, false, defaultConfig)
+            _, beforeUpdate = Config:GetUsageText(setting, false, defaultConfig, true)
             local cleanValue = Config.MakeValidSetting(settingModuleName, setting, value)
             if cleanValue ~= nil then
                 settings[setting] = cleanValue
@@ -1693,8 +1699,7 @@ function Config:SetSetting(setting, value)
     end
 
     local _, afterUpdate = Config:GetUsageText(setting, false, defaultConfig)
-    Logger.log_info("[%s] \ag%s :: Before :: %-5s", settingModuleName, setting, beforeUpdate)
-    Logger.log_info("[%s] \ag%s :: After  :: %-5s", settingModuleName, setting, afterUpdate)
+    Logger.log_info("(%s) \ag%s\aw is now:\ax %-5s \ay[Previous:\ax %s\ay]", settingModuleName, setting, afterUpdate, beforeUpdate)
 end
 
 --- Resolves the default values for a given settings table.
