@@ -23,7 +23,17 @@ local _ClassConfig = {
             if Casting.AAReady("Radiant Cure") then
                 return Casting.UseAA("Radiant Cure", targetId)
             end
-            local cureSpell = Core.GetResolvedActionMapItem('SingleTgtCure')
+
+            local cureSpell = Core.GetResolvedActionMapItem('CureDisease')
+
+            if type:lower() == "poison" then
+                cureSpell = Core.GetResolvedActionMapItem('CurePoison')
+            elseif type:lower() == "curse" then
+                cureSpell = Core.GetResolvedActionMapItem('CureCurse')
+            elseif type:lower() == "corruption" then
+                cureSpell = Core.GetResolvedActionMapItem('CureCorrupt')
+            end
+
             if not cureSpell or not cureSpell() then return false end
             return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
         end,
@@ -40,6 +50,62 @@ local _ClassConfig = {
             "Arboreal Atonement",
             "Arbor Tender's Coalition",
             "Bosquetender's Alliance",
+        },
+        ['CurePoison'] = {
+            --Cure poison Lines Single Target
+            "Cure Poison",
+            "Counteract Poison",
+            "Abolish Poison",
+            "Eradicate Poison",
+            "Antidote",
+            "Purged Blood",
+            "Perfected Blood",
+            "Cleansed Blood",
+            "Unblemished Blood",
+            "Expurgated Blood",
+            "Sanctified Blood",
+        },
+        ['CureDisease'] = {
+            --Cure Diease Lines Single Target
+            "Cure Disease",
+            "Counteract Disease",
+            "Pure Blood",
+            "Eradicate Disease",
+            "Purified Blood",
+            "Purged Blood",
+            "Perfected Blood",
+            "Cleansed Blood",
+            "Unblemished Blood",
+            "Expurgated Blood",
+            "Sanctified Blood",
+        },
+        ['CureCurse'] = {
+            -- Single target Curse Removal Line.
+            "Remove Minor Curse",
+            "Remove Lesser Curse",
+            "Remove Curse",
+            "Remove Greater Curse",
+            "Eradicate Curse",
+            "Purged Blood",
+            "Perfected Blood",
+            "Cleansed Blood",
+            "Unblemished Blood",
+            "Expurgated Blood",
+            "Sanctified Blood",
+        },
+        ['CureCorrupt'] = {
+            --Cure Corrupt Single Target Cures. begins at level 74 and Evolves into Blood Line for Cureall.
+            "Expunge Corruption",
+            "Vitiate Corruption",
+            "Abolish Corruption",
+            "Pristine Blood",
+            "Dissolve Corruption",
+            "Perfected Blood",
+            "Cleansed Blood",
+            "Unblemished Blood",
+            "Expurgated Blood",
+            "Purged Blood",
+            "Sanctified Blood",
         },
         ['FireAura'] = {
             -- Spell Series >= 87LVL Minimum
