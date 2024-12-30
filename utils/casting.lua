@@ -1568,7 +1568,7 @@ function Casting.AutoMed()
         Config:GetSetting('ManaMedPct'), me.PctEndurance(),
         Config:GetSetting('EndMedPct'), Strings.BoolToColorString(forcesit), Strings.BoolToColorString(forcestand), Strings.BoolToColorString(Casting.Memorizing))
 
-    if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee')) then
+    if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or Targeting.IHaveAggro(90)) then
         forcesit = false
         forcestand = true
     end
