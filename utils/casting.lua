@@ -691,7 +691,7 @@ end
 ---
 --- @param target MQSpawn The target to wait for the casting to finish.
 --- @param bAllowDead boolean Whether to allow the target to be dead.
-function Casting.WaitCastFinish(target, bAllowDead) --I am not vested in the math below, I simply converted the existing entry from sec to ms
+function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not vested in the math below, I simply converted the existing entry from sec to ms
     local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime() or 0) + ((mq.TLO.EverQuest.Ping() * 20) + 1000))
     local maxWait = maxWaitOrig
 
@@ -714,6 +714,13 @@ function Casting.WaitCastFinish(target, bAllowDead) --I am not vested in the mat
 
         if target() and target.ID() ~= Targeting.GetTargetID() then
             Logger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) is no longer your currentTarget(%d)", target.ID(), Targeting.GetTargetID())
+        end
+
+        if Targeting.GetTargetDistance(target) > (spellRange * 1.2) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
+            mq.TLO.Me.StopCast()
+            Logger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d, range %d) is out of spell range(%d)", target.ID(), Targeting.GetTargetDistance(),
+                spellRange)
+            return
         end
 
         maxWait = maxWait - 10
@@ -1330,13 +1337,14 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
         local cmd = string.format("/cast \"%s\"", spellName)
         Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESULT_NONE)
 
+        local spellRange = spell.MyRange() or 300
         repeat
             Logger.log_verbose("\ayUseSpell(): Attempting to cast: %s", spellName)
             Core.DoCmd(cmd)
             Logger.log_verbose("\ayUseSpell(): Waiting to start cast: %s", spellName)
             mq.delay("1s", function() return mq.TLO.Me.Casting.ID() > 0 end)
             Logger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
-            Casting.WaitCastFinish(targetSpawn, bAllowDead or false)
+            Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
             mq.doevents()
             mq.delay(1)
             Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
@@ -1568,7 +1576,7 @@ function Casting.AutoMed()
         Config:GetSetting('ManaMedPct'), me.PctEndurance(),
         Config:GetSetting('EndMedPct'), Strings.BoolToColorString(forcesit), Strings.BoolToColorString(forcestand), Strings.BoolToColorString(Casting.Memorizing))
 
-    if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or Targeting.IHaveAggro(75)) then
+    if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or Targeting.IHaveAggro(90)) then
         forcesit = false
         forcestand = true
     end
