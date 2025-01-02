@@ -1124,10 +1124,9 @@ local _ClassConfig = {
             {
                 name = "TempHPBuff",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoTempHP') then return false end
-                    return Targeting.TargetClassIs("WAR", target) and Casting.GroupBuffCheck(spell, target) --PAL/SHD have their own temp hp buff
+                    return Targeting.TargetClassIs("WAR", target) and Casting.CastReady(spell.RankName) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1298,8 +1297,9 @@ local _ClassConfig = {
             spells = {
 
                 { name = "TwinHealNuke",        cond = function(self) return Config:GetSetting("DoTwinHeal") end, },
-                { name = "ReptileCombatInnate", cond = function(self) return true end, },
                 { name = "GroupCure",           cond = function(self) return true end, },
+                { name = "TempHPBuff",          cond = function(self) return Config:GetSetting('DoTempHP') end, },
+                { name = "ReptileCombatInnate", cond = function(self) return true end, },
             },
         },
         {
@@ -1307,8 +1307,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
 
-                { name = "SunDOT",          cond = function(self) return true end, }, --Config:GetSetting("DoFire") end, },
-                { name = "IceBreathDebuff", cond = function(self) return true end, },
+                { name = "SunDOT", cond = function(self) return true end, }, --Config:GetSetting("DoFire") end, },
             },
         },
         {
@@ -1326,6 +1325,7 @@ local _ClassConfig = {
 
                 { name = "DichoSpell",          cond = function(self) return mq.TLO.Me.Level() >= 101 end, },
                 { name = "GroupCure",           cond = function(self) return true end, },
+                { name = "TempHPBuff",          cond = function(self) return Config:GetSetting('DoTempHP') end, },
                 { name = "ReptileCombatInnate", cond = function(self) return true end, },
             },
         },
@@ -1335,6 +1335,7 @@ local _ClassConfig = {
             spells = {
                 { name = "TwincastSpell",       cond = function(self) return true end, },
                 { name = "GroupCure",           cond = function(self) return true end, },
+                { name = "TempHPBuff",          cond = function(self) return Config:GetSetting('DoTempHP') end, },
                 { name = "ReptileCombatInnate", cond = function(self) return true end, },
             },
         },
@@ -1342,7 +1343,19 @@ local _ClassConfig = {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "GroupCure", cond = function(self) return true end, },
+                { name = "TempHPBuff",          cond = function(self) return Config:GetSetting('DoTempHP') and mq.TLO.Me.NumGems() == 14 end, },
+                { name = "GroupCure",           cond = function(self) return true end, },
+                { name = "TempHPBuff",          cond = function(self) return Config:GetSetting('DoTempHP') end, },
+                { name = "ReptileCombatInnate", cond = function(self) return true end, },
+            },
+        },
+        {
+            gem = 14,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "GroupCure",           cond = function(self) return true end, },
+                { name = "TempHPBuff",          cond = function(self) return Config:GetSetting('DoTempHP') end, },
+                { name = "ReptileCombatInnate", cond = function(self) return true end, },
             },
         },
     },
@@ -1350,24 +1363,22 @@ local _ClassConfig = {
         DoRez = function(self, corpseId)
             if not Casting.SpellReady(mq.TLO.Spell("Incarnate Anew")) and
                 not mq.TLO.FindItem("Staff of Forbidden Rites")() and
-                not Casting.CanUseAA("Rejuvenation of Spirit") and
-                not Casting.CanUseAA("Call of the Wild") then
+                not Casting.AAReady("Rejuvenation of Spirit") and
+                not Casting.AAReady("Call of the Wild") then
                 return false
             end
+            -- local target = mq.TLO.Target
 
-            Targeting.SetTarget(corpseId)
-
-            local target = mq.TLO.Target
-
-            if not target or not target() then return false end
+            -- if not target or not target() then return false end
 
             if mq.TLO.Target.Distance() > 25 then
+                Targeting.SetTarget(corpseId)
                 Core.DoCmd("/corpse")
             end
 
-            local targetClass = target.Class.ShortName()
+            --local targetClass = target.Class.ShortName()
 
-            if mq.TLO.Me.CombatState():lower() == "combat" and (targetClass == "dru" or targetClass == "clr" or Config:GetSetting('DoBattleRez')) then
+            if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then --(targetClass == "dru" or targetClass == "clr" or Config:GetSetting('DoBattleRez')) then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
                     return Casting.UseItem("Staff of Forbidden Rites", corpseId)
                 end
@@ -1375,8 +1386,8 @@ local _ClassConfig = {
                 if Casting.AAReady("Call of the Wild") then
                     return Casting.UseAA("Call of the Wild", corpseId)
                 end
-            else
-                if Casting.CanUseAA("Rejuvenation of Spirit") then
+            elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
+                if Casting.AAReady("Rejuvenation of Spirit") then
                     return Casting.UseAA("Rejuvenation of Spirit", corpseId)
                 end
 
