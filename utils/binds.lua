@@ -255,7 +255,8 @@ Binds.Handlers    = {
             Core.DoCmd("/dgga /notify ConfirmationDialogBox CD_OK_Button leftmouseup")
             Core.DoCmd("/dgga /notify TradeWND TRDW_Trade_Button leftmouseup")
             Core.DoCmd("/dgga /notify GiveWnd GVW_Give_Button leftmouseup ")
-            Core.DoCmd("/dgga /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup ; /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
+            Core.DoCmd("/dgga /notify ProgressionSelectionWnd ProgressionTemplateSelectAcceptButton leftmouseup")
+            Core.DoCmd("/dgga /notify TaskSelectWnd TSEL_AcceptButton leftmouseup")
             Core.DoCmd("/dgga /notify RaidWindow RAID_AcceptButton leftmouseup")
         end,
     },
