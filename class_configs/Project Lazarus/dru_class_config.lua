@@ -316,6 +316,10 @@ local _ClassConfig = {
             "Gelid Frost",
             "Hoar Frost",
         },
+        ['EvacSpell'] = {
+            "Succor",
+            "Lesser Succor",
+        },
         ['RoDebuff'] = {
             -- Updated to 125
             -- Ro Debuff Series -- >= 37LVL -- AA Starts at LVL (Single Target) -- On Bar Until AA
@@ -1617,6 +1621,8 @@ local _ClassConfig = {
         {
             gem = 7,
             spells = {
+                { name = "EvacSpell",           cond = function(self) return Config:GetSetting('KeepEvac') end, },
+
                 -- [ MANA MODE ] --
                 { name = "SunMoonDot",          cond = function(self) return Core.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
@@ -1854,6 +1860,14 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why am I in a buff war with my Paladin or Druid? We are constantly overwriting each other's buffs.",
             Answer = "Disable [DoHPBuff] to prevent issues with Aego/Symbol lines overwriting. Alternatively, you can adjust the settings for the other class instead.",
+        },
+        ['KeepEvac']     = {
+            DisplayName = "Keep Evac Up",
+            Category = "Spells and Abilities",
+            Tooltip = "Keep an evac spell on bar",
+            Default = false,
+            FAQ = "Why when i try to evac does my druid not ever have the spell memmed?",
+            Answer = "Enable this setting to keep an evac on your bar.",
         },
         ['DoTempHP']     = {
             DisplayName = "Temp HP Buff",
