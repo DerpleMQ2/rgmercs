@@ -1306,9 +1306,9 @@ function Module:FixPullerMerc()
         ---@diagnostic disable-next-line: param-type-mismatch
         if merc and merc() and Targeting.TargetIsType("Mercenary", merc) and merc.Owner.DisplayName() == mq.TLO.Group.Puller() then
             if (merc.Distance() or 0) > Config:GetSetting('AutoCampRadius') and (merc.Owner.Distance() or 0) < Config:GetSetting('AutoCampRadius') then
-                Core.DoCmd("/grouproles unset %s 3", mq.TLO.Me.DisplayName())
+                Core.DoCmd("/grouproles unset %s 3", merc.Owner.DisplayName())
                 mq.delay("10s", function() return (merc.Distance() or 0) < Config:GetSetting('AutoCampRadius') end)
-                Core.DoCmd("/grouproles set %s 3", mq.TLO.Me.DisplayName())
+                Core.DoCmd("/grouproles set %s 3", merc.Owner.DisplayName())
             end
         end
     end
