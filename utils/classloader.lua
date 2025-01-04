@@ -49,7 +49,7 @@ end
 
 function ClassLoader.writeCustomConfig(class)
     -- Define file paths
-    local base_config_file = Config:GetConfigFileName()
+    local base_config_file = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.luaDir, Config:GetSetting('ClassConfigDir'), class:lower())
     local custom_config_old = string.format("%s/rgmercs/class_configs/%s_class_config.lua", mq.configDir, class:lower())
     local custom_config_file = string.format("%s/rgmercs/class_configs/%s/%s_class_config.lua", mq.configDir, Config.Globals.BuildType, class:lower())
     local backup_config_file = string.format("%s/rgmercs/class_configs/BACKUP/%s/%s_class_config_%s.lua", mq.configDir, Config.Globals.BuildType, class:lower(),
@@ -87,9 +87,6 @@ function ClassLoader.writeCustomConfig(class)
     local content = file:read("*all")
     file:close()
 
-    -- Find the location of the _author line and insert FullConfig
-    local updated_content = content:gsub("(_author%s*=%s*[%S%s]-\n)", "%1    FullConfig = true,\n")
-
     -- Write the updated content to the custom config file
     mq.pickle(custom_config_file, {}) -- incase the path isn't made yet
     local custom_file, err = io.open(custom_config_file, "w")
@@ -98,7 +95,7 @@ function ClassLoader.writeCustomConfig(class)
         return
     end
 
-    custom_file:write(updated_content)
+    custom_file:write(content)
     custom_file:close()
 
     Logger.log_info("Custom Core Class Config Written: %s", custom_config_file)

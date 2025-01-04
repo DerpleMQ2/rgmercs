@@ -180,8 +180,8 @@ function Module:LoadSettings()
 end
 
 function Module:WriteCustomConfig()
-    Logger.log_info("Automated custom config creation via this button is temporarily disabled. Please copy manually.")
-    --ClassLoader.writeCustomConfig(Config.Globals.CurLoadedClass)
+    --Logger.log_info("Automated custom config creation via this button is temporarily disabled. Please copy manually.")
+    ClassLoader.writeCustomConfig(Config.Globals.CurLoadedClass)
 end
 
 function Module:GetSettings()
