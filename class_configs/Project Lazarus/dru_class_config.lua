@@ -130,16 +130,6 @@ local _ClassConfig = {
             "Aura of Life",
             "Aura of the Grove",
         },
-        ['SingleTgtCure'] = {
-            -- Single Target Multi-Cure >= 84
-            "Sanctified Blood",
-            "Expurgated Blood",
-            "Unblemished Blood",
-            "Cleansed Blood",
-            "Perfected Blood",
-            "Purged Blood",
-            "Purified Blood",
-        },
         ['GroupCure'] = {
             -- Group Multi-Cure >=91
             "Nightwhisper's Breeze",
@@ -1862,12 +1852,12 @@ local _ClassConfig = {
             Answer = "Disable [DoHPBuff] to prevent issues with Aego/Symbol lines overwriting. Alternatively, you can adjust the settings for the other class instead.",
         },
         ['KeepEvac']     = {
-            DisplayName = "Keep Evac Up",
+            DisplayName = "Memorize Evac",
             Category = "Spells and Abilities",
-            Tooltip = "Keep an evac spell on bar",
+            Tooltip = "Keep (Lesser) Succor memorized.",
             Default = false,
-            FAQ = "Why when i try to evac does my druid not ever have the spell memmed?",
-            Answer = "Enable this setting to keep an evac on your bar.",
+            FAQ = "I want my druid to keep an evac memorized, is this possible?",
+            Answer = "Enable the Memorize Evac setting to keep Succor or Lessor Succor on your spell bar.",
         },
         ['DoTempHP']     = {
             DisplayName = "Temp HP Buff",

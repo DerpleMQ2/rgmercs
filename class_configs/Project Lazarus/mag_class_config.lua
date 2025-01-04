@@ -953,7 +953,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToNuke')
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -1573,54 +1573,54 @@ _ClassConfig      = {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("Fire")
+                    return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
                 cond = function(self, _)
-                    return Core.IsModeActive("Fire")
+                    return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "SpearNuke1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("Fire")
+                    return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "VolleyNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("Fire")
+                    return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "FireNuke1",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
             },
             {
                 name = "FireNuke2",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
             },
             {
                 name = "FireBoltNuke",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
             },
             {
                 name = "MagicNuke1",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 and Core.IsModeActive("Fire") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 and Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
             },
             {
                 name = "MagicNuke2",
                 type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 and Core.IsModeActive("Fire") end,
+                cond = function(self) return mq.TLO.Me.Level() < 70 and Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
             },
             {
                 name = "Turned Summoned",
