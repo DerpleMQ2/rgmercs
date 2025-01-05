@@ -487,14 +487,14 @@ Module.DefaultConfig                   = {
             "This list is found in /config/rgmercs/PCConfigs/Pull_<Server>_<Character>.lua",
     },
     ['PullBuffCount']                          = {
-        DisplayName = "BuffCount",
+        DisplayName = "Min Buff Count",
         Category = "Pulling",
-        Tooltip = "",
-        Default = 3,
+        Tooltip = "The minimum number of buffs in our buff window we should have before pulling (0 disables).",
+        Default = 0,
         Min = 0,
         Max = 40,
         FAQ = "How do I make it so my puller doesn't pull with no buffs?",
-        Answer = "Set the min number of buffs before pulling with [PullBuffCount].",
+        Answer = "Set the min number of buffs before pulling with Min Buff Count and the pulling will pause to wait for that number of buffs.",
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
