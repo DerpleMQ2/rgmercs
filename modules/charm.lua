@@ -430,6 +430,8 @@ end
 
 function Module:IsCharmImmune(mobId)
 	local tmpSpawn = mq.TLO.Spawn(mobId)
+	local isNamed = Targeting.IsNamed(tmpSpawn)
+
 	local mobName = tmpSpawn.CleanName() or "Unknown"
 	local mobType = tmpSpawn.Body() or "Unknown"
 	local zoneShort = mq.TLO.Zone.ShortName()
@@ -445,6 +447,10 @@ function Module:IsCharmImmune(mobId)
 		end
 	end
 	if self.TempSettings.CharmImmune[mobId] ~= nil then
+		return true
+	end
+	if isNamed then
+		self:AddImmuneTarget(mobId, { id = tmpSpawn.ID(), name = tmpSpawn.CleanName(), lvl = tmpSpawn.Level(), body = tmpSpawn.Body(), reason = "Named", })
 		return true
 	end
 	return false
