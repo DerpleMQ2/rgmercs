@@ -1140,14 +1140,6 @@ return {
                     return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
                 end,
             },
-            {
-                name = Config:GetSetting('ClarityPotion'),
-                type = "Item",
-                cond = function(self)
-                    local item = mq.TLO.FindItem(Config:GetSetting('ClarityPotion'))
-                    return item() and item.Spell.Stacks() and item.TimerReady()
-                end,
-            },
         },
     },
     ['Spells']        = {

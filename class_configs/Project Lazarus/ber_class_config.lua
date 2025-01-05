@@ -437,6 +437,15 @@ return {
                         mq.TLO.Me.PctEndurance() > 10
                 end,
             },
+            {
+                name = "Emergency Rage Cancel",
+                type = "CustomFunc",
+                custom_func = function(self)
+                    if mq.TLO.Me.PctHPs() < 10 and mq.TLO.Me.Buff("Untamed Rage")() then
+                        Core.DoCmd("/removebuff \"Untamed Rage\"")
+                    end
+                end,
+            },
         },
         ['Burn'] = { --If this burn rotation is optimal, we may wish to refactor with a helper function, a lot of duplicate code near the end. Fixing broken functionality first. - Algar
             {

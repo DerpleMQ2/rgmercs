@@ -141,7 +141,7 @@ Config.DefaultConfig = {
         Category    = "Clickies",
         Index       = 0,
         Tooltip     = "Use items during Downtime.",
-        Default     = true,
+        Default     = false,
         ConfigType  = "Normal",
         FAQ         = "I have some clickie items that I want to use during downtime. How do I set them up?",
         Answer      = "You can set up to 12 clickie items in the Clickies section of the config.\n" ..
@@ -427,16 +427,6 @@ Config.DefaultConfig = {
         ConfigType = "Advanced",
         FAQ = "How do I automate using Mod Rods?",
         Answer = "You can set the [ModRodManaPct] option to the percent mana you would like to start using Mod Rods at.",
-    },
-    ['ClarityPotion']        = {
-        DisplayName = "Clarity Potion",
-        Category = "Med/Mana",
-        Index = 12,
-        Tooltip = "Name of your Clarity Pot",
-        Default = "Distillate of Clarity",
-        ConfigType = "Advanced",
-        FAQ = "How do I automate using Clarity Potions?",
-        Answer = "You can set the [ClarityPotion] option to the name of the Clarity Potion you would like to use.",
     },
 
     -- [ PET / MERC] --
@@ -887,7 +877,7 @@ Config.DefaultConfig = {
     ['DoSelfWard']           = {
         DisplayName = "Enable Wards",
         Category = "Buffs",
-        Index = 8,
+        Index = 9,
         Tooltip = "Enable Self Ward Spells",
         Default = false,
         ConfigType = "Normal",
