@@ -486,6 +486,16 @@ Module.DefaultConfig                   = {
         Answer = "You can add a zone to the [PullSafeZones] and it will not pull in that zone.\n" ..
             "This list is found in /config/rgmercs/PCConfigs/Pull_<Server>_<Character>.lua",
     },
+    ['PullBuffCount']                          = {
+        DisplayName = "BuffCount",
+        Category = "Pulling",
+        Tooltip = "",
+        Default = 3,
+        Min = 0,
+        Max = 40,
+        FAQ = "How do I make it so my puller doesn't pull with no buffs?",
+        Answer = "Set the min number of buffs before pulling with [PullBuffCount].",
+    },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Category = "UI",
@@ -1099,6 +1109,11 @@ end
 ---@return boolean, string
 function Module:ShouldPull(campData)
     local me = mq.TLO.Me
+
+    if self.settings.PullBuffCount > 0 and me.BuffCount() < self.settings.PullBuffCount then
+        Logger.log_info("\ay::PULL:: \arAborted!\ax Waiting for Buffs! BuffCount < %d", self.settings.PullBuffCount)
+        return false, string.format("BuffCount < %d", self.settings.PullBuffCount)
+    end
 
     if me.PctHPs() < self.settings.PullHPPct then
         Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctHPs < %d", self.settings.PullHPPct)
