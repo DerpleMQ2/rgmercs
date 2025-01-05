@@ -104,14 +104,6 @@ local function GetTheme()
     return Modules:ExecModule("Class", "GetTheme")
 end
 
-local function GetClassConfigIDFromName(name)
-    for idx, curName in ipairs(Config.Globals.ClassConfigDirs or {}) do
-        if curName == name then return idx end
-    end
-
-    return 1
-end
-
 local function RenderLoader()
     InitLoader()
 
@@ -130,31 +122,6 @@ local function RenderLoader()
     ImGui.ProgressBar(initPctComplete / 100, ImVec2(310, 0), initMsg)
     ImGui.PopStyleColor()
     ImGui.End()
-end
-
-local function RenderConfigSelector()
-    if Config.Globals.ClassConfigDirs ~= nil then
-        ImGui.Text("Configuration Type")
-        local newConfigDir, changed = ImGui.Combo("##config_type", GetClassConfigIDFromName(Config:GetSetting('ClassConfigDir')), Config.Globals.ClassConfigDirs,
-            #Config.Globals.ClassConfigDirs)
-        if changed then
-            Config:SetSetting('ClassConfigDir', Config.Globals.ClassConfigDirs[newConfigDir])
-            Config:SaveSettings()
-            Config:LoadSettings()
-            Modules:ExecAll("LoadSettings")
-        end
-
-        ImGui.SameLine()
-        if ImGui.SmallButton(Icons.FA_REFRESH) then
-            Core.ScanConfigDirs()
-        end
-
-        if ImGui.SmallButton('Create Custom Config') then
-            Modules:ExecModule("Class", "WriteCustomConfig")
-        end
-        Ui.Tooltip("Creates a copy of the current Class Configuration\nthat you can edit to change rotations, spell loadouts, etc.")
-        ImGui.NewLine()
-    end
 end
 
 local function RenderTarget()
@@ -204,6 +171,14 @@ local function RenderTarget()
         end
         Ui.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
+
+        ImGui.PushStyleColor(ImGuiCol.Button, 0.6, 0.2, 0.01, 0.8)
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.3, 0.1, 0.01, 1.0)
+        local burnLabel = (Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()) and " FORCE BURN ACTIVATED " or " FORCE BURN THIS TARGET! "
+        if ImGui.SmallButton(Icons.FA_FIRE .. burnLabel .. Icons.FA_FIRE) then
+            Targeting.SetForceBurn(assistSpawn.ID())
+        end
+        ImGui.PopStyleColor(2)
     end
 end
 
@@ -229,10 +204,18 @@ local function RenderWindowControls()
     ImGui.SetCursorPos(position)
 end
 
-local function DrawConsole()
+local function DrawConsole(showPopout)
     local RGMercsConsole = Console:GetConsole("##RGMercs", Config:GetMainOpacity())
 
     if RGMercsConsole then
+        if showPopout then
+            if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
+                Config:SetSetting('PopOutConsole', true)
+            end
+            Ui.Tooltip("Pop the Force Target list out into its own window.")
+            ImGui.NewLine()
+        end
+
         local changed
         if ImGui.BeginTable("##debugoptions", 2, ImGuiTableFlags.None) then
             ImGui.TableSetupColumn("Opt Name", bit32.bor(ImGuiTableColumnFlags.WidthFixed, ImGuiTableColumnFlags.NoResize), 100)
@@ -399,8 +382,6 @@ local function RGMercsGUI()
                 ImGui.NewLine()
                 ImGui.Separator()
 
-                RenderConfigSelector()
-
                 if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
                     ImGui.SetItemDefaultFocus()
                     if ImGui.BeginTabItem("RGMercsMain") then
@@ -417,6 +398,22 @@ local function RGMercsGUI()
                         end
                         ImGui.Text("Stuck To: " ..
                             (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
+                        if ImGui.CollapsingHeader("Outside Assist List") then
+                            ImGui.Indent()
+                            Ui.RenderOAList()
+                            ImGui.Unindent()
+                        end
+
+                        if Core.IAmMA() and not Config:GetSetting('PopOutForceTarget') then
+                            if ImGui.CollapsingHeader("Force Target") then
+                                ImGui.Indent()
+                                Ui.RenderForceTargetList(true)
+                                ImGui.Unindent()
+                            end
+                        end
+
+                        ImGui.Separator()
+
                         if ImGui.CollapsingHeader("Config Options") then
                             ImGui.Indent()
 
@@ -452,16 +449,6 @@ local function RGMercsGUI()
                             end
                             ImGui.Unindent()
                         end
-
-                        if ImGui.CollapsingHeader("Outside Assist List") then
-                            Ui.RenderOAList()
-                        end
-
-                        if Core.IAmMA() and not Config:GetSetting('PopOutForceTarget') then
-                            if ImGui.CollapsingHeader("Force Target") then
-                                Ui.RenderForceTargetList(true)
-                            end
-                        end
                         ImGui.EndTabItem()
                     end
 
@@ -471,11 +458,11 @@ local function RGMercsGUI()
                     ImGui.EndTabBar();
                 end
 
-                ImGui.NewLine()
-                ImGui.NewLine()
                 ImGui.Separator()
                 if not Config:GetSetting('PopOutConsole') then
-                    DrawConsole()
+                    if ImGui.CollapsingHeader("Console") then
+                        DrawConsole(true)
+                    end
                 end
             elseif shouldDrawGUI and Config.Globals.Minimized then
                 local btnImg = Casting.LastBurnCheck and burnImg or derpImg
@@ -484,7 +471,7 @@ local function RGMercsGUI()
                         Config.Globals.Minimized = false
                     end
                     if ImGui.IsItemHovered() then
-                        ImGui.SetTooltip("RGMercs is Paused")
+                        ImGui.SetTooltip("RGMercs is Paused.")
                     end
                 else
                     if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then

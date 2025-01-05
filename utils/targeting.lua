@@ -433,4 +433,11 @@ function Targeting.GroupedWithTarget(target)
     return mq.TLO.Group.Member(targetName)()
 end
 
+function Targeting.SetForceBurn(targetId)
+    Targeting.ForceBurnTargetID = tonumber(targetId) or mq.TLO.Target.ID()
+    local burnNowSpawn = mq.TLO.Spawn(Targeting.ForceBurnTargetID)
+    Logger.log_info("\aoForcing Burn Now: \at%s \aw(\am%d\aw)", burnNowSpawn and (burnNowSpawn() and burnNowSpawn.CleanName() or "None") or "None",
+        Targeting.ForceBurnTargetID)
+end
+
 return Targeting

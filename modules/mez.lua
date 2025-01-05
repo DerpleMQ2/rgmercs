@@ -148,11 +148,12 @@ Module.DefaultConfig               = {
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
-        Category = "Monitoring",
+        Category = "Custom",
         Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
         FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-        Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling " .. Module._name .. "_Popped",
+        Answer =
+        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
 
@@ -238,28 +239,22 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-        self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-        self:SaveSettings(false)
+    if not self.settings[self._name .. "_Popped"] then
+        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
+            self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+            self:SaveSettings(false)
+        end
+        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
+        ImGui.NewLine()
     end
-    ImGui.SameLine()
-    ImGui.Text("Mez Module")
 
     ---@type boolean|nil
     local pressed = false
 
     if self.ModuleLoaded then
-        if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
-                self.DefaultCategories)
-            if pressed then
-                self:SaveSettings(false)
-            end
-        end
-
-        ImGui.Separator()
         -- CCEd targets
         if ImGui.CollapsingHeader("CC Target List") then
+            ImGui.Indent()
             if ImGui.BeginTable("MezzedList", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
                 ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
@@ -288,11 +283,13 @@ function Module:Render()
                 end
                 ImGui.EndTable()
             end
+            ImGui.Unindent()
         end
 
         ImGui.Separator()
         -- Immune targets
         if ImGui.CollapsingHeader("Immune Target List") then
+            ImGui.Indent()
             if ImGui.BeginTable("Immune", 2, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders)) then
                 ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
                 ImGui.TableSetupColumn('Id', (ImGuiTableColumnFlags.WidthFixed), 70.0)
@@ -307,9 +304,18 @@ function Module:Render()
                 end
                 ImGui.EndTable()
             end
+            ImGui.Unindent()
         end
 
         ImGui.Separator()
+
+        if ImGui.CollapsingHeader("Config Options") then
+            self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
+                self.DefaultCategories)
+            if pressed then
+                self:SaveSettings(false)
+            end
+        end
     end
 end
 
