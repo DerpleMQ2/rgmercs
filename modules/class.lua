@@ -272,15 +272,17 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    ImGui.Text("Core Class Modules")
+    ImGui.Text("Combat State: %s", self.CombatState)
+    ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
 
     ---@type boolean|nil
     local pressed = false
     local loadoutChange = false
 
     if self.ClassConfig and self.ModuleLoaded then
-        ImGui.Text("Mode: ")
+        ImGui.Text("Active Mode:")
         ImGui.SameLine()
+        ImGui.SetNextItemWidth(200)
         Ui.Tooltip(self.ClassConfig.DefaultConfig.Mode.Tooltip)
         self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes,
             #self.ClassConfig.Modes)
@@ -289,14 +291,7 @@ function Module:Render()
             self:RescanLoadout()
         end
 
-        if ImGui.CollapsingHeader("Config Options") then
-            self.settings, pressed, loadoutChange = Ui.RenderSettings(self.settings,
-                self.ClassConfig.DefaultConfig, self.DefaultCategories)
-            if pressed then
-                self:SaveSettings(false)
-                self.TempSettings.NewCombatMode = self.TempSettings.NewCombatMode or loadoutChange
-            end
-        end
+        Ui.RenderConfigSelector()
 
         ImGui.Separator()
 
@@ -333,6 +328,8 @@ function Module:Render()
         if not self.TempSettings.ReloadingLoadouts then
             if ImGui.CollapsingHeader("Rotations") then
                 ImGui.Indent()
+                ImGui.Text("Combat State: %s", self.CombatState)
+                ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
                 Ui.RenderRotationTableKey()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
@@ -368,8 +365,16 @@ function Module:Render()
             end
         end
 
-        ImGui.Text("Combat State: %s", self.CombatState)
-        ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
+        ImGui.Separator()
+
+        if ImGui.CollapsingHeader("Config Options") then
+            self.settings, pressed, loadoutChange = Ui.RenderSettings(self.settings,
+                self.ClassConfig.DefaultConfig, self.DefaultCategories)
+            if pressed then
+                self:SaveSettings(false)
+                self.TempSettings.NewCombatMode = self.TempSettings.NewCombatMode or loadoutChange
+            end
+        end
     end
 end
 

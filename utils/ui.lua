@@ -93,11 +93,52 @@ function Ui.RenderOAList()
     end
 end
 
+function Ui.GetClassConfigIDFromName(name)
+    for idx, curName in ipairs(Config.Globals.ClassConfigDirs or {}) do
+        if curName == name then return idx end
+    end
+
+    return 1
+end
+
+function Ui.RenderConfigSelector()
+    if Config.Globals.ClassConfigDirs ~= nil then
+        ImGui.Text("Config Type:")
+        Ui.Tooltip(
+            "Select your current server/environment.\nLive: Official EQ Servers (Live, Test, TLP).\nBeta: Configs in testing (see forums).\nExpirimental: Configs restricted to specific modes or levels (see forums, often preferred over the base if available!).\nProject Lazurus: Laz-specific (Live may be better suited for other emu servers).\nCustom: Copies of the above configs that you have edited yourself.")
+        ImGui.SameLine()
+        ImGui.SetNextItemWidth(200)
+        local newConfigDir, changed = ImGui.Combo("##config_type", Ui.GetClassConfigIDFromName(Config:GetSetting('ClassConfigDir')), Config.Globals.ClassConfigDirs,
+            #Config.Globals.ClassConfigDirs)
+        if changed then
+            Config:SetSetting('ClassConfigDir', Config.Globals.ClassConfigDirs[newConfigDir])
+            Config:SaveSettings()
+            Config:LoadSettings()
+            Modules:ExecAll("LoadSettings")
+        end
+
+        ImGui.SameLine()
+        if ImGui.SmallButton(Icons.FA_REFRESH) then
+            Core.ScanConfigDirs()
+        end
+        Ui.Tooltip("Refreshes the class config directory list.")
+
+        ImGui.SameLine()
+        if ImGui.SmallButton('Create Custom Config') then
+            Modules:ExecModule("Class", "WriteCustomConfig")
+        end
+        Ui.Tooltip("Places a copy of the currently loaded class config in the MQ config directory for customization.\nWill back up the existing custom configuration.")
+        ImGui.NewLine()
+    end
+end
+
 function Ui.RenderForceTargetList(showPopout)
     if showPopout then
-        if ImGui.Button(Icons.MD_OPEN_IN_NEW, 0, 18) then
+        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
             Config:SetSetting('PopOutForceTarget', true)
         end
+        Ui.Tooltip("Pop the Force Target list out into its own window.")
+        ImGui.NewLine()
     end
 
     if ImGui.Button("Clear Forced Target", ImGui.GetWindowWidth() * .3, 18) then
@@ -632,6 +673,7 @@ end
 --- @return boolean: any_pressed was anythign pressed?
 --- @return boolean: requires_new_loadout do we require a new loadout?
 function Ui.RenderSettings(settings, defaults, categories, hideControls, showMainOptions)
+    ImGui.Indent()
     local any_pressed = false
     local new_loadout = false
 
@@ -712,6 +754,8 @@ function Ui.RenderSettings(settings, defaults, categories, hideControls, showMai
         end
         ImGui.EndTabBar()
     end
+
+    ImGui.Unindent()
 
     return settings, any_pressed, new_loadout
 end

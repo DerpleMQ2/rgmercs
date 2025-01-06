@@ -498,11 +498,12 @@ Module.DefaultConfig                   = {
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
-        Category = "UI",
+        Category = "Custom",
         Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
         FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
-        Answer = "You can pop out the " .. Module._name .. " module into its own window by toggeling " .. Module._name .. "_Popped",
+        Answer =
+        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
 }
 
@@ -748,12 +749,14 @@ function Module:ShouldRender()
 end
 
 function Module:Render()
-    if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
-        self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
-        self:SaveSettings(false)
+    if not self.settings[self._name .. "_Popped"] then
+        if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
+            self.settings[self._name .. "_Popped"] = not self.settings[self._name .. "_Popped"]
+            self:SaveSettings(false)
+        end
+        Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
+        ImGui.NewLine()
     end
-    ImGui.SameLine()
-    ImGui.Text("Pull")
 
     local pressed
 
@@ -979,6 +982,8 @@ function Module:Render()
             end
         end
     end
+
+    ImGui.Separator()
 
     if ImGui.CollapsingHeader("Config Options") then
         if self.ModuleLoaded then

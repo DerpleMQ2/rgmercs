@@ -255,6 +255,8 @@ function Module:Render()
         ImPlot.EndPlot()
     end
 
+    ImGui.Separator()
+
     if ImGui.CollapsingHeader("Config Options") then
         self.settings.ExpSecondsToStore, pressed = ImGui.SliderInt(self.DefaultConfig.ExpSecondsToStore.DisplayName,
             self.settings.ExpSecondsToStore, self.DefaultConfig.ExpSecondsToStore.Min,

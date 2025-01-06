@@ -1262,21 +1262,23 @@ Config.DefaultConfig = {
     },
     ['PopOutForceTarget']    = {
         DisplayName = "Pop Out Force Target",
-        Category = "UI",
+        Category = "Custom",
         Tooltip = "Pop out the Force Target into it's own Window",
         Default = false,
         ConfigType = "Advanced",
         FAQ = "How do I pop out the Force Target?",
-        Answer = "You can set the [PopOutForceTarget] option to true to pop out the Force Target into it's own Window.",
+        Answer =
+        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
     ['PopOutConsole']        = {
         DisplayName = "Pop Out Console",
-        Category = "UI",
+        Category = "Custom",
         Tooltip = "Pop out the Console into it's own Window",
         Default = false,
         ConfigType = "Advanced",
         FAQ = "How do I pop out the Console?",
-        Answer = "You can set the [PopOutConsole] option to true to pop out the Debug Console into it's own Window.",
+        Answer =
+        "You can set the click the popout button at the top of a tab or heading to pop it into its own window.\n Simply close the window and it will snap back to the main window.",
     },
     ['MainWindowLocked']     = {
         DisplayName = "Main Window Locked",
