@@ -1262,6 +1262,7 @@ Config.DefaultConfig = {
     },
     ['PopOutForceTarget']    = {
         DisplayName = "Pop Out Force Target",
+        Type = "Custom",
         Category = "Custom",
         Tooltip = "Pop out the Force Target into it's own Window",
         Default = false,
@@ -1272,6 +1273,7 @@ Config.DefaultConfig = {
     },
     ['PopOutConsole']        = {
         DisplayName = "Pop Out Console",
+        Type = "Custom",
         Category = "Custom",
         Tooltip = "Pop out the Console into it's own Window",
         Default = false,
