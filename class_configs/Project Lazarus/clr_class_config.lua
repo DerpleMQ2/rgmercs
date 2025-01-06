@@ -5,8 +5,8 @@ local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
-    _version              = "1.0 - Project Lazarus",
-    _author               = "Pureleaf, Derple",
+    _version              = "1.1 - Project Lazarus",
+    _author               = "Pureleaf, Derple, RobbanEQ, Algar",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
@@ -483,15 +483,13 @@ local _ClassConfig = {
             "Unified Persistence",
             "Unified Commitment",
         }, ]] --
-        ['aurabuff1'] = {
-            ----Aura Buffs - Using the AA Spirit Mastery
-            --- Removed Aurabuff1
-           
-        },
-        ['aurabuff2'] = {
-            ---- Aura Buff 2 - Using normal Aura Buff if AA Spirit Mastery not Avaliable
+        ['AbsorbAura'] = {
             "Aura of the Pious",
             "Aura of the Zealot",
+
+        },
+        ['HPAura'] = {
+            "Aura of Divinity",
         },
         ['DivineBuff'] = {
             --Divine Buffs REQUIRES extra spell slot because of the 90s recast
@@ -1141,15 +1139,36 @@ local _ClassConfig = {
             {
                 name = "Spirit Mastery",
                 type = "AA",
+                pre_activate = function(self, spell) --remove the old aura if we just purchased the AA, otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if mq.TLO.Me.Aura(1)() then mq.TLO.Me.Aura(1).Remove() end
+                end,
                 cond = function(self, aaName)
-                    return Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName("Aura of Pious Divinity")
+                    return not Casting.AuraActiveByName("Aura of Pious Divinity") and Casting.AAReady(aaName)
                 end,
             },
             {
-                name = "aurabuff2",
+                name = "AbsorbAura",
                 type = "Spell",
+                pre_activate = function(self, spell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if not Casting.AuraActiveByName(spell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                end,
                 cond = function(self, spell)
-                    return not Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) and Casting.SpellStacksOnMe(spell)
+                    if Casting.CanUseAA('Spirit Mastery') then return false end
+                    return not Casting.AuraActiveByName(spell.BaseName()) and Config:GetSetting('UseAura') == 1
+                end,
+            },
+            {
+                name = "HPAura",
+                type = "Spell",
+                pre_activate = function(self, spell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if not Casting.AuraActiveByName(spell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                end,
+                cond = function(self, spell)
+                    if Casting.CanUseAA('Spirit Mastery') then return false end
+                    return not Casting.AuraActiveByName(spell.BaseName()) and Config:GetSetting('UseAura') == 2
                 end,
             },
             {
@@ -1502,6 +1521,20 @@ local _ClassConfig = {
             Default = false,
             FAQ = "Why is my cleric not using his Symbol Spells?",
             Answer = "Make sure you have [DoSymbol] enabled in your settings. Also make sure you have reagents for the spell.",
+        },
+        ['UseAura']         = {
+            DisplayName = "Aura Spell Choice:",
+            Category = "Spells and Abilities",
+            Index = 1,
+            Tooltip = "Select the Aura to be used, prior to purchasing the Spirit Mastery AA.",
+            Type = "Combo",
+            ComboOptions = { 'Absorb(Pious/Zealot)', 'HP(Divinity)', 'None', },
+            RequiresLoadoutChange = true,
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            FAQ = "Why am I not using the aura I prefer?",
+            Answer = "You can select which aura to use (prior to purchase of Spirit Mastery) by changing your Aura Spell Choice option.",
         },
     },
     -- end DefaultConfig

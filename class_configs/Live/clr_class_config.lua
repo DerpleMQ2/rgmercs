@@ -6,7 +6,7 @@ local Casting      = require("utils.casting")
 
 local _ClassConfig = {
     _version              = "1.0 - Live",
-    _author               = "Pureleaf, Derple",
+    _author               = "Pureleaf, Derple, Algar",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
         IsCuring = function() return true end,
@@ -487,14 +487,14 @@ local _ClassConfig = {
             "Unified Persistence",
             "Unified Commitment",
         }, ]] --
-        ['aurabuff1'] = {
+        ['AbsorbAura'] = {
             ----Aura Buffs - Aura Name is seperate than the buff name
             "Aura of the Pious",
             "Aura of the Zealot",
             "Aura of the Reverent",
             "Aura of the Persistent",
         },
-        ['aurabuff2'] = {
+        ['HPAura'] = {
             ---- Aura Buff 2 - Aura Name is the same as the buff name
             "Bastion of Divinity",
             "Circle of Divinity",
@@ -1147,18 +1147,25 @@ local _ClassConfig = {
         },
         ['Downtime'] = {
             {
-                name = "aurabuff1",
+                name = "AbsorbAura",
                 type = "Spell",
+                pre_activate = function(self, spell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if not Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                end,
                 cond = function(self, spell)
-                    return Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) and not Casting.AuraActiveByName("Reverent Aura") and
-                        Casting.SpellStacksOnMe(spell)
+                    return not Casting.AuraActiveByName(spell.BaseName()) and (Config:GetSetting('UseAura') == 1 or Casting.CanUseAA('Spirit Mastery'))
                 end,
             },
             {
-                name = "aurabuff2",
+                name = "HPAura",
                 type = "Spell",
+                pre_activate = function(self, spell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if not Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                end,
                 cond = function(self, spell)
-                    return Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) and Casting.SpellStacksOnMe(spell)
+                    return not Casting.AuraActiveByName(spell.BaseName()) and (Config:GetSetting('UseAura') == 2 or Casting.CanUseAA('Spirit Mastery'))
                 end,
             },
             {
@@ -1511,6 +1518,20 @@ local _ClassConfig = {
             Default = false,
             FAQ = "Why is my cleric not using his Symbol Spells?",
             Answer = "Make sure you have [DoSymbol] enabled in your settings. Also make sure you have reagents for the spell.",
+        },
+        ['UseAura']         = {
+            DisplayName = "Aura Spell Choice:",
+            Category = "Spells and Abilities",
+            Index = 1,
+            Tooltip = "Select the Aura to be used, prior to purchasing the Spirit Mastery AA.",
+            Type = "Combo",
+            ComboOptions = { 'Absorb', 'HP', 'None', },
+            RequiresLoadoutChange = true,
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            FAQ = "Why am I not using the aura I prefer?",
+            Answer = "You can select which aura to use (prior to purchase of Spirit Mastery) by changing your Aura Spell Choice option.",
         },
     },
     -- end DefaultConfig
