@@ -914,16 +914,23 @@ local _ClassConfig = {
             {
                 name = "AbsorbAura",
                 type = "Spell",
+                pre_activate = function(self, spell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if not Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                end,
                 cond = function(self, spell)
-                    return not Casting.AuraActiveByName(spell.BaseName()) and not Casting.AuraActiveByName("Reverent Aura") and
-                        Casting.SpellStacksOnMe(spell)
+                    return not Casting.AuraActiveByName(spell.BaseName()) and (Config:GetSetting('UseAura') == 1 or Casting.CanUseAA('Spirit Mastery'))
                 end,
             },
             {
                 name = "HPAura",
                 type = "Spell",
+                pre_activate = function(self, spell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
+                    ---@diagnostic disable-next-line: undefined-field
+                    if not Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                end,
                 cond = function(self, spell)
-                    return Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) and Casting.SpellStacksOnMe(spell)
+                    return not Casting.AuraActiveByName(spell.BaseName()) and (Config:GetSetting('UseAura') == 2 or Casting.CanUseAA('Spirit Mastery'))
                 end,
             },
         },
@@ -1072,7 +1079,7 @@ local _ClassConfig = {
         },
         ['AegoSymbol']     = {
             DisplayName = "Aego/Symbol Choice:",
-            Category = "Buffs",
+            Category = "Buffs/Debuffs",
             Index = 1,
             Tooltip = "WIP",
             RequiresLoadoutChange = true,
@@ -1122,6 +1129,20 @@ local _ClassConfig = {
             Default = true,
             FAQ = "What Vet AA's does SHD use?",
             Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
+        },
+        ['UseAura']        = {
+            DisplayName = "Aura Spell Choice:",
+            Category = "Buffs/Debuffs",
+            Index = 1,
+            Tooltip = "Select the Aura to be used, prior to purchasing the Spirit Mastery AA.",
+            Type = "Combo",
+            ComboOptions = { 'Absorb', 'HP', 'None', },
+            RequiresLoadoutChange = true,
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            FAQ = "Why am I not using the aura I prefer?",
+            Answer = "You can select which aura to use (prior to purchase of Spirit Mastery) by changing your Aura Spell Choice option.",
         },
         -- ['DoHOT']           = {
         --     DisplayName = "Cast HOTs",
