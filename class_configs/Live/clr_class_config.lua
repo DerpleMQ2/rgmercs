@@ -1150,11 +1150,14 @@ local _ClassConfig = {
                 name = "AbsorbAura",
                 type = "Spell",
                 pre_activate = function(self, spell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
-                    ---@diagnostic disable-next-line: undefined-field
-                    if not Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) then mq.TLO.Me.Aura(1).Remove() end
+                    if not Casting.CanUseAA('Spirit Mastery') and not (Casting.AuraActiveByName("Reverent Aura") or Casting.AuraActiveByName(spell.BaseName())) then
+                        ---@diagnostic disable-next-line: undefined-field
+                        mq.TLO.Me.Aura(1).Remove()
+                    end
                 end,
                 cond = function(self, spell)
-                    return not Casting.AuraActiveByName(spell.BaseName()) and (Config:GetSetting('UseAura') == 1 or Casting.CanUseAA('Spirit Mastery'))
+                    return not (Casting.AuraActiveByName("Reverent Aura") or Casting.AuraActiveByName(spell.BaseName())) and
+                        (Config:GetSetting('UseAura') == 1 or Casting.CanUseAA('Spirit Mastery'))
                 end,
             },
             {
