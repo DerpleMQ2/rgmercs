@@ -176,7 +176,7 @@ local function RenderTarget()
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.3, 0.1, 0.01, 1.0)
         local burnLabel = (Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()) and " FORCE BURN ACTIVATED " or " FORCE BURN THIS TARGET! "
         if ImGui.SmallButton(Icons.FA_FIRE .. burnLabel .. Icons.FA_FIRE) then
-            Targeting.SetForceBurn(assistSpawn.ID())
+            Core.DoCmd("/squelch /dgga /rgl burnnow %d", assistSpawn.ID())
         end
         ImGui.PopStyleColor(2)
     end
