@@ -212,7 +212,7 @@ local function DrawConsole(showPopout)
             if ImGui.SmallButton(Icons.MD_OPEN_IN_NEW) then
                 Config:SetSetting('PopOutConsole', true)
             end
-            Ui.Tooltip("Pop the Force Target list out into its own window.")
+            Ui.Tooltip("Pop the Console out into its own window.")
             ImGui.NewLine()
         end
 

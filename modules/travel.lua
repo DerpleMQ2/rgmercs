@@ -53,6 +53,7 @@ travelColors["Single"]["b"]        = 180
 Module.DefaultConfig               = {
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
+        Type = "Custom",
         Category = "Custom",
         Tooltip = Module._name .. " Pop Out Into Window",
         Default = false,
