@@ -484,17 +484,14 @@ local _ClassConfig = {
             "Unified Commitment",
         }, ]] --
         ['aurabuff1'] = {
-            ----Aura Buffs - Aura Name is seperate than the buff name
-            "Aura of the Pious",
-            "Aura of the Zealot",
-            "Aura of the Reverent",
-            "Aura of the Persistent",
+            ----Aura Buffs - Using the AA Spirit Mastery
+            --- Removed Aurabuff1
+           
         },
         ['aurabuff2'] = {
-            ---- Aura Buff 2 - Aura Name is the same as the buff name
-            "Bastion of Divinity",
-            "Circle of Divinity",
-            "Aura of Divinity",
+            ---- Aura Buff 2 - Using normal Aura Buff if AA Spirit Mastery not Avaliable
+            "Aura of the Pious",
+            "Aura of the Zealot",
         },
         ['DivineBuff'] = {
             --Divine Buffs REQUIRES extra spell slot because of the 90s recast
@@ -1142,18 +1139,17 @@ local _ClassConfig = {
         },
         ['Downtime'] = {
             {
-                name = "aurabuff1",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) and not Casting.AuraActiveByName("Reverent Aura") and
-                        Casting.SpellStacksOnMe(spell)
+                name = "Spirit Mastery",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName("Aura of Pious Divinity")
                 end,
             },
             {
                 name = "aurabuff2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) and Casting.SpellStacksOnMe(spell)
+                    return not Casting.CanUseAA('Spirit Mastery') and not Casting.AuraActiveByName(spell.BaseName()) and Casting.SpellStacksOnMe(spell)
                 end,
             },
             {
