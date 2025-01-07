@@ -432,29 +432,31 @@ local _ClassConfig = {
     }, -- end AbilitySets
     ['HelperFunctions']   = {
         DoRez = function(self, corpseId)
-            if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
-                Targeting.SetTarget(corpseId, true)
+            local rezAction = false
+            local rezSpell = self.ResolvedActionMap['RezSpell']
 
-                local target = mq.TLO.Target
-
-                if not target or not target() then return false end
-
-                if mq.TLO.Target.Distance() > 25 then
-                    Core.DoCmd("/corpse")
-                end
-
+            if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
                 if Casting.AAReady("Blessing of Resurrection") then
-                    return Casting.UseAA("Blessing of Resurrection", corpseId)
+                    rezAction = Casting.UseAA("Blessing of Resurrection", corpseId)
+                elseif mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
+                    rezAction = Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 end
-
-                if mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
-                    Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
-                end
-
-                if Casting.SpellReady(self.ResolvedActionMap['RezSpell']) and Targeting.GetXTHaterCount() == 0 and not Casting.CanUseAA("Blessing of Resurrection") then
-                    Casting.UseSpell(self.ResolvedActionMap['RezSpell'], corpseId, true, true)
+            elseif mq.TLO.SpawnCount("pccorpse radius 80 zradius 30")() > 2 and Casting.SpellReady(mq.TLO.Spell("Larger Reviviscence")) and mq.TLO.Me.CombatState():lower() == "active" or mq.TLO.Me.CombatState():lower() == "resting" then
+                rezAction = Casting.UseSpell("Larger Reviviscence", corpseId, true, true)
+            else
+                if Casting.AAReady("Blessing of Resurrection") then
+                    rezAction = Casting.UseAA("Blessing of Resurrection", corpseId)
+                elseif not Casting.CanUseAA("Blessing of Resurrection") and Casting.SpellReady(rezSpell) then
+                    rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
                 end
             end
+
+            if rezAction and mq.TLO.Spawn(corpseId).Distance3D() > 25 then
+                Targeting.SetTarget(corpseId)
+                Core.DoCmd("/corpse")
+            end
+
+            return rezAction
         end,
         GetMainAssistPctMana = function()
             local groupMember = mq.TLO.Group.Member(Config.Globals.MainAssist)

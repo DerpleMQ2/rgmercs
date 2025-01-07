@@ -706,25 +706,33 @@ local _ClassConfig = {
             "Reflexive Righteousness",
             "Reflexive Reverence",
         },
+        ['RezSpell'] = {
+            'Resurrection',
+            'Restoration',
+            'Renewal',
+            'Revive',
+            'Reparation',
+            'Reconstitution',
+            'Reanimation',
+        },
     },
     ['HelperFunctions']   = {
-        --Did not include Staff of Forbidden Rites, GoR refresh is very fast and rez is 96%
         DoRez = function(self, corpseId)
-            if Config:GetSetting('DoBattleRez') or Casting.DoBuffCheck() then
-                Targeting.SetTarget(corpseId)
+            local rezAction = false
+            local rezSpell = Core.GetResolvedActionMapItem('RezSpell')
 
-                local target = mq.TLO.Target
-
-                if not target or not target() then return false end
-
-                if mq.TLO.Target.Distance() > 25 then
-                    Core.DoCmd("/corpse")
-                end
-
-                if Casting.AAReady("Gift of Resurrection") then
-                    return Casting.UseAA("Gift of Resurrection", corpseId)
-                end
+            if (Config:GetSetting('DoBattleRez') or mq.TLO.Me.CombatState():lower() ~= "combat") and Casting.AAReady("Gift of Resurrection") then
+                rezAction = Casting.UseAA("Gift of Resurrection", corpseId)
+            elseif not Casting.CanUseAA("Gift of Resurrection") and mq.TLO.Me.CombatState():lower() ~= "combat" and Casting.SpellReady(rezSpell) then
+                rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
             end
+
+            if rezAction and mq.TLO.Spawn(corpseId).Distance3D() > 25 then
+                Targeting.SetTarget(corpseId)
+                Core.DoCmd("/corpse")
+            end
+
+            return rezAction
         end,
         --determine whether we should overwrite DPU buffs with better single buffs
         SingleBuffCheck = function(self)
