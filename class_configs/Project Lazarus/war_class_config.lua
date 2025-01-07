@@ -387,7 +387,7 @@ local _ClassConfig = {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 75
                 end,
             },
             {
@@ -451,6 +451,13 @@ local _ClassConfig = {
                 cond = function(self, discSpell)
                     if Config:GetSetting('DoAETaunt') and not Config:GetSetting('SafeAETaunt') then return false end
                     return Core.IsTanking() and Casting.DiscReady(discSpell) and not Casting.BuffActiveByID(discSpell.ID())
+                end,
+            },
+            {
+                name = "Infused by Rage",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName) and not Casting.SongActiveByName('Infusion of Rage')
                 end,
             },
             {
@@ -580,6 +587,13 @@ local _ClassConfig = {
         ['EmergencyDefenses'] = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
             --Abilities should be placed in order of lowest to highest triggered HP thresholds
+            {
+                name = "Hold the Line",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 50
+                end,
+            },
             {
                 name = "Armor of Experience",
                 type = "AA",
@@ -871,6 +885,20 @@ local _ClassConfig = {
             },
             {
                 name = "Gut Punch",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Press the Attack",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Grappling Strike",
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
