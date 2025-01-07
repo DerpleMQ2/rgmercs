@@ -679,54 +679,28 @@ local _ClassConfig = {
     },
     ['HelperFunctions']   = {
         DoRez = function(self, corpseId)
-            Logger.log_debug("DoRez(): Checking for a valid rez ability.")
-            local rezSpell = Core.GetResolvedActionMapItem('RezSpell')
-            if (not Casting.SpellReady(rezSpell)) and
-                not mq.TLO.FindItem("Staff of Forbidden Rites")() and
-                not Casting.CanUseAA("Rejuvenation of Spirit") and
-                not Casting.CanUseAA("Call of the Wild") then
-                return false
+            local rezAction = false
+
+            if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
+                if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
+                    rezAction = Casting.UseItem("Staff of Forbidden Rites", corpseId)
+                elseif Casting.AAReady("Call of the Wild") then
+                    rezAction = Casting.UseAA("Call of the Wild", corpseId)
+                end
+            elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
+                if Casting.AAReady("Rejuvenation of Spirit") then
+                    rezAction = Casting.UseAA("Rejuvenation of Spirit", corpseId)
+                elseif not Casting.CanUseAA("Rejuvenation of Spirit") and Casting.SpellReady(mq.TLO.Spell("Incarnate Anew")) then
+                    rezAction = Casting.UseSpell("Incarnate Anew", corpseId, true, true)
+                end
             end
 
-            Logger.log_debug("DoRez(): Found for a valid rez ability.")
-
-            Targeting.SetTarget(corpseId)
-
-            local target = mq.TLO.Target
-
-            if not target or not target() then return false end
-
-            if mq.TLO.Target.Distance() > 25 then
+            if rezAction and mq.TLO.Spawn(corpseId).Distance3D() > 25 then
+                Targeting.SetTarget(corpseId)
                 Core.DoCmd("/corpse")
             end
 
-            local targetClass = target.Class.ShortName()
-
-            if Targeting.GetXTHaterCount() > 0 and (targetClass == "dru" or targetClass == "clr" or Config:GetSetting('DoBattleRez')) then
-                Logger.log_debug("DoRez(): Doing Battle Rez!")
-                if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
-                    return Casting.UseItem("Staff of Forbidden Rites", corpseId)
-                end
-
-                if Casting.AAReady("Call of the Wild") then
-                    return Casting.UseAA("Call of the Wild", corpseId)
-                end
-            elseif Targeting.GetXTHaterCount() == 0 then
-                Logger.log_debug("DoRez(): Doing out of combat Rez!")
-                if Casting.CanUseAA("Rejuvenation of Spirit") then
-                    Logger.log_debug("DoRez(): Using AA Rez!")
-                    return Casting.UseAA("Rejuvenation of Spirit", corpseId)
-                end
-
-                if Casting.SpellReady(rezSpell) then
-                    Logger.log_debug("DoRez(): Using Spell Res: %s", rezSpell.RankName.Name())
-                    return Casting.UseSpell(rezSpell.RankName.Name(), corpseId, true, true)
-                end
-
-                Logger.log_debug("DoRez(): Failed out of combat Rez!")
-            end
-
-            return false
+            return rezAction
         end,
     },
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead

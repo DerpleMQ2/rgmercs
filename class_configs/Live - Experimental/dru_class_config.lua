@@ -1361,42 +1361,28 @@ local _ClassConfig = {
     },
     ['HelperFunctions']   = {
         DoRez = function(self, corpseId)
-            if not Casting.SpellReady(mq.TLO.Spell("Incarnate Anew")) and
-                not mq.TLO.FindItem("Staff of Forbidden Rites")() and
-                not Casting.AAReady("Rejuvenation of Spirit") and
-                not Casting.AAReady("Call of the Wild") then
-                return false
+            local rezAction = false
+
+            if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
+                if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
+                    rezAction = Casting.UseItem("Staff of Forbidden Rites", corpseId)
+                elseif Casting.AAReady("Call of the Wild") then
+                    rezAction = Casting.UseAA("Call of the Wild", corpseId)
+                end
+            elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
+                if Casting.AAReady("Rejuvenation of Spirit") then
+                    rezAction = Casting.UseAA("Rejuvenation of Spirit", corpseId)
+                elseif not Casting.CanUseAA("Rejuvenation of Spirit") and Casting.SpellReady(mq.TLO.Spell("Incarnate Anew")) then
+                    rezAction = Casting.UseSpell("Incarnate Anew", corpseId, true, true)
+                end
             end
-            -- local target = mq.TLO.Target
 
-            -- if not target or not target() then return false end
-
-            if mq.TLO.Target.Distance() > 25 then
+            if rezAction and mq.TLO.Spawn(corpseId).Distance3D() > 25 then
                 Targeting.SetTarget(corpseId)
                 Core.DoCmd("/corpse")
             end
 
-            --local targetClass = target.Class.ShortName()
-
-            if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then --(targetClass == "dru" or targetClass == "clr" or Config:GetSetting('DoBattleRez')) then
-                if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("=Staff of Forbidden Rites")() then
-                    return Casting.UseItem("Staff of Forbidden Rites", corpseId)
-                end
-
-                if Casting.AAReady("Call of the Wild") then
-                    return Casting.UseAA("Call of the Wild", corpseId)
-                end
-            elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
-                if Casting.AAReady("Rejuvenation of Spirit") then
-                    return Casting.UseAA("Rejuvenation of Spirit", corpseId)
-                end
-
-                if Casting.SpellReady(mq.TLO.Spell("Incarnate Anew")) then
-                    return Casting.UseSpell("Incarnate Anew", corpseId, true, true)
-                end
-            end
-
-            return false
+            return rezAction
         end,
     },
     --TODO: These are nearly all in need of Display and Tooltip updates.
