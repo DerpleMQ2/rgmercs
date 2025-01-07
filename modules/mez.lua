@@ -361,7 +361,7 @@ function Module:GetMezSpell()
     if Core.MyClassIs("BRD") then
         return Modules:ExecModule("Class", "GetResolvedActionMapItem", "MezSong")
     end
-    if Core.MyClassIs("ENC") and Config:GetSetting('DoTwincastMez') then
+    if Core.MyClassIs("ENC") and Config:GetSetting('DoTwincastMez') > 1 then
         local twincastMez = Modules:ExecModule("Class", "GetResolvedActionMapItem", "TwinCastMez")
         if twincastMez and twincastMez() then return twincastMez end
     end
