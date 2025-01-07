@@ -134,7 +134,7 @@ Binds.Handlers    = {
             end
             Core.DoCmd("/squelch /dggaexecute /mqtarget id %d", Targeting.GetTargetID())
             mq.delay(5)
-            Core.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,40]} /say %s", text)
+            Core.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,60]} /say %s", text)
         end,
     },
     ['cast'] = {

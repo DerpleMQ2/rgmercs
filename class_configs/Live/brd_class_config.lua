@@ -895,6 +895,15 @@ local _ClassConfig = {
             name = 'Combat',
             state = 1,
             steps = 1,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning()
+            end,
+        },
+        {
+            name = 'CombatSongs',
+            state = 1,
+            steps = 1,
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
@@ -902,7 +911,6 @@ local _ClassConfig = {
             end,
         },
     },
-    --TODO: Triple-check usage of PCAAReady and TargetedAAReady, etc, depending on ability
     ['Rotations']       = {
         ['Burn'] = {
             {
@@ -915,8 +923,8 @@ local _ClassConfig = {
             {
                 name = "Funeral Dirge",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) -- and Config:GetSetting('UseFuneralDirge') --see note in config settings
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID()) -- and Config:GetSetting('UseFuneralDirge') --see note in config settings
                 end,
             },
             {
@@ -936,8 +944,8 @@ local _ClassConfig = {
             {
                 name = "Song of Stone",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -983,8 +991,8 @@ local _ClassConfig = {
             {
                 name = "Frenzied Kicks",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
@@ -997,14 +1005,14 @@ local _ClassConfig = {
             },
         },
         ['Debuff'] = {
-            {
-                name = "MezAESong",
-                type = "Song",
-                cond = function(self, songSpell)
-                    if not (Config:GetSetting('MezOn') and Config:GetSetting('UseAEAAMez') and Casting.SongMemed(songSpell)) then return false end
-                    return Targeting.GetXTHaterCount() >= Config:GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
-                end,
-            },
+            -- {
+            --     name = "MezAESong",
+            --     type = "Song",
+            --     cond = function(self, songSpell)
+            --         if not (Config:GetSetting('MezOn') and Config:GetSetting('UseAEAAMez') and Casting.SongMemed(songSpell)) then return false end
+            --        return Targeting.GetXTHaterCount() >= Config:GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
+            --     end,
+            -- },
             {
                 name = "AESlowSong",
                 type = "Song",
@@ -1026,8 +1034,6 @@ local _ClassConfig = {
                     return Config:GetSetting('DoDispel') and mq.TLO.Target.Beneficial()
                 end,
             },
-        },
-        ['Heal'] = {
         },
         ['Combat'] = {
             -- Kludge that addresses bards not attempting to start attacking until after a song completes
@@ -1087,6 +1093,16 @@ local _ClassConfig = {
                         Casting.DetSpellCheck(mq.TLO.AltAbility(aaName).Spell) and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
+            {
+                name = "Intimidation",
+                type = "Ability",
+                cond = function(self, abilityName)
+                    if (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) < 2 then return false end
+                    return mq.TLO.Me.AbilityReady(abilityName)()
+                end,
+            },
+        },
+        ['CombatSongs'] = {
             {
                 name = "DichoSong",
                 type = "Song",
