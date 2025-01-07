@@ -1323,7 +1323,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
 
         Casting.ActionPrep()
 
-        retryCount = retryCount or 5
+        retryCount = retryCount or 3
 
         if targetId > 0 then
             Targeting.SetTarget(targetId, true)

@@ -146,6 +146,17 @@ Module.DefaultConfig               = {
         FAQ = "I just learned my AA AOE Mez, Can I use that when its avail?",
         Answer = "Certainly you can use your AA AOE Mez just Toggle [UseAEAAMez] on to use Area Effect AA Mez.",
     },
+    ['SafeAEMez']                              = {
+        DisplayName = "AE Mez Safety Check",
+        Category = "Mez",
+        Index = 3,
+        Tooltip =
+        "Check to ensure there aren't neutral mobs in range we could aggro if AE mez is used. May result in non-use due to false positives.",
+        Default = false,
+        FAQ = "Can you better explain the AE Mez Safety Check?",
+        Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the mez.\n" ..
+            "Unfortunately, the script currently cannot always discern whether an NPC is (un)attackable, so at times this may lead to the mez not being used when it is safe to do so.",
+    },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
         Type = "Custom",
@@ -405,7 +416,7 @@ function Module:MezNow(mezId, useAE, useAA)
             if Core.MyClassIs("brd") then
                 -- TODO songnow aemez
                 self.TempSettings.BardAEMezTimer = "30s"
-                Casting.UseSong(aeMezSpell.RankName(), mezId, false, 5)
+                Casting.UseSong(aeMezSpell.RankName(), mezId, false, 3)
             else
                 Casting.UseSpell(aeMezSpell.RankName(), mezId, false)
             end
@@ -448,7 +459,7 @@ function Module:MezNow(mezId, useAE, useAA)
         -- TODO: Make spell now use songnow for brds
         if Core.MyClassIs("brd") then
             -- TODO SongNow MezSpell
-            Casting.UseSong(mezSpell.RankName(), mezId, false, 5)
+            Casting.UseSong(mezSpell.RankName(), mezId, false, 3)
         else
             -- This may not work for Bards but will work for NEC/ENCs
             Casting.UseSpell(mezSpell.RankName(), mezId, false)
@@ -472,9 +483,6 @@ function Module:MezNow(mezId, useAE, useAA)
 end
 
 function Module:AEMezCheck()
-    -- Bard AE Mez doesn't work like others, it's a PBAE we handle in class config
-    if Core.MyClassIs("brd") then return end
-
     if not Config:GetSetting('UseAEAAMez') then return end
 
     local mezNPCFilter = string.format("npc radius %d targetable los playerstate 4", self.settings.MezRadius)
@@ -489,47 +497,54 @@ function Module:AEMezCheck()
         Logger.log_warn("\arWarning AE Mez Spell: %s has no AERange!", aeMezSpell.RankName.Name())
     end
 
-    -- Make sure the mobs of concern are within rang
+    -- Make sure the mobs of concern are within range
     if aeCount < self.settings.MezAECount then return end
 
-    -- Get the nearest spawn meeting our npc search criteria
-    local nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCFilter)
-    if not nearestSpawn or not nearestSpawn() then
-        nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCPetFilter)
+    if Config:GetSetting('SafeAEMez') then --not Core.MyClassIs("brd") then
+        -- Get the nearest spawn meeting our npc search criteria
+        local angryMobCount = 0
+        local mobCount = 999
+
+        if Core.MyClassIs("brd") then
+            --using MezRadius because our instrument-modified song range is not exposed and would require excessive code to determine (checking base(1) of focus2 itemspell and math, etc)
+            angryMobCount = mq.TLO.SpawnCount(string.format("npc xtarhater radius %d", Config:GetSetting('MezRadius')))()
+            mobCount = mq.TLO.SpawnCount(string.format("npc radius %d", Config:GetSetting('MezRadius')))()
+        else --I think this can all be refactored to something simpler (we need to check from the AutoTarget, which is who we end up casting on), will look later. -- Algar 1/7/2025
+            local nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCFilter)
+            if not nearestSpawn or not nearestSpawn() then
+                nearestSpawn = mq.TLO.NearestSpawn(1, mezNPCPetFilter)
+            end
+
+            if not nearestSpawn or not nearestSpawn() then
+                return
+            end
+            -- Next make sure casting our AE won't anger more mobs -- I'm lazy and not checking the AERange of the AA. I'm gonna assume if the
+            -- AERange of the normal spell will piss them off, then the AA probably would too.
+            angryMobCount = mq.TLO.SpawnCount(string.format("npc xtarhater loc %0.2f, %0.2f radius %d", nearestSpawn.X(),
+                nearestSpawn.Y(), aeMezSpell.AERange() or 0))()
+            mobCount = mq.TLO.SpawnCount(string.format("npc loc %0.2f, %0.2f radius %d", nearestSpawn.X(),
+                nearestSpawn.Y(), aeMezSpell.AERange() or 0))()
+        end
+        if mobCount > angryMobCount then return end
+    end
+    -- Checking to see if we are auto attacking, or if we are actively casting a spell (Algar comment: we turn attack off, why do we care about auto-attacking enchanters here?)
+    -- purpose for this is to catch auto attacking enchanters and bards who never are not casting.
+    if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() ~= nil then
+        Logger.log_debug("\awNOTICE:\ax Stopping cast or song so I can cast AE mez.")
+        Core.DoCmd("/stopcast")
+        Core.DoCmd("/stopsong")
     end
 
-    if not nearestSpawn or not nearestSpawn() then
-        return
-    end
+    -- Call MezNow and pass the AE flag and allow it to use the AA if the Spell isn't ready.
+    -- This won't effect bards at all.
+    -- We target autoassist id as we don't want to swap targets and we want to continue meleeing
+    Logger.log_debug("\awNOTICE:\ax Re-targeting to our main assist's mob.")
+    --Combat.SetControlToon() --don't think we need to revalidate our MA to do this, will revisit. Algar 1/7/2025
 
-    -- Next make sure casting our AE won't anger ore mobs -- I'm lazy and not checking the AERange of the AA. I'm gonna assume if the
-    -- AERange of the normal spell will piss them off, then the AA probably would too.
-    local angryMobCount = mq.TLO.SpawnCount(string.format("npc xtarhater loc %0.2f, %0.2f radius %d", nearestSpawn.X(),
-        nearestSpawn.Y(), aeMezSpell.AERange() or 0))()
-    local chillMobCount = mq.TLO.SpawnCount(string.format("npc loc %0.2f, %0.2f radius %d", nearestSpawn.X(),
-        nearestSpawn.Y(), aeMezSpell.AERange() or 0))()
-
-    -- Checking to see if we are auto attacking, or if we are actively casting a spell
-    -- purpose for this is to catch auto attacking enchaters (who have lost their mind)
-    -- And bards who never are not casting.
-    if angryMobCount >= chillMobCount then
-        if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() ~= nil then
-            Logger.log_debug("\awNOTICE:\ax Stopping Singing so I can cast AE mez.")
-            Core.DoCmd("/stopcast")
-            Core.DoCmd("/stopsong")
-        end
-
-        -- Call MezNow and pass the AE flag and allow it to use the AA if the Spell isn't ready.
-        -- This won't effect bards at all.
-        -- We target autoassist id as we don't want to swap targets and we want to continue meleeing
-        Logger.log_debug("\awNOTICE:\ax Re-targeting to our main assist's mob.")
-        Combat.SetControlToon()
-
-        if Combat.FindBestAutoTargetCheck() then
-            Combat.FindBestAutoTarget()
-            Targeting.SetTarget(Config.Globals.AutoTargetID)
-            self:MezNow(Config.Globals.AutoTargetID, true, true)
-        end
+    if Combat.FindBestAutoTargetCheck() then
+        Combat.FindBestAutoTarget()
+        Targeting.SetTarget(Config.Globals.AutoTargetID)
+        self:MezNow(Config.Globals.AutoTargetID, true, true)
     end
 
     mq.doevents()
