@@ -1260,10 +1260,10 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "TwinCast",
+                name = "TwinCastMez",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoTwincastDPS') or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
+                    if not Config:GetSetting('TwincastMez') > 1 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
                     return not Casting.BuffActiveByID(spell.ID()) and not Casting.BuffActiveByName("Improved Twincast") and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1488,7 +1488,7 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
-                { name = "TwinCastMez", cond = function(self) return Core.IsModeActive("ModernEra") and Config:GetSetting('DoTwincastMez') end, },
+                { name = "TwinCastMez", cond = function(self) return Config:GetSetting('TwincastMez') > 1 end, },
                 { name = "MezSpell", },
             },
         },
@@ -1655,24 +1655,22 @@ local _ClassConfig = {
             Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
                 "If you are not Tashing, you may need to Enable the [DoTash] setting.",
         },
-        ['DoTwincastDPS']    = {
-            DisplayName = "Use TwincastMez as DPS",
+        ['TwincastMez']      = {
+            DisplayName = "TwinCast Mez Usage:",
             Category = "Combat",
-            Tooltip = "(Default Mode Only) Cast TwinCast Mez during DPS rotation to proc a Twincast effect.",
-            Default = true,
-            FAQ = "Why do I have a mez in the DPS rotation?",
-            Answer = "The Default mode uses the TwinCast Mez during the DPS rotation solely to proc the TwinCast effect (the mez is instantly broken by attackers generally).\n" ..
-                "You can delect this option on the Combat Tab.",
-        },
-        ['DoTwincastMez']    = {
-            DisplayName = "Use TwincastMez as Mez",
-            Category = "Debuffs",
-            Tooltip = "(ModernEra Mode Only) Use TwinCast Mez as your main ST Mez",
-            Default = true,
-            FAQ = "Can you explain why the Twincast Mez is implemented differently in the Modern Era Mode?",
+            Tooltip = "If selected, will replace the standard ST Mez with an option that gives a DD twincast effect.",
+            ConfigType = "Advanced",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Disabled', 'As ST Mez', 'As Mez and to Trigger Twincast', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            FAQ = "Can you explain TwinCast Mez usage in more detail?",
             Answer =
-                "The Twincast Mez offers a marginal DPS increase when used with a (even slighter) marginal loss of effectiveness.\n" ..
-                "Unfortunately, gem slots are tight so we won't use them both together in this mode, and allow you to choose which you prefer.",
+                "Disabled: We will use our standard ST Mez in Gem 1.\n" ..
+                "As ST Mez: We will use the Twincast Mez as our ST Mez in Gem 1.\n" ..
+                "As Mez and to Trigger Twincast: As above and we will also use this spell in combat to trigger the twincast effect.",
         },
         ['DoDot']            = {
             DisplayName = "Cast DOTs",
