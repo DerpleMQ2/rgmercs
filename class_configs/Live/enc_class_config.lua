@@ -1268,7 +1268,7 @@ local _ClassConfig = {
                 name = "TwinCastMez",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoTwincastMez') > 1 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
+                    if not Config:GetSetting('TwincastMez') > 1 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
                     return not Casting.BuffActiveByID(spell.ID()) and not Casting.BuffActiveByName("Improved Twincast") and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1373,7 +1373,7 @@ local _ClassConfig = {
                 name = "TwinCastMez",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoTwincastMez') > 1 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
+                    if not Config:GetSetting('TwincastMez') > 1 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
                     return not Casting.BuffActiveByID(spell.ID()) and not Casting.BuffActiveByName("Improved Twincast") and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1501,7 +1501,7 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
-                { name = "TwinCastMez", cond = function(self) return Config:GetSetting('DoTwincastMez') > 1 end, },
+                { name = "TwinCastMez", cond = function(self) return Config:GetSetting('TwincastMez') > 1 end, },
                 { name = "MezSpell", },
             },
         },
@@ -1668,7 +1668,7 @@ local _ClassConfig = {
             Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
                 "If you are not Tashing, you may need to Enable the [DoTash] setting.",
         },
-        ['DoTwincastMez']    = {
+        ['TwincastMez']      = {
             DisplayName = "TwinCast Mez Usage:",
             Category = "Combat",
             Tooltip = "If selected, will replace the standard ST Mez with an option that gives a DD twincast effect.",
