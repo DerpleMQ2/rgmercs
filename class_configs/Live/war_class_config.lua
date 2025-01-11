@@ -457,7 +457,7 @@ local _ClassConfig = {
                 name = "Blade Guardian",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not Casting.SongActiveByName(aaName)
+                    return Casting.SelfBuffAACheck(aaName) and not Casting.SongActiveByName(aaName)
                 end,
             },
             {

@@ -457,14 +457,14 @@ local _ClassConfig = {
                 name = "Infused by Rage",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not Casting.SongActiveByName('Infusion of Rage')
+                    return Core.IsTanking() and Casting.SelfBuffAACheck(aaName) and not Casting.SongActiveByName(aaName)
                 end,
             },
             {
                 name = "Blade Guardian",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not Casting.SongActiveByName(aaName)
+                    return Casting.SelfBuffAACheck(aaName) and not Casting.SongActiveByName(aaName)
                 end,
             },
             {
@@ -587,13 +587,6 @@ local _ClassConfig = {
         ['EmergencyDefenses'] = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
             --Abilities should be placed in order of lowest to highest triggered HP thresholds
-            {
-                name = "Hold the Line",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 50
-                end,
-            },
             {
                 name = "Armor of Experience",
                 type = "AA",
@@ -734,6 +727,13 @@ local _ClassConfig = {
                     return Casting.AAReady(aaName) and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and
                         mq.TLO.Me.Song(absorbDisc)() and not Casting.BuffActiveByName("Guardian's Boon") and
                         not Casting.BuffActiveByName("Guardian's Bravery")
+                end,
+            },
+            {
+                name = "Hold the Line",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -894,6 +894,7 @@ local _ClassConfig = {
                 name = "Press the Attack",
                 type = "AA",
                 cond = function(self, aaName, target)
+                    if not Config:GetSetting("DoPress") then return false end
                     return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
@@ -997,6 +998,14 @@ local _ClassConfig = {
             Default = true,
             FAQ = "How do I use Battle Leap?",
             Answer = "Enable [DoBattleLeap] in the settings and you will use Battle Leap.",
+        },
+        ['DoPress']          = {
+            DisplayName = "Do Press the Attack",
+            Category = "Abilities",
+            Tooltip = "Use the Press to Attack stun/push AA.",
+            Default = false,
+            FAQ = "Why isn't Press the Attack working?",
+            Answer = "This ability must be turned on in the Abilities tab.",
         },
         ['DoSnare']          = {
             DisplayName = "Use Snares",
