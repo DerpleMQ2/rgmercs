@@ -891,21 +891,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Press the Attack",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting("DoPress") then return false end
-                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
-                end,
-            },
-            {
-                name = "Grappling Strike",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
-                end,
-            },
-            {
                 name = "Knee Strike",
                 type = "AA",
                 cond = function(self, aaName, target)
@@ -926,6 +911,14 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSnare') then return false end
                     return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                end,
+            },
+            {
+                name = "Press the Attack",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting("DoPress") then return false end
+                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {

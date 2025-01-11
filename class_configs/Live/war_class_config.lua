@@ -900,6 +900,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Press the Attack",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting("DoPress") then return false end
+                    return Core.IsTanking() and Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
@@ -969,6 +977,14 @@ local _ClassConfig = {
             Default = true,
             FAQ = "How do I use Battle Leap?",
             Answer = "Enable [DoBattleLeap] in the settings and you will use Battle Leap.",
+        },
+        ['DoPress']          = {
+            DisplayName = "Do Press the Attack",
+            Category = "Abilities",
+            Tooltip = "Use the Press to Attack stun/push AA.",
+            Default = false,
+            FAQ = "Why isn't Press the Attack working?",
+            Answer = "This ability must be turned on in the Abilities tab.",
         },
         ['DoSnare']          = {
             DisplayName = "Use Snares",
