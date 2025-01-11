@@ -1115,6 +1115,14 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell) return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Config:GetSetting('DoDruid') end,
             },
+            {
+                name = "Marr's Salvation",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoSalvation') then return false end
+                    return Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.AltAbility(aaName).Spell, target)
+                end,
+            },
         },
         ['EmergencyDefenses'] = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
@@ -1808,6 +1816,14 @@ local _ClassConfig = {
             Default = true,
             FAQ = "Why am I not curing?",
             Answer = "Make sure you have the [DoCures] setting enabled.",
+        },
+        ['DoSalvation']       = {
+            DisplayName = "Marr's Salvation",
+            Category = "Spells and Abilities",
+            Tooltip = "Use your group hatred reduction buff AA.",
+            Default = false,
+            FAQ = "Why isn't Marr's Salvation being used?",
+            Answer = "Select the option in the Spells and Abilities tab to use this buff, it is not enabled by default.",
         },
 
         --Hate Tools

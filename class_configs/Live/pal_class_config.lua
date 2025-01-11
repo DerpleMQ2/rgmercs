@@ -1378,6 +1378,14 @@ return {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell) return Casting.SelfBuffCheck(spell) and Config:GetSetting('DoDruid') end,
             },
+            {
+                name = "Marr's Salvation",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoSalvation') then return false end
+                    return Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.AltAbility(aaName).Spell, target)
+                end,
+            },
         },
     },
     ['Spells']            = {
@@ -1641,6 +1649,14 @@ return {
             Default = true,
             FAQ = "Why am I not casting Symbol?",
             Answer = "Make sure you have the [DoDruid] setting enabled to use Symbol instead of Aego spells.",
+        },
+        ['DoSalvation']  = {
+            DisplayName = "Marr's Salvation",
+            Category = "Group Buffs",
+            Tooltip = "Use your group hatred reduction buff AA.",
+            Default = false,
+            FAQ = "Why isn't Marr's Salvation being used?",
+            Answer = "Select the option in the Group Buffs tab to use this buff, it is not enabled by default.",
         },
         ['DoBandolier']  = {
             DisplayName = "Use Bandolier",
