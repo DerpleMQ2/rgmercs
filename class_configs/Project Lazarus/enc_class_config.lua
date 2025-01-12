@@ -30,23 +30,11 @@ local _ClassConfig = {
             "Twincast Aura",
         },
         ['SpellProcAura'] = {
-            "Mana Ripple Aura",
-            "Mana Radix Aura",
-            "Mana Replication Aura",
-            "Mana Repetition Aura",
-            "Mana Reciprocation Aura",
-            "Mana Reverberation Aura",
-            "Mana Repercussion Aura",
-            "Mana Reiteration Aura",
-            "Mana Reiterate Aura",
-            "Mana Resurgence Aura",
-            "Mystifier's Aura",
-            "Entrancer's Aura",
             "Illusionist's Aura",
             "Beguiler's Aura",
         },
-        ['LearnersAura'] = {
-            "Learner's Aura",
+        ['VisageAura'] = {
+            "Aura of Endless Glamour",
         },
         ['HasteBuff'] = {
             "Hastening of Margator",
@@ -969,20 +957,17 @@ local _ClassConfig = {
                 cond = function(self, aaName) return mq.TLO.Me.PctMana() < 60 and Casting.AAReady(aaName) end,
             },
             {
-                name = "LearnersAura",
-                type = "Spell",
-                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell)
-                    return Config:GetSetting('DoLearners') and Casting.SpellReady(spell) and not Casting.AuraActiveByName(spell.Name())
+                name = "Auroria Mastery",
+                type = "AA",
+                active_cond = function(self) return Casting.AuraActiveByName("Aura of Bedazzlement") end,
+                pre_activate = function(self) -- remove the old aura if we leveled up, otherwise we will be spammed because of no focus.
+                    if not Casting.AuraActiveByName("Aura of Bedazzlement") then
+                        ---@diagnostic disable-next-line: undefined-field
+                        mq.TLO.Me.Aura(1).Remove()
+                    end
                 end,
-            },
-            {
-                name = "TwincastAura",
-                type = "Spell",
-                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
-                cond = function(self, spell)
-                    if Config:GetSetting('DoLearners') and not Casting.CanUseAA('Auroria Mastery') then return false end
-                    return Casting.SpellReady(spell) and not Casting.AuraActiveByName(spell.Name())
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName) and not Casting.AuraActiveByName("Aura of Bedazzlement")
                 end,
             },
             {
@@ -990,20 +975,49 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell)
                     local aura = string.sub(spell.Name() or "", 1, 8)
-                    return Casting.AuraActiveByName(aura)
+                    return Casting.AuraActiveByName(aura) or Casting.AuraActiveByName("Aura of Bedazzlement")
                 end,
-                pre_activate = function(self, spell)           --remove the old aura if we leveled up, otherwise we will be spammed because of no focus.
-                    local aura = string.sub(spell.Name() or "", 1, 8)
-                    if not Casting.AuraActiveByName(aura) then ----This is complex because the aura could be in slot 1 or 2 depending on level and aa status
-                        local rmv = Casting.CanUseAA('Auroria Mastery') and 2 or 1
+                pre_activate = function(self, spell)                  -- remove the old aura if we leveled up or changed options, otherwise we will be spammed because of no focus.
+                    local aura = string.sub(spell.Name() or "", 1, 8) -- we use a string sub because aura name doesn't have the apostrophe the spell name does
+                    if not Casting.AuraActiveByName(aura) then
                         ---@diagnostic disable-next-line: undefined-field
-                        mq.TLO.Me.Aura(rmv).Remove() --I have to remove by slot because I can't map the "old" aura to remove it by name
+                        mq.TLO.Me.Aura(1).Remove()
                     end
                 end,
                 cond = function(self, spell)
-                    if (self:GetResolvedActionMapItem('TwincastAura') or Config:GetSetting('DoLearners')) and not Casting.CanUseAA('Auroria Mastery') then return false end
+                    if Casting.CanUseAA('Auroria Mastery') or Config:GetSetting('UseAura') ~= 1 then return false end
                     local aura = string.sub(spell.Name() or "", 1, 8)
                     return Casting.SpellReady(spell) and not Casting.AuraActiveByName(aura)
+                end,
+            },
+            {
+                name = "TwincastAura",
+                type = "Spell",
+                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
+                pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
+                    if not Casting.AuraActiveByName(spell.Name()) then
+                        ---@diagnostic disable-next-line: undefined-field
+                        mq.TLO.Me.Aura(1).Remove()
+                    end
+                end,
+                cond = function(self, spell)
+                    if Casting.CanUseAA('Auroria Mastery') or Config:GetSetting('UseAura') ~= 2 then return false end
+                    return Casting.SpellReady(spell) and not Casting.AuraActiveByName(spell.Name())
+                end,
+            },
+            {
+                name = "VisageAura",
+                type = "Spell",
+                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
+                pre_activate = function(self, spell) -- remove the old aura if we changed options, otherwise we will be spammed because of no focus.
+                    if not Casting.AuraActiveByName(spell.Name()) then
+                        ---@diagnostic disable-next-line: undefined-field
+                        mq.TLO.Me.Aura(1).Remove()
+                    end
+                end,
+                cond = function(self, spell)
+                    if Casting.CanUseAA('Auroria Mastery') or Config:GetSetting('UseAura') ~= 3 then return false end
+                    return Casting.SpellReady(spell) and not Casting.AuraActiveByName(spell.Name())
                 end,
             },
         },
@@ -1606,14 +1620,20 @@ local _ClassConfig = {
                 "The ModernEra Mode is designed to be used with the ModernEra DPS rotation and spellset.\n" ..
                 "It should function well starting around level 90, but may not fully come into its own for a few levels after.",
         },
-        ['DoLearners']       = {
-            DisplayName = "Do Learners",
+        ['UseAura']          = {
+            DisplayName = "Aura Selection:",
             Category = "Buffs",
-            Tooltip = "Set to use the Learner's Aura instead of the Mana Regen Aura.",
-            Default = false,
-            FAQ = "How do I use my Learner's Aura?",
-            Answer = "To use your Learner's Aura, set [DoLearners] to true in your PC's configuration.\n" ..
-                "This will cause your PC to use the Learner's Aura instead of the Mana Regen Aura.",
+            Index = 1,
+            Tooltip = "Select the Aura to be used, if any, prior to purchasing the Auroria Mastery AA.",
+            Type = "Combo",
+            ComboOptions = { 'Spell Proc', 'Twincast', 'Visage', 'None', },
+            RequiresLoadoutChange = true,
+            Default = 1,
+            Min = 1,
+            Max = 4,
+            FAQ = "Why am I using the wrong aura?",
+            Answer = "Aura choice can be made on the buff tab.\n" ..
+                "Once the PC has purchased Auroria Mastery, this setting is ignored in favor of using the AA.",
         },
         ['AESlowCount']      = {
             DisplayName = "Slow Count",
