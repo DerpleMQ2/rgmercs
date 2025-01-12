@@ -325,17 +325,6 @@ local _ClassConfig = {
             "Chromatic Covenant",
             "Chromatic Alliance",
         },
-        ['TwinCastMez'] = {
-            "Chaotic Deception",
-            "Chaotic Delusion",
-            "Chaotic Bewildering",
-            "Chaotic Confounding",
-            "Chaotic Confusion",
-            "Chaotic Baffling",
-            "Chaotic Befuddling",
-            "Chaotic Puzzlement",
-            "Chaotic Conundrum",
-        },
         ['PBAEStunSpell'] = {
             "Color Calibration",
             "Color Conflagration",
@@ -1260,14 +1249,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "TwinCastMez",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('TwincastMez') > 1 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
-                    return not Casting.BuffActiveByID(spell.ID()) and not Casting.BuffActiveByName("Improved Twincast") and Casting.TargetedSpellReady(spell, target.ID())
-                end,
-            },
-            {
                 name = "DoTSpell1",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1488,7 +1469,6 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
-                { name = "TwinCastMez", cond = function(self) return Config:GetSetting('TwincastMez') > 1 end, },
                 { name = "MezSpell", },
             },
         },
@@ -1654,23 +1634,6 @@ local _ClassConfig = {
             FAQ = "Why am I not Tashing?",
             Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
                 "If you are not Tashing, you may need to Enable the [DoTash] setting.",
-        },
-        ['TwincastMez']      = {
-            DisplayName = "TwinCast Mez Usage:",
-            Category = "Combat",
-            Tooltip = "If selected, will replace the standard ST Mez with an option that gives a DD twincast effect.",
-            ConfigType = "Advanced",
-            RequiresLoadoutChange = true,
-            Type = "Combo",
-            ComboOptions = { 'Disabled', 'As ST Mez', 'As Mez and to Trigger Twincast', },
-            Default = 1,
-            Min = 1,
-            Max = 3,
-            FAQ = "Can you explain TwinCast Mez usage in more detail?",
-            Answer =
-                "Disabled: We will use our standard ST Mez in Gem 1.\n" ..
-                "As ST Mez: We will use the Twincast Mez as our ST Mez in Gem 1.\n" ..
-                "As Mez and to Trigger Twincast: As above and we will also use this spell in combat to trigger the twincast effect.",
         },
         ['DoDot']            = {
             DisplayName = "Cast DOTs",

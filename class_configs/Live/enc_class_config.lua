@@ -1268,7 +1268,7 @@ local _ClassConfig = {
                 name = "TwinCastMez",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('TwincastMez') > 1 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
+                    if Config:GetSetting('TwincastMez') ~= 3 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
                     return not Casting.BuffActiveByID(spell.ID()) and not Casting.BuffActiveByName("Improved Twincast") and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1373,7 +1373,7 @@ local _ClassConfig = {
                 name = "TwinCastMez",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('TwincastMez') > 1 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
+                    if Config:GetSetting('TwincastMez') ~= 3 or Modules:ExecModule("Mez", "IsMezImmune", mq.TLO.Target.ID()) then return false end
                     return not Casting.BuffActiveByID(spell.ID()) and not Casting.BuffActiveByName("Improved Twincast") and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
