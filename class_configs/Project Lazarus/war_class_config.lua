@@ -261,27 +261,23 @@ local _ClassConfig = {
         end,
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
         AETargetCheck = function(printDebug)
-            local mobs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
-            local xtCount = mq.TLO.Me.XTarget() or 0
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 50 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 50 zradius 50")()
+            if (haters + haterPets) < Config:GetSetting('AETargetCnt') then return false end
 
-            if (mobs or xtCount) < Config:GetSetting('AETargetCnt') then return false end
-
-            local targets = {}
-            for i = 1, xtCount do
-                local xtarg = mq.TLO.Me.XTarget(i)
-                --this won't work becuse .Mezzed requires Targeting for cache, left more as a note for others.
-                --if Config:GetSetting('SafeAEDamage') and xtarg.Mezzed() then return false end
-                if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and (xtarg.Distance() or 999) <= 50 then
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 50 zradius 50")()
+                if (haters + haterPets) < (npcs + npcPets) then
                     if printDebug then
-                        Logger.log_verbose("AETargetCheck(): XT(%d) Counting %s(%d) as an eligible target.", i, xtarg.CleanName() or "None",
-                            xtarg.ID())
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
                     end
-                    table.insert(targets, xtarg.ID())
+                    return false
                 end
             end
-            return #targets >= Config:GetSetting('AETargetCnt') and not (Config:GetSetting('SafeAEDamage') and #targets < mobs)
-        end,
 
+            return true
+        end,
         --function to determine if we have enough mobs in range to use a defensive disc
         DefensiveDiscCheck = function(printDebug)
             local xtCount = mq.TLO.Me.XTarget() or 0
@@ -307,12 +303,11 @@ local _ClassConfig = {
             if mq.TLO.Me.ActiveDisc.Name() == "Fortitude Discipline" or mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') then return false end
             local burnDisc = { "Onslaught", "MightyStrike", "ChargeDisc", "OffensiveDisc", }
             for _, buffName in ipairs(burnDisc) do
-                local resolvedDisc = self:GetResolvedActionMapItem(burnDisc)
-                if mq.TLO.Me.ActiveDisc.Name() == resolvedDisc.RankName() then return false end
+                local resolvedDisc = self:GetResolvedActionMapItem(buffName)
+                if resolvedDisc and resolvedDisc.RankName() == mq.TLO.Me.ActiveDisc.Name() then return false end
             end
             return true
         end,
-
     },
     ['RotationOrder']   = {
         { --Self Buffs
