@@ -18,18 +18,19 @@ Logger.set_log_to_file(Config:GetSettings().LogToFile)
 local Binds = require('utils.binds')
 require('utils.event_handlers')
 
-local Console   = require('utils.console')
-local Core      = require("utils.core")
-local Targeting = require("utils.targeting")
-local Combat    = require("utils.combat")
-local Casting   = require("utils.casting")
-local Events    = require("utils.events")
-local Ui        = require("utils.ui")
-local Comms     = require("utils.comms")
-local Strings   = require("utils.strings")
+local Console     = require('utils.console')
+local Core        = require("utils.core")
+local ClassLoader = require('utils.classloader')
+local Targeting   = require("utils.targeting")
+local Combat      = require("utils.combat")
+local Casting     = require("utils.casting")
+local Events      = require("utils.events")
+local Ui          = require("utils.ui")
+local Comms       = require("utils.comms")
+local Strings     = require("utils.strings")
 
 -- Initialize class-based moduldes
-local Modules   = require("utils.modules")
+local Modules     = require("utils.modules")
 Modules:load()
 
 require('utils.datatypes')
@@ -624,13 +625,6 @@ local function RGInit(...)
     initMsg = "Pausing the CWTN Plugin..."
     Core.DoCmd("/squelch /docommand /%s pause on", mq.TLO.Me.Class.ShortName())
 
-    initMsg = "Setting up Pet Hold..."
-    if Casting.CanUseAA("Companion's Discipline") then
-        Core.DoCmd("/pet ghold on")
-    else
-        Core.DoCmd("/pet hold on")
-    end
-
     initPctComplete = 80
     initMsg = "Clearing Cursor..."
 
@@ -726,10 +720,13 @@ local function Main()
 
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then return end
 
-    if (Config.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() or
-            Config.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName()) then
+    if Config.Globals.CurLoadedChar ~= mq.TLO.Me.DisplayName() then
         Config:LoadSettings()
         Modules:ExecAll("LoadSettings")
+    end
+
+    if Config.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName() then
+        ClassLoader.changeLoadedClass()
     end
 
     Config:StoreLastMove()

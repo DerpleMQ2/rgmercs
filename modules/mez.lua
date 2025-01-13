@@ -10,6 +10,7 @@ local Comms     = require("utils.comms")
 local Modules   = require("utils.modules")
 local Strings   = require("utils.strings")
 local Tables    = require("utils.tables")
+local Files     = require("utils.files")
 local Logger    = require("utils.logger")
 local Set       = require("mq.Set")
 local Icons     = require('mq.ICONS')
@@ -178,9 +179,20 @@ for k, v in pairs(Module.DefaultConfig) do
 end
 
 local function getConfigFileName()
-    return mq.configDir ..
+    local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/' ..
         Module._name .. "_" .. Config.Globals.CurServer .. "_" .. Config.Globals.CurLoadedChar .. '.lua'
+    local newFile = mq.configDir ..
+        '/rgmercs/PCConfigs/' ..
+        Module._name .. "_" .. Config.Globals.CurServer .. "_" .. Config.Globals.CurLoadedChar .. "_" .. Config.Globals.CurLoadedClass:lower() .. '.lua'
+
+    if Files.file_exists(newFile) then
+        return newFile
+    end
+
+    Files.copy_file(oldFile, newFile)
+
+    return newFile
 end
 
 function Module:SaveSettings(doBroadcast)

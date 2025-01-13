@@ -1,5 +1,7 @@
 local mq          = require('mq')
+local Core        = require("utils.core")
 local Config      = require('utils.config')
+local Modules     = require("utils.modules")
 local Files       = require("utils.files")
 local Logger      = require("utils.logger")
 
@@ -114,6 +116,15 @@ function ClassLoader.mergeTables(tblA, tblB)
         end
     end
     return tblA
+end
+
+function ClassLoader.changeLoadedClass()
+    Config.Globals.CurLoadedClass = mq.TLO.Me.Class.ShortName()
+    Logger.log_info("\ayPersona class swap detected! \awLoading settings for \ag%s.", mq.TLO.Me.Class())
+    Config:LoadSettings()
+    Core.ScanConfigDirs()
+    Modules:ExecAll("Init")
+    Config:UpdateCommandHandlers()
 end
 
 return ClassLoader

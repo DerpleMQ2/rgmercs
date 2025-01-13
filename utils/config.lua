@@ -2,6 +2,7 @@ local mq                             = require('mq')
 local Modules                        = require("utils.modules")
 local Tables                         = require("utils.tables")
 local Strings                        = require("utils.strings")
+local Files                          = require("utils.files")
 local Logger                         = require("utils.logger")
 local Set                            = require("mq.Set")
 
@@ -1441,8 +1442,18 @@ end
 Config.CommandHandlers = {}
 
 function Config:GetConfigFileName()
-    return mq.configDir ..
+    local oldFile = mq.configDir ..
         '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServer .. "_" .. self.Globals.CurLoadedChar .. '.lua'
+    local newFile = mq.configDir ..
+        '/rgmercs/PCConfigs/RGMerc_' .. self.Globals.CurServer .. "_" .. self.Globals.CurLoadedChar .. "_" .. self.Globals.CurLoadedClass:lower() .. '.lua'
+
+    if Files.file_exists(newFile) then
+        return newFile
+    end
+
+    Files.copy_file(oldFile, newFile)
+
+    return newFile
 end
 
 function Config:SaveSettings()
@@ -1480,10 +1491,12 @@ function Config:LoadSettings()
         self:SaveSettings()
     end
 
-    -- setup our script path for later usage since getting it kind of sucks.
-    local info = debug.getinfo(2, "S")
-    local scriptDir = info.short_src:sub(info.short_src:find("lua") + 4):sub(0, -10)
-    Config.Globals.ScriptDir = string.format("%s/%s", mq.TLO.Lua.Dir(), scriptDir)
+    -- setup our script path for later usage since getting it kind of sucks, but only on the first run (personas)
+    if Config.Globals.ScriptDir == "" then
+        local info = debug.getinfo(2, "S")
+        local scriptDir = info.short_src:sub(info.short_src:find("lua") + 4):sub(0, -10)
+        Config.Globals.ScriptDir = string.format("%s/%s", mq.TLO.Lua.Dir(), scriptDir)
+    end
 
     return true
 end

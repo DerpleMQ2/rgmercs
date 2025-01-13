@@ -1,13 +1,14 @@
-local mq        = require('mq')
-local Config    = require('utils.config')
-local Modules   = require("utils.modules")
-local Core      = require("utils.core")
-local Combat    = require("utils.combat")
-local Casting   = require("utils.casting")
-local Targeting = require("utils.targeting")
-local Comms     = require("utils.comms")
-local Logger    = require("utils.logger")
-local Movement  = require("utils.movement")
+local mq          = require('mq')
+local Config      = require('utils.config')
+local Modules     = require("utils.modules")
+local Core        = require("utils.core")
+local Combat      = require("utils.combat")
+local Casting     = require("utils.casting")
+local Targeting   = require("utils.targeting")
+local Comms       = require("utils.comms")
+local Logger      = require("utils.logger")
+local Movement    = require("utils.movement")
+local ClassLoader = require('utils.classloader')
 
 -- [ CANT SEE HANDLERS ] --
 
@@ -441,3 +442,11 @@ mq.event('FallToGround', "#1# has fallen to the ground#*#", function(_, who)
 end)
 
 -- [ END FD EVENT HANDLERS ] --
+
+-- [ CLASS CHANGE EVENT HANDLERS ] --
+mq.event('PersonaEquipLoad', "You successfully loaded your #*# equipment set.", function()
+    if Config.Globals.CurLoadedClass ~= mq.TLO.Me.Class.ShortName() then
+        ClassLoader.changeLoadedClass()
+    end
+end)
+-- [ END CLASS CHANGE EVENT HANDLERS ] --
