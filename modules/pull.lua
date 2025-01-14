@@ -27,7 +27,8 @@ Module.TempSettings.PullTargetsMetaData   = {}
 Module.TempSettings.AbortPull             = false
 Module.TempSettings.PullID                = 0
 Module.TempSettings.LastPullAbilityCheck  = 0
-Module.TempSettings.LastPullerMercChec    = 0
+Module.TempSettings.LastPullerMercCheck   = 0
+Module.TempSettings.LastFoundGroupCorpse  = 0
 Module.TempSettings.HuntX                 = 0
 Module.TempSettings.HuntY                 = 0
 Module.TempSettings.HuntZ                 = 0
@@ -361,6 +362,7 @@ Module.DefaultConfig                   = {
     ['GroupWatch']                             = {
         DisplayName = "Enable Group Watch",
         Category = "Group Watch",
+        Index = 1,
         Tooltip = "1 = Off, 2 = Healers, 3 = Everyone",
         Type = "Combo",
         ComboOptions = { 'Off', 'Healers', 'Everyone', },
@@ -376,15 +378,16 @@ Module.DefaultConfig                   = {
     ['GroupWatchEnd']                          = {
         DisplayName = "Watch Group Endurance",
         Category = "Group Watch",
+        Index = 4,
         Tooltip = "Check for Endurance on Group Members",
         Default = false,
         FAQ = "I want to make sure my group has enough Endurance before I pull, how do I do that?",
         Answer = "Enable [GroupWatchEnd] and you will check for Endurance on Group Members.",
-
     },
     ['GroupWatchStartPct']                     = {
         DisplayName = "Group Watch Start %",
         Category = "Group Watch",
+        Index = 2,
         Tooltip = "If your group member is above [X]% resource, start pulls again.",
         Default = 80,
         Min = 1,
@@ -395,6 +398,7 @@ Module.DefaultConfig                   = {
     ['GroupWatchStopPct']                      = {
         DisplayName = "Group Watch Stop %",
         Category = "Group Watch",
+        Index = 3,
         Tooltip = "If your group member is below [X]% resource, stop pulls.",
         Default = 40,
         Min = 1,
@@ -406,6 +410,7 @@ Module.DefaultConfig                   = {
     ['PullHPPct']                              = {
         DisplayName = "Pull HP %",
         Category = "Group Watch",
+        Index = 5,
         Tooltip = "Make sure you have at least this much HP %",
         Default = 60,
         Min = 1,
@@ -416,6 +421,7 @@ Module.DefaultConfig                   = {
     ['PullManaPct']                            = {
         DisplayName = "Pull Mana %",
         Category = "Group Watch",
+        Index = 7,
         Tooltip = "Make sure you have at least this much Mana %",
         Default = 60,
         Min = 0,
@@ -426,6 +432,7 @@ Module.DefaultConfig                   = {
     ['PullEndPct']                             = {
         DisplayName = "Pull End %",
         Category = "Group Watch",
+        Index = 6,
         Tooltip = "Make sure you have at least this much Endurance %",
         Default = 30,
         Min = 0,
@@ -436,10 +443,32 @@ Module.DefaultConfig                   = {
     ['PullRespectMedState']                    = {
         DisplayName = "Respect Med State",
         Category = "Group Watch",
+        Index = 8,
         Tooltip = "Hold pulls if you are currently meditating.",
         Default = false,
         FAQ = "My puller only meds long enough to meet the pull minimums, what can be done?",
         Answer = "If you turn on Respect Med State in the Group Watch options, your puller will remain medding until those thresholds are reached.",
+    },
+    ['PullWaitCorpse']                         = {
+        DisplayName = "Hold for Corpses",
+        Category = "Group Watch",
+        Index = 9,
+        Tooltip = "Hold pulls while we detect a groupmember's corpse in the vicinity.",
+        Default = true,
+        FAQ = "Why do I stop pulling every time someone dies?",
+        Answer = "By default, the puller will hold pulls when the corpse of a groupmember is nearby. You can turn this off in the Group Watch options.",
+    },
+    ['WaitAfterRez']                           = {
+        DisplayName = "Wait After Rez",
+        Category = "Group Watch",
+        Index = 10,
+        Tooltip = "If the puller detected a group corpse and held pulls, allow x seconds for the group to rebuff after the corpse is rezzed.\n" ..
+            "**Only respected when \"Hold for Corpses\" is enabled and a corpse was detected by that process!**",
+        Default = 0,
+        Min = 0,
+        Max = 90,
+        FAQ = "How can I pause pulls to allow more time to rebuff after death?",
+        Answer = "You can adjust the Wait After Rez setting in the Group Watch tab to allow time for your group to rebuff after a death.",
     },
     ['FarmWayPoints']                          = {
         DisplayName = "Farming Waypoints",
@@ -1136,10 +1165,27 @@ function Module:ShouldPull(campData)
         return false, string.format("PctMana < %d", self.settings.PullManaPct)
     end
 
-    if Config:GetSetting('PullRespectMedState') and Config.Globals.InMedState then return false, string.format("Meditating") end
+    if Config:GetSetting('PullRespectMedState') and Config.Globals.InMedState then
+        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax Meditating.")
+        return false, string.format("Meditating")
+    end
 
-    if Casting.BuffActiveByName("Resurrection Sickness") then return false, string.format("Resurrection Sickness") end
+    if Casting.BuffActiveByName("Resurrection Sickness") then
+        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax Rez Sickness for %d seconds.",
+            mq.TLO.Me.Buff("Resurrection Sickness")() and mq.TLO.Me.Buff("Resurrection Sickness").Duration.TotalSeconds() or 0)
+        return false, string.format("Resurrection Sickness")
+    end
 
+    if Config:GetSetting('PullWaitCorpse') then
+        if mq.TLO.SpawnCount("pccorpse group radius 100 zradius 50")() > 0 then
+            self.TempSettings.LastFoundGroupCorpse = os.clock()
+            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax %d group corpses in-range.", mq.TLO.SpawnCount("pccorpse group radius 100 zradius 50")())
+            return false, string.format("Group Corpse Detected")
+        elseif os.clock() - self.TempSettings.LastFoundGroupCorpse < Config:GetSetting('WaitAfterRez') then
+            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax Giving time for rebuffs after a groupmember was rezzed.")
+            return false, string.format("Groupmember Recently Rezzed")
+        end
+    end
 
     if (me.Rooted.ID() or 0 > 0) then
         Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am rooted!")
@@ -1314,8 +1360,8 @@ function Module:CheckGroupForPull(classes, resourceResumePct, resourcePausePct, 
 end
 
 function Module:FixPullerMerc()
-    if os.clock() - self.TempSettings.LastPullerMercChec < 15 then return end
-    self.TempSettings.LastPullerMercChec = os.clock()
+    if os.clock() - self.TempSettings.LastPullerMercCheck < 15 then return end
+    self.TempSettings.LastPullerMercCheck = os.clock()
 
     if mq.TLO.Group.Leader() ~= mq.TLO.Me.DisplayName() then return end
 
