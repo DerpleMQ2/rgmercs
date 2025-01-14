@@ -1645,7 +1645,7 @@ _ClassConfig      = {
         },
         ['Debuff'] = {
             {
-                name = "Malaise",
+                name = "Malosinete",
                 type = "AA",
                 cond = function(self, aaName)
                     return Config:GetSetting('DoMalo') and Casting.DetAACheck(aaName) and Casting.AAReady(aaName)
@@ -1659,8 +1659,8 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "Malaise",
-                type = "Wind of Malaise",
+                name = "Malosinete",
+                type = "Wind of Malosinete",
                 cond = function(self, aaName)
                     return Config:GetSetting('DoMalo') and Config:GetSetting('DoAEMalo') and Casting.DetAACheck(aaName)
                 end,
@@ -1874,7 +1874,7 @@ _ClassConfig      = {
                 {
                     name = "FireOrbSummon",
                     cond = function(self)
-                        return mq.TLO.Me.Level() >= 75 and ((mq.TLO.Me.AltAbility("Malaise").ID() or 0) > 0 or not Config:GetSetting('DoMalo'))
+                        return mq.TLO.Me.Level() >= 65 and ((mq.TLO.Me.AltAbility("Malosinete").ID() or 0) > 0 or not Config:GetSetting('DoMalo'))
                     end,
                 },
                 { name = "MaloDebuff", cond = function(self) return true end, },
