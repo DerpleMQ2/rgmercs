@@ -1445,7 +1445,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Slowing Helix",
+                name = "Dreary Deeds",
                 type = "AA",
                 cond = function(self, aaName, target)
                     return not Casting.TargetHasBuffByName(aaName) and (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
