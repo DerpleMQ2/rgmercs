@@ -696,34 +696,30 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
     local maxWait = maxWaitOrig
 
     while mq.TLO.Me.Casting() do
-        Logger.log_verbose("Waiting to Finish Casting...")
-        mq.delay(10)
+        local currentCast = mq.TLO.Me.Casting()
+        Logger.log_super_verbose("WaitCastFinish(): Waiting to Finish Casting...")
+        mq.delay(20)
         if target() and Targeting.GetTargetPctHPs(target) <= 0 and not bAllowDead then
             mq.TLO.Me.StopCast()
-            Logger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", target.ID(),
+            Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%d) is dead with no HP(%d)", currentCast, target.ID(),
                 Targeting.GetTargetPctHPs(target))
             return
-        end
-
-        if target() and Targeting.GetTargetID() > 0 and target.ID() ~= Targeting.GetTargetID() then
+        elseif target() and Targeting.GetTargetID() > 0 and target.ID() ~= Targeting.GetTargetID() then
             mq.TLO.Me.StopCast()
-            Logger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%s/%d) is no longer myTarget(%s/%d)", target.CleanName() or "", target.ID(),
-                Targeting.GetTargetCleanName(), Targeting.GetTargetID())
+            Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%s/%d) is no longer myTarget(%s/%d)", currentCast, target.CleanName() or "",
+                target.ID(), Targeting.GetTargetCleanName(), Targeting.GetTargetID())
             return
-        end
-
-        if target() and target.ID() ~= Targeting.GetTargetID() then
-            Logger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) is no longer your currentTarget(%d)", target.ID(), Targeting.GetTargetID())
-        end
-
-        if Targeting.GetTargetDistance(target) > (spellRange * 1.2) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
+        elseif target() and Targeting.GetTargetDistance(target) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
             mq.TLO.Me.StopCast()
-            Logger.log_debug("WaitCastFinish(): Canceled casting because spellTarget(%d, range %d) is out of spell range(%d)", target.ID(), Targeting.GetTargetDistance(),
+            Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%d, range %d) is out of spell range(%d)", currentCast, target.ID(),
+                Targeting.GetTargetDistance(),
                 spellRange)
             return
+            --elseif target() and target.ID() ~= Targeting.GetTargetID() then
+            --Logger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) for %s is no longer your currentTarget(%d)", target.ID(), currentCast, Targeting.GetTargetID())
         end
 
-        maxWait = maxWait - 10
+        maxWait = maxWait - 20
 
         if maxWait <= 0 then
             local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d",
@@ -841,7 +837,7 @@ end
 --- @param aaName string The name of the AA ability to use.
 --- @param targetId number The ID of the target on which to use the AA ability.
 --- @return boolean True if the AA ability was successfully used, false otherwise.
-function Casting.UseAA(aaName, targetId)
+function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     local me = mq.TLO.Me
     local oldTargetId = mq.TLO.Target.ID()
 
@@ -863,47 +859,67 @@ function Casting.UseAA(aaName, targetId)
             mq.delay(10)
             Core.DoCmd("/stopsong")
         else
-            Logger.log_debug("\ayUseAA(): CANT CAST AA - Casting Window Open")
+            Logger.log_verbose("\ayUseAA(): CANT CAST AA - Casting Window Open")
             return false
         end
     end
 
-    local target = mq.TLO.Spawn(targetId)
+    local targetSpawn = mq.TLO.Spawn(targetId)
 
     -- If we're combat casting we need to both have the same swimming status
-    if target() and target.FeetWet() ~= me.FeetWet() then
-        Logger.log_debug("\ayUseAA(): Can't use AA feet wet mismatch!")
+    if targetSpawn() and targetSpawn.FeetWet() ~= me.FeetWet() then
+        Logger.log_verbose("\ayUseAA(): Can't use AA feet wet mismatch!")
+        return false
+    end
+
+    if not bAllowDead and targetSpawn() and targetSpawn.Dead() then
+        Logger.log_verbose("\ayUseAA(): \arAbility Failed!: I tried to use %s but my target (%d) is dead.",
+            aaName, targetId)
         return false
     end
 
     Casting.ActionPrep()
 
-    if Targeting.GetTargetID() ~= targetId and target() then
-        if me.Combat() and Targeting.TargetIsType("pc", target) then
+    if Targeting.GetTargetID() ~= targetId and targetSpawn() then
+        if me.Combat() and Targeting.TargetIsType("pc", targetSpawn) then
             Logger.log_info("\awUseAA():NOTICE:\ax Turning off autoattack to cast on a PC.")
             Core.DoCmd("/attack off")
             mq.delay("2s", function() return not me.Combat() end)
         end
 
-        Logger.log_debug("\awUseAA():NOTICE:\ax Swapping target to %s [%d] to use %s", target.DisplayName(), targetId, aaName)
+        Logger.log_debug("\awUseAA():NOTICE:\ax Swapping target to %s [%d] to use %s", targetSpawn.DisplayName(), targetId, aaName)
         Targeting.SetTarget(targetId, true)
     end
 
+    retryCount = retryCount or 3
     local cmd = string.format("/alt act %d", aaAbility.ID())
 
     Logger.log_debug("\ayUseAA():Activating AA: '%s' [t: %dms]", cmd, aaAbility.Spell.MyCastTime())
-    Core.DoCmd(cmd)
 
-    mq.delay(5)
+    if aaAbility.Spell.MyCastTime() > 0 then
+        Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESULT_NONE)
 
-    if (aaAbility.Spell.MyCastTime() or 0) > 0 then           --Not having the fudge additional delay was causing the same clipping up until around + 3-400ms for me.
-        local totaldelay = aaAbility.Spell.MyCastTime() + 600 --Magic Number for now until we can do more solid testing and solicit feedback (this may also be rewritten anyways)
-        mq.delay(string.format("%dms", totaldelay))
-    end
+        local spellRange = aaAbility.Spell.MyRange() > 0 and aaAbility.Spell.MyRange() or (aaAbility.Spell.AERange() > 0 and aaAbility.Spell.AERange() or 250)
 
-    if oldTargetId > 0 then
-        Logger.log_debug("UseAA():switching target back to old target after casting aa")
-        Targeting.SetTarget(oldTargetId, true)
+        repeat
+            Logger.log_verbose("\ayUseAA(): Attempting to cast: %s", aaName)
+            Core.DoCmd(cmd)
+            Logger.log_verbose("\ayUseAA(): Waiting to start cast: %s", aaName)
+            mq.delay("1s", function() return mq.TLO.Me.Casting() end)
+            Logger.log_verbose("\ayUseAA(): Started to cast: %s - waiting to finish", aaName)
+            Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
+            mq.doevents()
+            mq.delay(1)
+            Logger.log_verbose("\atUseAA(): Finished waiting on cast: %s result = %s retries left = %d", aaName, Casting.GetLastCastResultName(), retryCount)
+            retryCount = retryCount - 1
+        until Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS or retryCount < 0
+    else
+        Core.DoCmd(cmd)
+        mq.delay(5)
+        if oldTargetId > 0 then
+            Logger.log_debug("UseAA():switching target back to old target after casting aa")
+            Targeting.SetTarget(oldTargetId, true)
+        end
     end
 
     return true
@@ -1337,7 +1353,8 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
         local cmd = string.format("/cast \"%s\"", spellName)
         Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESULT_NONE)
 
-        local spellRange = spell.MyRange() or 300
+        local spellRange = spell.MyRange() > 0 and spell.MyRange() or (spell.AERange() > 0 and spell.AERange() or 250)
+
         repeat
             Logger.log_verbose("\ayUseSpell(): Attempting to cast: %s", spellName)
             Core.DoCmd(cmd)

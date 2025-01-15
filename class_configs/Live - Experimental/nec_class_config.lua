@@ -1208,7 +1208,7 @@ local _ClassConfig = {
                 end
 
                 if Casting.AAReady("Convergence") and mq.TLO.FindItemCount(mq.TLO.AltAbility("Convergence").Spell.ReagentID(1)())() > 0 then
-                    return Casting.UseAA("Convergence", corpseId)
+                    return Casting.UseAA("Convergence", corpseId, true, 1)
                 end
             end
         end,

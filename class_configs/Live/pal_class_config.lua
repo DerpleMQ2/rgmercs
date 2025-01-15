@@ -728,7 +728,7 @@ return {
             local rezSpell = Core.GetResolvedActionMapItem('RezSpell')
 
             if (Config:GetSetting('DoBattleRez') or mq.TLO.Me.CombatState():lower() ~= "combat") and Casting.AAReady("Gift of Resurrection") then
-                rezAction = Casting.UseAA("Gift of Resurrection", corpseId)
+                rezAction = Casting.UseAA("Gift of Resurrection", corpseId, true, 1)
             elseif not Casting.CanUseAA("Gift of Resurrection") and mq.TLO.Me.CombatState():lower() ~= "combat" and Casting.SpellReady(rezSpell) then
                 rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
             end

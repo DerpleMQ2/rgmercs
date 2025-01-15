@@ -1334,7 +1334,7 @@ local _ClassConfig = {
                 end,
                 cond = function(self, aaName, target)
                     local bookSpell = self:GetResolvedActionMapItem('MoveSpells')
-                    local aaSpell = mq.TLO.AltAbility(aaName).Spell.Trigger(1)
+                    local aaSpell = mq.TLO.AltAbility(aaName).Spell
                     if not Config:GetSetting('DoRunSpeed') or (bookSpell and bookSpell.Level() or 999) > (aaSpell.Level() or 0) then return false end
 
                     return Casting.GroupBuffCheck(aaSpell, target)
@@ -1674,11 +1674,11 @@ local _ClassConfig = {
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
                     rezAction = Casting.UseItem("Staff of Forbidden Rites", corpseId)
                 elseif Casting.AAReady("Call of the Wild") then
-                    rezAction = Casting.UseAA("Call of the Wild", corpseId)
+                    rezAction = Casting.UseAA("Call of the Wild", corpseId, true, 1)
                 end
             elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
                 if Casting.AAReady("Rejuvenation of Spirit") then
-                    rezAction = Casting.UseAA("Rejuvenation of Spirit", corpseId)
+                    rezAction = Casting.UseAA("Rejuvenation of Spirit", corpseId, true, 1)
                 elseif not Casting.CanUseAA("Rejuvenation of Spirit") and Casting.SpellReady(mq.TLO.Spell("Incarnate Anew")) then
                     rezAction = Casting.UseSpell("Incarnate Anew", corpseId, true, true)
                 end
