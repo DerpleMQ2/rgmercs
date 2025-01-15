@@ -1092,7 +1092,7 @@ local _ClassConfig = {
         },
         ['Malo'] = {
             {
-                name = "Wind of Malaise",
+                name = "Wind of Malosinete",
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoAEMalo') then return false end
@@ -1104,13 +1104,13 @@ local _ClassConfig = {
                 name = "AEMaloSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAEMalo') or Casting.CanUseAA("Wind of Malaise") then return false end
+                    if not Config:GetSetting('DoAEMalo') or Casting.CanUseAA("Wind of Malosinete") then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.TargetedSpellReady(spell, target.ID()) and
                         Casting.DetSpellCheck(spell)
                 end,
             },
             {
-                name = "Malaise",
+                name = "Malosinete",
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSTMalo') then return false end
@@ -1121,14 +1121,14 @@ local _ClassConfig = {
                 name = "MaloSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSTMalo') or Casting.CanUseAA("Malaise") then return false end
+                    if not Config:GetSetting('DoSTMalo') or Casting.CanUseAA("Malosinete") then return false end
                     return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
                 end,
             },
         },
         ['Slow'] = {
             {
-                name = "Turgur's Virulent Swarm",
+                name = "Tigir's Insect Swarm",
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoAESlow') then return false end
@@ -1140,7 +1140,7 @@ local _ClassConfig = {
                 name = "AESlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAESlow') or Casting.CanUseAA("Turgur's Virulent Swarm") then return false end
+                    if not Config:GetSetting('DoAESlow') or Casting.CanUseAA("Tigir's Insect Swarm") then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.TargetedSpellReady(spell, target.ID()) and
                         Casting.DetSpellCheck(spell)
                 end,
@@ -1568,7 +1568,7 @@ local _ClassConfig = {
                 {
                     name = "AESlowSpell",
                     cond = function(self)
-                        return not Casting.CanUseAA("Turgur's Virulent Swarm") and Config:GetSetting('DoAESlow')
+                        return not Casting.CanUseAA("Tigir's Insect Swarm") and Config:GetSetting('DoAESlow')
                     end,
                 }, -- 58-79
                 {
@@ -1605,14 +1605,14 @@ local _ClassConfig = {
                 {
                     name = "AEMaloSpell",
                     cond = function(self)
-                        return not Casting.CanUseAA("Wind of Malaise")
+                        return not Casting.CanUseAA("Wind of Malosinete")
                             and Config:GetSetting('DoAEMalo')
                     end,
                 }, -- 84-94
                 {
                     name = "MaloSpell",
                     cond = function(self)
-                        return not Casting.CanUseAA("Malaise") and Config:GetSetting('DoSTMalo')
+                        return not Casting.CanUseAA("Malosinete") and Config:GetSetting('DoSTMalo')
                     end,
                 }, -- 47-74
             },
