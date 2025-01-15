@@ -399,6 +399,7 @@ return {
             "Spiritual Radiance",
             "Spiritual Purity",
             "Spiritual Dominion",
+            "Spiritual Rejuvenation",
             "Spiritual Ascendance",
             "Spiritual Enlightenment",
             "Spiritual Epiphany",
