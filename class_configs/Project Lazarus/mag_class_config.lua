@@ -912,11 +912,12 @@ _ClassConfig      = {
             end,
         },
         {
-            name = 'Debuff',
+            name = 'Malo',
             state = 1,
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
+                if not Config:GetSetting('DoMalo') then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning() and mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
             end,
         },
@@ -1643,26 +1644,28 @@ _ClassConfig      = {
             --       end,
             --    },
         },
-        ['Debuff'] = {
+        ['Malo'] = {
             {
                 name = "Malosinete",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoMalo') and Casting.DetAACheck(aaName) and Casting.AAReady(aaName)
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(aaName)
                 end,
             },
             {
                 name = "MaloDebuff",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Config:GetSetting('DoMalo') and Casting.DetSpellCheck(spell)
+                cond = function(self, spell, target)
+                    if Casting.CanUseAA("Malaise") then return false end
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
-                name = "Malosinete",
-                type = "Wind of Malosinete",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoMalo') and Config:GetSetting('DoAEMalo') and Casting.DetAACheck(aaName)
+                name = "Wind of Malosinete",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoAEMalo') then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(aaName)
                 end,
             },
         },
