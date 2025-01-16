@@ -34,12 +34,15 @@ Module.DefaultConfig     = {
         Category = "Named Spawns",
         Tooltip = "Enables loading a different Named List",
         Type = "Combo",
-        ComboOptions = { 'RGMercs', 'Alert Master', 'Spawn Master', },
+        ComboOptions = { 'RGMercs', 'Alert Master', 'MQ2SpawnMaster', },
         Default = 1,
         Min = 1,
         Max = 3,
-        FAQ = "Why am I not seeing anything in the Named list?",
-        Answer = "You must pick either Use RGMercs, Spawn Master or Alert Master List.",
+        FAQ = "Why do we have different options for the named list?",
+        Answer =
+            "RGMercs has a built-in named list that is suitable for official EQ servers. However, other servers may change or add named mobs. In that case, you can replace the default list by loading your Alert Master or MQ2SpawnMaster list instead.\n" ..
+            "Please note that regardless of which list you choose, we will use the MQ2SpawnMaster TLO (if loaded) to check that list for the purposes of when to burn or use certain abilities.",
+
     },
     [string.format("%s_Popped", Module._name)] = {
         DisplayName = Module._name .. " Popped",
@@ -147,16 +150,17 @@ function Module:Render()
             self:SaveSettings(false)
         end
         Ui.Tooltip(string.format("Pop the %s tab out into its own window.", self._name))
-        ImGui.NewLine()
     end
-
+    ImGui.SameLine()
+    ImGui.Text("Make any mob \"named\" for burns by adding it to your MQ2SpawnMaster list!")
+    ImGui.NewLine()
     Ui.RenderZoneNamed()
 
     ---@type boolean|nil
     local pressed
 
     ImGui.SetNextItemWidth(150)
-    self.settings['NamedTable'], pressed = ImGui.Combo("Named Table", self.settings['NamedTable'], { 'RGMercs', 'Alert Master', 'Spawn Master', })
+    self.settings['NamedTable'], pressed = ImGui.Combo("Named Table", self.settings['NamedTable'], { 'RGMercs', 'Alert Master', 'MQ2SpawnMaster', })
     if pressed then
         if self.settings['NamedTable'] ~= self.CurSelection then
             self:SaveSettings(false)
@@ -164,6 +168,9 @@ function Module:Render()
             self.CurSelection = self.settings['NamedTable']
         end
     end
+    Ui.Tooltip(
+        "RGMercs has a built-in named list that is suitable for official EQ servers. However, other servers may change or add named mobs. In that case, you can replace the default list by loading your Alert Master or MQ2SpawnMaster list instead.\n" ..
+        "Please note that regardless of which list you choose, we will use the MQ2SpawnMaster TLO (if loaded) to check that list for the purposes of when to burn or use certain abilities.")
     ImGui.SameLine()
     if ImGui.SmallButton("Reload from INI") then
         if self.settings['NamedTable'] == 2 then
