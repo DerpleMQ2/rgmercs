@@ -685,11 +685,11 @@ local _ClassConfig = {
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
                     rezAction = Casting.UseItem("Staff of Forbidden Rites", corpseId)
                 elseif Casting.AAReady("Call of the Wild") then
-                    rezAction = Casting.UseAA("Call of the Wild", corpseId)
+                    rezAction = Casting.UseAA("Call of the Wild", corpseId, true, 1)
                 end
             elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
                 if Casting.AAReady("Rejuvenation of Spirit") then
-                    rezAction = Casting.UseAA("Rejuvenation of Spirit", corpseId)
+                    rezAction = Casting.UseAA("Rejuvenation of Spirit", corpseId, true, 1)
                 elseif not Casting.CanUseAA("Rejuvenation of Spirit") and Casting.SpellReady(mq.TLO.Spell("Incarnate Anew")) then
                     rezAction = Casting.UseSpell("Incarnate Anew", corpseId, true, true)
                 end
@@ -1252,6 +1252,7 @@ local _ClassConfig = {
             {
                 name = "Cannibalization",
                 type = "AA",
+                allowDead = true,
                 cond = function(self, aaName)
                     if not (Config:GetSetting('DoAACanni') and Config:GetSetting('DoCombatCanni')) then return false end
                     return Casting.AAReady(aaName) and mq.TLO.Me.PctMana() < Config:GetSetting('AACanniManaPct') and
@@ -1261,6 +1262,7 @@ local _ClassConfig = {
             {
                 name = "CanniSpell",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self, spell)
                     if not (Config:GetSetting('DoSpellCanni') and Config:GetSetting('DoCombatCanni')) then return false end
                     return Casting.CastReady(spell.RankName()) and Casting.SpellReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and
@@ -1270,6 +1272,7 @@ local _ClassConfig = {
             {
                 name = "GroupRenewalHoT",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self, spell)
                     if not Casting.CanUseAA("Luminary's Synergy") and Config:GetSetting('DoHealOverTime') then return false end
                     return not Casting.DotSpellCheck(spell) and Casting.SpellStacksOnMe(spell.RankName)
@@ -1424,7 +1427,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if target.ID() ~= Core.GetMainAssistId() then return false end
-                    return Casting.AAReady(aaName)
+                    return Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.AltAbility(aaName).Spell, target)
                 end,
             },
             {
@@ -1515,7 +1518,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target) --check ranks because this won't use Tala'Tak between 74 and 90
                     if not Config:GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility(aaName).Rank() or 0) < 4 then return false end
 
-                    local speedSpell = mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1)
+                    local speedSpell = mq.TLO.Me.AltAbility(aaName).Spell
                     if not speedSpell or not speedSpell() then return false end
 
                     return Casting.GroupBuffCheck(speedSpell, target)

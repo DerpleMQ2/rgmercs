@@ -744,7 +744,7 @@ local _ClassConfig = {
 
             if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
                 if Casting.AAReady("Blessing of Resurrection") then
-                    rezAction = Casting.UseAA("Blessing of Resurrection", corpseId)
+                    rezAction = Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
                     rezAction = Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 end
@@ -752,7 +752,7 @@ local _ClassConfig = {
                 rezAction = Casting.UseSpell("Larger Reviviscence", corpseId, true, true)
             else
                 if Casting.AAReady("Blessing of Resurrection") then
-                    rezAction = Casting.UseAA("Blessing of Resurrection", corpseId)
+                    rezAction = Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif not Casting.CanUseAA("Blessing of Resurrection") and Casting.SpellReady(rezSpell) then
                     rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
                 end

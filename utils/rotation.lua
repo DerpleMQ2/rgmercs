@@ -162,7 +162,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
     if entry.type:lower() == "aa" then
         if Casting.AAReady(entry.name) then
-            Casting.UseAA(entry.name, targetId)
+            Casting.UseAA(entry.name, targetId, entry.allowDead, entry.retries)
             ret = true
         else
             ret = false
