@@ -1183,27 +1183,23 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
                 end
 
                 if targetId > 0 and targetId ~= mq.TLO.Me.ID() then
-                    if targetSpawn() and Targeting.GetTargetPctHPs(targetSpawn) <= 0 then
+                    if targetSpawn() and Targeting.GetTargetPctHPs(targetSpawn) <= 0 and spell.SpellType() == "Detrimental" then -- Almost all bard casts should be allowed to continue
                         mq.TLO.Me.StopCast()
                         Logger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", targetSpawn.ID(),
                             Targeting.GetTargetPctHPs(targetSpawn))
                         break
-                    end
-
-                    if targetSpawn() and Targeting.GetTargetID() > 0 and targetSpawn.ID() ~= Targeting.GetTargetID() then
+                    elseif targetSpawn() and Targeting.GetTargetID() > 0 and targetSpawn.ID() ~= Targeting.GetTargetID() and spell.SpellType() == "Detrimental" then -- Almost all bard casts should be allowed to continue
                         mq.TLO.Me.StopCast()
                         Logger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", targetSpawn.ID(),
                             Targeting.GetTargetID())
                         break
-                    end
-
-                    if targetSpawn() and targetSpawn.ID() ~= Targeting.GetTargetID() then
+                    elseif targetSpawn() and targetSpawn.ID() ~= Targeting.GetTargetID() then
                         Logger.log_debug("UseSong::WaitSingFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", targetSpawn.ID(),
                             Targeting.GetTargetID())
                     end
                 end
                 mq.doevents()
-                mq.delay(1)
+                mq.delay(20)
             end
 
             retryCount = retryCount - 1
