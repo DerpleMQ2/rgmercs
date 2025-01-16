@@ -8,6 +8,7 @@ local Comms               = require("utils.comms")
 local Strings             = require("utils.strings")
 local Logger              = require("utils.logger")
 local Set                 = require("mq.Set")
+local Icons               = require('mq.ICONS')
 
 local LootnScoot          = require('lib.lootnscoot.loot_lib')
 local sNameStripped       = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
@@ -25,6 +26,7 @@ Module.GlobalItemsTable   = {}
 Module.GlobalItemsClasses = {}
 Module.NormalItemsTable   = {}
 Module.NormalItemsClasses = {}
+Module.NormalItemsLink    = {}
 Module.FAQ                = {}
 Module.ClassFAQ           = {}
 
@@ -378,6 +380,22 @@ Module.DefaultConfig      = {
 		Answer = "Enabling [LootMyCorpse] should enable looting of your own corpse, this will make sure to loot your own corpse FIRST." ..
 			"Before proceeding to the NPC corpses. This will not check for a REZ.",
 	},
+	['CheckCorpseOnce']                        = {
+		DisplayName = "Check Corpse Once",
+		Default = LootnScoot.Settings.CheckCorpseOnce,
+		Category = "Loot Settings",
+		Tooltip = "Only check a corpse once",
+		FAQ = "Why are my goobers looting the same corpse when everything is set to ignore?",
+		Answer = "You most likely have [CheckCorpseOnce] turned off.",
+	},
+	['AutoShowNewItem']                        = {
+		DisplayName = "Auto Show New Item Window",
+		Default = LootnScoot.Settings.AutoShowNewItem,
+		Category = "Loot N Scoot",
+		Tooltip = "Pops up a table showing new items looted, so you an adjust the settings.",
+		FAQ = "I hate having to search for new items to adjust their settings, how can I make this easier?",
+		Answer = "Enable [AutoShowNewItem] and a window will pop up showing the new items looted.",
+	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
 		Category = "Loot N Scoot",
@@ -578,6 +596,10 @@ function Module:ModifyLootSettings()
 		self.GlobalItemsClasses = LootnScoot.GlobalItemsClasses
 		self.TempSettings.GlobalItemsClasses = self.GlobalItemsClasses
 	end
+	if LootnScoot.NormalItemsLink ~= nil then
+		self.NormalItemsLink = {}
+		self.NormalItemsLink = LootnScoot.NormalItemsLink
+	end
 	self:SaveSettings(false)
 end
 
@@ -620,6 +642,9 @@ function Module:LoadSettings()
 	end
 	if LootnScoot.GlobalItemsClasses ~= nil then
 		self.GlobalItemsClasses = LootnScoot.GlobalItemsClasses
+	end
+	if LootnScoot.NormalItemsLink ~= nil then
+		self.NormalItemsLink = LootnScoot.NormalItemsLink
 	end
 	-- lootnscoot tables
 	local buyItems_pickle_path = getLootItemsConfigFileName('buy')
@@ -674,6 +699,8 @@ function Module:SortItemTables()
 	for k in pairs(self.NormalItemsTable) do
 		table.insert(self.TempSettings.SortedNormalItemKeys, k)
 	end
+
+
 	table.sort(self.TempSettings.SortedNormalItemKeys, function(a, b) return a < b end)
 end
 
@@ -721,7 +748,19 @@ function Module:SearchLootTable(search, key, value)
 	end
 end
 
+local selectedIndex = 1
+
 function Module:Render()
+	local settingList = {
+		"",
+		"Keep",
+		"Ignore",
+		"Destroy",
+		"Quest",
+		"Sell",
+		"Tribute",
+		"Bank",
+	}
 	ImGui.Text("EMU Loot")
 	local pressed
 	self.settings, pressed, _ = Ui.RenderSettings(self.settings, self.DefaultConfig,
@@ -817,6 +856,7 @@ function Module:Render()
 								local index = row + column * numRows
 								local k = self.TempSettings.SortedBuyItemKeys[index]
 								if k then
+									local itemLink = self.NormalItemsLink[k] or "NULL"
 									local v = self.BuyItemsTable[k]
 									if self:SearchLootTable(self.TempSettings.SearchBuyItems, k, v) then
 										self.TempSettings.BuyItems[k] = self.TempSettings.BuyItems[k] or
@@ -826,6 +866,19 @@ function Module:Render()
 										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.BuyItems[k].Key)
 
 										ImGui.TableNextColumn()
+										if itemLink ~= "NULL" then
+											ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.213, 0.569, 0.065, 1.000))
+											if ImGui.SmallButton(Icons.FA_EYE .. "##" .. k) then
+												Core.DoCmd('/executelink %s', itemLink)
+											end
+											ImGui.PopStyleColor()
+											ImGui.SameLine()
+										else
+											ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.353, 0.351, 0.354, 1.000))
+											ImGui.SmallButton(Icons.FA_EYE_SLASH .. "##" .. k)
+											ImGui.PopStyleColor()
+											ImGui.SameLine()
+										end
 										local newValue = ImGui.InputText("##Value" .. k,
 											self.TempSettings.BuyItems[k].Value)
 
@@ -889,8 +942,7 @@ function Module:Render()
 								who = Config.Globals.CurLoadedChar,
 								section = "GlobalItems",
 								action = 'deleteitem',
-								item =
-									k,
+								item = k,
 							})
 					end
 					self.TempSettings.UpdatedGlobalItems = {}
@@ -920,6 +972,7 @@ function Module:Render()
 					ImGui.SetNextItemWidth(150)
 					self.TempSettings.NewGlobalItem = ImGui.InputText("New Item##GlobalItems",
 						self.TempSettings.NewGlobalItem) or nil
+
 					if ImGui.IsItemHovered() and mq.TLO.Cursor() ~= nil then
 						if ImGui.IsMouseClicked(0) then
 							self.TempSettings.NewGlobalItem = mq.TLO.Cursor()
@@ -929,9 +982,22 @@ function Module:Render()
 					ImGui.TableNextColumn()
 					ImGui.SetNextItemWidth(120)
 
-					self.TempSettings.NewGlobalValue = ImGui.InputTextWithHint("New Value##GlobalItems",
-						"Quest, Keep, Sell, Tribute, Bank, Ignore, Destroy",
-						self.TempSettings.NewGlobalValue) or nil
+					-- self.TempSettings.NewGlobalValue = ImGui.InputTextWithHint("New Value##GlobalItems",
+					-- 	"Quest, Keep, Sell, Tribute, Bank, Ignore, Destroy",
+					-- 	self.TempSettings.NewGlobalValue) or nil
+					if ImGui.BeginCombo('##NewItem', settingList[selectedIndex]) then
+						for i, setting in ipairs(settingList) do
+							local isSelected = selectedIndex == i
+							if ImGui.Selectable(setting, isSelected) then
+								selectedIndex = i
+								self.TempSettings.NewGlobalValue = setting
+							end
+							if isSelected then
+								self.TempSettings.NewGlobalValue = setting
+							end
+						end
+						ImGui.EndCombo()
+					end
 
 					ImGui.TableNextColumn()
 					ImGui.SetNextItemWidth(120)
@@ -941,7 +1007,7 @@ function Module:Render()
 					ImGui.TableNextColumn()
 
 					if ImGui.Button("Add Item##GlobalItems") then
-						if self.TempSettings.NewGlobalValue ~= "" and self.TempSettings.NewGlobalValue ~= "" then
+						if self.TempSettings.NewGlobalValue ~= "" and self.TempSettings.NewGlobalItem ~= nil and self.TempSettings.NewGlobalItem ~= "" then
 							self.GlobalItemsTable[self.TempSettings.NewGlobalItem] = self.TempSettings.NewGlobalValue
 							LootnScoot.setGlobalItem(self.TempSettings.NewGlobalItem, self.TempSettings.NewGlobalValue, self.TempSettings.NewGlobalClasses)
 							LootnScoot.lootActor:send({ mailbox = 'lootnscoot', },
@@ -954,9 +1020,10 @@ function Module:Render()
 									classes = self.TempSettings.NewGlobalClasses,
 								})
 
-							self.TempSettings.NewGlobalItem = ""
-							self.TempSettings.NewGlobalValue = ""
+							self.TempSettings.NewGlobalItem = nil
+							-- self.TempSettings.NewGlobalValue = nil
 							self.TempSettings.NewGlobalClasses = "All"
+							self:SortItemTables()
 						end
 					end
 					ImGui.EndTable()
@@ -995,6 +1062,7 @@ function Module:Render()
 								local index = row + column * numRows
 								local k = self.TempSettings.SortedGlobalItemKeys[index]
 								if k then
+									local itemLink = self.NormalItemsLink[k] or "NULL"
 									local v = self.GlobalItemsTable[k]
 									if self:SearchLootTable(self.TempSettings.SearchGlobalItems, k, v) then
 										self.TempSettings.GlobalItems[k] = self.TempSettings.GlobalItems[k] or
@@ -1006,6 +1074,19 @@ function Module:Render()
 										local newKey = ImGui.InputText("##Key" .. k, self.TempSettings.GlobalItems[k].Key)
 
 										ImGui.TableNextColumn()
+										if itemLink ~= "NULL" then
+											ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.213, 0.569, 0.065, 1.000))
+											if ImGui.SmallButton(Icons.FA_EYE .. "##" .. k) then
+												Core.DoCmd('/executelink %s', itemLink)
+											end
+											ImGui.PopStyleColor()
+											ImGui.SameLine()
+										else
+											ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.353, 0.351, 0.354, 1.000))
+											ImGui.SmallButton(Icons.FA_EYE_SLASH .. "##" .. k)
+											ImGui.PopStyleColor()
+											ImGui.SameLine()
+										end
 										local newValue = ImGui.InputText("##Value" .. k,
 											self.TempSettings.GlobalItems[k].Value)
 
@@ -1064,6 +1145,7 @@ function Module:Render()
 								section = "NormalItems",
 								item = k,
 								rule = v,
+								link = self.NormalItemsLink[k] or "NULL",
 								classes = self.TempSettings.UpdateItemClasses[k] or "All",
 							})
 					end
@@ -1094,7 +1176,7 @@ function Module:Render()
 						Core.DoCmd("/autoinv")
 					end
 				end
-				col = math.max(3, math.floor(ImGui.GetContentRegionAvail() / 150))
+				col = math.max(3, math.floor(ImGui.GetContentRegionAvail() / 180))
 				local colCount = col + (col % 3)
 				if colCount % 3 ~= 0 then
 					if (colCount - 1) % 3 == 0 then
@@ -1128,6 +1210,7 @@ function Module:Render()
 								local k = self.TempSettings.SortedNormalItemKeys[index]
 								if k then
 									local v = self.NormalItemsTable[k]
+									local itemLink = self.NormalItemsLink[k] or "NULL"
 									if self:SearchLootTable(self.TempSettings.SearchItems, k, v) then
 										self.TempSettings.NormalItems[k] = self.TempSettings.NormalItems[k] or
 											{ Key = k, Value = v, }
@@ -1141,8 +1224,22 @@ function Module:Render()
 										end
 
 										ImGui.TableNextColumn()
+										if itemLink ~= "NULL" then
+											ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.213, 0.569, 0.065, 1.000))
+											if ImGui.SmallButton(Icons.FA_EYE .. "##" .. k) then
+												Core.DoCmd('/executelink %s', itemLink)
+											end
+											ImGui.PopStyleColor()
+											ImGui.SameLine()
+										else
+											ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.353, 0.351, 0.354, 1.000))
+											ImGui.SmallButton(Icons.FA_EYE_SLASH .. "##" .. k)
+											ImGui.PopStyleColor()
+											ImGui.SameLine()
+										end
 										local newValue = ImGui.InputText("##Value" .. k,
 											self.TempSettings.NormalItems[k].Value)
+
 
 										ImGui.TableNextColumn()
 										local newClasses = ImGui.InputText("##Class" .. k,
