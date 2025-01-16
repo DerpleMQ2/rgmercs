@@ -1355,7 +1355,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
             Logger.log_verbose("\ayUseSpell(): Attempting to cast: %s", spellName)
             Core.DoCmd(cmd)
             Logger.log_verbose("\ayUseSpell(): Waiting to start cast: %s", spellName)
-            mq.delay("1s", function() return mq.TLO.Me.Casting.ID() > 0 end)
+            mq.delay("1s", function() return mq.TLO.Me.Casting() end)
             Logger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
             Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
             mq.doevents()
