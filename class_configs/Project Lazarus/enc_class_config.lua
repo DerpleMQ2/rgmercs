@@ -1497,19 +1497,19 @@ local _ClassConfig = {
             spells = {
                 { name = "CharmSpell",     cond = function(self) return Config:GetSetting('CharmOn') and Core.IsModeActive("ModernEra") end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') and Core.IsModeActive("ModernEra") end, },
-                { name = "TashSpell", },
+                { name = "TashSpell",      cond = function(self) return not Casting.CanUseAA("Bite of Tashani") end, },
+                { name = "SpellProcBuff", },
             },
         },
         {
             gem = 4,
             spells = {
                 { name = "DichoSpell",     cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "SlowSpell",      cond = function(self) return not Casting.CanUseAA("Slowing Helix") and mq.TLO.Me.Level() < 88 end, },
-                { name = "CripSlowSpell",  cond = function(self) return not Casting.CanUseAA("Slowing Helix") and mq.TLO.Me.Level() >= 88 end, },
+                { name = "SlowSpell",      cond = function(self) return not Casting.CanUseAA("Dreary Deeds") and mq.TLO.Me.Level() < 88 end, },
+                { name = "CripSlowSpell",  cond = function(self) return not Casting.CanUseAA("Dreary Deeds") and mq.TLO.Me.Level() >= 88 end, },
                 { name = "ManaDrainSpell", cond = function(self) return true end, },
             },
-        },
-        {
+        },        {
             gem = 5,
             spells = {
                 { name = "ManaDot",    cond = function(self) return Core.IsModeActive("ModernEra") end, },
