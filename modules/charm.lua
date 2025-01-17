@@ -325,6 +325,33 @@ function Module:Render()
 		ImGui.Separator()
 		-- Immune targets
 		if ImGui.CollapsingHeader("Invalid Charm Targets") then
+			self.TempSettings.NewImmune = ImGui.InputTextWithHint("##NewImmune", "Mob Name", self.TempSettings.NewImmune)
+
+			ImGui.SetNextItemWidth(80)
+
+			self.TempSettings.NewImmuneLvl = ImGui.InputInt("Lvl##NewImmuneLvl", self.TempSettings.NewImmuneLvl ~= nil and self.TempSettings.NewImmuneLvl or 0)
+
+			ImGui.SetNextItemWidth(100)
+
+			self.TempSettings.NewImmuneBody = ImGui.InputTextWithHint("##NewImmuneBody", "Body Type", self.TempSettings.NewImmuneBody)
+			ImGui.SetNextItemWidth(100)
+			ImGui.SameLine()
+			self.TempSettings.NewImmuneReason = ImGui.InputTextWithHint("##NewImmuneReason", "Reason", self.TempSettings.NewImmuneReason)
+			ImGui.SameLine()
+
+			if ImGui.SmallButton(Icons.MD_ADD) then
+				local mobData = {
+					name = self.TempSettings.NewImmune,
+					lvl = self.TempSettings.NewImmuneLvl,
+					body = self.TempSettings.NewImmuneBody,
+					reason = self.TempSettings.NewImmuneReason,
+				}
+				self:AddImmuneTarget(self.TempSettings.NewImmune, mobData)
+				self.TempSettings.NewImmune = nil
+				self.TempSettings.NewImmuneLvl = nil
+				self.TempSettings.NewImmuneBody = nil
+				self.TempSettings.NewImmuneReason = nil
+			end
 			ImGui.Indent()
 			if ImGui.BeginTable("Immune", 5, bit32.bor(ImGuiTableFlags.None, ImGuiTableFlags.Borders, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Hideable)) then
 				ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
