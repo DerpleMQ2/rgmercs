@@ -1847,129 +1847,130 @@ function loot.renderNewItem()
         local itemsToRemove = {} -- Temporary table to store items to remove
 
         if newItemsCount > 0 then
-            ImGui.BeginTable('##newItemTable', 9,
-                bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollX, ImGuiTableFlags.ScrollY, ImGuiTableFlags.Resizable, ImGuiTableFlags.Reorderable, ImGuiTableFlags
-                    .Hideable))
-            ImGui.TableSetupColumn('Item', ImGuiTableColumnFlags.WidthStretch)
-            ImGui.TableSetupColumn('Rule', ImGuiTableColumnFlags.WidthFixed, 100)
-            ImGui.TableSetupColumn('Classes', ImGuiTableColumnFlags.WidthFixed, 150)
-            ImGui.TableSetupColumn('Value', ImGuiTableColumnFlags.WidthFixed, 120)
-            ImGui.TableSetupColumn('NoDrop', ImGuiTableColumnFlags.WidthFixed, 50)
-            ImGui.TableSetupColumn('Lore', ImGuiTableColumnFlags.WidthFixed, 50)
-            ImGui.TableSetupColumn("Aug", ImGuiTableColumnFlags.WidthFixed, 50)
-            ImGui.TableSetupColumn('TS', ImGuiTableColumnFlags.WidthFixed, 50)
-            ImGui.TableSetupColumn("Save", ImGuiTableColumnFlags.WidthFixed, 90)
-            ImGui.TableHeadersRow()
+            if ImGui.BeginTable('##newItemTable', 9,
+                    bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollX, ImGuiTableFlags.ScrollY, ImGuiTableFlags.Resizable, ImGuiTableFlags.Reorderable, ImGuiTableFlags
+                        .Hideable)) then
+                ImGui.TableSetupColumn('Item', ImGuiTableColumnFlags.WidthStretch)
+                ImGui.TableSetupColumn('Rule', ImGuiTableColumnFlags.WidthFixed, 100)
+                ImGui.TableSetupColumn('Classes', ImGuiTableColumnFlags.WidthFixed, 150)
+                ImGui.TableSetupColumn('Value', ImGuiTableColumnFlags.WidthFixed, 120)
+                ImGui.TableSetupColumn('NoDrop', ImGuiTableColumnFlags.WidthFixed, 50)
+                ImGui.TableSetupColumn('Lore', ImGuiTableColumnFlags.WidthFixed, 50)
+                ImGui.TableSetupColumn("Aug", ImGuiTableColumnFlags.WidthFixed, 50)
+                ImGui.TableSetupColumn('TS', ImGuiTableColumnFlags.WidthFixed, 50)
+                ImGui.TableSetupColumn("Save", ImGuiTableColumnFlags.WidthFixed, 90)
+                ImGui.TableHeadersRow()
 
-            for name, item in pairs(loot.NewItems) do
-                if tmpLinks[name] == nil then tmpLinks[name] = item.Link end
-                if name == nil then break end
-                if tmpClasses[name] == nil then tmpClasses[name] = item.Classes end
-                if tmpRules[name] == nil then tmpRules[name] = item.Rule end
-                local corpseID = item.CorpseID
-                ImGui.TableNextRow()
+                for name, item in pairs(loot.NewItems) do
+                    if tmpLinks[name] == nil then tmpLinks[name] = item.Link end
+                    if name == nil then break end
+                    if tmpClasses[name] == nil then tmpClasses[name] = item.Classes end
+                    if tmpRules[name] == nil then tmpRules[name] = item.Rule end
+                    local corpseID = item.CorpseID
+                    ImGui.TableNextRow()
 
-                -- Item Name and link
-                ImGui.TableNextColumn()
-                if ImGui.SmallButton(Icons.FA_EYE .. "##" .. name) then
-                    Core.DoCmd('/executelink %s', tmpLinks[name])
-                end
-                ImGui.SameLine()
-                ImGui.Text(name)
+                    -- Item Name and link
+                    ImGui.TableNextColumn()
+                    if ImGui.SmallButton(Icons.FA_EYE .. "##" .. name) then
+                        Core.DoCmd('/executelink %s', tmpLinks[name])
+                    end
+                    ImGui.SameLine()
+                    ImGui.Text(name)
 
-                -- Rule
-                ImGui.TableNextColumn()
-                if item.selectedIndex == nil then
-                    for i, setting in ipairs(settingList) do
-                        if item.Rule == setting then
-                            item.selectedIndex = i
-                            break
+                    -- Rule
+                    ImGui.TableNextColumn()
+                    if item.selectedIndex == nil then
+                        for i, setting in ipairs(settingList) do
+                            if item.Rule == setting then
+                                item.selectedIndex = i
+                                break
+                            end
                         end
                     end
-                end
-                ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
-                if ImGui.BeginCombo('##Setting' .. name, settingList[item.selectedIndex]) then
-                    for i, setting in ipairs(settingList) do
-                        local isSelected = item.selectedIndex == i
-                        if ImGui.Selectable(setting, isSelected) then
-                            item.selectedIndex = i
-                            tmpRules[name] = setting
+                    ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
+                    if ImGui.BeginCombo('##Setting' .. name, settingList[item.selectedIndex]) then
+                        for i, setting in ipairs(settingList) do
+                            local isSelected = item.selectedIndex == i
+                            if ImGui.Selectable(setting, isSelected) then
+                                item.selectedIndex = i
+                                tmpRules[name] = setting
+                            end
+                            if isSelected then
+                                tmpRules[name] = setting
+                            end
                         end
-                        if isSelected then
-                            tmpRules[name] = setting
-                        end
+                        ImGui.EndCombo()
                     end
-                    ImGui.EndCombo()
+
+                    -- Classes
+                    ImGui.TableNextColumn()
+                    ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
+                    tmpClasses[name] = ImGui.InputText('##Classes' .. name, tmpClasses[name])
+
+                    -- Value
+                    ImGui.TableNextColumn()
+                    ImGui.Text(item.SellPrice)
+
+                    -- NoDrop
+                    ImGui.TableNextColumn()
+                    if item.NoDrop then
+                        ImGui.TextColored(ImVec4(0.0, 1.0, 1.0, 1.0), 'Yes')
+                    else
+                        ImGui.TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), 'No')
+                    end
+
+                    -- Lore
+                    ImGui.TableNextColumn()
+                    if item.Lore then
+                        ImGui.TextColored(ImVec4(0.0, 1.0, 1.0, 1.0), 'Yes')
+                    else
+                        ImGui.TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), 'No')
+                    end
+
+                    -- Augment
+                    ImGui.TableNextColumn()
+                    if item.Aug > 0 then
+                        ImGui.TextColored(ImVec4(0.0, 1.0, 1.0, 1.0), 'Yes')
+                    else
+                        ImGui.TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), 'No')
+                    end
+
+                    -- TradeSkill
+                    ImGui.TableNextColumn()
+                    if item.TradeSkill then
+                        ImGui.TextColored(ImVec4(0.0, 1.0, 1.0, 1.0), 'Yes')
+                    else
+                        ImGui.TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), 'No')
+                    end
+
+                    -- Save
+                    ImGui.TableNextColumn()
+                    if ImGui.Button('Save##' .. name) then
+                        loot.addRule(name, "NormalItems", tmpRules[name], tmpClasses[name], tmpLinks[name])
+                        loot.lootActor:send({
+                            mailbox = 'lootnscoot',
+                        }, {
+                            who = Config.Globals.CurLoadedChar,
+                            action = 'modifyitem',
+                            section = "NormalItems",
+                            item = name,
+                            rule = tmpRules[name],
+                            link = tmpLinks[name],
+                            classes = tmpClasses[name],
+                        })
+
+                        if lootedCorpses[corpseID] then lootedCorpses[corpseID] = nil end
+                        loot.setNormalItem(name, tmpRules[name], tmpClasses[name], tmpLinks[name])
+                        loot.lootActor:send({ mailbox = 'lootnscoot', }, { who = Config.Globals.CurLoadedChar, action = 'entered', item = name, corpse = corpseID, })
+
+                        table.insert(itemsToRemove, name) -- Add item to removal list
+                    end
                 end
 
-                -- Classes
-                ImGui.TableNextColumn()
-                ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
-                tmpClasses[name] = ImGui.InputText('##Classes' .. name, tmpClasses[name])
 
-                -- Value
-                ImGui.TableNextColumn()
-                ImGui.Text(item.SellPrice)
 
-                -- NoDrop
-                ImGui.TableNextColumn()
-                if item.NoDrop then
-                    ImGui.TextColored(ImVec4(0.0, 1.0, 1.0, 1.0), 'Yes')
-                else
-                    ImGui.TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), 'No')
-                end
-
-                -- Lore
-                ImGui.TableNextColumn()
-                if item.Lore then
-                    ImGui.TextColored(ImVec4(0.0, 1.0, 1.0, 1.0), 'Yes')
-                else
-                    ImGui.TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), 'No')
-                end
-
-                -- Augment
-                ImGui.TableNextColumn()
-                if item.Aug > 0 then
-                    ImGui.TextColored(ImVec4(0.0, 1.0, 1.0, 1.0), 'Yes')
-                else
-                    ImGui.TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), 'No')
-                end
-
-                -- TradeSkill
-                ImGui.TableNextColumn()
-                if item.TradeSkill then
-                    ImGui.TextColored(ImVec4(0.0, 1.0, 1.0, 1.0), 'Yes')
-                else
-                    ImGui.TextColored(ImVec4(1.0, 0.0, 0.0, 1.0), 'No')
-                end
-
-                -- Save
-                ImGui.TableNextColumn()
-                if ImGui.Button('Save##' .. name) then
-                    loot.addRule(name, "NormalItems", tmpRules[name], tmpClasses[name], tmpLinks[name])
-                    loot.lootActor:send({
-                        mailbox = 'lootnscoot',
-                    }, {
-                        who = Config.Globals.CurLoadedChar,
-                        action = 'modifyitem',
-                        section = "NormalItems",
-                        item = name,
-                        rule = tmpRules[name],
-                        link = tmpLinks[name],
-                        classes = tmpClasses[name],
-                    })
-
-                    if lootedCorpses[corpseID] then lootedCorpses[corpseID] = nil end
-                    loot.setNormalItem(name, tmpRules[name], tmpClasses[name], tmpLinks[name])
-                    loot.lootActor:send({ mailbox = 'lootnscoot', }, { who = Config.Globals.CurLoadedChar, action = 'entered', item = name, corpse = corpseID, })
-
-                    table.insert(itemsToRemove, name) -- Add item to removal list
-                end
+                ImGui.EndTable()
             end
-
-
-
-            ImGui.EndTable()
         end
         -- Remove items after iteration
         for _, name in ipairs(itemsToRemove) do
