@@ -19,6 +19,7 @@ Module.__index                            = Module
 Module.settings                           = {}
 Module.ModuleLoaded                       = false
 Module.TempSettings                       = {}
+Module.TempSettings.BuffCount             = 0
 Module.TempSettings.LastPullOrCombatEnded = os.clock()
 Module.TempSettings.TargetSpawnID         = 0
 Module.TempSettings.CurrentWP             = 1
@@ -914,9 +915,15 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text("%d, %d, %d", self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ)
             ImGui.TableNextColumn()
+            ImGui.Text("Current WP")
+            ImGui.TableNextColumn()
             local wpId = self:GetCurrentWpId()
             local wpData = self:GetWPById(wpId)
             ImGui.Text(wpId == 0 and "<None>" or string.format("%d [y: %0.2f, x: %0.2f, z: %0.2f]", wpId, wpData.y, wpData.x, wpData.z))
+            ImGui.TableNextColumn()
+            ImGui.Text("Buff Count")
+            ImGui.TableNextColumn()
+            ImGui.Text("%s", self.TempSettings.BuffCount)
             ImGui.EndTable()
         end
 
@@ -1140,12 +1147,27 @@ function Module:DeleteWayPoint(idx)
     end
 end
 
+-- because mq.TLO.Me.BuffCount() fails to update when gaining buffs without targeting yourself.
+-- it does update when you lose buffs though.
+---@return number -- # of buffs you have currently
+function Module:CountBuffs()
+    local count = 0
+    for i = 1, mq.TLO.Me.MaxBuffSlots() do
+        local buff = mq.TLO.Me.Buff(i)()
+        if buff ~= nil then
+            count = count + 1
+        end
+    end
+    self.TempSettings.BuffCount = count
+    return count
+end
+
 ---@param campData table
 ---@return boolean, string
 function Module:ShouldPull(campData)
     local me = mq.TLO.Me
 
-    if self.settings.PullBuffCount > 0 and me.BuffCount() < self.settings.PullBuffCount then
+    if self.settings.PullBuffCount > 0 and self:CountBuffs() < self.settings.PullBuffCount then
         Logger.log_info("\ay::PULL:: \arAborted!\ax Waiting for Buffs! BuffCount < %d", self.settings.PullBuffCount)
         return false, string.format("BuffCount < %d", self.settings.PullBuffCount)
     end
