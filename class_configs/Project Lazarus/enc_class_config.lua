@@ -606,16 +606,6 @@ local _ClassConfig = {
         -- "Multichromatic Assault",
         -- "Polychromatic Assault",
         -- },
-        ['CripSlowSpell'] = {
-            --- Slow Cripple Combo Spell - Beginning @ Level 88
-            "Constraining Coil",
-            "Constraining Helix",
-            "Undermining Helix",
-            "Diminishing Helix",
-            "Attenuating Helix",
-            "Curtailing Helix",
-            "Inhibiting Helix",
-        },
         ['PetSpell'] = {
             "Flariton's Animation",
             "Constance's Animation",
@@ -1453,14 +1443,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "CripSlowSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if Casting.CanUseAA("Enveloping Helix") then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
-                end,
-            },
-            {
                 name = "SlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1504,12 +1486,11 @@ local _ClassConfig = {
         {
             gem = 4,
             spells = {
-                { name = "DichoSpell",     cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "SlowSpell",      cond = function(self) return not Casting.CanUseAA("Dreary Deeds") and mq.TLO.Me.Level() < 88 end, },
-                { name = "CripSlowSpell",  cond = function(self) return not Casting.CanUseAA("Dreary Deeds") and mq.TLO.Me.Level() >= 88 end, },
+                { name = "SlowSpell",      cond = function(self) return not Casting.CanUseAA("Dreary Deeds") end, },
                 { name = "ManaDrainSpell", cond = function(self) return true end, },
             },
-        },        {
+        },
+        {
             gem = 5,
             spells = {
                 { name = "ManaDot",    cond = function(self) return Core.IsModeActive("ModernEra") end, },
@@ -1533,7 +1514,7 @@ local _ClassConfig = {
             gem = 8,
             spells = {
                 { name = "ManaNuke",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "CrippleSpell",   cond = function(self) return Config:GetSetting('DoCripple') and mq.TLO.Me.Level() < 88 end, },
+                { name = "CrippleSpell",   cond = function(self) return Config:GetSetting('DoCripple') end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') end, },
                 { name = "NukeSpell2",     cond = function(self) return true end, },
             },
