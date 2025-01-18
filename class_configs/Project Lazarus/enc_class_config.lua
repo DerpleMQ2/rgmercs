@@ -8,7 +8,7 @@ local Logger       = require("utils.logger")
 
 local _ClassConfig = {
     _version            = "1.2 - Project Lazarus",
-    _author             = "Derple, Grimmier, Algar",
+    _author             = "Derple, Grimmier, Algar, Robban",
     ['ModeChecks']      = {
         CanMez     = function() return true end,
         CanCharm   = function() return true end,
@@ -606,16 +606,6 @@ local _ClassConfig = {
         -- "Multichromatic Assault",
         -- "Polychromatic Assault",
         -- },
-        ['CripSlowSpell'] = {
-            --- Slow Cripple Combo Spell - Beginning @ Level 88
-            "Constraining Coil",
-            "Constraining Helix",
-            "Undermining Helix",
-            "Diminishing Helix",
-            "Attenuating Helix",
-            "Curtailing Helix",
-            "Inhibiting Helix",
-        },
         ['PetSpell'] = {
             "Flariton's Animation",
             "Constance's Animation",
@@ -831,12 +821,12 @@ local _ClassConfig = {
             end,
         },
         { --Slow and Tash separated so we use both before we start DPS
-            name = 'CripSlow',
+            name = 'Slow',
             state = 1,
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('DoSlow') or not Config:GetSetting('DoCripple') then return false end
+                if not Config:GetSetting('DoSlow') then return false end
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
                     mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
             end,
@@ -1416,6 +1406,22 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName) return not Casting.SongActiveByName("Illusions of Grandeur") and Casting.AAReady(aaName) end,
             },
+            {
+                name = "Crippling Aurora",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoCripple') then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "CrippleSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoCripple') then return false end
+                    return Targeting.IsNamed(mq.TLO.Target) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
         },
         ['Tash'] = {
             {
@@ -1435,7 +1441,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['CripSlow'] = {
+        ['Slow'] = {
             {
                 name = "Enveloping Helix",
                 type = "AA",
@@ -1453,28 +1459,12 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "CripSlowSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if Casting.CanUseAA("Enveloping Helix") then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
-                end,
-            },
-            {
                 name = "SlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoSlow') then return false end
                     return not Casting.TargetHasBuffByName(spell) and (mq.TLO.Me.AltAbility(spell).Spell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
                         Casting.TargetedSpellReady(spell, target.ID())
-                end,
-            },
-            {
-                name = "CrippleSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoCripple') or Casting.CanUseAA("Enveloping Helix") then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
@@ -1497,15 +1487,14 @@ local _ClassConfig = {
             spells = {
                 { name = "CharmSpell",     cond = function(self) return Config:GetSetting('CharmOn') and Core.IsModeActive("ModernEra") end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') and Core.IsModeActive("ModernEra") end, },
-                { name = "TashSpell", },
+                { name = "TashSpell",      cond = function(self) return not Casting.CanUseAA("Bite of Tashani") end, },
+                { name = "SpellProcBuff", },
             },
         },
         {
             gem = 4,
             spells = {
-                { name = "DichoSpell",     cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "SlowSpell",      cond = function(self) return not Casting.CanUseAA("Slowing Helix") and mq.TLO.Me.Level() < 88 end, },
-                { name = "CripSlowSpell",  cond = function(self) return not Casting.CanUseAA("Slowing Helix") and mq.TLO.Me.Level() >= 88 end, },
+                { name = "SlowSpell",      cond = function(self) return not Casting.CanUseAA("Dreary Deeds") end, },
                 { name = "ManaDrainSpell", cond = function(self) return true end, },
             },
         },
@@ -1533,7 +1522,7 @@ local _ClassConfig = {
             gem = 8,
             spells = {
                 { name = "ManaNuke",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "CrippleSpell",   cond = function(self) return Config:GetSetting('DoCripple') and mq.TLO.Me.Level() < 88 end, },
+                { name = "CrippleSpell",   cond = function(self) return Config:GetSetting('DoCripple') end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') end, },
                 { name = "NukeSpell2",     cond = function(self) return true end, },
             },
