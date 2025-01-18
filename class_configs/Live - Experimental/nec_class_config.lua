@@ -774,7 +774,7 @@ local _ClassConfig = {
             name = 'PetSummon',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.DoPetCheck() and not Core.IsCharming()
+                return combat_state == "Downtime" and Casting.DoPetCheck() and not Core.IsCharming() and Casting.AmIBuffable()
             end,
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
