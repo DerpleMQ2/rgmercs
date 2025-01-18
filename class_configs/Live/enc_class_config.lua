@@ -864,7 +864,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('DoSlow') or not Config:GetSetting('DoCripple') then return false end
+                if not Config:GetSetting('DoSlow') and not Config:GetSetting('DoCripple') then return false end
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
                     mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
             end,
