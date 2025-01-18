@@ -664,11 +664,15 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
         local me = mq.TLO.Me
         Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         if me.CombatState():lower() == "combat" or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
-            Logger.log_verbose(
-                "I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s)",
+            Logger.log_debug(
+                "I was interrupted while waiting for spell '%s' to load in slot %d'! Aborting. CombatState(%s) Casting(%s) Moving(%s) Stick(%s) Nav(%s) MoveTo(%s) Following(%s))",
                 spell, gem, me.CombatState(), me.Casting() or "None", Strings.BoolToColorString(me.Moving()), Strings.BoolToColorString(mq.TLO.Stick.Active()),
                 Strings.BoolToColorString(mq.TLO.Navigation.Active()), Strings.BoolToColorString(mq.TLO.MoveTo.Moving()),
                 Strings.BoolToColorString(mq.TLO.AdvPath.Following()))
+            break
+        end
+        if not mq.TLO.Me.Book(spell)() then
+            Logger.log_debug("I was trying to memorize %s as my persona was changed, aborting.", spell)
             break
         end
         mq.delay(100)
@@ -747,6 +751,10 @@ function Casting.WaitCastReady(spell, maxWait)
         mq.doevents()
         if Targeting.GetXTHaterCount() > 0 then
             Logger.log_debug("I was interruped by combat while waiting to cast %s.", spell)
+            return
+        end
+        if not mq.TLO.Me.Book(spell)() then
+            Logger.log_debug("I was trying to cast %s as my persona was changed, aborting.", spell)
             return
         end
 
