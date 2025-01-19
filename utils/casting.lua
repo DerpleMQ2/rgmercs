@@ -589,7 +589,7 @@ function Casting.TargetedSpellReady(spellName, targetId, healingSpell)
     if not target or not target() then return false end
 
     if me.SpellReady(spell.RankName.Name())() and me.CurrentMana() >= spell.Mana() then
-        if not me.Moving() and not me.Casting.ID() and not Targeting.TargetIsType("corpse", target) then
+        if not (me.Moving() and (spell.MyCastTime() or -1) > 0) and not me.Casting.ID() and not Targeting.TargetIsType("corpse", target) then
             if target.LineOfSight() then
                 return true
             elseif healingSpell then

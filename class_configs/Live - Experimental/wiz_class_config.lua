@@ -568,39 +568,32 @@ return {
             end,
         },
         {
+            name = 'Aggro Management',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and mq.TLO.Me.PctAggro() > (Config:GetSetting('JoltAggro') or 90)
+            end,
+        },
+        {
             name = 'Burn',
             state = 1,
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck()
+                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
             end,
         },
-        {
-            name = 'Aggro Management',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
-            end,
-        },
-        -- {
-        -- name = 'Gift of Mana',
-        -- state = 1,
-        -- steps = 1,
-        -- targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-        -- cond = function(self, combat_state)
-        -- return combat_state == "Combat" and (not Config:GetSetting('DoGOMCheck') or Casting.DetGOMCheck())
-        -- end,
-        -- },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -609,49 +602,48 @@ return {
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
-            name = 'Combat Buffs',
+            name = 'CombatBuff',
             state = 1,
             steps = 1,
             timer = 30, -- only run every 30 seconds at most.
-            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
     },
     ['Rotations']     = {
         ['Burn'] = {
             {
-                name = "Arcane Whisper",
+                name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self)
-                    return Targeting.GetTargetPctHPs() > 10
-                end,
-            },
-            {
-                name = "Silent Casting",
-                type = "AA",
-                cond = function(self)
-                    return true
-                end,
-            },
-            {
-                name = "Arcane Destruction",
-                type = "AA",
-                cond = function(self)
-                    return not Casting.SongActiveByName("Frenzied Devastation")
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Arcane Fury",
                 type = "AA",
-                cond = function(self)
-                    return (not Casting.SongActiveByName("Chromatic Haze")) and (not Casting.SongActiveByName("Gift of Chromatic Haze")) and
-                        ((Casting.SongActiveByName("Arcane Destruction")) or (Casting.SongActiveByName("Frenzied Devastation")))
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Fury of the Gods",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Spire of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
             {
@@ -662,169 +654,83 @@ return {
                 end,
             },
             {
-                name = "Mana Burn",
-                type = "AA",
-                cond = function(self)
-                    return not Casting.TargetHasBuffByName("Mana Burn") and Config:GetSetting('DoManaBurn') and Casting.HaveManaToNuke()
-                end,
-            },
-            {
-                name = "Harvest of Druzzil",
+                name = "Arcane Destruction",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady(aaName)
+                    return Casting.AAReady(aaName) and not mq.TLO.Me.Buff("Spire of Arcanum")
                 end,
             },
             {
-                name = "HarvestSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                name = "Frenzied Devastation",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName) and not mq.TLO.Me.Buff("Spire of Arcanum")
+                end,
+            },
+            {
+                name = "Silent Casting",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Mana Burn",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.TargetHasBuffByName("Mana Burn") and Config:GetSetting('DoManaBurn') and
+                        Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "Call of Xuzl",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
                 end,
             },
         },
         ['Aggro Management'] =
         {
             {
-                name = "A Hole in Space",
+                name = "Mind Crash",
                 type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctAggro() > 99 and Targeting.IHaveAggro(100)
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
                 end,
             },
             {
-                name = "Mind Crash",
+                name = "Arcane Whisper",
                 type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctAggro() > 85
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
+                end,
+            },
+            {
+                name = "A Hole in Space",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName) and Targeting.IHaveAggro(100)
                 end,
             },
             {
                 name = "Concussion",
                 type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
             },
             {
                 name = "JoltSpell",
                 type = "Spell",
-                cond = function(self)
-                    return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
             },
 
         },
-        ['Combat Buffs'] =
+        ['CombatBuff'] =
         {
-            {
-                name = "Etherealist's Unity",
-                type = "AA",
-                active_cond = function(self, aaName) return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
-                cond = function(self, aaName)
-                    local selfHPBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
-                    local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "SelfRune1",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell) and mq.TLO.FindItemCount('Peridot')() > 0
-                end,
-            },
-            {
-                name = "GambitSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('ModRodManaPct')
-                end,
-            },
-            {
-                name = "Harvest of Druzzil",
-                type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
-                end,
-            },
-            {
-                name = "HarvestSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
-                end,
-            },
-        },
-        ['Weaves'] = {
-            {
-                name = "Force of Ice",
-                type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Ice")
-                end,
-            },
-            {
-                name = "Force of Will",
-                type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Will")
-                end,
-            },
-            {
-                name = "Force of Flame",
-                type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Flame")
-                end,
-            },
-        },
-        ['Gift of Mana'] = {
-
-        },
-        ['DPS'] = {
-            {
-                name = "CloudburstNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return (Casting.DetGambitCheck() or ((mq.TLO.Me.Song("Evoker's Synergy I").ID() or 0) > 0)) and Casting.TargetedSpellReady(spell)
-                end,
-            },
-            {
-                name = "VortexNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return not Casting.TargetHasBuff(spell) and Casting.TargetedSpellReady(spell)
-                end,
-            },
-            {
-                name = "FuseNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell)
-                end,
-            },
-            {
-                name = "FireClaw",
-                type = "Spell",
-                cond = function(self, spell)
-                    return not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID()) and Casting.TargetedSpellReady(spell)
-                end,
-            },
-            {
-                name = "FireEtherealNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell)
-                end,
-            },
-            {
-                name = "IceEtherealNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell)
-                end,
-            },
             {
                 name = "TwincastSpell",
                 type = "Spell",
@@ -833,127 +739,109 @@ return {
                 end,
             },
             {
-                name = "FireClaw",
+                name = "GambitSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.BuffActiveByID(mq.TLO.Spell("Twincast").RankName.ID()) and Casting.TargetedSpellReady(spell)
+                    return Casting.SpellReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('GambitManaPct')
+                end,
+            },
+            {
+                name = "Harvest of Druzzil",
+                type = "AA",
+                allowDead = true,
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName) and mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
+                end,
+            },
+            {
+                name = "HarvestSpell",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self, spell)
+                    return Casting.SpellReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
+                end,
+            },
+        },
+        ['Weaves'] = {
+            {
+                name = "Lower Element",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.DetAACheck(mq.TLO.AltAbility(aaName).ID()) and Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Force of Ice",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Force of Will",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Force of Flame",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+        },
+        ['DPS'] = { --TODO: Implement AE DPS: Fire Beam (3+ targets), Fire Ring (5+ targets). Drop jolt spell and arrange others accordingly.
+            {
+                name = "VortexNuke",
+                type = "Spell",
+                cond = function(self, spell, target) --using DotSpellCheck to leverage HPStopDot settings to ensure we aren't casting just before trash dies (default: stop at 25% on named, 50% on trash)
+                    return Casting.DetSpellCheck(spell) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "CloudburstNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return (Casting.DetGambitCheck() or mq.TLO.Me.Song("Evoker's Synergy")()) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "FuseNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "FireClaw",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID()) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "FireEtherealNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "WildNuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.DetGambitCheck() and Casting.TargetedSpellReady(spell)
+                cond = function(self, spell, target)
+                    return Casting.DetGambitCheck() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
-                name = "DichoSpell",
+                name = "IceEtherealNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell)
+                    return Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
-
-
-            -- {
-            -- name = "WildNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.DetGambitCheck()
-            -- end,
-            -- },
-            -- {
-            -- name = "DichoSpell",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return not Casting.DetGambitCheck() and mq.TLO.Me.Buff("Twincast").ID() == 0 and not Casting.BuffActiveByName("Improved Twincast")
-            -- end,
-            -- },
-            -- {
-            -- name = "FuseNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- local fireClaw = Modules:ExecModule("Class", "GetResolvedActionMapItem", "FireClaw")
-            -- return not Casting.DetGambitCheck() and ((not fireClaw or not fireClaw()) or not mq.TLO.Me.SpellReady(fireClaw.RankName()))
-            -- end,
-            -- },
-            -- {
-            -- name = "FireNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck()
-            -- end,
-            -- },
-            -- {
-            -- name = "IceNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck()
-            -- end,
-            -- },
-            -- {
-            -- name = "MagicNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck()
-            -- end,
-            -- },
-            -- {
-            -- name = "FireRainNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and Targeting.GetXTHaterCount() > 2 and Targeting.GetTargetDistance() > 30
-            -- end,
-            -- },
-            -- {
-            -- name = "IceRainNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and not Casting.DetGambitCheck() and Targeting.GetXTHaterCount() > 2 and Targeting.GetTargetDistance() > 30
-            -- end,
-            -- },
-            -- {
-            -- name = "SnareSpell",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke() and Targeting.GetTargetDistance() > 30 and self.settings.DoSnare
-            -- end,
-            -- },
-            -- {
-            -- name = "FastMagicNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke()
-            -- end,
-            -- },
-            -- {
-            -- name = "FuseNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke()
-            -- end,
-            -- },
-            -- {
-            -- name = "FireEtherealNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke()
-            -- end,
-            -- },
-            -- {
-            -- name = "IceEtherealNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke()
-            -- end,
-            -- },
-            -- {
-            -- name = "DichoSpell",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.HaveManaToNuke()
-            -- end,
-            -- },
         },
         ['Downtime'] = {
             {
@@ -971,7 +859,7 @@ return {
                 cond = function(self, aaName)
                     local selfHPBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
                     local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and Casting.SelfBuffAACheck(aaName)
+                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) >= selfHPBuffLevel and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1003,21 +891,21 @@ return {
                 cond = function(self, aaName)
                     local familiarBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
                     local familiarBuffLevel = familiarBuff and familiarBuff() and familiarBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility(aaName).Spell.Level() or 0) > familiarBuffLevel and Casting.SelfBuffAACheck(aaName)
+                    return (mq.TLO.Me.AltAbility(aaName).Spell.Level() or 0) >= familiarBuffLevel and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
+                cond = function(self, aaName)
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and mq.TLO.Me.SpellReady(spell.RankName())
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.SpellReady(spell)
                 end,
             },
             {
@@ -1083,35 +971,35 @@ return {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "DichoSpell", },
+                { name = "JoltSpell", }, --This can go in the modern Era. Will replace with AE dps.
             },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "JoltSpell", },
+                { name = "TwincastSpell", },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "TwincastSpell", },
+                { name = "GambitSpell", },
             },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "GambitSpell", },
+                { name = "SelfRune1", },
             },
         },
         {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SelfRune1", },
+                { name = "SelfSpellShield1", },
             },
         },
         {
@@ -1123,7 +1011,7 @@ return {
         },
     },
     ['DefaultConfig'] = {
-        ['Mode']            = {
+        ['Mode']                 = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this Toon",
@@ -1135,7 +1023,7 @@ return {
             FAQ = "What do the different Modes Do?",
             Answer = "This is an experimental Modern DPS mode for 110+",
         },
-        ['DoChestClick']    = {
+        ['DoChestClick']         = {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
@@ -1143,17 +1031,17 @@ return {
             FAQ = "How do I use my chest item Clicky?",
             Answer = "Enable [DoChestClick] to use your chest item clicky.",
         },
-        ['JoltAggro']       = {
+        ['JoltAggro']            = {
             DisplayName = "Jolt Aggro %",
             Category = "Combat",
             Tooltip = "Aggro at which to use Jolt",
-            Default = 65,
+            Default = 85,
             Min = 1,
             Max = 100,
             FAQ = "Can I customize when to use Jolt?",
             Answer = "Yes, you can set the aggro % at which to use Jolt with the [JoltAggro] setting.",
         },
-        ['WeaveAANukes']    = {
+        ['WeaveAANukes']         = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
@@ -1163,7 +1051,7 @@ return {
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
-        ['DoManaBurn']      = {
+        ['DoManaBurn']           = {
             DisplayName = "Use Mana Burn AA",
             Category = "Combat",
             Tooltip = "Enable usage of Mana Burn",
@@ -1171,7 +1059,7 @@ return {
             FAQ = "Can I use Mana Burn?",
             Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
         },
-        ['DoSnare']         = {
+        ['DoSnare']              = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
@@ -1181,7 +1069,7 @@ return {
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
-        ['DoRain']          = {
+        ['DoRain']               = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
@@ -1191,7 +1079,7 @@ return {
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
-        ['RainDist']        = {
+        ['RainDist']             = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
@@ -1201,7 +1089,7 @@ return {
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
-        ['RainMinHaters']   = {
+        ['RainMinHaters']        = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
@@ -1211,7 +1099,7 @@ return {
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
-        ['RainMinTargetHP'] = {
+        ['RainMinTargetHP']      = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
@@ -1221,7 +1109,7 @@ return {
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
-        ['DoGOMCheck']      = {
+        ['DoGOMCheck']           = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
@@ -1231,11 +1119,31 @@ return {
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
-        ['HarvestManaPct']  = {
+        ['GambitManaPct']        = {
+            DisplayName = "Gambit Mana %",
+            Category = "Utilities",
+            Tooltip = "What Mana % to hit before using your Gambit line.",
+            Default = 80,
+            Min = 1,
+            Max = 99,
+            FAQ = "How do I use Harvest Spells?",
+            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
+        },
+        ['HarvestManaPct']       = {
             DisplayName = "Harvest Mana %",
             Category = "Utilities",
             Tooltip = "What Mana % to hit before using a harvest spell or aa.",
             Default = 85,
+            Min = 1,
+            Max = 99,
+            FAQ = "How do I use Harvest Spells?",
+            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
+        },
+        ['CombatHarvestManaPct'] = {
+            DisplayName = "Combat Harvest %",
+            Category = "Utilities",
+            Tooltip = "What Mana % to hit before using a harvest spell or aa in Combat.",
+            Default = 60,
             Min = 1,
             Max = 99,
             FAQ = "How do I use Harvest Spells?",
