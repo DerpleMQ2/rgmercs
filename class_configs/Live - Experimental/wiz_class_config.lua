@@ -735,7 +735,7 @@ return {
                 name = "TwincastSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID())
+                    return Casting.SpellReady(spell) and not mq.TLO.Me.Buff("Improved Twincast")()
                 end,
             },
             {
@@ -797,7 +797,7 @@ return {
                 name = "VortexNuke",
                 type = "Spell",
                 cond = function(self, spell, target) --using DotSpellCheck to leverage HPStopDot settings to ensure we aren't casting just before trash dies (default: stop at 25% on named, 50% on trash)
-                    return Casting.DetSpellCheck(spell) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.DetGambitCheck() or Casting.DotSpellCheck(spell)) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {

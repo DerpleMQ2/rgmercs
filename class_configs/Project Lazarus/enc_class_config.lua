@@ -1454,7 +1454,8 @@ local _ClassConfig = {
                 name = "Dreary Deeds",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return not Casting.TargetHasBuffByName(aaName) and (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
+                    local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
+                    return Casting.DetAACheck(aaSpell.ID()) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
                         Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
@@ -1462,8 +1463,8 @@ local _ClassConfig = {
                 name = "SlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSlow') then return false end
-                    return not Casting.TargetHasBuffByName(spell) and (mq.TLO.Me.AltAbility(spell).Spell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
+                    if Casting.CanUseAA("Dreary Deeds") then return false end
+                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
                         Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
