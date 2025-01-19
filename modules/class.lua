@@ -96,6 +96,19 @@ Module.CommandHandlers                       = {
             return true
         end,
     },
+    rebuff = {
+        usage = "/rgl rebuff",
+        about = "Resets the delay timer on buff rotations. Does not force the cast of any buff.",
+        handler = function(self)
+            self:ResetRotationTimer("SlowDowntime")
+            self:ResetRotationTimer("GroupBuff")
+            self:ResetRotationTimer("PetBuff")
+
+            Logger.log_info("\awResetting buff rotation timers.")
+
+            return true
+        end,
+    },
 }
 
 local function getConfigFileName()
@@ -533,6 +546,7 @@ function Module:SelfCheckAndRez()
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Core.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self:ResetRotationTimer("GroupBuff")
                 end
             end
         end
@@ -553,6 +567,7 @@ function Module:IGCheckAndRez()
                     Logger.log_debug("\atIGCheckAndRez(): Attempting to Res: %s", rezSpawn.CleanName())
                     Core.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self:ResetRotationTimer("GroupBuff")
                 end
             end
         end
@@ -570,6 +585,7 @@ function Module:OOGCheckAndRez()
                 if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
+                    self:ResetRotationTimer("GroupBuff")
                 end
             end
         end
@@ -965,6 +981,13 @@ function Module:HandleBind(cmd, ...)
         return Core.SafeCallFunc(string.format("Command Handler: %s", cmd), self.CommandHandlers[cmd].handler, self, ...)
     end
     return handled
+end
+
+function Module:ResetRotationTimer(rotation)
+    if self.TempSettings.RotationTimers[rotation] then
+        Logger.log_verbose("\ayResetting Class:TempSettings.RotationTimers[\ag%s\ay].", rotation)
+        self.TempSettings.RotationTimers[rotation] = 0
+    end
 end
 
 function Module:Shutdown()
