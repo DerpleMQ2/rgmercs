@@ -539,7 +539,7 @@ function Casting.SpellReady(spell)
 
     if me.Stunned() then return false end
 
-    return me.CurrentMana() > spell.Mana() and (me.Casting.ID() or 0) == 0 and me.Book(spell.RankName.Name())() ~= nil and
+    return me.CurrentMana() > spell.Mana() and not me.Casting() and me.Book(spell.RankName.Name())() ~= nil and
         not (me.Moving() and (spell.MyCastTime() or -1) > 0)
 end
 
@@ -589,7 +589,7 @@ function Casting.TargetedSpellReady(spellName, targetId, healingSpell)
     if not target or not target() then return false end
 
     if me.SpellReady(spell.RankName.Name())() and me.CurrentMana() >= spell.Mana() then
-        if not (me.Moving() and (spell.MyCastTime() or -1) > 0) and not me.Casting.ID() and not Targeting.TargetIsType("corpse", target) then
+        if not (me.Moving() and (spell.MyCastTime() or -1) > 0) and not me.Casting() and not Targeting.TargetIsType("corpse", target) then
             if target.LineOfSight() then
                 return true
             elseif healingSpell then
@@ -630,7 +630,7 @@ function Casting.TargetedAAReady(aaName, targetId, healingSpell)
     end
 
     if Casting.AAReady(aaName) and me.CurrentMana() >= ability.Spell.Mana() and me.CurrentEndurance() >= ability.Spell.EnduranceCost() then
-        if Core.MyClassIs("brd") or (not me.Moving() and not me.Casting.ID()) then
+        if Core.MyClassIs("brd") or (not me.Moving() and not me.Casting()) then
             Logger.log_verbose("TargetedAAReady(%s) - Check LOS", aaName)
             if target.LineOfSight() then
                 Logger.log_verbose("TargetedAAReady(%s) - Success", aaName)
@@ -861,7 +861,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
         return false
     end
 
-    if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
+    if mq.TLO.Window("CastingWindow").Open() or me.Casting() then
         if Core.MyClassIs("brd") then
             mq.delay("3s", function() return (not mq.TLO.Window("CastingWindow").Open()) end)
             mq.delay(10)
@@ -940,7 +940,7 @@ end
 function Casting.UseItem(itemName, targetId)
     local me = mq.TLO.Me
 
-    if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
+    if mq.TLO.Window("CastingWindow").Open() or me.Casting() then
         if Core.MyClassIs("brd") then
             mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
             mq.delay(10)
@@ -1014,16 +1014,16 @@ function Casting.UseItem(itemName, targetId)
         mq.delay(4)
     else
         local maxWait = 1000
-        while maxWait > 0 and not me.Casting.ID() do
+        while maxWait > 0 and not me.Casting() do
             Logger.log_verbose("Waiting for item to start casting...")
             mq.delay(100)
             mq.doevents()
             maxWait = maxWait - 100
         end
-        mq.delay(item.CastTime(), function() return not me.Casting.ID() end)
+        mq.delay(item.CastTime(), function() return not me.Casting() end)
 
         -- pick up any additonal server lag.
-        while me.Casting.ID() do
+        while me.Casting() do
             mq.delay(5)
             mq.doevents()
         end
@@ -1062,7 +1062,7 @@ function Casting.UseDisc(discSpell, targetId)
 
     if not discSpell or not discSpell() then return false end
 
-    if mq.TLO.Window("CastingWindow").Open() or me.Casting.ID() then
+    if mq.TLO.Window("CastingWindow").Open() or me.Casting() then
         Logger.log_debug("CANT USE Disc - Casting Window Open")
         return false
     else
@@ -1085,7 +1085,7 @@ function Casting.UseDisc(discSpell, targetId)
             Core.DoCmd("/squelch /doability \"%s\"", discSpell.RankName.Name())
 
             mq.delay(discSpell.MyCastTime() or 1000,
-                function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting.ID()) end)
+                function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting()) end)
 
             -- Is this even needed?
             if Casting.IsActiveDisc(discSpell.RankName.Name()) then

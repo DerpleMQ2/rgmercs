@@ -662,7 +662,7 @@ function Module:ShouldFollow()
     local assistSpawn = Core.GetMainAssistSpawn()
 
     return not mq.TLO.MoveTo.Moving() and
-        (not me.Casting.ID() or Core.MyClassIs("brd")) and
+        (not me.Casting() or Core.MyClassIs("brd")) and
         (Targeting.GetXTHaterCount() == 0 or (assistSpawn() and (assistSpawn.Distance() or 0) > self.settings.ChaseDistance))
 end
 

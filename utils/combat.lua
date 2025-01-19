@@ -438,7 +438,7 @@ function Combat.FindBestAutoTarget(validateFn)
 
     if Config.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then
         if not validateFn or validateFn(Config.Globals.AutoTargetID) then
-            Targeting.SetTarget(Config.Globals.AutoTargetID, true)
+            Targeting.SetTarget(Config.Globals.AutoTargetID)
         end
     end
 end
@@ -645,7 +645,7 @@ end
 function Combat.AutoCampCheck(tempConfig)
     if not Config:GetSetting('ReturnToCamp') then return end
 
-    if mq.TLO.Me.Casting.ID() and not Core.MyClassIs("brd") then return end
+    if mq.TLO.Me.Casting() and not Core.MyClassIs("brd") then return end
 
     -- chasing a toon dont use camnp.
     if Config:GetSetting('ChaseOn') then return end
@@ -705,7 +705,7 @@ end
 function Combat.CombatCampCheck(tempConfig)
     if not Config:GetSetting('ReturnToCamp') then return end
 
-    if mq.TLO.Me.Casting.ID() and not Core.MyClassIs("brd") then return end
+    if mq.TLO.Me.Casting() and not Core.MyClassIs("brd") then return end
 
     -- chasing a toon dont use camnp.
     if Config:GetSetting('ChaseOn') then return end

@@ -541,7 +541,7 @@ function Module:AEMezCheck()
     end
     -- Checking to see if we are auto attacking, or if we are actively casting a spell (Algar comment: we turn attack off, why do we care about auto-attacking enchanters here?)
     -- purpose for this is to catch auto attacking enchanters and bards who never are not casting.
-    if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() ~= nil then
+    if mq.TLO.Me.Combat() or mq.TLO.Me.Casting() then
         Logger.log_debug("\awNOTICE:\ax Stopping cast or song so I can cast AE mez.")
         Core.DoCmd("/stopcast")
         Core.DoCmd("/stopsong")
@@ -726,7 +726,7 @@ function Module:ProcessMezList()
                         table.insert(removeList, id)
                     else
                         Logger.log_debug("\ayProcessMezList(%d) :: Mob needs mezed.", id)
-                        if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() then
+                        if mq.TLO.Me.Combat() or mq.TLO.Me.Casting() then
                             Logger.log_debug(
                                 " \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start mez.")
                             Core.DoCmd("/attack off")
