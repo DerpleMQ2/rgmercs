@@ -45,7 +45,9 @@ function Ui.RenderOAList()
             ImGui.TableNextColumn()
             local _, clicked = ImGui.Selectable(name, false)
             if clicked then
-                Targeting.SetTarget(spawn.ID() or 0, false)
+                if spawn and spawn() then
+                    mq.TLO.Spawn(spawn.ID()).DoTarget()
+                end
             end
             ImGui.TableNextColumn()
             if spawn() and spawn.ID() > 0 then

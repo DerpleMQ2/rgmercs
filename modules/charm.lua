@@ -700,7 +700,7 @@ function Module:ProcessCharmList()
 						table.insert(removeList, id)
 					else
 						Logger.log_debug("\ayProcessCharmList(%d) :: Mob needs charmed.", id)
-						if mq.TLO.Me.Combat() or mq.TLO.Me.Casting.ID() then
+						if mq.TLO.Me.Combat() or mq.TLO.Me.Casting() then
 							Logger.log_debug(
 								" \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start charm.")
 							Core.DoCmd("/attack off")

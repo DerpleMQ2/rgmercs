@@ -589,7 +589,7 @@ local function RGInit(...)
     if mainAssist:len() > 0 then
         Config.Globals.MainAssist = mainAssist
         Comms.PopUp("Targeting %s for Main Assist", Config.Globals.MainAssist)
-        Targeting.SetTarget(Core.GetMainAssistId())
+        Targeting.SetTarget(Core.GetMainAssistId(), true)
         Logger.log_info("\aw Assisting \ay >> \ag %s \ay << \aw at \ag %d%%", Config.Globals.MainAssist,
             Config:GetSetting('AutoAssistAt'))
     end
