@@ -706,11 +706,12 @@ return {
             end,
         },
         {
-            name = 'Debuff',
+            name = 'Slow',
             state = 1,
             steps = 1,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
+                if not Config:GetSetting('DoSlow') then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
@@ -874,23 +875,23 @@ return {
                 end,
             },
         },
-        ['Debuff'] = {
-            {
-                name = "SlowSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    Targeting.SetTarget(target.ID() or 0)
-                    return Config:GetSetting('DoSlow') and not Casting.CanUseAA("Sha's Reprisal") and not Casting.TargetHasBuff(spell) and
-                        Casting.SpellStacksOnTarget(spell) and spell.SlowPct() > (Targeting.GetTargetSlowedPct()) and Casting.TargetedSpellReady(spell)
-                end,
-            },
+        ['Slow'] = {
             {
                 name = "Sha's Reprisal",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Config:GetSetting('DoSlow') and not Casting.TargetHasBuffByName(aaName) and
-                        (mq.TLO.Me.AltAbility(aaName).Spell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and Casting.TargetedAAReady(aaName, target.ID())
+                    local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
+                    return Casting.DetAACheck(aaSpell.ID()) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
+                        Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "SlowSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if Casting.CanUseAA("Sha's Reprisal") then return false end
+                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
+                        Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
