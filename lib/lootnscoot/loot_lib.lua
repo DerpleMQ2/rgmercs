@@ -1605,7 +1605,7 @@ function loot.processItems(action)
                 if sellPrice == 0 then
                     Logger.log_warn(string.format('Item \ay%s\ax is set to Sell but has no sell value!', item.Name()))
                 else
-                    loot.SellToVendor(item.Name(), bag, slot, item.itemLink('CLICKABLE')())
+                    loot.SellToVendor(item.Name(), bag, slot, item.ItemLink('CLICKABLE')() or "NULL")
                     totalPlat = totalPlat + sellPrice
                     mq.delay(1)
                 end
