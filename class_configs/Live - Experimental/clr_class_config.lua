@@ -243,10 +243,10 @@ local _ClassConfig = {
             "Daring",
             "Bravery",
             "Valor",
-            -- [] = "Resolution",
+            --"Resolution",
             "Temperance",
-            "]Blessing of Temperance",
-            -- [] = "Heroic Bond",
+            "Blessing of Temperance",
+            "Heroic Bond",
             "Blessing of Aegolism",
             "Hand of Virtue",
             "Hand of Conviction",
@@ -955,7 +955,8 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('AegoSymbol') ~= 1 then return false end
-                    return Casting.GroupBuffCheck(spell, target)
+                    ---@diagnostic disable-next-line: undefined-field
+                    return Casting.GroupBuffCheck(spell, target, mq.TLO.Me.Spell(spell).ID())
                 end,
             },
             {

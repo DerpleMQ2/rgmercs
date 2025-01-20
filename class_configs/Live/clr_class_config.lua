@@ -376,7 +376,7 @@ local _ClassConfig = {
             -- [] = "Resolution",
             "Temperance",
             "Blessing of Temperance",
-            -- [] = "Heroic Bond",
+            "Heroic Bond",
             "Blessing of Aegolism",
             "Hand of Virtue",
             "Hand of Conviction",
@@ -1216,9 +1216,8 @@ local _ClassConfig = {
                 name = "AegoBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    Targeting.SetTarget(target.ID() or 0)
-                    return Config:GetSetting('DoDruid') and Casting.SpellStacksOnTarget(spell) and not Casting.BuffActive(spell)
+                    ---@diagnostic disable-next-line: undefined-field
+                    return Config:GetSetting('DoDruid') and Casting.GroupBuffCheck(spell, target, mq.TLO.Me.Spell(spell).ID())
                 end,
             },
         },

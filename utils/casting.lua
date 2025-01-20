@@ -227,27 +227,26 @@ end
 --- @param spell MQSpell The name of the spell to check.
 --- @param target MQSpawn The name of the target to receive the buff.
 --- @return boolean Returns true if the buff can be cast, false otherwise.
-function Casting.GroupBuffCheck(spell, target)
+function Casting.GroupBuffCheck(spell, target, spellID)
     if not spell or not spell() then return false end
     if not target or not target() then return false end
+    if not spellID then spellID = spell.RankName.ID() end
 
     local targetName = target.CleanName() or "None"
 
     if mq.TLO.DanNet(targetName)() ~= nil then
         local spellName = spell.RankName.Name()
-        local spellID = spell.RankName.ID()
         local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spellID), 1000)
         Logger.log_verbose("\ayGroupBuffCheck() Querying via DanNet for %s(ID:%d) on %s", spellName, spellID, targetName)
-        --Logger.log_verbose("AlgarInclude.GroupBuffCheckNeedsBuff() DanNet result for %s: %s", spellName, spellResult)
         if spellResult == spellName then
             Logger.log_verbose("\atGroupBuffCheck() DanNet detects that %s(ID:%d) is already present on %s, ending.", spellName, spellID, targetName)
             return false
         elseif spellResult == "NULL" then
             Logger.log_verbose("\atGroupBuffCheck() DanNet detects %s(ID:%d) is missing on %s, let's check for triggers.", spellName, spellID, targetName)
-            local numEffects = spell.NumEffects()
+            local numEffects = mq.TLO.Spell(spellID).NumEffects()
             local triggerCt = 0
             for i = 1, numEffects do
-                local triggerSpell = spell.RankName.Trigger(i)
+                local triggerSpell = mq.TLO.Spell(spellID).RankName.Trigger(i)
                 if triggerSpell and triggerSpell() then
                     local triggerRankResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", triggerSpell.ID()), 1000)
                     --Logger.log_verbose("GroupBuffCheck() DanNet result for trigger %d of %d (%s, %s): %s", i, numEffects, triggerSpell.Name(), triggerSpell.ID(), triggerRankResult)
