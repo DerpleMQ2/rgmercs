@@ -919,7 +919,8 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
             mq.delay(1)
             Logger.log_verbose("\atUseAA(): Finished waiting on cast: %s result = %s retries left = %d", aaName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
-        until Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS or retryCount < 0
+        until Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS or
+            Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_TAKEHOLD or retryCount < 0
     else
         Core.DoCmd(cmd)
         mq.delay(5)
@@ -1369,7 +1370,8 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
             mq.delay(1)
             Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
-        until Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS or retryCount < 0
+        until Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS or
+            Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_TAKEHOLD or retryCount < 0
 
         -- don't return control until we are done.
         if Config:GetSetting('WaitOnGlobalCooldown') and not overrideWaitForGlobalCooldown then
