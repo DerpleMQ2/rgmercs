@@ -1078,7 +1078,7 @@ function Casting.UseDisc(discSpell, targetId)
                     Logger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(),
                         me.ActiveDisc.Name())
                     Core.DoCmd("/stopdisc")
-                    mq.delay(20, function() return not me.ActiveDisc.ID() end)
+                    mq.delay(20, function() return not me.ActiveDisc() end)
                 end
             end
 
@@ -1089,7 +1089,7 @@ function Casting.UseDisc(discSpell, targetId)
 
             -- Is this even needed?
             if Casting.IsActiveDisc(discSpell.RankName.Name()) then
-                mq.delay(20, function() return me.ActiveDisc.ID() end)
+                mq.delay(20, function() return me.ActiveDisc() end)
             end
 
             Logger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName.Name())

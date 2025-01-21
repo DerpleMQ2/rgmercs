@@ -477,7 +477,7 @@ function Module:Campfire(camptype)
         mq.TLO.Window("FellowshipWnd").Child("FP_CreateCampsite").LeftMouseUp()
         mq.delay("5s", function() return mq.TLO.Me.Fellowship.Campfire() ~= nil end)
         mq.TLO.Window("FellowshipWnd").DoClose()
-        mq.delay("2s", function() return mq.TLO.Me.Fellowship.CampfireZone.ID() == mq.TLO.Zone.ID() end)
+        mq.delay("2s", function() return (mq.TLO.Me.Fellowship.CampfireZone.ID() or 0) == mq.TLO.Zone.ID() end)
 
         Logger.log_info("\agCampfire Dropped")
     else
