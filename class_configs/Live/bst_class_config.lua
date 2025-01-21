@@ -629,19 +629,23 @@ return {
             {
                 name = "Mend Companion",
                 type = "AA",
-                cond = function(self, aaName, target) return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.AAReady(aaName) end,
+                cond = function(self, aaName, target)
+                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
+                end,
             },
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                cond = function(self, spell) return Config:GetSetting('DoPetHeals') and Casting.SpellReady(spell) end,
+                cond = function(self, spell, target)
+                    return Config:GetSetting('DoPetHeals') and Casting.TargetedSpellReady(spell, target.ID(), true)
+                end,
             },
         },
         ["MainHealPoint"] = {
             {
                 name = "HealSpell",
                 type = "Spell",
-                cond = function(self, spell) return Casting.SpellReady(spell) end,
+                cond = function(self, spell, target) return Casting.TargetedSpellReady(spell, target.ID(), true) end,
             },
         },
     },

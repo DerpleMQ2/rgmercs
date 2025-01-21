@@ -625,24 +625,30 @@ return {
             {
                 name = "Replenish Companion",
                 type = "AA",
-                cond = function(self, aaName, target) return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.AAReady(aaName) end,
+                cond = function(self, aaName, target)
+                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
+                end,
             },
             {
                 name = "Mend Companion",
                 type = "AA",
-                cond = function(self, aaName, target) return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.AAReady(aaName) end,
+                cond = function(self, aaName, target)
+                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
+                end,
             },
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                cond = function(self, spell) return Config:GetSetting('DoPetHeals') and Casting.SpellReady(spell) end,
+                cond = function(self, spell, target)
+                    return Config:GetSetting('DoPetHeals') and Casting.TargetedSpellReady(spell, target.ID(), true)
+                end,
             },
         },
         ["MainHealPoint"] = {
             {
                 name = "HealSpell",
                 type = "Spell",
-                cond = function(self, spell) return Casting.SpellReady(spell) end,
+                cond = function(self, spell, target) return Casting.TargetedSpellReady(spell, target.ID(), true) end,
             },
         },
     },
@@ -1243,13 +1249,6 @@ return {
         },
         ['Downtime'] = {
             {
-                name = "Taste of Blood",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
-            },
-            {
                 name = "Gelid Rending",
                 type = "AA",
                 cond = function(self, aaName)
@@ -1388,6 +1387,13 @@ return {
             },
             {
                 name = "Companion's Aegis",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Casting.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Taste of Blood",
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Casting.AAReady(aaName)
