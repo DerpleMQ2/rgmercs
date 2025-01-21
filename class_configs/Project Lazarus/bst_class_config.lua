@@ -623,21 +623,32 @@ return {
     ['HealRotations']     = {
         ["PetHealpoint"] = {
             {
+                name = "Replenish Companion",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
+                end,
+            },
+            {
                 name = "Mend Companion",
                 type = "AA",
-                cond = function(self, aaName, target) return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.AAReady(aaName) end,
+                cond = function(self, aaName, target)
+                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
+                end,
             },
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                cond = function(self, spell) return Config:GetSetting('DoPetHeals') and Casting.SpellReady(spell) end,
+                cond = function(self, spell, target)
+                    return Config:GetSetting('DoPetHeals') and Casting.TargetedSpellReady(spell, target.ID(), true)
+                end,
             },
         },
         ["MainHealPoint"] = {
             {
                 name = "HealSpell",
                 type = "Spell",
-                cond = function(self, spell) return Casting.SpellReady(spell) end,
+                cond = function(self, spell, target) return Casting.TargetedSpellReady(spell, target.ID(), true) end,
             },
         },
     },
@@ -755,6 +766,13 @@ return {
     ['Rotations']         = {
         ['Burn'] = {
             {
+                name = "Bestial Bloodrage",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
+                end,
+            },
+            {
                 name = "Group Bestial Alignment",
                 type = "AA",
                 cond = function(self, aaName)
@@ -762,7 +780,7 @@ return {
                 end,
             },
             {
-                name = "Attack of the Warder",
+                name = "Attack of the Warders",
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Casting.TargetedAAReady(aaName, target.ID())
@@ -1034,17 +1052,38 @@ return {
         },
         ['Weaves'] = {
             {
-                name = "Round Kick",
-                type = "Ability",
-                cond = function(self, abilityName, target)
-                    return Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
+                name = "Roar of Thunder",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Raven's Claw",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Gorilla Smash",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Feral Swipe",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
                 name = "Kick",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return not Casting.CanUseAA("Feral Swipe") and mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
                 end,
             },
             {
@@ -1052,6 +1091,13 @@ return {
                 type = "Ability",
                 cond = function(self, abilityName, target)
                     return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
+                end,
+            },
+            {
+                name = "Bite of the Asp",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1203,6 +1249,13 @@ return {
         },
         ['Downtime'] = {
             {
+                name = "Gelid Rending",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
+                end,
+            },
+            {
                 name = "Consumption of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
@@ -1334,6 +1387,13 @@ return {
             },
             {
                 name = "Companion's Aegis",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Casting.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Taste of Blood",
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Casting.AAReady(aaName)
