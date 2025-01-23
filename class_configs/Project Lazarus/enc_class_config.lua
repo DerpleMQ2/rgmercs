@@ -1427,9 +1427,9 @@ local _ClassConfig = {
             {
                 name = "TashSpell",
                 type = "Spell",
-                cond = function(self, spell)
+                cond = function(self, spell, target)
                     return Config:GetSetting('DoTash') and Casting.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
-                        and Casting.TargetedSpellReady(spell)
+                        and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {

@@ -900,37 +900,37 @@ local _ClassConfig = {
             {
                 name = "NaturesWrathDOT",
                 type = "Spell",
-                cond = function(self, spell)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                cond = function(self, spell, target)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "SunDOT",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                cond = function(self, spell, target)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "HordeDOT",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.DotSpellCheck(spell) and (Casting.DetGOMCheck() or Targeting.IsNamed(mq.TLO.Target)) and Casting.TargetedSpellReady(spell)
+                cond = function(self, spell, target)
+                    return Casting.DotSpellCheck(spell) and (Casting.DetGOMCheck() or Targeting.IsNamed(mq.TLO.Target)) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and
                         (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
                 end,
             },
             {
                 name = "RemoteSunDD",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
                 end,
             },
             {

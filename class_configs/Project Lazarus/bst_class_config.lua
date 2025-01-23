@@ -4,9 +4,10 @@ local Config    = require('utils.config')
 local Core      = require("utils.core")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
+local Logger    = require("utils.logger")
 
 return {
-    _version              = "1.2 - Project Lazarus",
+    _version              = "1.3 - Project Lazarus",
     _author               = "Derple, Algar",
     ['Modes']             = {
         'DPS',
@@ -18,6 +19,10 @@ return {
         ['Epic'] = {
             "Savage Lord's Totem",             -- Epic    -- Epic 1.5
             "Spiritcaller Totem of the Feral", -- Epic    -- Epic 2.0
+        },
+        ['OoW_Chest'] = {
+            "Beast Tamer's Jerkin",
+            "Savagesoul Jerkin of the Wilds",
         },
     },
     ['AbilitySets']       = { --TODO/Under Consideration: Add AoE Roar line, add rotation entry (tie it to Do AoE setting), swap in instead of lance 2, especially since the last lance2 is level 112
@@ -762,6 +767,25 @@ return {
             return Casting.SongActiveByName("Bestial Alignment") or (disc and disc() and Casting.SongActiveByName(disc.Name()))
                 or Casting.BuffActiveByName("Ferociousness")
         end,
+        --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
+        AETargetCheck = function(printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 50 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 50 zradius 50")()
+            if (haters + haterPets) < Config:GetSetting('AETargetCnt') then return false end
+
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 50 zradius 50")()
+                if (haters + haterPets) < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+                    end
+                    return false
+                end
+            end
+
+            return true
+        end,
     },
     ['Rotations']         = {
         ['Burn'] = {
@@ -878,14 +902,18 @@ return {
                     return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
-
-            -- omens chest would go here with fero (I think same conditions excepting fero can be active, but more study needed to make sure)
-
             {
                 name = "Bestial Alignment",
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                end,
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
+                cond = function(self, itemName)
+                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
         },
@@ -974,7 +1002,7 @@ return {
                     --This checks to see if the Growl portion is up on the pet (or about to expire) before using this, those who prefer the swarm pets can use the actual swarm pet spell in conjunction with this for mana savings.
                     --There are some instances where the Growl isn't needed, but that is a giant TODO and of minor benefit.
                     ---@diagnostic disable-next-line: undefined-field
-                    return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10 and Casting.TargetedSpellReady(spell)
+                    return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10 and Casting.TargetedSpellReady(spell, target.ID())
                         and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
@@ -983,7 +1011,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -991,7 +1019,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -999,42 +1027,42 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "Maelstrom",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "FrozenPoi",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "PoiBite",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "Icelance1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "Icelance2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1045,7 +1073,7 @@ return {
                     --We will let Feralgia apply swarm pets if our pet currently doesn't have its Growl Effect.
                     local feralgia = self.ResolvedActionMap['Feralgia']
                     return (feralgia and feralgia() and mq.TLO.Me.PetBuff(mq.TLO.Spell(feralgia).RankName.Trigger(2).ID()))
-                        and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                        and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                         and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
@@ -1132,7 +1160,7 @@ return {
                 name = "AEClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Config:GetSetting('DoAoe') and Casting.TargetedDiscReady(discSpell, target.ID())
+                    return Config:GetSetting('DoAEDamage') and Casting.TargetedDiscReady(discSpell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
@@ -1719,20 +1747,10 @@ return {
             Answer = "Generally, BST DoT spells are worth using at all levels of play.\n" ..
                 "Dots have additional settings in the RGMercs Main config, such as the min mana% to use them, or mob HP to stop using them",
         },
-        ['DoAoe']          = {
-            DisplayName = "Do AoE",
-            Category = "Spells and Abilities",
-            Index = 4,
-            Tooltip = "Enable using AoE Claw Ability. --TODO: Add AoE DD Nuke",
-            Default = false,
-            ConfigType = "Advanced",
-            FAQ = "I have Do AoE selected, why am I not using my Roar line?",
-            Answer = "Roar line will be added soon™, until then, Do AoE only governs your \"Of Claws\" ability selection.",
-        },
         ['DoRunSpeed']     = {
             DisplayName = "Do Run Speed",
             Category = "Spells and Abilities",
-            Index = 5,
+            Index = 4,
             Tooltip = "Do Run Speed Spells/AAs",
             Default = true,
             FAQ = "Why are my buffers in a run speed buff war?",
@@ -1741,38 +1759,59 @@ return {
         ['DoAvatar']       = {
             DisplayName = "Do Avatar",
             Category = "Spells and Abilities",
-            Index = 6,
+            Index = 5,
             Tooltip = "Buff Group/Pet with Infusion of Spirit",
             Default = false,
             FAQ = "How do I use my Avatar Buffs?",
             Answer = "Make sure you have [DoAvatar] enabled.\n" ..
                 "Also double check [DoBuffs] is enabled so you can cast on others.",
         },
-        ['DoChestClick']   = {
-            DisplayName = "Do Chest Click",
+        ['DoVetAA']        = {
+            DisplayName = "Use Vet AA",
             Category = "Spells and Abilities",
-            Index = 7,
-            Tooltip = "Click your chest item during burns.",
-            Default = false,
-            ConfigType = "Advanced",
-            FAQ = "What is a Chest Click?",
-            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
-                "BST is set to use theirs during burns, so long as the item equipped has a clicky effect.",
-        },
-        ['AggroFeign']     = {
-            DisplayName = "Emergency Feign",
-            Category = "Spells and Abilities",
-            Index = 8,
-            Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
+            Index = 6,
+            Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
-            FAQ = "How do I use my Feign Death?",
-            Answer = "Make sure you have [AggroFeign] enabled.\n" ..
-                "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
+            FAQ = "What Vet AA's does SHD use?",
+            Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
+        },
+        --Combat
+        ['DoAEDamage']     = {
+            DisplayName = "Do AE Damage",
+            Category = "Combat",
+            Index = 1,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['AETargetCnt']    = {
+            DisplayName = "AE Target Count",
+            Category = "Combat",
+            Index = 2,
+            Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
+            Default = 2,
+            Min = 1,
+            Max = 10,
+            FAQ = "Why am I using AE abilities on only a couple of targets?",
+            Answer =
+            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
+        },
+        ['SafeAEDamage']   = {
+            DisplayName = "AE Proximity Check",
+            Category = "Combat",
+            Index = 3,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
-            Category = "Spells and Abilities",
-            Index = 9,
+            Category = "Combat",
+            Index = 4,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
             Min = 1,
@@ -1781,6 +1820,26 @@ return {
             FAQ = "How do I use my Emergency Mitigation Abilities?",
             Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
-        --['DoCombatFero']    = { DisplayName = "Do Combat Fero", Category = "Combat", Tooltip = "Do Combat Fero", Default = true, }, --commented like the respective entry.
+        ['AggroFeign']     = {
+            DisplayName = "Emergency Feign",
+            Category = "Combat",
+            Index = 5,
+            Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
+            Default = true,
+            FAQ = "How do I use my Feign Death?",
+            Answer = "Make sure you have [AggroFeign] enabled.\n" ..
+                "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
+        },
+        ['DoChestClick']   = {
+            DisplayName = "Do Chest Click",
+            Category = "Combat",
+            Index = 6,
+            Tooltip = "Click your chest item during burns.",
+            Default = false,
+            ConfigType = "Advanced",
+            FAQ = "What is a Chest Click?",
+            Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
+                "BST is set to use theirs during burns, so long as the item equipped has a clicky effect.",
+        },
     },
 }

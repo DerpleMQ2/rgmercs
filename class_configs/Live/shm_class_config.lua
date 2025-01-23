@@ -1190,7 +1190,9 @@ local _ClassConfig = {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                    if Config:GetSetting('UseEpic') == 1 then return false end
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and mq.TLO.FindItem(itemName)() and
+                        mq.TLO.FindItem(itemName).TimerReady() == 0
                 end,
             },
             {
@@ -1199,7 +1201,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
                     return Casting.CastReady(spell.RankName) and Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and
-                        Casting.TargetedSpellReady(spell)
+                        Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1207,7 +1209,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1215,7 +1217,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1223,7 +1225,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('CurseDoT2') or not Config:GetSetting('DoHealDPS'))) then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1231,7 +1233,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('ChaoticDoT') or not Config:GetSetting('DoHealDPS'))) then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1239,7 +1241,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Core.IsModeActive("Hybrid") then return false end
-                    return Targeting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell)
+                    return Targeting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1247,7 +1249,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Core.IsModeActive("Hybrid") or Core.GetResolvedActionMapItem('AfflictionDoT') then return false end
-                    return Targeting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell)
+                    return Targeting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1284,7 +1286,7 @@ local _ClassConfig = {
                 name = "FastPoisonNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1292,7 +1294,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and Core.GetResolvedActionMapItem('FastPoisonNuke') then return false end
-                    return not Casting.DotSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return not Casting.DotSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1300,7 +1302,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.GetResolvedActionMapItem('PoisonNuke') then return false end
-                    return not Casting.DotSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell)
+                    return not Casting.DotSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
@@ -1936,10 +1938,35 @@ local _ClassConfig = {
             Answer =
             "Canni in Combat can be disabled at your discretion; you could also tune HP or Mana settings for Canni Spell or AA.",
         },
+        --Buffs
+        ['UseEpic']           = {
+            DisplayName = "Epic Use:",
+            Category = "Buffs",
+            Index = 1,
+            Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
+            Default = 3,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why is my SHM using Epic on these trash mobs?",
+            Answer = "By default, we use the Epic in any combat, as saving it for burns ends up being a DPS loss over a long frame of time.\n" ..
+                "This can be adjusted in the Buffs tab.",
+        },
+        ['DoRunSpeed']        = {
+            DisplayName = "Do Run Speed",
+            Category = "Buffs",
+            Index = 2,
+            Tooltip = "Do Run Speed Spells/AAs",
+            Default = true,
+            FAQ = "Why are my buffers in a run speed buff war?",
+            Answer = "Many run speed spells freely stack and overwrite each other, you will need to disable Run Speed Buffs on some of the buffers.",
+        },
         ['DoGroupShrink']     = {
             DisplayName = "Group Shrink",
             Category = "Buffs",
-            Index = 2,
+            Index = 3,
             Tooltip = "Use Group Shrink Buff",
             Default = true,
             FAQ = "Group Shrink is enabled, why are my dudes still big?",
@@ -1949,7 +1976,7 @@ local _ClassConfig = {
         ['DoTempHP']          = {
             DisplayName = "Temp HP Buff",
             Category = "Buffs",
-            Index = 3,
+            Index = 4,
             Tooltip = "Use Temp HP Buff on Warriors in the group.",
             Default = false,
             FAQ = "Why is the Temp HP Buff only used on Warriors?",
@@ -1958,7 +1985,7 @@ local _ClassConfig = {
         ['DoAura']            = {
             DisplayName = "Use Aura",
             Category = "Buffs",
-            Index = 4,
+            Index = 5,
             Tooltip = "Use Aura (Pact of Wolf)",
             Default = true,
             ConfigType = "Advanced",
@@ -1968,7 +1995,7 @@ local _ClassConfig = {
         ['DoGroupRegen']      = {
             DisplayName = "Group Regen Buff",
             Category = "Buffs",
-            Index = 5,
+            Index = 6,
             Tooltip = "Use your Group Regen buff.",
             Default = true,
             FAQ = "Why am I spamming my Group Regen buff?",
@@ -1977,32 +2004,24 @@ local _ClassConfig = {
         ['DoHaste']           = {
             DisplayName = "Use Haste",
             Category = "Buffs",
-            Index = 6,
+            Index = 7,
             Tooltip = "Do Haste Spells/AAs",
             Default = true,
             ConfigType = "Advanced",
             FAQ = "Why aren't I casting Talisman of Celerity or other haste buffs?",
             Answer = "Even with Use Haste enabled, these buffs are part of your Focus spell (Unity) at very high levels, so they may not be needed.",
         },
-        ['DoRunSpeed']        = {
-            DisplayName = "Do Run Speed",
-            Category = "Buffs",
-            Index = 1,
-            Tooltip = "Do Run Speed Spells/AAs",
-            Default = true,
-            FAQ = "Why are my buffers in a run speed buff war?",
-            Answer = "Many run speed spells freely stack and overwrite each other, you will need to disable Run Speed Buffs on some of the buffers.",
-        },
         ['DoVetAA']           = {
             DisplayName = "Do Vet AA",
             Category = "Buffs",
-            Index = 7,
+            Index = 8,
             Tooltip = "Use Veteran AA during burns (See FAQ).",
             Default = true,
             ConfigType = "Advanced",
             FAQ = "What Veteran AA's will be used with Do Vet AA set?",
             Answer = "Currently, Shaman will use Intensity of the Resolute during burns. More may be added in the future.",
         },
+        --Debuffs
         ['DoSTMalo']          = {
             DisplayName = "Do ST Malo",
             Category = "Debuffs",

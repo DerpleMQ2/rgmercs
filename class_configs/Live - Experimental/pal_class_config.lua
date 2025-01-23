@@ -46,6 +46,10 @@ local _ClassConfig = {
             "Nightbane, Sword of the Valiant",
             "Redemption",
         },
+        ['Coating'] = {
+            "Spirit Drinker's Coating",
+            "Blood Drinker's Coating",
+        },
     },
     ['AbilitySets']       = {
         ["CrushTimer6"] = {
@@ -1077,8 +1081,8 @@ local _ClassConfig = {
             {
                 name = "HealWard", --requires a target, using TargetedSpellReady to force a target if needed
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and Core.IsModeActive("Tank") and
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.SpellStacksOnMe(spell.RankName) and Core.IsModeActive("Tank") and
                         (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
@@ -1092,6 +1096,15 @@ local _ClassConfig = {
                 cond = function(self)
                     local item = mq.TLO.Me.Inventory("Charm")
                     return Config:GetSetting('DoCharmClick') and item() and Casting.SelfBuffCheck(item.Spell) and item.TimerReady() == 0
+                end,
+            },
+            {
+                name = "Huntsman's Ethereal Quiver",
+                type = "Item",
+                active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
+                cond = function(self)
+                    return Config:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
+                        mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
                 end,
             },
         },
@@ -1354,6 +1367,15 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Coating",
+                type = "Item",
+                cond = function(self, itemName)
+                    if not Config:GetSetting('DoCoating') then return false end
+                    local item = mq.TLO.FindItem(itemName)
+                    return item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
+                end,
+            },
+            {
                 name = "Purification",
                 type = "AA",
                 cond = function(self, aaName)
@@ -1440,8 +1462,8 @@ local _ClassConfig = {
             {
                 name = "StunTimer4",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.TargetedSpellReady(spell) and Casting.DetSpellCheck(spell)
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1490,7 +1512,7 @@ local _ClassConfig = {
             -- name = "Healtaunt",
             -- type = "Spell",
             -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell)
+            -- return Casting.TargetedSpellReady(spell, target.ID())
             -- end,
             -- },
             -- {
@@ -1505,7 +1527,7 @@ local _ClassConfig = {
             -- name = "StunTimer5",
             -- type = "Spell",
             -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell) and Casting.DetSpellCheck(spell)
+            -- return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
             -- end,
             -- },
             -- {
@@ -1519,7 +1541,7 @@ local _ClassConfig = {
             -- name = "DebuffNuke",
             -- type = "Spell",
             -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell) and
+            -- return Casting.TargetedSpellReady(spell, target.ID()) and
             -- ((Targeting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
             -- end,
             -- },
@@ -1527,14 +1549,14 @@ local _ClassConfig = {
             -- name = "AntiUndeadNuke",
             -- type = "Spell",
             -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
+            -- return Casting.TargetedSpellReady(spell, target.ID()) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
             -- end,
             -- },
             -- {
             -- name = "Reverseds",
             -- type = "Spell",
             -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell) and Casting.TargetHasBuff(spell) and Config:GetSetting('DoReverseDS')
+            -- return Casting.TargetedSpellReady(spell, target.ID()) and Casting.TargetHasBuff(spell) and Config:GetSetting('DoReverseDS')
             -- end,
             -- },
         },
@@ -1918,10 +1940,19 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not clicking his charm?",
             Answer = "Charm clicks won't happen if you are in combat.",
         },
+        ['DoCoating']         = {
+            DisplayName = "Use Coating",
+            Category = "Equipment",
+            Index = 3,
+            Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
+            Default = false,
+            FAQ = "What is a Coating?",
+            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
+        },
         ['UseBandolier']      = {
             DisplayName = "Dynamic Weapon Swap",
             Category = "Equipment",
-            Index = 3,
+            Index = 4,
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"2Hand\" TO USE THIS FUNCTION.***",
             Default = false,
             FAQ = "Why is my Shadow Knight not using Dynamic Weapon Swapping?",
@@ -1931,7 +1962,7 @@ local _ClassConfig = {
         ['EquipShield']       = {
             DisplayName = "Equip Shield",
             Category = "Equipment",
-            Index = 4,
+            Index = 5,
             Tooltip = "Under this HP%, you will swap to your \"Shield\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 50,
             Min = 1,
@@ -1944,7 +1975,7 @@ local _ClassConfig = {
         ['Equip2Hand']        = {
             DisplayName = "Equip 2Hand",
             Category = "Equipment",
-            Index = 5,
+            Index = 6,
             Tooltip = "Over this HP%, you will swap to your \"2Hand\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 75,
             Min = 1,
@@ -1957,11 +1988,20 @@ local _ClassConfig = {
         ['NamedShieldLock']   = {
             DisplayName = "Shield on Named",
             Category = "Equipment",
-            Index = 6,
+            Index = 7,
             Tooltip = "Keep Shield equipped for Named mobs(must be in SpawnMaster or named.lua)",
             Default = true,
             FAQ = "Why does my SHD switch to a Shield on puny gray named?",
             Answer = "The Shield on Named option doesn't check levels, so feel free to disable this setting (or Bandolier swapping entirely) if you are farming fodder.",
+        },
+        ['SummonArrows']      = {
+            DisplayName = "Use Huntsman's Quiver",
+            Category = "Equipment",
+            Index = 8,
+            Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
+            Default = false,
+            FAQ = "How do I summon arrows?",
+            Answer = "If you are at least level 90, keep a Huntsman's Ethereal Quiver in your inventory and enable its use in the options.",
         },
         --ORPHANED PLACEHOLDERS
         ['DoNuke']            = {
@@ -1975,16 +2015,6 @@ local _ClassConfig = {
                 "These tabs or settings will be removed if and when the config is made the default.",
         },
         ['DoReverseDS']       = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['SummonArrows']      = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
