@@ -111,6 +111,10 @@ local _ClassConfig = {
             "Heartstiller's Mail Chestguard",
             "Duskbringer's Plate Chestguard of the Hateful",
         },
+        ['Coating'] = {
+            "Spirit Drinker's Coating",
+            "Blood Drinker's Coating",
+        },
     },
     ['AbilitySets']     = {
         ['Mantle'] = {
@@ -1396,6 +1400,15 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Coating",
+                type = "Item",
+                cond = function(self, itemName)
+                    if not Config:GetSetting('DoCoating') then return false end
+                    local item = mq.TLO.FindItem(itemName)
+                    return item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell) and self.ClassConfig.HelperFunctions.LeechCheck(self)
+                end,
+            },
+            {
                 name = "UnholyAura",
                 type = "Disc",
                 tooltip = Tooltips.UnholyAura,
@@ -2423,10 +2436,19 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not clicking his charm?",
             Answer = "Charm clicks won't happen if you are in combat.",
         },
+        ['DoCoating']         = {
+            DisplayName = "Use Coating",
+            Category = "Equipment",
+            Index = 3,
+            Tooltip = "Click your Blood/Spirit Drinker's Coating when defenses are triggered.",
+            Default = false,
+            FAQ = "What is a Coating?",
+            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
+        },
         ['UseBandolier']      = {
             DisplayName = "Dynamic Weapon Swap",
             Category = "Equipment",
-            Index = 3,
+            Index = 4,
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"2Hand\" TO USE THIS FUNCTION.***",
             Default = false,
             FAQ = "Why is my Shadow Knight not using Dynamic Weapon Swapping?",
@@ -2436,7 +2458,7 @@ local _ClassConfig = {
         ['EquipShield']       = {
             DisplayName = "Equip Shield",
             Category = "Equipment",
-            Index = 4,
+            Index = 5,
             Tooltip = "Under this HP%, you will swap to your \"Shield\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 50,
             Min = 1,
@@ -2449,7 +2471,7 @@ local _ClassConfig = {
         ['Equip2Hand']        = {
             DisplayName = "Equip 2Hand",
             Category = "Equipment",
-            Index = 5,
+            Index = 6,
             Tooltip = "Over this HP%, you will swap to your \"2Hand\" bandolier entry. (Dynamic Bandolier Enabled Only)",
             Default = 75,
             Min = 1,
@@ -2462,7 +2484,7 @@ local _ClassConfig = {
         ['NamedShieldLock']   = {
             DisplayName = "Shield on Named",
             Category = "Equipment",
-            Index = 6,
+            Index = 7,
             Tooltip = "Keep Shield equipped for Named mobs(must be in SpawnMaster or named.lua)",
             Default = true,
             FAQ = "Why does my SHD switch to a Shield on puny gray named?",
@@ -2471,7 +2493,7 @@ local _ClassConfig = {
         ['SummonArrows']      = {
             DisplayName = "Use Huntsman's Quiver",
             Category = "Equipment",
-            Index = 7,
+            Index = 8,
             Tooltip = "Summon arrows with your Huntsman's Ethereal Quiver (Level 90+)",
             Default = false,
             FAQ = "How do I summon arrows?",

@@ -232,6 +232,10 @@ local _ClassConfig = {
             "Rapier of Somber Notes",
             "Songblade of the Eternal",
         },
+        ['Coating'] = {
+            "Spirit Drinker's Coating",
+            "Blood Drinker's Coating",
+        },
     },
     ['AbilitySets']     = {
         ['ShortRunBuff'] = {
@@ -1450,6 +1454,15 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.AAReady(aaName)
                 end,
             },
+            {
+                name = "Coating",
+                type = "Item",
+                cond = function(self, itemName)
+                    if not Config:GetSetting('DoCoating') then return false end
+                    local item = mq.TLO.FindItem(itemName)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
+                end,
+            },
         },
     },
     ['PullAbilities']   = {
@@ -1954,10 +1967,10 @@ local _ClassConfig = {
             Answer = "You can enable Use Accelerando to use your Accelerando song." ..
                 "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
         },
-        --Utility/Items/Misc
+        --Equipment
         ['UseEpic']             = {
             DisplayName = "Epic Use:",
-            Category = "Utility/Items/Misc",
+            Category = "Equipment",
             Index = 1,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",
@@ -1972,7 +1985,7 @@ local _ClassConfig = {
         },
         ['DoChestClick']        = {
             DisplayName = "Chest Click",
-            Category = "Utility/Items/Misc",
+            Category = "Equipment",
             Index = 2,
             Tooltip = "Click your equipped chest item.",
             Default = true,
@@ -1983,7 +1996,7 @@ local _ClassConfig = {
         },
         ['UseSoBItems']         = {
             DisplayName = "Symph. of Battle",
-            Category = "Utility/Items/Misc",
+            Category = "Equipment",
             Index = 3,
             Tooltip = "Click your Symphony of Battle items.",
             Default = false,
@@ -1993,7 +2006,7 @@ local _ClassConfig = {
         },
         ['UseDreadstone']       = {
             DisplayName = "Dreadstone",
-            Category = "Utility/Items/Misc",
+            Category = "Equipment",
             Index = 4,
             Tooltip = "Use your Dreadstone when able.",
             Default = false,
@@ -2001,10 +2014,19 @@ local _ClassConfig = {
             FAQ = "What does the Dreadstone option control?",
             Answer = "Possessed Dreadstone Minstrel's Rapier is a clicky 55% slow item rewarded by the quest \"The Depths of Fear\".",
         },
+        ['DoCoating']           = {
+            DisplayName = "Use Coating",
+            Category = "Equipment",
+            Index = 5,
+            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Default = false,
+            FAQ = "What is a Coating?",
+            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
+        },
         ['UseRunBuff']          = {
             DisplayName = "Runspeed Buff:",
-            Category = "Utility/Items/Misc",
-            Index = 5,
+            Category = "Utility/Misc",
+            Index = 1,
             Tooltip = "Select Runspeed Buff to use. NOTE: This setting may need user adjustment during the early level range!",
             Type = "Combo",
             ComboOptions = { 'AA', 'Song (Long Duration Only)', 'Song (Fastest Available)', 'Off', },
@@ -2018,8 +2040,8 @@ local _ClassConfig = {
         },
         ['UseEndBreath']        = {
             DisplayName = "Use Enduring Breath",
-            Category = "Utility/Items/Misc",
-            Index = 6,
+            Category = "Utility/Misc",
+            Index = 2,
             Tooltip = Tooltips.EndBreathSong,
             Default = false,
             ConfigType = "Advanced",
@@ -2028,8 +2050,8 @@ local _ClassConfig = {
         },
         ['DoVetAA']             = {
             DisplayName = "Use Vet AA",
-            Category = "Utility/Items/Misc",
-            Index = 7,
+            Category = "Utility/Misc",
+            Index = 3,
             Tooltip = "Use Veteran AA's in emergencies or during Burn",
             Default = true,
             ConfigType = "Advanced",
@@ -2038,8 +2060,8 @@ local _ClassConfig = {
         },
         ['EmergencyStart']      = {
             DisplayName = "Emergency HP%",
-            Category = "Utility/Items/Misc",
-            Index = 8,
+            Category = "Utility/Misc",
+            Index = 4,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
             Min = 1,
@@ -2051,8 +2073,8 @@ local _ClassConfig = {
         },
         ['UseFading']           = {
             DisplayName = "Use Combat Escape",
-            Category = "Utility/Items/Misc",
-            Index = 9,
+            Category = "Utility/Misc",
+            Index = 5,
             Tooltip = "Use Fading Memories when you have aggro and you aren't the Main Assist.",
             Default = true,
             ConfigType = "Advanced",
@@ -2062,8 +2084,8 @@ local _ClassConfig = {
         },
         ['RefreshDT']           = {
             DisplayName = "Downtime Threshold",
-            Category = "Utility/Items/Misc",
-            Index = 10,
+            Category = "Utility/Misc",
+            Index = 6,
             Tooltip =
             "The duration threshold for refreshing a buff song outside of combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.",
             Default = 12,
@@ -2076,8 +2098,8 @@ local _ClassConfig = {
         },
         ['RefreshCombat']       = {
             DisplayName = "Combat Threshold",
-            Category = "Utility/Items/Misc",
-            Index = 11,
+            Category = "Utility/Misc",
+            Index = 7,
             Tooltip =
             "The duration threshold for refreshing a buff song in combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.",
             Default = 6,
