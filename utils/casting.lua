@@ -963,29 +963,31 @@ function Casting.UseItem(itemName, targetId)
         return false
     end
 
-    if Casting.BuffActiveByID(item.Clicky.SpellID()) then
-        Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the clicky buff is already active!", itemName)
-        return false
-    end
+    if targetId == mq.TLO.Me.ID() then
+        if Casting.BuffActiveByID(item.Clicky.SpellID()) then
+            Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the clicky buff is already active!", itemName)
+            return false
+        end
 
-    if Casting.BuffActiveByID(item.Spell.ID()) then
-        Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the buff is already active!", itemName)
-        return false
-    end
+        if Casting.BuffActiveByID(item.Spell.ID()) then
+            Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the buff is already active!", itemName)
+            return false
+        end
 
-    if Casting.SongActive(item.Spell) then
-        Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the song buff is already active: %s!", itemName, item.Spell.Name())
-        return false
-    end
+        if Casting.SongActive(item.Spell) then
+            Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the song buff is already active: %s!", itemName, item.Spell.Name())
+            return false
+        end
 
-    -- validate this wont kill us.
-    if item.Spell() and item.Spell.HasSPA(0)() then
-        for i = 1, item.Spell.NumEffects() do
-            if item.Spell.Attrib(i)() == 0 then
-                if mq.TLO.Me.CurrentHPs() + item.Spell.Base(i)() <= 0 then
-                    Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but it would kill me!: %s! HPs: %d SpaHP: %d", itemName, item.Spell.Name(),
-                        mq.TLO.Me.CurrentHPs(), item.Spell.Base(i)())
-                    return false
+        -- validate this wont kill us.
+        if item.Spell() and item.Spell.HasSPA(0)() then
+            for i = 1, item.Spell.NumEffects() do
+                if item.Spell.Attrib(i)() == 0 then
+                    if mq.TLO.Me.CurrentHPs() + item.Spell.Base(i)() <= 0 then
+                        Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but it would kill me!: %s! HPs: %d SpaHP: %d", itemName, item.Spell.Name(),
+                            mq.TLO.Me.CurrentHPs(), item.Spell.Base(i)())
+                        return false
+                    end
                 end
             end
         end

@@ -750,6 +750,47 @@ function Module:RunCounterRotation()
     end
 end
 
+function Module:DoCombatClickies()
+    if not Config:GetSetting('UseCombatClickies') then return end
+
+    -- make sure we are safe to use clickies
+    if mq.TLO.Me.Sitting() or Casting.IAmFeigning() or not Core.OkayToNotHeal() or mq.TLO.Me.PctHPs() < (Config:GetSetting('EmergencyStart') and Config:GetSetting('EmergencyStart') or 45) then return end
+
+    -- Control the frequency of checks to prioritize rotations
+    self.TempSettings.CombatClickiesTimer = self.TempSettings.CombatClickiesTimer or 0
+    if os.clock() - self.TempSettings.CombatClickiesTimer < Config:GetSetting('CombatClickiesDelay') then
+        Logger.log_super_verbose("Too soon since last Combat Clickies check, aborting.")
+        return
+    end
+
+    for i = 1, 6 do
+        local setting = Config:GetSetting(string.format("CombatClicky%d", i))
+        if setting and setting:len() > 0 then
+            local item = mq.TLO.FindItem(setting)
+            Logger.log_verbose("Looking for clicky item: %s found: %s", setting, Strings.BoolToColorString(item() ~= nil))
+
+            if item then
+                if item.Timer.TotalSeconds() == 0 then
+                    if (item.RequiredLevel() or 0) <= mq.TLO.Me.Level() then
+                        if Casting.DetSpellCheck(item.Clicky.Spell.RankName) then
+                            Logger.log_verbose("\aaCasting Item: \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
+                            Casting.UseItem(item.Name(), Config.Globals.AutoTargetID)
+                            break --ensure we stop after we process a single clicky to allow rotations to continue
+                        else
+                            Logger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay already active or would not stack!", item.Name(), item.Clicky.Spell.RankName.Name())
+                        end
+                    else
+                        Logger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay I am too low level to use this clicky!", item.Name(), item.Clicky.Spell.RankName.Name())
+                    end
+                else
+                    Logger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
+                end
+            end
+        end
+    end
+    self.TempSettings.CombatClickiesTimer = os.clock()
+end
+
 function Module:GiveTime(combat_state)
     if not self.ClassConfig then return end
 
@@ -864,6 +905,10 @@ function Module:GiveTime(combat_state)
     end
 
     self.TempSettings.CurrentRotationStateType = 0
+
+    if combat_state == "Combat" then
+        self:DoCombatClickies()
+    end
 end
 
 function Module:SetCurrentRotationState(state)

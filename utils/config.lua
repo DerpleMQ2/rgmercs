@@ -138,7 +138,7 @@ Config.DefaultConfig = {
 
     -- [ CLICKIES ] --
     ['UseClickies']          = {
-        DisplayName = "Use Clickies",
+        DisplayName = "Use Downtime Clickies",
         Category    = "Clickies",
         Index       = 0,
         Tooltip     = "Use items during Downtime.",
@@ -149,7 +149,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem1']          = {
-        DisplayName = "Clicky Item 1",
+        DisplayName = "Downtime Item 1",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -161,7 +161,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem2']          = {
-        DisplayName = "Clicky Item 2",
+        DisplayName = "Downtime Item 2",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -173,7 +173,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem3']          = {
-        DisplayName = "Clicky Item 3",
+        DisplayName = "Downtime Item 3",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -185,7 +185,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem4']          = {
-        DisplayName = "Clicky Item 4",
+        DisplayName = "Downtime Item 4",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -197,7 +197,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem5']          = {
-        DisplayName = "Clicky Item 5",
+        DisplayName = "Downtime Item 5",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -209,7 +209,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem6']          = {
-        DisplayName = "Clicky Item 6",
+        DisplayName = "Downtime Item 6",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -221,7 +221,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem7']          = {
-        DisplayName = "Clicky Item 7",
+        DisplayName = "Downtime Item 7",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -233,7 +233,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem8']          = {
-        DisplayName = "Clicky Item 8",
+        DisplayName = "Downtime Item 8",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -245,7 +245,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem9']          = {
-        DisplayName = "Clicky Item 9",
+        DisplayName = "Downtime Item 9",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -257,7 +257,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem10']         = {
-        DisplayName = "Clicky Item 10",
+        DisplayName = "Downtime Item 10",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -269,7 +269,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem11']         = {
-        DisplayName = "Clicky Item 11",
+        DisplayName = "Downtime Item 11",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -281,7 +281,7 @@ Config.DefaultConfig = {
             "You can drag and drop them onto the ClickyItem# tags to add them.",
     },
     ['ClickyItem12']         = {
-        DisplayName = "Clicky Item 12",
+        DisplayName = "Downtime Item 12",
         Category = "Clickies",
         Tooltip = "Clicky Item to use During Downtime",
         Type = "ClickyItem",
@@ -291,6 +291,104 @@ Config.DefaultConfig = {
         FAQ = "I have some clickie items that I want to use during downtime. How do I set them up?",
         Answer = "You can set up to 12 clickie items in the Clickies section of the config.\n" ..
             "You can drag and drop them onto the ClickyItem# tags to add them.",
+    },
+    ['UseCombatClickies']    = {
+        DisplayName = "Use Combat Clickies",
+        Category    = "Clickies",
+        Index       = 13,
+        Tooltip     = "Use detrimental clickies on your target during Combat.",
+        Default     = false,
+        ConfigType  = "Normal",
+        FAQ         = "Why isn't my combat clicky being used?",
+        Answer      = "Combat clickies only support detrimental items.\n" ..
+            "Beneficial items should be used in Downtime or have a specific entry added to control proper use conditions.",
+    },
+    ['CombatClickiesDelay']  = {
+        DisplayName = "C.Click Check Delay",
+        Category = "Buffs",
+        Index = 14,
+        Tooltip = "Seconds to wait between the check to use Combat Clickies.\n" ..
+            "Please Note: Setting this value too low may interfere with other actions!",
+        Default = 10,
+        Min = 1,
+        Max = 30,
+        ConfigType = "Advanced",
+        FAQ = "Why are my Combat Clickies being used so slowly?",
+        Answer = "By default, Combat Clickies are only checked every 10 seconds to ensure we aren't interfering with other (more important) actions.\n" ..
+            "You can adjust this with the C.Click Check Delay setting. ",
+    },
+
+    ['CombatClicky1']        = {
+        DisplayName = "Combat Item 1",
+        Category    = "Clickies",
+        Tooltip     = "Clicky Item to use During Downtime",
+        Type        = "ClickyItem",
+        Default     = "",
+        ConfigType  = "Normal",
+        Index       = 15,
+        FAQ         = "Why isn't my combat clicky being used?",
+        Answer      = "Combat clickies only support detrimental items.\n" ..
+            "Beneficial items should be used in Downtime or have a specific entry added to control proper use conditions.",
+    },
+    ['CombatClicky2']        = {
+        DisplayName = "Combat Item 2",
+        Category    = "Clickies",
+        Tooltip     = "Clicky Item to use During Downtime",
+        Type        = "ClickyItem",
+        Default     = "",
+        ConfigType  = "Normal",
+        Index       = 16,
+        FAQ         = "Why isn't my combat clicky being used?",
+        Answer      = "Combat clickies only support detrimental items.\n" ..
+            "Beneficial items should be used in Downtime or have a specific entry added to control proper use conditions.",
+    },
+    ['CombatClicky3']        = {
+        DisplayName = "Combat Item 3",
+        Category    = "Clickies",
+        Tooltip     = "Clicky Item to use During Downtime",
+        Type        = "ClickyItem",
+        Default     = "",
+        ConfigType  = "Normal",
+        Index       = 17,
+        FAQ         = "Why isn't my combat clicky being used?",
+        Answer      = "Combat clickies only support detrimental items.\n" ..
+            "Beneficial items should be used in Downtime or have a specific entry added to control proper use conditions.",
+    },
+    ['CombatClicky4']        = {
+        DisplayName = "Combat Item 4",
+        Category    = "Clickies",
+        Tooltip     = "Clicky Item to use During Downtime",
+        Type        = "ClickyItem",
+        Default     = "",
+        ConfigType  = "Normal",
+        Index       = 18,
+        FAQ         = "Why isn't my combat clicky being used?",
+        Answer      = "Combat clickies only support detrimental items.\n" ..
+            "Beneficial items should be used in Downtime or have a specific entry added to control proper use conditions.",
+    },
+    ['CombatClicky5']        = {
+        DisplayName = "Combat Item 5",
+        Category    = "Clickies",
+        Tooltip     = "Clicky Item to use During Downtime",
+        Type        = "ClickyItem",
+        Default     = "",
+        ConfigType  = "Normal",
+        Index       = 19,
+        FAQ         = "Why isn't my combat clicky being used?",
+        Answer      = "Combat clickies only support detrimental items.\n" ..
+            "Beneficial items should be used in Downtime or have a specific entry added to control proper use conditions.",
+    },
+    ['CombatClicky6']        = {
+        DisplayName = "Combat Item 6",
+        Category    = "Clickies",
+        Tooltip     = "Clicky Item to use During Downtime",
+        Type        = "ClickyItem",
+        Default     = "",
+        ConfigType  = "Normal",
+        Index       = 20,
+        FAQ         = "Why isn't my combat clicky being used?",
+        Answer      = "Combat clickies only support detrimental items.\n" ..
+            "Beneficial items should be used in Downtime or have a specific entry added to control proper use conditions.",
     },
 
     -- [ MED/MANA ] --
