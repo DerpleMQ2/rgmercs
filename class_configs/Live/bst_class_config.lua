@@ -1165,7 +1165,7 @@ return {
                 name = "SingleClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not Config:GetSetting('DoAoe') and Casting.TargetedDiscReady(discSpell, target.ID())
+                    return not Config:GetSetting('DoAEDamage') and Casting.TargetedDiscReady(discSpell, target.ID())
                 end,
             },
             {
