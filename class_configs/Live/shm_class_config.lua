@@ -1112,7 +1112,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoAEMalo') then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AEMaloCount') and Casting.TargetedAAReady(aaName, target.ID()) and
-                        Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                        Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
@@ -1129,7 +1129,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSTMalo') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
@@ -1148,7 +1148,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoAESlow') then return false end
                     return Targeting.GetXTHaterCount() >= Config:GetSetting('AESlowCount') and Casting.TargetedAAReady(aaName, target.ID()) and
-                        Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                        Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
@@ -1165,7 +1165,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSTSlow') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {

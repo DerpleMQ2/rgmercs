@@ -1024,7 +1024,7 @@ local _ClassConfig = {
                 name = "Season's Wrath",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Core.IsModeActive("Mana") and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
+                    return Core.IsModeActive("Mana") and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and
                         Targeting.GetTargetPctHPs() > 75
                 end,
             },
@@ -1141,7 +1141,7 @@ local _ClassConfig = {
                 name = "Nature's Frost",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Core.IsModeActive("Mana") and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
+                    return Core.IsModeActive("Mana") and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and
                         mq.TLO.Me.PctMana() > 50 and
                         (not Core.IsModeActive("Heal") or (Core.IsModeActive("Heal") and not Config:GetSetting('DoFire') and (Casting.HaveManaToNuke() or Casting.BurnCheck())))
                 end,
@@ -1150,7 +1150,7 @@ local _ClassConfig = {
                 name = "Nature's Fire",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and mq.TLO.Me.PctMana() > 50 and
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and mq.TLO.Me.PctMana() > 50 and
                         Config:GetSetting('DoNuke') and
                         (not Core.IsModeActive("Heal") or (Core.IsModeActive("Heal") and Config:GetSetting('DoFire') and (Casting.HaveManaToNuke() or Casting.BurnCheck())))
                 end,
@@ -1159,7 +1159,7 @@ local _ClassConfig = {
                 name = "Nature's Bolt",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Core.IsModeActive("Mana") and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and
+                    return Core.IsModeActive("Mana") and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and
                         mq.TLO.Me.PctMana() > 50
                 end,
             },
@@ -1291,8 +1291,8 @@ local _ClassConfig = {
                 name = "Entrap",
                 tooltip = "AA: Snare",
                 type = "AA",
-                cond = function(self)
-                    return Config:GetSetting('DoSnare') and Casting.DetAACheck(219)
+                cond = function(self, aaName)
+                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
@@ -1306,7 +1306,7 @@ local _ClassConfig = {
                 name = "Season's Wrath",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID())
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
         },

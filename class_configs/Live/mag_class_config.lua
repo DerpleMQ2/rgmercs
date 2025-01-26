@@ -1647,7 +1647,7 @@ _ClassConfig      = {
                 name = "Malaise",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(aaName)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
@@ -1663,7 +1663,7 @@ _ClassConfig      = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoAEMalo') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetAACheck(aaName)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
         },

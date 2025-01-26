@@ -936,7 +936,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
-                    return Casting.DetAACheck(aaSpell.ID()) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
+                    return Casting.DetSpellCheck(aaSpell) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
                         Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },

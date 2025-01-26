@@ -775,6 +775,9 @@ local _ClassConfig = {
             "Instill",
             "Root",
         },
+        ['HasteManaCombo'] = {
+            "Unified Alacrity",
+        },
     },
     ['RotationOrder']   = {
         {
@@ -1036,11 +1039,19 @@ local _ClassConfig = {
         },
         ['GroupBuff'] = {
             {
+                name = "HasteManaCombo",
+                type = "Spell",
+                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+                cond = function(self, spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
                 name = "ManaRegen",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+                    if self:GetResolvedActionMapItem('HasteManaCombo') or not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1049,7 +1060,8 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    return Config.Constants.RGMelee:contains(target.Class.ShortName()) and Casting.GroupBuffCheck(spell, target)
+                    if self:GetResolvedActionMapItem('HasteManaCombo') or not Config.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1443,7 +1455,7 @@ local _ClassConfig = {
                 name = "Bite of Tashani",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Config:GetSetting('DoTash') and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed() and
+                    return Config:GetSetting('DoTash') and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and not mq.TLO.Target.Tashed() and
                         Targeting.GetXTHaterCount() > 1 and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
@@ -1454,7 +1466,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if Targeting.GetXTHaterCount() < Config:GetSetting('AESlowCount') then return false end
-                    return Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and Casting.TargetedAAReady(aaName, target.ID())
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1462,7 +1474,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
-                    return Casting.DetAACheck(aaSpell.ID()) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
+                    return Casting.DetSpellCheck(aaSpell) and (aaSpell.SlowPct() or 0) > Targeting.GetTargetSlowedPct() and
                         Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
