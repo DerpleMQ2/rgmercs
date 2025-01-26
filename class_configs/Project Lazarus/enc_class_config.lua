@@ -1026,6 +1026,13 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.ID()).ID() end,
                 cond = function(self, spell) return Casting.SelfBuffPetCheck(spell) end,
             },
+            {
+                name = "Fortify Companion",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
+                end,
+            },
         },
         ['GroupBuff'] = {
             {

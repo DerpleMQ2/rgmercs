@@ -1341,28 +1341,28 @@ _ClassConfig      = {
                 name = "Second Wind Ward",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Casting.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Host in the Shell",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Aegis",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
                 end,
             },
             {
                 name = "Companion's Intervening Divine Aura",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Spell(aaName)) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Core.IsModeActive("PetTank") and Casting.AAReady(aaName)
                 end,
             },
         },

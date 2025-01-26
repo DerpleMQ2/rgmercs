@@ -1196,6 +1196,20 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
                 cond = function(self, spell) return Casting.SelfBuffPetCheck(spell) end,
             },
+            {
+                name = "Aegis of Kildrukaun",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Fortify Companion",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
+                end,
+            },
         },
     },
     ['HelperFunctions'] = {
