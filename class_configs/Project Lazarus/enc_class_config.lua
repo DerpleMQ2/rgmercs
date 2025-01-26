@@ -935,7 +935,6 @@ local _ClassConfig = {
                 active_cond = function(self, aaName) return Casting.BuffActiveByName(aaName) end,
                 cond = function(self, aaName) return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName) end,
             },
-
             {
                 name = "Azure Mind Crystal",
                 type = "AA",
@@ -1148,53 +1147,43 @@ local _ClassConfig = {
         },
         ['CombatSupport'] = {
             {
-                name = "Eldritch Rune",
-                type = "AA",
-                cond = function(self, aaName) 
-                    return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName) end,
-            },
-            {
                 name = "Glyph Spray",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
-                        Core.GetMainAssistPctHPs() < 45 and Core.GetMainAssistPctHPs() > 5 and Casting.AAReady(aaName)
+                    return ((Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
+                        Core.GetMainAssistPctHPs() < 40) and Casting.AAReady(aaName)
                 end,
-
             },
             {
                 name = "Reactive Rune",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
-                        Core.GetMainAssistPctHPs() < 45 and Core.GetMainAssistPctHPs() > 5 and Casting.AAReady(aaName)
+                    return ((Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
+                        Core.GetMainAssistPctHPs() < 40) and Casting.AAReady(aaName)
                 end,
-
             },
-            {
-                name = "Self Stasis",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30 and
-                        Casting.AAReady(aaName)
-                end,
-
-            },
-            {
-                name = "Dimensional Instability",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30 and
-                        Casting.AAReady(aaName)
-                end,
-
-            },
+            -- { --this can be readded once we creat a post_activate to cancel the debuff you receive after
+            --     name = "Self Stasis",
+            --     type = "AA",
+            --     cond = function(self, aaName)
+            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30 and
+            --             Casting.AAReady(aaName)
+            --     end,
+            -- },
+            -- { --This can interrupt spellcasting which can just make something worse. Let us trust healers and tanks.
+            --     name = "Dimensional Instability",
+            --     type = "AA",
+            --     cond = function(self, aaName)
+            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30 and
+            --             Casting.AAReady(aaName)
+            --     end,
+            -- },
             {
                 name = "Beguiler's Directed Banishment",
                 type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 40 and
-                        Casting.AAReady(aaName)
+                cond = function(self, aaName, target)
+                    if not mq.TLO.Target.ID() == Config.Globals.AutoTargetID then return false end
+                    return mq.TLO.Me.PctAggro() > 99 and mq.TLO.Me.PctHPs() <= 40 and Casting.TargetedAAReady(aaName, target.ID())
                 end,
 
             },
@@ -1202,8 +1191,7 @@ local _ClassConfig = {
                 name = "Beguiler's Banishment",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 50 and
-                        mq.TLO.SpawnCount("npc radius 20")() > 2 and Casting.AAReady(aaName)
+                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= 50 and mq.TLO.SpawnCount("npc radius 20")() > 2 and Casting.AAReady(aaName)
                 end,
 
             },
@@ -1211,47 +1199,44 @@ local _ClassConfig = {
                 name = "Doppelganger",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 60 and
-                        Casting.AAReady(aaName)
+                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= 60 and Casting.AAReady(aaName)
                 end,
 
             },
+            -- { --This can interrupt spellcasting which can just make something worse. Let us trust healers and tanks.
+            --     name = "Dimensional Shield",
+            --     type = "AA",
+            --     cond = function(self, aaName)
+            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 80 and
+            --             Casting.AAReady(aaName)
+            --     end,
+
+            -- },
             {
-                name = "Phantasmal Opponent",
+                name = "Eldritch Rune",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 60 and
-                        Casting.AAReady(aaName)
+                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= 80 and Casting.SelfBuffAACheck(aaName)
                 end,
-
-            },
-            {
-                name = "Dimensional Shield",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 80 and
-                        Casting.AAReady(aaName)
-                end,
-
-            },
-            {
-                name = "Color Shock",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctAggro() >= 90 and Casting.AAReady(aaName)
-                end,
-
             },
             {
                 name = "Arcane Whisper",
                 type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctAggro() >= 90 and Casting.AAReady(aaName)
+                cond = function(self, aaName, target)
+                    return Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() >= 90 and Casting.TargetedAAReady(aaName, target.ID())
                 end,
 
             },
             {
                 name = "Silent Casting",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() >= 90 and Casting.AAReady(aaName)
+                end,
+
+            },
+            {
+                name = "Color Shock",
                 type = "AA",
                 cond = function(self, aaName)
                     return mq.TLO.Me.PctAggro() >= 90 and Casting.AAReady(aaName)
@@ -1457,6 +1442,13 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoCripple') then return false end
                     return Targeting.IsNamed(mq.TLO.Target) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "Phantasmal Opponent",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
         },
