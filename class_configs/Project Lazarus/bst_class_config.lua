@@ -508,6 +508,7 @@ return {
             -- Group Attack+ Hp Buff
             "Spiritual Vigor",
             "Spiritual Vitality",
+            "Spiritual Vibrance",
             "Spiritual Vim",
             "Spiritual Vivacity",
             "Spiritual Verve",
@@ -517,7 +518,6 @@ return {
             "Spiritual Vivification",
             "Spiritual Vibrancy",
             "Spiritual Vehemence",
-            "Spiritual Vigor",
             "Spiritual Valiancy",
             --Single Target Atk+HP Buff* - Does Not Stack with Pally brells or Ranger Buff - is Middle ground Buff has HP & Atk
             "Spiritual Brawn",
