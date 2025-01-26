@@ -1448,7 +1448,7 @@ local _ClassConfig = {
                 name = "Bite of Tashani",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Config:GetSetting('DoTash') and Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and not mq.TLO.Target.Tashed() and
+                    return Config:GetSetting('DoTash') and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and not mq.TLO.Target.Tashed() and
                         Targeting.GetXTHaterCount() > 1 and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
@@ -1459,7 +1459,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if Targeting.GetXTHaterCount() < Config:GetSetting('AESlowCount') then return false end
-                    return Casting.DetAACheck(mq.TLO.Me.AltAbility(aaName).ID()) and Casting.TargetedAAReady(aaName, target.ID())
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1468,7 +1468,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSlow') then return false end
                     local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
-                    return Casting.DetAACheck(aaSpell.ID()) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
+                    return Casting.DetSpellCheck(aaSpell) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
                         Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },

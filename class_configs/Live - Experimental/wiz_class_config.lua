@@ -767,7 +767,7 @@ return {
                 name = "Lower Element",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.DetAACheck(mq.TLO.AltAbility(aaName).ID()) and Casting.TargetedAAReady(aaName, target.ID())
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {

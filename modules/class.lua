@@ -754,7 +754,7 @@ function Module:DoCombatClickies()
     if not Config:GetSetting('UseCombatClickies') then return end
 
     -- make sure we are safe to use clickies
-    if mq.TLO.Me.Sitting() or Casting.IAmFeigning() or not Core.OkayToNotHeal() or mq.TLO.Me.PctHPs() < (Config:GetSetting('EmergencyStart') and Config:GetSetting('EmergencyStart') or 45) then return end
+    if mq.TLO.Me.Sitting() or Casting.IAmFeigning() or not Core.OkayToNotHeal() or mq.TLO.Me.PctHPs() < (Config:GetSetting('EmergencyStart', true) and Config:GetSetting('EmergencyStart') or 45) then return end
 
     -- Control the frequency of checks to prioritize rotations
     self.TempSettings.CombatClickiesTimer = self.TempSettings.CombatClickiesTimer or 0

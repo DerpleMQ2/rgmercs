@@ -88,7 +88,7 @@ function ItemManager.SwapItemToSlot(slot, item)
     Core.DoCmd("/itemnotify \"%s\" leftmouseup", item)
     mq.delay(100, function() return mq.TLO.Cursor() and mq.TLO.Cursor.Name() == item end)
     Core.DoCmd("/itemnotify %s leftmouseup", slot)
-    mq.delay(100, function() return not mq.TLO.Cursor() or mq.TLO.Cursor.Name() ~= item end)
+    mq.delay(100, function() return mq.TLO.Cursor() and mq.TLO.Cursor.Name() ~= item end)
 
     while mq.TLO.Cursor.ID() do
         mq.delay(1)
