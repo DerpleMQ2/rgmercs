@@ -119,6 +119,7 @@ local _ClassConfig = {
         ['NdtBuff'] = {
             "Night's Perpetual Terror",
             "Night's Endless Terror",
+            "Boon of the Legion",
             "Night's Dark Terror",
             "Boon of the Garou",
         },
@@ -306,6 +307,7 @@ local _ClassConfig = {
             "Mana Reiteration",
             "Mana Reiterate",
             "Mana Resurgence",
+            "Mana Recursion",
         },
         ['AllianceSpell'] = {
             "Chromatic Conjunction",
@@ -399,6 +401,7 @@ local _ClassConfig = {
             "Fragmented Consciousness",
             "Shattered Consciousness",
             "Fractured Consciousness",
+            "Synaptic Seizure",
             "Synapsis Spasm",
             "Cripple",
             "Incapacitate",
@@ -417,6 +420,7 @@ local _ClassConfig = {
         },
         ['StripBuffSpell'] = {
             "Eradicate Magic",
+            "Abashi's Disempowerment",
             "Recant Magic",
             "Pillage Enchantment",
             "Nullify Magic",
@@ -1144,6 +1148,12 @@ local _ClassConfig = {
         },
         ['CombatSupport'] = {
             {
+                name = "Eldritch Rune",
+                type = "AA",
+                cond = function(self, aaName) 
+                    return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName) end,
+            },
+            {
                 name = "Glyph Spray",
                 type = "AA",
                 cond = function(self, aaName)
@@ -1221,6 +1231,14 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 80 and
                         Casting.AAReady(aaName)
+                end,
+
+            },
+            {
+                name = "Color Shock",
+                type = "AA",
+                cond = function(self, aaName)
+                    return mq.TLO.Me.PctAggro() >= 90 and Casting.AAReady(aaName)
                 end,
 
             },
