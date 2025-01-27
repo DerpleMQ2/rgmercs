@@ -435,7 +435,7 @@ local _ClassConfig = {
             "Unity of Jorlleag",
             "Unity of Helmsbane",
         },
-        ['SymbolBuff'] = {
+        ['GroupSymbolBuff'] = {
             ----Group Symbols
             "Symbol of Transal",
             "Symbol of Ryltan",
@@ -1177,6 +1177,7 @@ local _ClassConfig = {
                 name = "Saint's Unity",
                 type = "AA",
                 cond = function(self, aaName)
+                    if Config:GetSetting('AegoSymbol') == 2 then return false end
                     local selfBuffHP = Core.GetResolvedActionMapItem('SelfBuffhp')
                     local selfBuffHPLevel = selfBuffHP and selfBuffHP.Level() or 0
                     local aaSpell = mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName)() and mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).BaseName() or "")
@@ -1188,9 +1189,10 @@ local _ClassConfig = {
                 name = "SelfBuffhp",
                 type = "Spell",
                 cond = function(self, spell)
+                    if Config:GetSetting('AegoSymbol') == 2 then return false end
                     local aaSpell = mq.TLO.Spell(mq.TLO.Me.AltAbility("Saint's Unity").Spell.Trigger(1).BaseName() or "")
                     local aaLevel = aaSpell and aaSpell.Level() or 0
-                    return aaLevel < (spell.Level() or 0) and Config:GetSetting('DoDruid') and spell.Stacks() and Casting.CanUseAA('Spirit Mastery') and
+                    return aaLevel < (spell.Level() or 0) and spell.Stacks() and Casting.CanUseAA('Spirit Mastery') and
                         not Casting.BuffActive(spell)
                 end,
             },
@@ -1204,20 +1206,20 @@ local _ClassConfig = {
         },
         ['GroupBuff'] = {
             {
-                name = "SymbolBuff",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    -- force the target for StacksTarget to work.
-                    Targeting.SetTarget(target.ID() or 0)
-                    return Config:GetSetting('DoSymbol') and Targeting.TargetClassIs({ "WAR", "PAL", "SHD", }, target) and Casting.SpellStacksOnTarget(spell)
-                end,
-            },
-            {
                 name = "AegoBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if Config:GetSetting('AegoSymbol') ~= 1 then return false end
                     ---@diagnostic disable-next-line: undefined-field
-                    return Config:GetSetting('DoDruid') and Casting.GroupBuffCheck(spell, target, mq.TLO.Me.Spell(spell).ID())
+                    return Casting.GroupBuffCheck(spell, target, mq.TLO.Me.Spell(spell).ID())
+                end,
+            },
+            {
+                name = "GroupSymbolBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if Config:GetSetting('AegoSymbol') ~= 2 then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },
@@ -1499,13 +1501,18 @@ local _ClassConfig = {
             FAQ = "Why is my cleric not using his Divine Buff Spells?",
             Answer = "Make sure you have [DivineBuffOn] enabled in your settings.",
         },
-        ['DoDruid']         = {
-            DisplayName = "Do Druid",
+        ['AegoSymbol']      = {
+            DisplayName = "Aego/Symbol Choice:",
             Category = "Spells and Abilities",
-            Tooltip = "Use Spells",
-            Default = false,
-            FAQ = "TODO",
-            Answer = "TODO",
+            Index = 1,
+            Tooltip = "Choose whether to use the Aegolism or Symbol Line of HP Buffs.",
+            Type = "Combo",
+            ComboOptions = { 'Aegolism', 'Symbol', 'None', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            FAQ = "Why aren't I using Aego and/or Symbol buffs?",
+            Answer = "Please set which buff you would like to use on the Buffs/Debuffs tab.",
         },
         ['DoCH']            = {
             DisplayName = "Do CH",
@@ -1514,14 +1521,6 @@ local _ClassConfig = {
             Default = false,
             FAQ = "Why is my cleric not using his Complete Heal Spells?",
             Answer = "Make sure you have [DoCH] enabled in your settings.",
-        },
-        ['DoSymbol']        = {
-            DisplayName = "Do Symbol",
-            Category = "Heals",
-            Tooltip = "Use Spells",
-            Default = false,
-            FAQ = "Why is my cleric not using his Symbol Spells?",
-            Answer = "Make sure you have [DoSymbol] enabled in your settings. Also make sure you have reagents for the spell.",
         },
         ['UseAura']         = {
             DisplayName = "Aura Spell Choice:",

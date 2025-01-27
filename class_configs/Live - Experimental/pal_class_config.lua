@@ -1120,13 +1120,19 @@ local _ClassConfig = {
                 name = "Aego",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and not Config:GetSetting('DoDruid') end,
+                cond = function(self, spell)
+                    if Config:GetSetting('AegoSymbol') ~= 1 then return false end
+                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                end,
             },
             {
                 name = "Symbol",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Config:GetSetting('DoDruid') end,
+                cond = function(self, spell)
+                    if Config:GetSetting('AegoSymbol') ~= 2 then return false end
+                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                end,
             },
             {
                 name = "Marr's Salvation",
@@ -1766,15 +1772,19 @@ local _ClassConfig = {
             FAQ = "Why am I not casting Brells?",
             Answer = "Make sure you have the [DoBrells] setting enabled.",
         },
-        ['DoDruid']           = {
-            DisplayName = "Do Druid",
+        ['AegoSymbol']        = {
+            DisplayName = "Aego/Symbol Choice:",
             Category = "Buffs/Debuffs",
-            Tooltip = "Enable Casting Symbol instead of Aego",
-            Default = true,
-            FAQ = "Why am I not casting Symbol?",
-            Answer = "Make sure you have the [DoDruid] setting enabled to use Symbol instead of Aego spells.",
+            Index = 1,
+            Tooltip = "Choose whether to use the Aegolism or Symbol Line of HP Buffs.",
+            Type = "Combo",
+            ComboOptions = { 'Aegolism Line (Keeper)', 'Symbol Line', 'None', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            FAQ = "Why aren't I using Aego and/or Symbol buffs?",
+            Answer = "Please set which buff you would like to use on the Buffs/Debuffs tab.",
         },
-
         --Healing
         ['TotHealPoint']      = {
             DisplayName = "ToT HealPoint",
