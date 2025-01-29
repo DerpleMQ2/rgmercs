@@ -107,7 +107,7 @@ function Ui.RenderConfigSelector()
     if Config.Globals.ClassConfigDirs ~= nil then
         ImGui.Text("Config Type:")
         Ui.Tooltip(
-            "Select your current server/environment.\nLive: Official EQ Servers (Live, Test, TLP).\nBeta: Configs in testing (see forums).\nExpirimental: Configs restricted to specific modes or levels (see forums, often preferred over the base if available!).\nProject Lazurus: Laz-specific (Live may be better suited for other emu servers).\nCustom: Copies of the above configs that you have edited yourself.")
+            "Select your current server/environment.\nLive: Official EQ Servers (Live, Test, TLP).\nBeta: Configs in testing (see forums).\nExperimental: Configs restricted to specific modes or levels (see forums, often preferred over the base if available!).\nProject Lazurus: Laz-specific (Live may be better suited for other emu servers).\nCustom: Copies of the above configs that you have edited yourself.")
         ImGui.SameLine()
         ImGui.SetNextItemWidth(200)
         local newConfigDir, changed = ImGui.Combo("##config_type", Ui.GetClassConfigIDFromName(Config:GetSetting('ClassConfigDir')), Config.Globals.ClassConfigDirs,
