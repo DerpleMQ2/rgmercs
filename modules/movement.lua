@@ -69,7 +69,7 @@ Module.Constants.CampfireTypes = { 'All Off', }
 for t, _ in pairs(Module.Constants.CampfireNameToKit) do table.insert(Module.Constants.CampfireTypes, t) end
 table.sort(Module.Constants.CampfireTypes)
 
-Module.DefaultConfig     = {
+Module.DefaultConfig   = {
     ['AutoCampRadius']                         = {
         DisplayName = "Auto Camp Radius",
         Category = "Camp",
@@ -201,7 +201,7 @@ Module.DefaultConfig     = {
     },
 }
 
-Module.CommandHandlers   = {
+Module.CommandHandlers = {
     chaseon = {
         usage = "/rgl chaseon <name?>",
         about = "Chase your current target or <name>",
@@ -231,14 +231,6 @@ Module.CommandHandlers   = {
         end,
     },
 }
-
-Module.DefaultCategories = Set.new({})
-for k, v in pairs(Module.DefaultConfig or {}) do
-    if v.Type ~= "Custom" then
-        Module.DefaultCategories:add(v.Category)
-    end
-    Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
-end
 
 local function getConfigFileName()
     local oldFile = mq.configDir ..
@@ -282,14 +274,24 @@ function Module:LoadSettings()
         Logger.log_error("\ay[Basic]: Unable to load global settings file(%s), creating a new one!",
             settings_pickle_path)
         self.settings = {}
+        self:SaveSettings(false)
     else
         self.settings = config()
+    end
+
+    Module.DefaultCategories = Set.new({})
+    for k, v in pairs(Module.DefaultConfig or {}) do
+        if v.Type ~= "Custom" then
+            Module.DefaultCategories:add(v.Category)
+        end
+        Module.FAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
     end
 
     local settingsChanged = false
 
     -- Setup Defaults
     self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
+
     if settingsChanged then
         self:SaveSettings(false)
     end
