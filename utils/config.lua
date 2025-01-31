@@ -1167,7 +1167,7 @@ Config.DefaultConfig = {
         Category = "Heal/Rez",
         Index = 2,
         Tooltip = "Minimum PctHPs to use the Light Heal Rotation.",
-        Default = 90,
+        Default = mq.TLO.Me.Class.ShortName() == "CLR" and 95 or 90,
         Min = 1,
         Max = 99,
         ConfigType = "Advanced",

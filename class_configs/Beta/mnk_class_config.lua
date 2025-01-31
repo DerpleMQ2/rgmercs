@@ -409,29 +409,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Spire of the Sensei",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
-            },
-            {
-                name = "Infusion of Thunder",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
-            },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
-                type = "Item",
-                cond = function(self)
-                    if not Config:GetSetting('DoChestClick') then return false end
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and item.TimerReady() == 0 and Casting.SpellStacksOnMe(item.Spell)
-                end,
-            },
-            {
                 name = "Heel",
                 type = "Disc",
                 cond = function(self, discSpell)
@@ -457,6 +434,29 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                end,
+            },
+            {
+                name = "Spire of the Sensei",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
+                end,
+            },
+            {
+                name = "Infusion of Thunder",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.AAReady(aaName)
+                end,
+            },
+            {
+                name = mq.TLO.Me.Inventory("Chest").Name(),
+                type = "Item",
+                cond = function(self)
+                    if not Config:GetSetting('DoChestClick') then return false end
+                    local item = mq.TLO.Me.Inventory("Chest")
+                    return item() and item.TimerReady() == 0 and Casting.SpellStacksOnMe(item.Spell)
                 end,
             },
             { --10m reuse
@@ -537,20 +537,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Storm",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
-                end,
-            },
-            {
-                name = "EarthForce",
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
-                end,
-            },
-            {
                 name = "FistsOfWu",
                 type = "Disc",
                 cond = function(self, discSpell)
@@ -564,6 +550,20 @@ local _ClassConfig = {
                 cond = function(self, discSpell)
                     if not Config:GetSetting('DoAlliance') then return false end
                     return Casting.TargetedDiscReady(discSpell) and not Casting.TargetHasBuffByName(discSpell.Trigger(1))
+                end,
+            },
+            {
+                name = "Storm",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                end,
+            },
+            {
+                name = "EarthForce",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
         },
