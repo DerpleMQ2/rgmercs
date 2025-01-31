@@ -684,7 +684,7 @@ local _ClassConfig = {
             if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
                     rezAction = Casting.UseItem("Staff of Forbidden Rites", corpseId)
-                elseif Casting.AAReady("Call of the Wild") then
+                elseif Casting.AAReady("Call of the Wild") and corpseId ~= mq.TLO.Me.ID() then
                     rezAction = Casting.UseAA("Call of the Wild", corpseId, true, 1)
                 end
             elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
@@ -946,7 +946,7 @@ local _ClassConfig = {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
-                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.DoBuffCheck()
+                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.DoBuffCheck() and Casting.AmIBuffable()
             end,
         },
         { --Spells that should be checked on group members

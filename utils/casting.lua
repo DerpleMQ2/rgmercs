@@ -1478,6 +1478,7 @@ end
 --- @return boolean True if the entity can be buffed, false otherwise.
 function Casting.AmIBuffable()
     local myCorpseCount = Config:GetSetting('BuffRezables') and 0 or mq.TLO.SpawnCount(string.format('pccorpse %s radius 100 zradius 50', mq.TLO.Me.CleanName()))()
+    if myCorpseCount > 0 then Logger.log_debug("Corpse detected (%s), aborting rotation.", mq.TLO.Me.CleanName()) end
     return myCorpseCount == 0
 end
 
@@ -1485,29 +1486,37 @@ end
 ---
 --- @return table A table containing the IDs of the groups that can receive buffs.
 function Casting.GetBuffableGroupIDs()
-    local groupIds = Casting.AmIBuffable() and { mq.TLO.Me.ID(), } or {}
-    local count = mq.TLO.Group.Members()
-    for i = 1, count do
-        local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
-        if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
-            groupIds = {}
-            Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
-            break
-        else
-            table.insert(groupIds, mq.TLO.Group.Member(i).ID())
-        end
-    end
+    local groupIds = {}
 
-    -- check OA list
-    for _, n in ipairs(Config:GetSetting('OutsideAssistList')) do
-        -- dont double up OAs who are in our group
-        if not mq.TLO.Group.Member(n)() then
-            local oaSpawn = mq.TLO.Spawn(("pc =%s"):format(n))
-            if oaSpawn and oaSpawn() and oaSpawn.Distance() <= 90 then
-                table.insert(groupIds, oaSpawn.ID())
+    if Casting.AmIBuffable() then
+        table.insert(groupIds, mq.TLO.Me.ID())
+
+        local count = mq.TLO.Group.Members()
+        for i = 1, count do
+            local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+            if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
+                groupIds = {}
+                Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
+                break
+            else
+                table.insert(groupIds, mq.TLO.Group.Member(i).ID())
             end
         end
+
+        -- check OA list
+        for _, n in ipairs(Config:GetSetting('OutsideAssistList')) do
+            -- dont double up OAs who are in our group
+            if not mq.TLO.Group.Member(n)() then
+                local oaSpawn = mq.TLO.Spawn(("pc =%s"):format(n))
+                if oaSpawn and oaSpawn() and oaSpawn.Distance() <= 90 then
+                    table.insert(groupIds, oaSpawn.ID())
+                end
+            end
+        end
+    else
+        Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Me.DisplayName())
     end
+
     return groupIds
 end
 
@@ -1600,16 +1609,34 @@ function Casting.AutoMed()
         Config:GetSetting('ManaMedPct'), me.PctEndurance(),
         Config:GetSetting('EndMedPct'), Strings.BoolToColorString(forcesit), Strings.BoolToColorString(forcestand), Strings.BoolToColorString(Casting.Memorizing))
 
-    if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or Targeting.IHaveAggro(90)) then
-        forcesit = false
-        forcestand = true
-    end
+    -- This could likely be refactored
+    if me.Sitting() and not Casting.Memorizing then
+        if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or Targeting.IHaveAggro(90)) then
+            Config.Globals.InMedState = false
+            Logger.log_debug("Forcing stand - Aggro threshold reached.")
+            me.Stand()
+            return
+        end
 
-    if (Config:GetSetting('StandWhenDone') or Config:GetSetting('DoPull')) and me.Sitting() and forcestand and not Casting.Memorizing then
-        Config.Globals.InMedState = false
-        Logger.log_debug("Forcing stand - all conditions met.")
-        me.Stand()
-        return
+        if Modules:ExecModule("Class", "IsRezing") and mq.TLO.Me.PctMana() > 10 then
+            local group = mq.TLO.Group.Members()
+            for i = 1, group do
+                local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+                if mq.TLO.SpawnCount(rezSearch)() > 0 then
+                    Config.Globals.InMedState = false
+                    Logger.log_debug("Forcing stand - we should have enough mana to rez and there is a corpse nearby.")
+                    me.Stand()
+                    return
+                end
+            end
+        end
+
+        if (Config:GetSetting('StandWhenDone') or Config:GetSetting('DoPull')) and forcestand then
+            Config.Globals.InMedState = false
+            Logger.log_debug("Forcing stand - all conditions met.")
+            me.Stand()
+            return
+        end
     end
 
     if not me.Sitting() and forcesit then
