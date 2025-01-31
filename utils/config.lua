@@ -50,6 +50,7 @@ Config.Constants.RGPetClass          = Set.new({ "BST", "NEC", "MAG", "SHM", "EN
 Config.Constants.RGMezAnims          = Set.new({ 1, 5, 6, 27, 43, 44, 45, 80, 82, 112, 134, 135, })
 Config.Constants.ModRods             = { "Modulation Shard", "Transvergence", "Modulation", "Modulating", }
 Config.Constants.SpellBookSlots      = 1120
+Config.Constants.CastCompleted       = Set.new({ "CAST_SUCCESS", "CAST_IMMUNE", "CAST_TAKEHOLD", "CAST_RESISTED", "CAST_RECOVER", })
 
 Config.Constants.CastResults         = {
     ['CAST_RESULT_NONE'] = 0,

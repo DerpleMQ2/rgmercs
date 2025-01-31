@@ -919,8 +919,7 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
             mq.delay(1)
             Logger.log_verbose("\atUseAA(): Finished waiting on cast: %s result = %s retries left = %d", aaName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
-        until Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS or
-            Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_TAKEHOLD or retryCount < 0
+        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
     else
         Core.DoCmd(cmd)
         mq.delay(5)
@@ -1213,10 +1212,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             end
 
             retryCount = retryCount - 1
-        until Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS or
-            Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_TAKEHOLD or
-            Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_RECOVER or
-            retryCount < 0
+        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
         -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
         local clipDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('SongClipDelayFact')
@@ -1372,8 +1368,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
             mq.delay(1)
             Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
             retryCount = retryCount - 1
-        until Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS or
-            Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_TAKEHOLD or retryCount < 0
+        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
 
         -- don't return control until we are done.
         if Config:GetSetting('WaitOnGlobalCooldown') and not overrideWaitForGlobalCooldown then
