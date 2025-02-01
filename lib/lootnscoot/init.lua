@@ -110,6 +110,7 @@ There is also no flag for combat looting. It will only loot if no mobs are withi
 
 ]]
 ---@diagnostic disable: undefined-global
+---@diagnostic disable: undefined-field
 
 local mq              = require 'mq'
 local PackageMan      = require('mq.PackageMan')
@@ -558,8 +559,9 @@ function loot.LoadRuleDB()
             "item_link" TEXT
         );
     ]], charTableName)
-
+    db:exec("BEGIN TRANSACTION")
     db:exec(createTablesQuery)
+    db:exec("COMMIT")
     db:close()
 
 
@@ -689,6 +691,7 @@ function loot.loadSettings(firstRun)
 
         -- check if the DB structure needs updating
         local db = loot.OpenItemsSQL()
+        db:exec("BEGIN TRANSACTION")
         db:exec([[
         CREATE TABLE IF NOT EXISTS Items (
         item_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
@@ -755,6 +758,7 @@ function loot.loadSettings(firstRun)
         link TEXT
         );
         ]])
+        db:exec("COMMIT")
         db:close()
 
         -- load the items database
@@ -1030,7 +1034,6 @@ function loot.addToItemDB(item)
         heroicsvpoison                                    = excluded.heroicsvpoison,
         heroicwis                                    = excluded.heroicwis
         ]]
-
     local stmt = db:prepare(sql)
     if not stmt then
         Logger.Error("\arFailed to prepare \ax[\ayINSERT\ax] \aoSQL\ax statement: \at%s", db:errmsg())
@@ -1108,8 +1111,9 @@ function loot.addToItemDB(item)
     if not success then
         Logger.Error("Error executing SQL statement: %s", errmsg)
     end
-
+    db:exec("BEGIN TRANSACTION")
     stmt:finalize()
+    db:exec("COMMIT")
     db:close()
 
     -- insert the item into the lua table for easier lookups
@@ -4745,7 +4749,7 @@ loot.init({ ..., })
 
 while not loot.Terminate do
     local mercsRunnig = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
-    if not mercsRunnig then
+    if mercsRunnig then
         loot.Terminate = true
     end
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then loot.Terminate = true end -- exit sctipt if at char select.
