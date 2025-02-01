@@ -130,6 +130,8 @@ for i = 10, 40 do
 	end
 end
 
+--
+
 ---@param names boolean
 ---@param links boolean
 ---@param record boolean
@@ -282,29 +284,13 @@ function guiLoot.GUI()
 				-- ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, 4,7)
 				if imgui.BeginMenu('Options') then
 					local activated = false
-					activated, guiLoot.console.autoScroll = imgui.MenuItem('Auto-scroll', nil, guiLoot.console.autoScroll)
-					activated, openConfigGUI = imgui.MenuItem('Config', nil, openConfigGUI)
-					activated, guiLoot.hideNames = imgui.MenuItem('Hide Names', nil, guiLoot.hideNames)
-					if activated then
-						if guiLoot.hideNames then
-							guiLoot.console:AppendText("\ay[Looted]\ax Hiding Names\ax")
-						else
-							guiLoot.console:AppendText("\ay[Looted]\ax Showing Names\ax")
-						end
-					end
-					activated, zoom = imgui.MenuItem('Zoom', nil, zoom)
+					_, guiLoot.console.autoScroll = ImGui.MenuItem('Auto-scroll', nil, guiLoot.console.autoScroll)
+					_, openConfigGUI = ImGui.MenuItem('Config', nil, openConfigGUI)
+					_, guiLoot.hideNames = ImGui.MenuItem('Hide Names', nil, guiLoot.hideNames)
+					_, zoom = ImGui.MenuItem('Zoom', nil, zoom)
 
 					if not guiLoot.UseActors then
-						activated, guiLoot.showLinks = imgui.MenuItem('Show Links', nil, guiLoot.showLinks)
-						if activated then
-							guiLoot.linkdb = mq.TLO.Plugin('mq2linkdb').IsLoaded()
-							if guiLoot.showLinks then
-								if not guiLoot.linkdb then guiLoot.loadLDB() end
-								guiLoot.console:AppendText("\ay[Looted]\ax Link Lookup Enabled\ax")
-							else
-								guiLoot.console:AppendText("\ay[Looted]\ax Link Lookup Disabled\ax")
-							end
-						end
+						_, guiLoot.showLinks = ImGui.MenuItem('Show Links', nil, guiLoot.showLinks)
 					end
 					activated, guiLoot.recordData = imgui.MenuItem('Record Data', nil, guiLoot.recordData)
 					if activated then

@@ -109,8 +109,8 @@ The forage event handling also does not handle fishing events like ninjadvloot d
 There is also no flag for combat looting. It will only loot if no mobs are within the radius.
 
 ]]
-
 ---@diagnostic disable: undefined-global
+
 local mq              = require 'mq'
 local PackageMan      = require('mq.PackageMan')
 local SQLite3         = PackageMan.Require('lsqlite3')
@@ -197,7 +197,7 @@ local newItem                        = nil
 loot.guiLoot                         = require('loot_hist')
 if loot.guiLoot ~= nil then
     loot.UseActors = true
-    loot.guiLoot.GetSettings(loot.HideNames, loot.LookupLinks, loot.RecordData, true, loot.UseActors, 'lootnscoot')
+    loot.guiLoot.GetSettings(loot.HideNames, loot.LookupLinks, loot.RecordData, true, loot.UseActors, 'lootnscoot', false)
 end
 
 local iconAnimation                     = mq.FindTextureAnimation('A_DragItem')
@@ -2259,7 +2259,7 @@ function loot.commandHandler(...)
                     loot.Settings.RecordData,
                     true,
                     loot.Settings.UseActors,
-                    'lootnscoot'
+                    'lootnscoot', false
                 )
             end
             Logger.Info("\ayReloaded Settings \axand \atLoot Files")
@@ -2271,7 +2271,7 @@ function loot.commandHandler(...)
                     loot.Settings.RecordData,
                     true,
                     loot.Settings.UseActors,
-                    'lootnscoot'
+                    'lootnscoot', false
                 )
             end
             loot.UpdateDB()
@@ -4618,7 +4618,7 @@ function loot.renderMainUI()
         if show then
             ImGui.PushStyleColor(ImGuiCol.PopupBg, ImVec4(0.002, 0.009, 0.082, 0.991))
             if ImGui.SmallButton(string.format("%s Report", Icons.MD_INSERT_CHART)) then
-                loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot')
+                loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', true)
             end
             if ImGui.IsItemHovered() then ImGui.SetTooltip("Show/Hide Report Window") end
 
@@ -4684,7 +4684,7 @@ function loot.processArgs(args)
     if #args == 1 then
         if args[1] == 'directed' then
             if loot.guiLoot ~= nil then
-                loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot')
+                loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', false)
             end
 
             Mode = 'directed'
@@ -4706,7 +4706,7 @@ function loot.processArgs(args)
             loot.lootMobs()
         elseif args[1] == 'standalone' then
             if loot.guiLoot ~= nil then
-                loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot')
+                loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', false)
             end
             Mode = 'standalone'
             loot.Terminate = false
@@ -4736,7 +4736,7 @@ function loot.init(args)
 end
 
 if loot.guiLoot ~= nil then
-    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot')
+    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', false)
     loot.guiLoot.init(true, true, 'lootnscoot')
     loot.guiExport()
 end
