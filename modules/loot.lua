@@ -116,10 +116,6 @@ function Module:LoadSettings()
 	local needsSave = false
 	self.settings, needsSave = Config.ResolveDefaults(Module.DefaultConfig, self.settings)
 
-	if Config:GetSetting('SwapInstruments') then
-		self.settings.DoDestroy = false
-		needsSave = true
-	end
 	Logger.log_debug("Settings Changes = %s", Strings.BoolToColorString(needsSave))
 	if needsSave then
 		self:SaveSettings(false)
