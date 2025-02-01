@@ -204,28 +204,28 @@ Module.DefaultConfig   = {
 Module.CommandHandlers = {
     chaseon = {
         usage = "/rgl chaseon <name?>",
-        about = "Chase your current target or <name>",
+        about = "Chase <name> (uses your current target if no name is supplied).",
         handler = function(self, params)
             self:ChaseOn(params)
         end,
     },
     chaseoff = {
         usage = "/rgl chaseoff",
-        about = "Turn Chasing Off",
+        about = "Stop chasing your current chase target.",
         handler = function(self, _)
             self:ChaseOff()
         end,
     },
     campon = {
         usage = "/rgl campon",
-        about = "Set a camp here",
+        about = "Set a camp here.",
         handler = function(self, _)
             self:CampOn()
         end,
     },
     campoff = {
         usage = "/rgl campoff",
-        about = "Clear your camp",
+        about = "Clear your current camp.",
         handler = function(self, _)
             self:CampOff()
         end,

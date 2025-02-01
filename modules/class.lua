@@ -55,7 +55,7 @@ Module.TempSettings.MissingSpellsHighestOnly = true
 Module.CommandHandlers                       = {
     setmode = {
         usage = "/rgl setmode <mode>",
-        about = "Make sets my mode to mode - this is a helper so you don't need to use an index.",
+        about = "Change the active class mode to <mode>.",
         handler =
             function(self, mode)
                 local newMode = nil
@@ -865,15 +865,18 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    -- Downtime rotaiton will just run a full rotation to completion
+    -- Downtime rotation will just run a full rotation to completion
     for idx, r in ipairs(self.TempSettings.RotationStates) do
         Logger.log_verbose("\ay:::TEST ROTATION::: => \at%s", r.name)
         self.TempSettings.CurrentRotationStateType = 1
         self.TempSettings.CurrentRotationStateId = idx
         local timeCheckPassed = true
-        if r.timer then
-            self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
+
+        self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
+        if r.timer then -- see if we've waited the rotation timer out.
             timeCheckPassed = ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
+        else            -- default to only processing Downtime rotations once per second if no timer is specified.
+            timeCheckPassed = self.CombatState ~= "Downtime" and true or ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= 1)
         end
         if timeCheckPassed then
             local targetTable = Core.SafeCallFunc("Rotation Target Table", r.targetId)
@@ -900,7 +903,7 @@ function Module:GiveTime(combat_state)
             Logger.log_verbose(
                 "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
                 Strings.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
-                Strings.FormatTime(r.timer - (os.clock() - self.TempSettings.RotationTimers[r.name])))
+                Strings.FormatTime((r.timer or 1) - (os.clock() - self.TempSettings.RotationTimers[r.name])))
         end
     end
 

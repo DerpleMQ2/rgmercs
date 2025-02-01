@@ -29,7 +29,7 @@ end
 Binds.Handlers    = {
     ['set'] = {
         usage = "/rgl set [show | <setting> <value>]",
-        about = "Show All Settings or Set a specific RGMercs setting",
+        about = "Show all settings or set a specific RGMercs setting.",
         handler = function(config, value)
             Config:HandleBind(config, value)
         end,
@@ -69,7 +69,7 @@ Binds.Handlers    = {
     },
     ['forcenamed'] = {
         usage = "/rgl forcenamed",
-        about = "Will force the current target to be considered a name mainly for testing purposes.",
+        about = "Will force the current target to be considered a Named (this flag does not persist and is for testing purposes).",
         handler = function()
             Targeting.ForceNamed = not Targeting.ForceNamed
             Logger.log_info("\awForced Named: %s", Strings.BoolToColorString(Targeting.ForceNamed))
@@ -84,7 +84,7 @@ Binds.Handlers    = {
     },
     ['addoa'] = {
         usage = "/rgl addoa <Name>",
-        about = "Adds <Name> to your Outside Assist List, if no name is given, Target name is used",
+        about = "Adds <Name> to your Outside Assist List. If no name is entered, your target's name is used.",
         handler = function(name)
             if not name then name = mq.TLO.Target.CleanName() end
             if not name then
@@ -97,7 +97,7 @@ Binds.Handlers    = {
     },
     ['deloa'] = {
         usage = "/rgl deloa <Name>",
-        about = "Deletes <Name> from your Outside Assist List, if no name is given, Target name is used",
+        about = "Deletes <Name> from your Outside Assist List. If no name is entered, your target's name is used.",
         handler = function(name)
             if not name then name = mq.TLO.Target.CleanName() end
             if not name then
@@ -110,7 +110,7 @@ Binds.Handlers    = {
     },
     ['backoff'] = {
         usage = "/rgl backoff <on|off>",
-        about = "Toggles or sets backoff flag",
+        about = "Toggles or sets backoff flag, which temporarily stops the PC from assisting or engaging.",
         handler = function(value)
             if value == nil then
                 Config.Globals.BackOffFlag = not Config.Globals.BackOffFlag
@@ -125,7 +125,7 @@ Binds.Handlers    = {
     },
     ['qsay'] = {
         usage = "/rgl qsay <text>",
-        about = "All RGMercs will target your target and say your <text>",
+        about = "All groupmembers running RGMercs will target your target and say the <text> with a random delay.",
         handler = function(...)
             local allText = { ..., }
             local text
@@ -139,7 +139,7 @@ Binds.Handlers    = {
     },
     ['cast'] = {
         usage = "/rgl cast \"<spell>\" <targetId?>",
-        about = "All RGMercs will memorize and cast <spell> you can pass an optional <target id>",
+        about = "Uses a spell or AA (memorizes if necessary). If no targetId is entered, your target is used.",
         handler = function(spell, targetId)
             targetId = targetId and tonumber(targetId)
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
@@ -152,7 +152,7 @@ Binds.Handlers    = {
     },
     ['castaa'] = {
         usage = "/rgl castaa \"<AAName>\" <targetId?>",
-        about = "All RGMercs will try to use <AAName> you can pass an optional <target id>",
+        about = "Uses an AA. If no targetId is entered, your target is used.",
         handler = function(spell, targetId)
             targetId = targetId and tonumber(targetId)
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
@@ -191,7 +191,7 @@ Binds.Handlers    = {
     },
     ['setlogfilter'] = {
         usage = "/rgl setlogfilter <filter|filter|filter|...>",
-        about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging)",
+        about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging).",
         handler = function(text)
             Logger.set_log_filter(text)
         end,
@@ -205,21 +205,21 @@ Binds.Handlers    = {
     },
     ['togglepause'] = {
         usage = "/rgl togglepause",
-        about = "Will toggle the pause state of your RGMerc Main Loop",
+        about = "Toggle the pause state of your RGMercs Main Loop.",
         handler = function()
             Config.Globals.PauseMain = not Config.Globals.PauseMain
         end,
     },
     ['pause'] = {
         usage = "/rgl pause",
-        about = "Will pause your RGMerc Main Loop",
+        about = "Pauses your RGMercs Main Loop.",
         handler = function()
             Config.Globals.PauseMain = true
         end,
     },
     ['pauseall'] = {
         usage = "/rgl pauseall",
-        about = "Will pause all of your Group RGMercs' Main Loop",
+        about = "Pauses the RGMercs Main Loop for every groupmember.",
         handler = function()
             Config.Globals.PauseMain = true
             Core.DoCmd("/squelch /dgge /rgl pause")
@@ -228,14 +228,14 @@ Binds.Handlers    = {
     },
     ['unpause'] = {
         usage = "/rgl unpause",
-        about = "Will unpause your RGMerc Main Loop",
+        about = "Unpauses your RGMercs Main Loop.",
         handler = function()
             Config.Globals.PauseMain = false
         end,
     },
     ['unpauseall'] = {
         usage = "/rgl unpauseall",
-        about = "Will unpause all of your Group RGMercs' Main Loop",
+        about = "Unpauses the RGMercs Main Loop for every groupmember.",
         handler = function()
             Config.Globals.PauseMain = false
             Core.DoCmd("/squelch /dgge /rgl unpause")
@@ -244,7 +244,7 @@ Binds.Handlers    = {
     },
     ['yes'] = {
         usage = "/rgl yes",
-        about = "Will cause all of your Group RGMercs to click on every possible 'Yes' Dialogue they have up.",
+        about = "All groupmembers running RGMercs will click on every possible 'Yes' Dialogue they have up.",
         handler = function()
             Core.DoCmd("/dgga /notify LargeDialogWindow LDW_YesButton leftmouseup")
             Core.DoCmd("/dgga /notify LargeDialogWindow LDW_OkButton leftmouseup")
@@ -259,7 +259,7 @@ Binds.Handlers    = {
     },
     ['circle'] = {
         usage = "/rgl circle <radius>",
-        about = "Will cause all of your Group RGMercs form a circle around you of radius.",
+        about = "All groupmembers running RGMercss will form a circle around you using the entered radius.",
         handler = function(radius)
             if not radius then radius = 15 end
 
@@ -297,7 +297,7 @@ Binds.Handlers    = {
     },
     ['mini'] = {
         usage = "/rgl mini",
-        about = "Toggle minimizing of the RGMercs window",
+        about = "Toggle minimizing of the RGMercs window to a small icon.",
         handler = function()
             Config.Globals.Minimized = not Config.Globals.Minimized
         end,
@@ -331,8 +331,8 @@ Binds.Handlers    = {
         end,
     },
     ['pop'] = {
-        usage = "/rgl pop [Module Name]",
-        about = "Toggle Popout of Module",
+        usage = "/rgl pop <modulename>",
+        about = "Toggles between popped and docked states for <modulename>.",
         handler = function(config, value)
             if config == 'debug' or config == 'console' then
                 Config:SetSetting("PopOutConsole", not Config:GetSetting("PopOutConsole"))
@@ -342,8 +342,8 @@ Binds.Handlers    = {
         end,
     },
     ['faq'] = {
-        usage = "/rgl faq [question]",
-        about = "Toggle Popout of Module",
+        usage = "/rgl faq \"<search terms>\"",
+        about = "Search the FAQ and display the results in the mq2 console. Please see the FAQ tab for a friendlier experience!",
         handler = function(config, value)
             Modules:ExecModule('FAQ', "FaqFind", config)
         end,
