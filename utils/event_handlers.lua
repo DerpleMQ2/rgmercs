@@ -64,23 +64,31 @@ end)
 
 mq.event("TooClose", "Your target is too close to use a ranged weapon!", function()
     if not Config:GetSetting('HandleTooClose') then
+        Logger.log_debug("TooCloseHandler: Event Detected, but HandleTooClose is not enabled.")
         return
     end
+    Logger.log_debug("TooCloseHandler: Event Detected.")
     -- Check if we're in the middle of a pull and use a backup.
     if Config:GetSetting('DoPull') and Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
+        Logger.log_debug("TooCloseHandler: Pull Mode Detected.")
         local discSpell = mq.TLO.Spell("Throw Stone")
         if Casting.TargetedDiscReady(discSpell) then
+            Logger.log_debug("TooCloseHandler: Attempting to Throw Stone.")
             Casting.UseDisc(discSpell, mq.TLO.Target.ID())
         else
             if Casting.AbilityReady("Taunt") then
-                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targeting.GetTargetID(), Targeting.GetTargetMaxRangeTo())
+                Logger.log_debug("TooCloseHandler: Naving to target to use Taunt.")
+                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Taunt")
+                Logger.log_debug("TooCloseHandler: Attempting to Taunt.")
             end
             if Casting.AbilityReady("Kick") then
-                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targeting.GetTargetID(), Targeting.GetTargetMaxRangeTo())
+                Logger.log_debug("TooCloseHandler: Naving to target to use Kick.")
+                Core.DoCmd("/nav id %d distance=%d lineofsite=on log=off", Targeting.GetTargetID(), (Targeting.GetTargetMaxRangeTo() * .8))
                 mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
                 Casting.UseAbility("Kick")
+                Logger.log_debug("TooCloseHandler: Attempting to Kick.")
             end
         end
     end
@@ -88,6 +96,7 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
     -- Only do non-pull code if autoengage is on
     if Config:GetSetting('DoAutoEngage') and not mq.TLO.Me.Moving() then
         if not Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
+            Logger.log_debug("TooCloseHandler: Pull State not detected, using Combat Nav.")
             local classConfig = Modules:ExecModule("Class", "GetClassConfig")
             if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
                 Core.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, true)
