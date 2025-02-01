@@ -558,7 +558,7 @@ Module.CommandHandlers = {
     },
     pulldeny = {
         usage = "/rgl pulldeny \"<name>\"",
-        about = "Puts <name> on the pull deny list",
+        about = "Adds <name> to the Pull Deny List.",
         handler = function(self, name)
             self:AddMobToList("PullDenyList", name)
             return true
@@ -566,28 +566,29 @@ Module.CommandHandlers = {
     },
     pullallow = {
         usage = "/rgl pullallow \"<name>\"",
-        about = "Puts <name> on the pull allow list",
+        about = "Adds <name> to the Pull Allow List.",
         handler = function(self, name)
             self:AddMobToList("PullAllowList", name)
             return true
         end,
     },
-    pulldenyrm = {
-        usage = "/rgl pulldenyrm \"<name>\"",
-        about = "Removes <name> from the pull deny list",
-        handler = function(self, name)
-            self:AddMobToList("PullDenyList", name)
-            return true
-        end,
-    },
-    pullallowrm = {
-        usage = "/rgl pullallowrm \"<name>\"",
-        about = "Removes <name> from the pull allow list",
-        handler = function(self, name)
-            self:AddMobToList("PullAllowList", name)
-            return true
-        end,
-    },
+    -- These are broken. Would need to adjust the delete function to look up the ID with name
+    -- pulldenyrm = {
+    --     usage = "/rgl pulldenyrm \"<name>\"",
+    --     about = "Removes <name> from the pull deny list",
+    --     handler = function(self, name)
+    --         self:AddMobToList("PullDenyList", name)
+    --         return true
+    --     end,
+    -- },
+    -- pullallowrm = {
+    --     usage = "/rgl pullallowrm \"<name>\"",
+    --     about = "Removes <name> from the pull allow list",
+    --     handler = function(self, name)
+    --         self:AddMobToList("PullAllowList", name)
+    --         return true
+    --     end,
+    -- },
 }
 
 local function getConfigFileName()

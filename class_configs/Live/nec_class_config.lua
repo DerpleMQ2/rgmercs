@@ -51,7 +51,7 @@ local _ClassConfig = {
     ['CommandHandlers'] = {
         startlich = {
             usage = "/rgl startlich",
-            about = "Start your Lich Spell [Note: This will enabled DoLich if it is not already]",
+            about = "Start your Lich Spell [Note: This will enabled DoLich if it is not already].",
             handler =
                 function(self)
                     Config:SetSetting('DoLich', true)
@@ -62,7 +62,7 @@ local _ClassConfig = {
         },
         stoplich = {
             usage = "/rgl stoplich",
-            about = "Stop your Lich Spell [Note: This will NOT disable DoLich]",
+            about = "Stop your Lich Spell [Note: This will NOT disable DoLich].",
             handler =
                 function(self)
                     Core.SafeCallFunc("Stop Necro Lich", self.ClassConfig.HelperFunctions.CancelLich, self)
