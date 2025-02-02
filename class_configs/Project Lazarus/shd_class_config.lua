@@ -35,10 +35,11 @@ local Tooltips     = {
     AETaunt             = "Spell Line: PBAE Hate Increase + Taunt",
     PoisonDot           = "Spell Line: Poison Dot",
     SpearNuke           = "Spell Line: Instacast Disease Nuke",
+    AESpearNuke         = "Spell Line: Instacast Directional Disease Nuke",
     BondTap             = "Spell Line: LifeTap DOT",
     DireTap             = "Spell Line: LifeTap",
     LifeTap             = "Spell Line: LifeTap",
-    BuffTap             = "Spell Line: Dmg + Max HP Buff + Hate Increase",
+    AEBuffTap           = "Spell Line: AE Dmg + Max HP Buff",
     BiteTap             = "Spell Line: LifeTap + ManaTap",
     ForPower            = "Spell Line: Hate Increase + Hate Increase DOT + AC Buff 'BY THE POWER OF GRAYSKULL, I HAVE THE POWER -- HE-MAN'",
     Terror              = "Spell Line: Hate Increase + Taunt",
@@ -379,12 +380,9 @@ local _ClassConfig = {
         },
         ['SpearNuke'] = {
             "Spike of Disease", -- Level 1
-            "Spear of Disease",
             "Spear of Pain",
             "Spear of Plague",
-            "Spear of Decay",
             "Miasmic Spear",
-            "Spear of Muram",
             "Rotroot Spear",
             "Rotmarrow Spear",
             "Malarian Spear",
@@ -396,6 +394,10 @@ local _ClassConfig = {
             "Spear of Cadcane",
             "Spear of Bloodwretch",
             "Spear of Lazam",
+        },
+        ['AESpearNuke'] = {
+            "Spear of Decay",
+            "Spear of Muram",
         },
         ['BondTap'] = {
             "Bond of Tatalros",
@@ -476,18 +478,8 @@ local _ClassConfig = {
             "Lifespike",
             "Lifetap", -- Level 8
         },
-        ['BuffTap'] = {
-            "Touch of Mortimus",
-            "Touch of Namdrows",
-            "Touch of Zlandicar",
-            "Touch of Hemofax",
-            "Touch of Holmein",
-            "Touch of Klonda",
-            "Touch of Piqiorn",
-            "Touch of Iglum",
-            "Touch of Lanys",
-            "Touch of the Soulbleeder",
-            "Touch of the Wailing Three", -- Level 75
+        ['AEBuffTap'] = {
+            "Grasp of Lhranc",
         },
         ['BiteTap'] = {
             "Zevfeer's Bite", -- Level 62
@@ -697,6 +689,25 @@ local _ClassConfig = {
             for _, buffName in ipairs(LeechEffects) do
                 if mq.TLO.Me.Buff(buffName)() or mq.TLO.Me.Song(buffName)() then return false end
             end
+            return true
+        end,
+        AETargetCheck = function(printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < Config:GetSetting('AETargetCnt') or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
+
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+                    end
+                    return false
+                end
+            end
+
             return true
         end,
     },
@@ -1551,9 +1562,18 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "SpearNuke",
+                name = "AESpearNuke",
                 type = "Spell",
                 tooltip = Tooltips.SpearNuke,
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
+                end,
+            },
+            {
+                name = "SpearNuke",
+                type = "Spell",
+                tooltip = Tooltips.AESpearNuke,
                 cond = function(self, spell, target)
                     return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
@@ -1603,12 +1623,13 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "BuffTap",
+                name = "AEBuffTap",
                 type = "Spell",
-                tooltip = Tooltips.BuffTap,
+                tooltip = Tooltips.AEBuffTap,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoBuffTap') then return false end
-                    return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.SpellStacksOnMe(spell.Trigger) and Casting.TargetedSpellReady(spell, target.ID())
+                    if not Config:GetSetting('DoAEBuffTap') or not Config:GetSetting('DoAEDamage') then return false end
+                    return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.SpellStacksOnMe(spell.Trigger) and Casting.TargetedSpellReady(spell, target.ID()) and
+                        self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
         },
@@ -1644,6 +1665,7 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
+                { name = "AESpearNuke", cond = function(self) return Config:GetSetting('DoAEDamage') end, },
                 { name = "SpearNuke", },
             },
         },
@@ -1709,8 +1731,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "Skin",      cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
             },
         },
@@ -1745,8 +1767,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "Skin",      cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1787,8 +1809,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "Skin",      cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1828,8 +1850,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "Skin",      cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1863,8 +1885,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "Skin",      cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1892,8 +1914,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "Skin",      cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1919,8 +1941,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "Skin",      cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1946,8 +1968,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "Skin",      cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1972,8 +1994,8 @@ local _ClassConfig = {
                         return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "HealBurn", cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AEBuffTap", cond = function(self) return Config:GetSetting('DoAEBuffTap') end, },
+                { name = "HealBurn",  cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -2001,6 +2023,18 @@ local _ClassConfig = {
             AbilityRange = 200,
             cond = function(self)
                 local resolvedSpell = Core.GetResolvedActionMapItem('SpearNuke')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
+            id = 'AESpearNuke',
+            Type = "Spell",
+            DisplayName = function() return Core.GetResolvedActionMapItem('AESpearNuke').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('AESpearNuke').RankName.Name() or "" end,
+            AbilityRange = 200,
+            cond = function(self)
+                local resolvedSpell = Core.GetResolvedActionMapItem('AESpearNuke')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
@@ -2125,17 +2159,6 @@ local _ClassConfig = {
             FAQ = "When should I be using Torrents?",
             Answer = "Generally, this is only advised at 100+ when you can benefit from the increased AC. Some early level ranges may find their use appropriate.",
         },
-        ['DoBuffTap']         = {
-            DisplayName = "Use Buff Tap",
-            Category = "Buffs/Debuffs",
-            Index = 7,
-            Tooltip = function() return Ui.GetDynamicTooltipForSpell("BuffTap") end,
-            Default = false,
-            RequiresLoadoutChange = true,
-            ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Buff Tap?",
-            Answer = "The term is a misnomer; contrary to common belief, these spells are not Life Taps. The HP buff is negligible in most situations.",
-        },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
             Category = "Buffs/Debuffs",
@@ -2234,10 +2257,10 @@ local _ClassConfig = {
             Answer = "You can choose the conditions under which you will use Thought Leech on the Taps tab.",
         },
 
-        --DoTs
+        --Damage Spells
         ['DoBondTap']         = {
             DisplayName = "Use Bond Dot",
-            Category = "DoT Spells",
+            Category = "Damage Spells",
             Index = 1,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("BondTap") end,
             RequiresLoadoutChange = true,
@@ -2247,7 +2270,7 @@ local _ClassConfig = {
         },
         ['DoPoisonDot']       = {
             DisplayName = "Use Poison Dot",
-            Category = "DoT Spells",
+            Category = "Damage Spells",
             Index = 2,
             ToolTip = function() return Ui.GetDynamicTooltipForSpell("PoisonDot") end,
             RequiresLoadoutChange = true,
@@ -2257,7 +2280,7 @@ local _ClassConfig = {
         },
         ['DoCorruptionDot']   = {
             DisplayName = "Use Corrupt Dot",
-            Category = "DoT Spells",
+            Category = "Damage Spells",
             Index = 3,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("CorruptDot") end,
             RequiresLoadoutChange = true,
@@ -2267,7 +2290,7 @@ local _ClassConfig = {
         },
         ['DoDireDot']         = {
             DisplayName = "Use Dire Dot",
-            Category = "DoT Spells",
+            Category = "Damage Spells",
             Index = 4,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("Dicho") end,
             RequiresLoadoutChange = true,
@@ -2275,7 +2298,62 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not using Dire Dot?",
             Answer = "Dire Dot is not enabled by default, you may need to select it.",
         },
-
+        ['DoAEBuffTap']       = {
+            DisplayName = "Use AE Buff Tap",
+            Category = "Damage Spells",
+            Index = 5,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("AEBuffTap") end,
+            Default = false,
+            RequiresLoadoutChange = true,
+            ConfigType = "Advanced",
+            FAQ = "Why is my Shadow Knight Not using the AE Buff Tap?",
+            Answer = "Please ensure you have selected the option in Spell Damage and not that AE Damage must be enabled for it to cast.",
+        },
+        ['DoAEDamage']        = {
+            DisplayName = "Do AE Damage",
+            Category = "Damage Spells",
+            Index = 6,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells, Discs and AA. **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['AETargetCnt']       = {
+            DisplayName = "AE Target Count",
+            Category = "Damage Spells",
+            Index = 7,
+            Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
+            Default = 2,
+            Min = 1,
+            Max = 10,
+            FAQ = "Why am I using AE abilities on only a couple of targets?",
+            Answer =
+            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
+        },
+        ['MaxAETargetCnt']    = {
+            DisplayName = "Max AE Targets",
+            Category = "Damage Spells",
+            Index = 8,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 5,
+            Min = 2,
+            Max = 30,
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
+            Answer =
+            "Use this setting to set a value just under your mezzer's AE mez count, if desired.",
+        },
+        ['SafeAEDamage']      = {
+            DisplayName = "AE Proximity Check",
+            Category = "Damage Spells",
+            Index = 9,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
+        },
         --Hate Tools
         ['UseVoT']            = {
             DisplayName = "Use VoT AA",

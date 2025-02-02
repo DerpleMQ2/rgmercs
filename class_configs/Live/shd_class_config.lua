@@ -481,6 +481,14 @@ local _ClassConfig = {
             "Lifespike",
             "Lifetap", -- Level 8
         },
+        ['AETap'] = {  --Lifetap/Hate up to 30 targets, level 98+
+            "Insidious Repudiation",
+            "Insidious Renunciation",
+            "Insidious Rejection",
+            "Insidious Denial",
+            "Deceitful Deflection",
+            "Insidious Deflection",
+        },
         ['BuffTap'] = {
             "Touch of Mortimus",
             "Touch of Namdrows",
@@ -492,7 +500,8 @@ local _ClassConfig = {
             "Touch of Iglum",
             "Touch of Lanys",
             "Touch of the Soulbleeder",
-            "Touch of the Wailing Three", -- Level 75
+            "Touch of the Wailing Three",
+            "Touch of Draygun", -- Level 69
         },
         ['BiteTap'] = {
             "Zevfeer's Bite", -- Level 62
@@ -706,6 +715,26 @@ local _ClassConfig = {
             for _, buffName in ipairs(LeechEffects) do
                 if mq.TLO.Me.Buff(buffName)() or mq.TLO.Me.Song(buffName)() then return false end
             end
+            return true
+        end,
+        --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
+        AETargetCheck = function(printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < Config:GetSetting('AETargetCnt') or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
+
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+                    end
+                    return false
+                end
+            end
+
             return true
         end,
     },
@@ -1183,6 +1212,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "AETap",
+                type = "Spell",
+                cond = function(self, spell)
+                    if not (Config:GetSetting('DoAETap') and Config:GetSetting('DoAEDamage')) then return false end
+                    return Casting.SpellReady(spell) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                end,
+            },
+            {
                 name = "Projection of Doom",
                 type = "AA",
                 tooltip = Tooltips.ProjectionofDoom,
@@ -1474,6 +1511,17 @@ local _ClassConfig = {
                         (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap')))
                 end,
             },
+            {
+                name = "AETap",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not (Config:GetSetting('DoAETap') and Config:GetSetting('DoAEDamage')) then return false end
+                    local myHP = mq.TLO.Me.PctHPs()
+                    return Casting.TargetedSpellReady(spell, target.ID()) and
+                        (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap'))) and
+                        self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                end,
+            },
             { --This entry solely for emergencies on SK as a fallback, group has a different entry.
                 name = "ReflexStrike",
                 type = "Disc",
@@ -1731,6 +1779,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
             },
         },
@@ -1767,6 +1816,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1809,6 +1859,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1850,6 +1901,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1885,6 +1937,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1914,6 +1967,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1941,6 +1995,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1968,6 +2023,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1994,6 +2050,7 @@ local _ClassConfig = {
                 },
                 { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
                 { name = "HealBurn", cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -2008,7 +2065,17 @@ local _ClassConfig = {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "HealBurn", cond = function(self) return Core.IsTanking() end, }, --level 103, this may be overwritten by pauses but it is fine, it has a low refresh time. At least it will be there on start.
+            },
+        },
+        { -- Level 125
+            gem = 14,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "HealBurn", cond = function(self) return Core.IsTanking() end, }, --level 103, this may be overwritten by pauses but it is fine, it has a low refresh time. At least it will be there on start.
+                { name = "LifeTap2", },
             },
         },
     },
@@ -2253,10 +2320,10 @@ local _ClassConfig = {
             Answer = "You can choose the conditions under which you will use Thought Leech on the Taps tab.",
         },
 
-        --DoTs
+        --Damage Spells
         ['DoBondTap']         = {
             DisplayName = "Use Bond Dot",
-            Category = "DoT Spells",
+            Category = "Damage Spells",
             Index = 1,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("BondTap") end,
             RequiresLoadoutChange = true,
@@ -2266,7 +2333,7 @@ local _ClassConfig = {
         },
         ['DoPoisonDot']       = {
             DisplayName = "Use Poison Dot",
-            Category = "DoT Spells",
+            Category = "Damage Spells",
             Index = 2,
             ToolTip = function() return Ui.GetDynamicTooltipForSpell("PoisonDot") end,
             RequiresLoadoutChange = true,
@@ -2276,7 +2343,7 @@ local _ClassConfig = {
         },
         ['DoCorruptionDot']   = {
             DisplayName = "Use Corrupt Dot",
-            Category = "DoT Spells",
+            Category = "Damage Spells",
             Index = 3,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("CorruptDot") end,
             RequiresLoadoutChange = true,
@@ -2286,13 +2353,68 @@ local _ClassConfig = {
         },
         ['DoDireDot']         = {
             DisplayName = "Use Dire Dot",
-            Category = "DoT Spells",
+            Category = "Damage Spells",
             Index = 4,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("Dicho") end,
             RequiresLoadoutChange = true,
             Default = false,
             FAQ = "Why is my Shadow Knight not using Dire Dot?",
             Answer = "Dire Dot is not enabled by default, you may need to select it.",
+        },
+        ['DoAEDamage']        = {
+            DisplayName = "Do AE Damage",
+            Category = "Damage Spells",
+            Index = 5,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells, Discs and AA. **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['AETargetCnt']       = {
+            DisplayName = "AE Target Count",
+            Category = "Damage Spells",
+            Index = 6,
+            Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
+            Default = 2,
+            Min = 1,
+            Max = 10,
+            FAQ = "Why am I using AE abilities on only a couple of targets?",
+            Answer =
+            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
+        },
+        ['MaxAETargetCnt']    = {
+            DisplayName = "Max AE Targets",
+            Category = "Damage Spells",
+            Index = 7,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 5,
+            Min = 2,
+            Max = 30,
+            FAQ = "Why am I using AE abilities on only a couple of targets?",
+            Answer =
+            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
+        },
+        ['SafeAEDamage']      = {
+            DisplayName = "AE Proximity Check",
+            Category = "Damage Spells",
+            Index = 8,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
+        },
+        ['DoAETap']           = {
+            DisplayName = "Use AE Hate/LifeTap",
+            Category = "Damage Spells",
+            Index = 9,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("AETap") end,
+            RequiresLoadoutChange = true,
+            Default = false,
+            FAQ = "Why is my Shadow Knight not using the AE Tap (Insidious) Line?",
+            Answer = "The Insidious AE Hate Life Tap is not enabled by default, you may need to select it.",
         },
 
         --Hate Tools

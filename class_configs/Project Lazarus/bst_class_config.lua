@@ -780,14 +780,15 @@ return {
         end,
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
         AETargetCheck = function(printDebug)
-            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 50 zradius 50")()
-            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 50 zradius 50")()
-            if (haters + haterPets) < Config:GetSetting('AETargetCnt') then return false end
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < Config:GetSetting('AETargetCnt') or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
 
             if Config:GetSetting('SafeAEDamage') then
-                local npcs = mq.TLO.SpawnCount("NPC radius 50 zradius 50")()
-                local npcPets = mq.TLO.SpawnCount("NPCpet radius 50 zradius 50")()
-                if (haters + haterPets) < (npcs + npcPets) then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
                     if printDebug then
                         Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
                     end
@@ -1809,10 +1810,23 @@ return {
             Answer =
             "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
+        ['MaxAETargetCnt'] = {
+            DisplayName = "Max AE Targets",
+            Category = "Damage Spells",
+            Index = 3,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 5,
+            Min = 2,
+            Max = 30,
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
+            Answer =
+            "Use this setting to set a value just under your mezzer's AE mez count, if desired.",
+        },
         ['SafeAEDamage']   = {
             DisplayName = "AE Proximity Check",
             Category = "Combat",
-            Index = 3,
+            Index = 4,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Proximity Check?",
@@ -1823,7 +1837,7 @@ return {
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
             Category = "Combat",
-            Index = 4,
+            Index = 5,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
             Min = 1,
@@ -1835,7 +1849,7 @@ return {
         ['AggroFeign']     = {
             DisplayName = "Emergency Feign",
             Category = "Combat",
-            Index = 5,
+            Index = 6,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
             FAQ = "How do I use my Feign Death?",
@@ -1845,7 +1859,7 @@ return {
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
             Category = "Combat",
-            Index = 6,
+            Index = 7,
             Tooltip = "Click your chest item during burns.",
             Default = false,
             ConfigType = "Advanced",
