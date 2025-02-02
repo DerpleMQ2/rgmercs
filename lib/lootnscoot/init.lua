@@ -2248,6 +2248,13 @@ function loot.commandHandler(...)
     end
     Logger.Debug("arg1: %s, arg2: %s, arg3: %s, arg4: %s", tostring(args[1]), tostring(args[2]), tostring(args[3]), tostring(args[4]))
 
+    if args[1] == 'find' and args[2] ~= nil then
+        if tonumber(args[2]) then
+            loot.findItemInDb(nil, tonumber(args[2]))
+        else
+            loot.findItemInDb(args[2])
+        end
+    end
     if #args == 1 then
         local command = args[1]
         if command == 'sellstuff' then
@@ -2359,6 +2366,28 @@ function loot.commandHandler(...)
         end
     end
     loot.writeSettings()
+end
+
+function loot.findItemInDb(itemName, itemId)
+    local db = loot.OpenItemsSQL()
+    local query = "SELECT * FROM Items"
+    if itemId ~= nil then
+        query = string.format("SELECT * FROM Items WHERE item_id = %d", itemId)
+    elseif itemName ~= nil then
+        query = string.format("SELECT * FROM Items WHERE name LIKE '%%%s%%'", itemName)
+    end
+    db:exec("BEGIN TRANSACTION")
+    local stmt = db:prepare(query)
+    local counter = 0
+    for row in stmt:nrows() do
+        if counter > 20 then break end
+        Logger.Info("\aoItem:\ax\ay %s\ax \ayID:\ax \at%d\ax, \aoValue:\ax \ag%s\ax Link: %s,", row.name, row.link, row.item_id, row.sell_value)
+        counter = counter + 1
+    end
+    stmt:finalize()
+    db:exec("COMMIT")
+    db:close()
+    if counter > 20 then Logger.Info("\aoMore than\ax \ay20\ax items found, \aoonly showing first\ax \at20\ax.") end
 end
 
 function loot.setupBinds()
@@ -3171,8 +3200,15 @@ function loot.drawYesNo(decision)
     end
 end
 
+---comment
+---@param search any Search string we are looking for, can be a string or number
+---@param key any Table field we are checking against, for Lookups this is only Name. for other tables this can be ItemId, Name, Class, Race
+---@param value any Field value we are checking against
+---@return boolean True if the search string is found in the key or value, false otherwise
 function loot.SearchLootTable(search, key, value)
-    if key == nil or value == nil then return false end
+    if key == nil or value == nil or search == nil then return false end
+    key = tostring(key)
+    search = tostring(search)
     search = search and search:gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%1") or ""
     if (search == nil or search == "") or key:lower():find(search:lower()) or value:lower():find(search:lower()) then
         return true
@@ -3991,7 +4027,8 @@ function loot.drawItemsTables()
                     -- setup the filteredItems for sorting
                     local filteredItems = {}
                     for id, item in pairs(loot.ALLITEMS) do
-                        if loot.SearchLootTable(loot.TempSettings.SearchItems, item.Name, item.ClassList) then
+                        if loot.SearchLootTable(loot.TempSettings.SearchItems, item.Name, item.ClassList) or
+                            loot.SearchLootTable(loot.TempSettings.SearchItems, id, item.ClassList) then
                             table.insert(filteredItems, { id = id, data = item, })
                         end
                     end
@@ -4756,8 +4793,8 @@ end
 loot.init({ ..., })
 
 while not loot.Terminate do
-    local mercsRunning = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
-    if not mercsRunning then
+    local mercsRunnig = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
+    if not mercsRunnig and Mode == 'directed' then
         loot.Terminate = true
     end
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then loot.Terminate = true end -- exit sctipt if at char select.
