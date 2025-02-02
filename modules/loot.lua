@@ -85,8 +85,8 @@ end
 function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 	if self.settings.DoLoot == true then
-		local lnsRunnig = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
-		if lnsRunnig then
+		local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
+		if lnsRunning then
 			Core.DoCmd("/lua stop lootnscoot")
 		end
 		Core.DoCmd("/lua run %s directed", LootnScootDir)
@@ -121,8 +121,8 @@ function Module:LoadSettings()
 		self:SaveSettings(false)
 	end
 	if self.settings.DoLoot then
-		local lnsRunnig = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
-		if lnsRunnig then
+		local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
+		if lnsRunning then
 			Core.DoCmd("/lua stop lootnscoot")
 		end
 		Core.DoCmd("/lua run %s directed", LootnScootDir)
