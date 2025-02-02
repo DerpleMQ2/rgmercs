@@ -879,9 +879,10 @@ local _ClassConfig = {
             name = 'TwinHeal',
             state = 1,
             steps = 1,
+            load_cond = function(self) return Config:GetSetting('DoTwinHeal') and self:GetResolvedActionMapItem('TwinHealNuke') end,
             targetId = function(self) return { Core.GetMainAssistId(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Config:GetSetting('DoTwinHeal') and Core.OkayToNotHeal() and not Casting.IAmFeigning()
+                return combat_state == "Combat" and Core.OkayToNotHeal() and not Casting.IAmFeigning()
             end,
         },
         {
@@ -893,7 +894,6 @@ local _ClassConfig = {
                 return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal()
             end,
         },
-
     },
     ['Rotations']         = {
         ['HealDPS'] = {

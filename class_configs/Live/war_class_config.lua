@@ -321,9 +321,10 @@ local _ClassConfig = {
             name = 'HateTools',
             state = 1,
             steps = 1,
+            load_cond = function() return Core.IsTanking() end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Core.IsTanking() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
             end,
         },
         { --Defensive actions triggered by low HP
@@ -340,10 +341,11 @@ local _ClassConfig = {
             name = 'Weapon Management',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('UseBandolier') end,
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Config:GetSetting('UseBandolier')
+                return combat_state == "Combat"
             end,
         },
         { --Defensive actions used proactively to prevent emergencies
@@ -1134,6 +1136,7 @@ local _ClassConfig = {
             Index = 4,
             Tooltip = "Enable 1H+S/2H swapping based off of current health. ***YOU MUST HAVE BANDOLIER ENTRIES NAMED \"Shield\" and \"DW\" TO USE THIS FUNCTION.***",
             Default = false,
+            RequiresLoadoutChange = true,
             FAQ = "Why is my Warrior not using Dynamic Weapon Swapping?",
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"DW\" to use this function.",

@@ -881,6 +881,7 @@ local _ClassConfig = {
             name = 'Debuff',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting("DoSTSlow") or Config:GetSetting("DoAESlow") or Config:GetSetting("DoDispel") end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning()
@@ -1009,14 +1010,6 @@ local _ClassConfig = {
             },
         },
         ['Debuff'] = {
-            -- {
-            --     name = "MezAESong",
-            --     type = "Song",
-            --     cond = function(self, songSpell)
-            --         if not (Config:GetSetting('MezOn') and Config:GetSetting('UseAEAAMez') and Casting.SongMemed(songSpell)) then return false end
-            --        return Targeting.GetXTHaterCount() >= Config:GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
-            --     end,
-            -- },
             {
                 name = "AESlowSong",
                 type = "Song",

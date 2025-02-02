@@ -820,9 +820,9 @@ local _ClassConfig = {
             name = 'Tash',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoTash') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('DoTash') then return false end
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
                     mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
             end,
@@ -831,9 +831,9 @@ local _ClassConfig = {
             name = 'Slow',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoSlow') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('DoSlow') then return false end
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
                     mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
             end,
@@ -857,22 +857,22 @@ local _ClassConfig = {
             end,
         },
         {
-            name = 'DPS',
+            name = 'DPS(Default)',
             state = 1,
             steps = 1,
+            load_cond = function() return Core.IsModeActive("Default") end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not Core.IsModeActive("Default") then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
-            name = 'ModernEraDPS',
+            name = 'DPS(ModernEra)',
             state = 1,
             steps = 1,
+            load_cond = function() return Core.IsModeActive("ModernEra") end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not Core.IsModeActive("ModernEra") then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
@@ -1258,7 +1258,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['DPS'] = {
+        ['DPS(Default)'] = {
             {
                 name = "StripBuffSpell",
                 type = "Spell",
@@ -1320,7 +1320,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['ModernEraDPS'] = {
+        ['DPS(ModernEra)'] = {
             {
                 name = "StripBuffSpell",
                 type = "Spell",
@@ -1669,6 +1669,7 @@ local _ClassConfig = {
             DisplayName = "Do Tash",
             Category = "Debuffs",
             Tooltip = "Cast Tash Spells",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I not Tashing?",
             Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
@@ -1686,6 +1687,7 @@ local _ClassConfig = {
             DisplayName = "Cast Slow",
             Category = "Debuffs",
             Tooltip = "Enable casting Slow spells.",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I not Slowing?",
             Answer = "The [DoSlow] setting determines whether or not your PC will cast Slow spells.\n" ..
@@ -1695,6 +1697,7 @@ local _ClassConfig = {
             DisplayName = "Cast Cripple",
             Category = "Debuffs",
             Tooltip = "Enable casting Cripple spells.",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I not Crippling?",
             Answer = "The [DoCripple] setting determines whether or not your PC will cast Cripple spells.\n" ..
@@ -1714,6 +1717,7 @@ local _ClassConfig = {
             DisplayName = "Cast NDT",
             Category = "Buffs",
             Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I not using NDT?",
             Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..

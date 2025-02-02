@@ -296,6 +296,7 @@ local _ClassConfig = {
             name = 'Precision',
             state = 1,
             steps = 1,
+            load_cond = function(self) return self:GetResolvedActionMapItem('Precision1') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning()

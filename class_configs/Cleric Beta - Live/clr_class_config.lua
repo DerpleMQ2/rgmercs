@@ -668,17 +668,18 @@ local _ClassConfig = {
             name = 'GroupHeal(98+)',
             state = 1,
             steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 97 end,
             cond = function(self, target)
-                if mq.TLO.Me.Level() < 98 or not Targeting.GroupedWithTarget(target) then return false end
+                if not Targeting.GroupedWithTarget(target) then return false end
                 return (mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() or 0) >= Config:GetSetting('GroupInjureCnt')
             end,
         },
         { -- Level 70+
-            name  = 'BigHeal(70+)',
+            name = 'BigHeal(70+)',
             state = 1,
             steps = 1,
-            cond  = function(self, target)
-                if mq.TLO.Me.Level() < 70 then return false end
+            load_cond = function() return mq.TLO.Me.Level() > 69 end,
+            cond = function(self, target)
                 return (target.PctHPs() or 999) < Config:GetSetting('BigHealPoint')
             end,
         },
@@ -686,8 +687,8 @@ local _ClassConfig = {
             name = 'MainHeal(101+)',
             state = 1,
             steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 100 end,
             cond = function(self, target)
-                if mq.TLO.Me.Level() < 101 then return false end
                 return (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint')
             end,
         },
@@ -695,8 +696,9 @@ local _ClassConfig = {
             name = 'GroupHeal(1-97)',
             state = 1,
             steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 98 end,
             cond = function(self, target)
-                if mq.TLO.Me.Level() > 97 or not Targeting.GroupedWithTarget(target) then return false end
+                if not Targeting.GroupedWithTarget(target) then return false end
                 return (mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() or 0) >= Config:GetSetting('GroupInjureCnt')
             end,
         },
@@ -704,8 +706,8 @@ local _ClassConfig = {
             name = 'MainHeal(70-100)',
             state = 1,
             steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 69 and mq.TLO.Me.Level() < 101 end,
             cond = function(self, target)
-                if mq.TLO.Me.Level() < 70 or mq.TLO.Me.Level() > 100 then return false end
                 return (target.PctHPs() or 999) <= Config:GetSetting('MainHealPoint')
             end,
         },
@@ -713,8 +715,8 @@ local _ClassConfig = {
             name = 'Heal(1-69)',
             state = 1,
             steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 70 end,
             cond = function(self, target)
-                if mq.TLO.Me.Level() > 69 then return false end
                 return (target.PctHPs() or 999) <= Config:GetSetting('MainHealPoint')
             end,
         },
@@ -1043,9 +1045,7 @@ local _ClassConfig = {
         { --Spells that should be checked on group members
             name = 'GroupBuff',
             timer = 60,
-            targetId = function(self)
-                return Casting.GetBuffableGroupIDs()
-            end,
+            targetId = function(self) return Casting.GetBuffableGroupIDs() end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.DoBuffCheck()
             end,
@@ -1064,12 +1064,12 @@ local _ClassConfig = {
             timer = 30,
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoManaRestore') and (Casting.CanUseAA("Veturika's Perseverence") or Casting.CanUseAA("Quiet Prayer")) end,
             targetId = function(self)
                 return { Combat.FindWorstHurtManaGroupMember(Config:GetSetting('ManaRestorePct')),
                     Combat.FindWorstHurtManaXT(Config:GetSetting('ManaRestorePct')), }
             end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('DoManaRestore') or mq.TLO.Me.Level() < 95 then return false end
                 local downtime = combat_state == "Downtime" and Casting.DoBuffCheck()
                 local combat = combat_state == "Combat" and not Casting.IAmFeigning()
                 return (downtime or combat) and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
@@ -1080,9 +1080,9 @@ local _ClassConfig = {
             timer = 10,
             state = 1,
             steps = 1,
+            load_cond = function(self) return self:GetResolvedActionMapItem('ReverseDS') or self:GetResolvedActionMapItem('WardBuff') end,
             targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
             cond = function(self, combat_state)
-                if mq.TLO.Me.Level() < 85 then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -1706,6 +1706,7 @@ local _ClassConfig = {
             Category = "Spells and Abilities",
             Index = 5,
             Tooltip = "Use Veturika's Prescence (on self) or Quiet Prayer (on others) at critically low mana.",
+            RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
             FAQ = "WIP?",

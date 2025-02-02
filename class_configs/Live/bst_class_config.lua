@@ -632,32 +632,43 @@ return {
     },
     ['HealRotationOrder'] = {
         {
-            name = 'PetHealpoint',
+            name = 'PetHealAA',
             state = 1,
             steps = 1,
-            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() end,
+            load_cond = function() return Casting.CanUseAA("Mend Companion") end,
+            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('MainHealPoint') end,
         },
         {
-            name  = 'MainHealPoint',
+            name = 'PetHealSpell',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return Config:GetSetting('DoHeals') and (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint') end,
+            load_cond = function() return Config:GetSetting('DoPetHeals') end,
+            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') end,
+        },
+        {
+            name = 'MainHealPoint',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoHeals') end,
+            cond = function(self, target) return (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint') end,
         },
     },
     ['HealRotations']     = {
-        ["PetHealpoint"] = {
+        ["PetHealAA"] = {
             {
                 name = "Mend Companion",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
+                    return Casting.TargetedAAReady(aaName, target.ID(), true)
                 end,
             },
+        },
+        ["PetHealSpell"] = {
             {
                 name = "PetHealSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoPetHeals') and Casting.TargetedSpellReady(spell, target.ID(), true)
+                    return Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
         },
@@ -718,12 +729,12 @@ return {
             name = 'FocusedParagon',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoParagon') and Casting.CanUseAA("Focused Paragon of Spirits") end,
             targetId = function(self)
                 return { Combat.FindWorstHurtManaGroupMember(Config:GetSetting('FParaPct')),
                     Combat.FindWorstHurtManaXT(Config:GetSetting('FParaPct')), }
             end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('DoParagon') then return false end
                 local downtime = combat_state == "Downtime" and Config:GetSetting('DowntimeFP') and Casting.DoBuffCheck()
                 local combat = combat_state == "Combat" and not Casting.IAmFeigning()
                 return (downtime or combat) and not Casting.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
@@ -733,9 +744,9 @@ return {
             name = 'Slow',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoSlow') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('DoSlow') then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
@@ -1568,6 +1579,7 @@ return {
             Category = "Mana Mgmt.",
             Index = 1,
             Tooltip = "Use Group or Focused Paragon AAs.",
+            RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
             FAQ = "How do I use my Paragon of Spirit(s) abilities?",

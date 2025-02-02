@@ -711,28 +711,32 @@ local _ClassConfig = {
             name = 'LowLevelHealPoint',
             state = 1,
             steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 65 end,
             cond = function(self, target)
-                return mq.TLO.Me.Level() < 65 and (target.PctHPs() or 999) <= Config:GetSetting('MainHealPoint')
+                return (target.PctHPs() or 999) <= Config:GetSetting('MainHealPoint')
             end,
         },
         {
             name = 'GroupHealPoint',
             state = 1,
             steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 64 end,
             cond = function(self, target)
                 return (mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() or 0) >= Config:GetSetting('GroupInjureCnt')
             end,
         },
         {
-            name  = 'BigHealPoint',
+            name = 'BigHealPoint',
             state = 1,
             steps = 1,
-            cond  = function(self, target) return (target.PctHPs() or 999) < Config:GetSetting('BigHealPoint') end,
+            load_cond = function() return mq.TLO.Me.Level() > 64 end,
+            cond = function(self, target) return (target.PctHPs() or 999) < Config:GetSetting('BigHealPoint') end,
         },
         {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 64 end,
             cond = function(self, target) return (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint') end,
         },
     },
@@ -963,9 +967,9 @@ local _ClassConfig = {
             name = 'Malo',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoSTMalo') or Config:GetSetting('DoAEMalo') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not (Config:GetSetting('DoSTMalo') or Config:GetSetting('DoAEMalo')) then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
@@ -974,9 +978,9 @@ local _ClassConfig = {
             name = 'Slow',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoSTSlow') or Config:GetSetting('DoAESlow') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not (Config:GetSetting('DoSTSlow') or Config:GetSetting('DoAESlow')) then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck() and
                     (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
@@ -996,6 +1000,7 @@ local _ClassConfig = {
             timer = 10,
             state = 1,
             steps = 1,
+            load_cond = function(self) return self:GetResolvedActionMapItem('MeleeProcBuff') end,
             targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning() and
@@ -1016,9 +1021,9 @@ local _ClassConfig = {
             name = 'TwinHeal',
             state = 1,
             steps = 1,
+            load_cond = function(self) return Config:GetSetting('DoTwinHeal') and self:GetResolvedActionMapItem('TwinHealNuke') end,
             targetId = function(self) return { Core.GetMainAssistId(), } end,
             cond = function(self, combat_state)
-                if not (Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal')) then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal()
             end,
         },
@@ -1844,6 +1849,7 @@ local _ClassConfig = {
             Category = "Heal Mode",
             Index = 2,
             Tooltip = "Heal Mode: Use Heal Over Time Spells",
+            RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
             FAQ = "Why does my Shaman randomly use HoTs in downtime?",
@@ -1897,6 +1903,7 @@ local _ClassConfig = {
             Category = "Canni",
             Index = 1,
             Tooltip = "Mem and use Canni Spells",
+            RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
             FAQ = "Why am I still using a Canni spell, now that I have the AA?",
@@ -1978,6 +1985,7 @@ local _ClassConfig = {
             Category = "Buffs",
             Index = 4,
             Tooltip = "Use Temp HP Buff on Warriors in the group.",
+            RequiresLoadoutChange = true,
             Default = false,
             FAQ = "Why is the Temp HP Buff only used on Warriors?",
             Answer = "Mana costs and recast time make this buff only feasible on a Tank; PAL and SHD have their own buff and they don't stack with this one.",
@@ -2027,6 +2035,7 @@ local _ClassConfig = {
             Category = "Debuffs",
             Index = 1,
             Tooltip = "Do ST Malo Spells/AAs",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Cast Malo is selected, why am I not using it?",
             Answer = "Ensure that your Debuff settings in the RGMercs Main config are set properly, as there are options for con colors and named mobs there.",
@@ -2036,6 +2045,7 @@ local _ClassConfig = {
             Category = "Debuffs",
             Index = 2,
             Tooltip = "Do AE Malo Spells/AAs",
+            RequiresLoadoutChange = true,
             Default = false,
             FAQ = "I have Do AE Malo selected, why isn't it being used?",
             Answer = "The AE Malo Spell comes later in the levels for Shaman than AE Slows, and the AA later than that. Check your level. Also, ensure your count is set properly. ",
@@ -2045,6 +2055,7 @@ local _ClassConfig = {
             Category = "Debuffs",
             Index = 4,
             Tooltip = "Do ST Slow Spells/AAs",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Why am I not slowing mobs?",
             Answer =
@@ -2055,6 +2066,7 @@ local _ClassConfig = {
             Category = "Debuffs",
             Index = 5,
             Tooltip = "Do AE Slow Spells/AAs",
+            RequiresLoadoutChange = true,
             Default = false,
             FAQ = "Why am I using a single-target slow after the AE Slow Spell?",
             Answer = "The AE Slow Spell is a lower slow percentage than the ST Version. AA, however, are identical other than number of targets.",
@@ -2088,6 +2100,7 @@ local _ClassConfig = {
             Category = "Debuffs",
             Index = 7,
             Tooltip = "Use Disease Slow instead of normal ST Slow",
+            RequiresLoadoutChange = true,
             Default = false,
             ConfigType = "Advanced",
             FAQ = "What is a Disease Slow?",
