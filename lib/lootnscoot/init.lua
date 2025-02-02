@@ -4793,8 +4793,8 @@ end
 loot.init({ ..., })
 
 while not loot.Terminate do
-    local mercsRunnig = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
-    if not mercsRunnig and Mode == 'directed' then
+    local mercsRunning = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
+    if not mercsRunning and Mode == 'directed' then
         loot.Terminate = true
     end
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then loot.Terminate = true end -- exit sctipt if at char select.
