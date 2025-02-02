@@ -214,6 +214,7 @@ function Module.New()
 end
 
 function Module:Init()
+    self.ModuleLoaded = false
     Logger.log_debug("\agInitializing Core Class Module...")
     self:LoadSettings()
 

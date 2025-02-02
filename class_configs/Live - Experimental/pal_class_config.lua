@@ -1785,6 +1785,14 @@ local _ClassConfig = {
             FAQ = "Why aren't I using Aego and/or Symbol buffs?",
             Answer = "Please set which buff you would like to use on the Buffs/Debuffs tab.",
         },
+        ['DoSalvation']       = {
+            DisplayName = "Marr's Salvation",
+            Category = "Buffs/Debuffs",
+            Tooltip = "Use your group hatred reduction buff AA.",
+            Default = false,
+            FAQ = "Why isn't Marr's Salvation being used?",
+            Answer = "Select the option in the Spells and Abilities tab to use this buff, it is not enabled by default.",
+        },
         --Healing
         ['TotHealPoint']      = {
             DisplayName = "ToT HealPoint",
@@ -1843,19 +1851,11 @@ local _ClassConfig = {
         },
         ['DoCures']           = {
             DisplayName = "Do Cures",
-            Category = "Spells and Abilities",
+            Category = "Healing",
             Tooltip = "Use cure spells and abilities",
             Default = true,
             FAQ = "Why am I not curing?",
             Answer = "Make sure you have the [DoCures] setting enabled.",
-        },
-        ['DoSalvation']       = {
-            DisplayName = "Marr's Salvation",
-            Category = "Spells and Abilities",
-            Tooltip = "Use your group hatred reduction buff AA.",
-            Default = false,
-            FAQ = "Why isn't Marr's Salvation being used?",
-            Answer = "Select the option in the Spells and Abilities tab to use this buff, it is not enabled by default.",
         },
 
         --Hate Tools
