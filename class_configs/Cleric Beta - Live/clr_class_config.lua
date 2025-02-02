@@ -1473,7 +1473,7 @@ local _ClassConfig = {
         {
             gem = 7,
             spells = {
-                { name = "DivineBuff", cond = function(self) return mq.TLO.Me.NumGems() == 8 end, },          -- Level 51+
+                { name = "DivineBuff", },                                                                     -- Level 51+
                 { name = "UndeadNuke", cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- Level 4-50
                 { name = "MagicNuke",  cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- Level 4-50
             },

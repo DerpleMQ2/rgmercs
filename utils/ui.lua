@@ -313,7 +313,7 @@ function Ui.RenderRotationTableKey()
         ImGui.TableNextColumn()
 
         ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
-        ImGui.Text(Icons.MD_CHECK .. ": Will Cast (Coditions Met)")
+        ImGui.Text(Icons.MD_CHECK .. ": Will Cast (Conditions Met)")
 
         ImGui.PopStyleColor()
         ImGui.TableNextColumn()
