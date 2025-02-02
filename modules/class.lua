@@ -42,7 +42,7 @@ Module.Constants.RezSearchOutOfGroup         = "pccorpse radius 100 zradius 50"
 Module.TempSettings.CurrentRotationStateId   = 0
 Module.TempSettings.CurrentRotationStateType = 0 -- 0 : Invalid, 1 : Combat, 2 : Healing
 Module.TempSettings.RotationStates           = {}
-Module.TempSettings.HealingRotationStates    = {}
+Module.TempSettings.HealRotationStates       = {}
 Module.TempSettings.RotationTimers           = {}
 Module.TempSettings.RezTimers                = {}
 Module.TempSettings.CureCheckTimer           = 0
@@ -151,13 +151,6 @@ function Module:LoadSettings()
         self.ClassFAQ[k] = { Question = v.FAQ or 'None', Answer = v.Answer or 'None', Settings_Used = k, }
     end
 
-    self.TempSettings.RotationStates = {}
-    for i, m in ipairs(self.ClassConfig.RotationOrder or {}) do self.TempSettings.RotationStates[i] = m end
-
-    -- these are different since they arent strickly ordered but based on conditions of the target.
-    self.TempSettings.HealingRotationStates = {}
-    for i, m in pairs(self.ClassConfig.HealRotationOrder or {}) do self.TempSettings.HealingRotationStates[i] = m end
-
     Logger.log_info("\ar%s\ao Core Module Loading Settings for: %s.", Config.Globals.CurLoadedClass,
         Config.Globals.CurLoadedChar)
     Logger.log_info("\ayUsing Class Config by: \at%s\ay (\am%s\ay)", self.ClassConfig._author,
@@ -214,7 +207,7 @@ function Module.New()
 end
 
 function Module:Init()
-    self.ModuleLoaded = false
+    self.ModuleLoaded = false --reinitialize to stop class module UI render during persona switch (avoid crash conditions)
     Logger.log_debug("\agInitializing Core Class Module...")
     self:LoadSettings()
 
@@ -302,13 +295,18 @@ function Module:Render()
     if self.ClassConfig and self.ModuleLoaded then
         ImGui.Text("Active Mode:")
         ImGui.SameLine()
-        ImGui.SetNextItemWidth(200)
+        ImGui.SetNextItemWidth(150)
         Ui.Tooltip(self.ClassConfig.DefaultConfig.Mode.Tooltip)
         self.settings.Mode, pressed = ImGui.Combo("##_select_ai_mode", self.settings.Mode, self.ClassConfig.Modes,
             #self.ClassConfig.Modes)
         if pressed then
             self:SaveSettings(false)
             self:RescanLoadout()
+        end
+        ImGui.SameLine()
+        if ImGui.SmallButton("Rescan Loadout") then
+            self:RescanLoadout()
+            Logger.log_info("\awManual loadout scan initiated.")
         end
 
         Ui.RenderConfigSelector()
@@ -317,8 +315,9 @@ function Module:Render()
 
         if ImGui.CollapsingHeader("Spell Loadout") then
             ImGui.Indent()
-            if ImGui.SmallButton("Reload Spell Loadout") then
+            if ImGui.SmallButton("Rescan Loadout") then
                 self:RescanLoadout()
+                Logger.log_info("\awManual loadout scan initiated.")
             end
 
             if Tables.GetTableSize(self.SpellLoadOut) > 0 then
@@ -366,12 +365,12 @@ function Module:Render()
             end
         end
 
-        if not self.TempSettings.ReloadingLoadouts and #self.TempSettings.HealingRotationStates > 0 then
+        if not self.TempSettings.ReloadingLoadouts and #self.TempSettings.HealRotationStates > 0 then
             if ImGui.CollapsingHeader("Healing Rotations") then
                 ImGui.Indent()
                 Ui.RenderRotationTableKey()
 
-                for _, r in pairs(self.TempSettings.HealingRotationStates) do
+                for _, r in pairs(self.TempSettings.HealRotationStates) do
                     local rotationName = r.name
                     if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
                         ImGui.Indent()
@@ -404,7 +403,7 @@ function Module:ResetRotation()
             v.state = 1
         end
     end
-    for _, v in ipairs(self.TempSettings.HealingRotationStates) do
+    for _, v in ipairs(self.TempSettings.HealRotationStates) do
         Logger.log_verbose("HealRotationsState(%s) reset from %d to 1", v.name, v.state)
         if v.state then
             v.state = 1
@@ -533,6 +532,44 @@ function Module:GetClassConfig()
     return self.ClassConfig
 end
 
+function Module:GetRotations()
+    --check rotation load conditions
+    self.TempSettings.ValidRotations = {}
+    for _, m in pairs(self.ClassConfig.RotationOrder or {}) do
+        if m.load_cond then
+            local valid = Core.SafeCallFunc("CheckLoadConditions", m.load_cond, self)
+            if valid then
+                table.insert(self.TempSettings.ValidRotations, m)
+            end
+        else
+            table.insert(self.TempSettings.ValidRotations, m)
+        end
+    end
+    -- move the valid rotations to a useable table
+    self.TempSettings.RotationStates = {}
+    for i, m in ipairs(self.TempSettings.ValidRotations) do
+        self.TempSettings.RotationStates[i] = m
+    end
+
+    --check heal rotation conditions
+    self.TempSettings.ValidHealRotations = {}
+    for _, m in pairs(self.ClassConfig.HealRotationOrder or {}) do
+        if m.load_cond then
+            local valid = Core.SafeCallFunc("CheckLoadConditions", m.load_cond, self)
+            if valid then
+                table.insert(self.TempSettings.ValidHealRotations, m)
+            end
+        else
+            table.insert(self.TempSettings.ValidHealRotations, m)
+        end
+    end
+    -- move the valid heal rotations to a useable table
+    self.TempSettings.HealRotationStates = {}
+    for i, m in ipairs(self.TempSettings.ValidHealRotations) do
+        self.TempSettings.HealRotationStates[i] = m
+    end
+end
+
 function Module:SelfCheckAndRez()
     local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Me.DisplayName())
     local rezCount = mq.TLO.SpawnCount(rezSearch)()
@@ -595,7 +632,7 @@ end
 
 function Module:HealById(id)
     if id == 0 then return end
-    if not self.TempSettings.HealingRotationStates then return end
+    if not self.TempSettings.HealRotationStates then return end
 
     Logger.log_verbose("\awHealById(%d)", id)
 
@@ -615,7 +652,7 @@ function Module:HealById(id)
 
     local selectedRotation = nil
 
-    for idx, rotation in ipairs(self.TempSettings.HealingRotationStates or {}) do
+    for idx, rotation in ipairs(self.TempSettings.HealRotationStates or {}) do
         self.TempSettings.CurrentRotationStateType = 2
         self.TempSettings.CurrentRotationStateId = idx
 
@@ -807,6 +844,7 @@ function Module:GiveTime(combat_state)
     if self.TempSettings.NewCombatMode then
         Logger.log_debug("New Combat Mode Requested: %s", self.ClassConfig.Modes[self.settings.Mode])
         self:SetCombatMode(self.ClassConfig.Modes[self.settings.Mode])
+        self:GetRotations()
         self.TempSettings.NewCombatMode = false
     end
 
@@ -924,8 +962,8 @@ function Module:SetCurrentRotationState(state)
     end
 
     if self.TempSettings.CurrentRotationStateType == 2 then
-        if not self.TempSettings.HealingRotationStates[self.TempSettings.CurrentRotationStateId] then return end
-        self.TempSettings.HealingRotationStates[self.TempSettings.CurrentRotationStateId].state = state
+        if not self.TempSettings.HealRotationStates[self.TempSettings.CurrentRotationStateId] then return end
+        self.TempSettings.HealRotationStates[self.TempSettings.CurrentRotationStateId].state = state
     end
 end
 

@@ -921,9 +921,9 @@ _ClassConfig      = {
             name = 'Malo',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoMalo') or Config:GetSetting('DoAEMalo') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('DoMalo') then return false end
                 return combat_state == "Combat" and not Casting.IAmFeigning() and mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
             end,
         },
@@ -940,9 +940,10 @@ _ClassConfig      = {
             name = 'DPS PET',
             state = 1,
             steps = 1,
+            load_cond = function() return Core.IsModeActive("PetTank") end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.IsModeActive("PetTank")
+                return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
         {
@@ -968,6 +969,7 @@ _ClassConfig      = {
             timer = 120, --this will only be checked once every 2 minutes
             state = 1,
             steps = 2,
+            load_cond = function() return Config:GetSetting('SummonModRods') end,
             targetId = function(self)
                 local groupIds = { mq.TLO.Me.ID(), }
                 local count = mq.TLO.Group.Members()
@@ -977,7 +979,6 @@ _ClassConfig      = {
                 return groupIds
             end,
             cond = function(self, combat_state)
-                if not Config:GetSetting('SummonModRods') then return false end
                 local downtime = combat_state == "Downtime" and Casting.DoBuffCheck()
                 local pct = Config:GetSetting('GroupManaPct')
                 local combat = combat_state == "Combat" and Config:GetSetting('CombatModRod') and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt') and
@@ -2013,6 +2014,7 @@ _ClassConfig      = {
             Category = "Mana",
             Index = 1,
             Tooltip = "Summon Mod Rods",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Can I summon mod rods for my group?",
             Answer = "Yes, you can summon mod rods for your group by setting the [SummonModRods] setting.",
@@ -2078,6 +2080,7 @@ _ClassConfig      = {
             DisplayName = "Cast Malo",
             Category = "Debuffs",
             Tooltip = "Do Malo Spells/AAs",
+            RequiresLoadoutChange = true,
             Default = true,
             FAQ = "I want to use Malo in my rotation, how do I do that?",
             Answer = "You can use the [DoMalo] feature to use Malo in your rotation.",
@@ -2086,6 +2089,7 @@ _ClassConfig      = {
             DisplayName = "Cast AE Malo",
             Category = "Debuffs",
             Tooltip = "Do AE Malo Spells/AAs",
+            RequiresLoadoutChange = true,
             Default = false,
             FAQ = "I want to use AE Malo in my rotation, how do I do that?",
             Answer = "You can use the [DoAEMalo] feature to use AE Malo in your rotation.",
