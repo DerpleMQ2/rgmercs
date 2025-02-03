@@ -53,41 +53,47 @@ local function GetCallerString()
     return string.format('(%s) ', callString)
 end
 
-local function Output(paramLogLevel, message)
+local function Output(paramLogLevel, console, message)
     if Write.loglevels[Write.loglevel:lower()].level <= Write.loglevels[paramLogLevel].level then
-        print(string.format('%s%s%s[%s]%s :: %s', type(Write.prefix) == 'function' and Write.prefix() or Write.prefix, GetCallerString(), GetColorStart(paramLogLevel),
-            Write.loglevels[paramLogLevel].abbreviation, GetColorEnd(), message))
+        if console ~= nil then
+            console:AppendText(string.format('%s%s%s[%s]%s :: %s', type(Write.prefix) == 'function' and Write.prefix() or Write.prefix, GetCallerString(),
+                GetColorStart(paramLogLevel),
+                Write.loglevels[paramLogLevel].abbreviation, GetColorEnd(), message))
+        else
+            print(string.format('%s%s%s[%s]%s :: %s', type(Write.prefix) == 'function' and Write.prefix() or Write.prefix, GetCallerString(), GetColorStart(paramLogLevel),
+                Write.loglevels[paramLogLevel].abbreviation, GetColorEnd(), message))
+        end
     end
 end
 
-function Write.Debug(message, ...)
+function Write.Debug(console, message, ...)
     if (... ~= nil) then message = string.format(message, ...) end
 
-    Output('debug', message)
+    Output('debug', console, message)
 end
 
-function Write.Info(message, ...)
+function Write.Info(console, message, ...)
     if (... ~= nil) then message = string.format(message, ...) end
 
-    Output('info', message)
+    Output('info', console, message)
 end
 
-function Write.Warn(message, ...)
+function Write.Warn(console, message, ...)
     if (... ~= nil) then message = string.format(message, ...) end
 
-    Output('warn', message)
+    Output('warn', console, message)
 end
 
-function Write.Error(message, ...)
+function Write.Error(console, message, ...)
     if (... ~= nil) then message = string.format(message, ...) end
 
-    Output('error', message)
+    Output('error', console, message)
 end
 
-function Write.Fatal(message, ...)
+function Write.Fatal(console, message, ...)
     if (... ~= nil) then message = string.format(message, ...) end
 
-    Output('fatal', message)
+    Output('fatal', console, message)
     Terminate()
 end
 
