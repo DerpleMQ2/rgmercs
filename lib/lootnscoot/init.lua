@@ -516,16 +516,19 @@ end
 
 function loot.OpenItemsSQL()
     local db = SQLite3.open(lootDB)
+    db:exec("PRAGMA journal_mode=WAL;")
     return db
 end
 
 function loot.LoadRuleDB()
-    -- Create the database and its table if it doesn't exist
-
+    -- Open the database once
     local db = SQLite3.open(RulesDB)
     local charTableName = string.format("%s_Rules", MyName)
 
-    local createTablesQuery = string.format([[
+    -- Create tables only if necessary (wrapped in a single transaction)
+    db:exec("PRAGMA journal_mode=WAL;")
+    db:exec("BEGIN TRANSACTION")
+    db:exec(string.format([[
         CREATE TABLE IF NOT EXISTS Global_Rules (
             "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
             "item_name" TEXT NOT NULL,
@@ -547,40 +550,35 @@ function loot.LoadRuleDB()
             "item_rule_classes" TEXT,
             "item_link" TEXT
         );
-    ]], charTableName)
-    db:exec("BEGIN TRANSACTION")
-    db:exec(createTablesQuery)
+    ]], charTableName))
     db:exec("COMMIT")
-    db:close()
 
+    -- Function to process rules in a table
+    local function processRules(stmt, ruleTable, classTable, linkTable)
+        for row in stmt:nrows() do
+            local id = row.item_id
+            ruleTable[id] = row.item_rule
+            classTable[id] = row.item_rule_classes or "All"
+            linkTable[id] = row.item_link or "NULL"
+            loot.ItemNames[id] = loot.ItemNames[id] or row.item_name
+        end
+    end
 
-    -- process the loaded data
-    db         = SQLite3.open(RulesDB)
+    -- Load rules efficiently
+    db:exec("BEGIN TRANSACTION")
     local stmt = db:prepare("SELECT * FROM Global_Rules")
-    for row in stmt:nrows() do
-        loot.GlobalItemsRules[row.item_id]   = row.item_rule
-        loot.GlobalItemsClasses[row.item_id] = row.item_rule_classes ~= nil and row.item_rule_classes or 'All'
-        loot.GlobalItemsLink[row.item_id]    = row.item_link ~= nil and row.item_link or 'NULL'
-        loot.ItemNames[row.item_id]          = row.item_name
-    end
+    processRules(stmt, loot.GlobalItemsRules, loot.GlobalItemsClasses, loot.GlobalItemsLink)
     stmt:finalize()
+
     stmt = db:prepare("SELECT * FROM Normal_Rules")
-    for row in stmt:nrows() do
-        loot.NormalItemsRules[row.item_id]   = row.item_rule
-        loot.NormalItemsClasses[row.item_id] = row.item_rule_classes ~= nil and row.item_rule_classes or 'All'
-        loot.NormalItemsLink[row.item_id]    = row.item_link ~= nil and row.item_link or 'NULL'
-        loot.ItemNames[row.item_id]          = row.item_name
-    end
+    processRules(stmt, loot.NormalItemsRules, loot.NormalItemsClasses, loot.NormalItemsLink)
     stmt:finalize()
-    local persQuery = string.format("SELECT * FROM %s", charTableName)
-    stmt = db:prepare(persQuery)
-    for row in stmt:nrows() do
-        loot.PersonalItemsRules[row.item_id]   = row.item_rule
-        loot.PersonalItemsClasses[row.item_id] = row.item_rule_classes ~= nil and row.item_rule_classes or 'All'
-        loot.PersonalItemsLink[row.item_id]    = row.item_link ~= nil and row.item_link or 'NULL'
-        loot.ItemNames[row.item_id]            = row.item_name
-    end
+
+    stmt = db:prepare(string.format("SELECT * FROM %s", charTableName))
+    processRules(stmt, loot.PersonalItemsRules, loot.PersonalItemsClasses, loot.PersonalItemsLink)
     stmt:finalize()
+    db:exec("COMMIT")
+
     db:close()
 end
 
@@ -748,6 +746,7 @@ function loot.loadSettings(firstRun)
         link TEXT
         );
         ]])
+        db:exec("CREATE INDEX IF NOT EXISTS idx_item_name ON Items (name);")
         db:exec("COMMIT")
         db:close()
 
@@ -776,89 +775,89 @@ end
 ---@param db any DB Connection SQLite3 [optional]
 ---@return integer Quantity of items found
 function loot.GetItemFromDB(itemName, itemID, rules, db)
-    if itemID == nil and itemName == nil then return 0 end
-    if itemID == nil then itemID = 0 end
-    if itemName == nil then itemName = 'NULL' end
-    if db == nil then db = loot.OpenItemsSQL() end
+    if not itemID and not itemName then return 0 end
 
-    local stmt
-    if not rules then
-        stmt = db:prepare("SELECT * FROM Items WHERE item_id = ? OR name LIKE ? ORDER BY name")
-        stmt:bind(1, itemID)
-        stmt:bind(2, "%" .. itemName .. "%")
-    else
-        stmt = db:prepare("SELECT * FROM Items WHERE item_id = ? ORDER BY name")
-        stmt:bind(1, itemID)
-    end
+    itemID = itemID or 0
+    itemName = itemName or 'NULL'
+    db = db or loot.OpenItemsSQL()
+
+    local query = rules and "SELECT * FROM Items WHERE item_id = ? ORDER BY name"
+        or "SELECT * FROM Items WHERE item_id = ? OR name LIKE ? ORDER BY name"
+
+    local stmt = db:prepare(query)
+    stmt:bind(1, itemID)
+    if not rules then stmt:bind(2, "%" .. itemName .. "%") end
+
     local rowsFetched = 0
-
     for row in stmt:nrows() do
-        rowsFetched = rowsFetched + 1
-        if row.item_id ~= nil then
-            loot.ALLITEMS[row.item_id]                    = {}
-            loot.ALLITEMS[row.item_id].Name               = row.name or 'NULL'
-            loot.ALLITEMS[row.item_id].NoDrop             = row.nodrop == 1
-            loot.ALLITEMS[row.item_id].NoTrade            = row.notrade == 1
-            loot.ALLITEMS[row.item_id].Tradeskills        = row.tradeskill == 1
-            loot.ALLITEMS[row.item_id].Quest              = row.quest == 1
-            loot.ALLITEMS[row.item_id].Lore               = row.lore == 1
-            loot.ALLITEMS[row.item_id].Augment            = row.augment == 1
-            loot.ALLITEMS[row.item_id].Stackable          = row.stackable == 1
-            loot.ALLITEMS[row.item_id].Value              = loot.valueToCoins(row.sell_value)
-            loot.ALLITEMS[row.item_id].Tribute            = row.tribute_value
-            loot.ALLITEMS[row.item_id].StackSize          = row.stack_size
-            loot.ALLITEMS[row.item_id].Clicky             = row.clickable or 'None'
-            loot.ALLITEMS[row.item_id].AugType            = row.augtype
-            loot.ALLITEMS[row.item_id].STR                = row.strength
-            loot.ALLITEMS[row.item_id].DEX                = row.dexterity
-            loot.ALLITEMS[row.item_id].AGI                = row.agility
-            loot.ALLITEMS[row.item_id].STA                = row.stamina
-            loot.ALLITEMS[row.item_id].INT                = row.intelligence
-            loot.ALLITEMS[row.item_id].WIS                = row.wisdom
-            loot.ALLITEMS[row.item_id].CHA                = row.charisma
-            loot.ALLITEMS[row.item_id].Mana               = row.mana
-            loot.ALLITEMS[row.item_id].HP                 = row.hp
-            loot.ALLITEMS[row.item_id].AC                 = row.ac
-            loot.ALLITEMS[row.item_id].HPRegen            = row.regen_hp
-            loot.ALLITEMS[row.item_id].ManaRegen          = row.regen_mana
-            loot.ALLITEMS[row.item_id].Haste              = row.haste
-            loot.ALLITEMS[row.item_id].Classes            = row.classes
-            loot.ALLITEMS[row.item_id].ClassList          = row.class_list or 'All'
-            loot.ALLITEMS[row.item_id].svFire             = row.svfire
-            loot.ALLITEMS[row.item_id].svCold             = row.svcold
-            loot.ALLITEMS[row.item_id].svDisease          = row.svdisease
-            loot.ALLITEMS[row.item_id].svPoison           = row.svpoison
-            loot.ALLITEMS[row.item_id].svCorruption       = row.svcorruption
-            loot.ALLITEMS[row.item_id].svMagic            = row.svmagic
-            loot.ALLITEMS[row.item_id].SpellDamage        = row.spelldamage
-            loot.ALLITEMS[row.item_id].SpellShield        = row.spellshield
-            loot.ALLITEMS[row.item_id].Damage             = row.damage
-            loot.ALLITEMS[row.item_id].Weight             = row.weight / 10
-            loot.ALLITEMS[row.item_id].Size               = row.item_size
-            loot.ALLITEMS[row.item_id].WeightReduction    = row.weightreduction
-            loot.ALLITEMS[row.item_id].Races              = row.races
-            loot.ALLITEMS[row.item_id].RaceList           = row.race_list or 'All'
-            loot.ALLITEMS[row.item_id].Icon               = row.icon
-            loot.ALLITEMS[row.item_id].Attack             = row.attack
-            loot.ALLITEMS[row.item_id].Collectible        = row.collectible == 1
-            loot.ALLITEMS[row.item_id].StrikeThrough      = row.strikethrough
-            loot.ALLITEMS[row.item_id].HeroicAGI          = row.heroicagi
-            loot.ALLITEMS[row.item_id].HeroicCHA          = row.heroiccha
-            loot.ALLITEMS[row.item_id].HeroicDEX          = row.heroicdex
-            loot.ALLITEMS[row.item_id].HeroicINT          = row.heroicint
-            loot.ALLITEMS[row.item_id].HeroicSTA          = row.heroicsta
-            loot.ALLITEMS[row.item_id].HeroicSTR          = row.heroicstr
-            loot.ALLITEMS[row.item_id].HeroicSvCold       = row.heroicsvcold
-            loot.ALLITEMS[row.item_id].HeroicSvCorruption = row.heroicsvcorruption
-            loot.ALLITEMS[row.item_id].HeroicSvDisease    = row.heroicsvdisease
-            loot.ALLITEMS[row.item_id].HeroicSvFire       = row.heroicsvfire
-            loot.ALLITEMS[row.item_id].HeroicSvMagic      = row.heroicsvmagic
-            loot.ALLITEMS[row.item_id].HeroicSvPoison     = row.heroicsvpoison
-            loot.ALLITEMS[row.item_id].HeroicWIS          = row.heroicwis
-            loot.ALLITEMS[row.item_id].Link               = row.link
+        local id = row.item_id
+        if id then
+            local itemData = {
+                Name = row.name or 'NULL',
+                NoDrop = row.nodrop == 1,
+                NoTrade = row.notrade == 1,
+                Tradeskills = row.tradeskill == 1,
+                Quest = row.quest == 1,
+                Lore = row.lore == 1,
+                Augment = row.augment == 1,
+                Stackable = row.stackable == 1,
+                Value = loot.valueToCoins(row.sell_value),
+                Tribute = row.tribute_value,
+                StackSize = row.stack_size,
+                Clicky = row.clickable or 'None',
+                AugType = row.augtype,
+                STR = row.strength,
+                DEX = row.dexterity,
+                AGI = row.agility,
+                STA = row.stamina,
+                INT = row.intelligence,
+                WIS = row.wisdom,
+                CHA = row.charisma,
+                Mana = row.mana,
+                HP = row.hp,
+                AC = row.ac,
+                HPRegen = row.regen_hp,
+                ManaRegen = row.regen_mana,
+                Haste = row.haste,
+                Classes = row.classes,
+                ClassList = row.class_list or 'All',
+                svFire = row.svfire,
+                svCold = row.svcold,
+                svDisease = row.svdisease,
+                svPoison = row.svpoison,
+                svCorruption = row.svcorruption,
+                svMagic = row.svmagic,
+                SpellDamage = row.spelldamage,
+                SpellShield = row.spellshield,
+                Damage = row.damage,
+                Weight = row.weight / 10,
+                Size = row.item_size,
+                WeightReduction = row.weightreduction,
+                Races = row.races,
+                RaceList = row.race_list or 'All',
+                Icon = row.icon,
+                Attack = row.attack,
+                Collectible = row.collectible == 1,
+                StrikeThrough = row.strikethrough,
+                HeroicAGI = row.heroicagi,
+                HeroicCHA = row.heroiccha,
+                HeroicDEX = row.heroicdex,
+                HeroicINT = row.heroicint,
+                HeroicSTA = row.heroicsta,
+                HeroicSTR = row.heroicstr,
+                HeroicSvCold = row.heroicsvcold,
+                HeroicSvCorruption = row.heroicsvcorruption,
+                HeroicSvDisease = row.heroicsvdisease,
+                HeroicSvFire = row.heroicsvfire,
+                HeroicSvMagic = row.heroicsvmagic,
+                HeroicSvPoison = row.heroicsvpoison,
+                HeroicWIS = row.heroicwis,
+                Link = row.link,
+            }
+            loot.ALLITEMS[id] = itemData
+            rowsFetched = rowsFetched + 1
         end
     end
-
     stmt:finalize()
 
     return rowsFetched
@@ -940,11 +939,12 @@ function loot.addToItemDB(item)
     -- insert the item into the database
 
     local db = SQLite3.open(lootDB)
+
     if not db then
         Logger.Error(loot.guiLoot.console, "\arFailed to open\ax loot database.")
         return
     end
-
+    db:exec("PRAGMA journal_mode=WAL;")
     local sql  = [[
         INSERT INTO Items (
         item_id, name, nodrop, notrade, tradeskill, quest, lore, augment,
@@ -1335,6 +1335,7 @@ function loot.modifyItemRule(itemID, action, tableName, classes, link)
 
     local stmt
     local sql
+    db:exec("PRAGMA journal_mode=WAL;")
     db:exec("BEGIN TRANSACTION")
     if action == 'delete' then
         -- DELETE operation
@@ -1516,7 +1517,7 @@ function loot.lookupLootRule(itemID, tablename)
             Logger.Warn(loot.guiLoot.console, "\atSQL \arFailed\ax to open \atRulesDB:\ax for \aolookupLootRule\ax.")
             return found, 'NULL', 'All', 'NULL'
         end
-
+        db:exec("PRAGMA journal_mode=WAL;")
         local sql  = string.format("SELECT item_rule, item_rule_classes, item_link FROM %s WHERE item_id = ?", tbl)
         local stmt = db:prepare(sql)
 
@@ -1828,7 +1829,7 @@ function loot.getRule(item, from)
 
     -- Lookup existing rule in the databases
     local lootRule, lootClasses, lootLink = loot.lookupLootRule(itemID)
-    Logger.Info(loot.guiLoot.console, "Item: %s, Rule: %s, Classes: %s, Link: %s", itemName, lootRule, lootClasses, lootLink)
+    Logger.Info(loot.guiLoot.console, "\aoLookup Rule\ax: \at%s\ax, \ayClasses\ax: \at%s\ax, Item: %s, \atLink: %s", lootRule, lootClasses, itemName, lootLink)
     if lootRule == 'NULL' and item.NoDrop() then
         lootRule = "CanUse"
         loot.addRule(itemID, 'NormalItems', lootRule, lootClasses, item.ItemLink('CLICKABLE')())
@@ -4432,7 +4433,7 @@ function loot.bulkSet(item_table, setting, classes, which_table)
 
     local db = SQLite3.open(RulesDB)
     if not db then return end
-
+    db:exec("PRAGMA journal_mode=WAL;")
     local stmt = db:prepare(string.format([[
         INSERT INTO %s (item_id, item_name, item_rule, item_rule_classes, item_link)
         VALUES (?, ?, ?, ?, ?)
