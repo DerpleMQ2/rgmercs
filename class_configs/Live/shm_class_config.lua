@@ -1024,7 +1024,7 @@ local _ClassConfig = {
             load_cond = function(self) return Config:GetSetting('DoTwinHeal') and self:GetResolvedActionMapItem('TwinHealNuke') end,
             targetId = function(self) return { Core.GetMainAssistId(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
 
