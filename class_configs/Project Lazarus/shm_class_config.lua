@@ -1010,7 +1010,18 @@ local _ClassConfig = {
             load_cond = function(self) return Config:GetSetting('DoTwinHeal') and self:GetResolvedActionMapItem('TwinHealNuke') end,
             targetId = function(self) return { Core.GetMainAssistId(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+            end,
+        },
+        {
+            name = 'ArcanumWeave',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and not mq.TLO.Me.Buff("Focus of Arcanum")() and
+                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
 
@@ -1070,7 +1081,7 @@ local _ClassConfig = {
                 name = "Focus of Arcanum",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
+                    return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target)
                 end,
             },
             {
@@ -1564,6 +1575,29 @@ local _ClassConfig = {
                 end,
             },
         },
+        ['ArcanumWeave'] = {
+            {
+                name = "Empowered Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Enlightened Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Acute Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+        },
     },
     ['Spells']            = {
         {
@@ -2001,10 +2035,21 @@ local _ClassConfig = {
             FAQ = "Why aren't I casting Talisman of Celerity or other haste buffs?",
             Answer = "Even with Use Haste enabled, these buffs are part of your Focus spell (Unity) at very high levels, so they may not be needed.",
         },
+        ['DoArcanumWeave']    = {
+            DisplayName = "Weave Arcanums",
+            Category = "Buffs",
+            Index = 8,
+            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = true,
+            FAQ = "What is an Arcanum and why would I want to weave them?",
+            Answer =
+            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
+        },
         ['DoVetAA']           = {
             DisplayName = "Do Vet AA",
             Category = "Buffs",
-            Index = 8,
+            Index = 9,
             Tooltip = "Use Veteran AA during burns (See FAQ).",
             Default = true,
             ConfigType = "Advanced",

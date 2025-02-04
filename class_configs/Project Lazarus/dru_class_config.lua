@@ -1049,7 +1049,17 @@ local _ClassConfig = {
                 return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
-
+        {
+            name = 'ArcanumWeave',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and not mq.TLO.Me.Buff("Focus of Arcanum")() and
+                    (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+            end,
+        },
     },
     ['Rotations']         = {
         ['DPS'] = {
@@ -1298,6 +1308,11 @@ local _ClassConfig = {
                     return true
                 end,
             },
+            {
+                name = "Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName) return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) end,
+            },
         },
         ['Twin Heal'] = {
             {
@@ -1501,6 +1516,29 @@ local _ClassConfig = {
                     return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName)
                         .Spell.ID())
                 end,
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+        },
+        ['ArcanumWeave'] = {
+            {
+                name = "Empowered Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Enlightened Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Acute Focus of Arcanum",
+                type = "AA",
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName)
                 end,
@@ -1742,7 +1780,7 @@ local _ClassConfig = {
     },
     --TODO: These are nearly all in need of Display and Tooltip updates.
     ['DefaultConfig']     = {
-        ['Mode']         = {
+        ['Mode']           = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this Toon",
@@ -1755,7 +1793,7 @@ local _ClassConfig = {
             Answer = "Heal Mode will focus on healing and buffing.\nMana Mode will focus on DPS and Mana Management.",
         },
         --TODO: This is confusing because it is actually a choice between fire and ice and should be rewritten (need time to update conditions above)
-        ['DoFire']       = {
+        ['DoFire']         = {
             DisplayName = "Cast Fire Spells",
             Category = "Spells and Abilities",
             Tooltip = "if Enabled Use Fire Spells, Disabled Use Ice Spells",
@@ -1766,7 +1804,7 @@ local _ClassConfig = {
                 "When [DoFire] is enabled, we will use Fire based Nukes.\n" ..
                 "When [DoFire] is disabled, we will use Ice based Nukes.",
         },
-        ['DoRain']       = {
+        ['DoRain']         = {
             DisplayName = "Cast Rain Spells",
             Category = "Spells and Abilities",
             Tooltip = "Use Rain Spells",
@@ -1774,7 +1812,7 @@ local _ClassConfig = {
             FAQ = "I like Rain spells, can I use them?",
             Answer = "Yes, you can enable [DoRain] to use Rain spells.",
         },
-        ['DoRunSpeed']   = {
+        ['DoRunSpeed']     = {
             DisplayName = "Cast Run Speed",
             Category = "Spells and Abilities",
             Tooltip = "Cast Run Speed Spells",
@@ -1782,7 +1820,7 @@ local _ClassConfig = {
             FAQ = "Sometimes I group with a bard and don't need to worry about Run Speed, can I disable it?",
             Answer = "Yes, you can disable [DoRunSpeed] to prevent casting Run Speed spells.",
         },
-        ['DoNuke']       = {
+        ['DoNuke']         = {
             DisplayName = "Cast Spells",
             Category = "Spells and Abilities",
             Tooltip = "Use Spells",
@@ -1791,7 +1829,7 @@ local _ClassConfig = {
             Answer = "Make sure [DoNuke] is enabled. If you are in Heal Mode, you may not be nuking.\n" ..
                 "Also double check [NukePct] to ensure you are nuking at the correct health percentage.",
         },
-        ['NukePct']      = {
+        ['NukePct']        = {
             DisplayName = "Cast Spells",
             Category = "Spells and Abilities",
             Tooltip = "Use Spells",
@@ -1801,7 +1839,7 @@ local _ClassConfig = {
             FAQ = "Why am I nuking at 10% health?",
             Answer = "Make sure [NukePct] is set to the correct health percentage you want to start nuking at.",
         },
-        ['DoSnare']      = {
+        ['DoSnare']        = {
             DisplayName = "Cast Snares",
             Category = "Spells and Abilities",
             Tooltip = "Enable casting Snare spells.",
@@ -1809,7 +1847,7 @@ local _ClassConfig = {
             FAQ = "Why am I not Snaring?",
             Answer = "Make sure [DoSnare] is enabled. If you are in Heal Mode, you may not be snaring.",
         },
-        ['DoChestClick'] = {
+        ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
@@ -1817,7 +1855,7 @@ local _ClassConfig = {
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Make sure [DoChestClick] is enabled. If you are in Heal Mode, you may not be clicking your chest item.",
         },
-        ['DoDot']        = {
+        ['DoDot']          = {
             DisplayName = "Cast DOTs",
             Category = "Spells and Abilities",
             Tooltip = "Enable casting Damage Over Time spells.",
@@ -1825,7 +1863,7 @@ local _ClassConfig = {
             FAQ = "Why am I not DOTing?",
             Answer = "Make sure [DoDot] is enabled. If you are in Heal Mode, you may not be DOTing.",
         },
-        ['DoTwinHeal']   = {
+        ['DoTwinHeal']     = {
             DisplayName = "Cast Twin Heal Nuke",
             Category = "Spells and Abilities",
             Tooltip = "Use Twin Heal Nuke Spells",
@@ -1834,7 +1872,7 @@ local _ClassConfig = {
             FAQ = "I have Twincastig AA, can I use it?",
             Answer = "Yes, you can enable [DoTwinHeal] to use Twin Heal Nuke spells.",
         },
-        ['DoHPBuff']     = {
+        ['DoHPBuff']       = {
             DisplayName = "Group HP Buff",
             Category = "Spells and Abilities",
             Tooltip = "Use your group HP Buff. Disable as desired to prevent conflicts with CLR or PAL buffs.",
@@ -1842,7 +1880,7 @@ local _ClassConfig = {
             FAQ = "Why am I in a buff war with my Paladin or Druid? We are constantly overwriting each other's buffs.",
             Answer = "Disable [DoHPBuff] to prevent issues with Aego/Symbol lines overwriting. Alternatively, you can adjust the settings for the other class instead.",
         },
-        ['KeepEvac']     = {
+        ['KeepEvac']       = {
             DisplayName = "Memorize Evac",
             Category = "Spells and Abilities",
             Tooltip = "Keep (Lesser) Succor memorized.",
@@ -1850,7 +1888,7 @@ local _ClassConfig = {
             FAQ = "I want my druid to keep an evac memorized, is this possible?",
             Answer = "Enable the Memorize Evac setting to keep Succor or Lessor Succor on your spell bar.",
         },
-        ['DoTempHP']     = {
+        ['DoTempHP']       = {
             DisplayName = "Temp HP Buff",
             Category = "Spells and Abilities",
             Tooltip = "Use Temp HP Buff (Only for WAR, other tanks have their own)",
@@ -1859,13 +1897,23 @@ local _ClassConfig = {
             FAQ = "Why isn't my Temp HP Buff being used?",
             Answer = "You either have [DoTempHP] disabled, or you don't have a Warrior in your group (Other tanks have their own Temp HP Buff).",
         },
-        ['DoGroupRegen'] = {
+        ['DoGroupRegen']   = {
             DisplayName = "Group Regen Buff",
             Category = "Spells and Abilities",
             Tooltip = "Use your Group Regen buff.",
             Default = true,
             FAQ = "Why am I spamming my Group Regen buff?",
             Answer = "Certain Shaman and Druid group regen buffs report cross-stacking. You should deselect the option on one of the PCs if they are grouped together.",
+        },
+        ['DoArcanumWeave'] = {
+            DisplayName = "Weave Arcanums",
+            Category = "Spells and Abilities",
+            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = true,
+            FAQ = "What is an Arcanum and why would I want to weave them?",
+            Answer =
+            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
     },
 }

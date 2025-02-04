@@ -876,6 +876,16 @@ local _ClassConfig = {
                 return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
+        {
+            name = 'ArcanumWeave',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and not mq.TLO.Me.Buff("Focus of Arcanum")()
+            end,
+        },
     },
     ['HelperFunctions'] = { --used to autoinventory our azure crystal after summon
         StashCrystal = function()
@@ -1268,13 +1278,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Focus of Arcanum",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
-            },
-            {
                 name = "DoTSpell1",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1391,9 +1394,9 @@ local _ClassConfig = {
                 cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
-                name = "Forceful Rejuvenation",
+                name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName) return Casting.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) end,
             },
             {
                 name = "Calculated Insanity",
@@ -1451,6 +1454,11 @@ local _ClassConfig = {
                     return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
+            {
+                name = "Forceful Rejuvenation",
+                type = "AA",
+                cond = function(self, aaName) return Casting.AAReady(aaName) end,
+            },
         },
         ['Tash'] = {
             {
@@ -1495,6 +1503,29 @@ local _ClassConfig = {
                     if Casting.CanUseAA("Dreary Deeds") then return false end
                     return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
                         Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+        },
+        ['ArcanumWeave'] = {
+            {
+                name = "Empowered Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Enlightened Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Acute Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
         },
@@ -1653,6 +1684,16 @@ local _ClassConfig = {
             FAQ = "Why am I using the wrong aura?",
             Answer = "Aura choice can be made on the buff tab.\n" ..
                 "Once the PC has purchased Auroria Mastery, this setting is ignored in favor of using the AA.",
+        },
+        ['DoArcanumWeave']   = {
+            DisplayName = "Weave Arcanums",
+            Category = "Buffs",
+            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = true,
+            FAQ = "What is an Arcanum and why would I want to weave them?",
+            Answer =
+            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
         ['AESlowCount']      = {
             DisplayName = "Slow Count",
