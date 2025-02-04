@@ -768,6 +768,16 @@ local _ClassConfig = {
                 return combat_state == "Combat" and not Casting.IAmFeigning()
             end,
         },
+        {
+            name = 'ArcanumWeave',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and not mq.TLO.Me.Buff("Focus of Arcanum")()
+            end,
+        },
     },
     ['Rotations']       = {
         ['Lich Management'] = {
@@ -1084,7 +1094,7 @@ local _ClassConfig = {
                 name = "Focus of Arcanum",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
+                    return Casting.SelfBuffAACheck(aaName) and Targeting.IsNamed(mq.TLO.Target)
                 end,
             },
             {
@@ -1107,6 +1117,29 @@ local _ClassConfig = {
             --    active_cond = function(self, spell) return Casting.SongActiveByName(spell.RankName()) end,
             --    cond = function(self, spell) return not Casting.SongActiveByName(spell.RankName()) end,
             --},
+        },
+        ['ArcanumWeave'] = {
+            {
+                name = "Empowered Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Enlightened Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Acute Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
         },
         ['Downtime'] = {
             {
@@ -1486,6 +1519,16 @@ local _ClassConfig = {
             Max = 100,
             FAQ = "I want to stop Liching at a certain Mana %, how do I do that?",
             Answer = "Set the [StopLichMana] setting to the desired % of Mana you want to stop Liching at.",
+        },
+        ['DoArcanumWeave']    = {
+            DisplayName = "Weave Arcanums",
+            Category = "Spells and Abilities",
+            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = true,
+            FAQ = "What is an Arcanum and why would I want to weave them?",
+            Answer =
+            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
     },
 

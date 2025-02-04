@@ -981,6 +981,16 @@ _ClassConfig      = {
                 return downtime or combat
             end,
         },
+        {
+            name = 'ArcanumWeave',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and not mq.TLO.Me.Buff("Focus of Arcanum")()
+            end,
+        },
     },
     -- Really the meat of this class.
     ['HelperFunctions']   = {
@@ -1472,7 +1482,7 @@ _ClassConfig      = {
             {
                 name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName) return Casting.AAReady(aaName) end,
+                cond = function(self, aaName) return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) end,
             },
             {
                 name = "Improved Twincast",
@@ -1842,6 +1852,29 @@ _ClassConfig      = {
                 end,
             },
         },
+        ['ArcanumWeave'] = {
+            {
+                name = "Empowered Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Enlightened Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Acute Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+        },
     },
     ['Spells']            = {
         {
@@ -2040,7 +2073,7 @@ _ClassConfig      = {
         },
         ['DoForce']        = {
             DisplayName = "Do Force",
-            Category = "Spells & Abilities",
+            Category = "Spells and Abilties",
             Tooltip = "Use Force of Elements AA",
             Default = true,
             FAQ = "I want to use Force of Elements AA in my rotation, how do I do that?",
@@ -2048,7 +2081,7 @@ _ClassConfig      = {
         },
         ['DoMagicNuke']    = {
             DisplayName = "Do Magic Nuke",
-            Category = "Spells & Abilities",
+            Category = "Spells and Abilties",
             Tooltip = "Use Magic nukes instead of Fire",
             Default = false,
             FAQ = "I want to use Magic Nukes instead of Fire Nukes, how do I do that?",
@@ -2148,6 +2181,16 @@ _ClassConfig      = {
                 "You can adjust the number of party members that need to be under the above mana percentage to summon Mod Rods in combat by setting the [GroupManaCt] setting.\n" ..
                 "Also Make sure you have the [CombatModRod] setting enabled if you want to resummon them during combat.\n" ..
                 "Finally make sure you have the [SummonModRods] setting enabled.",
+        },
+        ['DoArcanumWeave'] = {
+            DisplayName = "Weave Arcanums",
+            Category = "Spells and Abilities",
+            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = true,
+            FAQ = "What is an Arcanum and why would I want to weave them?",
+            Answer =
+            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
     },
 }
