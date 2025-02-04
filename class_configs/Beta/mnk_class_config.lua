@@ -764,7 +764,7 @@ local _ClassConfig = {
             Max = 30,
             FAQ = "How do I take advantage of the Max AE Targets setting?",
             Answer =
-            "Use this setting to set a value just under your mezzer's AE mez count, if desired.",
+            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
         },
         ['SafeAEDamage']   = {
             DisplayName = "AE Proximity Check",

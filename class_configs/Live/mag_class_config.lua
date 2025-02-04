@@ -2031,7 +2031,7 @@ _ClassConfig      = {
         },
         ['DoForce']        = {
             DisplayName = "Do Force",
-            Category = "Spells & Abilities",
+            Category = "Spells and Abilties",
             Tooltip = "Use Force of Elements AA",
             Default = true,
             FAQ = "I want to use Force of Elements AA in my rotation, how do I do that?",
@@ -2039,7 +2039,7 @@ _ClassConfig      = {
         },
         ['DoMagicNuke']    = {
             DisplayName = "Do Magic Nuke",
-            Category = "Spells & Abilities",
+            Category = "Spells and Abilties",
             Tooltip = "Use Magic nukes instead of Fire",
             Default = false,
             FAQ = "I want to use Magic Nukes instead of Fire Nukes, how do I do that?",

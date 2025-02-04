@@ -2391,9 +2391,9 @@ local _ClassConfig = {
             Default = 5,
             Min = 2,
             Max = 30,
-            FAQ = "Why am I using AE abilities on only a couple of targets?",
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
             Answer =
-            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
+            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
         },
         ['SafeAEDamage']      = {
             DisplayName = "AE Proximity Check",
