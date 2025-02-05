@@ -748,10 +748,12 @@ local _ClassConfig = {
                 elseif mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
                     rezAction = Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 end
-            elseif mq.TLO.SpawnCount("pccorpse radius 80 zradius 30")() > 2 and Casting.SpellReady(mq.TLO.Spell("Larger Reviviscence")) and mq.TLO.Me.CombatState():lower() == "active" or mq.TLO.Me.CombatState():lower() == "resting" then
-                rezAction = Casting.UseSpell("Larger Reviviscence", corpseId, true, true)
-            else
-                if Casting.AAReady("Blessing of Resurrection") then
+            end
+
+            if mq.TLO.Me.CombatState():lower() == "active" or mq.TLO.Me.CombatState():lower() == "resting" then
+                if mq.TLO.SpawnCount("pccorpse radius 80 zradius 30")() > 2 and Casting.SpellReady(mq.TLO.Spell("Larger Reviviscence")) then
+                    rezAction = Casting.UseSpell("Larger Reviviscence", corpseId, true, true)
+                elseif Casting.AAReady("Blessing of Resurrection") then
                     rezAction = Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif not Casting.CanUseAA("Blessing of Resurrection") and Casting.SpellReady(rezSpell) then
                     rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
