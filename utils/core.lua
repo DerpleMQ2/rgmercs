@@ -78,7 +78,7 @@ function Core.CheckPlugins(t)
     for _, p in pairs(t) do
         if not mq.TLO.Plugin(p)() then
             Core.DoCmd("/squelch /plugin %s noauto", p)
-            Logger.log_info("\aw %s \ar not detected! \aw This macro requires it! Loading ...", p)
+            Logger.log_info("\aw %s \ar not detected! \aw This script requires it! Loading ...", p)
         end
     end
 end
