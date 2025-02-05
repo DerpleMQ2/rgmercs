@@ -393,7 +393,7 @@ loot.CurrentPage                        = loot.CurrentPage or 1
 
 ---
 ---This will keep your table sorted by columns instead of rows.
----@param input_table table|nil  the table to sort (optional) You can send a set of sorted keys if you have already custom sorted it.
+---@param input_table table|nil the table to sort (optional) You can send a set of sorted keys if you have already custom sorted it.
 ---@param sorted_keys table|nil  the sorted keys table (optional) if you have already sorted the keys
 ---@param num_columns integer  the number of column groups to sort the keys into
 ---@return table
@@ -1918,12 +1918,15 @@ function loot.getRule(item, from)
             local _, position = string.find(lootDecision, "|")
             if position then qKeep = lootDecision:sub(position + 1) else qKeep = tostring(loot.Settings.QuestKeep) end
             if countHave < tonumber(qKeep) then
+                ---@diagnostic disable-next-line: return-type-mismatch
                 return "Keep", tonumber(qKeep), newRule
             end
             if loot.Settings.AlwaysDestroy then
+                ---@diagnostic disable-next-line: return-type-mismatch
                 return "Destroy", tonumber(qKeep), newRule
             end
         end
+        ---@diagnostic disable-next-line: return-type-mismatch
         return "Ignore", tonumber(qKeep), newRule
     end
 
@@ -1936,6 +1939,7 @@ function loot.getRule(item, from)
         -- else
         --     lootDecision = 'Ignore'
         -- end
+        ---@diagnostic disable-next-line: undefined-field
         if not item.CanUse() then
             lootDecision = 'Ignore'
             cantWear = true
@@ -2346,7 +2350,7 @@ function loot.commandHandler(...)
             loot.addRule(itemID, 'GlobalItems', 'Quest|' .. args[3], 'All', item.ItemLink('CLICKABLE')())
             Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \agGlobal Item \ayQuest|%s\ax", item.Name(), args[3], item.ItemLink('CLICKABLE')())
         elseif args[1] == 'globalitem' and validActions[args[2]] and item() then
-            loot.addRule(item.ID(), 'GlobalItems', validActions[args[2]], args[3] ~= nil or 'All', item.ItemLink('CLICKABLE')())
+            loot.addRule(item.ID(), 'GlobalItems', validActions[args[2]], args[3] or 'All', item.ItemLink('CLICKABLE')())
             Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \agGlobal Item \ay%s \ax(\at%s\ax)", item.Name(), item.ID(), validActions[args[2]])
         elseif args[1] == 'globalitem' and validActions[args[2]] and args[3] ~= nil then
             local itemName = args[3]
@@ -2773,7 +2777,7 @@ function loot.SellToVendor(itemID, bag, slot, name)
     if NEVER_SELL[itemName] then return end
     if mq.TLO.Window('MerchantWnd').Open() then
         Logger.Info(loot.guiLoot.console, 'Selling item: %s', itemName)
-        local notify = slot == nil or slot == -1
+        local notify = slot == (nil or -1)
             and ('/itemnotify %s leftmouseup'):format(bag)
             or ('/itemnotify in pack%s %s leftmouseup'):format(bag, slot)
         mq.cmdf(notify)
@@ -2792,7 +2796,7 @@ function loot.openBanker()
 end
 
 function loot.bankItem(itemID, bag, slot)
-    local notify = slot == nil or slot == -1
+    local notify = slot == (nil or -1)
         and ('/shift /itemnotify %s leftmouseup'):format(bag)
         or ('/shift /itemnotify in pack%s %s leftmouseup'):format(bag, slot)
     mq.cmdf(notify)
@@ -4614,6 +4618,7 @@ function loot.renderSettingsSection(who)
     end
     ImGui.SameLine()
     if ImGui.SmallButton("Clone Settings") then
+        if not loot.TempSettings.CloneWho or not loot.TempSettings.CloneTo then return end
         loot.Boxes[loot.TempSettings.CloneTo] = {}
         for k, v in pairs(loot.Boxes[loot.TempSettings.CloneWho]) do
             if type(v) == 'table' then
@@ -4732,6 +4737,7 @@ local function renderBtn()
         else
             animMini:SetTextureCell(644 - EQ_ICON_OFFSET)
         end
+        ---@diagnostic disable-next-line: param-type-mismatch --Bool/Boolean mismatch
         ImGui.DrawTextureAnimation(animMini, 34, 34, true)
     end
     if ImGui.IsItemHovered() then
@@ -4899,7 +4905,7 @@ end
 
 function loot.processArgs(args)
     loot.Terminate = true
-    local mercsRunnig = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
+    local mercsRunning = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
     if args == nil then return end
     if #args == 1 then
         if args[1] == 'directed' then
@@ -4912,17 +4918,17 @@ function loot.processArgs(args)
             loot.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, { action = 'Hello', Server = eqServer, who = MyName, })
             loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, { action = 'Hello', Server = eqServer, who = MyName, })
         elseif args[1] == 'sellstuff' then
-            if mercsRunnig then mq.cmd('/rgl pause') end
+            if mercsRunning then mq.cmd('/rgl pause') end
             loot.processItems('Sell')
-            if mercsRunnig then mq.cmd('/rgl unpause') end
+            if mercsRunning then mq.cmd('/rgl unpause') end
         elseif args[1] == 'tributestuff' then
-            if mercsRunnig then mq.cmd('/rgl pause') end
+            if mercsRunning then mq.cmd('/rgl pause') end
             loot.processItems('Tribute')
-            if mercsRunnig then mq.cmd('/rgl unpause') end
+            if mercsRunning then mq.cmd('/rgl unpause') end
         elseif args[1] == 'cleanup' then
-            if mercsRunnig then mq.cmd('/rgl pause') end
+            if mercsRunning then mq.cmd('/rgl pause') end
             loot.processItems('Cleanup')
-            if mercsRunnig then mq.cmd('/rgl unpause') end
+            if mercsRunning then mq.cmd('/rgl unpause') end
         elseif args[1] == 'once' then
             loot.lootMobs()
         elseif args[1] == 'standalone' then
