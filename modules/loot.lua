@@ -191,11 +191,9 @@ end
 function Module:GiveTime(combat_state)
 	if not Config:GetSetting('DoLoot') then return end
 
-	if Targeting.GetXTHaterCount() == 0 then
-		-- send actors message to loot
-		Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
-			{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
-	end
+	-- send actors message to loot
+	Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
+		{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
 end
 
 function Module:OnDeath()

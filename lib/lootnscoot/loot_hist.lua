@@ -143,7 +143,7 @@ end
 ---@param imported boolean
 ---@param useactors boolean
 ---@param caller string
----@param report boolean
+---@param report boolean|nil
 function guiLoot.GetSettings(names, links, record, imported, useactors, caller, report)
 	local repVal = report and not guiLoot.showReport
 	guiLoot.imported = imported
