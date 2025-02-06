@@ -9,7 +9,7 @@ local Strings            = require("utils.strings")
 local Logger             = require("utils.logger")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
-local LootnScootDir      = string.format("%s/rgmercs/lib/lootnscoot", mq.luaDir)
+local LootnScootDir      = string.format("\"%s/rgmercs/lib/lootnscoot\"", mq.luaDir)
 
 local sNameStripped      = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 
