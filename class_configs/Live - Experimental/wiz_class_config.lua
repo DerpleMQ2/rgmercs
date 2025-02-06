@@ -143,6 +143,7 @@ return {
             "Chaos Incandescence",
             "Chaos Blaze",
             "Chaos Char",
+            "Chaos Combustion",
             "Chaos Conflagration",
             "Chaos Immolation",
             "Chaos Flame",
@@ -174,6 +175,19 @@ return {
             "Fire Vortex",
         },
         ['WildNuke'] = {
+            "Wildspell Strike",
+            "Wildflame Strike",
+            "Wildscorch Strike",
+            "Wildflash Strike",
+            "Wildflash Barrage",
+            "Wildether Barrage",
+            "Wildspark Barrage",
+            "Wildmana Barrage",
+            "Wildmagic Blast",
+            "Wildmagic Burst",
+            "Wildmagic Strike",
+        },
+        ['WildNuke2'] = {
             "Wildspell Strike",
             "Wildflame Strike",
             "Wildscorch Strike",
@@ -556,6 +570,19 @@ return {
             "Thundaka",
             "Mana Weave",
         },
+        ['SnapNuke'] = {  --T2 Ice ~8.5s recast (shared with Cloudburst)
+            "Frostblast", -- Level 123
+            "Chillblast",
+            "Coldburst",
+            "Flashfrost",
+            "Flashrime",
+            "Flashfreeze",
+            "Frost Snap",
+            "Freezing Snap",
+            "Gelid Snap",
+            "Rime Snap",
+            "Cold Snap", -- Level 73
+        },
     },
     ['RotationOrder'] = {
         -- Downtime doesn't have state because we run the whole rotation at once.
@@ -678,6 +705,7 @@ return {
                 name = "Mana Burn",
                 type = "AA",
                 cond = function(self, aaName, target)
+                    --TODO: make this not fire until it gets good at a certain rank
                     return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.TargetHasBuffByName("Mana Burn") and Config:GetSetting('DoManaBurn') and
                         Casting.HaveManaToNuke()
                 end,
@@ -837,6 +865,50 @@ return {
             },
             {
                 name = "IceEtherealNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+        },
+        ['DPS(SOFSODish-WIP)'] = {
+            {
+                name = "SnapNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "FireEtherealNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.DetGOMCheck() or (Casting.BurnCheck() and Casting.HaveManaToNuke))
+                end,
+            },
+            {
+                name = "IceEtherealNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.DetGOMCheck() or (Casting.BurnCheck() and Casting.HaveManaToNuke))
+                end,
+            },
+            {
+                name = "WildNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "WildNuke2",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "ChaosNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.TargetedSpellReady(spell, target.ID())
