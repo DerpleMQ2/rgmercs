@@ -1319,23 +1319,10 @@ local _ClassConfig = {
         },
         ['Downtime'] = {
             {
-                name = "Saint's Unity",
-                type = "AA",
-                cond = function(self, aaName)
-                    if Config:GetSetting('AegoSymbol') == 2 then return false end
-                    local hpSpell = Core.GetResolvedActionMapItem('SelfHPBuff')
-                    local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
-                    if (hpSpell and hpSpell.Level() or 1) > (aaSpell and aaSpell.Level() or 0) then return false end
-                    return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
                 name = "SelfHPBuff",
                 type = "Spell",
                 cond = function(self, spell)
                     if Config:GetSetting('AegoSymbol') == 2 then return false end
-                    local aaSpell = mq.TLO.Me.AltAbility("Saint's Unity").Spell
-                    if (aaSpell and aaSpell.Level() or 0) >= spell.Level() then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
