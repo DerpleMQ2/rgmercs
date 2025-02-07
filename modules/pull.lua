@@ -2235,6 +2235,7 @@ end
 
 function Module:SetLastPullOrCombatEndedTimer()
     self.TempSettings.LastPullOrCombatEnded = os.clock()
+    Logger.log_verbose("Last Pull or Combat Ended: %s", os.clock())
 end
 
 ---@param cmd string
