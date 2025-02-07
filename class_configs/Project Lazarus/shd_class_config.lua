@@ -380,23 +380,13 @@ local _ClassConfig = {
         },
         ['SpearNuke'] = {
             "Spike of Disease", -- Level 1
+            "Spear of Disease",
             "Spear of Pain",
             "Spear of Plague",
-            "Miasmic Spear",
-            "Rotroot Spear",
-            "Rotmarrow Spear",
-            "Malarian Spear",
-            "Gorgon Spear",
-            "Spear of Sholoth",
-            "Spear of Grelleth",
-            "Spear of Vizat",
-            "Spear of Tylix",
-            "Spear of Cadcane",
-            "Spear of Bloodwretch",
-            "Spear of Lazam",
         },
         ['AESpearNuke'] = {
             "Spear of Decay",
+            "Miasmic Spear",
             "Spear of Muram",
         },
         ['BondTap'] = {

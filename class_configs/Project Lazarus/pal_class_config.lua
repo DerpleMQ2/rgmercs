@@ -419,7 +419,8 @@ return {
         },
         ["ArmorSelfBuff"] = {
             --- Self Buff Armor Line Ac/Hp/Mana regen
-            "Aura of the Crusader",       -- Level 64
+            "Armor of the Divine",        -- Level 60
+            "Armor of the Crusader",      -- Level 64
             "Armor of the Champion",      -- Level 69
             "Armor of Unrelenting Faith", -- Level 73
             "Armor of Inexorable Faith",  -- Level 78

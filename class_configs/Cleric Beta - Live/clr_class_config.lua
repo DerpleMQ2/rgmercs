@@ -1706,8 +1706,10 @@ local _ClassConfig = {
             RequiresLoadoutChange = true,
             Default = true,
             ConfigType = "Advanced",
-            FAQ = "WIP?",
-            Answer = "WIP.",
+            FAQ = "What circumstances do we use Veturika's or Quiet Prayer?",
+            Answer =
+                "If the Mana Restore AA setting is set on the Spells and Abilities tab, we will use either of these once the Mana Restore Pct threshold is crossed.\n" ..
+                "We will also use Veturika's as an emergency self-heal if required.",
         },
         ['ManaRestorePct']    = {
             DisplayName = "Mana Restore Pct",
@@ -1718,8 +1720,8 @@ local _ClassConfig = {
             Min = 1,
             Max = 99,
             ConfigType = "Advanced",
-            FAQ = "WIP?",
-            Answer = "WIP.",
+            FAQ = "Why am I not using Veturika's or Quiet Prayer?",
+            Answer = "Ensure that your Mana Restore Pct is configured to the value you would like to start using these abilities.",
         },
         ['DoStun']            = {
             DisplayName = "Use Stuns",
