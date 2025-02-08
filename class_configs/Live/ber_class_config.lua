@@ -884,7 +884,7 @@ return {
             DisplayName = "Do Intimidate",
             Category = "Abilities",
             Tooltip = "Enable using Intimidate",
-            Default = true,
+            Default = false,
             FAQ = "Why am I not using Intimidate?",
             Answer = "Make sure you have [DoIntimidate] enabled.\n" ..
                 "Early levels of Intimidate can fear the target.\nUSE WITH CAUTION!",
