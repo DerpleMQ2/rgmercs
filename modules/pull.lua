@@ -307,6 +307,7 @@ Module.DefaultConfig                   = {
     ['PullMinCon']                             = {
         DisplayName = "Pull Min Con",
         Category = "Pull Targets",
+        Index = 1,
         Tooltip = "Min Con Mobs to consider pulling",
         Default = 2,
         Min = 1,
@@ -321,6 +322,7 @@ Module.DefaultConfig                   = {
     ['PullMaxCon']                             = {
         DisplayName = "Pull Max Con",
         Category = "Pull Targets",
+        Index = 2,
         Tooltip = "Max Con Mobs to consider pulling",
         Default = 5,
         Min = 1,
@@ -330,9 +332,21 @@ Module.DefaultConfig                   = {
         FAQ = "Why am I not pulling Red con mobs?",
         Answer = "You probably have your [PullMaxCon] set too low, adjust it to the highest con you want to pull.",
     },
+    ['MaxLevelDiff']                           = {
+        DisplayName = "Max Level Diff",
+        Category = "Pull Targets",
+        Index = 3,
+        Tooltip = "If set to pull Red con mobs, limit the level gap to this value.",
+        Default = 6,
+        Min = 4,
+        Max = 20,
+        FAQ = "Why am I pulling deep Red con mobs?",
+        Answer = "You can set your Max Level Diff to control whether deep red mobs will be pulled.",
+    },
     ['UsePullLevels']                          = {
         DisplayName = "Use Pull Levels",
         Category = "Pull Targets",
+        Index = 4,
         Tooltip = "Use Min and Max Levels Instead of Con.",
         Default = false,
         ConfigType = "Advanced",
@@ -342,6 +356,7 @@ Module.DefaultConfig                   = {
     ['PullMinLevel']                           = {
         DisplayName = "Pull Min Level",
         Category = "Pull Targets",
+        Index = 5,
         Tooltip = "Min Level Mobs to consider pulling",
         Default = mq.TLO.Me.Level() - 3,
         Min = 1,
@@ -353,6 +368,7 @@ Module.DefaultConfig                   = {
     ['PullMaxLevel']                           = {
         DisplayName = "Pull Max Level",
         Category = "Pull Targets",
+        Index = 6,
         Tooltip = "Max Level Mobs to consider pulling",
         Default = mq.TLO.Me.Level() + 3,
         Min = 1,
@@ -1487,6 +1503,13 @@ function Module:GetPullableSpawns()
                     spawn.CleanName(), spawn.ID(),
                     self.settings.PullMinCon,
                     self.settings.PullMaxCon, conLevel, spawn.ConColor())
+                return false
+            end
+            -- check max level difference
+            local maxLvl = mq.TLO.Me.Level() + self.settings.MaxLevelDiff
+            if spawn.Level() > maxLvl then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to max level difference. Max Level = %d, Mob = %d",
+                    spawn.CleanName(), spawn.ID(), maxLvl, spawn.Level())
                 return false
             end
         end
