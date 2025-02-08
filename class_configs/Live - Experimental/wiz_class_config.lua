@@ -8,24 +8,25 @@ local Config    = require('utils.config')
 local Modules   = require("utils.modules")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
+local Logger    = require("utils.logger")
 
 return {
-    _version          = "Experimental - Modern Era DPS (110+) 1.1",
-    _author           = "Algar",
-    ['Modes']         = {
+    _version            = "Experimental - Modern Era DPS (110+) 1.2",
+    _author             = "Algar",
+    ['Modes']           = {
         'ModernEra',
     },
-    ['OnModeChange']  = function(self, mode)
+    ['OnModeChange']    = function(self, mode)
         -- if this is enabled the weaves will break.
         Config:GetSettings().WaitOnGlobalCooldown = false
     end,
-    ['ItemSets']      = {
+    ['ItemSets']        = {
         ['Epic'] = {
             "Staff of Phenomenal Power",
             "Staff of Prismatic Power",
         },
     },
-    ['AbilitySets']   = {
+    ['AbilitySets']     = {
         ['AllianceSpell'] = {
             "Frostbound Covariance",
             "Frostbound Conjunction",
@@ -570,7 +571,7 @@ return {
             "Thundaka",
             "Mana Weave",
         },
-        ['SnapNuke'] = {  --T2 Ice ~8.5s recast (shared with Cloudburst)
+        ['SnapNuke'] = {  -- T2 Ice ~8.5s recast (shared with Cloudburst)
             "Frostblast", -- Level 123
             "Chillblast",
             "Coldburst",
@@ -581,10 +582,57 @@ return {
             "Freezing Snap",
             "Gelid Snap",
             "Rime Snap",
-            "Cold Snap", -- Level 73
+            "Cold Snap",      -- Level 73
+        },
+        ['AEBeam'] = {        -- T2 Frontal Fire AE
+            "Cremating Beam", -- Level 121
+            "Vaporizing Beam",
+            "Scorching Beam",
+            "Burning Beam",
+            "Combusting Beam",
+            "Incinerating Beam",
+            "Blazing Beam",
+            "Corona Beam",      -- Level 86
+            "Beam of Solteris", -- Level 72
+        },
+        ['PBFlame'] = {         -- T4 PB Fire AE
+            "Gyre of Flame",    -- Level 122
+            "Coil of Flame",
+            "Loop of Flame",
+            "Wheel of Flame",
+            "Corona of Flame",
+            "Circle of Flame",
+            "Ring of Flame",
+            "Ring of Fire",
+            "Talendor's Presence",
+            "Vsorgu's Presence",
+            "Magmaraug's Presence",
+            "Circle of Fire", -- Level 67
         },
     },
-    ['RotationOrder'] = {
+    ['HelperFunctions'] = {
+        --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
+        AETargetCheck = function(minCount, printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < minCount or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
+
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+                    end
+                    return false
+                end
+            end
+
+            return true
+        end,
+    },
+    ['RotationOrder']   = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
@@ -643,7 +691,7 @@ return {
             end,
         },
     },
-    ['Rotations']     = {
+    ['Rotations']       = {
         ['Burn'] = {
             {
                 name = "Focus of Arcanum",
@@ -843,10 +891,26 @@ return {
                 end,
             },
             {
+                name = "AEBeam",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    return Casting.TargetedSpellReady(spell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('BeamTargetCnt'), true)
+                end,
+            },
+            {
                 name = "FireClaw",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID()) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "PBFlame",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    return Casting.TargetedSpellReady(spell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
                 end,
             },
             {
@@ -995,7 +1059,7 @@ return {
             },
         },
     },
-    ['Spells']        = {
+    ['Spells']          = {
         {
             gem = 1,
             spells = {
@@ -1043,7 +1107,7 @@ return {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "JoltSpell", }, --This can go in the modern Era. Will replace with AE dps.
+                { name = "GambitSpell", },
             },
         },
         {
@@ -1057,20 +1121,26 @@ return {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "GambitSpell", },
+                { name = "AEBeam",           function() return Config:GetSetting('DoAEBeam') end, },
+                { name = "PBFlame",          cond = function() return Config:GetSetting('DoPBAE') end, },
+                { name = "SelfRune1", },
+                { name = "SelfSpellShield1", },
             },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "PBFlame",          cond = function() return Config:GetSetting('DoPBAE') end, },
                 { name = "SelfRune1", },
+                { name = "SelfSpellShield1", },
             },
         },
         {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "SelfRune1", },
                 { name = "SelfSpellShield1", },
             },
         },
@@ -1078,11 +1148,11 @@ return {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                --{ name = "", },
+                { name = "SelfSpellShield1", },
             },
         },
     },
-    ['DefaultConfig'] = {
+    ['DefaultConfig']   = {
         ['Mode']                 = {
             DisplayName = "Mode",
             Category = "Combat",
@@ -1130,6 +1200,81 @@ return {
             Default = true,
             FAQ = "Can I use Mana Burn?",
             Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
+        },
+        ['DoAEDamage']           = {
+            DisplayName = "Do AE Damage",
+            Category = "AE Damage",
+            Index = 1,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['DoAEBeam']             = {
+            DisplayName = "Use Beam Spells",
+            Category = "AE Damage",
+            Index = 2,
+            Tooltip = "**WILL BREAK MEZ** Use your Frontal AE Spells (Beam Line). **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['BeamTargetCnt']        = {
+            DisplayName = "Beam Tgt Cnt",
+            Category = "AE Damage",
+            Index = 3,
+            Tooltip = "Minimum number of valid targets before using AE Spells like Beams.",
+            Default = 2,
+            Min = 1,
+            Max = 10,
+            FAQ = "Why am I using AE abilities on only a couple of targets?",
+            Answer =
+            "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
+        },
+        ['DoPBAE']               = {
+            DisplayName = "Use PBAE Spells",
+            Category = "AE Damage",
+            Index = 4,
+            Tooltip = "**WILL BREAK MEZ** Use your PB AE Spells (of Flame Line). **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['PBAETargetCnt']        = {
+            DisplayName = "PBAE Tgt Cnt",
+            Category = "AE Damage",
+            Index = 5,
+            Tooltip = "Minimum number of valid targets before using PB Spells like the of Flame line.",
+            Default = 4,
+            Min = 1,
+            Max = 10,
+            FAQ = "Why am I not using my PBAE spells?",
+            Answer =
+            "You can adjust the PB Target Count to control when you will use actions PBAE Spells such as the of Flame line.",
+        },
+        ['MaxAETargetCnt']       = {
+            DisplayName = "Max AE Targets",
+            Category = "AE Damage",
+            Index = 6,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 6,
+            Min = 2,
+            Max = 30,
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
+            Answer =
+            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
+        },
+        ['SafeAEDamage']         = {
+            DisplayName = "AE Proximity Check",
+            Category = "AE Damage",
+            Index = 7,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
         ['DoSnare']              = {
             DisplayName = "Orphaned",

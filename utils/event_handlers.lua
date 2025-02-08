@@ -141,7 +141,7 @@ local function tooFarHandler()
                 if Combat.OkToEngage(target.ID() or 0) then
                     Core.DoCmd("/squelch /face fast")
 
-                    if Targeting.GetTargetDistance() < (15 and target.MaxRangeTo()) then --not sure if this is necessary or still happening since we changed distance to use 3D.
+                    if Targeting.GetTargetDistance() < (10 and target.MaxRangeTo()) then --not sure if this is necessary or still happening since we changed distance to use 3D.
                         Logger.log_debug("Too Far from Target (%s [%d]). Possible flyer detected. Moving back 10.", target.CleanName() or "", target.ID() or 0)
                         Core.DoCmd("/stick 10 moveback uw")
                     else
