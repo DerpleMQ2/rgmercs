@@ -120,15 +120,6 @@ function Module:LoadSettings()
 	if needsSave then
 		self:SaveSettings(false)
 	end
-	if self.settings.DoLoot then
-		local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
-		if lnsRunning then
-			Core.DoCmd("/lua stop lootnscoot")
-		end
-		Core.DoCmd("/lua run %s directed", LootnScootDir)
-	end
-	Module.Actor = Comms.Actors.register('rgmercs_lootnscoot', function(message) end)
-	--pass settings to lootnscoot lib
 end
 
 function Module:GetSettings()
@@ -154,6 +145,15 @@ function Module:Init()
 		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s",
 			mq.TLO.MacroQuest.BuildName())
 	else
+		if self.settings.DoLoot then
+			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
+			if lnsRunning then
+				Core.DoCmd("/lua stop lootnscoot")
+			end
+			Core.DoCmd("/lua run %s directed", LootnScootDir)
+		end
+		Module.Actor = Comms.Actors.register('rgmercs_lootnscoot', function(message) end)
+		--pass settings to lootnscoot lib
 		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	end
 
@@ -247,7 +247,7 @@ end
 
 function Module:Shutdown()
 	Logger.log_debug("\ay[LOOT]: \axEMU Loot Module Unloaded.")
-	Core.DoCmd("/lua stop %s directed", LootnScootDir)
+	Core.DoCmd("/lua stop %s", LootnScootDir)
 end
 
 return Module
