@@ -265,6 +265,18 @@ local _ClassConfig = {
             "Divine Contravention",
             "Avowed Contravention",
         },
+        ['NukeHeal3'] = {
+            -- Nuke Target and Heal Tank -  Dps Heals
+            "Holy Contravention",
+            "Celestial Contravention",
+            "Elysian Contravention",
+            "Virtuous Contravention",
+            "Ardent Contravention",
+            "Merciful Contravention",
+            "Sincere Contravention",
+            "Divine Contravention",
+            "Avowed Contravention",
+        },
         ['ReverseDS'] = {
             -- Reverse Damage Shield Proc (LVL >=85) -- Ignoring the Mark Line
             "Erud's Retort",
