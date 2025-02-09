@@ -357,6 +357,14 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Feign Death",
+                type = "Ability",
+                cond = function(self, abilityName)
+                    if not Config:GetSetting('AggroFeign') then return false end
+                    return Targeting.IHaveAggro(95) and mq.TLO.Me.AbilityReady(abilityName)() and not Core.IAmMA
+                end,
+            },
+            {
                 name = "Defy Death",
                 type = "Disc",
                 cond = function(self, discSpell)
