@@ -271,14 +271,14 @@ local _ClassConfig = {
             "Legion of Alendar",
             "Circle of Alendar",
         },
-        ['SingleDoTShield'] = {
+        ['SingleDotShield'] = {
             "Aegis of Xetheg",
             "Aegis of Cekenar",
             "Aegis of Milyex",
             "Aegis of the Indagator",
             "Aegis of the Keeper",
         },
-        ['GroupDoTShield'] = {
+        ['GroupDotShield'] = {
             "Legion of Dhakka",
             "Legion of Xetheg",
             "Legion of Cekenar",
@@ -493,7 +493,7 @@ local _ClassConfig = {
             "Dichotomic Reinforcement",
             "Reciprocal Reinforcement",
         },
-        ['DoTSpell1'] = {
+        ['DotSpell1'] = {
             ---DoT 1 -- >=LVL1
             "Asphyxiating Grasp",
             "Throttling Grip",
@@ -1074,7 +1074,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "GroupDoTShield",
+                name = "GroupDotShield",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
@@ -1266,7 +1266,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "DoTSpell1",
+                name = "DotSpell1",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
@@ -1349,14 +1349,14 @@ local _ClassConfig = {
                 end,
             },
             { --Mana check used instead of dot mana check because this is spammed like a nuke
-                name = "DoTSpell1",
+                name = "DotSpell1",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             { --this is not an error, we want the spell twice in a row as part of the rotation.
-                name = "DoTSpell1",
+                name = "DotSpell1",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
@@ -1547,7 +1547,7 @@ local _ClassConfig = {
         {
             gem = 7,
             spells = {
-                { name = "DoTSpell1", },
+                { name = "DotSpell1", },
             },
         },
         {

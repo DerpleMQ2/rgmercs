@@ -150,7 +150,7 @@ return {
             "Vampyric Endemic",      -- Level 117
             "Fevered Endemic",       -- Level 122
         },
-        ['Blooddot'] = {
+        ['BloodDot'] = {
             -- Poison DoT Instant Cast
             "Tainted Breath",      -- Level 19
             "Envenomed Breath",    -- Level 35
@@ -170,7 +170,7 @@ return {
             "Akhevan Blood",       -- Level 116
             "Forgebound Blood",    -- Level 121
         },
-        ['Colddot'] = {
+        ['ColdDot'] = {
             -- Cold DoT Instant Cast
             "Edoth's Chill",     -- Level 99
             "Kirchen's Chill",   -- Level 104
@@ -882,7 +882,7 @@ return {
                 end,
             },
             {
-                name = "Blooddot",
+                name = "BloodDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     local vinDisc = self.ResolvedActionMap['VinDisc']
@@ -1049,7 +1049,7 @@ return {
                 end,
             },
             {
-                name = "Blooddot",
+                name = "BloodDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
@@ -1057,7 +1057,7 @@ return {
                 end,
             },
             {
-                name = "Colddot",
+                name = "ColdDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
@@ -1454,7 +1454,7 @@ return {
                 { name = "Icelance1", },
                 { name = "AERoar",    cond = function(self) return Config:GetSetting('DoAEDamage') end, },
                 { name = "Icelance2", cond = function(self) return not Config:GetSetting('DoAEDamage') or not self:GetResolvedActionMapItem("AERoar") end, },
-                { name = "Blooddot", },
+                { name = "BloodDot", },
             },
         },
         {
@@ -1462,15 +1462,15 @@ return {
             spells = {
                 { name = "AERoar",    cond = function(self) return Config:GetSetting('DoAEDamage') end, },
                 { name = "Icelance2", cond = function(self) return not Config:GetSetting('DoAEDamage') or not self:GetResolvedActionMapItem("AERoar") end, },
-                { name = "Blooddot", },
-                { name = "Colddot",   cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "BloodDot", },
+                { name = "ColdDot",   cond = function(self) return Config:GetSetting('DoDot') end, },
             },
         },
         {
             gem = 5,
             spells = {
-                { name = "Blooddot", },
-                { name = "Colddot",    cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "BloodDot", },
+                { name = "ColdDot",    cond = function(self) return Config:GetSetting('DoDot') end, },
                 { name = "EndemicDot", cond = function(self) return Config:GetSetting('DoDot') end, },
             },
         },
@@ -1522,7 +1522,7 @@ return {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Colddot",     cond = function(self) return Config:GetSetting('DoDot') end, },
+                { name = "ColdDot",     cond = function(self) return Config:GetSetting('DoDot') end, },
                 { name = "PetHealProc", },
 
             },

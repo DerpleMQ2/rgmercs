@@ -1241,7 +1241,7 @@ local _ClassConfig = {
                 name = "StunTimer6",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoStun') or (spell.Level() > 85 and Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint')) then return false end
+                    if not Config:GetSetting('DoStun') or ((spell.Level() or 0) > 85 and Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint')) then return false end
                     return Casting.CastReady(spell.RankName) and Casting.DetSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and
                         Casting.TargetedSpellReady(spell, target.ID())
                 end,
