@@ -487,7 +487,7 @@ local _ClassConfig = {
             "Spirit Strike",
             "Frost Rift",
         },
-        ["ChaoticDoT"] = {
+        ["ChaoticDot"] = {
             -- Long Dot(42s) LVL 104+
             -- Two resist types because it throws 2 dots
             -- Stacking: Nectar of Pain - Stacking: Blood of Saryrn
@@ -514,7 +514,7 @@ local _ClassConfig = {
             "Txiki's Malosinara",
             "Krizad's Malosinera",
         },
-        ["CurseDoT1"] = {
+        ["CurseDot1"] = {
             -- Curse Dot 1 Stacking: Curse - Long Dot(30s) - Level 34+
             "Malediction",
             "Obeah",
@@ -533,7 +533,7 @@ local _ClassConfig = {
             "Odium",
             "Curse",
         },
-        ["CurseDoT2"] = {
+        ["CurseDot2"] = {
             ---, Stacking: Enalam's Curse - Long Dot(54s) - 100+
             "Lenrel's Curse",
             "Marlek's Curse",
@@ -1198,7 +1198,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "ChaoticDoT",
+                name = "ChaoticDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
@@ -1207,7 +1207,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "CurseDoT2",
+                name = "CurseDot2",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
@@ -1223,23 +1223,23 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "CurseDoT1",
+                name = "CurseDot1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('CurseDoT2') or not Config:GetSetting('DoHealDPS'))) then return false end
+                    if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('CurseDot2') or not Config:GetSetting('DoHealDPS'))) then return false end
                     return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
-                name = "SaryrnDoT",
+                name = "SaryrnDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('ChaoticDoT') or not Config:GetSetting('DoHealDPS'))) then return false end
+                    if (Core.IsModeActive("Heal") and (Core.GetResolvedActionMapItem('ChaoticDot') or not Config:GetSetting('DoHealDPS'))) then return false end
                     return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
-                name = "AfflictionDoT",
+                name = "AfflictionDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Core.IsModeActive("Hybrid") then return false end
@@ -1247,10 +1247,10 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "UltorDoT",
+                name = "UltorDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Core.IsModeActive("Hybrid") or Core.GetResolvedActionMapItem('AfflictionDoT') then return false end
+                    if not Core.IsModeActive("Hybrid") or Core.GetResolvedActionMapItem('AfflictionDot') then return false end
                     return Targeting.IsNamed(mq.TLO.Target) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1686,7 +1686,7 @@ local _ClassConfig = {
             spells = {
                 { name = "DichoSpell", },                                                                                                             -- 101-125
                 { name = "MeleeProcBuff", },                                                                                                          -- 50-101
-                { name = "CurseDoT1",     cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "CurseDot1",     cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",     cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "UltorDot",      cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
 
@@ -1700,7 +1700,7 @@ local _ClassConfig = {
                 { name = "AfflictionDot",   cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
                 { name = "UltorDot",        cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
                 { name = "FastPoisonNuke",  cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
-                { name = "CurseDoT1",       cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "CurseDot1",       cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",       cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
             },
         },
@@ -1714,7 +1714,7 @@ local _ClassConfig = {
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
                 { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
                 { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
@@ -1731,7 +1731,7 @@ local _ClassConfig = {
                 { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
                 { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
                 { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
@@ -1744,12 +1744,12 @@ local _ClassConfig = {
             gem = 10,
             cond = function(self) return mq.TLO.Me.NumGems() >= 11 end,
             spells = {
-                { name = "CurseDoT2",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 100-125
+                { name = "CurseDot2",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 100-125
                 { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
                 { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
                 { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
@@ -1767,7 +1767,7 @@ local _ClassConfig = {
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
                 { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
                 { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
@@ -1780,12 +1780,12 @@ local _ClassConfig = {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "ChaoticDoT",        cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 104-125
+                { name = "ChaoticDot",        cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 104-125
                 { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
                 { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
-                { name = "CurseDoT1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
+                { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
                 { name = "UltorDot",          cond = function(self) return Core.IsModeActive("Hybrid") and mq.TLO.Me.Level() < 92 end, },                 -- 4-91 Hybrid (Boss Only)
