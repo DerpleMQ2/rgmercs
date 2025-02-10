@@ -137,6 +137,20 @@ Binds.Handlers    = {
             Core.DoCmd("/squelch /dggaexecute /docommand /timed $\\{Math.Rand[1,60]} /say %s", text)
         end,
     },
+    ['say'] = {
+        usage = "/rgl say <text>",
+        about = "All groupmembers running RGMercs will target your target and say the <text> after a very short delay.",
+        handler = function(...)
+            local allText = { ..., }
+            local text
+            for _, t in ipairs(allText) do
+                text = (text and text .. " " or "") .. t
+            end
+            Core.DoCmd("/squelch /dggaexecute /mqtarget id %d", Targeting.GetTargetID())
+            mq.delay(5)
+            Core.DoCmd("/squelch /dggaexecute /docommand /timed 5 /say %s", text)
+        end,
+    },
     ['cast'] = {
         usage = "/rgl cast \"<spell>\" <targetId?>",
         about = "Uses a spell or AA (memorizes if necessary). If no targetId is entered, your target is used.",

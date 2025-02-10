@@ -2054,13 +2054,25 @@ local _ClassConfig = {
             end,
         },
         {
-            id = 'Lifetap',
+            id = 'LifeTap',
             Type = "Spell",
-            DisplayName = function() return Core.GetResolvedActionMapItem('Lifetap').RankName.Name() or "" end,
-            AbilityName = function() return Core.GetResolvedActionMapItem('Lifetap').RankName.Name() or "" end,
+            DisplayName = function() return Core.GetResolvedActionMapItem('LifeTap').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('LifeTap').RankName.Name() or "" end,
             AbilityRange = 200,
             cond = function(self)
-                local resolvedSpell = Core.GetResolvedActionMapItem('Lifetap')
+                local resolvedSpell = Core.GetResolvedActionMapItem('LifeTap')
+                if not resolvedSpell then return false end
+                return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
+            end,
+        },
+        {
+            id = 'LifeTap2',
+            Type = "Spell",
+            DisplayName = function() return Core.GetResolvedActionMapItem('LifeTap2').RankName.Name() or "" end,
+            AbilityName = function() return Core.GetResolvedActionMapItem('LifeTap2').RankName.Name() or "" end,
+            AbilityRange = 200,
+            cond = function(self)
+                local resolvedSpell = Core.GetResolvedActionMapItem('LifeTap2')
                 if not resolvedSpell then return false end
                 return mq.TLO.Me.Gem(resolvedSpell.RankName.Name() or "")() ~= nil
             end,
