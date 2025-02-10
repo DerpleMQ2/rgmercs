@@ -1716,6 +1716,15 @@ function Module:GetPullStateTargetInfo()
 end
 
 function Module:GiveTime(combat_state)
+    if combat_state ~= "Downtime" then
+        Logger.log_verbose("PULL:GiveTime() we are in %s, not ready for pulling.", combat_state)
+        return
+    end
+    if (os.clock() - self.TempSettings.LastPullOrCombatEnded) < self.settings.PullDelay then
+        Logger.log_verbose("PULL:GiveTime() waiting for Pull Delay, next attempt in %d seconds.", self.settings.PullDelay - (os.clock() - self.TempSettings.LastPullOrCombatEnded))
+        return
+    end
+
     Logger.log_verbose("PULL:GiveTime() - Enter")
     self:SetValidPullAbilities()
     self:FixPullerMerc()
@@ -1779,10 +1788,6 @@ function Module:GiveTime(combat_state)
         end
         return
     end
-
-    Logger.log_verbose("PULL:GiveTime() - Last Pull: %d < %d ", os.clock() - self.TempSettings.LastPullOrCombatEnded, self.settings.PullDelay)
-
-    if (os.clock() - self.TempSettings.LastPullOrCombatEnded) < self.settings.PullDelay then return end
 
     -- GROUPWATCH and NAVINTERRUPT are the two states we can't reset. In the future it may be best to
     -- limit this to only the states we know should be transitionable to the IDLE state.
