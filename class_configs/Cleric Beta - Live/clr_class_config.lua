@@ -1300,8 +1300,7 @@ local _ClassConfig = {
                 name = "LowLevelStun",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell.RankName) and Casting.DetSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and
-                        Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.CastReady(spell.RankName) and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {

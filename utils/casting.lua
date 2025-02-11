@@ -415,6 +415,13 @@ function Casting.DotHaveManaToNuke()
     return mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDot')
 end
 
+--- Checks the mana status for the character.
+--- This function evaluates the current mana level and determines if it meets the required threshold.
+--- @return boolean True if the mana level is sufficient, false otherwise.
+function Casting.HaveManaToDebuff()
+    return mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
+end
+
 --- DetGOMCheck performs a check if Gift of Mana is active
 --- This function does not take any parameters.
 ---
