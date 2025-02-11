@@ -1074,7 +1074,8 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     if self:GetResolvedActionMapItem('HasteManaCombo') or not Config.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
-                    return Casting.GroupBuffCheck(spell, target)
+                    return not Casting.GroupBuffCheck(spell, target) and
+                        Casting.GroupBuffCheck(mq.TLO.Spell("Unified Alacrity"), target) --stacking checks are incorrect with a common outside buff
                 end,
             },
             {

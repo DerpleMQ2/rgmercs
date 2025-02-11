@@ -400,7 +400,7 @@ local _ClassConfig = {
             "Katabatic Roar",
             "Roar of Kolos",
         },
-        ['QuickRoarDD'] = {
+        ['StunDD'] = {
             -- Quick Cast Roar Series -- will be replaced by roar at lvl 93
             "Maelstrom of the Stormborn",
             "Thunderbolt of the Stormborn",
@@ -413,7 +413,7 @@ local _ClassConfig = {
             "Gale of the Stormborn",
             "Stormwatch",
             "Storm's Fury",
-            "Dustdevil",
+            --"Dustdevil", --Does not Stun
             "Fury of Air",
         },
         ['DichoSpell'] = {
@@ -978,6 +978,13 @@ local _ClassConfig = {
         },
         ['HealDPS(1-70)'] = {
             {
+                name = "StunDD",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
+                end,
+            },
+            {
                 name = "WinterFireDD",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1127,6 +1134,7 @@ local _ClassConfig = {
                 name = "RoDebuff",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if not Config:GetSetting('DoRoDebuff') then return false end
                     return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1319,6 +1327,7 @@ local _ClassConfig = {
             spells = {
 
                 { name = "QuickHeal", cond = function(self) return mq.TLO.Me.Level() >= 90 end, },
+                { name = "StunDD", },
 
             },
         },
@@ -1595,6 +1604,16 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight Not snaring?",
             Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
                 "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
+        },
+        ['DoRoDebuff']   = {
+            DisplayName = "Use Ro Debuff",
+            Category = "Buffs/Debuffs",
+            Index = 1,
+            Tooltip = "Use Ro Debuff",
+            Default = false,
+            RequiresLoadoutChange = true,
+            FAQ = "Why is my Shadow Knight not snaring?",
+            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
     },
 }
