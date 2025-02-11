@@ -1981,7 +1981,7 @@ local _ClassConfig = {
             Category = "Equipment",
             Index = 2,
             Tooltip = "Click your equipped chest item.",
-            Default = not mq.TLO.MacroQuest.BuildName() == "Emu",
+            Default = true,
             ConfigType = "Advanced",
             FAQ = "What is a Chest Click?",
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
