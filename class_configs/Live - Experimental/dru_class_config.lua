@@ -1452,7 +1452,7 @@ local _ClassConfig = {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
-            Default = true,
+            Default = not mq.TLO.MacroQuest.BuildName() == "Emu",
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Make sure [DoChestClick] is enabled. If you are in Heal Mode, you may not be clicking your chest item.",
         },
