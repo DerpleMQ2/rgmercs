@@ -571,36 +571,6 @@ local _ClassConfig = {
             "Ancient: Chaos Madness",
             "Ancient: Chaotic Visions",
         },
-        ['NukeSpell2'] = {
-            --- Nuke 1 -- >= LVL7
-            "Mindrend",
-            "Mindreap",
-            "Mindrift",
-            "Mindslash",
-            "Mindsunder",
-            "Mindcleave",
-            "Mindscythe",
-            "Mindblade",
-            "Spectral Assault",
-            "Polychaotic Assault",
-            "Multichromatic Assault",
-            "Polychromatic Assault",
-            "Colored Chaos",
-            "Psychosis",
-            "Madness of Ikkibi",
-            "Insanity",
-            "Dementing Visions",
-            "Dementia",
-            "Discordant Mind",
-            "Anarchy",
-            "Chaos Flux",
-            "Sanity Warp",
-            "Chaotic Feedback",
-            "Chromarcana",
-            "Ancient: Neurosis",
-            "Ancient: Chaos Madness",
-            "Ancient: Chaotic Visions",
-        },
         ['RuneNuke'] = {
             --- RUNE - Nuke Fast >=LVL86
             "Chromatic Spike",
@@ -853,9 +823,9 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return Config:GetSetting('DoTash') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-            cond = function(self, combat_state)
+            cond = function(self, combat_state, targetId)
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
-                    mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
+                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
             end,
         },
         { --Slow and Tash separated so we use both before we start DPS
@@ -864,9 +834,9 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return Config:GetSetting('DoSlow') or Config:GetSetting('DoCripple') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-            cond = function(self, combat_state)
+            cond = function(self, combat_state, targetId)
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
-                    mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
+                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
             end,
         },
         {
@@ -1297,13 +1267,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "NukeSpell2",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
-                end,
-            },
-            {
                 name = "ManaDrainSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1556,7 +1519,6 @@ local _ClassConfig = {
                 { name = "ManaNuke",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "CrippleSpell",   cond = function(self) return Config:GetSetting('DoCripple') and mq.TLO.Me.Level() < 88 end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') end, },
-                { name = "NukeSpell2",     cond = function(self) return true end, },
             },
         },
         {
