@@ -323,7 +323,7 @@ local _ClassConfig = {
             "Scales of the Reptile",
             "Skin of the Reptile",
         },
-        ['NaturesWrathDOT'] = {
+        ['NaturesWrathDot'] = {
             -- Updated to 125
             -- Natures Wrath DOT Line >= 75LVL -- On Bar
             "Nature's Fervid Wrath",
@@ -338,7 +338,7 @@ local _ClassConfig = {
             "Nature's Sweltering Wrath",
             "Nature's Boiling Wrath",
         },
-        ['HordeDOT'] = {
+        ['HordeDot'] = {
             -- Updated to 125
             -- Horde Dots >= 10LVL -- On Bar
             "Horde of Hotaria",
@@ -360,7 +360,7 @@ local _ClassConfig = {
             "Creeping Crud",
             "Stinging Swarm",
         },
-        ['SunDOT'] = {
+        ['SunDot'] = {
             -- Updated to 125
             -- SUN Dot Line >= 49LVL -- On Bar
             "Sunscald",
@@ -408,7 +408,7 @@ local _ClassConfig = {
             "Immolate",
             "Flame Lick",
         },
-        ['SunrayDOT'] = {
+        ['SunrayDot'] = {
             -- Updated to 125
             -- Sunray Line >= 1 LVL
             "Searing Sunray",
@@ -429,7 +429,7 @@ local _ClassConfig = {
             "Immolate",
             "Flame Lick",
         },
-        ['MoonBeamDOT'] = {
+        ['MoonBeamDot'] = {
             -- Updated to 125
             -- MoonBeam Dot
             "Gelid Moonbeam",
@@ -528,7 +528,7 @@ local _ClassConfig = {
             "Burst of Fire",
             "Burst of Flame",
         },
-        ['ChillDOT'] = {
+        ['ChillDot'] = {
             -- Updated to 125
             -- Chill DOT Line -- >= 95LVL -- Used for Burns
             "Chill of the Ferntender",
@@ -993,7 +993,7 @@ local _ClassConfig = {
     ['Rotations']         = {
         ['DPS'] = {
             {
-                name = "SunrayDOT",
+                name = "SunrayDot",
                 type = "Spell",
                 cond = function(self, spell)
                     return Core.IsModeActive("Heal")
@@ -1004,7 +1004,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "ChillDOT",
+                name = "ChillDot",
                 type = "Spell",
                 cond = function(self, spell)
                     return Core.IsModeActive("Heal")
@@ -1038,7 +1038,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "SunDOT",
+                name = "SunDot",
                 type = "Spell",
                 cond = function(self, spell)
                     return Core.IsModeActive("Mana") or (Core.IsModeActive("Heal")
@@ -1047,7 +1047,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "HordeDOT",
+                name = "HordeDot",
                 type = "Spell",
                 cond = function(self, spell)
                     return Core.IsModeActive("Mana")
@@ -1093,7 +1093,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "NaturesWrathDOT",
+                name = "NaturesWrathDot",
                 type = "Spell",
                 cond = function(self, spell)
                     return Core.IsModeActive("Mana")
@@ -1524,7 +1524,7 @@ local _ClassConfig = {
                 -- [ MANA MODE ] --
                 { name = "QuickRoarDD",     cond = function(self) return Core.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "HordeDOT",        cond = function(self) return true end, },
+                { name = "HordeDot",        cond = function(self) return true end, },
                 -- [ Fall Back ]--
                 { name = "RoDebuff",        cond = function(self) return Config:GetSetting("DoFire") end, },
                 { name = "IceBreathDebuff", cond = function(self) return true end, },
@@ -1534,13 +1534,13 @@ local _ClassConfig = {
             gem = 5,
             spells = {
                 -- [ MANA MODE ] --
-                { name = "HordeDOT",      cond = function(self) return Core.IsModeActive("Mana") end, },
+                { name = "HordeDot",      cond = function(self) return Core.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
                 { name = "LongGroupHeal", cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
-                { name = "SunDOT",        cond = function(self) return true end, },
-                { name = "SunrayDOT",     cond = function(self) return true end, },
+                { name = "SunDot",        cond = function(self) return true end, },
+                { name = "SunrayDot",     cond = function(self) return true end, },
                 -- [ Fall Back ]--
-                { name = "SunrayDOT",     cond = function(self) return true end, },
+                { name = "SunrayDot",     cond = function(self) return true end, },
             },
         },
         {
@@ -1562,11 +1562,11 @@ local _ClassConfig = {
                 -- [ MANA MODE ] --
                 { name = "RoDebuff",            cond = function(self) return Core.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "SunrayDOT",           cond = function(self) return mq.TLO.Me.Level() >= 73 end, },
+                { name = "SunrayDot",           cond = function(self) return mq.TLO.Me.Level() >= 73 end, },
                 { name = "ReptileCombatInnate", cond = function(self) return true end, },
                 { name = "SnareSpells",         cond = function(self) return Config:GetSetting('DoSnare') end, },
                 -- [ Fall Back ]--
-                { name = "HordeDOT",            cond = function(self) return true end, },
+                { name = "HordeDot",            cond = function(self) return true end, },
             },
         },
         {
@@ -1579,7 +1579,7 @@ local _ClassConfig = {
                 { name = "ReptileCombatInnate", cond = function(self) return Casting.CanUseAA("Blessing of Ro") end, },
                 { name = "RoDebuff",            cond = function(self) return true end, },
                 -- [ Fall Back ]--
-                { name = "HordeDOT",            cond = function(self) return true end, },
+                { name = "HordeDot",            cond = function(self) return true end, },
                 { name = "SnareSpells",         cond = function(self) return Config:GetSetting('DoSnare') end, },
             },
         },
@@ -1588,7 +1588,7 @@ local _ClassConfig = {
             spells = {
                 -- [ MANA MODE ] --
                 {
-                    name = "SunDOT",
+                    name = "SunDot",
                     cond = function(self)
                         return mq.TLO.Me.Level() >= 49 and
                             Core.IsModeActive("Mana")
@@ -1614,7 +1614,7 @@ local _ClassConfig = {
                 },
                 { name = "IceDD",           cond = function(self) return Core.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
-                { name = "SunDOT",          cond = function(self) return Config:GetSetting("DoFire") end, },
+                { name = "SunDot",          cond = function(self) return Config:GetSetting("DoFire") end, },
                 { name = "IceBreathDebuff", cond = function(self) return true end, },
             },
         },
@@ -1623,7 +1623,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 -- [ MANA MODE ] --
-                { name = "NaturesWrathDOT", cond = function(self) return Core.IsModeActive("Mana") end, },
+                { name = "NaturesWrathDot", cond = function(self) return Core.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
                 { name = "TempHPBuff",      cond = function(self) return true end, },
             },
@@ -1652,7 +1652,7 @@ local _ClassConfig = {
                             Core.IsModeActive("Mana")
                     end,
                 },
-                { name = "ChillDOT",            cond = function(self) return Core.IsModeActive("Mana") end, },
+                { name = "ChillDot",            cond = function(self) return Core.IsModeActive("Mana") end, },
                 -- [ HEAL MODE ] --
                 { name = "GroupCure",           cond = function(self) return true end, },
                 { name = "ReptileCombatInnate", cond = function(self) return true end, },
@@ -1765,7 +1765,7 @@ local _ClassConfig = {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
-            Default = true,
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Make sure [DoChestClick] is enabled. If you are in Heal Mode, you may not be clicking your chest item.",
         },

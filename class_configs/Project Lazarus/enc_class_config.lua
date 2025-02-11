@@ -1804,7 +1804,7 @@ local _ClassConfig = {
             DisplayName = "Do Chest Click",
             Category = "Combat",
             Tooltip = "Click your equipped chest item during burns.",
-            Default = false,
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
                 "ENC is set to use theirs during burns, so long as the item equipped has a clicky effect.",

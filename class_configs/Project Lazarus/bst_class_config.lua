@@ -1861,7 +1861,7 @@ return {
             Category = "Combat",
             Index = 7,
             Tooltip = "Click your chest item during burns.",
-            Default = false,
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             ConfigType = "Advanced",
             FAQ = "What is a Chest Click?",
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..

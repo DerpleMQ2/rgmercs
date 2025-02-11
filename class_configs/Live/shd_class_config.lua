@@ -45,7 +45,7 @@ local Tooltips     = {
     TempHP              = "Spell Line: Temporary Hitpoints (Decrease per Tick)",
     Dicho               = "Spell Line: Hate Increase + LifeTap",
     Torrent             = "Spell Line: Attack Tap",
-    SnareDOT            = "Spell Line: Snare + HP DOT",
+    SnareDot            = "Spell Line: Snare + HP DOT",
     Acrimony            = "Spell Increase: Aggrolock + LifeTap DOT + Hate Generation",
     SpiteStrike         = "Spell Line: LifeTap + Caster 1H Blunt Increase + Target Armor Decrease",
     ReflexStrike        = "Ability: Triple 2HS Attack + HP Increase",
@@ -598,7 +598,7 @@ local _ClassConfig = {
             "Torrent of Melancholy",
             "Torrent of Desolation",
         },
-        ['SnareDOT'] = {
+        ['SnareDot'] = {
             "Clinging Darkness", -- Level 11
             "Engulfing Darkness",
             "Dooming Darkness",
@@ -1376,12 +1376,12 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "SnareDOT",
+                name = "SnareDot",
                 type = "Spell",
-                tooltip = Tooltips.SnareDOT,
+                tooltip = Tooltips.SnareDot,
                 cond = function(self, spell, target)
                     if Casting.CanUseAA("Encroaching Darkness") then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Targeting.GetTargetPctHPs(target) < 50
                 end,
             },
         },
@@ -1724,7 +1724,7 @@ local _ClassConfig = {
         {
             gem = 3,
             spells = {
-                { name = "SnareDOT", cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Encroaching Darkness") end, },
+                { name = "SnareDot", cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Encroaching Darkness") end, },
                 { name = "DireTap",  cond = function(self) return Config:GetSetting('DoDireTap') end, },
                 { name = "Dicho",    cond = function(self) return Config:GetSetting('DoDicho') end, },
                 { name = "ForPower", cond = function(self) return Config:GetSetting('DoForPower') end, },
@@ -2560,7 +2560,7 @@ local _ClassConfig = {
             Category = "Equipment",
             Index = 1,
             Tooltip = "Click your equipped chest.",
-            Default = true,
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "What the heck is a chest click?",
             Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHD's is generally a healing tool (a lifetapping pet).",
         },
@@ -2569,7 +2569,7 @@ local _ClassConfig = {
             Category = "Equipment",
             Index = 2,
             Tooltip = "Click your charm for Geomantra.",
-            Default = true,
+            Default = false,
             FAQ = "Why is my Shadow Knight not clicking his charm?",
             Answer = "Charm clicks won't happen if you are in combat.",
         },
