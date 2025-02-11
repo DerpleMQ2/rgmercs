@@ -2487,7 +2487,7 @@ local _ClassConfig = {
             Category = "Equipment",
             Index = 1,
             Tooltip = "Click your equipped chest.",
-            Default = not mq.TLO.MacroQuest.BuildName() == "Emu",
+            Default = false,
             FAQ = "What the heck is a chest click?",
             Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHD's is generally a healing tool (a lifetapping pet).",
         },

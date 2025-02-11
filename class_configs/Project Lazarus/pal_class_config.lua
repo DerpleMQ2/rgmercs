@@ -1615,7 +1615,7 @@ return {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
-            Default = not mq.TLO.MacroQuest.BuildName() == "Emu",
+            Default = false,
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Make sure you have the [DoChestClick] setting enabled.",
         },

@@ -1387,7 +1387,7 @@ local _ClassConfig = {
             Answer = "Set the [StopLichMana] setting to the desired % of Mana you want to stop Liching at.",
         },
         ['StartLichMana']     = { DisplayName = "Start Lich Mana", Category = "Lich", Tooltip = "Start Lich at Mana Pct [x]", RequiresLoadoutChange = false, Default = 70, Min = 1, Max = 100, },
-        ['DoChestClick']      = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = not mq.TLO.MacroQuest.BuildName() == "Emu", },
+        ['DoChestClick']      = { DisplayName = "Do Chest Click", Category = "Utilities", Tooltip = "Click your chest item", Default = true, },
         ['EmergencyStart']    = {
             DisplayName = "Emergency HP%",
             Category = "Spells and Abilities",
