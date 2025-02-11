@@ -1136,7 +1136,7 @@ local _ClassConfig = {
             Category = "Equipment",
             Index = 1,
             Tooltip = "Click your equipped chest.",
-            Default = false,
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "What the heck is a chest click?",
             Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The WAR's is generally an absorbe rune for large hits.",
         },

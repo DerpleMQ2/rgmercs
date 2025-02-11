@@ -269,7 +269,7 @@ local _ClassConfig = {
             "Skin of the Reptile",
             "Bulwark of the Reptile",
         },
-        ['NaturesWrathDOT'] = {
+        ['NaturesWrathDot'] = {
             -- Natures Wrath DOT Line >= 75LVL -- On Bar
             "Nature's Fervid Wrath",
             "Nature's Blistering Wrath",
@@ -282,7 +282,7 @@ local _ClassConfig = {
             "Nature's Blazing Wrath",
             "Nature's Sweltering Wrath",
         },
-        ['HordeDOT'] = {
+        ['HordeDot'] = {
             -- Horde Dots >= 10LVL -- On Bar
             "Horde of Duskwigs",
             "Horde of Hyperboreads",
@@ -302,7 +302,7 @@ local _ClassConfig = {
             "Creeping Crud",
             "Stinging Swarm",
         },
-        ['SunDOT'] = {
+        ['SunDot'] = {
             -- SUN Dot Line >= 49LVL -- On Bar
             "Sunpyre",
             "Sunshock",
@@ -343,7 +343,7 @@ local _ClassConfig = {
             "Immolate",
             "Flame Lick",
         },
-        ['SunrayDOT'] = {
+        ['SunrayDot'] = {
             -- Sunray Line >= 1 LVL
             "Tenebrous Sunray",
             "Erupting Sunray",
@@ -362,7 +362,7 @@ local _ClassConfig = {
             "Immolate",
             "Flame Lick",
         },
-        ['MoonBeamDOT'] = {
+        ['MoonBeamDot'] = {
             -- MoonBeam Dot
             "Gelid Moonbeam",
             "Algid Moonbeam",
@@ -448,7 +448,7 @@ local _ClassConfig = {
             "Burst of Fire",
             "Burst of Flame",
         },
-        ['ChillDOT'] = {
+        ['ChillDot'] = {
             -- Chill DOT Line -- >= 95LVL -- Used for Burns
             "Chill of the Dusksage Tender",
             "Chill of the Arbor Tender",
@@ -898,21 +898,21 @@ local _ClassConfig = {
     ['Rotations']         = {
         ['HealDPS'] = {
             {
-                name = "NaturesWrathDOT",
+                name = "NaturesWrathDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
-                name = "SunDOT",
+                name = "SunDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
-                name = "HordeDOT",
+                name = "HordeDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.DotSpellCheck(spell) and (Casting.DetGOMCheck() or Targeting.IsNamed(mq.TLO.Target)) and Casting.TargetedSpellReady(spell, target.ID())
@@ -1287,7 +1287,7 @@ local _ClassConfig = {
             spells = {
 
                 --{ name = "FrostDebuff", cond = function(self) return mq.TLO.Me.Level() >= 74 and not Config:GetSetting('DoFire') end, },
-                { name = "HordeDOT", cond = function(self) return Casting.CanUseAA("Blessing of Ro") end, },
+                { name = "HordeDot", cond = function(self) return Casting.CanUseAA("Blessing of Ro") end, },
                 { name = "RoDebuff", cond = function(self) return true end, },
 
             },
@@ -1307,14 +1307,14 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
 
-                { name = "SunDOT", cond = function(self) return true end, }, --Config:GetSetting("DoFire") end, },
+                { name = "SunDot", cond = function(self) return true end, }, --Config:GetSetting("DoFire") end, },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "NaturesWrathDOT", cond = function(self) return true end, },
+                { name = "NaturesWrathDot", cond = function(self) return true end, },
 
             },
         },
@@ -1452,7 +1452,7 @@ local _ClassConfig = {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
-            Default = true,
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Make sure [DoChestClick] is enabled. If you are in Heal Mode, you may not be clicking your chest item.",
         },

@@ -549,7 +549,7 @@ local _ClassConfig = {
             "Chaotic Corruption",
             "Chaotic Contagion",
         },
-        ['SnareDOT'] = {
+        ['SnareDot'] = {
             -- LVL4 -> <= LVL70
             "Afflicted Darkness",
             "Harrowing Darkness",
@@ -913,7 +913,7 @@ local _ClassConfig = {
                 cond = function(self, _) return true end,
             },
             {
-                name = "SnareDOT",
+                name = "SnareDot",
                 type = "Spell",
                 cond = function(self, spell) return Casting.DotSpellCheck(spell) and Config:GetSetting('DoSnare') end,
             },
@@ -1342,7 +1342,7 @@ local _ClassConfig = {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SnareDOT",   cond = function(self) return Config:GetSetting('DoSnare') end, },
+                { name = "SnareDot",   cond = function(self) return Config:GetSetting('DoSnare') end, },
                 { name = "Magic1",     cond = function(self) return mq.TLO.Me.Level() > 70 and mq.TLO.Me.Level() < 87 end, },
                 { name = "Magic3", },
                 { name = "HealthTaps", },

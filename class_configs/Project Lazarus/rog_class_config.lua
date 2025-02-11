@@ -612,7 +612,7 @@ return {
             DisplayName = "Do Chest Click",
             Category = "Utilities",
             Tooltip = "Click your chest item",
-            Default = false,
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "Why would I not want to click my chest item?",
             Answer = "Enable [DoChestClick] if you want to use the chest item.",
         },
