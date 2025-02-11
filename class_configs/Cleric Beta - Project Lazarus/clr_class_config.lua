@@ -1241,7 +1241,7 @@ local _ClassConfig = {
                 name = "StunTimer6",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoStun') then return false end
+                    if not Config:GetSetting('DoHealStun') then return false end
                     return Casting.CastReady(spell.RankName) and Casting.DetSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and
                         Casting.TargetedSpellReady(spell, target.ID())
                 end,
@@ -1300,6 +1300,7 @@ local _ClassConfig = {
                 name = "LowLevelStun",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if not Config:GetSetting('DoLLStun') then return false end
                     return Casting.CastReady(spell.RankName) and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1481,8 +1482,8 @@ local _ClassConfig = {
         {
             gem = 5,
             spells = {
-                { name = "ClutchHeal", },                                                               -- Level 77+
-                { name = "StunTimer6", cond = function(self) return Config:GetSetting('DoStun') end, }, -- Level 16 - 76 (moved gems after)
+                { name = "ClutchHeal", },                                                                   -- Level 77+
+                { name = "StunTimer6", cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- Level 16 - 76 (moved gems after)
 
             },
         },
@@ -1506,7 +1507,7 @@ local _ClassConfig = {
             gem = 8,
             spells = {
                 { name = "YaulpSpell",    cond = function(self) return not Casting.CanUseAA("Yaulp") end, },     -- Level 56-75
-                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoStun') end, },       -- 88+ has ToT heal
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, },   -- 88+ has ToT heal
                 { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- 51+, 1-50 elsewhere
                 { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },   -- 84+
                 { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- 51+, 1-50 elsewhere
@@ -1750,22 +1751,34 @@ local _ClassConfig = {
             FAQ = "Why am I not using Veturika's or Quiet Prayer?",
             Answer = "Ensure that your Mana Restore Pct is configured to the value you would like to start using these abilities.",
         },
-        ['DoStun']            = {
-            DisplayName = "Twin Heal Nuke",
+        ['DoHealStun']        = {
+            DisplayName = "ToT-Heal Stun",
             Category = "Spells and Abilities",
             Index = 7,
-            Tooltip = "Use Stun spells.",
+            Tooltip = "Use the Timer 6 HoT Stun (\"Sound of\" Line).",
             RequiresLoadoutChange = true,
             Default = true,
             FAQ = "Which stun spells does the Cleric use?",
             Answer =
-                "At low levels, we will use the \"Stun\" spell (until 58) and either \"Holy Might\", \"Force\", or \"Tarnation\" until level 65.\n" ..
-                "After that, we transition to the Timer 6 stuns (\"Sound of\" line), which have a ToT heal from Level 88.",
+                "At low levels, we will use the \"Stun\" spell (until 58, if selected) and either \"Holy Might\", \"Force\", or \"Tarnation\" until level 65.\n" ..
+                "After that, we transition to the Timer 6 stuns (\"Sound of\" line), which have a ToT heal from Level 88.\n" ..
+                "Please note that the low level spell named \"Stun\" is controlled by the Low Level Stun option.",
+        },
+        ['DoLLStun']          = {
+            DisplayName = "Low Level Stun",
+            Category = "Spells and Abilities",
+            Index = 8,
+            Tooltip = "Use the Level 2 \"Stun\" spell, as long as it is level-appropriate (works on targets up to Level 58).",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why is a Cleric stunning? It should be healing!?",
+            Answer =
+            "At low levels, Cleric stuns are often more efficient than healing the damage an non-stunned mob would cause.",
         },
         ['DoUndeadNuke']      = {
             DisplayName = "Do Undead Nuke",
             Category = "Spells and Abilities",
-            Index = 8,
+            Index = 9,
             Tooltip = "Use the Undead nuke line.",
             RequiresLoadoutChange = true,
             Default = false,
@@ -1775,7 +1788,7 @@ local _ClassConfig = {
         ['DoMagicNuke']       = {
             DisplayName = "Do Magic Nuke",
             Category = "Spells and Abilities",
-            Index = 9,
+            Index = 10,
             Tooltip = "Use the Undead nuke line.",
             RequiresLoadoutChange = true,
             Default = false,
