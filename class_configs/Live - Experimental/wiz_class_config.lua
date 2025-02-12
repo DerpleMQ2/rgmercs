@@ -1025,7 +1025,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoStun') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1033,14 +1033,14 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('HPStopBigNuke') and not Targeting.IsNamed(target)) then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
@@ -1050,7 +1050,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoStun') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1058,14 +1058,14 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "IceNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
@@ -1075,7 +1075,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoStun') then return false end
-                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1083,14 +1083,14 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
