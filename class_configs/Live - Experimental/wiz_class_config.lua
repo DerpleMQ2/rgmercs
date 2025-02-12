@@ -11,10 +11,10 @@ local Casting   = require("utils.casting")
 local Logger    = require("utils.logger")
 
 return {
-    _version            = "Experimental - Modern Era DPS (110+) 1.2",
+    _version            = "Experimental 1.3 (1-70 or 100+, others WIP)",
     _author             = "Algar",
     ['Modes']           = {
-        'ModernEra',
+        'DPS',
     },
     ['OnModeChange']    = function(self, mode)
         -- if this is enabled the weaves will break.
@@ -213,14 +213,25 @@ return {
             "Klixcxyk's Fire",
             "Inizen's Fire",
             "Sothgar's Flame",
-            "Corona Flare",
-            "White Fire",
-            "Garrison's Superior Sundering",
+            "Ether Flame",
+            "Chaos Flame",
+            "Spark of Fire",
+            "Draught of Ro",
+            "Draught of Fire",
             "Conflagration",
             "Inferno Shock",
             "Flame Shock",
             "Fire Bolt",
             "Shock of Fire",
+        },
+        ['BigFireNuke'] = { -- Level 51-70, Long Cast, Heavy Damage
+            "Ancient: Core Fire",
+            "Corona Flare",
+            "Ancient: Strike of Chaos",
+            "White Fire",
+            "Strike of Solusek",
+            "Garrison's Superior Sundering",
+            "Sunstrike",
         },
         ['IceNuke'] = {
             "Glacial Ice Cascade",
@@ -234,16 +245,21 @@ return {
             "Icesheet Cascade",
             "Glacial Collapse",
             "Icefall Avalanche",
-            "Gelidin Comet",
-            "Ice Meteor",
-            "Ice Spear of Solist",
-            "Frozen Harpoon",
+            "Spark of Ice",
+            "Black Ice",
+            "Draught of E`ci",
+            "Draught of Ice",
             "Ice Comet",
             "Ice Shock",
             "Frost Shock",
             "Shock of Ice",
-            "Frost Bolt",
             "Blast of Cold",
+        },
+        ['BigIceNuke'] = { -- Level 60-70, Timed with great Ratio or High Cast Time/Damage
+            "Gelidin Comet",
+            "Ice Meteor",
+            "Ancient: Destruction of Ice", --13s T1
+            "Ice Spear of Solist",         --13s T2
         },
         ['MagicNuke'] = {
             "Lightning Cyclone",
@@ -259,15 +275,17 @@ return {
             "Ball Lightning",
             "Spark of Lightning",
             "Draught of Lightning",
-            "Elnerick's Electrical Rending",
-            "Draught of Jiva",
             "Voltaic Draught",
             "Rend",
             "Lightning Shock",
-            "Thunder Strike",
             "Garrison's Mighty Mana Shock",
-            "Lightning Bolt",
             "Shock of Lightning",
+        },
+        ['BigMagicNuke'] = { -- Level 60-68, High Cast Time/Damage
+            "Thundaka",
+            "Shock of Magic",
+            "Agnarr's Thunder",
+            "Elnerick's Electrical Rending",
         },
         ['StunSpell'] = {
             "Teladaka",
@@ -458,28 +476,7 @@ return {
             "Lightningbane",
             "Permeating Ether",
         },
-        -- Fast Nukes
-        ['FastIceNuke'] = {
-            "Draught of Ice",
-            "Frost Shock",
-            "Shock of Ice",
-            "Draught of E`ci",
-            "Black Ice",
-            "Spark of Ice",
-        },
-        ['FastFireNuke'] = {
-            "Shock of Fire",
-            "Flame Shock",
-            "Inferno Shock",
-            "Draught of Fire",
-            "Draught of Ro",
-            "Chaos Flame",
-            "Spark of Fire",
-        },
-        ['FastMagicNuke'] = {
-            "Voltaic Draught",
-            "Draught of Lightning",
-            "Spark of Lightning",
+        ['StunMagicNuke'] = {
             "Leap of Stormjolts",
             "Leap of Stormbolts",
             "Leap of Static Sparks",
@@ -489,6 +486,14 @@ return {
             "Leap of Static Bolts",
             "Leap of Sparks",
             "Leap of Levinsparks",
+            "Leap of Shocking Bolts",
+            "Spark of Thunder",
+            "Draught of Thunder",
+            "Draught of Jiva",
+            "Force Strike",
+            "Thunder Strike",
+            "Force Snap",
+            "Lightning Bolt",
         },
         -- Rain Spells Listed here are used Primarily for TLP Mode.
         -- Magic Rain - Only have 3 of them so Not Sustainable.
@@ -542,34 +547,6 @@ return {
             "Magmatic Explosion",
             "Volcanic Downpour",
             "Volcanic Barrage",
-        },
-        -- Large 8 Second Cast Nukes
-        ['BigIceNuke'] = {
-            -- Big Ice Nukes  50-69
-            "Ice Comet",
-            "Ice Spear of Solist",
-            "Ancient: Destruction of Ice",
-            "Ice Meteor",
-            "Gelidin Comet",
-        },
-        ['BigFireNuke'] = {
-            -- Big Fire Nukes
-            "Conflagration",
-            "Sunstrike",
-            "Garrison's Superior Sundering",
-            "Strike of Solusek",
-            "White Fire",
-            "Ether Flame",
-            "Corona Flare",
-        },
-        ['BigMagicNuke'] = {
-            -- Big Magic Nukes
-            "Rend",
-            "Elnerick's Electrical Rending",
-            "Agnarr's Thunder",
-            "Shock of Magic",
-            "Thundaka",
-            "Mana Weave",
         },
         ['SnapNuke'] = {  -- T2 Ice ~8.5s recast (shared with Cloudburst)
             "Frostblast", -- Level 123
@@ -661,10 +638,65 @@ return {
                 return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
             end,
         },
-        {
-            name = 'DPS',
+        { --Keep things from running
+            name = 'Snare',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoSnare') end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+            end,
+        },
+        {
+            name = 'DPS(HighLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 100 end,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning()
+            end,
+        },
+        {
+            name = 'DPS(MidLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 101 and mq.TLO.Me.Level() > 70 end,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning()
+            end,
+        },
+        {
+            name = 'DPS(FireLowLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 1 end,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning()
+            end,
+        },
+        {
+            name = 'DPS(IceLowLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 2 end,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning()
+            end,
+        },
+        {
+            name = 'DPS(MagicLowLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 3 end,
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
@@ -803,7 +835,15 @@ return {
                     return Casting.TargetedSpellReady(spell, target.ID()) and mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
             },
-
+        },
+        ['Snare'] = {
+            {
+                name = "SnareSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Targeting.GetTargetPctHPs(target) < 50
+                end,
+            },
         },
         ['CombatBuff'] =
         {
@@ -868,7 +908,7 @@ return {
                 end,
             },
         },
-        ['DPS'] = { --TODO: Implement AE DPS: Fire Beam (3+ targets), Fire Ring (5+ targets). Drop jolt spell and arrange others accordingly.
+        ['DPS(HighLevel)'] = {
             {
                 name = "VortexNuke",
                 type = "Spell",
@@ -935,7 +975,7 @@ return {
                 end,
             },
         },
-        ['DPS(SOFSODish-WIP)'] = {
+        ['DPS(MidLevel)'] = {
             {
                 name = "SnapNuke",
                 type = "Spell",
@@ -973,6 +1013,81 @@ return {
             },
             {
                 name = "ChaosNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+        },
+        ['DPS(FireLowLevel)'] = {
+            {
+                name = "StunSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoStun') then return false end
+                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "BigFireNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "FireNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+        },
+        ['DPS(IceLowLevel)'] = {
+            {
+                name = "StunSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoStun') then return false end
+                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "BigIceNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "IceNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+        },
+        ['DPS(MagicLowLevel)'] = {
+            {
+                name = "StunSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoStun') then return false end
+                    return Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "BigMagicNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
+                    return Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "MagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.TargetedSpellReady(spell, target.ID())
@@ -1064,36 +1179,47 @@ return {
             gem = 1,
             spells = {
                 { name = "VortexNuke", },
+                { name = "FireNuke",   cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
+                { name = "IceNuke",    cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
+                { name = "MagicNuke",  cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
+
             },
         },
         {
             gem = 2,
             spells = {
                 { name = "FuseNuke", },
+                { name = "BigFireNuke",  cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
+                { name = "BigIceNuke",   cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
+                { name = "BigMagicNuke", cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
             },
         },
         {
             gem = 3,
             spells = {
                 { name = "FireClaw", },
+                { name = "StunSpell", function() return Config:GetSetting('DoStun') end, },
             },
         },
         {
             gem = 4,
             spells = {
                 { name = "FireEtherealNuke", },
+                { name = "HarvestSpell", },
             },
         },
         {
             gem = 5,
             spells = {
                 { name = "IceEtherealNuke", },
+                { name = "JoltSpell", },
             },
         },
         {
             gem = 6,
             spells = {
                 { name = "CloudburstNuke", },
+                { name = "SnareSpell",     function() return Config:GetSetting('DoSnare') end, },
             },
         },
         {
@@ -1101,6 +1227,8 @@ return {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "WildNuke", },
+                { name = "EvacSpell", },
+
             },
         },
         {
@@ -1108,6 +1236,8 @@ return {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "GambitSpell", },
+                { name = "SelfHPBuff", },
+
             },
         },
         {
@@ -1163,7 +1293,7 @@ return {
             Min = 1,
             Max = 1,
             FAQ = "What do the different Modes Do?",
-            Answer = "This is an experimental Modern DPS mode for 110+",
+            Answer = "Wizard only has a single mode, but the spells used will adjust based on your level range.",
         },
         ['DoChestClick']         = {
             DisplayName = "Do Chest Click",
@@ -1183,15 +1313,19 @@ return {
             FAQ = "Can I customize when to use Jolt?",
             Answer = "Yes, you can set the aggro % at which to use Jolt with the [JoltAggro] setting.",
         },
-        ['WeaveAANukes']         = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
+        ['ElementChoice']        = {
+            DisplayName = "Element Choice:",
+            Category = "DPS Low Level",
+            Index = 1,
+            Tooltip = "Choose an element to focus on under level 71.",
+            Type = "Combo",
+            ComboOptions = { 'Fire', 'Ice', 'Magic', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            RequiresLoadoutChange = true,
+            FAQ = "WIP?",
+            Answer = "WIP.",
         },
         ['DoManaBurn']           = {
             DisplayName = "Use Mana Burn AA",
@@ -1277,6 +1411,28 @@ return {
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
         ['DoSnare']              = {
+            DisplayName = "Use Snares",
+            Category = "Buffs/Debuffs",
+            Index = 1,
+            Tooltip = "Use Snare Spells.",
+            Default = false,
+            RequiresLoadoutChange = true,
+            FAQ = "Why is my Shadow Knight not snaring?",
+            Answer = "Make sure Use Snares is enabled in your class settings.",
+        },
+        ['SnareCount']           = {
+            DisplayName = "Snare Max Mob Count",
+            Category = "Buffs/Debuffs",
+            Index = 2,
+            Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
+            Default = 3,
+            Min = 1,
+            Max = 99,
+            FAQ = "Why is my Shadow Knight Not snaring?",
+            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
+                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
+        },
+        ['WeaveAANukes']         = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
