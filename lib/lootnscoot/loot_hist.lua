@@ -85,6 +85,7 @@ local ColorCountRep, StyleCountRep                           = 0, 0
 local openConfigGUI, locked, zoom                            = false, false, false
 local themeFile                                              = mq.configDir .. '/MyThemeZ.lua'
 local configFile                                             = mq.configDir .. '/MyUI_Configs.lua'
+local recordFile                                             = string.format("%s/MyUI/Looted/%s/%s_LootRecord.lua", mq.configDir, mq.TLO.EverQuest.Server(), MyName)
 local ZoomLvl                                                = 1.0
 local fontSize                                               = 16 -- coming soon adding in the var and table now. usage is commented out for now.
 local ThemeName                                              = 'None'
@@ -93,6 +94,7 @@ local globalNewIcon                                          = Icons.FA_GLOBE
 local globeIcon                                              = Icons.FA_GLOBE
 local changed                                                = false
 local txtBuffer                                              = {}
+local LootRecord                                             = {}
 local defaults                                               = {
 	LoadTheme = 'None',
 	Scale = 1.0,
@@ -102,7 +104,7 @@ local defaults                                               = {
 	lastScrollPos = 0,
 	fontSize = 16,
 }
-
+local pageSizes                                              = {}
 local guiLoot                                                = {
 	SHOW              = false,
 	openGUI           = false,
@@ -122,9 +124,13 @@ local guiLoot                                                = {
 	UseActors         = true,
 	winFlags          = bit32.bor(ImGuiWindowFlags.MenuBar, ImGuiWindowFlags.NoFocusOnAppearing),
 }
-
+local oldStyle                                               = ImGui.GetStyle()
+local style                                                  = ImGui.GetStyle()
+guiLoot.PastHistory                                          = false
+guiLoot.pageSize                                             = 25
 local lootTable                                              = {}
-
+guiLoot.TempSettings                                         = {}
+guiLoot.TempSettings.FilterHistory                           = ''
 local fontSizes                                              = {}
 for i = 10, 40 do
 	if i % 2 == 0 then
@@ -207,6 +213,10 @@ local function loadTheme()
 	ThemeName = theme.LoadTheme or 'notheme'
 end
 
+function guiLoot.LoadHistoricalData(table)
+	LootRecord = table or {}
+end
+
 local function loadSettings()
 	local newSetting = false
 	local temp = {}
@@ -224,6 +234,11 @@ local function loadSettings()
 		temp = settings[script]
 	end
 
+	-- if not Files.File.Exists(recordFile) then
+	-- 	mq.pickle(recordFile, {})
+	-- else
+	-- 	LootRecord = dofile(recordFile)
+	-- end
 	loadTheme()
 
 	for k, v in pairs(defaults) do
@@ -242,6 +257,11 @@ local function loadSettings()
 	mq.pickle(configFile, settings)
 
 	temp = settings[script]
+	for i = 1, 200 do
+		if i % 25 == 0 then
+			table.insert(pageSizes, i)
+		end
+	end
 end
 ---comment
 ---@param themeName string|nil -- name of the theme to load form table
@@ -256,17 +276,29 @@ function guiLoot.DrawTheme(themeName)
 	for tID, tData in pairs(theme.Theme) do
 		if tData.Name == themeName then
 			for pID, cData in pairs(theme.Theme[tID].Color) do
-				ImGui.PushStyleColor(pID, ImVec4(cData.Color[1], cData.Color[2], cData.Color[3], cData.Color[4]))
+				ImGui.PushStyleColor(ImGuiCol[cData.PropertyName], ImVec4(cData.Color[1], cData.Color[2], cData.Color[3], cData.Color[4]))
 				ColorCounter = ColorCounter + 1
 			end
 			if tData['Style'] ~= nil then
 				if next(tData['Style']) ~= nil then
 					for sID, sData in pairs(theme.Theme[tID].Style) do
 						if sData.Size ~= nil then
-							ImGui.PushStyleVar(sID, sData.Size)
+							if sData.PropertyName == 'FrameRounding' then
+								ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 10)
+							elseif sData.PropertyName == 'ChildRounding' then
+								ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 10)
+							elseif sData.PropertyName == 'PopupRounding' then
+								ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 10)
+							elseif sData.PropertyName == 'ScrollbarRounding' then
+								ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, 12)
+							elseif sData.PropertyName == 'WindowRounding' then
+								ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 12)
+							else
+								ImGui.PushStyleVar(ImGuiStyleVar[sData.PropertyName], sData.Size)
+							end
 							StyleCounter = StyleCounter + 1
 						elseif sData.X ~= nil then
-							ImGui.PushStyleVar(sID, sData.X, sData.Y)
+							ImGui.PushStyleVar(ImGuiStyleVar[sData.PropertyName], sData.X, sData.Y)
 							StyleCounter = StyleCounter + 1
 						end
 					end
@@ -278,13 +310,15 @@ function guiLoot.DrawTheme(themeName)
 end
 
 function guiLoot.GUI()
+	ColorCount, StyleCount = guiLoot.DrawTheme(ThemeName)
+
 	if guiLoot.openGUI then
 		local windowName = 'Looted Items##' .. MyName
 		ImGui.SetNextWindowSize(260, 300, ImGuiCond.FirstUseEver)
-		--imgui.PushStyleVar(ImGuiStyleVar.WindowPadding, ImVec2(1, 0));
-		ColorCount, StyleCount = guiLoot.DrawTheme(ThemeName)
+
 		if guiLoot.imported then windowName = 'Loot Console##' .. MyName end
 		local openGui, show = ImGui.Begin(windowName, true, guiLoot.winFlags)
+
 		if not openGui then
 			guiLoot.openGUI = false
 			show = false
@@ -302,7 +336,7 @@ function guiLoot.GUI()
 					_, openConfigGUI = ImGui.MenuItem('Config', nil, openConfigGUI)
 					_, guiLoot.hideNames = ImGui.MenuItem('Hide Names', nil, guiLoot.hideNames)
 					_, zoom = ImGui.MenuItem('Zoom', nil, zoom)
-
+					_, guiLoot.PastHistory = ImGui.MenuItem('Past History', nil, guiLoot.PastHistory)
 					if not guiLoot.UseActors then
 						_, guiLoot.showLinks = ImGui.MenuItem('Show Links', nil, guiLoot.showLinks)
 					end
@@ -400,8 +434,6 @@ function guiLoot.GUI()
 			ImGui.SetWindowFontScale(1)
 		end
 
-		if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
-		if StyleCount > 0 then ImGui.PopStyleVar(StyleCount) end
 		ImGui.End()
 	end
 
@@ -412,6 +444,13 @@ function guiLoot.GUI()
 	if openConfigGUI then
 		guiLoot.lootedConf_GUI()
 	end
+
+	if guiLoot.PastHistory then
+		guiLoot.drawRecord()
+	end
+
+	if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
+	if StyleCount > 0 then ImGui.PopStyleVar(StyleCount) end
 end
 
 local function evalRule(item)
@@ -478,7 +517,6 @@ end
 
 function guiLoot.lootedReport_GUI()
 	--- Report Window
-	ColorCountRep, StyleCountRep = guiLoot.DrawTheme(ThemeName)
 	ImGui.SetNextWindowSize(300, 200, ImGuiCond.Appearing)
 	if changed and mq.TLO.Plugin('mq2dannet').IsLoaded() and guiLoot.caller == 'lootnscoot' then
 		mq.cmdf('/dgae /lootutils reload')
@@ -719,9 +757,6 @@ function guiLoot.lootedReport_GUI()
 		ImGui.EndTable()
 	end
 
-
-	if ColorCountRep > 0 then ImGui.PopStyleColor(ColorCountRep) end
-	if StyleCountRep > 0 then ImGui.PopStyleVar(StyleCountRep) end
 	ImGui.SetWindowFontScale(1)
 	ImGui.End()
 
@@ -730,11 +765,182 @@ function guiLoot.lootedReport_GUI()
 	end
 end
 
-function guiLoot.lootedConf_GUI()
-	ColorCountConf = 0
-	StyleCountConf = 0
-	ColorCountConf, StyleCountConf = guiLoot.DrawTheme(ThemeName)
+function guiLoot.drawRecord()
+	if not guiLoot.PastHistory then return end
 
+	local openWin, showRecord = ImGui.Begin("Loot PastHistory##" .. script, true)
+	ImGui.SetWindowFontScale(ZoomLvl)
+	if not openWin then
+		guiLoot.PastHistory = false
+	end
+
+	if showRecord then
+		if ImGui.CollapsingHeader('Manage') then
+			-- Clear History and Close Buttons
+			if ImGui.Button("Clear History File") then
+				LootRecord = {}
+				mq.pickle(recordFile, LootRecord)
+			end
+			ImGui.SameLine()
+			if ImGui.Button("Close") then
+				guiLoot.PastHistory = false
+			end
+		end
+
+		-- Pagination Variables
+		local filteredTable = {}
+		for i = 1, #LootRecord do
+			local item = LootRecord[i]
+			if item then
+				if guiLoot.TempSettings.FilterHistory ~= '' then
+					local filterString = guiLoot.TempSettings.FilterHistory:lower()
+					filterString = filterString:gsub("%:", ""):gsub("%-", "")
+					local filterTS = item.TimeStamp:gsub("%:", ""):gsub("%-", "")
+					local filterDate = item.Date:gsub("%:", ""):gsub("%-", "")
+					if not (string.find(item.Item:lower(), filterString) or
+							string.find(filterDate, filterString) or
+							string.find(filterTS, filterString) or
+							string.find(item.Looter:lower(), filterString) or
+							string.find(item.Action:lower(), filterString) or
+							string.find(item.CorpseName:lower(), filterString) or
+							string.find(item.Zone:lower(), filterString)) then
+						goto continue
+					end
+				end
+				table.insert(filteredTable, item)
+			end
+			::continue::
+		end
+		table.sort(filteredTable, function(a, b)
+			return a.Date .. a.TimeStamp > b.Date .. b.TimeStamp
+		end)
+		ImGui.SeparatorText("Loot History")
+		guiLoot.pageSize = guiLoot.pageSize or 20 -- Items per page
+		guiLoot.currentPage = guiLoot.currentPage or 1
+		local totalItems = #LootRecord
+		local totalFilteredItems = #filteredTable
+		local totalPages = math.max(1, math.ceil(totalFilteredItems / guiLoot.pageSize))
+
+		-- Filter Input
+		ImGui.SetNextItemWidth(150)
+		guiLoot.TempSettings.FilterHistory = ImGui.InputTextWithHint("##FilterHistory", "Filter by Fields", guiLoot.TempSettings.FilterHistory)
+		ImGui.SameLine()
+		if ImGui.SmallButton(Icons.MD_DELETE_SWEEP) then
+			guiLoot.TempSettings.FilterHistory = ''
+		end
+		ImGui.SameLine()
+		ImGui.Text("Found: ")
+		ImGui.SameLine()
+		ImGui.TextColored(ImVec4(0, 1, 1, 1), tostring(totalFilteredItems))
+		ImGui.SameLine()
+		ImGui.Text("Total: ")
+		ImGui.SameLine()
+		ImGui.TextColored(ImVec4(1, 1, 0, 1), tostring(totalItems))
+
+		-- Clamp the current page
+		guiLoot.currentPage = math.max(1, math.min(guiLoot.currentPage, totalPages))
+
+		-- Navigation Buttons
+		if ImGui.Button(Icons.FA_BACKWARD) then
+			guiLoot.currentPage = 1
+		end
+		ImGui.SameLine()
+		if ImGui.ArrowButton("##Previous", ImGuiDir.Left) and guiLoot.currentPage > 1 then
+			guiLoot.currentPage = guiLoot.currentPage - 1
+		end
+		ImGui.SameLine()
+		ImGui.Text(string.format("Page %d of %d", guiLoot.currentPage, totalPages))
+		ImGui.SameLine()
+		if ImGui.ArrowButton("##Next", ImGuiDir.Right) and guiLoot.currentPage < totalPages then
+			guiLoot.currentPage = guiLoot.currentPage + 1
+		end
+		ImGui.SameLine()
+		if ImGui.Button(Icons.FA_FORWARD) then
+			guiLoot.currentPage = totalPages
+		end
+
+		ImGui.SameLine()
+
+		ImGui.Text("Items Per Page")
+		ImGui.SameLine()
+		ImGui.SetNextItemWidth(80)
+		if ImGui.BeginCombo('##pageSize', tostring(guiLoot.pageSize)) then
+			for i = 1, 200 do
+				if i % 25 == 0 then
+					if ImGui.Selectable(tostring(i), guiLoot.pageSize == i) then
+						guiLoot.pageSize = i
+					end
+				end
+			end
+			ImGui.EndCombo()
+		end
+
+
+		-- Table
+
+		if ImGui.BeginTable("Items History", 7, bit32.bor(ImGuiTableFlags.ScrollX, ImGuiTableFlags.ScrollY,
+				ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg)) then
+			ImGui.TableSetupColumn("Date", ImGuiTableColumnFlags.WidthFixed, 100)
+			ImGui.TableSetupColumn("TimeStamp", ImGuiTableColumnFlags.WidthFixed, 100)
+			ImGui.TableSetupColumn("Item", ImGuiTableColumnFlags.WidthFixed, 150)
+			ImGui.TableSetupColumn("Looter", ImGuiTableColumnFlags.WidthFixed, 75)
+			ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.WidthFixed, 75)
+			ImGui.TableSetupColumn("Corpse", ImGuiTableColumnFlags.WidthFixed, 100)
+			ImGui.TableSetupColumn("Zone", ImGuiTableColumnFlags.WidthFixed, 100)
+			ImGui.TableHeadersRow()
+
+			-- Calculate start and end indices for pagination
+			local startIdx = (guiLoot.currentPage - 1) * guiLoot.pageSize + 1
+			local endIdx = math.min(startIdx + guiLoot.pageSize - 1, totalFilteredItems)
+
+			for i = startIdx, endIdx do
+				local item = filteredTable[i]
+				if item then
+					if guiLoot.TempSettings.FilterHistory ~= '' then
+						local filterString = guiLoot.TempSettings.FilterHistory:lower()
+						filterString = filterString:gsub("%:", ""):gsub("%-", "")
+						local filterTS = item.TimeStamp:gsub("%:", ""):gsub("%-", "")
+						local filterDate = item.Date:gsub("%:", ""):gsub("%-", "")
+						if not (string.find(item.Item:lower(), filterString) or
+								string.find(filterDate, filterString) or
+								string.find(filterTS, filterString) or
+								string.find(item.Looter:lower(), filterString) or
+								string.find(item.Action:lower(), filterString) or
+								string.find(item.CorpseName:lower(), filterString) or
+								string.find(item.Zone:lower(), filterString)) then
+							goto continue
+						end
+					end
+
+					ImGui.TableNextColumn()
+					ImGui.TextColored(ImVec4(1, 1, 0, 1), item.Date)
+					ImGui.TableNextColumn()
+					ImGui.TextColored(ImVec4(0, 1, 1, 1), item.TimeStamp)
+					ImGui.TableNextColumn()
+					ImGui.Text(item.Item)
+					if ImGui.IsItemHovered() and ImGui.IsItemClicked(0) then
+						mq.cmdf('/executelink %s', item.Link)
+					end
+					ImGui.TableNextColumn()
+					ImGui.TextColored(ImVec4(1.000, 0.557, 0.000, 1.000), item.Looter)
+					ImGui.TableNextColumn()
+					ImGui.Text(item.Action == 'Looted' and 'Keep' or item.Action)
+					ImGui.TableNextColumn()
+					ImGui.TextColored(ImVec4(0.976, 0.518, 0.844, 1.000), item.CorpseName)
+					ImGui.TableNextColumn()
+					ImGui.Text(item.Zone)
+					::continue::
+				end
+			end
+			ImGui.EndTable()
+		end
+	end
+
+	ImGui.SetWindowFontScale(1)
+	ImGui.End()
+end
+
+function guiLoot.lootedConf_GUI()
 	local openWin, showConfigGUI = ImGui.Begin("Looted Conf##" .. script, true, bit32.bor(ImGuiWindowFlags.None, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoCollapse))
 	ImGui.SetWindowFontScale(ZoomLvl)
 
@@ -786,8 +992,6 @@ function guiLoot.lootedConf_GUI()
 		end
 	end
 
-	if StyleCountConf > 0 then ImGui.PopStyleVar(StyleCountConf) end
-	if ColorCountConf > 0 then ImGui.PopStyleColor(ColorCountConf) end
 	ImGui.SetWindowFontScale(1)
 	ImGui.End()
 end
@@ -820,6 +1024,10 @@ local function getNextID(table)
 	return maxChannelId + 1
 end
 
+local function trimCorpseName(corpseName)
+	return corpseName:gsub("'s corpse$", "") -- Replaces only at the end of the string
+end
+
 function guiLoot.RegisterActor()
 	guiLoot.actor = Actors.register('looted', function(message)
 		local lootEntry = message()
@@ -827,6 +1035,7 @@ function guiLoot.RegisterActor()
 			local link = item.Link
 			local what = item.Name
 			local eval = item.Eval
+			local corpseName = trimCorpseName(item.CorpseName)
 			local who = lootEntry.LootedBy
 			local cantWear = item.cantWear or false
 
@@ -845,14 +1054,15 @@ function guiLoot.RegisterActor()
 			if cantWear then
 				actionLabel = actionLabel .. ' \ax(\arCant Wear\ax)'
 			end
-			local text = string.format('\ao[\at%s\ax] \at%s \ax%s %s CorpseID (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, link, lootEntry.ID)
+			local text = string.format('\ao[\at%s\ax] \at%s \ax%s %s Corpse \at%s\ax (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, link, corpseName, lootEntry.ID)
 			if item.Action == 'Destroyed' then
-				text = string.format('\ao[\at%s\ax] \at%s \ar%s \ax%s \axCorpseID (\at%s\ax)', lootEntry.LootedAt, who, string.upper(item.Action), link, lootEntry.ID)
+				text = string.format('\ao[\at%s\ax] \at%s \ar%s \ax%s \axCorpse \at%s\ax (\at%s\ax)', lootEntry.LootedAt, who, string.upper(item.Action), link, corpseName,
+					lootEntry.ID)
 			elseif item.Action == 'Looted' then
-				text = string.format('\ao[\at%s\ax] \at%s \ag%s \ax%s \axCorpseID (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, link, lootEntry.ID)
+				text = string.format('\ao[\at%s\ax] \at%s \ag%s \ax%s \axCorpse \at%s\ax (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, link, corpseName, lootEntry.ID)
 			end
 			guiLoot.console:AppendText(text)
-			local line = string.format('\ao[\at%s\ax] %s %s %s CorpseID (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, what, lootEntry.ID)
+			local line = string.format('\ao[\at%s\ax] %s %s %s Corpse \ax%s\ax (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, what, corpseName, lootEntry.ID)
 			local i = getNextID(txtBuffer)
 			-- ZOOM Console hack
 			if i > 1 then
@@ -871,7 +1081,20 @@ function guiLoot.RegisterActor()
 					table.remove(txtBuffer, 1)
 				end
 			end
-			-- do we want to record loot data?
+			local recordDate = os.date("%Y-%m-%d")
+			if LootRecord == nil then
+				LootRecord = {}
+			end
+			table.insert(LootRecord, {
+				Date = recordDate,
+				TimeStamp = lootEntry.LootedAt,
+				Zone = lootEntry.Zone,
+				CorpseName = corpseName,
+				Looter = who,
+				Item = item.Name,
+				Link = link,
+				Action = item.Action,
+			})
 		end
 	end)
 end
