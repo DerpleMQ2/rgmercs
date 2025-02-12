@@ -1476,7 +1476,7 @@ local _ClassConfig = {
                 cond = function(self, spell) return Casting.SelfBuffCheck(spell) and not (spell.Name() == "Mask of the Hunter" and mq.TLO.Zone.Indoor()) end,
             },
             {
-                name = "IceAura",
+                name = "HealingAura",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.AuraActiveByName(spell.BaseName()) end,
                 cond = function(self, spell) return (spell and spell() and not Casting.AuraActiveByName(spell.BaseName())) end,

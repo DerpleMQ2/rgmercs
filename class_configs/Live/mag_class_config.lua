@@ -1677,7 +1677,7 @@ _ClassConfig      = {
                     return Casting.BuffActive(spell)
                 end,
                 cond = function(self, spell, target)
-                    return not Casting.TargetHasBuff(spell, target) and Casting.SpellStacksOnTarget(spell)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
