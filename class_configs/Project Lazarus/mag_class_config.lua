@@ -621,6 +621,7 @@ _ClassConfig      = {
             "Child of Earth",
             "Greater Vocaration: Earth",
             "Vocarate: Earth",
+            "Greater Conjuration: Earth",
             "Conjuration: Earth",
             "Lesser Conjuration: Earth",
             "Minor Conjuration: Earth",

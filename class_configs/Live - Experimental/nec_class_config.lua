@@ -474,7 +474,7 @@ local _ClassConfig = {
             "Plague",
             "Asystole",
             "Scourge",
-            "Infectious Cloud",
+            -- "Infectious Cloud", -- Target AE Spell
             "Heart Flutter",
             "Disease Cloud",
         },

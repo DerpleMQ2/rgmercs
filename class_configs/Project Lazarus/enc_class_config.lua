@@ -517,7 +517,7 @@ local _ClassConfig = {
             "Confusing Constriction",
             "Baffling Constriction",
         },
-        ['NukeSpell1'] = {
+        ['NukeSpell'] = {
             --- Nuke 1 -- >= LVL7
             "Mindrend",
             "Mindreap",
@@ -567,7 +567,7 @@ local _ClassConfig = {
             "Mental Appropriation",
             "Cognitive Appropriation",
         },
-        --Unused table, temporarily removed - was causing conflicts while resolving NukeSpell1 action maps (will revisit nukes later)
+        --Unused table, temporarily removed - was causing conflicts while resolving NukeSpell action maps (will revisit nukes later)
         -- ['ChromaNuke'] = {
         --- Chromatic Lowest Nuke - Normal -- >=LVL73
         -- "Polycascading Assault",
@@ -1273,7 +1273,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "NukeSpell1",
+                name = "NukeSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
@@ -1318,7 +1318,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "NukeSpell1",
+                name = "NukeSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
@@ -1534,7 +1534,7 @@ local _ClassConfig = {
         {
             gem = 6,
             spells = {
-                { name = "NukeSpell1", },
+                { name = "NukeSpell", },
             },
         },
         {
