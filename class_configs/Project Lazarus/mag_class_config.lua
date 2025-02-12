@@ -435,6 +435,7 @@ _ClassConfig      = {
         ['PetAura'] = {
             -- Mage Pet Aura
             "Arcane Distillect",
+            "Earthen Strength",
         },
         --not used
         --[[ ['SingleDS'] = {
@@ -1308,6 +1309,14 @@ _ClassConfig      = {
                     return self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
                 end,
             },
+            -- { --this is currently commented out because of numerous stacking check errors (e.g, Talisman of Unification) and issues with the buff being clicked off causing a spam condition until the pet is released
+            --     name = "PetAura",
+            --     type = "Spell",
+            --     cond = function(self, spell)
+            --         local auraBuff = string.format("%s Effect", spell.Name())
+            --         return Casting.SelfBuffPetCheck(spell) and not mq.TLO.Me.PetBuff(auraBuff)()
+            --     end,
+            -- },
             {
                 name = "PetIceFlame",
                 type = "Spell",
@@ -1697,7 +1706,7 @@ _ClassConfig      = {
                     return Casting.BuffActive(spell)
                 end,
                 cond = function(self, spell, target)
-                    return not Casting.TargetHasBuff(spell, target) and Casting.SpellStacksOnTarget(spell)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1751,16 +1760,6 @@ _ClassConfig      = {
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName)
-                end,
-            },
-            {
-                name = "PetAura",
-                type = "Spell",
-                active_cond = function(self, spell)
-                    return Casting.AuraActiveByName(spell.BaseName()) ~= nil
-                end,
-                cond = function(self, spell)
-                    return not Casting.AuraActiveByName(spell.BaseName())
                 end,
             },
             {

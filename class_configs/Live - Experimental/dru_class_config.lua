@@ -1247,6 +1247,15 @@ local _ClassConfig = {
                 cond = function(self, spell) return (spell and spell() and not Casting.AuraActiveByName(spell.BaseName())) end,
             },
             {
+                name = "HealingAura",
+                type = "Spell",
+                active_cond = function(self, spell) return Casting.AuraActiveByName(spell.BaseName()) end,
+                cond = function(self, spell)
+                    if self:GetResolvedActionMapItem('IceAura') then return false end
+                    return (spell and spell() and not Casting.AuraActiveByName(spell.BaseName()))
+                end,
+            },
+            {
                 name = "ManaBear",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
