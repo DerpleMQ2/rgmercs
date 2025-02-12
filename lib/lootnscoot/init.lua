@@ -183,6 +183,8 @@ loot.Settings                        = {
     KeepSpells       = true,   -- Keep spells
     CanWear          = false,  -- Only loot items you can wear
     ShowInfoMessages = true,
+    ShowConsole      = false,
+    ShowReport       = false,
     BuyItemsTable    = {
         ['Iron Ration'] = 20,
         ['Water Flask'] = 20,
@@ -200,7 +202,7 @@ local newItem                        = nil
 loot.guiLoot                         = require('loot_hist')
 if loot.guiLoot ~= nil then
     loot.UseActors = true
-    loot.guiLoot.GetSettings(loot.HideNames, loot.LookupLinks, loot.RecordData, true, loot.UseActors, 'lootnscoot', false)
+    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, true, true, true, 'lootnscoot', false)
 end
 
 local iconAnimation                     = mq.FindTextureAnimation('A_DragItem')
@@ -381,7 +383,19 @@ local settingList                       = {
     "Bank",
 }
 
-local settingsNoDraw                    = { Version = true, logger = true, LootFile = true, SettingsFile = true, NoDropDefaults = true, CorpseRotTime = true, LootLagDelay = true, Terminate = true, BuyItemsTable = true, }
+local settingsNoDraw                    = {
+    Version = true,
+    logger = true,
+    LootFile = true,
+    SettingsFile = true,
+    NoDropDefaults = true,
+    CorpseRotTime = true,
+    LootLagDelay = true,
+    Terminate = true,
+    BuyItemsTable = true,
+    ShowReport = true,
+    ShowConsole = true,
+}
 
 local selectedIndex                     = 1
 
@@ -634,7 +648,7 @@ function loot.insertIntoHistory(itemName, corpseName, action, date, timestamp, l
     mq.delay(1)
     local eval = action == 'Ignore' and 'Left' or action
     local actLabel = action == 'Destroy' and 'Destroyed' or action
-    if action ~= ('Destroy' or 'Ignore') then
+    if action ~= 'Destroy' and action ~= 'Ignore' then
         actLabel = 'Looted'
     end
     table.insert(allItems,
@@ -901,7 +915,11 @@ function loot.loadSettings(firstRun)
     end
     loot.Settings = {}
     loot.Settings = tmpSettings
+
+    loot.guiLoot.openGUI = loot.Settings.ShowConsole
     -- Modules:ExecModule("Loot", "ModifyLootSettings")
+
+
     return needSave
 end
 
@@ -2039,26 +2057,22 @@ function loot.getRule(item, from)
     -- loot.addRule(itemID, 'NormalItems', baseRule, "All", item.ItemLink('CLICKABLE')())
     -- newRule = true
     -- end
+    local personalRule, personalClasses = loot.PersonalItemsRules[itemID] or "NULL", loot.PersonalItemsClasses[itemID] or "All"
+    local globalRule, globalClasses = loot.GlobalItemsRules[itemID] or "NULL", loot.GlobalItemsClasses[itemID] or "All"
 
     -- Handle GlobalItems override
     if loot.Settings.GlobalLootOn then
-        local personalRule, personalClasses = loot.PersonalItemsRules[itemID] or "NULL", loot.PersonalItemsClasses[itemID] or "All"
-        local globalRule, globalClasses = loot.GlobalItemsRules[itemID] or "NULL", loot.GlobalItemsClasses[itemID] or "All"
-        if personalRule == 'NULL' then
-            if globalRule ~= "NULL" then
-                if globalClasses:lower() ~= "all" and from == "loot" and not string.find(globalClasses:lower(), loot.MyClass) then
-                    lootDecision = "Ignore"
-                else
-                    lootDecision = globalRule
-                end
-            end
-        elseif personalRule ~= "NULL" then
-            if personalClasses:lower() ~= "all" and from == "loot" and not string.find(personalClasses:lower(), loot.MyClass) then
+        if globalRule ~= "NULL" then
+            if globalClasses:lower() ~= "all" and from == "loot" and not string.find(globalClasses:lower(), loot.MyClass) then
                 lootDecision = "Ignore"
             else
-                lootDecision = personalRule
+                lootDecision = globalRule
             end
         end
+    end
+
+    if personalRule ~= "NULL" then
+        lootDecision = personalRule
     end
 
     -- Handle specific class-based rules
@@ -5083,7 +5097,10 @@ function loot.renderMainUI()
             if ImGui.BeginChild('Main', 0.0, 400, bit32.bor(ImGuiChildFlags.ResizeY, ImGuiChildFlags.Border)) then
                 ImGui.PushStyleColor(ImGuiCol.PopupBg, ImVec4(0.002, 0.009, 0.082, 0.991))
                 if ImGui.SmallButton(string.format("%s Report", Icons.MD_INSERT_CHART)) then
+                    -- loot.guiLoot.showReport = not loot.guiLoot.showReport
                     loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', true)
+                    loot.Settings.ShowReport = loot.guiLoot.showReport
+                    loot.TempSettings.NeedSave = true
                 end
                 if ImGui.IsItemHovered() then ImGui.SetTooltip("Show/Hide Report Window") end
 
@@ -5099,6 +5116,8 @@ function loot.renderMainUI()
 
                 if ImGui.SmallButton(string.format("%s Console", Icons.FA_TERMINAL)) then
                     loot.guiLoot.openGUI = not loot.guiLoot.openGUI
+                    loot.Settings.ShowConsole = loot.guiLoot.openGUI
+                    loot.TempSettings.NeedSave = true
                 end
                 if ImGui.IsItemHovered() then ImGui.SetTooltip("Show/Hide Console Window") end
 
@@ -5214,6 +5233,8 @@ function loot.init(args)
     loot.processArgs(args)
     loot.sendMySettings()
     mq.imgui.init('LootnScoot', loot.RenderUIs)
+    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.UseActors, 'lootnscoot', loot.Settings.ShowReport)
+
     if needsSave then loot.writeSettings() end
     return needsSave
 end
