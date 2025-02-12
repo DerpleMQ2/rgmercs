@@ -1032,7 +1032,7 @@ return {
                 name = "BigFireNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
+                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('HPStopBigNuke') and not Targeting.IsNamed(target)) then return false end
                     return Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1326,6 +1326,26 @@ return {
             RequiresLoadoutChange = true,
             FAQ = "WIP?",
             Answer = "WIP.",
+        },
+        ['HPStopBigNuke']        = {
+            DisplayName = "Stop Big Nuke",
+            Category = "DPS Low Level",
+            Tooltip = "Don't use our Big Nuke below this health percentage.",
+            Default = 50,
+            Min = 1,
+            Max = 100,
+            FAQ = "WIP?",
+            Answer = "WIP.",
+        },
+        ['DoStun']               = {
+            DisplayName = "Do Stun",
+            Category = "DPS Low Level",
+            Tooltip = "Use your Stun Nukes (Stun with DD, not mana efficient).",
+            RequiresLoadoutChange = true,
+            Default = false,
+            FAQ = "WIP?",
+            Answer =
+            "WIP.",
         },
         ['DoManaBurn']           = {
             DisplayName = "Use Mana Burn AA",
