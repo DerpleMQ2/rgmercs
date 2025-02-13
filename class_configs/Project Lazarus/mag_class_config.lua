@@ -1571,28 +1571,28 @@ _ClassConfig      = {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
+                    return Core.IsModeActive("DPS") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
                 cond = function(self, _)
-                    return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
+                    return Core.IsModeActive("DPS") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "SpearNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
+                    return Core.IsModeActive("DPS") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "VolleyNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
+                    return Core.IsModeActive("DPS") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
@@ -1979,7 +1979,7 @@ _ClassConfig      = {
             RequiresLoadoutChange = true,
             Default = 1,
             Min = 1,
-            Max = 1,
+            Max = 2,
             FAQ = "What is the difference between the modes?",
             Answer = "Fire Mode will use Fire Nukes and strive for DPS.\n" ..
                 "PetTank mode will Focus on keeping the Pet alive as the main tank.",
@@ -1988,7 +1988,7 @@ _ClassConfig      = {
             DisplayName = "Do Pocket Pet",
             Category = "Pet",
             Tooltip = "Pocket your pet during downtime",
-            Default = true,
+            Default = false,
             RequiresLoadoutChange = true,
             FAQ = "I have suspend Minion AA, how do I keep a spare pet suspended?",
             Answer = "You can use the [DoPocketPet] feature to keep a spare pet suspended.",
@@ -1997,7 +1997,7 @@ _ClassConfig      = {
             DisplayName = "Do Pet Armor",
             Category = "Pet",
             Tooltip = "Summon Armor for Pets",
-            Default = true,
+            Default = false,
             FAQ = "I want to make sure my pet is always armored, how do I do that?",
             Answer = "You can use the [DoPetArmor] feature to summon pet armor.",
         },
@@ -2005,7 +2005,7 @@ _ClassConfig      = {
             DisplayName = "Do Pet Weapons",
             Category = "Pet",
             Tooltip = "Summon Weapons for Pets",
-            Default = true,
+            Default = false,
             FAQ = "I want to make sure my pet is always armed, how do I do that?",
             Answer = "You can use the [DoPetWeapons] feature to summon pet weapons.",
         },
@@ -2015,7 +2015,7 @@ _ClassConfig      = {
             Tooltip = "1 = Fire, 2 = Water, 3 = Earth, 4 = Air",
             Type = "Combo",
             ComboOptions = { 'Fire', 'Water', 'Earth', 'Air', },
-            Default = 1,
+            Default = 2,
             Min = 1,
             Max = 4,
             FAQ = "Can I specify the type of pet I want to use?",
@@ -2025,7 +2025,7 @@ _ClassConfig      = {
             DisplayName = "Do Pet Heirlooms",
             Category = "Pet",
             Tooltip = "Summon Heirlooms for Pets",
-            Default = true,
+            Default = false,
             FAQ = "I want to make sure my pet is always Heirloomed, how do I do that?",
             Answer = "You can use the [DoPetHeirlooms] feature to summon pet Heirlooms.",
         },
