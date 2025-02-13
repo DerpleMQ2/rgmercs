@@ -862,7 +862,8 @@ local _ClassConfig = {
             steps = 2,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state, targetId)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal() and (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Core.OkayToNotHeal() and
+                    Casting.DebuffConCheck() and (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
             end,
         },
         { --Keep things from running
