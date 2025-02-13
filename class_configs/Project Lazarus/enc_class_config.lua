@@ -1044,8 +1044,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     if self:GetResolvedActionMapItem('HasteManaCombo') or not Config.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
-                    return not Casting.GroupBuffCheck(spell, target) and
-                        Casting.GroupBuffCheck(mq.TLO.Spell("Unified Alacrity"), target) --stacking checks are incorrect with a common outside buff
+                    return Casting.GroupBuffCheck(spell, target) and Casting.GroupBuffCheck(mq.TLO.Spell("Unified Alacrity"), target, 42932) -- Fixes bad stacking check
                 end,
             },
             {
@@ -1549,6 +1548,7 @@ local _ClassConfig = {
                 { name = "ManaNuke",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "CrippleSpell",   cond = function(self) return Config:GetSetting('DoCripple') end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "ManaDrainSpell", cond = function(self) return true end, },
             },
         },
         {

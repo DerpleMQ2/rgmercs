@@ -9,13 +9,13 @@ local DanNet      = require('lib.dannet.helpers')
 local Logger      = require("utils.logger")
 
 _ClassConfig      = {
-    _version              = "1.0 - Project Lazarus",
-    _author               = "Derple, Morisato",
+    _version              = "1.1 - Project Lazarus",
+    _author               = "Derple, Morisato, Algar",
     ['ModeChecks']        = {
         IsTanking = function() return Core.IsModeActive("PetTank") end,
     },
     ['Modes']             = {
-        'Fire',
+        'DPS',
         'PetTank',
     },
     ['OnModeChange']      = function(self, mode)
@@ -61,19 +61,7 @@ _ClassConfig      = {
             "Raging Servant",
             "Rage of Zomm",
         },
-        ['SpearNuke1'] = {
-            -- Spear Nuke* >= LVL 70
-            "Spear of Molten Dacite",
-            "Spear of Molten Luclinite",
-            "Spear of Molten Komatiite",
-            "Spear of Molten Arcronite",
-            "Spear of Molten Shieldstone",
-            "Spear of Blistersteel",
-            "Spear of Molten Steel",
-            "Spear of Magma",
-            "Spear of Ro",
-        },
-        ['SpearNuke2'] = {
+        ['SpearNuke'] = {
             -- Spear Nuke* >= LVL 70
             "Spear of Molten Dacite",
             "Spear of Molten Luclinite",
@@ -100,139 +88,109 @@ _ClassConfig      = {
             "Fickle Inferno",
             "Fickle Fire",
         },
-        ['FireNuke1'] = {
-            -- Fire Nuke 1 <= LVL <= 70
-            "Cremating Sands",
-            "Ravaging Sands",
-            "Incinerating Sands",
-            "Crash of Sand",
-            "Blistering Sands",
-            "Searing Sands",
-            "Broiling Sands",
-            "Blast of Sand",
-            "Burning Sands",
-            "Burst of Sand",
-            "Strike of Sand",
-            "Torrid Sands",
-            "Scorching Sands",
-            "Scalding Sands",
-            "Sun Vortex",
-            "Star Strike",
-            "Ancient: Nova Strike",
+        -- ['FireNuke'] = {
+        --     -- Fire Nuke 1 <= LVL <= 70
+        --     "Cremating Sands",
+        --     "Ravaging Sands",
+        --     "Incinerating Sands",
+        --     "Crash of Sand",
+        --     "Blistering Sands",
+        --     "Searing Sands",
+        --     "Broiling Sands",
+        --     "Blast of Sand",
+        --     "Burning Sands",
+        --     "Burst of Sand",
+        --     "Strike of Sand",
+        --     "Torrid Sands",
+        --     "Scorching Sands",
+        --     "Scalding Sands",
+        --     "Sun Vortex",
+        --     "Star Strike",
+        --     "Ancient: Nova Strike",
+        --     "Burning Sand",
+        --     "Shock of Fiery Blades",
+        --     "Char",
+        --     "Blaze",
+        --     "Shock of Flame",
+        --     "Burn",
+        --     "Burst of Flame",
+        -- },
+        -- ['FireBoltNuke'] = {
+        --     -- Fire Bolt Nukes
+        --     "Bolt of Molten Dacite",
+        --     "Bolt of Molten Olivine",
+        --     "Bolt of Molten Komatiite",
+        --     "Bolt of Skyfire",
+        --     "Bolt of Molten Shieldstone",
+        --     "Bolt of Molten Magma",
+        --     "Bolt of Molten Steel",
+        --     "Bolt of Rhyolite",
+        --     "Bolt of Molten Scoria",
+        --     "Bolt of Molten Dross",
+        --     "Bolt of Molten Slag",
+        --     "Bolt of Jerikor",
+        --     "Firebolt of Tallon",
+        --     "Seeking Flame of Seukor",
+        --     "Scars of Sigil",
+        --     "Lava Bolt",
+        --     "Cinder Bolt",
+        --     "Bolt of Flame",
+        --     "Flame Bolt",
+        -- },
+        -- ['MagicNuke'] = {
+        --     -- Nuke 1 <= LVL <= 69
+        --     "Shock of Memorial Steel",
+        --     "Shock of Carbide Steel",
+        --     "Shock of Burning Steel",
+        --     "Shock of Arcronite Steel",
+        --     "Shock of Darksteel",
+        --     "Shock of Blistersteel",
+        --     "Shock of Argathian Steel",
+        --     "Shock of Ethereal Steel",
+        --     "Shock of Discordant Steel",
+        --     "Shock of Cineral Steel",
+        --     "Shock of Silvered Steel",
+        --     "Blade Strike",
+        --     "Rock of Taelosia",
+        --     "Black Steel",
+        --     "Shock of Steel",
+        --     "Shock of Swords",
+        --     "Shock of Spikes",
+        --     "Shock of Blades",
+        -- },
+        -- ['MagicBolt'] = {
+        --     -- Magic Bolt Nukes
+        --     "Voidstone Bolt",
+        --     "Luclinite Bolt",
+        --     "Komatiite Bolt",
+        --     "Korascian Bolt",
+        --     "Meteoric Bolt",
+        --     "Iron Bolt",
+        -- },
+        ['FireDD'] = { --Mix of Fire Nukes and Bolts appropriate for use at lower levels.
             "Burning Sand",
-            "Shock of Fiery Blades",
-            "Char",
-            "Blaze",
-            "Shock of Flame",
-            "Burn",
-            "Burst of Flame",
-        },
-        ['FireNuke2'] = {
-            -- Fire Nuke 1 <= LVL <= 70
-            "Cremating Sands",
-            "Ravaging Sands",
-            "Incinerating Sands",
-            "Crash of Sand",
-            "Blistering Sands",
-            "Searing Sands",
-            "Broiling Sands",
-            "Blast of Sand",
-            "Burning Sands",
-            "Burst of Sand",
-            "Strike of Sand",
-            "Torrid Sands",
-            "Scorching Sands",
-            "Scalding Sands",
-            "Sun Vortex",
-            "Star Strike",
-            "Ancient: Nova Strike",
-            "Burning Sand",
-            "Shock of Fiery Blades",
-            "Char",
-            "Blaze",
-            "Shock of Flame",
-            "Burn",
-            "Burst of Flame",
-        },
-        ['MagicNuke1'] = {
-            -- Nuke 1 <= LVL <= 69
-            "Shock of Memorial Steel",
-            "Shock of Carbide Steel",
-            "Shock of Burning Steel",
-            "Shock of Arcronite Steel",
-            "Shock of Darksteel",
-            "Shock of Blistersteel",
-            "Shock of Argathian Steel",
-            "Shock of Ethereal Steel",
-            "Shock of Discordant Steel",
-            "Shock of Cineral Steel",
-            "Shock of Silvered Steel",
-            "Blade Strike",
-            "Rock of Taelosia",
-            "Black Steel",
-            "Shock of Steel",
-            "Shock of Swords",
-            "Shock of Spikes",
-            "Shock of Blades",
-        },
-        ['MagicNuke2'] = {
-            -- Nuke 1 <= LVL <= 69
-            "Shock of Memorial Steel",
-            "Shock of Carbide Steel",
-            "Shock of Burning Steel",
-            "Shock of Arcronite Steel",
-            "Shock of Darksteel",
-            "Shock of Blistersteel",
-            "Shock of Argathian Steel",
-            "Shock of Ethereal Steel",
-            "Shock of Discordant Steel",
-            "Shock of Cineral Steel",
-            "Shock of Silvered Steel",
-            "Blade Strike",
-            "Rock of Taelosia",
-            "Black Steel",
-            "Shock of Steel",
-            "Shock of Swords",
-            "Shock of Spikes",
-            "Shock of Blades",
-        },
-        ['FireBoltNuke'] = {
-            -- Fire Bolt Nukes
-            "Bolt of Molten Dacite",
-            "Bolt of Molten Olivine",
-            "Bolt of Molten Komatiite",
-            "Bolt of Skyfire",
-            "Bolt of Molten Shieldstone",
-            "Bolt of Molten Magma",
-            "Bolt of Molten Steel",
-            "Bolt of Rhyolite",
-            "Bolt of Molten Scoria",
-            "Bolt of Molten Dross",
-            "Bolt of Molten Slag",
-            "Bolt of Jerikor",
-            "Firebolt of Tallon",
-            "Seeking Flame of Seukor",
             "Scars of Sigil",
             "Lava Bolt",
             "Cinder Bolt",
             "Bolt of Flame",
+            "Shock of Flame",
             "Flame Bolt",
+            "Burn",
+            "Burst of Flame",
         },
-        ['MagicBoltNuke1'] = {
-            -- Magic Bolt Nukes
-            "Luclinite Bolt",
-            "Komatiite Bolt",
-            "Korascian Bolt",
-            "Meteoric Bolt",
-            "Iron Bolt",
+        ['BigFireDD'] = { -- Longer cast time bolts we can use when mobs are at higher health.
+            "Bolt of Jerikor",
+            "Firebolt of Tallon",
+            "Seeking Flame of Seukor",
         },
-        ['MagicBoltNuke2'] = {
-            -- Magic Bolt Nukes
-            "Luclinite Bolt",
-            "Komatiite Bolt",
-            "Korascian Bolt",
-            "Meteoric Bolt",
-            "Iron Bolt",
+        ['MagicDD'] = { -- Magic does not have any faster casts like Fire, we have only these.
+            "Blade Strike",
+            "Rock of Taelosia",
+            "Black Steel",
+            "Shock of Steel",
+            "Shock of Swords",
+            "Shock of Spikes",
+            "Shock of Blades",
         },
         ['TwinCast'] = {
             "Twincast",
@@ -860,6 +818,12 @@ _ClassConfig      = {
             "Malaisement",
             "Malaise",
         },
+        ['SingleCotH'] = {
+            "Call of the Hero",
+        },
+        ['GroupCotH'] = {
+            "Call of the Heroes",
+        },
     },
     ['HealRotationOrder'] = {
 
@@ -928,6 +892,7 @@ _ClassConfig      = {
             name = 'Combat Pocket Pet',
             state = 1,
             steps = 1,
+            load_cond = function() return Config:GetSetting('DoPocketPet') end,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning()
@@ -953,9 +918,20 @@ _ClassConfig      = {
             end,
         },
         {
+            name = 'DPS(LowLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function(self) return not self:GetResolvedActionMapItem('ChaoticNuke') end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning()
+            end,
+        },
+        {
             name = 'DPS',
             state = 1,
             steps = 1,
+            load_cond = function(self) return self:GetResolvedActionMapItem('ChaoticNuke') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning()
@@ -1398,7 +1374,7 @@ _ClassConfig      = {
                 end,
                 cond = function(self)
                     if self.TempSettings.PocketPet == nil then self.TempSettings.PocketPet = false end
-                    return self.TempSettings.PocketPet and Config:GetSetting('DoPocketPet') and mq.TLO.Me.Pet.ID() == 0 and Targeting.GetXTHaterCount() > 0
+                    return self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and Targeting.GetXTHaterCount() > 0
                 end,
                 custom_func = function(self)
                     Logger.log_info("\atPocketPet: \arNo pet while in combat! \agPulling out pocket pet")
@@ -1581,14 +1557,6 @@ _ClassConfig      = {
                     return false
                 end,
             },
-            {
-                name = "Dagger of Evil Summons",
-                type = "Item",
-                cond = function(self, itemName)
-                    if not Config:GetSetting('DoEvilDagger') then return false end
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
-            },
         },
         ['DPS'] = {
             {
@@ -1614,7 +1582,7 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "SpearNuke1",
+                name = "SpearNuke",
                 type = "Spell",
                 cond = function(self, spell)
                     return Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck())
@@ -1628,35 +1596,11 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "FireNuke1",
-                type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
-            },
-            {
-                name = "FireNuke2",
-                type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
-            },
-            {
-                name = "FireBoltNuke",
-                type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 or Core.IsModeActive("PetTank") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
-            },
-            {
-                name = "MagicNuke1",
-                type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 and Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
-            },
-            {
-                name = "MagicNuke2",
-                type = "Spell",
-                cond = function(self) return mq.TLO.Me.Level() < 70 and Core.IsModeActive("Fire") and (Casting.HaveManaToNuke() or Casting.BurnCheck()) end,
-            },
-            {
-                name = "Turned Summoned",
+                name = "Turn Summoned",
                 type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Target.ID() > 0 and mq.TLO.Target.Body.Name():lower() == "undead pet" and Casting.AAReady(aaName)
+                cond = function(self, aaName, target)
+                    if not Targeting.TargetBodyIs(target, "Undead Pet") then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
             {
@@ -1672,6 +1616,38 @@ _ClassConfig      = {
             --               Config:GetSetting('DoAlliance') and Casting.CanAlliance()
             --       end,
             --    },
+        },
+        ['DPS(LowLevel)'] = {
+            {
+                name = "BigFireDD",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('HPStopBigNuke') and not Targeting.IsNamed(target)) then return false end
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "FireDD",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "MagicDD",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "Turn Summoned",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Targeting.TargetBodyIs(target, "Undead Pet") then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
         },
         ['Malo'] = {
             {
@@ -1880,94 +1856,114 @@ _ClassConfig      = {
         {
             gem = 1,
             spells = {
-                { name = "SpearNuke1", cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
-                { name = "FireNuke1", },
+                { name = "SpearNuke", },
+                { name = "FireDD", },
             },
         },
         {
             gem = 2,
             spells = {
-                { name = "ChaoticNuke", cond = function(self) return mq.TLO.Me.Level() >= 69 end, },
-                { name = "FireNuke2", },
+                { name = "ChaoticNuke", },
+                { name = "BigFireDD", },
             },
         },
         {
             gem = 3,
             spells = {
 
-                { name = "SwarmPet",     cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
-                { name = "FireBoltNuke", },
+                { name = "SwarmPet", cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
+                { name = "MagicDD", },
             },
         },
         {
             gem = 4,
             spells = {
-                { name = "VolleyNuke", cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
-                { name = "MagicNuke1", cond = function(self) return true end, },
+                { name = "VolleyNuke", },
+                { name = "PetHealSpell", },
             },
         },
         {
             gem = 5,
             spells = {
-                { name = "FireOrbSummon", cond = function(self) return mq.TLO.Me.Level() >= 75 end, },
-                { name = "MagicNuke2",    cond = function(self) return true end, },
+                { name = "TwinCast", },
+                { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malaise") end, },
+                { name = "PetHealSpell", },
+                { name = "LongDurDmgShield", },
             },
         },
         {
             gem = 6,
             spells = {
-                {
-                    name = "FireOrbSummon",
-                    cond = function(self)
-                        return mq.TLO.Me.Level() >= 65 and ((mq.TLO.Me.AltAbility("Malosinete").ID() or 0) > 0 or not Config:GetSetting('DoMalo'))
-                    end,
-                },
-                { name = "MaloDebuff", cond = function(self) return true end, },
+                { name = "GroupCotH", },
+                { name = "ManaRodSummon", },
+                { name = "PetHealSpell", },
+                { name = "LongDurDmgShield", },
             },
         },
         {
             gem = 7,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                {
-                    name = "AllianceBuff",
-                    cond = function(self)
-                        return Config:GetSetting('DoAlliance')
-                    end,
-                },
-                { name = "SelfManaRodSummon", },
+                { name = "FireOrbSummon", },
+                { name = "PetHealSpell", },
+                { name = "LongDurDmgShield", },
             },
         },
         {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "GatherMana", },
+                { name = "PetManaNuke", },
+                { name = "PetHealSpell", },
+                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
+                { name = "LongDurDmgShield", },
             },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "DichoSpell", },
+                { name = "GatherMana", },
+                { name = "PetHealSpell", },
+                { name = "LongDurDmgShield", },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "TwinCast", },
+                { name = "EarthPetItemSummon", },
+                { name = "PetHealSpell", },
+                { name = "LongDurDmgShield", },
             },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "PetManaNuke", },
+                { name = "FirePetItemSummon", },
+                { name = "PetHealSpell", },
+                { name = "LongDurDmgShield", },
             },
         },
         {
             gem = 12,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "SelfManaRodSummon", },
+                { name = "PetHealSpell", },
+                { name = "LongDurDmgShield", },
+            },
+        },
+        {
+            gem = 13,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "PetHealSpell", },
+                { name = "LongDurDmgShield", },
+            },
+        },
+        {
+            gem = 14,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "PetHealSpell", },
@@ -1993,6 +1989,7 @@ _ClassConfig      = {
             Category = "Pet",
             Tooltip = "Pocket your pet during downtime",
             Default = true,
+            RequiresLoadoutChange = true,
             FAQ = "I have suspend Minion AA, how do I keep a spare pet suspended?",
             Answer = "You can use the [DoPocketPet] feature to keep a spare pet suspended.",
         },
@@ -2079,13 +2076,29 @@ _ClassConfig      = {
             FAQ = "I want to use Force of Elements AA in my rotation, how do I do that?",
             Answer = "You can use the [DoForce] feature to use the Force of Elements AA in your rotation.",
         },
-        ['DoMagicNuke']    = {
-            DisplayName = "Do Magic Nuke",
-            Category = "Spells and Abilties",
-            Tooltip = "Use Magic nukes instead of Fire",
-            Default = false,
-            FAQ = "I want to use Magic Nukes instead of Fire Nukes, how do I do that?",
-            Answer = "You can use the [DoMagicNuke] feature to use Magic Nukes instead of Fire Nukes.",
+        ['ElementChoice']  = {
+            DisplayName = "Element Choice:",
+            Category = "DPS Low Level",
+            Index = 1,
+            Tooltip = "Choose an element to focus on under level 71.",
+            Type = "Combo",
+            ComboOptions = { 'Fire', 'Magic', },
+            Default = 1,
+            Min = 1,
+            Max = 2,
+            RequiresLoadoutChange = true,
+            FAQ = "I'm fighting fire-resistant mobs, how can I use my magic nukes?",
+            Answer = "If you are under level 70, you can swap to magic nukes on the DPS Low Level tab.",
+        },
+        ['HPStopBigNuke']  = {
+            DisplayName = "Stop Big Nuke",
+            Category = "DPS Low Level",
+            Tooltip = "Don't use our Big Nuke below this health percentage.",
+            Default = 50,
+            Min = 1,
+            Max = 100,
+            FAQ = "What is a Big Nuke?",
+            Answer = "Low level mages have fast(light) and slow(heavy) spell options, the Big Nuke is the latter; we don't want to start casting this when a mob is near death.",
         },
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
@@ -2094,14 +2107,6 @@ _ClassConfig      = {
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "How do I use my chest clicky?",
             Answer = "You can use the [DoChestClick] feature to click your chest item.",
-        },
-        ['DoEvilDagger']   = {
-            DisplayName = "Do Evil Dagger",
-            Category = "Utilities",
-            Tooltip = "Use the DD clicky effect on the Dagger of Evil Summons in combat.",
-            Default = false,
-            FAQ = "What is an Evil Dagger lol?",
-            Answer = "The Dagger of Evil Summons is a Laz-specific damage clicky.",
         },
         ['AISelfDelay']    = {
             DisplayName = "Autoinv Delay (Self)",
@@ -2113,7 +2118,6 @@ _ClassConfig      = {
             FAQ = "Why do I always have items stuck on the cursor?",
             Answer = "You can adjust the delay before autoinventory by setting the [AISelfDelay] setting.\n" ..
                 "Increase the delay if you notice items left on cursors regularly.",
-
         },
         ['AIGroupDelay']   = {
             DisplayName = "Autoinv Delay (Group)",
@@ -2130,6 +2134,7 @@ _ClassConfig      = {
             DisplayName = "Cast Malo",
             Category = "Debuffs",
             Tooltip = "Do Malo Spells/AAs",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
             FAQ = "I want to use Malo in my rotation, how do I do that?",
             Answer = "You can use the [DoMalo] feature to use Malo in your rotation.",
