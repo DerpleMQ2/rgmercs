@@ -747,7 +747,7 @@ return {
             load_cond = function() return Config:GetSetting('DoSlow') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck()
             end,
         },
         {

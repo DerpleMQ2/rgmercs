@@ -885,7 +885,8 @@ _ClassConfig      = {
             load_cond = function() return Config:GetSetting('DoMalo') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state, targetId)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck() and
+                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
             end,
         },
         {

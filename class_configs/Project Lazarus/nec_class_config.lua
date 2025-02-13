@@ -886,7 +886,7 @@ local _ClassConfig = {
             {
                 name = "ScentDebuff",
                 type = "Spell",
-                cond = function(self, spell) return Casting.DetSpellCheck(spell) end,
+                cond = function(self, spell) return Casting.DetSpellCheck(spell) and Casting.DebuffConCheck() end,
             },
             {
                 name = "ChaoticDebuff",
