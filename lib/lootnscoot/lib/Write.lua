@@ -5,10 +5,10 @@ Write.loglevel = 'info'
 Write.prefix = ''
 
 Write.loglevels = {
-    ['trace'] = { level = 1, color = '\27[36m', mqcolor = '\at', abbreviation = 'TRACE', },
-    ['debug'] = { level = 2, color = '\27[95m', mqcolor = '\am', abbreviation = 'DEBUG', },
-    ['info']  = { level = 3, color = '\27[92m', mqcolor = '\ag', abbreviation = 'INFO', },
-    ['warn']  = { level = 4, color = '\27[93m', mqcolor = '\ay', abbreviation = 'WARN', },
+    ['debug'] = { level = 1, color = '\27[95m', mqcolor = '\am', abbreviation = 'DEBUG', },
+    ['info']  = { level = 2, color = '\27[92m', mqcolor = '\ag', abbreviation = 'INFO', },
+    ['warn']  = { level = 3, color = '\27[93m', mqcolor = '\ay', abbreviation = 'WARN', },
+    ['trace'] = { level = 4, color = '\27[36m', mqcolor = '\at', abbreviation = 'TRACE', },
     ['error'] = { level = 5, color = '\27[31m', mqcolor = '\ao', abbreviation = 'ERROR', },
     ['fatal'] = { level = 6, color = '\27[91m', mqcolor = '\ar', abbreviation = 'FATAL', },
     ['help']  = { level = 7, color = '\27[97m', mqcolor = '\aw', abbreviation = 'HELP', },
