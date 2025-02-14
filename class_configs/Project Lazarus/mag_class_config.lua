@@ -1623,6 +1623,7 @@ _ClassConfig      = {
                 name = "BigFireDD",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if Config:GetSetting('ElementChoice') ~= 1 then return false end
                     if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('HPStopBigNuke') and not Targeting.IsNamed(target)) then return false end
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
@@ -1631,6 +1632,7 @@ _ClassConfig      = {
                 name = "FireDD",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if Config:GetSetting('ElementChoice') ~= 1 then return false end
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1638,6 +1640,7 @@ _ClassConfig      = {
                 name = "MagicDD",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if Config:GetSetting('ElementChoice') ~= 2 then return false end
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
