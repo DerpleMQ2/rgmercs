@@ -152,8 +152,8 @@ function Module:Init()
 				Core.DoCmd("/lua stop lootnscoot")
 			end
 			Core.DoCmd("/lua run %s directed", LootnScootDir)
+			if Module.Actor == nil then Module:LootMessageHandler() end
 		end
-		Module.Actor = Comms.Actors.register('rgmercs_lootnscoot', function(message) end)
 		--pass settings to lootnscoot lib
 		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	end
