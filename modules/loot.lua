@@ -209,7 +209,6 @@ function Module.LootMessageHandler()
 		if subject == 'processing' and who == Config.Globals.CurLoadedChar then
 			Module.TempSettings.Looting = true
 			Logger.log_debug("\ay[LOOT]: \aoPausing for \atLoot Actions")
-			Module.DoLooting()
 		end
 		if subject == 'done_processing' and who == Config.Globals.CurLoadedChar then
 			Module.TempSettings.Looting = false
@@ -226,6 +225,8 @@ function Module:GiveTime()
 			{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
 		self.TempSettings.Looting = true
 		Logger.log_debug("\ay[LOOT]: \atFinished Actions \agResuming:")
+	end
+	if self.TempSettings.Looting then
 		Module.DoLooting()
 	end
 end

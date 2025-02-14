@@ -3265,6 +3265,7 @@ function loot.processItems(action)
     local flag        = false
     local totalPlat   = 0
     ProcessItemsState = action
+    loot.informProcessing()
     -- Helper function to process individual items based on action
     local function processItem(item, action, bag, slot)
         if not item or not item.ID() then return end
@@ -3365,6 +3366,7 @@ function loot.processItems(action)
     -- Final check for bag status
     loot.CheckBags()
     ProcessItemsState = nil
+    loot.doneProcessing()
 end
 
 function loot.sellStuff()
@@ -5512,7 +5514,7 @@ end
 
 function loot.processArgs(args)
     loot.Terminate = true
-    local mercsRunnig = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
+    local directorRunning = mq.TLO.Lua.Script(loot.DirectorScript).Status() == 'RUNNING' or false
     if args == nil then return end
     if args[1] == 'directed' and args[2] ~= nil then
         if loot.guiLoot ~= nil then
@@ -5524,17 +5526,11 @@ function loot.processArgs(args)
         loot.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, { action = 'Hello', Server = eqServer, who = MyName, })
         loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, { action = 'Hello', Server = eqServer, who = MyName, })
     elseif args[1] == 'sellstuff' then
-        if mercsRunnig then loot.informProcessing() end
         loot.processItems('Sell')
-        if mercsRunnig then loot.doneProcessing() end
     elseif args[1] == 'tributestuff' then
-        if mercsRunnig then loot.informProcessing() end
         loot.processItems('Tribute')
-        if mercsRunnig then loot.doneProcessing() end
     elseif args[1] == 'cleanup' then
-        if mercsRunnig then loot.informProcessing() end
         loot.processItems('Destroy')
-        if mercsRunnig then loot.doneProcessing() end
     elseif args[1] == 'once' then
         loot.lootMobs()
     elseif args[1] == 'standalone' then
@@ -5579,8 +5575,8 @@ end
 loot.init({ ..., })
 
 while not loot.Terminate do
-    local mercsRunning = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
-    if not mercsRunning and Mode == 'directed' then
+    local directorRunning = mq.TLO.Lua.Script(loot.DirectorScript).Status() == 'RUNNING' or false
+    if not directorRunning and Mode == 'directed' then
         loot.Terminate = true
     end
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then loot.Terminate = true end -- exit sctipt if at char select.
