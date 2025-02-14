@@ -7,6 +7,7 @@ local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
 local Strings            = require("utils.strings")
 local Logger             = require("utils.logger")
+local Actors             = require("actors")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
 local LootnScootDir      = string.format("\"%s/rgmercs/lib/lootnscoot\"", mq.luaDir)
@@ -188,7 +189,26 @@ function Module:Pop()
 	self:SaveSettings(false)
 end
 
-function Module:GiveTime(combat_state)
+function Module:DoLooting()
+	Logger.log_debug("\ay[LOOT]: \agPaused for Looting...")
+	while (self.TempSettings.Looting) do
+		mq.delay(1000, function() return not self.TempSettings.Looting end)
+	end
+	Logger.log_debug("\ay[LOOT]: \agFinished Looting Resuming...")
+end
+
+function Module:LootMessageHandler()
+	Module.Actor = Actors.register('loot_module', function(message)
+		local mail = message()
+		local subject = mail.Subject or ''
+		local who = mail.Who or ''
+		if subject == "done looting" and who == Config.Globals.CurLoadedChar then
+			self.TempSettings.Looting = false
+		end
+	end)
+end
+
+function Module:GiveTime()
 	if not Config:GetSetting('DoLoot') then return end
 
 	-- send actors message to loot
