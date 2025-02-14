@@ -85,6 +85,8 @@ local ColorCountRep, StyleCountRep                           = 0, 0
 local openConfigGUI, locked, zoom                            = false, false, false
 local themeFile                                              = mq.configDir .. '/MyThemeZ.lua'
 local configFile                                             = mq.configDir .. '/MyUI_Configs.lua'
+local eqServer                                               = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
+
 local recordFile                                             = string.format("%s/MyUI/Looted/%s/%s_LootRecord.lua", mq.configDir, mq.TLO.EverQuest.Server(), MyName)
 local ZoomLvl                                                = 1.0
 local fontSize                                               = 16 -- coming soon adding in the var and table now. usage is commented out for now.
@@ -93,6 +95,7 @@ local gIcon                                                  = Icons.MD_SETTINGS
 local globalNewIcon                                          = Icons.FA_GLOBE
 local globeIcon                                              = Icons.FA_GLOBE
 local changed                                                = false
+
 local txtBuffer                                              = {}
 local defaults                                               = {
 	LoadTheme = 'None',
@@ -1032,6 +1035,7 @@ end
 function guiLoot.RegisterActor()
 	guiLoot.actor = Actors.register('looted', function(message)
 		local lootEntry = message()
+		if lootEntry.Server ~= eqServer then return end
 		for _, item in ipairs(lootEntry.Items) do
 			local link = item.Link
 			local what = item.Name

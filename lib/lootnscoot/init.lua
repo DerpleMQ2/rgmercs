@@ -2260,22 +2260,34 @@ end
 
 function loot.RegisterActors()
     loot.lootActor = Actors.register('lootnscoot', function(message)
-        local lootMessage = message()
-        local who         = lootMessage.who or ''
-        local action      = lootMessage.action or ''
-        local itemID      = lootMessage.itemID or 0
-        local rule        = lootMessage.rule or 'NULL'
-        local section     = lootMessage.section or 'NormalItems'
-        local server      = lootMessage.Server or 'NULL'
-        local itemName    = lootMessage.item or 'NULL'
-        local itemLink    = lootMessage.link or 'NULL'
-        local itemClasses = lootMessage.classes or 'All'
-        local itemRaces   = lootMessage.races or 'All'
-        local boxSettings = lootMessage.settings or {}
-        local directions  = lootMessage.directions or 'NULL'
+        local lootMessage   = message()
+        local who           = lootMessage.who or ''
+        local action        = lootMessage.action or ''
+        local itemID        = lootMessage.itemID or 0
+        local rule          = lootMessage.rule or 'NULL'
+        local section       = lootMessage.section or 'NormalItems'
+        local server        = lootMessage.Server or 'NULL'
+        local itemName      = lootMessage.item or 'NULL'
+        local itemLink      = lootMessage.link or 'NULL'
+        local itemClasses   = lootMessage.classes or 'All'
+        local itemRaces     = lootMessage.races or 'All'
+        local boxSettings   = lootMessage.settings or {}
+        local directions    = lootMessage.directions or 'NULL'
+        local combatLooting = lootMessage.CombatLooting ~= nil and lootMessage.CombatLooting or false
         if directions == 'doloot' then
             loot.LootNow = true
             return
+        end
+        if directions == 'combatlooting' then
+            loot.Settings.CombatLooting = combatLooting
+            loot.TempSettings.CombatLooting = combatLooting
+            loot.sendMySettings()
+            loot.writeSettings()
+            return
+        end
+        if directions == 'getcombatsetting' then
+            loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, },
+                { Subject = 'mysetting', Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
         end
         if itemName == 'NULL' then
             itemName = loot.ALLITEMS[itemID] and loot.ALLITEMS[itemID].Name or 'NULL'
@@ -2318,6 +2330,7 @@ function loot.RegisterActors()
             loot.loadSettings()
             loot.sendMySettings()
         end
+
         if server ~= eqServer then return end
 
         -- Reload loot settings
@@ -2950,7 +2963,7 @@ end
 function loot.finishedLooting()
     if Mode == 'directed' then
         loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, },
-            { Subject = 'done_looting', Who = MyName, })
+            { Subject = 'done_looting', Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
     end
 end
 
@@ -3235,7 +3248,7 @@ function loot.eventForage()
     while mq.TLO.Cursor() do
         local cursorItem        = mq.TLO.Cursor
         local foragedItem       = cursorItem.Name()
-        local forageRule        = loot.split(loot.getRule(cursorItem, 'forage', {}, 0))
+        local forageRule        = loot.split(loot.getRule(cursorItem, 'forage', 0))
         local ruleAction        = forageRule[1] -- what to do with the item
         local ruleAmount        = forageRule[2] -- how many of the item should be kept
         local currentItemAmount = mq.TLO.FindItemCount('=' .. foragedItem)()
@@ -4761,6 +4774,7 @@ end
 ---@param delete_items boolean Delete items from the table
 function loot.bulkSet(item_table, setting, classes, which_table, delete_items)
     if item_table == nil or type(item_table) ~= "table" then return end
+    if which_table == 'Personal_Rules' then which_table = loot.PersonalTableName end
     local localName = which_table == 'Normal_Rules' and 'NormalItems' or 'GlobalItems'
     localName = which_table == loot.PersonalTableName and 'PersonalItems' or localName
 
@@ -5505,11 +5519,11 @@ function loot.renderMainUI()
 end
 
 function loot.informProcessing()
-    loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = "processing", Who = MyName, })
+    loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = "processing", Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
 end
 
 function loot.doneProcessing()
-    loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = "done_processing", Who = MyName, })
+    loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = "done_processing", Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
 end
 
 function loot.processArgs(args)
@@ -5563,6 +5577,10 @@ function loot.init(args)
     loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.UseActors, 'lootnscoot', loot.Settings.ShowReport)
 
     if needsSave then loot.writeSettings() end
+    if Mode == 'directed' then
+        -- send them our combat setting
+        loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = 'combatsetting', Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
+    end
     return needsSave
 end
 
@@ -5581,7 +5599,14 @@ while not loot.Terminate do
     end
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then loot.Terminate = true end -- exit sctipt if at char select.
 
+    if loot.TempSettings.LastCombatSetting == nil then
+        loot.TempSettings.LastCombatSetting = loot.Settings.CombatLooting
+    end
 
+    if loot.TempSettings.LastCombatSetting ~= loot.Settings.CombatLooting and loot.TempSettings.NeedSave then
+        loot.TempSettings.LastCombatSetting = loot.Settings.CombatLooting
+        loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = 'combatsetting', Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
+    end
     if debugPrint then
         Logger.loglevel = 'debug'
     elseif not loot.Settings.ShowInfoMessages then
