@@ -152,8 +152,9 @@ function Module:Init()
 				Core.DoCmd("/lua stop lootnscoot")
 			end
 			Core.DoCmd("/lua run %s directed", LootnScootDir)
-			if Module.Actor == nil then Module:LootMessageHandler() end
+			self:LootMessageHandler()
 		end
+		self.TempSettings.Looting = false
 		--pass settings to lootnscoot lib
 		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	end
@@ -189,35 +190,36 @@ function Module:Pop()
 	self:SaveSettings(false)
 end
 
-function Module:DoLooting()
-	Logger.log_debug("\ay[LOOT]: \agPaused for Looting...")
-	while (self.TempSettings.Looting) do
-		mq.delay(1000, function() return not self.TempSettings.Looting end)
+function Module.DoLooting()
+	while (Module.TempSettings.Looting) do
+		mq.delay(100, function() return not Module.TempSettings.Looting end)
 	end
-	Logger.log_debug("\ay[LOOT]: \agFinished Looting Resuming...")
+	Logger.log_debug("\ay[LOOT]: \agLoot Finishing Resuming:")
 end
 
-function Module:LootMessageHandler()
+function Module.LootMessageHandler()
 	Module.Actor = Actors.register('loot_module', function(message)
 		local mail = message()
 		local subject = mail.Subject or ''
 		local who = mail.Who or ''
-		if subject == "done looting" and who == Config.Globals.CurLoadedChar then
-			self.TempSettings.Looting = false
+		if subject == "done_looting" and who == Config.Globals.CurLoadedChar then
+			Module.TempSettings.Looting = false
+			Module.DoLooting()
 		end
 	end)
 end
 
 function Module:GiveTime()
 	if not Config:GetSetting('DoLoot') then return end
-	if mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', 100))() > 0 then
-		if not Module.Actor then Module:LootMessageHandler() end
-		-- send actors message to loot
+	if Module.Actor == nil then self:LootMessageHandler() end
+	-- send actors message to loot
+	if not self.TempSettings.Looting then
 		Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
 			{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
 		self.TempSettings.Looting = true
-		self:DoLooting()
+		Logger.log_debug("\ay[LOOT]: \agLoot Paused for Looting:")
 	end
+	Module.DoLooting()
 end
 
 function Module:OnDeath()

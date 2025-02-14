@@ -2948,11 +2948,8 @@ end
 
 function loot.finishedLooting()
     if Mode == 'directed' then
-        local mercsRunning = mq.TLO.Lua.Script('rgmercs').Status() == 'RUNNING' or false
-        if not mercsRunning then
-            loot.lootActor:send({ mailbox = 'loot_module', script = 'rgmercs', },
-                { Subject = 'done looting', Who = MyName, })
-        end
+        loot.lootActor:send({ mailbox = 'loot_module', script = 'rgmercs', },
+            { Subject = 'done_looting', Who = MyName, })
     end
 end
 
