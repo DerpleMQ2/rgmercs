@@ -90,7 +90,7 @@ function Module:SaveSettings(doBroadcast)
 		if lnsRunning then
 			Core.DoCmd("/lua stop lootnscoot")
 		end
-		Core.DoCmd("/lua run %s directed", LootnScootDir)
+		Core.DoCmd("/lua run %s directed rgmercs", LootnScootDir)
 	else
 		Core.DoCmd("/lua stop %s", LootnScootDir)
 	end
@@ -151,7 +151,7 @@ function Module:Init()
 			if lnsRunning then
 				Core.DoCmd("/lua stop lootnscoot")
 			end
-			Core.DoCmd("/lua run %s directed", LootnScootDir)
+			Core.DoCmd("/lua run %s directed rgmercs", LootnScootDir)
 			self:LootMessageHandler()
 		end
 		self.TempSettings.Looting = false
@@ -191,10 +191,11 @@ function Module:Pop()
 end
 
 function Module.DoLooting()
+	if not Module.TempSettings.Looting then return end
 	while (Module.TempSettings.Looting) do
 		mq.delay(100, function() return not Module.TempSettings.Looting end)
 	end
-	Logger.log_debug("\ay[LOOT]: \agLoot Finishing Resuming:")
+	Logger.log_debug("\ay[LOOT]: \atFinished Actions \agResuming:")
 end
 
 function Module.LootMessageHandler()
@@ -204,7 +205,14 @@ function Module.LootMessageHandler()
 		local who = mail.Who or ''
 		if subject == "done_looting" and who == Config.Globals.CurLoadedChar then
 			Module.TempSettings.Looting = false
+		end
+		if subject == 'processing' and who == Config.Globals.CurLoadedChar then
+			Module.TempSettings.Looting = true
+			Logger.log_debug("\ay[LOOT]: \aoPausing for \atLoot Actions")
 			Module.DoLooting()
+		end
+		if subject == 'done_processing' and who == Config.Globals.CurLoadedChar then
+			Module.TempSettings.Looting = false
 		end
 	end)
 end
@@ -217,9 +225,9 @@ function Module:GiveTime()
 		Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
 			{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
 		self.TempSettings.Looting = true
-		Logger.log_debug("\ay[LOOT]: \agLoot Paused for Looting:")
+		Logger.log_debug("\ay[LOOT]: \atFinished Actions \agResuming:")
+		Module.DoLooting()
 	end
-	Module.DoLooting()
 end
 
 function Module:OnDeath()
