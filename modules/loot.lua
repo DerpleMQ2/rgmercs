@@ -210,10 +210,14 @@ end
 
 function Module:GiveTime()
 	if not Config:GetSetting('DoLoot') then return end
-
-	-- send actors message to loot
-	Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
-		{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
+	if mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', 100))() > 0 then
+		if not Module.Actor then Module:LootMessageHandler() end
+		-- send actors message to loot
+		Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
+			{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
+		self.TempSettings.Looting = true
+		self:DoLooting()
+	end
 end
 
 function Module:OnDeath()
