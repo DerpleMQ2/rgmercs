@@ -2,7 +2,7 @@
 local mq                 = require('mq')
 local Config             = require('utils.config')
 local Core               = require("utils.core")
-local Targeting          = require("utils.targeting")
+local Casting            = require("utils.casting")
 local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
 local Strings            = require("utils.strings")
@@ -45,10 +45,11 @@ Module.DefaultConfig     = {
 	['LootRespectMedState']                    = {
 		DisplayName = "Respect Med State",
 		Category = "Loot N Scoot",
-		Tooltip = "Respect Med State",
-		Default = true,
-		FAQ = "How do I make sure my guys are looting while meditating?",
-		Answer = "You can enable [LootRespectMedState] to prevent looting while meditating.",
+		Tooltip = "Hold looting if you are currently meditating.",
+		Default = false,
+		FAQ = "Why is the PC sitting there and not medding?",
+		Answer =
+		"If you turn on Respect Med State in the Group Watch options, your looter will remain medding until those thresholds are reached.\nIf Stand When Done is not enabled, the looter may continue to sit after those thresholds are reached.",
 	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
@@ -221,6 +222,7 @@ function Module.DoLooting()
 	if not Module.TempSettings.Looting then return end
 	while (Module.TempSettings.Looting) do
 		mq.delay(100, function() return not Module.TempSettings.Looting end)
+		mq.doevents()
 	end
 	Logger.log_debug("\ay[LOOT]: \atFinished Actions \agResuming:")
 end
@@ -250,6 +252,8 @@ end
 
 function Module:GiveTime(combat_state)
 	if not Config:GetSetting('DoLoot') then return end
+
+	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 
 	if Config:GetSetting('LootRespectMedState') and Config.Globals.InMedState then
 		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Meditating.")
