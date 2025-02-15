@@ -220,11 +220,28 @@ end
 
 function Module.DoLooting()
 	if not Module.TempSettings.Looting then return end
-	while (Module.TempSettings.Looting) do
-		mq.delay(100, function() return not Module.TempSettings.Looting end)
+
+	local maxWait = 10000
+	while Module.TempSettings.Looting do
+		if mq.TLO.Me.CombatState():lower() == "combat" and not Config:GetSetting('CombatLooting') then
+			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")
+			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
+			Module.TempSettings.Looting = false
+			break
+		end
+
+		mq.delay(20, function() return not Module.TempSettings.Looting end)
+
+		maxWait = maxWait - 20
+
+		if maxWait <= 0 then
+			Logger.log_debug("\ay[LOOT]: Aborting Actions due to timeout.")
+			Module.TempSettings.Looting = false
+			break
+		end
 		mq.doevents()
 	end
-	Logger.log_debug("\ay[LOOT]: \atFinished Actions \agResuming:")
+	Logger.log_verbose("\ay[LOOT]: \atFinished or Aborted Looting: \agResuming")
 end
 
 function Module:LootMessageHandler()
@@ -260,9 +277,12 @@ function Module:GiveTime(combat_state)
 		return
 	end
 
+	local deadCount = mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', 100))()
+
+
 	if self.Actor == nil then self:LootMessageHandler() end
 	-- send actors message to loot
-	if combat_state ~= "Combat" or Config:GetSetting('CombatLooting') then
+	if (combat_state ~= "Combat" or Config:GetSetting('CombatLooting')) and deadCount > 0 then
 		if not self.TempSettings.Looting then
 			self.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
 				{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
@@ -270,7 +290,8 @@ function Module:GiveTime(combat_state)
 		end
 	end
 	if self.TempSettings.Looting then
-		Logger.log_debug("\ay[LOOT]: \aoPausing for \atLoot Actions")
+		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
+		self.TempSettings.TimeEnetered = os.clock()
 		Module.DoLooting()
 	end
 	-- if Module.settings.CombatLooting ~= Module.TempSettings.CombatLooting then
