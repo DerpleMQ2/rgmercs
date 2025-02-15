@@ -405,6 +405,7 @@ local settingsNoDraw                    = {
     BuyItemsTable = true,
     ShowReport = true,
     ShowConsole = true,
+    LookupLinks = true,
 }
 
 local selectedIndex                     = 1
@@ -1048,34 +1049,33 @@ function loot.addMyInventoryToDB()
     local counterBank = 0
     Logger.Info(loot.guiLoot.console, "\atImporting Inventory\ax into the DB")
 
-    for i = 1, 22 do
-        if i < 11 then
-            -- Items in Bags and Main Inventory
-            local bagSlot       = mq.TLO.InvSlot('pack' .. i).Item
-            local containerSize = bagSlot.Container()
-            if bagSlot() ~= nil then
-                loot.addToItemDB(bagSlot)
-                counter = counter + 1
-                if containerSize then
-                    mq.delay(5) -- Delay to prevent spamming the DB
-                    for j = 1, containerSize do
-                        local item = bagSlot.Item(j)
-                        if item and item.ID() then
-                            loot.addToItemDB(item)
-                            counter = counter + 1
-                            mq.delay(10)
-                        end
+    for i = 23, 32 do
+        -- Items in Bags and Main Inventory
+        local bagSlot       = mq.TLO.InvSlot('pack' .. i).Item
+        local containerSize = bagSlot.Container()
+        if bagSlot() ~= nil then
+            loot.addToItemDB(bagSlot)
+            counter = counter + 1
+            if containerSize then
+                mq.delay(5)     -- Delay to prevent spamming the DB
+                for j = 1, containerSize do
+                    local item = bagSlot.Item(j)
+                    if item and item.ID() then
+                        loot.addToItemDB(item)
+                        counter = counter + 1
+                        mq.delay(10)
                     end
                 end
             end
-        else
-            -- Worn Items
-            local invItem = mq.TLO.Me.Inventory(i)
-            if invItem() ~= nil then
-                loot.addToItemDB(invItem)
-                counter = counter + 1
-                mq.delay(10) -- Delay to prevent spamming the DB
-            end
+        end
+    end
+    -- Worn Items
+    for i = 1, 22 do
+        local invItem = mq.TLO.Me.Inventory(i)
+        if invItem() ~= nil then
+            loot.addToItemDB(invItem)
+            counter = counter + 1
+            mq.delay(10)     -- Delay to prevent spamming the DB
         end
     end
     -- Banked Items
