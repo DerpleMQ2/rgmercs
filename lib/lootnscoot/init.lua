@@ -172,7 +172,7 @@ loot.Settings                        = {
     GMLSelect        = true,   -- not implimented yet
     LootLagDelay     = 0,      -- not implimented yet
     HideNames        = false,  -- Hides names and uses class shortname in looted window
-    LookupLinks      = false,  -- Enables Looking up Links for items not on that character. *recommend only running on one charcter that is monitoring.
+    -- LookupLinks      = false,  -- Enables Looking up Links for items not on that character. *recommend only running on one charcter that is monitoring.
     RecordData       = false,  -- Enables recording data to report later.
     AutoTag          = false,  -- Automatically tag items to sell if they meet the MinSellPrice
     AutoRestock      = false,  -- Automatically restock items from the BuyItems list when selling
@@ -364,7 +364,7 @@ local settingsEnum                      = {
     gmlselect = 'GMLSelect',
     lootlagdelay = 'LootLagDelay',
     hidenames = 'HideNames',
-    lookuplinks = 'LookupLinks',
+    -- lookuplinks = 'LookupLinks',
     recorddata = 'RecordData',
     autotag = 'AutoTag',
     autorestock = 'AutoRestock',
@@ -2004,12 +2004,13 @@ function loot.getRule(item, from, index)
     local lootActionPreformed             = "Looted"
     local equpiable                       = (item.WornSlots() or 0) > 0
     local newNoDrop                       = false
+    local itemLink                        = item.ItemLink('CLICKABLE')() or 'NULL'
     -- Lookup existing rule in the databases
     local lootRule, lootClasses, lootLink = loot.lookupLootRule(itemID)
     Logger.Info(loot.guiLoot.console, "\aoLookup Rule\ax: \at%s\ax, \ayClasses\ax: \at%s\ax, Item: \ao%s\ax, \atLink: %s", lootRule, lootClasses, itemName, lootLink)
     if lootRule == 'NULL' and item.NoDrop() then
         lootRule = "Ask"
-        loot.addRule(itemID, 'NormalItems', lootRule, lootClasses, item.ItemLink('CLICKABLE')())
+        loot.addRule(itemID, 'NormalItems', lootRule, lootClasses, itemLink)
     end
 
 
@@ -2274,7 +2275,7 @@ function loot.RegisterActors()
         local boxSettings   = lootMessage.settings or {}
         local directions    = lootMessage.directions or 'NULL'
         local combatLooting = lootMessage.CombatLooting ~= nil and lootMessage.CombatLooting or false
-        if directions == 'doloot' then
+        if directions == 'doloot' and who == MyName then
             loot.LootNow = true
             return
         end
@@ -2598,7 +2599,7 @@ function loot.commandHandler(...)
             if loot.guiLoot then
                 loot.guiLoot.GetSettings(
                     loot.Settings.HideNames,
-                    loot.Settings.LookupLinks,
+                    -- loot.Settings.LookupLinks,
                     loot.Settings.RecordData,
                     true,
                     loot.Settings.UseActors,
@@ -2610,7 +2611,7 @@ function loot.commandHandler(...)
             if loot.guiLoot then
                 loot.guiLoot.GetSettings(
                     loot.Settings.HideNames,
-                    loot.Settings.LookupLinks,
+                    -- loot.Settings.LookupLinks,
                     loot.Settings.RecordData,
                     true,
                     loot.Settings.UseActors,
@@ -5439,7 +5440,13 @@ function loot.renderMainUI()
                 ImGui.PushStyleColor(ImGuiCol.PopupBg, ImVec4(0.002, 0.009, 0.082, 0.991))
                 if ImGui.SmallButton(string.format("%s Report", Icons.MD_INSERT_CHART)) then
                     -- loot.guiLoot.showReport = not loot.guiLoot.showReport
-                    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', true)
+                    loot.guiLoot.GetSettings(loot.Settings.HideNames,
+                        -- loot.Settings.LookupLinks,
+                        loot.Settings.RecordData,
+                        true,
+                        loot.Settings.UseActors,
+                        'lootnscoot',
+                        true)
                     loot.Settings.ShowReport = loot.guiLoot.showReport
                     loot.TempSettings.NeedSave = true
                 end
@@ -5532,7 +5539,13 @@ function loot.processArgs(args)
     if args == nil then return end
     if args[1] == 'directed' and args[2] ~= nil then
         if loot.guiLoot ~= nil then
-            loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', false)
+            loot.guiLoot.GetSettings(loot.Settings.HideNames,
+                -- loot.Settings.LookupLinks,
+                loot.Settings.RecordData,
+                true,
+                loot.Settings.UseActors,
+                'lootnscoot',
+                false)
         end
         loot.DirectorScript = args[2]
         Mode = 'directed'
@@ -5549,7 +5562,13 @@ function loot.processArgs(args)
         loot.lootMobs()
     elseif args[1] == 'standalone' then
         if loot.guiLoot ~= nil then
-            loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', false)
+            loot.guiLoot.GetSettings(loot.Settings.HideNames,
+                -- loot.Settings.LookupLinks,
+                loot.Settings.RecordData,
+                true,
+                loot.Settings.UseActors,
+                'lootnscoot',
+                false)
         end
         Mode = 'standalone'
         loot.Terminate = false
@@ -5574,7 +5593,13 @@ function loot.init(args)
     loot.processArgs(args)
     loot.sendMySettings()
     mq.imgui.init('LootnScoot', loot.RenderUIs)
-    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.UseActors, 'lootnscoot', loot.Settings.ShowReport)
+    loot.guiLoot.GetSettings(loot.Settings.HideNames,
+        -- loot.Settings.LookupLinks,
+        loot.Settings.RecordData,
+        true,
+        loot.UseActors,
+        'lootnscoot',
+        loot.Settings.ShowReport)
 
     if needsSave then loot.writeSettings() end
     if Mode == 'directed' then
@@ -5585,7 +5610,13 @@ function loot.init(args)
 end
 
 if loot.guiLoot ~= nil then
-    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, loot.Settings.RecordData, true, loot.Settings.UseActors, 'lootnscoot', loot.Settings.ShowReport)
+    loot.guiLoot.GetSettings(loot.Settings.HideNames,
+        -- loot.Settings.LookupLinks,
+        loot.Settings.RecordData,
+        true,
+        loot.Settings.UseActors,
+        'lootnscoot',
+        loot.Settings.ShowReport)
     loot.guiLoot.init(true, true, 'lootnscoot')
     loot.guiExport()
 end

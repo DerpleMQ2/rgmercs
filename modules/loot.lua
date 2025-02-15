@@ -42,6 +42,14 @@ Module.DefaultConfig     = {
 		FAQ = "How do i make sure my guys are looting during combat?, incase I die or something.",
 		Answer = "You can enable [CombatLooting] to loot during combat, I recommend only having one or 2 characters do this and NOT THE MA!!.",
 	},
+	['LootRespectMedState']                    = {
+		DisplayName = "Respect Med State",
+		Category = "Loot N Scoot",
+		Tooltip = "Respect Med State",
+		Default = true,
+		FAQ = "How do I make sure my guys are looting while meditating?",
+		Answer = "You can enable [LootRespectMedState] to prevent looting while meditating.",
+	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
 		Category = "Loot N Scoot",
@@ -242,6 +250,12 @@ end
 
 function Module:GiveTime(combat_state)
 	if not Config:GetSetting('DoLoot') then return end
+
+	if Config:GetSetting('LootRespectMedState') and Config.Globals.InMedState then
+		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Meditating.")
+		return
+	end
+
 	if self.Actor == nil then self:LootMessageHandler() end
 	-- send actors message to loot
 	if combat_state ~= "Combat" or Config:GetSetting('CombatLooting') then
