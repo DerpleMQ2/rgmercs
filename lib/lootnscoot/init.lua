@@ -1,115 +1,4 @@
---[[
-loot.lua v1.7 - aquietone, grimmier
-
-This is a port of the RedGuides copy of ninjadvloot.inc with some updates as well.
-I may have glossed over some of the events or edge cases so it may have some issues
-around things like:
-- lore items
-- full inventory
-- not full inventory but no slot large enough for an item
-- ...
-Or those things might just work, I just haven't tested it very much using lvl 1 toons
-on project lazarus.
-
-Settings are saved per character in config\LootNScoot_[ServerName]_[CharName].ini
-if you would like to use a global settings file. you can Change this inside the above file to point at your global file instead.
-example= SettingsFile=D:\MQ_EMU\Config/LootNScoot_GlobalSettings.ini
-
-This script can be used in two ways:
-1. Included within a larger script using require, for example if you have some KissAssist-like lua script:
-To loot mobs, call lootutils.lootMobs():
-
-local mq                                    = require 'mq'
-local lootutils                                    = require 'lootnscoot'
-while true do
-lootutils.lootMobs()
-mq.delay(1000)
-end
-
-lootUtils.lootMobs() will run until it has attempted to loot all corpses within the defined radius.
-
-To sell to a vendor, call lootutils.sellStuff():
-
-local mq                                    = require 'mq'
-local lootutils                                    = require 'lootnscoot'
-local doSell                                    = false
-local function binds(...)
-local args                                    = {...}
-if args[1]                                    == 'sell' then doSell                                    = true end
-end
-mq.bind('/myscript', binds)
-while true do
-lootutils.lootMobs()
-if doSell then lootutils.sellStuff() doSell                                    = false end
-mq.delay(1000)
-end
-
-lootutils.sellStuff() will run until it has attempted to sell all items marked as sell to the targeted vendor.
-
-Note that in the above example, loot.sellStuff() isn't being called directly from the bind callback.
-Selling may take some time and includes delays, so it is best to be called from your main loop.
-
-Optionally, configure settings using:
-Set the radius within which corpses should be looted (radius from you, not a camp location)
-lootutils.CorpseRadius                                    = number
-Set whether loot.ini should be updated based off of sell item events to add manually sold items.
-lootutils.AddNewSales                                    = boolean
-Several other settings can be found in the "loot" table defined in the code.
-
-2. Run as a standalone script:
-/lua run lootnscoot standalone
-Will keep the script running, checking for corpses once per second.
-/lua run lootnscoot once
-Will run one iteration of loot.lootMobs().
-/lua run lootnscoot sell
-Will run one iteration of loot.sellStuff().
-/lua run lootnscoot cleanup
-Will run one iteration of loot.cleanupBags().
-
-The script will setup a bind for "/lootutils":
-/lootutils <action> "${Cursor.Name}"
-Set the loot rule for an item. "action" may be one of:
-- Keep
-- Bank
-- Sell
-- Tribute
-- Ignore
-- Destroy
-- Quest|#
-
-/lootutils reload
-Reload the contents of Loot.ini
-/lootutils bank
-Put all items from inventory marked as Bank into the bank
-/lootutils tsbank
-Mark all tradeskill items in inventory as Bank
-
-If running in standalone mode, the bind also supports:
-/lootutils sellstuff
-Runs lootutils.sellStuff() one time
-/lootutils tributestuff
-Runs lootutils.tributeStuff() one time
-/lootutils cleanup
-Runs lootutils.cleanupBags() one time
-
-The following events are used:
-- eventCantLoot - #*#may not loot this corpse#*#
-Add corpse to list of corpses to avoid for a few minutes if someone is already looting it.
-- eventSell - #*#You receive#*# for the #1#(s)#*#
-Set item rule to Sell when an item is manually sold to a vendor
-- eventInventoryFull - #*#Your inventory appears full!#*#
-Stop attempting to loot once inventory is full. Note that currently this never gets set back to false
-even if inventory space is made available.
-- eventNovalue - #*#give you absolutely nothing for the #1#.#*#
-Warn and move on when attempting to sell an item which the merchant will not buy.
-
-This does not include the buy routines from ninjadvloot. It does include the sell routines
-but lootly sell routines seem more robust than the code that was in ninjadvloot.inc.
-The forage event handling also does not handle fishing events like ninjadvloot did.
-There is also no flag for combat looting. It will only loot if no mobs are within the radius.
-
-]]
----@diagnostic disable: undefined-global
+---@diagnostic disable: undefined-global, param-type-mismatch
 ---@diagnostic disable: undefined-field
 
 local mq              = require 'mq'
@@ -123,8 +12,6 @@ if not success then
     return
 end
 local eqServer                       = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
--- Check for looted module, if found use that. else fall back on our copy, which may be outdated.
-
 local version                        = 5
 local MyName                         = mq.TLO.Me.CleanName()
 local Mode                           = 'once'
@@ -138,9 +25,139 @@ local tmpRules, tmpClasses, tmpLinks = {}, {}, {}
 local ProcessItemsState              = nil
 local reportPrefix                   = '/%s \a-t[\at%s\a-t][\ax\ayLootUtils\ax\a-t]\ax '
 Logger.prefix                        = "[\atLootnScoot\ax] "
+local newItem                        = nil
+local debugPrint                     = false
+local iconAnimation                  = mq.FindTextureAnimation('A_DragItem')
+-- Internal settings
+local cantLootList                   = {}
+local cantLootID                     = 0
+local itemNoValue                    = nil
+local noDropItems, loreItems         = {}, {}
+local allItems                       = {}
+-- Constants
+local spawnSearch                    = '%s radius %d zradius 50'
+local shouldLootActions              = { CanUse = false, Ask = false, Keep = true, Bank = true, Sell = true, Destroy = false, Ignore = false, Tribute = false, }
+local validActions                   = {
+    canuse = "CanUse",
+    ask = "Ask",
+    keep = 'Keep',
+    bank = 'Bank',
+    sell = 'Sell',
+    ignore = 'Ignore',
+    destroy = 'Destroy',
+    quest = 'Quest',
+    tribute = 'Tribute',
+}
+local saveOptionTypes                = { string = 1, number = 1, boolean = 1, }
+local NEVER_SELL                     = { ['Diamond Coin'] = true, ['Celestial Crest'] = true, ['Gold Coin'] = true, ['Taelosian Symbols'] = true, ['Planar Symbols'] = true, }
+local showNewItem                    = false
+local lookupDate                     = ''
+local Actors                         = require('actors')
+
+-- paths
+local resourceDir                    = mq.TLO.MacroQuest.Path('resources')() .. "/"
+local RulesDB                        = string.format('%s/LootNScoot/%s/AdvLootRules.db', resourceDir, eqServer)
+local lootDB                         = string.format('%s/LootNScoot/%s/Items.db', resourceDir, eqServer)
+local HistoryDB                      = string.format('%s/LootNScoot/%s/LootHistory.db', resourceDir, eqServer)
+
+-- gui
+local fontScale                      = 1
+local iconSize                       = 16
+local tempValues                     = {}
+local animMini                       = mq.FindTextureAnimation("A_DragItem")
+local EQ_ICON_OFFSET                 = 500
+local showSettings                   = false
+
+
+-- tables
+local settingsEnum                      = {
+    checkcorpseonce = 'CheckCorpseOnce',
+    autoshownewitem = 'AutoShowNewItem',
+    keepspells = 'KeepSpells',
+    canwear = 'CanWear',
+    globallooton = 'GlobalLootOn',
+    combatlooting = 'CombatLooting',
+    corpseradius = 'CorpseRadius',
+    mobstooclose = 'MobsTooClose',
+    savebagslots = 'SaveBagSlots',
+    tributekeep = 'TributeKeep',
+    mintributevalue = 'MinTributeValue',
+    minsellprice = 'MinSellPrice',
+    stackplatvalue = 'StackPlatValue',
+    stackableonly = 'StackableOnly',
+    alwayseval = 'AlwaysEval',
+    banktradeskills = 'BankTradeskills',
+    doloot = 'DoLoot',
+    lootforage = 'LootForage',
+    lootnodrop = 'LootNoDrop',
+    lootnodropnew = 'LootNoDropNew',
+    lootquest = 'LootQuest',
+    dodestroy = 'DoDestroy',
+    alwaysdestroy = 'AlwaysDestroy',
+    questkeep = 'QuestKeep',
+    lootchannel = 'LootChannel',
+    groupchannel = 'GroupChannel',
+    reportloot = 'ReportLoot',
+    spamlootinfo = 'SpamLootInfo',
+    lootforagespam = 'LootForageSpam',
+    addnewsales = 'AddNewSales',
+    addnewtributes = 'AddNewTributes',
+    gmlselect = 'GMLSelect',
+    lootlagdelay = 'LootLagDelay',
+    hidenames = 'HideNames',
+    -- lookuplinks = 'LookupLinks',
+    recorddata = 'RecordData',
+    autotag = 'AutoTag',
+    autorestock = 'AutoRestock',
+    lootmycorpse = 'LootMyCorpse',
+    lootaugments = 'LootAugments',
+    showinfomessages = 'ShowInfoMessages',
+    showconsole = 'ShowConsole',
+    showreport = 'ShowReport',
+
+}
+local doSell, doBuy, doTribute, areFull = false, false, false, false
+local settingList                       = {
+    "CanUse",
+    "Keep",
+    "Ignore",
+    "Destroy",
+    "Quest",
+    "Sell",
+    "Tribute",
+    "Bank",
+}
+
+local settingsNoDraw                    = {
+    Version = true,
+    logger = true,
+    LootFile = true,
+    SettingsFile = true,
+    NoDropDefaults = true,
+    CorpseRotTime = true,
+    LootLagDelay = true,
+    Terminate = true,
+    BuyItemsTable = true,
+    ShowReport = true,
+    ShowConsole = true,
+    LookupLinks = true,
+}
+
+-- table stuff
+
+-- Pagination state
+local ITEMS_PER_PAGE                    = 25
+local selectedIndex                     = 1
+
+
 -- Public default settings, also read in from Loot.ini [Settings] section
-local loot                           = {}
-loot.Settings                        = {
+
+
+-- Module Settings
+local loot       = {}
+loot.CurrentPage = loot.CurrentPage or 1
+
+loot.Settings    = {
     Version          = '"' .. tostring(version) .. '"',
     GlobalLootOn     = true,   -- Enable Global Loot Items. not implimented yet
     CombatLooting    = false,  -- Enables looting during combat. Not recommended on the MT
@@ -190,84 +207,59 @@ loot.Settings                        = {
         ['Water Flask'] = 20,
     },
 }
+local tmpCmd     = loot.GroupChannel or 'dgae'
 
-loot.MyClass                         = mq.TLO.Me.Class.ShortName():lower()
-loot.MyRace                          = mq.TLO.Me.Race.Name()
--- SQL information
-local resourceDir                    = mq.TLO.MacroQuest.Path('resources')() .. "/"
-local RulesDB                        = string.format('%s/LootNScoot/%s/AdvLootRules.db', resourceDir, eqServer)
-local lootDB                         = string.format('%s/LootNScoot/%s/Items.db', resourceDir, eqServer)
-local HistoryDB                      = string.format('%s/LootNScoot/%s/LootHistory.db', resourceDir, eqServer)
-local newItem                        = nil
-loot.guiLoot                         = require('loot_hist')
+loot.MyClass     = mq.TLO.Me.Class.ShortName():lower()
+loot.MyRace      = mq.TLO.Me.Race.Name()
+loot.guiLoot     = require('loot_hist')
 if loot.guiLoot ~= nil then
     loot.UseActors = true
-    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, true, true, true, 'lootnscoot', false)
+    loot.guiLoot.GetSettings(loot.Settings.HideNames, loot.Settings.LookupLinks, true, true, 'lootnscoot', false)
 end
-local debugPrint                        = false
-local iconAnimation                     = mq.FindTextureAnimation('A_DragItem')
--- Internal settings
-local cantLootList                      = {}
-local cantLootID                        = 0
-local noDropItems, loreItems            = {}, {}
-local allItems                          = {}
--- Constants
-local spawnSearch                       = '%s radius %d zradius 50'
--- If you want destroy to actually loot and destroy items, change DoDestroy=false to DoDestroy=true in the Settings Ini.
--- Otherwise, destroy behaves the same as ignore.
-local shouldLootActions                 = { CanUse = false, Ask = false, Keep = true, Bank = true, Sell = true, Destroy = false, Ignore = false, Tribute = false, }
-local validActions                      = {
-    canuse = "CanUse",
-    ask = "Ask",
-    keep = 'Keep',
-    bank = 'Bank',
-    sell = 'Sell',
-    ignore = 'Ignore',
-    destroy = 'Destroy',
-    quest = 'Quest',
-    tribute = 'Tribute',
+
+loot.DirectorScript         = 'none'
+loot.BuyItemsTable          = {}
+loot.ALLITEMS               = {}
+loot.GlobalItemsRules       = {}
+loot.NormalItemsRules       = {}
+loot.NormalItemsClasses     = {}
+loot.GlobalItemsClasses     = {}
+loot.NormalItemsLink        = {}
+loot.GlobalItemsLink        = {}
+loot.NewItems               = {}
+loot.TempSettings           = {}
+loot.PersonalItemsRules     = {}
+loot.PersonalItemsClasses   = {}
+loot.PersonalItemsLink      = {}
+loot.NewItemDecisions       = nil
+loot.ItemNames              = {}
+loot.NewItemsCount          = 0
+loot.TempItemClasses        = "All"
+loot.itemSelectionPending   = false -- Flag to indicate an item selection is in progress
+loot.pendingItemData        = nil   -- Temporary storage for item data
+loot.doImportInventory      = false
+loot.TempModClass           = false
+loot.ShowUI                 = false
+loot.Terminate              = true
+loot.Boxes                  = {}
+loot.LootNow                = false
+loot.histCurrentPage        = 1
+loot.histItemsPerPage       = 25
+loot.histTotalPages         = 1
+loot.histTotalItems         = 0
+loot.HistoricalDates        = {}
+loot.HistoryDataDate        = {}
+loot.PersonalTableName      = string.format("%s_Rules", MyName)
+loot.TempSettings.Edit      = {}
+local tableList             = {
+    "Global_Items", "Normal_Items", loot.PersonalTableName,
 }
-local saveOptionTypes                   = { string = 1, number = 1, boolean = 1, }
-local NEVER_SELL                        = { ['Diamond Coin'] = true, ['Celestial Crest'] = true, ['Gold Coin'] = true, ['Taelosian Symbols'] = true, ['Planar Symbols'] = true, }
-local tmpCmd                            = loot.GroupChannel or 'dgae'
-local showNewItem                       = false
-local lookupDate                        = ''
-local Actors                            = require('actors')
-loot.DirectorScript                     = 'none'
-loot.BuyItemsTable                      = {}
-loot.ALLITEMS                           = {}
-loot.GlobalItemsRules                   = {}
-loot.NormalItemsRules                   = {}
-loot.NormalItemsClasses                 = {}
-loot.GlobalItemsClasses                 = {}
-loot.NormalItemsLink                    = {}
-loot.GlobalItemsLink                    = {}
-loot.NewItems                           = {}
-loot.TempSettings                       = {}
-loot.PersonalItemsRules                 = {}
-loot.PersonalItemsClasses               = {}
-loot.PersonalItemsLink                  = {}
-loot.NewItemDecisions                   = nil
-loot.ItemNames                          = {}
-loot.NewItemsCount                      = 0
-loot.TempItemClasses                    = "All"
-loot.itemSelectionPending               = false -- Flag to indicate an item selection is in progress
-loot.pendingItemData                    = nil   -- Temporary storage for item data
-loot.doImportInventory                  = false
-loot.TempModClass                       = false
-loot.ShowUI                             = false
-loot.Terminate                          = true
-loot.Boxes                              = {}
-loot.LootNow                            = false
-loot.histCurrentPage                    = 1
-loot.histItemsPerPage                   = 25
-loot.histTotalPages                     = 1
-loot.histTotalItems                     = 0
-loot.HistoricalDates                    = {}
-loot.HistoryDataDate                    = {}
-loot.PersonalTableName                  = string.format("%s_Rules", MyName)
+local tableListRules        = {
+    "Global_Rules", "Normal_Rules", loot.PersonalTableName,
+}
+
 -- FORWARD DECLARATIONS
-loot.AllItemColumnListIndex             = {
+loot.AllItemColumnListIndex = {
     [1]  = 'name',
     [2]  = 'sell_value',
     [3]  = 'tribute_value',
@@ -329,96 +321,10 @@ loot.AllItemColumnListIndex             = {
     [59] = 'heroicwis',
 }
 
-local settingsEnum                      = {
-    checkcorpseonce = 'CheckCorpseOnce',
-    autoshownewitem = 'AutoShowNewItem',
-    keepspells = 'KeepSpells',
-    canwear = 'CanWear',
-    globallooton = 'GlobalLootOn',
-    combatlooting = 'CombatLooting',
-    corpseradius = 'CorpseRadius',
-    mobstooclose = 'MobsTooClose',
-    savebagslots = 'SaveBagSlots',
-    tributekeep = 'TributeKeep',
-    mintributevalue = 'MinTributeValue',
-    minsellprice = 'MinSellPrice',
-    stackplatvalue = 'StackPlatValue',
-    stackableonly = 'StackableOnly',
-    alwayseval = 'AlwaysEval',
-    banktradeskills = 'BankTradeskills',
-    doloot = 'DoLoot',
-    lootforage = 'LootForage',
-    lootnodrop = 'LootNoDrop',
-    lootnodropnew = 'LootNoDropNew',
-    lootquest = 'LootQuest',
-    dodestroy = 'DoDestroy',
-    alwaysdestroy = 'AlwaysDestroy',
-    questkeep = 'QuestKeep',
-    lootchannel = 'LootChannel',
-    groupchannel = 'GroupChannel',
-    reportloot = 'ReportLoot',
-    spamlootinfo = 'SpamLootInfo',
-    lootforagespam = 'LootForageSpam',
-    addnewsales = 'AddNewSales',
-    addnewtributes = 'AddNewTributes',
-    gmlselect = 'GMLSelect',
-    lootlagdelay = 'LootLagDelay',
-    hidenames = 'HideNames',
-    -- lookuplinks = 'LookupLinks',
-    recorddata = 'RecordData',
-    autotag = 'AutoTag',
-    autorestock = 'AutoRestock',
-    lootmycorpse = 'LootMyCorpse',
-    lootaugments = 'LootAugments',
-    showinfomessages = 'ShowInfoMessages',
-    showconsole = 'ShowConsole',
-    showreport = 'ShowReport',
+------------------------------------
+--      UTILITY functions
+------------------------------------
 
-}
-local tableList                         = {
-    "Global_Items", "Normal_Items", loot.PersonalTableName,
-}
-local tableListRules                    = {
-    "Global_Rules", "Normal_Rules", loot.PersonalTableName,
-}
-local doSell, doBuy, doTribute, areFull = false, false, false, false
-local settingList                       = {
-    "CanUse",
-    "Keep",
-    "Ignore",
-    "Destroy",
-    "Quest",
-    "Sell",
-    "Tribute",
-    "Bank",
-}
-
-local settingsNoDraw                    = {
-    Version = true,
-    logger = true,
-    LootFile = true,
-    SettingsFile = true,
-    NoDropDefaults = true,
-    CorpseRotTime = true,
-    LootLagDelay = true,
-    Terminate = true,
-    BuyItemsTable = true,
-    ShowReport = true,
-    ShowConsole = true,
-    LookupLinks = true,
-}
-
-local selectedIndex                     = 1
-
--- Pagination state
-local ITEMS_PER_PAGE                    = 25
-loot.CurrentPage                        = loot.CurrentPage or 1
-
--- UTILITIES
-
-
-
----
 ---This will keep your table sorted by columns instead of rows.
 ---@param input_table table|nil the table to sort (optional) You can send a set of sorted keys if you have already custom sorted it.
 ---@param sorted_keys table|nil  the sorted keys table (optional) if you have already sorted the keys
@@ -453,6 +359,59 @@ function loot.SortTableColums(input_table, sorted_keys, num_columns)
     end
 
     return column_sorted
+end
+
+---comment
+---@param search any Search string we are looking for, can be a string or number
+---@param key any Table field we are checking against, for Lookups this is only Name. for other tables this can be ItemId, Name, Class, Race
+---@param value any Field value we are checking against
+---@return boolean True if the search string is found in the key or value, false otherwise
+function loot.SearchLootTable(search, key, value)
+    if key == nil or value == nil or search == nil then return false end
+    key = tostring(key)
+    search = tostring(search)
+    search = search and search:gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%1") or ""
+    if (search == nil or search == "") or key:lower():find(search:lower()) or value:lower():find(search:lower()) then
+        return true
+    else
+        return false
+    end
+end
+
+function loot.SortTables()
+    loot.TempSettings.SortedGlobalItemKeys = {}
+    loot.TempSettings.SortedBuyItemKeys    = {}
+    loot.TempSettings.SortedNormalItemKeys = {}
+    loot.TempSettings.SortedSettingsKeys   = {}
+    loot.TempSettings.SortedToggleKeys     = {}
+
+    for k in pairs(loot.GlobalItemsRules) do
+        table.insert(loot.TempSettings.SortedGlobalItemKeys, k)
+    end
+    table.sort(loot.TempSettings.SortedGlobalItemKeys, function(a, b) return a < b end)
+
+    for k in pairs(loot.BuyItemsTable) do
+        table.insert(loot.TempSettings.SortedBuyItemKeys, k)
+    end
+    table.sort(loot.TempSettings.SortedBuyItemKeys, function(a, b) return a < b end)
+
+    for k in pairs(loot.NormalItemsRules) do
+        table.insert(loot.TempSettings.SortedNormalItemKeys, k)
+    end
+
+    table.sort(loot.TempSettings.SortedNormalItemKeys, function(a, b) return a < b end)
+
+    for k in pairs(loot.Settings) do
+        if settingsNoDraw[k] == nil then
+            if type(loot.Settings[k]) == 'boolean' then
+                table.insert(loot.TempSettings.SortedToggleKeys, k)
+            else
+                table.insert(loot.TempSettings.SortedSettingsKeys, k)
+            end
+        end
+    end
+    table.sort(loot.TempSettings.SortedToggleKeys, function(a, b) return a < b end)
+    table.sort(loot.TempSettings.SortedSettingsKeys, function(a, b) return a < b end)
 end
 
 function loot.SortKeys(input_table)
@@ -522,237 +481,6 @@ function loot.writeSettings()
     Logger.Debug(loot.guiLoot.console, "Loot::writeSettings()")
 end
 
-function loot.split(input, sep)
-    if sep == nil then
-        sep = "|"
-    end
-    local t = {}
-    for str in string.gmatch(input, "([^" .. sep .. "]+)") do
-        table.insert(t, str)
-    end
-    return t
-end
-
-function loot.drawIcon(iconID, iconSize)
-    if iconSize == nil then iconSize = 16 end
-    if iconID ~= nil then
-        iconAnimation:SetTextureCell(iconID - 500)
-        ImGui.DrawTextureAnimation(iconAnimation, iconSize, iconSize)
-    end
-end
-
-function loot.OpenItemsSQL()
-    local db = SQLite3.open(lootDB)
-    db:exec("PRAGMA journal_mode=WAL;")
-    return db
-end
-
-function loot.LoadHistoricalData()
-    loot.HistoricalDates = {}
-    local db = SQLite3.open(HistoryDB)
-    db:exec("PRAGMA journal_mode=WAL;")
-    db:exec("BEGIN TRANSACTION")
-    db:exec([[
-        CREATE TABLE IF NOT EXISTS LootHistory (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "Item" TEXT NOT NULL,
-            "CorpseName" TEXT NOT NULL,
-            "Action" TEXT NOT NULL,
-            "Date" TEXT NOT NULL,
-            "TimeStamp" TEXT NOT NULL ,
-            "Link" TEXT NOT NULL,
-            "Looter" TEXT NOT NULL,
-            "Zone" TEXT NOT NULL
-        );
-    ]])
-    db:exec("COMMIT")
-
-    db:exec("BEGIN TRANSACTION")
-
-    local stmt = db:prepare("SELECT DISTINCT Date FROM LootHistory")
-
-    for row in stmt:nrows() do
-        table.insert(loot.HistoricalDates, row.Date)
-    end
-
-    stmt:finalize()
-    db:exec("COMMIT")
-    db:close()
-end
-
-function loot.LoadDateHistory(lookup_Date)
-    local db = SQLite3.open(HistoryDB)
-    db:exec("PRAGMA journal_mode=WAL;")
-    db:exec("BEGIN TRANSACTION")
-
-    loot.HistoryDataDate = {}
-    local stmt = db:prepare("SELECT * FROM LootHistory WHERE Date = ?")
-    stmt:bind_values(lookup_Date)
-    for row in stmt:nrows() do
-        table.insert(loot.HistoryDataDate, row)
-    end
-
-    stmt:finalize()
-    db:exec("COMMIT")
-    db:close()
-end
-
-local function convertTimestamp(timeStr)
-    local h, mi, s = timeStr:match("(%d+):(%d+):(%d+)")
-    local hour = tonumber(h)
-    local min = tonumber(mi)
-    local sec = tonumber(s)
-    local timeSeconds = (hour * 3600) + (min * 60) + sec
-    return timeSeconds
-end
-
----comment
----@param itemName string the name of the item
----@param corpseName string the name of the corpse
----@param action string the action taken
----@param date string the date the item was looted (YYYY-MM-DD)
----@param timestamp string the time the item was looted (HH:MM:SS)
----@param link string the item link
----@param looter string the name of the looter
----@param zone string the zone the item was looted in (ShortName)
----@param allItems table items table sent to looted.
----@param cantWear boolean|nil if the item can be worn
-function loot.insertIntoHistory(itemName, corpseName, action, date, timestamp, link, looter, zone, allItems, cantWear)
-    if itemName == nil then return end
-    local db = SQLite3.open(HistoryDB)
-    if not db then
-        print("Error: Failed to open database.")
-        return
-    end
-
-    db:exec("PRAGMA journal_mode=WAL;")
-
-    -- Convert current date+time to epoch
-    local currentTime = convertTimestamp(timestamp)
-
-    -- Skip if a duplicate "Ignore" or "Left" action exists within the last minute
-    if action == "Ignore" or action == "Left" then
-        local checkStmt = db:prepare([[
-                SELECT Date, TimeStamp FROM LootHistory
-                WHERE Item = ? AND CorpseName = ? AND Action = ? AND Date = ?
-                ORDER BY Date DESC, TimeStamp DESC LIMIT 1
-            ]])
-        if checkStmt then
-            checkStmt:bind_values(itemName, corpseName, action, date)
-            local res = checkStmt:step()
-            if res == SQLite3.ROW then
-                local lastTimestamp = checkStmt:get_value(1)
-                local recoredTime = convertTimestamp(lastTimestamp)
-                if (currentTime - recoredTime) <= 60 then
-                    checkStmt:finalize()
-                    db:close()
-                    return
-                end
-            end
-            checkStmt:finalize()
-        end
-    end
-
-    db:exec("BEGIN TRANSACTION")
-    local stmt = db:prepare([[
-            INSERT INTO LootHistory (Item, CorpseName, Action, Date, TimeStamp, Link, Looter, Zone)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ]])
-    if stmt then
-        stmt:bind_values(itemName, corpseName, action, date, timestamp, link, looter, zone)
-        local res, err = stmt:step()
-        if res ~= SQLite3.DONE then
-            printf("Error inserting data: %s ", err)
-        end
-        stmt:finalize()
-    else
-        print("Error preparing statement")
-    end
-
-    db:exec("COMMIT")
-    db:close()
-    mq.delay(1)
-    local eval = action == 'Ignore' and 'Left' or action
-    local actLabel = action == 'Destroy' and 'Destroyed' or action
-    if action ~= 'Destroy' and action ~= 'Ignore' then
-        actLabel = 'Looted'
-    end
-    table.insert(allItems,
-        {
-            Name = itemName,
-            CorpseName = corpseName,
-            Action = actLabel,
-            Link = link,
-            Eval = eval,
-            cantWear = cantWear,
-        })
-end
-
-function loot.LoadRuleDB()
-    -- Open the database once
-    local db = SQLite3.open(RulesDB)
-    local charTableName = string.format("%s_Rules", MyName)
-
-    -- Create tables only if necessary (wrapped in a single transaction)
-    db:exec("PRAGMA journal_mode=WAL;")
-    db:exec("BEGIN TRANSACTION")
-    db:exec(string.format([[
-        CREATE TABLE IF NOT EXISTS Global_Rules (
-            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
-            "item_name" TEXT NOT NULL,
-            "item_rule" TEXT NOT NULL,
-            "item_rule_classes" TEXT,
-            "item_link" TEXT
-        );
-        CREATE TABLE IF NOT EXISTS Normal_Rules (
-            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
-            "item_name" TEXT NOT NULL,
-            "item_rule" TEXT NOT NULL,
-            "item_rule_classes" TEXT,
-            "item_link" TEXT
-        );
-        CREATE TABLE IF NOT EXISTS %s (
-            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
-            "item_name" TEXT NOT NULL,
-            "item_rule" TEXT NOT NULL,
-            "item_rule_classes" TEXT,
-            "item_link" TEXT
-        );
-    ]], charTableName))
-    db:exec("COMMIT")
-
-    -- Function to process rules in a table
-    local function processRules(stmt, ruleTable, classTable, linkTable)
-        for row in stmt:nrows() do
-            local id = row.item_id
-            local classes = row.item_rule_classes or 'All'
-            if classes == 'None' or classes:gsub(' ', '') then classes = 'All' end
-            ruleTable[id] = row.item_rule
-            classTable[id] = classes
-            linkTable[id] = row.item_link or "NULL"
-            loot.ItemNames[id] = loot.ItemNames[id] or row.item_name
-        end
-    end
-
-    -- Load rules efficiently
-    db:exec("BEGIN TRANSACTION")
-    local stmt = db:prepare("SELECT * FROM Global_Rules")
-    processRules(stmt, loot.GlobalItemsRules, loot.GlobalItemsClasses, loot.GlobalItemsLink)
-    stmt:finalize()
-
-    stmt = db:prepare("SELECT * FROM Normal_Rules")
-    processRules(stmt, loot.NormalItemsRules, loot.NormalItemsClasses, loot.NormalItemsLink)
-    stmt:finalize()
-
-    stmt = db:prepare(string.format("SELECT * FROM %s", charTableName))
-    processRules(stmt, loot.PersonalItemsRules, loot.PersonalItemsClasses, loot.PersonalItemsLink)
-    stmt:finalize()
-    db:exec("COMMIT")
-
-    db:close()
-end
-
----comment
 ---@param firstRun boolean|nil if passed true then we will load the DB's again
 ---@return boolean
 function loot.loadSettings(firstRun)
@@ -947,6 +675,594 @@ function loot.loadSettings(firstRun)
 
 
     return needSave
+end
+
+function loot.split(input, sep)
+    if sep == nil then
+        sep = "|"
+    end
+    local t = {}
+    for str in string.gmatch(input, "([^" .. sep .. "]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
+local function convertTimestamp(timeStr)
+    local h, mi, s = timeStr:match("(%d+):(%d+):(%d+)")
+    local hour = tonumber(h)
+    local min = tonumber(mi)
+    local sec = tonumber(s)
+    local timeSeconds = (hour * 3600) + (min * 60) + sec
+    return timeSeconds
+end
+
+function loot.valueToCoins(sellVal)
+    local platVal   = math.floor(sellVal / 1000)
+    local goldVal   = math.floor((sellVal % 1000) / 100)
+    local silverVal = math.floor((sellVal % 100) / 10)
+    local copperVal = sellVal % 10
+    return string.format("%s pp %s gp %s sp %s cp", platVal, goldVal, silverVal, copperVal)
+end
+
+function loot.checkSpells(item_name)
+    if string.find(item_name, "Spell: ") then
+        return true
+    end
+    return false
+end
+
+function loot.checkCursor()
+    local currentItem = nil
+    while mq.TLO.Cursor() do
+        -- can't do anything if there's nowhere to put the item, either due to no free inventory space
+        -- or no slot of appropriate size
+        if mq.TLO.Me.FreeInventory() == 0 or mq.TLO.Cursor() == currentItem then
+            if loot.Settings.SpamLootInfo then Logger.Debug(loot.guiLoot.console, 'Inventory full, item stuck on cursor') end
+            mq.cmdf('/autoinv')
+            return
+        end
+        currentItem = mq.TLO.Cursor()
+        mq.cmdf('/autoinv')
+        mq.delay(10000, function() return not mq.TLO.Cursor() end)
+    end
+end
+
+function loot.navToID(spawnID)
+    mq.cmdf('/nav id %d log=off', spawnID)
+    mq.delay(50)
+    if mq.TLO.Navigation.Active() then
+        local startTime = os.time()
+        while mq.TLO.Navigation.Active() do
+            mq.delay(100)
+            if os.difftime(os.time(), startTime) > 5 then
+                break
+            end
+        end
+    end
+end
+
+function loot.report(message, ...)
+    if loot.Settings.ReportLoot then
+        local prefixWithChannel = reportPrefix:format(loot.Settings.LootChannel, mq.TLO.Time())
+        mq.cmdf(prefixWithChannel .. message, ...)
+    end
+end
+
+function loot.AreBagsOpen()
+    local total = {
+        bags = 0,
+        open = 0,
+    }
+    for i = 23, 32 do
+        local slot = mq.TLO.Me.Inventory(i)
+        if slot and slot.Container() and slot.Container() > 0 then
+            total.bags = total.bags + 1
+            if slot.Open() then
+                total.open = total.open + 1
+            end
+        end
+    end
+    if total.bags == total.open then
+        return true
+    else
+        return false
+    end
+end
+
+function loot.eventNovalue(line, item)
+    itemNoValue = item
+end
+
+function loot.setupEvents()
+    mq.event("CantLoot", "#*#may not loot this corpse#*#", loot.eventCantLoot)
+    mq.event("NoSlot", "#*#There are no open slots for the held item in your inventory#*#", loot.eventNoSlot)
+    mq.event("Sell", "#*#You receive#*# for the #1#(s)#*#", loot.eventSell)
+    mq.event("ForageExtras", "Your forage mastery has enabled you to find something else!", loot.eventForage)
+    mq.event("Forage", "You have scrounged up #*#", loot.eventForage)
+    mq.event("Novalue", "#*#give you absolutely nothing for the #1#.#*#", loot.eventNovalue)
+    mq.event("Tribute", "#*#We graciously accept your #1# as tribute, thank you!#*#", loot.eventTribute)
+end
+
+function loot.setGlobalBind(value)
+    local itemID = mq.TLO.Cursor.ID()
+    loot.setGlobalItem(itemID, value)
+end
+
+------------------------------------
+--      Main command handler
+------------------------------------
+
+
+function loot.commandHandler(...)
+    local args = { ..., }
+    local item = mq.TLO.Cursor -- Capture the cursor item early for reuse
+
+    if args[1] == 'set' then
+        local setting    = args[2]:lower()
+        local settingVal = args[3]
+        if settingsEnum[setting] ~= nil then
+            local settingName = settingsEnum[setting]
+            if type(loot.Settings[settingName]) == 'table' then
+                Logger.Error(loot.guiLoot.console, "Setting \ay%s\ax is a table and cannot be set directly.", settingName)
+                return
+            end
+            if type(loot.Settings[settingName]) == 'boolean' then
+                loot.Settings[settingName] = settingVal == 'on'
+            elseif type(loot.Settings[settingName]) == 'number' then
+                loot.Settings[settingName] = tonumber(settingVal)
+            else
+                loot.Settings[settingName] = settingVal
+            end
+            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \ag%s\ax", settingName, settingVal)
+            loot.writeSettings()
+        else
+            Logger.Warn(loot.guiLoot.console, "Invalid setting name: %s", setting)
+        end
+        loot.writeSettings()
+        loot.sendMySettings()
+        return
+    end
+    Logger.Debug(loot.guiLoot.console, "arg1: %s, arg2: %s, arg3: %s, arg4: %s", tostring(args[1]), tostring(args[2]), tostring(args[3]), tostring(args[4]))
+
+    if args[1] == 'find' and args[2] ~= nil then
+        if tonumber(args[2]) then
+            loot.findItemInDb(nil, tonumber(args[2]))
+        else
+            loot.findItemInDb(args[2])
+        end
+    end
+    if #args == 1 then
+        local command = args[1]
+        if command == 'sellstuff' then
+            loot.processItems('Sell')
+        elseif command == 'restock' then
+            loot.processItems('Buy')
+        elseif command == 'debug' then
+            debugPrint = not debugPrint
+            Logger.Info(loot.guiLoot.console, "\ayDebugging\ax is now %s", debugPrint and "\agon" or "\aroff")
+        elseif command == 'reload' then
+            local needSave = loot.loadSettings()
+            if needSave then
+                loot.writeSettings()
+            end
+            if loot.guiLoot then
+                loot.guiLoot.GetSettings(
+                    loot.Settings.HideNames,
+                    -- loot.Settings.LookupLinks,
+                    loot.Settings.RecordData,
+                    true,
+                    loot.Settings.UseActors,
+                    'lootnscoot', false
+                )
+            end
+            Logger.Info(loot.guiLoot.console, "\ayReloaded Settings \axand \atLoot Files")
+        elseif command == 'update' then
+            if loot.guiLoot then
+                loot.guiLoot.GetSettings(
+                    loot.Settings.HideNames,
+                    -- loot.Settings.LookupLinks,
+                    loot.Settings.RecordData,
+                    true,
+                    loot.Settings.UseActors,
+                    'lootnscoot', false
+                )
+            end
+            loot.UpdateDB()
+            Logger.Info(loot.guiLoot.console, "\ayUpdated the DB from loot.ini \axand \atreloaded settings")
+        elseif command == 'importinv' then
+            loot.addMyInventoryToDB()
+        elseif command == 'bank' then
+            loot.processItems('Bank')
+        elseif command == 'cleanup' then
+            loot.processItems('Destroy')
+        elseif command == 'gui' or command == 'console' and loot.guiLoot then
+            loot.guiLoot.openGUI = not loot.guiLoot.openGUI
+        elseif command == 'report' and loot.guiLoot then
+            loot.guiLoot.ReportLoot()
+        elseif command == 'hidenames' and loot.guiLoot then
+            loot.guiLoot.hideNames = not loot.guiLoot.hideNames
+        elseif command == 'config' then
+            local confReport = "\ayLoot N Scoot Settings\ax"
+            for key, value in pairs(loot.Settings) do
+                if type(value) ~= "function" and type(value) ~= "table" then
+                    confReport = confReport .. string.format("\n\at%s\ax                                    = \ag%s\ax", key, tostring(value))
+                end
+            end
+            Logger.Info(loot.guiLoot.console, confReport)
+        elseif command == 'tributestuff' then
+            loot.processItems('Tribute')
+        elseif command == 'shownew' or command == 'newitems' then
+            showNewItem = not showNewItem
+        elseif command == 'loot' then
+            loot.lootMobs()
+        elseif command == 'show' then
+            loot.ShowUI = not loot.ShowUI
+        elseif command == 'tsbank' then
+            loot.markTradeSkillAsBank()
+        elseif validActions[command] and item() then
+            local itemID = item.ID()
+            loot.addRule(itemID, 'NormalItems', validActions[command], 'All', item.ItemLink('CLICKABLE')())
+            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \ay%s\ax", item.Name(), validActions[command])
+        elseif string.find(command, "quest%|") and item() then
+            local itemID = item.ID()
+            local val    = string.gsub(command, "quest", "Quest")
+            loot.addRule(itemID, 'NormalItems', val, 'All', item.ItemLink('CLICKABLE')())
+            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \ay%s\ax", item.Name(), val)
+        elseif command == 'quit' or command == 'exit' then
+            loot.Terminate = true
+        end
+    elseif #args == 2 then
+        local action, itemName = args[1], args[2]
+        if validActions[action] then
+            local lootID = loot.resolveItemIDbyName(itemName, false)
+            Logger.Warn(loot.guiLoot.console, "lootID: %s", lootID)
+            if lootID then
+                if loot.ALLITEMS[lootID] then
+                    loot.addRule(lootID, 'NormalItems', validActions[action], 'All', loot.ALLITEMS[lootID].Link)
+                    Logger.Info(loot.guiLoot.console, "Setting \ay%s (%s)\ax to \ay%s\ax", itemName, lootID, validActions[action])
+                end
+            end
+        end
+    elseif #args == 3 then
+        if args[1] == 'globalitem' and args[2] == 'quest' and item() then
+            local itemID = item.ID()
+            loot.addRule(itemID, 'GlobalItems', 'Quest|' .. args[3], 'All', item.ItemLink('CLICKABLE')())
+            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \agGlobal Item \ayQuest|%s\ax", item.Name(), args[3], item.ItemLink('CLICKABLE')())
+        elseif args[1] == 'globalitem' and validActions[args[2]] and item() then
+            loot.addRule(item.ID(), 'GlobalItems', validActions[args[2]], args[3] or 'All', item.ItemLink('CLICKABLE')())
+            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \agGlobal Item \ay%s \ax(\at%s\ax)", item.Name(), item.ID(), validActions[args[2]])
+        elseif args[1] == 'globalitem' and validActions[args[2]] and args[3] ~= nil then
+            local itemName = args[3]
+            local itemID   = loot.resolveItemIDbyName(itemName, false)
+            if itemID then
+                if loot.ALLITEMS[itemID] then
+                    loot.addRule(itemID, 'GlobalItems', validActions[args[2]], 'All', loot.ALLITEMS[itemID].Link)
+                    Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \agGlobal Item \ay%s|%s\ax", loot.ALLITEMS[itemID].Name, validActions[args[2]], args[3])
+                end
+            else
+                Logger.Warn(loot.guiLoot.console, "Item \ay%s\ax ID: %s\ax not found in loot.ALLITEMS.", itemName, itemID)
+            end
+        end
+    end
+    loot.writeSettings()
+end
+
+function loot.setupBinds()
+    mq.bind('/lootutils', loot.commandHandler)
+    mq.bind('/lns', loot.commandHandler)
+end
+
+function loot.CheckBags()
+    if loot.Settings.SaveBagSlots == nil then return false end
+    -- Logger.Warn(loot.guiLoot.console,"\agBag CHECK\ax free: \at%s\ax, save: \ag%s\ax", mq.TLO.Me.FreeInventory(), loot.Settings.SaveBagSlots)
+    areFull = mq.TLO.Me.FreeInventory() <= loot.Settings.SaveBagSlots
+end
+
+function loot.eventCantLoot()
+    cantLootID = mq.TLO.Target.ID()
+end
+
+function loot.eventNoSlot()
+    -- we don't have a slot big enough for the item on cursor. Dropping it to the ground.
+    local cantLootItemName = mq.TLO.Cursor()
+    mq.cmdf('/drop')
+    mq.delay(1)
+    loot.report("\ay[WARN]\arI can't loot %s, dropping it on the ground!\ax", cantLootItemName)
+end
+
+function loot.reportSkippedItems(noDropItems, loreItems, corpseName, corpseID)
+    -- Ensure parameters are valid
+    noDropItems = noDropItems or {}
+    loreItems   = loreItems or {}
+
+    -- Log skipped items
+    if next(noDropItems) then
+        Logger.Info(loot.guiLoot.console, "Skipped NoDrop items from corpse %s (ID: %s): %s",
+            corpseName, tostring(corpseID), table.concat(noDropItems, ", "))
+    end
+
+    if next(loreItems) then
+        Logger.Info(loot.guiLoot.console, "Skipped Lore items from corpse %s (ID: %s): %s",
+            corpseName, tostring(corpseID), table.concat(loreItems, ", "))
+    end
+end
+
+function loot.corpseLocked(corpseID)
+    if not cantLootList[corpseID] then return false end
+    if os.difftime(os.time(), cantLootList[corpseID]) > 1 then
+        cantLootList[corpseID] = nil
+        return false
+    end
+    return true
+end
+
+function loot.handleSelectedItem(itemID)
+    -- Process the selected item (e.g., add to a rule, perform an action, etc.)
+    local itemData = loot.ALLITEMS[itemID]
+    if not itemData then
+        Logger.Error(loot.guiLoot.console, "Invalid item selected: " .. tostring(itemID))
+        return
+    end
+
+    Logger.Info(loot.guiLoot.console, "Item selected: " .. itemData.Name .. " (ID: " .. itemID .. ")")
+    -- You can now use itemID for further actions
+end
+
+function loot.enterNewItemRuleInfo(data_table)
+    if data_table == nil then
+        if loot.NewItemDecisions == nil then return end
+        data_table = loot.NewItemDecisions
+    end
+
+    if data_table.ID == nil then
+        Logger.Error(loot.guiLoot.console, "loot.enterNewItemRuleInfo \arInvalid item \atID \axfor new item rule.")
+        return
+    end
+    Logger.Debug(loot.guiLoot.console,
+        "\aoloot.enterNewItemRuleInfo() \axSending \agNewItem Data\ax message \aoMailbox\ax \atlootnscoot actor\ax: item\at %s \ax, ID\at %s \ax, rule\at %s\ax, classes\at %s\ax, link\at %s\ax, corpseID\at %s\ax",
+        data_table.ItemName, data_table.ItemID, data_table.Rule, data_table.Classes, data_table.Link, data_table.CorpseID)
+
+    local itemID     = data_table.ID
+    local item       = data_table.ItemName
+    local rule       = data_table.Rule
+    local classes    = data_table.Classes
+    local link       = data_table.Link
+    local corpse     = data_table.CorpseID
+    local modMessage = {
+        who      = MyName,
+        action   = 'modifyitem',
+        section  = "NormalItems",
+        item     = item,
+        itemID   = itemID,
+        rule     = rule,
+        link     = link,
+        classes  = classes,
+        entered  = true,
+        corpse   = corpse,
+        noChange = false,
+        Server   = eqServer,
+    }
+    if (classes == loot.NormalItemsClasses[itemID] and rule == loot.NormalItemsRules[itemID]) then
+        modMessage.noChange = true
+
+        Logger.Debug(loot.guiLoot.console, "\ayNo Changes Made to Item: \at%s \ax(ID:\ag %s\ax) with rule: \at%s\ax, classes: \at%s\ax",
+            ltem, itemID, rule, classes)
+    else
+        Logger.Debug(loot.guiLoot.console,
+            "\aoloot.enterNewItemRuleInfo() \axSending \agENTERED ITEM\ax message \aoMailbox\ax \atlootnscoot actor\ax: item\at %s \ax, ID\at %s \ax, rule\at %s\ax, classes\at %s\ax, link\at %s\ax, corpseID\at %s\ax",
+            item, itemID, rule, classes, link, corpse)
+    end
+    loot.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, modMessage)
+    loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, modMessage)
+end
+
+------------------------------------
+--          SQL Functions
+------------------------------------
+
+
+
+function loot.OpenItemsSQL()
+    local db = SQLite3.open(lootDB)
+    db:exec("PRAGMA journal_mode=WAL;")
+    return db
+end
+
+function loot.LoadHistoricalData()
+    loot.HistoricalDates = {}
+    local db = SQLite3.open(HistoryDB)
+    db:exec("PRAGMA journal_mode=WAL;")
+    db:exec("BEGIN TRANSACTION")
+    db:exec([[
+        CREATE TABLE IF NOT EXISTS LootHistory (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "Item" TEXT NOT NULL,
+            "CorpseName" TEXT NOT NULL,
+            "Action" TEXT NOT NULL,
+            "Date" TEXT NOT NULL,
+            "TimeStamp" TEXT NOT NULL ,
+            "Link" TEXT NOT NULL,
+            "Looter" TEXT NOT NULL,
+            "Zone" TEXT NOT NULL
+        );
+    ]])
+    db:exec("COMMIT")
+
+    db:exec("BEGIN TRANSACTION")
+
+    local stmt = db:prepare("SELECT DISTINCT Date FROM LootHistory")
+
+    for row in stmt:nrows() do
+        table.insert(loot.HistoricalDates, row.Date)
+    end
+
+    stmt:finalize()
+    db:exec("COMMIT")
+    db:close()
+end
+
+function loot.LoadDateHistory(lookup_Date)
+    local db = SQLite3.open(HistoryDB)
+    db:exec("PRAGMA journal_mode=WAL;")
+    db:exec("BEGIN TRANSACTION")
+
+    loot.HistoryDataDate = {}
+    local stmt = db:prepare("SELECT * FROM LootHistory WHERE Date = ?")
+    stmt:bind_values(lookup_Date)
+    for row in stmt:nrows() do
+        table.insert(loot.HistoryDataDate, row)
+    end
+
+    stmt:finalize()
+    db:exec("COMMIT")
+    db:close()
+end
+
+---comment
+---@param itemName string the name of the item
+---@param corpseName string the name of the corpse
+---@param action string the action taken
+---@param date string the date the item was looted (YYYY-MM-DD)
+---@param timestamp string the time the item was looted (HH:MM:SS)
+---@param link string the item link
+---@param looter string the name of the looter
+---@param zone string the zone the item was looted in (ShortName)
+---@param allItems table items table sent to looted.
+---@param cantWear boolean|nil if the item can be worn
+function loot.insertIntoHistory(itemName, corpseName, action, date, timestamp, link, looter, zone, allItems, cantWear)
+    if itemName == nil then return end
+    local db = SQLite3.open(HistoryDB)
+    if not db then
+        print("Error: Failed to open database.")
+        return
+    end
+
+    db:exec("PRAGMA journal_mode=WAL;")
+
+    -- Convert current date+time to epoch
+    local currentTime = convertTimestamp(timestamp)
+
+    -- Skip if a duplicate "Ignore" or "Left" action exists within the last minute
+    if action == "Ignore" or action == "Left" then
+        local checkStmt = db:prepare([[
+                SELECT Date, TimeStamp FROM LootHistory
+                WHERE Item = ? AND CorpseName = ? AND Action = ? AND Date = ?
+                ORDER BY Date DESC, TimeStamp DESC LIMIT 1
+            ]])
+        if checkStmt then
+            checkStmt:bind_values(itemName, corpseName, action, date)
+            local res = checkStmt:step()
+            if res == SQLite3.ROW then
+                local lastTimestamp = checkStmt:get_value(1)
+                local recoredTime = convertTimestamp(lastTimestamp)
+                if (currentTime - recoredTime) <= 60 then
+                    checkStmt:finalize()
+                    db:close()
+                    return
+                end
+            end
+            checkStmt:finalize()
+        end
+    end
+
+    db:exec("BEGIN TRANSACTION")
+    local stmt = db:prepare([[
+            INSERT INTO LootHistory (Item, CorpseName, Action, Date, TimeStamp, Link, Looter, Zone)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ]])
+    if stmt then
+        stmt:bind_values(itemName, corpseName, action, date, timestamp, link, looter, zone)
+        local res, err = stmt:step()
+        if res ~= SQLite3.DONE then
+            printf("Error inserting data: %s ", err)
+        end
+        stmt:finalize()
+    else
+        print("Error preparing statement")
+    end
+
+    db:exec("COMMIT")
+    db:close()
+    mq.delay(1)
+    local eval = action == 'Ignore' and 'Left' or action
+    local actLabel = action == 'Destroy' and 'Destroyed' or action
+    if action ~= 'Destroy' and action ~= 'Ignore' then
+        actLabel = 'Looted'
+    end
+    table.insert(allItems,
+        {
+            Name = itemName,
+            CorpseName = corpseName,
+            Action = actLabel,
+            Link = link,
+            Eval = eval,
+            cantWear = cantWear,
+        })
+end
+
+function loot.LoadRuleDB()
+    -- Open the database once
+    local db = SQLite3.open(RulesDB)
+    local charTableName = string.format("%s_Rules", MyName)
+
+    -- Create tables only if necessary (wrapped in a single transaction)
+    db:exec("PRAGMA journal_mode=WAL;")
+    db:exec("BEGIN TRANSACTION")
+    db:exec(string.format([[
+        CREATE TABLE IF NOT EXISTS Global_Rules (
+            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
+            "item_name" TEXT NOT NULL,
+            "item_rule" TEXT NOT NULL,
+            "item_rule_classes" TEXT,
+            "item_link" TEXT
+        );
+        CREATE TABLE IF NOT EXISTS Normal_Rules (
+            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
+            "item_name" TEXT NOT NULL,
+            "item_rule" TEXT NOT NULL,
+            "item_rule_classes" TEXT,
+            "item_link" TEXT
+        );
+        CREATE TABLE IF NOT EXISTS %s (
+            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
+            "item_name" TEXT NOT NULL,
+            "item_rule" TEXT NOT NULL,
+            "item_rule_classes" TEXT,
+            "item_link" TEXT
+        );
+    ]], charTableName))
+    db:exec("COMMIT")
+
+    -- Function to process rules in a table
+    local function processRules(stmt, ruleTable, classTable, linkTable)
+        for row in stmt:nrows() do
+            local id = row.item_id
+            local classes = row.item_rule_classes or 'All'
+            if classes == 'None' or classes:gsub(' ', '') then classes = 'All' end
+            ruleTable[id] = row.item_rule
+            classTable[id] = classes
+            linkTable[id] = row.item_link or "NULL"
+            loot.ItemNames[id] = loot.ItemNames[id] or row.item_name
+        end
+    end
+
+    -- Load rules efficiently
+    db:exec("BEGIN TRANSACTION")
+    local stmt = db:prepare("SELECT * FROM Global_Rules")
+    processRules(stmt, loot.GlobalItemsRules, loot.GlobalItemsClasses, loot.GlobalItemsLink)
+    stmt:finalize()
+
+    stmt = db:prepare("SELECT * FROM Normal_Rules")
+    processRules(stmt, loot.NormalItemsRules, loot.NormalItemsClasses, loot.NormalItemsLink)
+    stmt:finalize()
+
+    stmt = db:prepare(string.format("SELECT * FROM %s", charTableName))
+    processRules(stmt, loot.PersonalItemsRules, loot.PersonalItemsClasses, loot.PersonalItemsLink)
+    stmt:finalize()
+    db:exec("COMMIT")
+
+    db:close()
 end
 
 ---comment Retrieve item data from the DB
@@ -1359,19 +1675,229 @@ function loot.addToItemDB(item)
     loot.ALLITEMS[itemID].Link               = item.ItemLink('CLICKABLE')()
 end
 
-function loot.valueToCoins(sellVal)
-    local platVal   = math.floor(sellVal / 1000)
-    local goldVal   = math.floor((sellVal % 1000) / 100)
-    local silverVal = math.floor((sellVal % 100) / 10)
-    local copperVal = sellVal % 10
-    return string.format("%s pp %s gp %s sp %s cp", platVal, goldVal, silverVal, copperVal)
+function loot.findItemInDb(itemName, itemId)
+    local db = loot.OpenItemsSQL()
+    local query = "SELECT * FROM Items"
+    if itemId ~= nil then
+        query = string.format("SELECT * FROM Items WHERE item_id = %d", itemId)
+    elseif itemName ~= nil then
+        query = string.format("SELECT * FROM Items WHERE name LIKE '%%%s%%'", itemName)
+    end
+    db:exec("BEGIN TRANSACTION")
+    local stmt = db:prepare(query)
+    local counter = 0
+    for row in stmt:nrows() do
+        if counter > 20 then break end
+        Logger.Info(loot.guiLoot.console, "\ao[\ax\ayLNS Find Item\ao]\ax:\ax\ay %s\ax \ayID:\ax \at%d\ax, \aoValue:\ax \ag%s\ax Link: %s,", row.name, row.item_id, row.sell_value,
+            row.link)
+        counter = counter + 1
+    end
+    stmt:finalize()
+    db:exec("COMMIT")
+    db:close()
+    if counter > 20 then Logger.Info(loot.guiLoot.console, "\aoMore than\ax \ay20\ax items found, \aoonly showing first\ax \at20\ax.") end
 end
 
-function loot.checkSpells(item_name)
-    if string.find(item_name, "Spell: ") then
-        return true
+---comment
+---@param item_table table Index of ItemId's to set
+---@param setting any Setting to set all items to
+---@param classes any Classes to set all items to
+---@param which_table string Which Rules table
+---@param delete_items boolean Delete items from the table
+function loot.bulkSet(item_table, setting, classes, which_table, delete_items)
+    if item_table == nil or type(item_table) ~= "table" then return end
+    if which_table == 'Personal_Rules' then which_table = loot.PersonalTableName end
+    local localName = which_table == 'Normal_Rules' and 'NormalItems' or 'GlobalItems'
+    localName = which_table == loot.PersonalTableName and 'PersonalItems' or localName
+
+    local db = SQLite3.open(RulesDB)
+    if not db then return end
+    db:exec("PRAGMA journal_mode=WAL;")
+
+    local qry = string.format([[
+        INSERT INTO %s (item_id, item_name, item_rule, item_rule_classes, item_link)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(item_id) DO UPDATE SET
+            item_name = excluded.item_name,
+            item_rule = excluded.item_rule,
+            item_rule_classes = excluded.item_rule_classes,
+            item_link = excluded.item_link;
+    ]], which_table)
+    if delete_items then
+        qry = string.format([[
+            DELETE FROM %s WHERE item_id = ?;
+        ]], which_table)
     end
-    return false
+    local stmt = db:prepare(qry)
+
+    if not stmt then
+        db:close()
+        return
+    end
+
+    db:exec("BEGIN TRANSACTION;")
+
+    for itemID, data in pairs(item_table) do
+        local item = loot.ALLITEMS[itemID]
+        if item then
+            if not delete_items then
+                stmt:bind_values(itemID, item.Name, setting, classes, item.Link)
+                stmt:step()
+                stmt:reset()
+                loot[localName .. 'Rules'][itemID] = setting
+                loot[localName .. 'Classes'][itemID] = classes
+                loot[localName .. 'Link'][itemID] = item.Link
+                loot.ItemNames[itemID] = item.Name
+            else
+                stmt:bind_values(itemID)
+                stmt:step()
+                stmt:reset()
+                loot[localName .. 'Rules'][itemID] = nil
+                loot[localName .. 'Classes'][itemID] = nil
+                loot[localName .. 'Link'][itemID] = nil
+                loot.ItemNames[itemID] = nil
+            end
+        end
+    end
+
+    db:exec("COMMIT;")
+    stmt:finalize()
+    db:close()
+    if localName ~= 'PersonalItems' then
+        loot.TempSettings.NeedSave = true
+        local message = {
+            action = 'reloadrules',
+            who = MyName,
+            Server = eqServer,
+            bulkLabel = localName,
+            bulkRules = loot[localName .. 'Rules'],
+            bulkClasses = loot[localName .. 'Classes'],
+            bulkLink = loot[localName .. 'Link'],
+        }
+        loot.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
+        loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
+    end
+    loot.TempSettings.BulkSet = {}
+end
+
+------------------------------------
+--         RULES FUNCTIONS
+------------------------------------
+
+
+
+---@param itemID any
+---@param tablename any|nil
+---@return string rule
+---@return string classes
+---@return string link
+function loot.lookupLootRule(itemID, tablename)
+    if not itemID then
+        return 'NULL', 'All', 'NULL'
+    end
+    -- check lua tables first
+    if tablename == 'Global_Rules' then
+        if loot.GlobalItemsRules[itemID] ~= nil then
+            return loot.GlobalItemsRules[itemID], loot.GlobalItemsClasses[itemID], loot.GlobalItemsLink[itemID]
+        end
+    elseif tablename == 'Normal_Rules' then
+        if loot.NormalItemsRules[itemID] ~= nil then
+            return loot.NormalItemsRules[itemID], loot.NormalItemsClasses[itemID], loot.NormalItemsLink[itemID]
+        end
+    elseif tablename == loot.PersonalTableName then
+        if loot.PersonalItemsRules[itemID] ~= nil then
+            return loot.PersonalItemsRules[itemID], loot.PersonalItemsClasses[itemID], loot.PersonalItemsLink[itemID]
+        end
+    elseif tablename == nil then
+        if loot.PersonalItemsRules[itemID] ~= nil then
+            return loot.PersonalItemsRules[itemID], loot.PersonalItemsClasses[itemID], loot.PersonalItemsLink[itemID]
+        end
+        if loot.GlobalItemsRules[itemID] ~= nil then
+            return loot.GlobalItemsRules[itemID], loot.GlobalItemsClasses[itemID], loot.GlobalItemsLink[itemID]
+        end
+        if loot.NormalItemsRules[itemID] ~= nil then
+            return loot.NormalItemsRules[itemID], loot.NormalItemsClasses[itemID], loot.NormalItemsLink[itemID]
+        end
+    end
+
+    -- check SQLite DB if lua tables don't have the data
+    local function checkDB(id, tbl)
+        local db = SQLite3.open(RulesDB)
+        local found = false
+        if not db then
+            Logger.Warn(loot.guiLoot.console, "\atSQL \arFailed\ax to open \atRulesDB:\ax for \aolookupLootRule\ax.")
+            return found, 'NULL', 'All', 'NULL'
+        end
+        db:exec("PRAGMA journal_mode=WAL;")
+        local sql  = string.format("SELECT item_rule, item_rule_classes, item_link FROM %s WHERE item_id = ?", tbl)
+        local stmt = db:prepare(sql)
+
+        if not stmt then
+            Logger.Warn(loot.guiLoot.console, "\atSQL \arFAILED \axto prepare statement for \atlookupLootRule\ax.")
+            db:close()
+            return found, 'NULL', 'All', 'NULL'
+        end
+
+        stmt:bind_values(id)
+        local stepResult = stmt:step()
+
+        local rule       = 'NULL'
+        local classes    = 'All'
+        local link       = 'NULL'
+
+        -- Extract values if a row is returned
+        if stepResult == SQLite3.ROW then
+            local row = stmt:get_named_values()
+            rule      = row.item_rule or 'NULL'
+            classes   = row.item_rule_classes or 'All'
+            link      = row.item_link or 'NULL'
+            found     = true
+        end
+        if classes == 'None' or classes:gsub(" ", '') == '' then
+            classes = 'All'
+        end
+        -- Finalize the statement and close the database
+        stmt:finalize()
+        db:close()
+        return found, rule, classes, link
+    end
+
+    local rule    = 'NULL'
+    local classes = 'All'
+    local link    = 'NULL'
+
+    if tablename == nil then
+        -- check global rules
+        local found = false
+        found, rule, classes, link = checkDB(itemID, loot.PersonalTableName)
+        if not found then
+            found, rule, classes, link = checkDB(itemID, 'Global_Rules')
+        end
+        if not found then
+            found, rule, classes, link = checkDB(itemID, 'Normal_Rules')
+        end
+
+        if not found then
+            rule = 'NULL'
+            classes = 'All'
+            link = 'NULL'
+        end
+    else
+        _, rule, classes, link = checkDB(itemID, tablename)
+    end
+
+    -- if SQL has the item add the rules to the lua table for next time
+
+    if rule ~= 'NULL' then
+        local localTblName                      = tablename == 'Global_Rules' and 'GlobalItems' or 'NormalItems'
+        localTblName                            = tablename == loot.PersonalTableName and 'PersonalItems' or localTblName
+
+        loot[localTblName .. 'Rules'][itemID]   = rule
+        loot[localTblName .. 'Classes'][itemID] = classes
+        loot[localTblName .. 'Link'][itemID]    = link
+        loot.ItemNames[itemID]                  = loot.ALLITEMS[itemID].Name
+    end
+    return rule, classes, link
 end
 
 function loot.addNewItem(corpseItem, itemRule, itemLink, corpseID)
@@ -1446,36 +1972,6 @@ function loot.addNewItem(corpseItem, itemRule, itemLink, corpseID)
     loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, newMessage)
 
     Logger.Info(loot.guiLoot.console, "\agAdding \ayNEW\ax item: \at%s \ay(\axID: \at%s\at) \axwith rule: \ag%s", corpseItem.Name(), itemID, itemRule)
-end
-
-function loot.checkCursor()
-    local currentItem = nil
-    while mq.TLO.Cursor() do
-        -- can't do anything if there's nowhere to put the item, either due to no free inventory space
-        -- or no slot of appropriate size
-        if mq.TLO.Me.FreeInventory() == 0 or mq.TLO.Cursor() == currentItem then
-            if loot.Settings.SpamLootInfo then Logger.Debug(loot.guiLoot.console, 'Inventory full, item stuck on cursor') end
-            mq.cmdf('/autoinv')
-            return
-        end
-        currentItem = mq.TLO.Cursor()
-        mq.cmdf('/autoinv')
-        mq.delay(10000, function() return not mq.TLO.Cursor() end)
-    end
-end
-
-function loot.navToID(spawnID)
-    mq.cmdf('/nav id %d log=off', spawnID)
-    mq.delay(50)
-    if mq.TLO.Navigation.Active() then
-        local startTime = os.time()
-        while mq.TLO.Navigation.Active() do
-            mq.delay(100)
-            if os.difftime(os.time(), startTime) > 5 then
-                break
-            end
-        end
-    end
 end
 
 ---comment: Takes in an item to modify the rules for, You can add, delete, or modify the rules for an item.
@@ -1635,161 +2131,6 @@ function loot.addRule(itemID, section, rule, classes, link)
     return true
 end
 
-function loot.actorAddRule(itemID, itemName, tableName, rule, classes, link)
-    loot.ItemNames[itemID]               = itemName
-
-    loot[tableName .. "Rules"][itemID]   = rule
-    loot[tableName .. "Classes"][itemID] = classes
-    loot[tableName .. "Link"][itemID]    = link
-    local tblName                        = tableName == 'GlobalItems' and 'Global_Rules' or 'Normal_Rules'
-    if tableName == 'PersonalItems' then
-        tblName = loot.PersonalTableName
-    end
-    loot.modifyItemRule(itemID, rule, tblName, classes, link)
-end
-
----@param itemID any
----@param tablename any|nil
----@return string rule
----@return string classes
----@return string link
-function loot.lookupLootRule(itemID, tablename)
-    if not itemID then
-        return 'NULL', 'All', 'NULL'
-    end
-    -- check lua tables first
-    if tablename == 'Global_Rules' then
-        if loot.GlobalItemsRules[itemID] ~= nil then
-            return loot.GlobalItemsRules[itemID], loot.GlobalItemsClasses[itemID], loot.GlobalItemsLink[itemID]
-        end
-    elseif tablename == 'Normal_Rules' then
-        if loot.NormalItemsRules[itemID] ~= nil then
-            return loot.NormalItemsRules[itemID], loot.NormalItemsClasses[itemID], loot.NormalItemsLink[itemID]
-        end
-    elseif tablename == loot.PersonalTableName then
-        if loot.PersonalItemsRules[itemID] ~= nil then
-            return loot.PersonalItemsRules[itemID], loot.PersonalItemsClasses[itemID], loot.PersonalItemsLink[itemID]
-        end
-    elseif tablename == nil then
-        if loot.PersonalItemsRules[itemID] ~= nil then
-            return loot.PersonalItemsRules[itemID], loot.PersonalItemsClasses[itemID], loot.PersonalItemsLink[itemID]
-        end
-        if loot.GlobalItemsRules[itemID] ~= nil then
-            return loot.GlobalItemsRules[itemID], loot.GlobalItemsClasses[itemID], loot.GlobalItemsLink[itemID]
-        end
-        if loot.NormalItemsRules[itemID] ~= nil then
-            return loot.NormalItemsRules[itemID], loot.NormalItemsClasses[itemID], loot.NormalItemsLink[itemID]
-        end
-    end
-
-    -- check SQLite DB if lua tables don't have the data
-    local function checkDB(id, tbl)
-        local db = SQLite3.open(RulesDB)
-        local found = false
-        if not db then
-            Logger.Warn(loot.guiLoot.console, "\atSQL \arFailed\ax to open \atRulesDB:\ax for \aolookupLootRule\ax.")
-            return found, 'NULL', 'All', 'NULL'
-        end
-        db:exec("PRAGMA journal_mode=WAL;")
-        local sql  = string.format("SELECT item_rule, item_rule_classes, item_link FROM %s WHERE item_id = ?", tbl)
-        local stmt = db:prepare(sql)
-
-        if not stmt then
-            Logger.Warn(loot.guiLoot.console, "\atSQL \arFAILED \axto prepare statement for \atlookupLootRule\ax.")
-            db:close()
-            return found, 'NULL', 'All', 'NULL'
-        end
-
-        stmt:bind_values(id)
-        local stepResult = stmt:step()
-
-        local rule       = 'NULL'
-        local classes    = 'All'
-        local link       = 'NULL'
-
-        -- Extract values if a row is returned
-        if stepResult == SQLite3.ROW then
-            local row = stmt:get_named_values()
-            rule      = row.item_rule or 'NULL'
-            classes   = row.item_rule_classes or 'All'
-            link      = row.item_link or 'NULL'
-            found     = true
-        end
-        if classes == 'None' or classes:gsub(" ", '') == '' then
-            classes = 'All'
-        end
-        -- Finalize the statement and close the database
-        stmt:finalize()
-        db:close()
-        return found, rule, classes, link
-    end
-
-    local rule    = 'NULL'
-    local classes = 'All'
-    local link    = 'NULL'
-
-    if tablename == nil then
-        -- check global rules
-        local found = false
-        found, rule, classes, link = checkDB(itemID, loot.PersonalTableName)
-        if not found then
-            found, rule, classes, link = checkDB(itemID, 'Global_Rules')
-        end
-        if not found then
-            found, rule, classes, link = checkDB(itemID, 'Normal_Rules')
-        end
-
-        if not found then
-            rule = 'NULL'
-            classes = 'All'
-            link = 'NULL'
-        end
-    else
-        _, rule, classes, link = checkDB(itemID, tablename)
-    end
-
-    -- if SQL has the item add the rules to the lua table for next time
-
-    if rule ~= 'NULL' then
-        local localTblName                      = tablename == 'Global_Rules' and 'GlobalItems' or 'NormalItems'
-        localTblName                            = tablename == loot.PersonalTableName and 'PersonalItems' or localTblName
-
-        loot[localTblName .. 'Rules'][itemID]   = rule
-        loot[localTblName .. 'Classes'][itemID] = classes
-        loot[localTblName .. 'Link'][itemID]    = link
-        loot.ItemNames[itemID]                  = loot.ALLITEMS[itemID].Name
-    end
-    return rule, classes, link
-end
-
-function loot.report(message, ...)
-    if loot.Settings.ReportLoot then
-        local prefixWithChannel = reportPrefix:format(loot.Settings.LootChannel, mq.TLO.Time())
-        mq.cmdf(prefixWithChannel .. message, ...)
-    end
-end
-
-function loot.AreBagsOpen()
-    local total = {
-        bags = 0,
-        open = 0,
-    }
-    for i = 23, 32 do
-        local slot = mq.TLO.Me.Inventory(i)
-        if slot and slot.Container() and slot.Container() > 0 then
-            total.bags = total.bags + 1
-            if slot.Open() then
-                total.open = total.open + 1
-            end
-        end
-    end
-    if total.bags == total.open then
-        return true
-    else
-        return false
-    end
-end
-
 function loot.processPendingItem()
     if not loot.pendingItemData and not loot.pendingItemData.selectedItem then
         Logger.Warn(loot.guiLoot.console, "No item selected for processing.")
@@ -1942,40 +2283,6 @@ function loot.resolveItemIDbyName(itemName, allowDuplicates)
         end)
         return nil -- Wait for user resolution
     end
-end
-
-function loot.sendMySettings()
-    local tmpTable = {}
-    for k, v in pairs(loot.Settings) do
-        if type(v) == 'table' then
-            tmpTable[k] = {}
-            for kk, vv in pairs(v) do
-                tmpTable[k][kk] = vv
-            end
-        else
-            tmpTable[k] = v
-        end
-    end
-    local message = {
-        who      = MyName,
-        action   = 'sendsettings',
-        settings = tmpTable,
-    }
-    loot.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-    loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
-
-    loot.Boxes[MyName] = {}
-    for k, v in pairs(loot.Settings) do
-        if type(v) == 'table' then
-            loot.Boxes[MyName][k] = {}
-            for kk, vv in pairs(v) do
-                loot.Boxes[MyName][k][kk] = vv
-            end
-        else
-            loot.Boxes[MyName][k] = v
-        end
-    end
-    loot.TempSettings.LastSent = os.time()
 end
 
 --- Evaluate and return the rule for an item.
@@ -2261,7 +2568,141 @@ function loot.getRule(item, from, index)
     return lootDecision, qKeep, newRule, iCanUse
 end
 
--- EVENTS
+function loot.setBuyItem(itemID, qty)
+    loot.BuyItemsTable[itemID] = qty
+end
+
+-- Changes the class restriction for an item
+function loot.ChangeClasses(itemID, classes, tableName)
+    if tableName == 'GlobalItems' then
+        loot.GlobalItemsClasses[itemID] = classes
+        loot.modifyItemRule(itemID, loot.GlobalItemsRules[itemID], 'Global_Rules', classes)
+    elseif tableName == 'NormalItems' then
+        loot.NormalItemsClasses[itemID] = classes
+        loot.modifyItemRule(itemID, loot.NormalItemsRules[itemID], 'Normal_Rules', classes)
+    elseif tableName == 'PersonalItems' then
+        loot.PersonalItemsClasses[itemID] = classes
+        loot.modifyItemRule(itemID, loot.PersonalItemsRules[itemID], loot.PersonalTableName, classes)
+    end
+end
+
+-- Sets a Global Item rule
+function loot.setGlobalItem(itemID, val, classes, link)
+    if itemID == nil then
+        Logger.Warn(loot.guiLoot.console, "Invalid itemID for setGlobalItem.")
+        return
+    end
+    loot.modifyItemRule(itemID, val, 'Global_Rules', classes, link)
+
+    loot.GlobalItemsRules[itemID] = val ~= 'delete' and val or nil
+    if val ~= 'delete' then
+        loot.GlobalItemsClasses[itemID] = classes or 'All'
+        loot.GlobalItemsLink[itemID]    = link or 'NULL'
+    else
+        loot.GlobalItemsClasses[itemID] = nil
+        loot.GlobalItemsLink[itemID]    = nil
+    end
+end
+
+-- Sets a Normal Item rule
+function loot.setNormalItem(itemID, val, classes, link)
+    if itemID == nil then
+        Logger.Warn(loot.guiLoot.console, "Invalid itemID for setNormalItem.")
+        return
+    end
+    loot.NormalItemsRules[itemID] = val ~= 'delete' and val or nil
+    if val ~= 'delete' then
+        loot.NormalItemsClasses[itemID] = classes or 'All'
+        loot.NormalItemsLink[itemID]    = link or 'NULL'
+    else
+        loot.NormalItemsClasses[itemID] = nil
+        loot.NormalItemsLink[itemID]    = nil
+    end
+    loot.modifyItemRule(itemID, val, 'Normal_Rules', classes, link)
+end
+
+function loot.setPersonalItem(itemID, val, classes, link)
+    if itemID == nil then
+        Logger.Warn(loot.guiLoot.console, "Invalid itemID for setPersonalItem.")
+        return
+    end
+    loot.PersonalItemsRules[itemID] = val ~= 'delete' and val or nil
+    if val ~= 'delete' then
+        loot.PersonalItemsClasses[itemID] = classes or 'All'
+        loot.PersonalItemsLink[itemID]    = link or 'NULL'
+    else
+        loot.PersonalItemsClasses[itemID] = nil
+        loot.PersonalItemsLink[itemID]    = nil
+    end
+    loot.modifyItemRule(itemID, val, loot.PersonalTableName, classes, link)
+end
+
+------------------------------------
+--          ACTORS
+------------------------------------
+
+
+function loot.actorAddRule(itemID, itemName, tableName, rule, classes, link)
+    loot.ItemNames[itemID]               = itemName
+
+    loot[tableName .. "Rules"][itemID]   = rule
+    loot[tableName .. "Classes"][itemID] = classes
+    loot[tableName .. "Link"][itemID]    = link
+    local tblName                        = tableName == 'GlobalItems' and 'Global_Rules' or 'Normal_Rules'
+    if tableName == 'PersonalItems' then
+        tblName = loot.PersonalTableName
+    end
+    loot.modifyItemRule(itemID, rule, tblName, classes, link)
+end
+
+function loot.sendMySettings()
+    local tmpTable = {}
+    for k, v in pairs(loot.Settings) do
+        if type(v) == 'table' then
+            tmpTable[k] = {}
+            for kk, vv in pairs(v) do
+                tmpTable[k][kk] = vv
+            end
+        else
+            tmpTable[k] = v
+        end
+    end
+    local message = {
+        who      = MyName,
+        action   = 'sendsettings',
+        settings = tmpTable,
+    }
+    loot.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
+    loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
+
+    loot.Boxes[MyName] = {}
+    for k, v in pairs(loot.Settings) do
+        if type(v) == 'table' then
+            loot.Boxes[MyName][k] = {}
+            for kk, vv in pairs(v) do
+                loot.Boxes[MyName][k][kk] = vv
+            end
+        else
+            loot.Boxes[MyName][k] = v
+        end
+    end
+    loot.TempSettings.LastSent = os.time()
+end
+
+function loot.finishedLooting()
+    if Mode == 'directed' then
+        loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, },
+            { Subject = 'done_looting', Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
+    end
+end
+
+function loot.informProcessing()
+    loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = "processing", Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
+end
+
+function loot.doneProcessing()
+    loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = "done_processing", Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
+end
 
 function loot.RegisterActors()
     loot.lootActor = Actors.register('lootnscoot', function(message)
@@ -2455,300 +2896,11 @@ function loot.RegisterActors()
     end)
 end
 
-local itemNoValue = nil
-function loot.eventNovalue(line, item)
-    itemNoValue = item
-end
+------------------------------------
+--      LOOTING
+------------------------------------
 
-function loot.setupEvents()
-    mq.event("CantLoot", "#*#may not loot this corpse#*#", loot.eventCantLoot)
-    mq.event("NoSlot", "#*#There are no open slots for the held item in your inventory#*#", loot.eventNoSlot)
-    mq.event("Sell", "#*#You receive#*# for the #1#(s)#*#", loot.eventSell)
-    mq.event("ForageExtras", "Your forage mastery has enabled you to find something else!", loot.eventForage)
-    mq.event("Forage", "You have scrounged up #*#", loot.eventForage)
-    mq.event("Novalue", "#*#give you absolutely nothing for the #1#.#*#", loot.eventNovalue)
-    mq.event("Tribute", "#*#We graciously accept your #1# as tribute, thank you!#*#", loot.eventTribute)
-end
 
--- BINDS
-
-function loot.setBuyItem(itemID, qty)
-    loot.BuyItemsTable[itemID] = qty
-end
-
--- Changes the class restriction for an item
-function loot.ChangeClasses(itemID, classes, tableName)
-    if tableName == 'GlobalItems' then
-        loot.GlobalItemsClasses[itemID] = classes
-        loot.modifyItemRule(itemID, loot.GlobalItemsRules[itemID], 'Global_Rules', classes)
-    elseif tableName == 'NormalItems' then
-        loot.NormalItemsClasses[itemID] = classes
-        loot.modifyItemRule(itemID, loot.NormalItemsRules[itemID], 'Normal_Rules', classes)
-    elseif tableName == 'PersonalItems' then
-        loot.PersonalItemsClasses[itemID] = classes
-        loot.modifyItemRule(itemID, loot.PersonalItemsRules[itemID], loot.PersonalTableName, classes)
-    end
-end
-
--- Sets a Global Item rule
-function loot.setGlobalItem(itemID, val, classes, link)
-    if itemID == nil then
-        Logger.Warn(loot.guiLoot.console, "Invalid itemID for setGlobalItem.")
-        return
-    end
-    loot.modifyItemRule(itemID, val, 'Global_Rules', classes, link)
-
-    loot.GlobalItemsRules[itemID] = val ~= 'delete' and val or nil
-    if val ~= 'delete' then
-        loot.GlobalItemsClasses[itemID] = classes or 'All'
-        loot.GlobalItemsLink[itemID]    = link or 'NULL'
-    else
-        loot.GlobalItemsClasses[itemID] = nil
-        loot.GlobalItemsLink[itemID]    = nil
-    end
-end
-
--- Sets a Normal Item rule
-function loot.setNormalItem(itemID, val, classes, link)
-    if itemID == nil then
-        Logger.Warn(loot.guiLoot.console, "Invalid itemID for setNormalItem.")
-        return
-    end
-    loot.NormalItemsRules[itemID] = val ~= 'delete' and val or nil
-    if val ~= 'delete' then
-        loot.NormalItemsClasses[itemID] = classes or 'All'
-        loot.NormalItemsLink[itemID]    = link or 'NULL'
-    else
-        loot.NormalItemsClasses[itemID] = nil
-        loot.NormalItemsLink[itemID]    = nil
-    end
-    loot.modifyItemRule(itemID, val, 'Normal_Rules', classes, link)
-end
-
-function loot.setPersonalItem(itemID, val, classes, link)
-    if itemID == nil then
-        Logger.Warn(loot.guiLoot.console, "Invalid itemID for setPersonalItem.")
-        return
-    end
-    loot.PersonalItemsRules[itemID] = val ~= 'delete' and val or nil
-    if val ~= 'delete' then
-        loot.PersonalItemsClasses[itemID] = classes or 'All'
-        loot.PersonalItemsLink[itemID]    = link or 'NULL'
-    else
-        loot.PersonalItemsClasses[itemID] = nil
-        loot.PersonalItemsLink[itemID]    = nil
-    end
-    loot.modifyItemRule(itemID, val, loot.PersonalTableName, classes, link)
-end
-
--- Sets a Global Item rule for the item currently on the cursor
-function loot.setGlobalBind(value)
-    local itemID = mq.TLO.Cursor.ID()
-    loot.setGlobalItem(itemID, value)
-end
-
--- Main command handler
-function loot.commandHandler(...)
-    local args = { ..., }
-    local item = mq.TLO.Cursor -- Capture the cursor item early for reuse
-
-    if args[1] == 'set' then
-        local setting    = args[2]:lower()
-        local settingVal = args[3]
-        if settingsEnum[setting] ~= nil then
-            local settingName = settingsEnum[setting]
-            if type(loot.Settings[settingName]) == 'table' then
-                Logger.Error(loot.guiLoot.console, "Setting \ay%s\ax is a table and cannot be set directly.", settingName)
-                return
-            end
-            if type(loot.Settings[settingName]) == 'boolean' then
-                loot.Settings[settingName] = settingVal == 'on'
-            elseif type(loot.Settings[settingName]) == 'number' then
-                loot.Settings[settingName] = tonumber(settingVal)
-            else
-                loot.Settings[settingName] = settingVal
-            end
-            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \ag%s\ax", settingName, settingVal)
-            loot.writeSettings()
-        else
-            Logger.Warn(loot.guiLoot.console, "Invalid setting name: %s", setting)
-        end
-        loot.writeSettings()
-        loot.sendMySettings()
-        return
-    end
-    Logger.Debug(loot.guiLoot.console, "arg1: %s, arg2: %s, arg3: %s, arg4: %s", tostring(args[1]), tostring(args[2]), tostring(args[3]), tostring(args[4]))
-
-    if args[1] == 'find' and args[2] ~= nil then
-        if tonumber(args[2]) then
-            loot.findItemInDb(nil, tonumber(args[2]))
-        else
-            loot.findItemInDb(args[2])
-        end
-    end
-    if #args == 1 then
-        local command = args[1]
-        if command == 'sellstuff' then
-            loot.processItems('Sell')
-        elseif command == 'restock' then
-            loot.processItems('Buy')
-        elseif command == 'debug' then
-            debugPrint = not debugPrint
-            Logger.Info(loot.guiLoot.console, "\ayDebugging\ax is now %s", debugPrint and "\agon" or "\aroff")
-        elseif command == 'reload' then
-            local needSave = loot.loadSettings()
-            if needSave then
-                loot.writeSettings()
-            end
-            if loot.guiLoot then
-                loot.guiLoot.GetSettings(
-                    loot.Settings.HideNames,
-                    -- loot.Settings.LookupLinks,
-                    loot.Settings.RecordData,
-                    true,
-                    loot.Settings.UseActors,
-                    'lootnscoot', false
-                )
-            end
-            Logger.Info(loot.guiLoot.console, "\ayReloaded Settings \axand \atLoot Files")
-        elseif command == 'update' then
-            if loot.guiLoot then
-                loot.guiLoot.GetSettings(
-                    loot.Settings.HideNames,
-                    -- loot.Settings.LookupLinks,
-                    loot.Settings.RecordData,
-                    true,
-                    loot.Settings.UseActors,
-                    'lootnscoot', false
-                )
-            end
-            loot.UpdateDB()
-            Logger.Info(loot.guiLoot.console, "\ayUpdated the DB from loot.ini \axand \atreloaded settings")
-        elseif command == 'importinv' then
-            loot.addMyInventoryToDB()
-        elseif command == 'bank' then
-            loot.processItems('Bank')
-        elseif command == 'cleanup' then
-            loot.processItems('Destroy')
-        elseif command == 'gui' or command == 'console' and loot.guiLoot then
-            loot.guiLoot.openGUI = not loot.guiLoot.openGUI
-        elseif command == 'report' and loot.guiLoot then
-            loot.guiLoot.ReportLoot()
-        elseif command == 'hidenames' and loot.guiLoot then
-            loot.guiLoot.hideNames = not loot.guiLoot.hideNames
-        elseif command == 'config' then
-            local confReport = "\ayLoot N Scoot Settings\ax"
-            for key, value in pairs(loot.Settings) do
-                if type(value) ~= "function" and type(value) ~= "table" then
-                    confReport = confReport .. string.format("\n\at%s\ax                                    = \ag%s\ax", key, tostring(value))
-                end
-            end
-            Logger.Info(loot.guiLoot.console, confReport)
-        elseif command == 'tributestuff' then
-            loot.processItems('Tribute')
-        elseif command == 'shownew' or command == 'newitems' then
-            showNewItem = not showNewItem
-        elseif command == 'loot' then
-            loot.lootMobs()
-        elseif command == 'show' then
-            loot.ShowUI = not loot.ShowUI
-        elseif command == 'tsbank' then
-            loot.markTradeSkillAsBank()
-        elseif validActions[command] and item() then
-            local itemID = item.ID()
-            loot.addRule(itemID, 'NormalItems', validActions[command], 'All', item.ItemLink('CLICKABLE')())
-            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \ay%s\ax", item.Name(), validActions[command])
-        elseif string.find(command, "quest%|") and item() then
-            local itemID = item.ID()
-            local val    = string.gsub(command, "quest", "Quest")
-            loot.addRule(itemID, 'NormalItems', val, 'All', item.ItemLink('CLICKABLE')())
-            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \ay%s\ax", item.Name(), val)
-        elseif command == 'quit' or command == 'exit' then
-            loot.Terminate = true
-        end
-    elseif #args == 2 then
-        local action, itemName = args[1], args[2]
-        if validActions[action] then
-            local lootID = loot.resolveItemIDbyName(itemName, false)
-            Logger.Warn(loot.guiLoot.console, "lootID: %s", lootID)
-            if lootID then
-                if loot.ALLITEMS[lootID] then
-                    loot.addRule(lootID, 'NormalItems', validActions[action], 'All', loot.ALLITEMS[lootID].Link)
-                    Logger.Info(loot.guiLoot.console, "Setting \ay%s (%s)\ax to \ay%s\ax", itemName, lootID, validActions[action])
-                end
-            end
-        end
-    elseif #args == 3 then
-        if args[1] == 'globalitem' and args[2] == 'quest' and item() then
-            local itemID = item.ID()
-            loot.addRule(itemID, 'GlobalItems', 'Quest|' .. args[3], 'All', item.ItemLink('CLICKABLE')())
-            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \agGlobal Item \ayQuest|%s\ax", item.Name(), args[3], item.ItemLink('CLICKABLE')())
-        elseif args[1] == 'globalitem' and validActions[args[2]] and item() then
-            loot.addRule(item.ID(), 'GlobalItems', validActions[args[2]], args[3] or 'All', item.ItemLink('CLICKABLE')())
-            Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \agGlobal Item \ay%s \ax(\at%s\ax)", item.Name(), item.ID(), validActions[args[2]])
-        elseif args[1] == 'globalitem' and validActions[args[2]] and args[3] ~= nil then
-            local itemName = args[3]
-            local itemID   = loot.resolveItemIDbyName(itemName, false)
-            if itemID then
-                if loot.ALLITEMS[itemID] then
-                    loot.addRule(itemID, 'GlobalItems', validActions[args[2]], 'All', loot.ALLITEMS[itemID].Link)
-                    Logger.Info(loot.guiLoot.console, "Setting \ay%s\ax to \agGlobal Item \ay%s|%s\ax", loot.ALLITEMS[itemID].Name, validActions[args[2]], args[3])
-                end
-            else
-                Logger.Warn(loot.guiLoot.console, "Item \ay%s\ax ID: %s\ax not found in loot.ALLITEMS.", itemName, itemID)
-            end
-        end
-    end
-    loot.writeSettings()
-end
-
-function loot.findItemInDb(itemName, itemId)
-    local db = loot.OpenItemsSQL()
-    local query = "SELECT * FROM Items"
-    if itemId ~= nil then
-        query = string.format("SELECT * FROM Items WHERE item_id = %d", itemId)
-    elseif itemName ~= nil then
-        query = string.format("SELECT * FROM Items WHERE name LIKE '%%%s%%'", itemName)
-    end
-    db:exec("BEGIN TRANSACTION")
-    local stmt = db:prepare(query)
-    local counter = 0
-    for row in stmt:nrows() do
-        if counter > 20 then break end
-        Logger.Info(loot.guiLoot.console, "\ao[\ax\ayLNS Find Item\ao]\ax:\ax\ay %s\ax \ayID:\ax \at%d\ax, \aoValue:\ax \ag%s\ax Link: %s,", row.name, row.item_id, row.sell_value,
-            row.link)
-        counter = counter + 1
-    end
-    stmt:finalize()
-    db:exec("COMMIT")
-    db:close()
-    if counter > 20 then Logger.Info(loot.guiLoot.console, "\aoMore than\ax \ay20\ax items found, \aoonly showing first\ax \at20\ax.") end
-end
-
-function loot.setupBinds()
-    mq.bind('/lootutils', loot.commandHandler)
-    mq.bind('/lns', loot.commandHandler)
-end
-
--- LOOTING
-
-function loot.CheckBags()
-    if loot.Settings.SaveBagSlots == nil then return false end
-    -- Logger.Warn(loot.guiLoot.console,"\agBag CHECK\ax free: \at%s\ax, save: \ag%s\ax", mq.TLO.Me.FreeInventory(), loot.Settings.SaveBagSlots)
-    areFull = mq.TLO.Me.FreeInventory() <= loot.Settings.SaveBagSlots
-end
-
-function loot.eventCantLoot()
-    cantLootID = mq.TLO.Target.ID()
-end
-
-function loot.eventNoSlot()
-    -- we don't have a slot big enough for the item on cursor. Dropping it to the ground.
-    local cantLootItemName = mq.TLO.Cursor()
-    mq.cmdf('/drop')
-    mq.delay(1)
-    loot.report("\ay[WARN]\arI can't loot %s, dropping it on the ground!\ax", cantLootItemName)
-end
 
 ---@param index number @The current index in the loot window, 1-based.
 ---@param doWhat string @The action to take for the item.
@@ -2854,23 +3006,6 @@ function loot.lootItem(index, doWhat, button, qKeep, cantWear)
     end
 end
 
-function loot.reportSkippedItems(noDropItems, loreItems, corpseName, corpseID)
-    -- Ensure parameters are valid
-    noDropItems = noDropItems or {}
-    loreItems   = loreItems or {}
-
-    -- Log skipped items
-    if next(noDropItems) then
-        Logger.Info(loot.guiLoot.console, "Skipped NoDrop items from corpse %s (ID: %s): %s",
-            corpseName, tostring(corpseID), table.concat(noDropItems, ", "))
-    end
-
-    if next(loreItems) then
-        Logger.Info(loot.guiLoot.console, "Skipped Lore items from corpse %s (ID: %s): %s",
-            corpseName, tostring(corpseID), table.concat(loreItems, ", "))
-    end
-end
-
 function loot.lootCorpse(corpseID)
     Logger.Debug(loot.guiLoot.console, 'Enter lootCorpse')
     shouldLootActions.Destroy = loot.Settings.DoDestroy
@@ -2963,22 +3098,6 @@ function loot.lootCorpse(corpseID)
         loot.lootActor:send({ mailbox = 'looted', script = 'lootnscoot', }, message)
         loot.lootActor:send({ mailbox = 'looted', script = 'rgmercs/lib/lootnscoot', }, message)
     end
-end
-
-function loot.finishedLooting()
-    if Mode == 'directed' then
-        loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, },
-            { Subject = 'done_looting', Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
-    end
-end
-
-function loot.corpseLocked(corpseID)
-    if not cantLootList[corpseID] then return false end
-    if os.difftime(os.time(), cantLootList[corpseID]) > 1 then
-        cantLootList[corpseID] = nil
-        return false
-    end
-    return true
 end
 
 function loot.lootMobs(limit)
@@ -3075,7 +3194,13 @@ function loot.lootMobs(limit)
     return didLoot
 end
 
+------------------------------------
+--      PROCESSING ITEMS
+------------------------------------
+
 -- SELLING
+
+
 function loot.eventSell(_, itemName)
     if ProcessItemsState ~= nil then return end
     -- Resolve the item ID from the given name
@@ -3410,6 +3535,19 @@ function loot.tributeStuff()
     loot.processItems('Tribute')
 end
 
+------------------------------------
+--          GUI FUNCTIONS
+------------------------------------
+
+
+function loot.drawIcon(iconID, iconSize)
+    if iconSize == nil then iconSize = 16 end
+    if iconID ~= nil then
+        iconAnimation:SetTextureCell(iconID - 500)
+        ImGui.DrawTextureAnimation(iconAnimation, iconSize, iconSize)
+    end
+end
+
 function loot.guiExport()
     -- Define a new menu element function
     local function customMenu()
@@ -3523,235 +3661,12 @@ function loot.guiExport()
     if loot.guiLoot ~= nil then loot.guiLoot.importGUIElements[1] = customMenu end
 end
 
-function loot.handleSelectedItem(itemID)
-    -- Process the selected item (e.g., add to a rule, perform an action, etc.)
-    local itemData = loot.ALLITEMS[itemID]
-    if not itemData then
-        Logger.Error(loot.guiLoot.console, "Invalid item selected: " .. tostring(itemID))
-        return
-    end
-
-    Logger.Info(loot.guiLoot.console, "Item selected: " .. itemData.Name .. " (ID: " .. itemID .. ")")
-    -- You can now use itemID for further actions
-end
-
 function loot.drawYesNo(decision)
     if decision then
         loot.drawIcon(4494, 20) -- Checkmark icon
     else
         loot.drawIcon(4495, 20) -- X icon
     end
-end
-
----comment
----@param search any Search string we are looking for, can be a string or number
----@param key any Table field we are checking against, for Lookups this is only Name. for other tables this can be ItemId, Name, Class, Race
----@param value any Field value we are checking against
----@return boolean True if the search string is found in the key or value, false otherwise
-function loot.SearchLootTable(search, key, value)
-    if key == nil or value == nil or search == nil then return false end
-    key = tostring(key)
-    search = tostring(search)
-    search = search and search:gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%1") or ""
-    if (search == nil or search == "") or key:lower():find(search:lower()) or value:lower():find(search:lower()) then
-        return true
-    else
-        return false
-    end
-end
-
-local fontScale = 1
-local iconSize = 16
-local tempValues = {}
-
-function loot.SortTables()
-    loot.TempSettings.SortedGlobalItemKeys = {}
-    loot.TempSettings.SortedBuyItemKeys    = {}
-    loot.TempSettings.SortedNormalItemKeys = {}
-    loot.TempSettings.SortedSettingsKeys   = {}
-    loot.TempSettings.SortedToggleKeys     = {}
-
-    for k in pairs(loot.GlobalItemsRules) do
-        table.insert(loot.TempSettings.SortedGlobalItemKeys, k)
-    end
-    table.sort(loot.TempSettings.SortedGlobalItemKeys, function(a, b) return a < b end)
-
-    for k in pairs(loot.BuyItemsTable) do
-        table.insert(loot.TempSettings.SortedBuyItemKeys, k)
-    end
-    table.sort(loot.TempSettings.SortedBuyItemKeys, function(a, b) return a < b end)
-
-    for k in pairs(loot.NormalItemsRules) do
-        table.insert(loot.TempSettings.SortedNormalItemKeys, k)
-    end
-
-    table.sort(loot.TempSettings.SortedNormalItemKeys, function(a, b) return a < b end)
-
-    for k in pairs(loot.Settings) do
-        if settingsNoDraw[k] == nil then
-            if type(loot.Settings[k]) == 'boolean' then
-                table.insert(loot.TempSettings.SortedToggleKeys, k)
-            else
-                table.insert(loot.TempSettings.SortedSettingsKeys, k)
-            end
-        end
-    end
-    table.sort(loot.TempSettings.SortedToggleKeys, function(a, b) return a < b end)
-    table.sort(loot.TempSettings.SortedSettingsKeys, function(a, b) return a < b end)
-end
-
-function loot.RenderModifyItemWindow()
-    if not loot.TempSettings.ModifyItemRule then
-        Logger.Error(loot.guiLoot.console, "Item not found in ALLITEMS %s %s", loot.TempSettings.ModifyItemID, loot.TempSettings.ModifyItemTable)
-        loot.TempSettings.ModifyItemRule = false
-        loot.TempSettings.ModifyItemID = nil
-        tempValues = {}
-        return
-    end
-    if loot.TempSettings.ModifyItemTable == 'Personal_Items' then
-        loot.TempSettings.ModifyItemTable = loot.PersonalTableName
-    end
-    local classes = loot.TempSettings.ModifyClasses
-    local rule = loot.TempSettings.ModifyItemSetting
-
-    ImGui.SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(-1, -1))
-    local open, show = ImGui.Begin("Modify Item", nil, ImGuiWindowFlags.AlwaysAutoResize)
-    if show then
-        local item = loot.ALLITEMS[loot.TempSettings.ModifyItemID]
-        if not item then
-            item = {
-                Name = loot.TempSettings.ModifyItemName,
-                Link = loot.TempSettings.ModifyItemLink,
-                RaceList = loot.TempSettings.ModifyItemRaceList,
-            }
-        end
-        local questRule = "Quest"
-        if item == nil then
-            Logger.Error(loot.guiLoot.console, "Item not found in ALLITEMS %s %s", loot.TempSettings.ModifyItemID, loot.TempSettings.ModifyItemTable)
-            ImGui.End()
-            return
-        end
-        ImGui.TextUnformatted("Item:")
-        ImGui.SameLine()
-        ImGui.TextColored(ImVec4(0, 1, 1, 1), item.Name)
-        ImGui.SameLine()
-        ImGui.TextUnformatted("ID:")
-        ImGui.SameLine()
-        ImGui.TextColored(ImVec4(1, 1, 0, 1), "%s", loot.TempSettings.ModifyItemID)
-
-        if ImGui.BeginCombo("Table", loot.TempSettings.ModifyItemTable) then
-            for i, v in ipairs(tableList) do
-                if ImGui.Selectable(v, loot.TempSettings.ModifyItemTable == v) then
-                    loot.TempSettings.ModifyItemTable = v
-                end
-            end
-            ImGui.EndCombo()
-        end
-
-        if tempValues.Classes == nil and classes ~= nil then
-            tempValues.Classes = classes
-        end
-
-        ImGui.SetNextItemWidth(100)
-        tempValues.Classes = ImGui.InputTextWithHint("Classes", "who can loot or all ex: shm clr dru", tempValues.Classes)
-
-        ImGui.SameLine()
-        loot.TempModClass = ImGui.Checkbox("All", loot.TempModClass)
-
-        if tempValues.Rule == nil and rule ~= nil then
-            tempValues.Rule = rule
-        end
-
-        ImGui.SetNextItemWidth(100)
-        if ImGui.BeginCombo("Rule", tempValues.Rule) then
-            for i, v in ipairs(settingList) do
-                if ImGui.Selectable(v, tempValues.Rule == v) then
-                    tempValues.Rule = v
-                end
-            end
-            ImGui.EndCombo()
-        end
-
-        if tempValues.Rule == "Quest" then
-            ImGui.SameLine()
-            ImGui.SetNextItemWidth(100)
-            tempValues.Qty = ImGui.InputInt("QuestQty", tempValues.Qty, 1, 1)
-            if tempValues.Qty > 0 then
-                questRule = string.format("Quest|%s", tempValues.Qty)
-            end
-        end
-
-        if ImGui.Button("Set Rule") then
-            local newRule = tempValues.Rule == "Quest" and questRule or tempValues.Rule
-            if tempValues.Classes == nil or tempValues.Classes == '' or loot.TempModClass then
-                tempValues.Classes = "All"
-            end
-            -- loot.modifyItemRule(loot.TempSettings.ModifyItemID, newRule, loot.TempSettings.ModifyItemTable, tempValues.Classes, item.Link)
-            if loot.TempSettings.ModifyItemTable == loot.PersonalTableName then
-                loot.PersonalItemsRules[loot.TempSettings.ModifyItemID] = newRule
-                loot.setPersonalItem(loot.TempSettings.ModifyItemID, newRule, tempValues.Classes, item.Link)
-            elseif loot.TempSettings.ModifyItemTable == "Global_Items" then
-                loot.GlobalItemsRules[loot.TempSettings.ModifyItemID] = newRule
-                loot.setGlobalItem(loot.TempSettings.ModifyItemID, newRule, tempValues.Classes, item.Link)
-            else
-                loot.NormalItemsRules[loot.TempSettings.ModifyItemID] = newRule
-                loot.setNormalItem(loot.TempSettings.ModifyItemID, newRule, tempValues.Classes, item.Link)
-            end
-            -- loot.setNormalItem(loot.TempSettings.ModifyItemID, newRule,  tempValues.Classes, item.Link)
-            loot.TempSettings.ModifyItemRule = false
-            loot.TempSettings.ModifyItemID = nil
-            loot.TempSettings.ModifyItemTable = nil
-            loot.TempSettings.ModifyItemClasses = 'All'
-            loot.TempSettings.ModifyItemName = nil
-            loot.TempSettings.ModifyItemLink = nil
-            loot.TempModClass = false
-
-            ImGui.End()
-            return
-        end
-        ImGui.SameLine()
-
-        ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(1.0, 0.4, 0.4, 0.4))
-        if ImGui.Button(Icons.FA_TRASH) then
-            if loot.TempSettings.ModifyItemTable == loot.PersonalTableName then
-                loot.PersonalItemsRules[loot.TempSettings.ModifyItemID] = nil
-                loot.setPersonalItem(loot.TempSettings.ModifyItemID, 'delete', 'All', 'NULL')
-            elseif loot.TempSettings.ModifyItemTable == "Global_Items" then
-                -- loot.GlobalItemsRules[loot.TempSettings.ModifyItemID] = nil
-                loot.setGlobalItem(loot.TempSettings.ModifyItemID, 'delete', 'All', 'NULL')
-            else
-                loot.setNormalItem(loot.TempSettings.ModifyItemID, 'delete', 'All', 'NULL')
-            end
-            loot.TempSettings.ModifyItemRule = false
-            loot.TempSettings.ModifyItemID = nil
-            loot.TempSettings.ModifyItemTable = nil
-            loot.TempSettings.ModifyItemClasses = 'All'
-            ImGui.PopStyleColor()
-
-            ImGui.End()
-            return
-        end
-        ImGui.PopStyleColor()
-
-        ImGui.SameLine()
-        if ImGui.Button("Cancel") then
-            loot.TempSettings.ModifyItemRule = false
-            loot.TempSettings.ModifyItemID = nil
-            loot.TempSettings.ModifyItemTable = nil
-            loot.TempSettings.ModifyItemClasses = 'All'
-            loot.TempSettings.ModifyItemName = nil
-            loot.TempSettings.ModifyItemLink = nil
-        end
-    end
-    if not open then
-        loot.TempSettings.ModifyItemRule = false
-        loot.TempSettings.ModifyItemID = nil
-        loot.TempSettings.ModifyItemTable = nil
-        loot.TempSettings.ModifyItemClasses = 'All'
-        loot.TempSettings.ModifyItemName = nil
-        loot.TempSettings.ModifyItemLink = nil
-    end
-    ImGui.End()
 end
 
 function loot.drawNewItemsTable()
@@ -4778,88 +4693,6 @@ function loot.DrawRuleToolTip(name, setting, classes)
     ImGui.EndTooltip()
 end
 
----comment
----@param item_table table Index of ItemId's to set
----@param setting any Setting to set all items to
----@param classes any Classes to set all items to
----@param which_table string Which Rules table
----@param delete_items boolean Delete items from the table
-function loot.bulkSet(item_table, setting, classes, which_table, delete_items)
-    if item_table == nil or type(item_table) ~= "table" then return end
-    if which_table == 'Personal_Rules' then which_table = loot.PersonalTableName end
-    local localName = which_table == 'Normal_Rules' and 'NormalItems' or 'GlobalItems'
-    localName = which_table == loot.PersonalTableName and 'PersonalItems' or localName
-
-    local db = SQLite3.open(RulesDB)
-    if not db then return end
-    db:exec("PRAGMA journal_mode=WAL;")
-
-    local qry = string.format([[
-        INSERT INTO %s (item_id, item_name, item_rule, item_rule_classes, item_link)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(item_id) DO UPDATE SET
-            item_name = excluded.item_name,
-            item_rule = excluded.item_rule,
-            item_rule_classes = excluded.item_rule_classes,
-            item_link = excluded.item_link;
-    ]], which_table)
-    if delete_items then
-        qry = string.format([[
-            DELETE FROM %s WHERE item_id = ?;
-        ]], which_table)
-    end
-    local stmt = db:prepare(qry)
-
-    if not stmt then
-        db:close()
-        return
-    end
-
-    db:exec("BEGIN TRANSACTION;")
-
-    for itemID, data in pairs(item_table) do
-        local item = loot.ALLITEMS[itemID]
-        if item then
-            if not delete_items then
-                stmt:bind_values(itemID, item.Name, setting, classes, item.Link)
-                stmt:step()
-                stmt:reset()
-                loot[localName .. 'Rules'][itemID] = setting
-                loot[localName .. 'Classes'][itemID] = classes
-                loot[localName .. 'Link'][itemID] = item.Link
-                loot.ItemNames[itemID] = item.Name
-            else
-                stmt:bind_values(itemID)
-                stmt:step()
-                stmt:reset()
-                loot[localName .. 'Rules'][itemID] = nil
-                loot[localName .. 'Classes'][itemID] = nil
-                loot[localName .. 'Link'][itemID] = nil
-                loot.ItemNames[itemID] = nil
-            end
-        end
-    end
-
-    db:exec("COMMIT;")
-    stmt:finalize()
-    db:close()
-    if localName ~= 'PersonalItems' then
-        loot.TempSettings.NeedSave = true
-        local message = {
-            action = 'reloadrules',
-            who = MyName,
-            Server = eqServer,
-            bulkLabel = localName,
-            bulkRules = loot[localName .. 'Rules'],
-            bulkClasses = loot[localName .. 'Classes'],
-            bulkLink = loot[localName .. 'Link'],
-        }
-        loot.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-        loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
-    end
-    loot.TempSettings.BulkSet = {}
-end
-
 function loot.drawSettingIcon(setting)
     if string.find(setting, 'Destroy') then
         ImGui.TextColored(0.860, 0.104, 0.104, 1.000, Icons.MD_DELETE)
@@ -4920,7 +4753,6 @@ function loot.drawSwitch(settingName, who)
     end
 end
 
-loot.TempSettings.Edit = {}
 function loot.renderSettingsSection(who)
     if who == nil then who = MyName end
     local col = 2
@@ -5105,6 +4937,180 @@ function loot.renderSettingsSection(who)
         end
         ImGui.EndTable()
     end
+end
+
+function loot.renderNewItem()
+    if ((loot.Settings.AutoShowNewItem and loot.NewItemsCount > 0) and showNewItem) or showNewItem then
+        ImGui.SetNextWindowSize(600, 400, ImGuiCond.FirstUseEver)
+        local open, show = ImGui.Begin('New Items', true)
+        if not open then
+            show = false
+            showNewItem = false
+        end
+        if show then
+            loot.drawNewItemsTable()
+        end
+        ImGui.End()
+    end
+end
+
+------------------------------------
+--          GUI WINDOWS
+------------------------------------
+
+
+function loot.RenderModifyItemWindow()
+    if not loot.TempSettings.ModifyItemRule then
+        Logger.Error(loot.guiLoot.console, "Item not found in ALLITEMS %s %s", loot.TempSettings.ModifyItemID, loot.TempSettings.ModifyItemTable)
+        loot.TempSettings.ModifyItemRule = false
+        loot.TempSettings.ModifyItemID = nil
+        tempValues = {}
+        return
+    end
+    if loot.TempSettings.ModifyItemTable == 'Personal_Items' then
+        loot.TempSettings.ModifyItemTable = loot.PersonalTableName
+    end
+    local classes = loot.TempSettings.ModifyClasses
+    local rule = loot.TempSettings.ModifyItemSetting
+
+    ImGui.SetNextWindowSizeConstraints(ImVec2(300, 200), ImVec2(-1, -1))
+    local open, show = ImGui.Begin("Modify Item", nil, ImGuiWindowFlags.AlwaysAutoResize)
+    if show then
+        local item = loot.ALLITEMS[loot.TempSettings.ModifyItemID]
+        if not item then
+            item = {
+                Name = loot.TempSettings.ModifyItemName,
+                Link = loot.TempSettings.ModifyItemLink,
+                RaceList = loot.TempSettings.ModifyItemRaceList,
+            }
+        end
+        local questRule = "Quest"
+        if item == nil then
+            Logger.Error(loot.guiLoot.console, "Item not found in ALLITEMS %s %s", loot.TempSettings.ModifyItemID, loot.TempSettings.ModifyItemTable)
+            ImGui.End()
+            return
+        end
+        ImGui.TextUnformatted("Item:")
+        ImGui.SameLine()
+        ImGui.TextColored(ImVec4(0, 1, 1, 1), item.Name)
+        ImGui.SameLine()
+        ImGui.TextUnformatted("ID:")
+        ImGui.SameLine()
+        ImGui.TextColored(ImVec4(1, 1, 0, 1), "%s", loot.TempSettings.ModifyItemID)
+
+        if ImGui.BeginCombo("Table", loot.TempSettings.ModifyItemTable) then
+            for i, v in ipairs(tableList) do
+                if ImGui.Selectable(v, loot.TempSettings.ModifyItemTable == v) then
+                    loot.TempSettings.ModifyItemTable = v
+                end
+            end
+            ImGui.EndCombo()
+        end
+
+        if tempValues.Classes == nil and classes ~= nil then
+            tempValues.Classes = classes
+        end
+
+        ImGui.SetNextItemWidth(100)
+        tempValues.Classes = ImGui.InputTextWithHint("Classes", "who can loot or all ex: shm clr dru", tempValues.Classes)
+
+        ImGui.SameLine()
+        loot.TempModClass = ImGui.Checkbox("All", loot.TempModClass)
+
+        if tempValues.Rule == nil and rule ~= nil then
+            tempValues.Rule = rule
+        end
+
+        ImGui.SetNextItemWidth(100)
+        if ImGui.BeginCombo("Rule", tempValues.Rule) then
+            for i, v in ipairs(settingList) do
+                if ImGui.Selectable(v, tempValues.Rule == v) then
+                    tempValues.Rule = v
+                end
+            end
+            ImGui.EndCombo()
+        end
+
+        if tempValues.Rule == "Quest" then
+            ImGui.SameLine()
+            ImGui.SetNextItemWidth(100)
+            tempValues.Qty = ImGui.InputInt("QuestQty", tempValues.Qty, 1, 1)
+            if tempValues.Qty > 0 then
+                questRule = string.format("Quest|%s", tempValues.Qty)
+            end
+        end
+
+        if ImGui.Button("Set Rule") then
+            local newRule = tempValues.Rule == "Quest" and questRule or tempValues.Rule
+            if tempValues.Classes == nil or tempValues.Classes == '' or loot.TempModClass then
+                tempValues.Classes = "All"
+            end
+            -- loot.modifyItemRule(loot.TempSettings.ModifyItemID, newRule, loot.TempSettings.ModifyItemTable, tempValues.Classes, item.Link)
+            if loot.TempSettings.ModifyItemTable == loot.PersonalTableName then
+                loot.PersonalItemsRules[loot.TempSettings.ModifyItemID] = newRule
+                loot.setPersonalItem(loot.TempSettings.ModifyItemID, newRule, tempValues.Classes, item.Link)
+            elseif loot.TempSettings.ModifyItemTable == "Global_Items" then
+                loot.GlobalItemsRules[loot.TempSettings.ModifyItemID] = newRule
+                loot.setGlobalItem(loot.TempSettings.ModifyItemID, newRule, tempValues.Classes, item.Link)
+            else
+                loot.NormalItemsRules[loot.TempSettings.ModifyItemID] = newRule
+                loot.setNormalItem(loot.TempSettings.ModifyItemID, newRule, tempValues.Classes, item.Link)
+            end
+            -- loot.setNormalItem(loot.TempSettings.ModifyItemID, newRule,  tempValues.Classes, item.Link)
+            loot.TempSettings.ModifyItemRule = false
+            loot.TempSettings.ModifyItemID = nil
+            loot.TempSettings.ModifyItemTable = nil
+            loot.TempSettings.ModifyItemClasses = 'All'
+            loot.TempSettings.ModifyItemName = nil
+            loot.TempSettings.ModifyItemLink = nil
+            loot.TempModClass = false
+
+            ImGui.End()
+            return
+        end
+        ImGui.SameLine()
+
+        ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(1.0, 0.4, 0.4, 0.4))
+        if ImGui.Button(Icons.FA_TRASH) then
+            if loot.TempSettings.ModifyItemTable == loot.PersonalTableName then
+                loot.PersonalItemsRules[loot.TempSettings.ModifyItemID] = nil
+                loot.setPersonalItem(loot.TempSettings.ModifyItemID, 'delete', 'All', 'NULL')
+            elseif loot.TempSettings.ModifyItemTable == "Global_Items" then
+                -- loot.GlobalItemsRules[loot.TempSettings.ModifyItemID] = nil
+                loot.setGlobalItem(loot.TempSettings.ModifyItemID, 'delete', 'All', 'NULL')
+            else
+                loot.setNormalItem(loot.TempSettings.ModifyItemID, 'delete', 'All', 'NULL')
+            end
+            loot.TempSettings.ModifyItemRule = false
+            loot.TempSettings.ModifyItemID = nil
+            loot.TempSettings.ModifyItemTable = nil
+            loot.TempSettings.ModifyItemClasses = 'All'
+            ImGui.PopStyleColor()
+
+            ImGui.End()
+            return
+        end
+        ImGui.PopStyleColor()
+
+        ImGui.SameLine()
+        if ImGui.Button("Cancel") then
+            loot.TempSettings.ModifyItemRule = false
+            loot.TempSettings.ModifyItemID = nil
+            loot.TempSettings.ModifyItemTable = nil
+            loot.TempSettings.ModifyItemClasses = 'All'
+            loot.TempSettings.ModifyItemName = nil
+            loot.TempSettings.ModifyItemLink = nil
+        end
+    end
+    if not open then
+        loot.TempSettings.ModifyItemRule = false
+        loot.TempSettings.ModifyItemID = nil
+        loot.TempSettings.ModifyItemTable = nil
+        loot.TempSettings.ModifyItemClasses = 'All'
+        loot.TempSettings.ModifyItemName = nil
+        loot.TempSettings.ModifyItemLink = nil
+    end
+    ImGui.End()
 end
 
 function loot.drawRecord(tableToDraw)
@@ -5302,25 +5308,6 @@ function loot.drawRecord(tableToDraw)
     ImGui.End()
 end
 
-function loot.renderNewItem()
-    if ((loot.Settings.AutoShowNewItem and loot.NewItemsCount > 0) and showNewItem) or showNewItem then
-        ImGui.SetNextWindowSize(600, 400, ImGuiCond.FirstUseEver)
-        local open, show = ImGui.Begin('New Items', true)
-        if not open then
-            show = false
-            showNewItem = false
-        end
-        if show then
-            loot.drawNewItemsTable()
-        end
-        ImGui.End()
-    end
-end
-
-local animMini       = mq.FindTextureAnimation("A_DragItem")
-local EQ_ICON_OFFSET = 500
-
-
 local function renderBtn()
     -- apply_style()
 
@@ -5358,84 +5345,6 @@ local function renderBtn()
     ImGui.PopStyleVar(2)
     ImGui.End()
 end
-
-function loot.RenderUIs()
-    local colCount, styCount = loot.guiLoot.DrawTheme()
-
-    if loot.NewItemDecisions ~= nil then
-        loot.enterNewItemRuleInfo(loot.NewItemDecisions)
-        loot.NewItemDecisions = nil
-    end
-
-    if loot.TempSettings.ModifyItemRule then loot.RenderModifyItemWindow() end
-
-    loot.renderNewItem()
-
-    if loot.pendingItemData ~= nil then
-        loot.processPendingItem()
-    end
-
-    loot.renderMainUI()
-
-    renderBtn()
-
-    if loot.TempSettings.PastHistory then
-        loot.drawRecord()
-    end
-
-    if colCount > 0 then ImGui.PopStyleColor(colCount) end
-    if styCount > 0 then ImGui.PopStyleVar(styCount) end
-end
-
-function loot.enterNewItemRuleInfo(data_table)
-    if data_table == nil then
-        if loot.NewItemDecisions == nil then return end
-        data_table = loot.NewItemDecisions
-    end
-
-    if data_table.ID == nil then
-        Logger.Error(loot.guiLoot.console, "loot.enterNewItemRuleInfo \arInvalid item \atID \axfor new item rule.")
-        return
-    end
-    Logger.Debug(loot.guiLoot.console,
-        "\aoloot.enterNewItemRuleInfo() \axSending \agNewItem Data\ax message \aoMailbox\ax \atlootnscoot actor\ax: item\at %s \ax, ID\at %s \ax, rule\at %s\ax, classes\at %s\ax, link\at %s\ax, corpseID\at %s\ax",
-        data_table.ItemName, data_table.ItemID, data_table.Rule, data_table.Classes, data_table.Link, data_table.CorpseID)
-
-    local itemID     = data_table.ID
-    local item       = data_table.ItemName
-    local rule       = data_table.Rule
-    local classes    = data_table.Classes
-    local link       = data_table.Link
-    local corpse     = data_table.CorpseID
-    local modMessage = {
-        who      = MyName,
-        action   = 'modifyitem',
-        section  = "NormalItems",
-        item     = item,
-        itemID   = itemID,
-        rule     = rule,
-        link     = link,
-        classes  = classes,
-        entered  = true,
-        corpse   = corpse,
-        noChange = false,
-        Server   = eqServer,
-    }
-    if (classes == loot.NormalItemsClasses[itemID] and rule == loot.NormalItemsRules[itemID]) then
-        modMessage.noChange = true
-
-        Logger.Debug(loot.guiLoot.console, "\ayNo Changes Made to Item: \at%s \ax(ID:\ag %s\ax) with rule: \at%s\ax, classes: \at%s\ax",
-            ltem, itemID, rule, classes)
-    else
-        Logger.Debug(loot.guiLoot.console,
-            "\aoloot.enterNewItemRuleInfo() \axSending \agENTERED ITEM\ax message \aoMailbox\ax \atlootnscoot actor\ax: item\at %s \ax, ID\at %s \ax, rule\at %s\ax, classes\at %s\ax, link\at %s\ax, corpseID\at %s\ax",
-            item, itemID, rule, classes, link, corpse)
-    end
-    loot.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, modMessage)
-    loot.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, modMessage)
-end
-
-local showSettings = false
 
 function loot.renderMainUI()
     if loot.ShowUI then
@@ -5536,13 +5445,39 @@ function loot.renderMainUI()
     end
 end
 
-function loot.informProcessing()
-    loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = "processing", Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
+function loot.RenderUIs()
+    local colCount, styCount = loot.guiLoot.DrawTheme()
+
+    if loot.NewItemDecisions ~= nil then
+        loot.enterNewItemRuleInfo(loot.NewItemDecisions)
+        loot.NewItemDecisions = nil
+    end
+
+    if loot.TempSettings.ModifyItemRule then loot.RenderModifyItemWindow() end
+
+    loot.renderNewItem()
+
+    if loot.pendingItemData ~= nil then
+        loot.processPendingItem()
+    end
+
+    loot.renderMainUI()
+
+    renderBtn()
+
+    if loot.TempSettings.PastHistory then
+        loot.drawRecord()
+    end
+
+    if colCount > 0 then ImGui.PopStyleColor(colCount) end
+    if styCount > 0 then ImGui.PopStyleVar(styCount) end
 end
 
-function loot.doneProcessing()
-    loot.lootActor:send({ mailbox = 'loot_module', script = loot.DirectorScript, }, { Subject = "done_processing", Who = MyName, CombatLooting = loot.Settings.CombatLooting, })
-end
+------------------------------------
+--         MAIN INIT AND LOOP
+------------------------------------
+
+
 
 function loot.processArgs(args)
     loot.Terminate = true
