@@ -2027,8 +2027,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 4,
             RequiresLoadoutChange = true,
-            ConfigType = "Advanced",
-            FAQ = "Why am I not using [x] run speed buff?",
+            FAQ = "Why am I not using [x] run speed (Selo) buff?",
             Answer = "You can configure your run speed buff selection in the Utility tab, this may need to be adjusted as you level.",
         },
         ['UseEndBreath']        = {
