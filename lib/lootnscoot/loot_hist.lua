@@ -147,17 +147,16 @@ end
 --
 
 ---@param names boolean
----@param links boolean
 ---@param record boolean
 ---@param imported boolean
 ---@param useactors boolean
 ---@param caller string
 ---@param report boolean|nil
-function guiLoot.GetSettings(names, links, record, imported, useactors, caller, report)
+function guiLoot.GetSettings(names, record, imported, useactors, caller, report)
 	local repVal = report and not guiLoot.showReport
 	guiLoot.imported = imported
 	guiLoot.hideNames = names
-	guiLoot.showLinks = links
+	-- guiLoot.showLinks = links
 	guiLoot.recordData = record
 	guiLoot.UseActors = useactors
 	guiLoot.caller = caller
@@ -340,9 +339,9 @@ function guiLoot.GUI()
 					_, guiLoot.hideNames = ImGui.MenuItem('Hide Names', nil, guiLoot.hideNames)
 					_, zoom = ImGui.MenuItem('Zoom', nil, zoom)
 					_, guiLoot.PastHistory = ImGui.MenuItem('Past History', nil, guiLoot.PastHistory)
-					if not guiLoot.UseActors then
-						_, guiLoot.showLinks = ImGui.MenuItem('Show Links', nil, guiLoot.showLinks)
-					end
+					-- if not guiLoot.UseActors then
+					-- 	_, guiLoot.showLinks = ImGui.MenuItem('Show Links', nil, guiLoot.showLinks)
+					-- end
 					if ImGui.MenuItem('Record Data', nil, guiLoot.recordData) then
 						if guiLoot.recordData then
 							guiLoot.console:AppendText("\ay[Looted]\ax Recording Data\ax")
@@ -1107,14 +1106,14 @@ function guiLoot.EventLoot(line, who, what)
 	local link = ''
 	if guiLoot.console ~= nil then
 		link = mq.TLO.FindItem(what).ItemLink('CLICKABLE')() or what
-		if guiLoot.linkdb and guiLoot.showLinks then
-			---@diagnostic disable-next-line: undefined-field
-			link = mq.TLO.LinkDB(string.format("=%s", what))() or link
-		elseif not guiLoot.linkdb and guiLoot.showLinks then
-			guiLoot.loadLDB()
-			---@diagnostic disable-next-line: undefined-field
-			link = mq.TLO.LinkDB(string.format("=%s", what))() or link
-		end
+		-- if guiLoot.linkdb and guiLoot.showLinks then
+		-- 	---@diagnostic disable-next-line: undefined-field
+		-- 	link = mq.TLO.LinkDB(string.format("=%s", what))() or link
+		-- elseif not guiLoot.linkdb and guiLoot.showLinks then
+		-- 	guiLoot.loadLDB()
+		-- 	---@diagnostic disable-next-line: undefined-field
+		-- 	link = mq.TLO.LinkDB(string.format("=%s", what))() or link
+		-- end
 		if guiLoot.hideNames then
 			if who ~= 'You' then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = MyClass end
 		end

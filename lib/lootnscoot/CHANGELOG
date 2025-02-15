@@ -1,29 +1,63 @@
-1.7.1
+5.0.0
+~ grimmier updates...
+
+- got a little behind on this...
+- Major rewrite for SQl support
+- Rules and items are stored in SQL db's by ItemID so we can deal with duplicate names easier.
+- Settings files are .lua files, still per character but now live in `mq\config\LootNScoot\ServerName\`
+- Databases live in `mq\resources\LootnScoot\ServerName\`
+- Added GUI for items\rules tables, and settings.
+- Actors support for all rule changes and additions.
+- Actors support to share, clone, and adjust settings for any character from the driver.
+- Past Looting History is recorded into a DB so you can lookup past loot.
+- Personal Rules to override Global and Normal rules. (these are character specific)
+- New item list to confirm or set rules for new items as you are looting.
+- Keep Spells option
+- Can Wear option. (for nodrop looting mostly but applys `Keep` if your race\class can equip the item.)
+- Check Corpse once option
+- New `directed` mode:
+
+  - this mode will run in the background and only react to `/lns` commands or through actors messages
+  - Actors support for non standalone mode.
+  - call driected mode `/lua run lootnscoot directed CallingScriptname`
+  - example from rgmercs lua.
+    `self.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })`
+    in this example script = is the path to where you have lootnscoot included in your project. who = your characters name however you want to store it.
+
+    1.7.1
+
 - Add LootNoDropNew option to toggle automatically looting newly seen no drop items
 - LootNoDrop must also be on, which controls looting no drop items which already have been seen before
 
-1.7.0
+  1.7.0
+
 - actor messaging for items looted/left/destroyed sent to loot history ui
 
-1.6.0
+  1.6.0
+
 - misc fixes/cleanup - grimmier
 
-1.5.0
+  1.5.0
+
 - quest item looting support - grimmier
 - tribute item support - grimmier
 - various cleanup, reporting changes, destroy item changes - grimmier
 - loot history ui, see https://github.com/grimmier378/looted - grimmier
 
-1.4.0
+  1.4.0
+
 - ???
 
-1.3.0
+  1.3.0
+
 - ???
 
-1.2.0
+  1.2.0
+
 - Split settings into a separate config file - grimmier
 - Track wasLooting state when bags get filled and looting stops - grimmier
 - Handle looting no drop items - grimmier
 
-1.0.0
+  1.0.0
+
 - Initial release
