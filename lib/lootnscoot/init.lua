@@ -2978,10 +2978,17 @@ function loot.corpseLocked(corpseID)
 end
 
 function loot.lootMobs(limit)
+    if mq.TLO.Me.Invis(0)() then
+        Logger.Warn(loot.guiLoot.console, "lootMobs(): You are Invis and we don't want to break it so skipping.")
+        loot.finishedLooting()
+        return
+    end
+
     if zoneID ~= mq.TLO.Zone.ID() then
         zoneID        = mq.TLO.Zone.ID()
         lootedCorpses = {}
     end
+
 
     -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Entering lootMobs function.')
     local deadCount     = mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', loot.Settings.CorpseRadius or 100))()
