@@ -291,7 +291,6 @@ function Module:GiveTime(combat_state)
 	end
 	if self.TempSettings.Looting then
 		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
-		self.TempSettings.TimeEnetered = os.clock()
 		Module.DoLooting()
 	end
 	-- if Module.settings.CombatLooting ~= Module.TempSettings.CombatLooting then
