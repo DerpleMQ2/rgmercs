@@ -2,15 +2,16 @@
 local mq                 = require('mq')
 local Config             = require('utils.config')
 local Core               = require("utils.core")
-local Targeting          = require("utils.targeting")
+local Casting            = require("utils.casting")
 local Ui                 = require("utils.ui")
 local Comms              = require("utils.comms")
 local Strings            = require("utils.strings")
 local Logger             = require("utils.logger")
+local Actors             = require("actors")
 local Set                = require("mq.Set")
 local Icons              = require('mq.ICONS')
-local LootnScootDir      = string.format("\"%s/rgmercs/lib/lootnscoot\"", mq.luaDir)
-
+local LootnScootPath     = string.format("\"%s/rgmercs/lib/lootnscoot\"", mq.luaDir)
+local LootScript         = "rgmercs/lib/lootnscoot"
 local sNameStripped      = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
 
 local Module             = { _version = '0.1a', _name = "Loot", _author = 'Derple, Grimmier, Aquietone (lootnscoot lua)', }
@@ -32,6 +33,23 @@ Module.DefaultConfig     = {
 		Default = true,
 		FAQ = "Why are my goobers not looting?",
 		Answer = "You most likely have [DoLoot] turned off.",
+	},
+	['CombatLooting']                          = {
+		DisplayName = "CombatLooting",
+		Category = "Loot N Scoot",
+		Tooltip = "Enables Looting during combat",
+		Default = false,
+		FAQ = "How do i make sure my guys are looting during combat?, incase I die or something.",
+		Answer = "You can enable [CombatLooting] to loot during combat, I recommend only having one or 2 characters do this and NOT THE MA!!.",
+	},
+	['LootRespectMedState']                    = {
+		DisplayName = "Respect Med State",
+		Category = "Loot N Scoot",
+		Tooltip = "Hold looting if you are currently meditating.",
+		Default = false,
+		FAQ = "Why is the PC sitting there and not medding?",
+		Answer =
+		"If you turn on Respect Med State in the Group Watch options, your looter will remain medding until those thresholds are reached.\nIf Stand When Done is not enabled, the looter may continue to sit after those thresholds are reached.",
 	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
@@ -86,12 +104,21 @@ function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
 	if self.settings.DoLoot == true then
 		local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
+		local localLNSRunning = mq.TLO.Lua.Script(LootScript).Status() == 'RUNNING' or false
 		if lnsRunning then
 			Core.DoCmd("/lua stop lootnscoot")
 		end
-		Core.DoCmd("/lua run %s directed", LootnScootDir)
+
+		if not localLNSRunning then
+			Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
+		end
+
+		if not Module.Actor then Module:LootMessageHandler() end
+
+		Module.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
+			{ who = Config.Globals.CurLoadedChar, directions = 'combatlooting', CombatLooting = self.settings.CombatLooting, })
 	else
-		Core.DoCmd("/lua stop %s", LootnScootDir)
+		Core.DoCmd("/lua stop %s", LootnScootPath)
 	end
 	if doBroadcast == true then
 		Comms.BroadcastUpdate(self._name, "LoadSettings")
@@ -150,9 +177,12 @@ function Module:Init()
 			if lnsRunning then
 				Core.DoCmd("/lua stop lootnscoot")
 			end
-			Core.DoCmd("/lua run %s directed", LootnScootDir)
+			Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
+			Module:LootMessageHandler()
+			Module.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
+				{ who = Config.Globals.CurLoadedChar, directions = 'getcombatsetting', })
 		end
-		Module.Actor = Comms.Actors.register('rgmercs_lootnscoot', function(message) end)
+		self.TempSettings.Looting = false
 		--pass settings to lootnscoot lib
 		Logger.log_debug("\ay[LOOT]: \agLoot for EMU module Loaded.")
 	end
@@ -188,12 +218,65 @@ function Module:Pop()
 	self:SaveSettings(false)
 end
 
+function Module.DoLooting()
+	if not Module.TempSettings.Looting then return end
+	while (Module.TempSettings.Looting) do
+		mq.delay(100, function() return not Module.TempSettings.Looting end)
+		mq.doevents()
+	end
+	Logger.log_debug("\ay[LOOT]: \atFinished Actions \agResuming:")
+end
+
+function Module:LootMessageHandler()
+	Module.Actor = Actors.register('loot_module', function(message)
+		local mail = message()
+		local subject = mail.Subject or ''
+		local who = mail.Who or ''
+		local CombatLooting = mail.CombatLooting or false
+		local currSetting = Config:GetSetting('CombatLooting')
+		if who ~= Config.Globals.CurLoadedChar then return end
+		if currSetting ~= CombatLooting then
+			Config:SetSetting('CombatLooting', CombatLooting)
+		end
+		if subject == "done_looting" and who == Config.Globals.CurLoadedChar then
+			Module.TempSettings.Looting = false
+		end
+		if subject == 'processing' and who == Config.Globals.CurLoadedChar then
+			Module.TempSettings.Looting = true
+		end
+		if subject == 'done_processing' and who == Config.Globals.CurLoadedChar then
+			Module.TempSettings.Looting = false
+		end
+	end)
+end
+
 function Module:GiveTime(combat_state)
 	if not Config:GetSetting('DoLoot') then return end
 
+	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
+
+	if Config:GetSetting('LootRespectMedState') and Config.Globals.InMedState then
+		Logger.log_super_verbose("\ay::LOOT:: \arAborted!\ax Meditating.")
+		return
+	end
+
+	if self.Actor == nil then self:LootMessageHandler() end
 	-- send actors message to loot
-	Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
-		{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
+	if combat_state ~= "Combat" or Config:GetSetting('CombatLooting') then
+		if not self.TempSettings.Looting then
+			self.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
+				{ who = Config.Globals.CurLoadedChar, directions = 'doloot', })
+			self.TempSettings.Looting = true
+		end
+	end
+	if self.TempSettings.Looting then
+		Logger.log_debug("\ay[LOOT]: \aoPausing for \atLoot Actions")
+		Module.DoLooting()
+	end
+	-- if Module.settings.CombatLooting ~= Module.TempSettings.CombatLooting then
+	-- 	Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
+	-- 		{ who = Config.Globals.CurLoadedChar, directions = 'combatlooting', CombatLooting = Module.settings.CombatLooting, })
+	-- end
 end
 
 function Module:OnDeath()
@@ -247,7 +330,7 @@ end
 
 function Module:Shutdown()
 	Logger.log_debug("\ay[LOOT]: \axEMU Loot Module Unloaded.")
-	Core.DoCmd("/lua stop %s", LootnScootDir)
+	Core.DoCmd("/lua stop %s", LootnScootPath)
 end
 
 return Module

@@ -85,6 +85,8 @@ local ColorCountRep, StyleCountRep                           = 0, 0
 local openConfigGUI, locked, zoom                            = false, false, false
 local themeFile                                              = mq.configDir .. '/MyThemeZ.lua'
 local configFile                                             = mq.configDir .. '/MyUI_Configs.lua'
+local eqServer                                               = string.gsub(mq.TLO.EverQuest.Server(), ' ', '_')
+
 local recordFile                                             = string.format("%s/MyUI/Looted/%s/%s_LootRecord.lua", mq.configDir, mq.TLO.EverQuest.Server(), MyName)
 local ZoomLvl                                                = 1.0
 local fontSize                                               = 16 -- coming soon adding in the var and table now. usage is commented out for now.
@@ -93,8 +95,8 @@ local gIcon                                                  = Icons.MD_SETTINGS
 local globalNewIcon                                          = Icons.FA_GLOBE
 local globeIcon                                              = Icons.FA_GLOBE
 local changed                                                = false
+
 local txtBuffer                                              = {}
-local LootRecord                                             = {}
 local defaults                                               = {
 	LoadTheme = 'None',
 	Scale = 1.0,
@@ -130,6 +132,7 @@ guiLoot.PastHistory                                          = false
 guiLoot.pageSize                                             = 25
 local lootTable                                              = {}
 guiLoot.TempSettings                                         = {}
+guiLoot.SessionLootRecord                                    = {}
 guiLoot.TempSettings.FilterHistory                           = ''
 local fontSizes                                              = {}
 for i = 10, 40 do
@@ -214,7 +217,7 @@ local function loadTheme()
 end
 
 function guiLoot.LoadHistoricalData(table)
-	LootRecord = table or {}
+	guiLoot.SessionLootRecord = table or {}
 end
 
 local function loadSettings()
@@ -445,9 +448,9 @@ function guiLoot.GUI()
 		guiLoot.lootedConf_GUI()
 	end
 
-	if guiLoot.PastHistory then
-		guiLoot.drawRecord()
-	end
+	-- if guiLoot.PastHistory then
+	-- 	guiLoot.drawRecord()
+	-- end
 
 	if ColorCount > 0 then ImGui.PopStyleColor(ColorCount) end
 	if StyleCount > 0 then ImGui.PopStyleVar(StyleCount) end
@@ -778,8 +781,8 @@ function guiLoot.drawRecord()
 		if ImGui.CollapsingHeader('Manage') then
 			-- Clear History and Close Buttons
 			if ImGui.Button("Clear History File") then
-				LootRecord = {}
-				mq.pickle(recordFile, LootRecord)
+				guiLoot.SessionLootRecord = {}
+				mq.pickle(recordFile, guiLoot.SessionLootRecord)
 			end
 			ImGui.SameLine()
 			if ImGui.Button("Close") then
@@ -789,8 +792,8 @@ function guiLoot.drawRecord()
 
 		-- Pagination Variables
 		local filteredTable = {}
-		for i = 1, #LootRecord do
-			local item = LootRecord[i]
+		for i = 1, #guiLoot.SessionLootRecord do
+			local item = guiLoot.SessionLootRecord[i]
 			if item then
 				if guiLoot.TempSettings.FilterHistory ~= '' then
 					local filterString = guiLoot.TempSettings.FilterHistory:lower()
@@ -817,7 +820,7 @@ function guiLoot.drawRecord()
 		ImGui.SeparatorText("Loot History")
 		guiLoot.pageSize = guiLoot.pageSize or 20 -- Items per page
 		guiLoot.currentPage = guiLoot.currentPage or 1
-		local totalItems = #LootRecord
+		local totalItems = #guiLoot.SessionLootRecord
 		local totalFilteredItems = #filteredTable
 		local totalPages = math.max(1, math.ceil(totalFilteredItems / guiLoot.pageSize))
 
@@ -1025,19 +1028,22 @@ local function getNextID(table)
 end
 
 local function trimCorpseName(corpseName)
-	return corpseName:gsub("'s corpse$", "") -- Replaces only at the end of the string
+	if corpseName == nil then return 'unknown' end
+	return corpseName:gsub("'s corpse$", "")
 end
 
 function guiLoot.RegisterActor()
 	guiLoot.actor = Actors.register('looted', function(message)
 		local lootEntry = message()
+		if lootEntry.Server ~= eqServer then return end
 		for _, item in ipairs(lootEntry.Items) do
 			local link = item.Link
 			local what = item.Name
 			local eval = item.Eval
-			local corpseName = trimCorpseName(item.CorpseName)
+			local corpseName = trimCorpseName(item.CorpseName) or 'unknown'
 			local who = lootEntry.LootedBy
 			local cantWear = item.cantWear or false
+			local actionLabel = item.Eval
 
 			if guiLoot.hideNames then
 				if who ~= mq.TLO.Me() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = MyClass end
@@ -1050,7 +1056,6 @@ function guiLoot.RegisterActor()
 				link = link .. ' *Destroyed*'
 				addRule(who, what, link, eval)
 			end
-			local actionLabel = item.Action
 			if cantWear then
 				actionLabel = actionLabel .. ' \ax(\arCant Wear\ax)'
 			end
@@ -1058,17 +1063,16 @@ function guiLoot.RegisterActor()
 			if item.Action == 'Destroyed' then
 				text = string.format('\ao[\at%s\ax] \at%s \ar%s \ax%s \axCorpse \at%s\ax (\at%s\ax)', lootEntry.LootedAt, who, string.upper(item.Action), link, corpseName,
 					lootEntry.ID)
-			elseif item.Action == 'Looted' then
-				text = string.format('\ao[\at%s\ax] \at%s \ag%s \ax%s \axCorpse \at%s\ax (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, link, corpseName, lootEntry.ID)
 			end
 			guiLoot.console:AppendText(text)
+
+
 			local line = string.format('\ao[\at%s\ax] %s %s %s Corpse \ax%s\ax (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, what, corpseName, lootEntry.ID)
 			local i = getNextID(txtBuffer)
 			-- ZOOM Console hack
 			if i > 1 then
 				if txtBuffer[i - 1].Text == '' then i = i - 1 end
 			end
-			-- Add the new line to the buffer
 			txtBuffer[i] = {
 				Text = line,
 			}
@@ -1082,10 +1086,10 @@ function guiLoot.RegisterActor()
 				end
 			end
 			local recordDate = os.date("%Y-%m-%d")
-			if LootRecord == nil then
-				LootRecord = {}
+			if guiLoot.SessionLootRecord == nil then
+				guiLoot.SessionLootRecord = {}
 			end
-			table.insert(LootRecord, {
+			table.insert(guiLoot.SessionLootRecord, {
 				Date = recordDate,
 				TimeStamp = lootEntry.LootedAt,
 				Zone = lootEntry.Zone,
@@ -1093,7 +1097,7 @@ function guiLoot.RegisterActor()
 				Looter = who,
 				Item = item.Name,
 				Link = link,
-				Action = item.Action,
+				Action = actionLabel,
 			})
 		end
 	end)
