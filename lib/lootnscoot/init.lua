@@ -36,10 +36,10 @@ local noDropItems, loreItems         = {}, {}
 local allItems                       = {}
 -- Constants
 local spawnSearch                    = '%s radius %d zradius 50'
-local shouldLootActions              = { CanUse = false, Ask = false, Keep = true, Bank = true, Sell = true, Destroy = false, Ignore = false, Tribute = false, }
+local shouldLootActions              = { Ask = false, CanUse = false, Keep = true, Bank = true, Sell = true, Destroy = false, Ignore = false, Tribute = false, }
 local validActions                   = {
-    canuse = "CanUse",
     ask = "Ask",
+    canuse = "CanUse",
     keep = 'Keep',
     bank = 'Bank',
     sell = 'Sell',
@@ -2847,7 +2847,7 @@ function LNS.RegisterActors()
                 LNS.NormalItemsClasses[itemID] = itemClasses
                 LNS.NormalItemsLink[itemID]    = itemLink
                 LNS.ItemNames[itemID]          = itemName
-                Logger.Info(LNS.guiLoot.console, "loot.RegisterActors: \atAction:\ax [\ay%s\ax] \aoNormal Rule\ax: \ag%s\ax for item \at%s\ax", action, rule, lootMessage.item)
+                Logger.Info(LNS.guiLoot.console, "loot.RegisterActors: \atAction:\ax [\ay%s\ax] \aoNormal Rule\ax: \ag%s\ax for item \at%s\ax", action, rule, itemName)
             end
 
             if lootMessage.entered then

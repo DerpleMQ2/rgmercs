@@ -115,7 +115,7 @@ local guiLoot                                                = {
 	hideNames         = false,
 	showReport        = false,
 	showLinks         = false,
-	linkdb            = false,
+	-- linkdb            = false,
 	importGUIElements = {},
 
 	---@type ConsoleWidget
@@ -152,25 +152,24 @@ end
 ---@param useactors boolean
 ---@param caller string
 ---@param report boolean|nil
-function guiLoot.GetSettings(names, record, imported, useactors, caller, report)
+function guiLoot.GetSettings(names,  record, imported, useactors, caller, report)
 	local repVal = report and not guiLoot.showReport
 	guiLoot.imported = imported
 	guiLoot.hideNames = names
-	-- guiLoot.showLinks = links
 	guiLoot.recordData = record
 	guiLoot.UseActors = useactors
 	guiLoot.caller = caller
 	guiLoot.showReport = repVal
 end
 
-function guiLoot.loadLDB()
-	if guiLoot.linkdb or guiLoot.UseActors then return end
-	local sWarn = "MQ2LinkDB not loaded, Can't lookup links.\n Attempting to Load MQ2LinkDB"
-	guiLoot.console:AppendText(sWarn)
-	print(sWarn)
-	mq.cmdf("/plugin mq2linkdb noauto")
-	guiLoot.linkdb = mq.TLO.Plugin('mq2linkdb').IsLoaded()
-end
+-- function guiLoot.loadLDB()
+-- 	if guiLoot.linkdb or guiLoot.UseActors then return end
+-- 	local sWarn = "MQ2LinkDB not loaded, Can't lookup links.\n Attempting to Load MQ2LinkDB"
+-- 	guiLoot.console:AppendText(sWarn)
+-- 	print(sWarn)
+-- 	mq.cmdf("/plugin mq2linkdb noauto")
+-- 	guiLoot.linkdb = mq.TLO.Plugin('mq2linkdb').IsLoaded()
+-- end
 
 -- draw any imported menus from outside this script.
 local function drawImportedMenu()
