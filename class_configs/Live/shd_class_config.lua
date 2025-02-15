@@ -118,7 +118,12 @@ local _ClassConfig = {
     },
     ['AbilitySets']     = {
         ['Mantle'] = {
-            "Malarian Mantle", -- Level 83, Timer 5
+            "Ichor Guard", -- Level 56, Timer 5
+            "Soul Guard",
+            "Soul Shield",
+            "Soul Carapace",
+            "Umbral Carapace",
+            "Malarian Mantle",
             "Gorgon Mantle",
             "Recondite Mantle",
             "Bonebrood Mantle",
@@ -129,9 +134,10 @@ local _ClassConfig = {
             "Geomimus Mantle",
         },
         ['Carapace'] = {
-            "Soul Carapace", -- Level 73, Timer 5
-            "Umbral Carapace",
-            "Malarian Carapace",
+            -- Added to mantle because we won't use carapace until it becomes Timer 11
+            -- "Soul Carapace", -- Level 73, Timer 5
+            -- "Umbral Carapace",
+            -- "Malarian Carapace", -- much worse than Malarian Mantle and shares a timer
             "Gorgon Carapace", -- Level 88, Timer 11 from here on
             "Sholothian Carapace",
             "Grelleth's Carapace",
@@ -1125,7 +1131,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.Carapace,
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.Level() > 87 --Shares timer with mantle before 88
+                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
@@ -1417,8 +1423,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Carapace,
                 cond = function(self, discSpell)
                     return Casting.DiscReady(discSpell) and Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and
-                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true)) and
-                        mq.TLO.Me.Level() > 87 --shares timer with mantle before 88
+                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
