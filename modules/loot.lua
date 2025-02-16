@@ -220,15 +220,30 @@ end
 
 function Module.DoLooting()
 	if not Module.TempSettings.Looting then return end
-	local timeSpent = os.difftime(os.clock(), Module.TempSettings.TimeEnetered)
-	while (Module.TempSettings.Looting) do
-		mq.delay(10000, function() return not Module.TempSettings.Looting end)
+
+	local maxWait = 10000
+	while Module.TempSettings.Looting do
+		if mq.TLO.Me.CombatState():lower() == "combat" and not Config:GetSetting('CombatLooting') then
+			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")
+			if mq.TLO.Window('LootWnd').Open() then mq.TLO.Window('LootWnd').DoClose() end
+			Module.TempSettings.Looting = false
+			break
+		end
+
+		mq.delay(20, function() return not Module.TempSettings.Looting end)
+
+		maxWait = maxWait - 20
+
+		if maxWait <= 0 then
+			Logger.log_debug("\ay[LOOT]: Aborting Actions due to timeout.")
+			Module.TempSettings.Looting = false
+			break
+		end
 		mq.doevents()
 		timeSpent = os.difftime(os.clock(), Module.TempSettings.TimeEnetered)
 		if timeSpent > 5 then Module.TempSettings.Looting = false end
 	end
-	Module.TempSettings.Looting = false
-	Logger.log_verbose("\ay[LOOT]: \atFinished Actions \agResuming:")
+	Logger.log_verbose("\ay[LOOT]: \atFinished or Aborted Looting: \agResuming")
 end
 
 function Module:LootMessageHandler()
@@ -278,7 +293,6 @@ function Module:GiveTime(combat_state)
 	end
 	if self.TempSettings.Looting then
 		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
-		self.TempSettings.TimeEnetered = os.clock()
 		Module.DoLooting()
 	end
 	-- if Module.settings.CombatLooting ~= Module.TempSettings.CombatLooting then

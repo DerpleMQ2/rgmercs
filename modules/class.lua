@@ -315,7 +315,7 @@ function Module:Render()
 
         if ImGui.CollapsingHeader("Spell Loadout") then
             ImGui.Indent()
-            if ImGui.SmallButton("Rescan Loadout") then
+            if ImGui.SmallButton("Reload Spells") then
                 self:RescanLoadout()
                 Logger.log_info("\awManual loadout scan initiated.")
             end

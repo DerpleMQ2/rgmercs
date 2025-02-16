@@ -317,16 +317,14 @@ local _ClassConfig = {
             "Divine Rejoinder",
         },
         ['AegoBuff'] = {
-            ----Group Buff All Levels starts at 45 - Group Aego Buff
+            ----Use HP Type one until Temperance at 40... Group Buff at 45 (Blessing of Temperance)
             "Courage",
             "Center",
             "Daring",
             "Bravery",
             "Valor",
-            --"Resolution",
             "Temperance",
             "Blessing of Temperance",
-            "Heroic Bond",
             "Blessing of Aegolism",
             "Hand of Virtue",
             "Hand of Conviction",
@@ -342,11 +340,29 @@ local _ClassConfig = {
             "Unified Hand of Persistence",
             "Unified Hand of Infallibility",
         },
+        ['ACBuff'] = { --Sometimes single, sometimes group, used on tank before Aego or until it is rolled into Unified (Symbol)
+            "Ward of the Avowed",
+            "Ward of the Guileless",
+            "Ward of Sincerity",
+            "Ward of the Merciful",
+            "Order of the Earnest",
+            "Ward of the Earnest",
+            "Order of the Devout",
+            "Ward of the Devout",
+            "Order of the Resolute",
+            "Ward of the Resolute",
+            "Ward of the Dauntless",
+            "Ward of Valliance",
+            "Ward of Gallantry",
+            "Bulwark of Faith",
+            "Shield of Words",
+            "Armor of Faith",
+            "Guard",
+            "Spirit Armor",
+            "Holy Armor",
+        },
         ['ShiningBuff'] = {
             --Tank Buff Traditionally Shining Series of Buffs
-            "Holy Armor",
-            "Spirit Armor",
-            "Armor of Faith",
             "Shining Rampart",
             "Shining Armor",
             "Shining Bastion",
@@ -355,6 +371,14 @@ local _ClassConfig = {
             "Shining Aegis",
             "Shining Fortitude",
             "Shining Steel",
+        },
+        ['SingleVieBuff'] = { -- Level 20-73
+            "Aegis of Vie",
+            "Panoply of Vie",
+            "Bulwark of Vie",
+            "Protection of Vie",
+            "Guard of Vie",
+            "Ward of Vie",
         },
         ['GroupVieBuff'] = {
             ----Group Vie Buff
@@ -1334,7 +1358,7 @@ local _ClassConfig = {
                 name = "SelfHPBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    if Config:GetSetting('AegoSymbol') == 2 then return false end
+                    if Config:GetSetting('AegoSymbol') == 3 then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -1344,20 +1368,6 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell)
                     return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "AbsorbAura",
-                type = "Spell",
-                pre_activate = function(self, spell) --remove the old aura if we leveled up (or the other aura if we just changed options), otherwise we will be spammed because of no focus.
-                    if not Casting.CanUseAA('Spirit Mastery') and not (Casting.AuraActiveByName("Reverent Aura") or Casting.AuraActiveByName(spell.BaseName())) then
-                        ---@diagnostic disable-next-line: undefined-field
-                        mq.TLO.Me.Aura(1).Remove()
-                    end
-                end,
-                cond = function(self, spell)
-                    return not (Casting.AuraActiveByName("Reverent Aura") or Casting.AuraActiveByName(spell.BaseName())) and
-                        (Config:GetSetting('UseAura') == 1 or Casting.CanUseAA('Spirit Mastery'))
                 end,
             },
             {
@@ -1409,7 +1419,7 @@ local _ClassConfig = {
                 name = "AegoBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Config:GetSetting('AegoSymbol') ~= 1 then return false end
+                    if Config:GetSetting('AegoSymbol') > 2 then return false end
                     ---@diagnostic disable-next-line: undefined-field
                     return Casting.GroupBuffCheck(spell, target, mq.TLO.Me.Spell(spell).ID())
                 end,
@@ -1418,7 +1428,23 @@ local _ClassConfig = {
                 name = "GroupSymbolBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Config:GetSetting('AegoSymbol') ~= 2 then return false end
+                    if Config:GetSetting('AegoSymbol') == (1 or 4) then return false end
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "SpellBlessing",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if mq.TLO.Me.Level() > 91 then return false end
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "ACBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoACBuff') then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1426,6 +1452,23 @@ local _ClassConfig = {
                 name = "GroupVieBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
+                    if not Config:GetSetting('DoVieBuff') or (target.ID() == Core.GetMainAssistId() and self:GetResolvedActionMapItem('ShiningBuff')) then return false end
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "ShiningBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if target.ID() ~= Core.GetMainAssistId() then return false end
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "SingleVieBuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoVieBuff') or self:GetResolvedActionMapItem('GroupVieBuff') or target.ID() ~= Core.GetMainAssistId() then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1433,7 +1476,7 @@ local _ClassConfig = {
                 name = "DivineBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if target.ID() ~= Core.GetMainAssistId() then return false end
+                    if not Config:GetSetting('DoDivineBuff') or target.ID() ~= Core.GetMainAssistId() then return false end
                     return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
@@ -1462,62 +1505,121 @@ local _ClassConfig = {
         {
             gem = 3,
             spells = {
-                { name = "HealNuke2",    cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, }, -- Level 88+
-                { name = "NukeHeal", },                                                                                   -- Level 85+
-                { name = "Renewal3", },                                                                                   -- Level 80-85/87
-                { name = "SingleElixir", },                                                                               -- Level 19-79
-                -- Level 1-18 free
+                { name = "HealNuke2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, }, -- Level 88+
+                { name = "NukeHeal", },                                                                                    -- Level 85+
+                { name = "Renewal3", },                                                                                    -- Level 80-85/87
+                { name = "SingleElixir",  cond = function(self) return Config:GetSetting('DoHealOverTime') end, },         -- Level 19-79
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },             -- 84+
+                { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
+                { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         {
             gem = 4,
             spells = {
-                { name = "NukeHeal2",    cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, }, -- Level 90+
-                { name = "HealNuke", },                                                                                   -- Level 83+
-                { name = "HealingLight", },                                                                               -- Fallback, Level 75-82
-                -- Level 65-74 free, Rez will just stay here and cast if the AA is down.
-                { name = "RezSpell", },                                                                                   -- Level 1-64 (AA at 65)
+                { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, }, -- Level 90+
+                { name = "HealNuke", },                                                                                    -- Level 83+
+                { name = "HealingLight", },                                                                                -- Fallback, Level 75-82
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },              -- Level 20-74
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },             -- 84+
+                { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
+                { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         {
             gem = 5,
             spells = {
-                { name = "ClutchHeal", },                                                                   -- Level 77+
-                { name = "StunTimer6", cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- Level 16 - 76 (moved gems after)
-
+                { name = "ClutchHeal", },                                                                      -- Level 77+
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- Level 16 - 76 (moved gems after)
+                --fallback
+                { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
+                { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         {
             gem = 6,
             spells = {
-                { name = "GroupFastHeal", },                                                                      -- Syllable, 98+
-                { name = "GroupHealNoCure", },                                                                    -- Level 30-97
-                { name = "MagicNuke",       cond = function(self) return Config:GetSetting('DoMagicNuke') end, }, -- Level 4-29
+                { name = "GroupFastHeal", },   -- Syllable, 98+
+                { name = "GroupHealNoCure", }, -- Level 30-97
+                --fallback
+                { name = "CureAll",         cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
+                { name = "GroupHealCure",   cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",       cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",      cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",    cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff",   cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "RezSpell",        cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         {
             gem = 7,
             spells = {
-                { name = "DivineBuff", },                                                                     -- Level 51+   -- Level 51+
-                { name = "UndeadNuke", cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- Level 4-50
-                { name = "MagicNuke",  cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- Level 4-50
+                { name = "DivineBuff",    cond = function(self) return Config:GetSetting('DoDivineBuff') end, }, -- Level 51+
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },   -- 84+
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, },   -- 88+ has ToT heal
+                { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
+                { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
+                { name = "HealNuke3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, },
+                { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 2 end, },
+                { name = "NukeHeal3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, },
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "NukeHeal", },
+                { name = "HealNuke", },
+                { name = "HealNuke2", },
+                { name = "NukeHeal2", },
+                { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         {
             gem = 8,
             spells = {
-                { name = "YaulpSpell",    cond = function(self) return not Casting.CanUseAA("Yaulp") end, },     -- Level 56-75
-                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, },   -- 88+ has ToT heal
-                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- 51+, 1-50 elsewhere
-                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },   -- 84+
-                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- 51+, 1-50 elsewhere
+                { name = "YaulpSpell",    cond = function(self) return not Casting.CanUseAA("Yaulp") end, }, -- Level 56-75
+
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, }, -- 84+
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- 88+ has ToT heal
+                { name = "WardBuff", },                                                                        -- Level 97
                 { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "HealNuke3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, },
                 { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 2 end, },
                 { name = "NukeHeal3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, },
-                { name = "NukeHeal", }, -- fallback
-                { name = "HealNuke", }, -- fallback
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "NukeHeal", },
+                { name = "HealNuke", },
+                { name = "HealNuke2", },
+                { name = "NukeHeal2", },
+                { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         { --55, we will use this and allow GroupElixir to be poofed by buffing if it happens from 60-74.
@@ -1526,97 +1628,146 @@ local _ClassConfig = {
             spells = {
                 -- Leve 56-59 free
                 { name = "GroupElixir",   cond = function(self) return Config:GetSetting('DoHealOverTime') end, }, -- Level 60+, gets better from 70 on, this may be overwritten before 75
-                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },   -- 51+, 1-50 elsewhere
+                --fallback
                 { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },     -- 84+
-                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },    -- 51+, 1-50 elsewhere
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, },     -- 88+ has ToT heal
+                { name = "WardBuff", },                                                                            -- Level 97
                 { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "HealNuke3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, },
                 { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 2 end, },
                 { name = "NukeHeal3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, },
-                { name = "NukeHeal", }, -- fallback
-                { name = "HealNuke", }, -- fallback
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "NukeHeal", },
+                { name = "HealNuke", },
+                { name = "HealNuke2", },
+                { name = "NukeHeal2", },
+                { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         { --75
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "ReverseDS", },                                                                         -- Level 85+
-                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- 51+, 1-50 elsewhere
-                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- 51+, 1-50 elsewhere
+                { name = "ReverseDS", },                                                                       -- Level 85+
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, }, -- 84+
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- 88+ has ToT heal
+                { name = "WardBuff", },                                                                        -- Level 97
                 { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
-                { name = "NukeHeal", }, -- fallback
-                { name = "HealNuke", }, -- fallback
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
+                { name = "HealNuke3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, },
+                { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 2 end, },
+                { name = "NukeHeal3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, },
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "NukeHeal", },
+                { name = "HealNuke", },
+                { name = "HealNuke2", },
+                { name = "NukeHeal2", },
+                { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         { --80
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "WardBuff", },                                                                          -- Level 97
-                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- 51+, 1-50 elsewhere
-                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },   -- 84+
-                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- 51+, 1-50 elsewhere
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, }, -- 84+
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- 88+ has ToT heal
+                { name = "WardBuff", },                                                                        -- Level 97
                 { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "HealNuke3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, },
                 { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 2 end, },
                 { name = "NukeHeal3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, },
-                { name = "NukeHeal", },  -- fallback
-                { name = "HealNuke", },  -- fallback
-                { name = "HealNuke2", }, -- fallback
-                { name = "NukeHeal2", }, -- fallback
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "NukeHeal", },
+                { name = "HealNuke", },
+                { name = "HealNuke2", },
+                { name = "NukeHeal2", },
+                { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
         },
         { --80, we will allow this gem to be filled for the convenience of buffing at the risk of having it overwritten due to a pause, etc.
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "DichoHeal", },                                                                         -- Level 101+ --may be overwritten from 101-104
-                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- 51+, 1-50 elsewhere
-                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },   -- 84+
-                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- 51+, 1-50 elsewhere
+                { name = "DichoHeal", },                                                                       -- Level 101+ --may be overwritten from 101-104
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, }, -- 84+
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- 88+ has ToT heal
+                { name = "WardBuff", },                                                                        -- Level 97
                 { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "HealNuke3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, },
                 { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 2 end, },
                 { name = "NukeHeal3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, },
-                { name = "HealNuke2", }, -- fallback
-                { name = "NukeHeal2", }, -- fallback
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "NukeHeal", },
+                { name = "HealNuke", },
+                { name = "HealNuke2", },
+                { name = "NukeHeal2", },
             },
         },
         { --105, we will allow this gem to be filled for the convenience of buffing (or an extra nuke) at the risk of having it overwritten due to a pause, etc.
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- 51+, 1-50 elsewhere
-                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },   -- 84+
-                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- 51+, 1-50 elsewhere
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, }, -- 84+
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- 88+ has ToT heal
+                { name = "WardBuff", },                                                                        -- Level 97
                 { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "HealNuke3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, },
                 { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 2 end, },
                 { name = "NukeHeal3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, },
-                { name = "HealNuke2", }, -- fallback
-                { name = "NukeHeal2", }, -- fallback
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "NukeHeal", },
+                { name = "HealNuke", },
+                { name = "HealNuke2", },
+                { name = "NukeHeal2", },
             },
         },
         { --125, we will allow this gem to be filled for the convenience of buffing (or an extra nuke) at the risk of having it overwritten due to a pause, etc.
             gem = 14,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, }, -- 51+, 1-50 elsewhere
-                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },   -- 84+
-                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },  -- 51+, 1-50 elsewhere
+                --fallback
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, }, -- 84+
+                { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, }, -- 88+ has ToT heal
+                { name = "WardBuff", },                                                                        -- Level 97
                 { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "GroupHealCure", cond = function(self) return Config:GetSetting('KeepCureMemmed') == 3 end, },
+                { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "HealNuke3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, },
                 { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 2 end, },
                 { name = "NukeHeal3",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, },
-                { name = "HealNuke2", }, -- fallback
-                { name = "NukeHeal2", }, -- fallback
+                { name = "ShiningBuff", },
+                { name = "GroupVieBuff",  cond = function(self) return Config:GetSetting('DoVieBuff') end, },
+                { name = "NukeHeal", },
+                { name = "HealNuke", },
+                { name = "HealNuke2", },
+                { name = "NukeHeal2", },
             },
         },
     },
@@ -1639,19 +1790,44 @@ local _ClassConfig = {
             DisplayName = "Aego/Symbol Choice:",
             Category = "Buffs/Debuffs",
             Index = 1,
-            Tooltip = "Choose whether to use the Aegolism or Symbol Line of HP Buffs.",
+            Tooltip =
+            "Choose whether to use the Aegolism or Symbol Line of HP Buffs.\nPlease note using both is supported for party members who block buffs, but these buffs do not stack.",
             Type = "Combo",
-            ComboOptions = { 'Aegolism', 'Symbol', 'None', },
+            ComboOptions = { 'Aegolism', 'Both (See Tooltip!)', 'Symbol', 'None', },
             Default = 1,
             Min = 1,
-            Max = 3,
+            Max = 4,
             FAQ = "Why aren't I using Aego and/or Symbol buffs?",
             Answer = "Please set which buff you would like to use on the Buffs/Debuffs tab.",
+        },
+        ['DoACBuff']          = {
+            DisplayName = "Use AC Buff",
+            Category = "Buffs/Debuffs",
+            Index = 2,
+            Tooltip =
+                "Use your single-slot AC Buff. USE CASES:\n" ..
+                "You have Aegolism selected and are below level 40 (We are still using a HP Type One buff).\n" ..
+                "You have Symbol selected and you are below level 95 (We don't have Unified Symbols yet).\n" ..
+                "Leaving this on in other cases is not likely to cause issue, but may cause unnecessary buff checking.",
+            Default = false,
+            FAQ = "Why aren't I used my AC Buff Line?",
+            Answer =
+            "You may need to select the option in Buffs/Debuffs. Alternatively, this line does not stack with Aegolism, and it is automatically included in \"Unified\" Symbol buffs.",
+        },
+        ['DoVieBuff']         = {
+            DisplayName = "Use Vie Buff",
+            Category = "Buffs/Debuffs",
+            Index = 3,
+            Tooltip = "Use your Melee Damage absorb (Vie) line.",
+            Default = true,
+            FAQ = "Why am I using the Vie and Shining buffs together when the melee gaurd does not stack?",
+            Answer = "We will always use the Shining line on the tank, but if selected, we will also use the Vie Buff on the Group.\n" ..
+                "Before we have the Shining Buff, we will use our single-target Vie buff only on the tank.",
         },
         ['UseAura']           = {
             DisplayName = "Aura Spell Choice:",
             Category = "Buffs/Debuffs",
-            Index = 2,
+            Index = 4,
             Tooltip = "Select the Aura to be used, prior to purchasing the Spirit Mastery AA.",
             Type = "Combo",
             ComboOptions = { 'Absorb', 'HP', 'None', },
@@ -1664,16 +1840,16 @@ local _ClassConfig = {
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
             Category = "Buffs/Debuffs",
-            Index = 3,
+            Index = 5,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
             FAQ = "What Vet AA's does CLR use?",
             Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns. Clerics have tools that largely leave Armor of Experience unused.",
         },
-        --Spells and Abilities
+        --Combat
         ['InterContraChoice'] = {
             DisplayName = "Inter/Contra:",
-            Category = "Spells and Abilities",
+            Category = "Combat",
             Index = 1,
             Tooltip = "Select your preference between the Intervention and Contravention lines.",
             RequiresLoadoutChange = true,
@@ -1687,10 +1863,115 @@ local _ClassConfig = {
             Answer = "Please set your spell preference on the Spells and Abilities tab.\n" ..
                 "Note that there are certain level ranges where additional spells may be loaded to fill available gems.",
         },
+        ['DoTwinHeal']        = {
+            DisplayName = "Twin Heal Nuke",
+            Category = "Combat",
+            Index = 2,
+            Tooltip = "Use Twin Heal Nuke Spells",
+            RequiresLoadoutChange = true,
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I using the Twin Heal Nuke?",
+            Answer =
+            "You can turn off the Twin Heal Nuke in the Spells and Abilities tab.",
+        },
+        ['DoHealStun']        = {
+            DisplayName = "ToT-Heal Stun",
+            Category = "Combat",
+            Index = 3,
+            Tooltip = "Use the Timer 6 HoT Stun (\"Sound of\" Line).",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Which stun spells does the Cleric use?",
+            Answer =
+                "At low levels, we will use the \"Stun\" spell (until 58, if selected) and either \"Holy Might\", \"Force\", or \"Tarnation\" until level 65.\n" ..
+                "After that, we transition to the Timer 6 stuns (\"Sound of\" line), which have a ToT heal from Level 88.\n" ..
+                "Please note that the low level spell named \"Stun\" is controlled by the Low Level Stun option.",
+        },
+        ['DoLLStun']          = {
+            DisplayName = "Low Level Stun",
+            Category = "Combat",
+            Index = 4,
+            Tooltip = "Use the Level 2 \"Stun\" spell, as long as it is level-appropriate (works on targets up to Level 58).",
+            RequiresLoadoutChange = true,
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why is a Cleric stunning? It should be healing!?",
+            Answer =
+            "At low levels, Cleric stuns are often more efficient than healing the damage an non-stunned mob would cause.",
+        },
+        ['DoUndeadNuke']      = {
+            DisplayName = "Do Undead Nuke",
+            Category = "Combat",
+            Index = 5,
+            Tooltip = "Use the Undead nuke line.",
+            RequiresLoadoutChange = true,
+            Default = false,
+            FAQ = "How can I use my Undead Nuke?",
+            Answer = "You can enable the undead nuke line in the Spells and Abilities tab.",
+        },
+        ['DoMagicNuke']       = {
+            DisplayName = "Do Magic Nuke",
+            Category = "Combat",
+            Index = 6,
+            Tooltip = "Use the Undead nuke line.",
+            RequiresLoadoutChange = true,
+            Default = false,
+            FAQ = "How can I use my Magic Nuke?",
+            Answer = "You can enable the magic nuke line in the Spells and Abilities tab.",
+        },
+        --Spells and Abilities
+        ['DoManaRestore']     = {
+            DisplayName = "Use Mana Restore AAs",
+            Category = "Spells and Abilities",
+            Index = 1,
+            Tooltip = "Use Veturika's Prescence (on self) or Quiet Prayer (on others) at critically low mana.",
+            RequiresLoadoutChange = true, -- used as a load condition
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "What circumstances do we use Veturika's or Quiet Prayer?",
+            Answer =
+                "If the Mana Restore AA setting is set on the Spells and Abilities tab, we will use either of these once the Mana Restore Pct threshold is crossed.\n" ..
+                "We will also use Veturika's as an emergency self-heal if required.",
+        },
+        ['ManaRestorePct']    = {
+            DisplayName = "Mana Restore Pct",
+            Category = "Spells and Abilities",
+            Index = 2,
+            Tooltip = "Min Mana to use restore AA.",
+            Default = 10,
+            Min = 1,
+            Max = 99,
+            ConfigType = "Advanced",
+            FAQ = "Why am I not using Veturika's or Quiet Prayer?",
+            Answer = "Ensure that your Mana Restore Pct is configured to the value you would like to start using these abilities.",
+        },
+        ['DoHealOverTime']    = {
+            DisplayName = "Use HoTs",
+            Category = "Spells and Abilities",
+            Index = 3,
+            Tooltip = "Use the Elixir Line (Low Level: Single, Mid-Level: Both (situationally), High Level: Group).",
+            RequiresLoadoutChange = true,
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why isn't my Cleric using the Group Elixir HoT?",
+            Answer = "Before Level 100, we will only use the Group Elixir if we have a GOM proc or the if the \"Group Injured Count\" is met (See Heal settings in RGMain config).",
+        },
+        ['DoDivineBuff']      = {
+            DisplayName = "Do Divine Buff",
+            Category = "Spells and Abilities",
+            Index = 4,
+            Tooltip = "Use your Divine Intervention line (death save) on the MA.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why isn't my Cleric using the Divine Intervention buff?",
+            Answer = "The Divine Intervention buff line requires a pair of emeralds.",
+        },
         ['KeepCureMemmed']    = {
             DisplayName = "Mem Cure:",
             Category = "Spells and Abilities",
-            Index = 2,
+            Index = 5,
             Tooltip = "Select your preference of a Cure spell to keep loaded (if a gem is availabe). \n" ..
                 "Please note that we will still memorize a cure out-of-combat if needed, and AA will always be used if available.",
             RequiresLoadoutChange = true,
@@ -1704,97 +1985,7 @@ local _ClassConfig = {
             Answer =
             "This would add an undesired level of complexity to the config. Before the \"Blood\" line is learned, feel free to memorize any cure you'd like in an open gem! It will be used, if appropriate.",
         },
-        ['DoHealOverTime']    = {
-            DisplayName = "Use HoTs",
-            Category = "Spells and Abilities",
-            Index = 3,
-            Tooltip = "Use the Elixir Line (Low Level: Single, Mid-Level: Both (situationally), High Level: Group).",
-            Default = true,
-            ConfigType = "Advanced",
-            FAQ = "Why isn't my Cleric using the Group Elixir HoT?",
-            Answer = "Before Level 100, we will only use the Group Elixir if we have a GOM proc or the if the \"Group Injured Count\" is met (See Heal settings in RGMain config).",
-        },
-        ['DoTwinHeal']        = {
-            DisplayName = "Twin Heal Nuke",
-            Category = "Spells and Abilities",
-            Index = 4,
-            Tooltip = "Use Twin Heal Nuke Spells",
-            RequiresLoadoutChange = true,
-            Default = true,
-            ConfigType = "Advanced",
-            FAQ = "Why am I using the Twin Heal Nuke?",
-            Answer =
-            "You can turn off the Twin Heal Nuke in the Spells and Abilities tab.",
-        },
-        ['DoManaRestore']     = {
-            DisplayName = "Use Mana Restore AAs",
-            Category = "Spells and Abilities",
-            Index = 5,
-            Tooltip = "Use Veturika's Prescence (on self) or Quiet Prayer (on others) at critically low mana.",
-            RequiresLoadoutChange = true,
-            Default = true,
-            ConfigType = "Advanced",
-            FAQ = "What circumstances do we use Veturika's or Quiet Prayer?",
-            Answer =
-                "If the Mana Restore AA setting is set on the Spells and Abilities tab, we will use either of these once the Mana Restore Pct threshold is crossed.\n" ..
-                "We will also use Veturika's as an emergency self-heal if required.",
-        },
-        ['ManaRestorePct']    = {
-            DisplayName = "Mana Restore Pct",
-            Category = "Spells and Abilities",
-            Index = 6,
-            Tooltip = "Min Mana to use restore AA.",
-            Default = 10,
-            Min = 1,
-            Max = 99,
-            ConfigType = "Advanced",
-            FAQ = "Why am I not using Veturika's or Quiet Prayer?",
-            Answer = "Ensure that your Mana Restore Pct is configured to the value you would like to start using these abilities.",
-        },
-        ['DoHealStun']        = {
-            DisplayName = "ToT-Heal Stun",
-            Category = "Spells and Abilities",
-            Index = 7,
-            Tooltip = "Use the Timer 6 HoT Stun (\"Sound of\" Line).",
-            RequiresLoadoutChange = true,
-            Default = true,
-            FAQ = "Which stun spells does the Cleric use?",
-            Answer =
-                "At low levels, we will use the \"Stun\" spell (until 58, if selected) and either \"Holy Might\", \"Force\", or \"Tarnation\" until level 65.\n" ..
-                "After that, we transition to the Timer 6 stuns (\"Sound of\" line), which have a ToT heal from Level 88.\n" ..
-                "Please note that the low level spell named \"Stun\" is controlled by the Low Level Stun option.",
-        },
-        ['DoLLStun']          = {
-            DisplayName = "Low Level Stun",
-            Category = "Spells and Abilities",
-            Index = 8,
-            Tooltip = "Use the Level 2 \"Stun\" spell, as long as it is level-appropriate (works on targets up to Level 58).",
-            RequiresLoadoutChange = true,
-            Default = true,
-            FAQ = "Why is a Cleric stunning? It should be healing!?",
-            Answer =
-            "At low levels, Cleric stuns are often more efficient than healing the damage an non-stunned mob would cause.",
-        },
-        ['DoUndeadNuke']      = {
-            DisplayName = "Do Undead Nuke",
-            Category = "Spells and Abilities",
-            Index = 9,
-            Tooltip = "Use the Undead nuke line.",
-            RequiresLoadoutChange = true,
-            Default = false,
-            FAQ = "How can I use my Undead Nuke?",
-            Answer = "You can enable the undead nuke line in the Spells and Abilities tab.",
-        },
-        ['DoMagicNuke']       = {
-            DisplayName = "Do Magic Nuke",
-            Category = "Spells and Abilities",
-            Index = 10,
-            Tooltip = "Use the Undead nuke line.",
-            RequiresLoadoutChange = true,
-            Default = false,
-            FAQ = "How can I use my Magic Nuke?",
-            Answer = "You can enable the magic nuke line in the Spells and Abilities tab.",
-        },
+
         --Orphaned: Not used in this config, to be deleted when config is default. Only here so we don't delete settings for the current default config in case people switch back and forth.
         ['DoHOT']             = {
             DisplayName = "Orphaned",
