@@ -47,6 +47,13 @@ function Core.OnEMU()
     return (mq.TLO.MacroQuest.BuildName() or ""):lower() == "emu"
 end
 
+--- Checks if the current server is Project Lazarus.
+---
+--- @return boolean True if the server is Project Lazarus, false otherwise.
+function Core.OnLaz()
+    return (mq.TLO.EverQuest.Server() or ""):lower() == "project lazarus"
+end
+
 --- Executes a given command with optional arguments.
 --- @param cmd string: The command to execute.
 --- @param ... any: Optional arguments for the command.
