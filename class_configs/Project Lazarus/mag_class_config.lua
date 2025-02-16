@@ -1750,7 +1750,7 @@ _ClassConfig      = {
                 end,
                 post_activate = function(self, spell, success)
                     if success then
-                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "group")
                     end
                 end,
             },
