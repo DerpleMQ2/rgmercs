@@ -8,16 +8,18 @@ local Config    = require('utils.config')
 local Modules   = require("utils.modules")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
+local Core      = require("utils.core")
 local Logger    = require("utils.logger")
 
 return {
-    _version            = "Experimental 1.3 (1-70 or 100+, others WIP)",
+    _version            = "Experimental 1.4 (1-100 or 110+, 100-110 WIP)",
     _author             = "Algar",
     ['Modes']           = {
         'DPS',
+        'PBAE(LowLevel)',
     },
     ['OnModeChange']    = function(self, mode)
-        -- if this is enabled the weaves will break.
+        -- if this is enabled weaves will break.
         Config:GetSettings().WaitOnGlobalCooldown = false
     end,
     ['ItemSets']        = {
@@ -41,15 +43,6 @@ return {
             "Dissident Fire",
             "Dichotomic Fire",
         },
-        ['ComboClaw'] = {
-            -- only here so that the loader does not complain
-        },
-        ['ComboNuke'] = {
-            -- only here so that the loader does not complain
-        },
-        ['ComboEtherealNuke'] = {
-            -- only here so that the loader does not complain
-        },
         ['IceClaw'] = {
             "Claw of the Void",
             "Claw of Gozzrem",
@@ -65,12 +58,12 @@ return {
             "Claw of Ankexfen",
         },
         ['FireClaw'] = {
+            "Claw of Ingot",
             "Claw of the Duskflame",
             "Claw of Sontalak",
             "Claw of Qunard",
             "Claw of the Flameweaver",
             "Claw of the Flamewing",
-            "Claw of Ingot",
         },
         ['MagicClaw'] = {
             "Claw of Itzal",
@@ -367,12 +360,12 @@ return {
             "Twincast",
         },
         ['GambitSpell'] = {
+            "Contemplative Gambit",
             "Anodyne Gambit",
             "Idyllic Gambit",
             "Musing Gambit",
             "Quiescent Gambit",
             "Bucolic Gambit",
-            "Contemplative Gambit",
         },
         ['PetSpell'] = {
             "Kindleheart's Pyroblade",
@@ -497,7 +490,7 @@ return {
         },
         -- Rain Spells Listed here are used Primarily for TLP Mode.
         -- Magic Rain - Only have 3 of them so Not Sustainable.
-        ['IceRainNuke'] = {
+        ['IceRain'] = {
             "Icestrike",
             "Frost Storm",
             "Tears of Prexus",
@@ -515,7 +508,7 @@ return {
             "Hypothermic Torrent",
             "Rimeclaw Torrent",
         },
-        ['FireRainNuke'] = {
+        ['FireRain'] = {
             "Firestorm",
             "Lava Storm",
             "Tears of Solusek",
@@ -533,7 +526,7 @@ return {
             "Tears of Night Fire",
             "Tears of the Rescued",
         },
-        ['FireRainLureNuke'] = {
+        ['FireLureRain'] = {
             "Volcanic Burst",
             "Tears of Arlyxir",
             "Meteor Storm",
@@ -584,7 +577,23 @@ return {
             "Talendor's Presence",
             "Vsorgu's Presence",
             "Magmaraug's Presence",
-            "Circle of Fire", -- Level 67
+            --"Circle of Fire", -- Level 67 Used in PBAE Mode, wouldn't be used in Modern PBAE
+        },
+        ['PBTimer4'] = {
+            "Circle of Thunder", -- Level 70, Magic
+            "Circle of Fire",    -- Level 67, Fire
+            "Winds of Gelid",    -- Level 60, Ice
+            "Supernova",         -- Level 45, Fire
+            "Thunderclap",       -- Level 30, Magic
+        },
+        ['FireJyll'] = {
+            "Jyll's Wave of Heat", -- Level 59
+        },
+        ['IceJyll'] = {
+            "Jyll's Zephyr of Iced", -- Level 56
+        },
+        ['MagicJyll'] = {
+            "Jyll's Static Pulse", -- Level 53
         },
     },
     ['HelperFunctions'] = {
@@ -607,6 +616,11 @@ return {
             end
 
             return true
+        end,
+        RainCheck = function(target) -- I made a funny
+            if not Config:GetSetting('DoRain') then return false end
+            return Targeting.GetTargetDistance() >= Config:GetSetting('RainDistance') and
+                (Targeting.GetTargetPctHPs(target) >= Config:GetSetting('HPStopBigNuke') or Targeting.IsNamed(target))
         end,
     },
     ['RotationOrder']   = {
@@ -652,7 +666,7 @@ return {
             name = 'DPS(HighLevel)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() > 100 end,
+            load_cond = function() return Core.IsModeActive('DPS') and mq.TLO.Me.Level() > 100 end,
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
@@ -663,7 +677,7 @@ return {
             name = 'DPS(MidLevel)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 101 and mq.TLO.Me.Level() > 70 end,
+            load_cond = function() return Core.IsModeActive('DPS') and mq.TLO.Me.Level() < 101 and mq.TLO.Me.Level() > 70 end,
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
@@ -678,7 +692,8 @@ return {
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and
+                    not (Core.IsModeActive('PBAE(LowLevel)') and not self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
         {
@@ -689,7 +704,8 @@ return {
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and
+                    not (Core.IsModeActive('PBAE(LowLevel)') and not self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
         {
@@ -700,7 +716,19 @@ return {
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat" and not Casting.IAmFeigning() and
+                    not (Core.IsModeActive('PBAE(LowLevel)') and not self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
+            end,
+        },
+        {
+            name = 'DPS(PBAELowLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end,
+            doFullRotation = true,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
             end,
         },
         {
@@ -785,8 +813,8 @@ return {
                 name = "Mana Burn",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    --TODO: make this not fire until it gets good at a certain rank
-                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.TargetHasBuffByName("Mana Burn") and Config:GetSetting('DoManaBurn') and
+                    if not Config:GetSetting('DoManaBurn') then return false end
+                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.TargetHasBuffByName("Mana Burn") and
                         Casting.HaveManaToNuke()
                 end,
             },
@@ -1029,6 +1057,14 @@ return {
                 end,
             },
             {
+                name = "FireRain",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
                 name = "BigFireNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1051,6 +1087,14 @@ return {
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoStun') then return false end
                     return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "IceRain",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
@@ -1091,6 +1135,36 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+        },
+        ['DPS(PBAELowLevel)'] = {
+            {
+                name = "PBTimer4",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.CastReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "FireJyll",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.CastReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "IceJyll",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.CastReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "MagicJyll",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.CastReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
@@ -1178,7 +1252,8 @@ return {
         {
             gem = 1,
             spells = {
-                { name = "VortexNuke", },
+                { name = "VortexNuke", cond = function() return mq.TLO.Me.Level() > 102 end, },
+                { name = "SnapNuke", },
                 { name = "FireNuke",   cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
                 { name = "IceNuke",    cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
                 { name = "MagicNuke",  cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
@@ -1189,6 +1264,7 @@ return {
             gem = 2,
             spells = {
                 { name = "FuseNuke", },
+                { name = "ChaosNuke", },
                 { name = "BigFireNuke",  cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
                 { name = "BigIceNuke",   cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
                 { name = "BigMagicNuke", cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
@@ -1198,20 +1274,27 @@ return {
             gem = 3,
             spells = {
                 { name = "FireClaw", },
-                { name = "StunSpell", function() return Config:GetSetting('DoStun') end, },
+                { name = "WildNuke", },
+                { name = "PBTimer4",  cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
+                { name = "StunSpell", cond = function() return Config:GetSetting('DoStun') end, },
             },
         },
         {
             gem = 4,
             spells = {
                 { name = "FireEtherealNuke", },
-                { name = "HarvestSpell", },
+                { name = "FireJyll",         cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
+                { name = "FireRain",         cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 1 end, },
+                { name = "IceRain",          cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 2 end, },
+                { name = "EvacSpell", },
+
             },
         },
         {
             gem = 5,
             spells = {
                 { name = "IceEtherealNuke", },
+                { name = "IceJyll",         cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
                 { name = "JoltSpell", },
             },
         },
@@ -1219,23 +1302,24 @@ return {
             gem = 6,
             spells = {
                 { name = "CloudburstNuke", },
-                { name = "SnareSpell",     function() return Config:GetSetting('DoSnare') end, },
+                { name = "MagicJyll",      cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
+                { name = "SnareSpell",     cond = function() return Config:GetSetting('DoSnare') end, },
             },
         },
         {
             gem = 7,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "WildNuke", },
-                { name = "EvacSpell", },
+                { name = "WildNuke2", },
+                { name = "HarvestSpell", },
 
             },
         },
         {
             gem = 8,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "GambitSpell", },
+                { name = "HarvestSpell", },
                 { name = "SelfHPBuff", },
 
             },
@@ -1251,7 +1335,7 @@ return {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "AEBeam",           function() return Config:GetSetting('DoAEBeam') end, },
+                { name = "AEBeam",           cond = function() return Config:GetSetting('DoAEBeam') end, },
                 { name = "PBFlame",          cond = function() return Config:GetSetting('DoPBAE') end, },
                 { name = "SelfRune1", },
                 { name = "SelfSpellShield1", },
@@ -1307,12 +1391,21 @@ return {
             DisplayName = "Jolt Aggro %",
             Category = "Combat",
             Tooltip = "Aggro at which to use Jolt",
-            Default = 85,
+            Default = 90,
             Min = 1,
             Max = 100,
             FAQ = "Can I customize when to use Jolt?",
             Answer = "Yes, you can set the aggro % at which to use Jolt with the [JoltAggro] setting.",
         },
+        ['DoManaBurn']           = {
+            DisplayName = "Use Mana Burn AA",
+            Category = "Combat",
+            Tooltip = "Enable usage of Mana Burn",
+            Default = true,
+            FAQ = "Can I use Mana Burn?",
+            Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
+        },
+        -- Low Level
         ['ElementChoice']        = {
             DisplayName = "Element Choice:",
             Category = "DPS Low Level",
@@ -1330,12 +1423,36 @@ return {
         ['HPStopBigNuke']        = {
             DisplayName = "Stop Big Nuke",
             Category = "DPS Low Level",
+            Index = 2,
             Tooltip = "Don't use our Big Nuke below this health percentage.",
             Default = 50,
             Min = 1,
             Max = 100,
             FAQ = "WIP?",
             Answer = "WIP.",
+        },
+        ['DoRain']               = {
+            DisplayName = "Do Rain",
+            Category = "DPS Low Level",
+            Index = 3,
+            ConfigType = "Advanced",
+            Tooltip = "**WILL BREAK MEZ** Use your selected element's Rain Spell as a single-target nuke. **WILL BREAK MEZ***",
+            Default = false,
+            FAQ = "Why is Rain being used a single target nuke?",
+            Answer = "In some situations, using a Rain can be an efficient single target nuke at low levels.\n" ..
+                "Note that PBAE spells tend to be superior for AE dps at those levels.",
+        },
+        ['RainDist']             = {
+            DisplayName = "Min Rain Distance",
+            Category = "DPS Low Level",
+            Index = 4,
+            ConfigType = "Advanced",
+            Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25').",
+            Default = 30,
+            Min = 0,
+            Max = 100,
+            FAQ = "Why does minimum rain distance matter?",
+            Answer = "Rain spells, if cast close enough, can damage the caster. The AE range of a Rain is 25'.",
         },
         ['DoStun']               = {
             DisplayName = "Do Stun",
@@ -1347,14 +1464,8 @@ return {
             Answer =
             "WIP.",
         },
-        ['DoManaBurn']           = {
-            DisplayName = "Use Mana Burn AA",
-            Category = "Combat",
-            Tooltip = "Enable usage of Mana Burn",
-            Default = true,
-            FAQ = "Can I use Mana Burn?",
-            Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
-        },
+
+        --AE Damage
         ['DoAEDamage']           = {
             DisplayName = "Do AE Damage",
             Category = "AE Damage",
@@ -1430,6 +1541,8 @@ return {
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
+
+        -- Buffs/Debuffs
         ['DoSnare']              = {
             DisplayName = "Use Snares",
             Category = "Buffs/Debuffs",
@@ -1452,27 +1565,41 @@ return {
             Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
                 "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
+
+        -- Utilities
+        ['GambitManaPct']        = {
+            DisplayName = "Gambit Mana %",
+            Category = "Utilities",
+            Tooltip = "What Mana % to hit before using your Gambit line.",
+            Default = 80,
+            Min = 1,
+            Max = 99,
+            FAQ = "How do I use Harvest Spells?",
+            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
+        },
+        ['HarvestManaPct']       = {
+            DisplayName = "Harvest Mana %",
+            Category = "Utilities",
+            Tooltip = "What Mana % to hit before using a harvest spell or aa.",
+            Default = 85,
+            Min = 1,
+            Max = 99,
+            FAQ = "How do I use Harvest Spells?",
+            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
+        },
+        ['CombatHarvestManaPct'] = {
+            DisplayName = "Combat Harvest %",
+            Category = "Utilities",
+            Tooltip = "What Mana % to hit before using a harvest spell or aa in Combat.",
+            Default = 60,
+            Min = 1,
+            Max = 99,
+            FAQ = "How do I use Harvest Spells?",
+            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
+        },
+
+        --Orphaned
         ['WeaveAANukes']         = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['DoRain']               = {
-            DisplayName = "Orphaned",
-            Type = "Custom",
-            Category = "Orphaned",
-            Tooltip = "Orphaned setting from live, no longer used in this config.",
-            Default = false,
-            FAQ = "Why do I see orphaned settings?",
-            Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
-                "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['RainDist']             = {
             DisplayName = "Orphaned",
             Type = "Custom",
             Category = "Orphaned",
@@ -1511,36 +1638,6 @@ return {
             FAQ = "Why do I see orphaned settings?",
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['GambitManaPct']        = {
-            DisplayName = "Gambit Mana %",
-            Category = "Utilities",
-            Tooltip = "What Mana % to hit before using your Gambit line.",
-            Default = 80,
-            Min = 1,
-            Max = 99,
-            FAQ = "How do I use Harvest Spells?",
-            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
-        },
-        ['HarvestManaPct']       = {
-            DisplayName = "Harvest Mana %",
-            Category = "Utilities",
-            Tooltip = "What Mana % to hit before using a harvest spell or aa.",
-            Default = 85,
-            Min = 1,
-            Max = 99,
-            FAQ = "How do I use Harvest Spells?",
-            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
-        },
-        ['CombatHarvestManaPct'] = {
-            DisplayName = "Combat Harvest %",
-            Category = "Utilities",
-            Tooltip = "What Mana % to hit before using a harvest spell or aa in Combat.",
-            Default = 60,
-            Min = 1,
-            Max = 99,
-            FAQ = "How do I use Harvest Spells?",
-            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
         },
     },
 }
