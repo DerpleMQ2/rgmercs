@@ -113,6 +113,7 @@ local settingsEnum                      = {
     showinfomessages = 'ShowInfoMessages',
     showconsole = 'ShowConsole',
     showreport = 'ShowReport',
+    ignorebagslot = 'IgnoreBagSlot',
     processingeval = 'ProcessingEval',
 
 }
@@ -201,6 +202,7 @@ LNS.Settings    = {
     ShowInfoMessages = true,
     ShowConsole      = false,
     ShowReport       = false,
+    IgnoreBagSlot    = 0,    -- Ignore this Bag Slot when buying, selling, tributing and destroying of items.
     ProcessingEval   = true, -- Re evaluate when processing items for sell\tribute? this will re check our settings and not sell or tribute items outside the new parameters
     BuyItemsTable    = {
         ['Iron Ration'] = 20,
@@ -3709,6 +3711,10 @@ function LNS.processItems(action)
     -- Iterate through bags and process items
 
     for i = 1, 10 do
+        if i == LNS.Settings.IgnoreBagSlot then
+            Logger.Debug(LNS.guiLoot.console, 'Bag Slot \at%s\ao is set to be ignored, moving to next bag.', i)
+            goto next_bag
+        end
         local bagSlot       = mq.TLO.InvSlot('pack' .. i).Item
         local containerSize = bagSlot.Container()
 
@@ -3720,6 +3726,7 @@ function LNS.processItems(action)
                 end
             end
         end
+        ::next_bag::
     end
 
     -- Handle restocking if AutoRestock is enabled
@@ -4148,7 +4155,7 @@ function LNS.drawTable(label)
         LNS.TempSettings['Search' .. varSub] = ImGui.InputTextWithHint("Search", "Search by Name or Rule",
             LNS.TempSettings['Search' .. varSub]) or nil
         ImGui.PopID()
-        if ImGui.IsItemHovered(ImGuiHoveredFlags.DelayShort) then
+        if ImGui.IsItemHovered(ImGuiHoveredFlags.DelayShort) and mq.TLO.Cursor() then
             LNS.TempSettings['Search' .. varSub] = mq.TLO.Cursor()
             mq.cmdf("/autoinv")
         end
@@ -4575,7 +4582,7 @@ function LNS.drawItemsTables()
                 LNS.TempSettings.SearchItems = ImGui.InputTextWithHint("Search Items##AllItems", "Lookup Name or Filter Class",
                     LNS.TempSettings.SearchItems) or nil
                 ImGui.PopID()
-                if ImGui.IsItemHovered() and mq.TLO.Cursor() then
+                if ImGui.IsItemHovered(ImGuiHoveredFlags.DelayShort) and mq.TLO.Cursor() then
                     LNS.TempSettings.SearchItems = mq.TLO.Cursor.Name()
                     mq.cmdf("/autoinv")
                 end
