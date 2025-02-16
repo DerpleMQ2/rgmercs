@@ -583,72 +583,74 @@ function LNS.loadSettings(firstRun)
         local db = LNS.OpenItemsSQL()
         db:exec("BEGIN TRANSACTION")
         db:exec([[
-        CREATE TABLE IF NOT EXISTS Items (
-        item_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
-        name TEXT NOT NULL,
-        nodrop INTEGER DEFAULT 0,
-        notrade INTEGER DEFAULT 0,
-        tradeskill INTEGER DEFAULT 0,
-        quest INTEGER DEFAULT 0,
-        lore INTEGER DEFAULT 0,
-        augment INTEGER DEFAULT 0,
-        stackable INTEGER DEFAULT 0,
-        sell_value INTEGER DEFAULT 0,
-        tribute_value INTEGER DEFAULT 0,
-        stack_size INTEGER DEFAULT 0,
-        clickable TEXT,
-        augtype INTEGER DEFAULT 0,
-        strength INTEGER DEFAULT 0,
-        dexterity INTEGER DEFAULT 0,
-        agility INTEGER DEFAULT 0,
-        stamina INTEGER DEFAULT 0,
-        intelligence INTEGER DEFAULT 0,
-        wisdom INTEGER DEFAULT 0,
-        charisma INTEGER DEFAULT 0,
-        mana INTEGER DEFAULT 0,
-        hp INTEGER DEFAULT 0,
-        ac INTEGER DEFAULT 0,
-        regen_hp INTEGER DEFAULT 0,
-        regen_mana INTEGER DEFAULT 0,
-        haste INTEGER DEFAULT 0,
-        classes INTEGER DEFAULT 0,
-        class_list TEXT DEFAULT 'All',
-        svfire INTEGER DEFAULT 0,
-        svcold INTEGER DEFAULT 0,
-        svdisease INTEGER DEFAULT 0,
-        svpoison INTEGER DEFAULT 0,
-        svcorruption INTEGER DEFAULT 0,
-        svmagic INTEGER DEFAULT 0,
-        spelldamage INTEGER DEFAULT 0,
-        spellshield INTEGER DEFAULT 0,
-        damage INTEGER DEFAULT 0,
-        weight INTEGER DEFAULT 0,
-        item_size INTEGER DEFAULT 0,
-        weightreduction INTEGER DEFAULT 0,
-        races INTEGER DEFAULT 0,
-        race_list TEXT DEFAULT 'All',
-        icon INTEGER,
-        item_range INTEGER DEFAULT 0,
-        attack INTEGER DEFAULT 0,
-        collectible INTEGER DEFAULT 0,
-        strikethrough INTEGER DEFAULT 0,
-        heroicagi INTEGER DEFAULT 0,
-        heroiccha INTEGER DEFAULT 0,
-        heroicdex INTEGER DEFAULT 0,
-        heroicint INTEGER DEFAULT 0,
-        heroicsta INTEGER DEFAULT 0,
-        heroicstr INTEGER DEFAULT 0,
-        heroicsvcold INTEGER DEFAULT 0,
-        heroicsvcorruption INTEGER DEFAULT 0,
-        heroicsvdisease INTEGER DEFAULT 0,
-        heroicsvfire INTEGER DEFAULT 0,
-        heroicsvmagic INTEGER DEFAULT 0,
-        heroicsvpoison INTEGER DEFAULT 0,
-        heroicwis INTEGER DEFAULT 0,
-        link TEXT
-        );
-        ]])
+CREATE TABLE IF NOT EXISTS Items (
+item_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
+name TEXT NOT NULL,
+nodrop INTEGER DEFAULT 0,
+notrade INTEGER DEFAULT 0,
+tradeskill INTEGER DEFAULT 0,
+quest INTEGER DEFAULT 0,
+lore INTEGER DEFAULT 0,
+augment INTEGER DEFAULT 0,
+stackable INTEGER DEFAULT 0,
+sell_value INTEGER DEFAULT 0,
+tribute_value INTEGER DEFAULT 0,
+stack_size INTEGER DEFAULT 0,
+clickable TEXT,
+augtype INTEGER DEFAULT 0,
+strength INTEGER DEFAULT 0,
+dexterity INTEGER DEFAULT 0,
+agility INTEGER DEFAULT 0,
+stamina INTEGER DEFAULT 0,
+intelligence INTEGER DEFAULT 0,
+wisdom INTEGER DEFAULT 0,
+charisma INTEGER DEFAULT 0,
+mana INTEGER DEFAULT 0,
+hp INTEGER DEFAULT 0,
+ac INTEGER DEFAULT 0,
+regen_hp INTEGER DEFAULT 0,
+regen_mana INTEGER DEFAULT 0,
+haste INTEGER DEFAULT 0,
+classes INTEGER DEFAULT 0,
+class_list TEXT DEFAULT 'All',
+svfire INTEGER DEFAULT 0,
+svcold INTEGER DEFAULT 0,
+svdisease INTEGER DEFAULT 0,
+svpoison INTEGER DEFAULT 0,
+svcorruption INTEGER DEFAULT 0,
+svmagic INTEGER DEFAULT 0,
+spelldamage INTEGER DEFAULT 0,
+spellshield INTEGER DEFAULT 0,
+damage INTEGER DEFAULT 0,
+weight INTEGER DEFAULT 0,
+item_size INTEGER DEFAULT 0,
+weightreduction INTEGER DEFAULT 0,
+races INTEGER DEFAULT 0,
+race_list TEXT DEFAULT 'All',
+icon INTEGER,
+item_range INTEGER DEFAULT 0,
+attack INTEGER DEFAULT 0,
+collectible INTEGER DEFAULT 0,
+strikethrough INTEGER DEFAULT 0,
+heroicagi INTEGER DEFAULT 0,
+heroiccha INTEGER DEFAULT 0,
+heroicdex INTEGER DEFAULT 0,
+heroicint INTEGER DEFAULT 0,
+heroicsta INTEGER DEFAULT 0,
+heroicstr INTEGER DEFAULT 0,
+heroicsvcold INTEGER DEFAULT 0,
+heroicsvcorruption INTEGER DEFAULT 0,
+heroicsvdisease INTEGER DEFAULT 0,
+heroicsvfire INTEGER DEFAULT 0,
+heroicsvmagic INTEGER DEFAULT 0,
+heroicsvpoison INTEGER DEFAULT 0,
+heroicwis INTEGER DEFAULT 0,
+link TEXT
+);
+]])
         db:exec("CREATE INDEX IF NOT EXISTS idx_item_name ON Items (name);")
+        db:exec("CREATE INDEX IF NOT EXISTS idx_item_id ON Items (item_id);")
+
         db:exec("COMMIT")
         db:close()
 
@@ -698,6 +700,7 @@ local function convertTimestamp(timeStr)
 end
 
 function LNS.valueToCoins(sellVal)
+    if sellVal == nil then return "0 pp 0 gp 0 sp 0 cp" end
     local platVal   = math.floor(sellVal / 1000)
     local goldVal   = math.floor((sellVal % 1000) / 100)
     local silverVal = math.floor((sellVal % 100) / 10)
@@ -1085,7 +1088,9 @@ end
 
 function LNS.OpenItemsSQL()
     local db = SQLite3.open(lootDB)
-    db:exec("PRAGMA journal_mode=WAL;")
+    if db then
+        db:exec("PRAGMA journal_mode=WAL;")
+    end
     return db
 end
 
@@ -1095,18 +1100,18 @@ function LNS.LoadHistoricalData()
     db:exec("PRAGMA journal_mode=WAL;")
     db:exec("BEGIN TRANSACTION")
     db:exec([[
-        CREATE TABLE IF NOT EXISTS LootHistory (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "Item" TEXT NOT NULL,
-            "CorpseName" TEXT NOT NULL,
-            "Action" TEXT NOT NULL,
-            "Date" TEXT NOT NULL,
-            "TimeStamp" TEXT NOT NULL ,
-            "Link" TEXT NOT NULL,
-            "Looter" TEXT NOT NULL,
-            "Zone" TEXT NOT NULL
-        );
-    ]])
+CREATE TABLE IF NOT EXISTS LootHistory (
+"id" INTEGER PRIMARY KEY AUTOINCREMENT,
+"Item" TEXT NOT NULL,
+"CorpseName" TEXT NOT NULL,
+"Action" TEXT NOT NULL,
+"Date" TEXT NOT NULL,
+"TimeStamp" TEXT NOT NULL ,
+"Link" TEXT NOT NULL,
+"Looter" TEXT NOT NULL,
+"Zone" TEXT NOT NULL
+);
+]])
     db:exec("COMMIT")
 
     db:exec("BEGIN TRANSACTION")
@@ -1166,10 +1171,10 @@ function LNS.insertIntoHistory(itemName, corpseName, action, date, timestamp, li
     -- Skip if a duplicate "Ignore" or "Left" action exists within the last minute
     if action == "Ignore" or action == "Left" then
         local checkStmt = db:prepare([[
-                SELECT Date, TimeStamp FROM LootHistory
-                WHERE Item = ? AND CorpseName = ? AND Action = ? AND Date = ?
-                ORDER BY Date DESC, TimeStamp DESC LIMIT 1
-            ]])
+SELECT Date, TimeStamp FROM LootHistory
+WHERE Item = ? AND CorpseName = ? AND Action = ? AND Date = ?
+ORDER BY Date DESC, TimeStamp DESC LIMIT 1
+]])
         if checkStmt then
             checkStmt:bind_values(itemName, corpseName, action, date)
             local res = checkStmt:step()
@@ -1188,9 +1193,9 @@ function LNS.insertIntoHistory(itemName, corpseName, action, date, timestamp, li
 
     db:exec("BEGIN TRANSACTION")
     local stmt = db:prepare([[
-            INSERT INTO LootHistory (Item, CorpseName, Action, Date, TimeStamp, Link, Looter, Zone)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ]])
+INSERT INTO LootHistory (Item, CorpseName, Action, Date, TimeStamp, Link, Looter, Zone)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+]])
     if stmt then
         stmt:bind_values(itemName, corpseName, action, date, timestamp, link, looter, zone)
         local res, err = stmt:step()
@@ -1221,40 +1226,50 @@ function LNS.insertIntoHistory(itemName, corpseName, action, date, timestamp, li
         })
 end
 
+function LNS.LoadIcons()
+    local db = LNS.OpenItemsSQL()
+    local stmt = db:prepare("SELECT item_id, icon FROM Items")
+
+    for row in stmt:nrows() do
+        LNS.ItemIcons[row.item_id] = row.icon
+    end
+
+    stmt:finalize()
+    db:close()
+end
+
 function LNS.LoadRuleDB()
-    -- Open the database once
     local db = SQLite3.open(RulesDB)
     local charTableName = string.format("%s_Rules", MyName)
 
-    -- Create tables only if necessary (wrapped in a single transaction)
     db:exec("PRAGMA journal_mode=WAL;")
     db:exec("BEGIN TRANSACTION")
-    db:exec(string.format([[
-        CREATE TABLE IF NOT EXISTS Global_Rules (
-            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
-            "item_name" TEXT NOT NULL,
-            "item_rule" TEXT NOT NULL,
-            "item_rule_classes" TEXT,
-            "item_link" TEXT
-        );
-        CREATE TABLE IF NOT EXISTS Normal_Rules (
-            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
-            "item_name" TEXT NOT NULL,
-            "item_rule" TEXT NOT NULL,
-            "item_rule_classes" TEXT,
-            "item_link" TEXT
-        );
-        CREATE TABLE IF NOT EXISTS %s (
-            "item_id" INTEGER PRIMARY KEY NOT NULL UNIQUE,
-            "item_name" TEXT NOT NULL,
-            "item_rule" TEXT NOT NULL,
-            "item_rule_classes" TEXT,
-            "item_link" TEXT
-        );
-    ]], charTableName))
-    db:exec("COMMIT")
 
-    -- Function to process rules in a table
+    -- Creating tables
+    db:exec(string.format([[
+    CREATE TABLE IF NOT EXISTS Global_Rules (
+        item_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
+        item_name TEXT NOT NULL,
+        item_rule TEXT NOT NULL,
+        item_rule_classes TEXT,
+        item_link TEXT
+    );
+    CREATE TABLE IF NOT EXISTS Normal_Rules (
+        item_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
+        item_name TEXT NOT NULL,
+        item_rule TEXT NOT NULL,
+        item_rule_classes TEXT,
+        item_link TEXT
+    );
+    CREATE TABLE IF NOT EXISTS %s (
+        item_id INTEGER PRIMARY KEY NOT NULL UNIQUE,
+        item_name TEXT NOT NULL,
+        item_rule TEXT NOT NULL,
+        item_rule_classes TEXT,
+        item_link TEXT
+    );
+    ]], charTableName))
+
     local function processRules(stmt, ruleTable, classTable, linkTable)
         for row in stmt:nrows() do
             local id = row.item_id
@@ -1264,43 +1279,59 @@ function LNS.LoadRuleDB()
             classTable[id] = classes
             linkTable[id] = row.item_link or "NULL"
             LNS.ItemNames[id] = row.item_name
-            LNS.GetIconID(id)
         end
     end
 
-    -- Load rules efficiently
-    db:exec("BEGIN TRANSACTION")
-    local stmt = db:prepare("SELECT * FROM Global_Rules")
-    processRules(stmt, LNS.GlobalItemsRules, LNS.GlobalItemsClasses, LNS.GlobalItemsLink)
-    stmt:finalize()
+    for _, tbl in ipairs({ "Global_Rules", "Normal_Rules", charTableName, }) do
+        local stmt = db:prepare("SELECT * FROM " .. tbl)
+        local lbl = tbl:gsub("_Rules", "")
+        if tbl == charTableName then lbl = 'Personal' end
+        processRules(stmt, LNS[lbl .. "ItemsRules"], LNS[lbl .. "ItemsClasses"], LNS[lbl .. "ItemsLink"])
+        stmt:finalize()
+    end
 
-    stmt = db:prepare("SELECT * FROM Normal_Rules")
-    processRules(stmt, LNS.NormalItemsRules, LNS.NormalItemsClasses, LNS.NormalItemsLink)
-    stmt:finalize()
-
-    stmt = db:prepare(string.format("SELECT * FROM %s", charTableName))
-    processRules(stmt, LNS.PersonalItemsRules, LNS.PersonalItemsClasses, LNS.PersonalItemsLink)
-    stmt:finalize()
     db:exec("COMMIT")
-
     db:close()
+
+    -- Load icons
+    LNS.LoadIcons()
 end
 
 function LNS.GetIconID(itemID)
-    local db = LNS.OpenItemsSQL()
-    local iconID = 0
-    db:exec("BEGIN TRANSACTION")
-    local stmt = db:prepare("SELECT icon FROM Items WHERE item_id = ?")
-    stmt:bind(1, itemID)
+    if not itemID or type(itemID) ~= "number" then
+        print("LNS.GetIconID: Invalid itemID")
+        return 0
+    end
 
+    local db = LNS.OpenItemsSQL()
+    if not db then
+        Logger.Debug(LNS.guiLoot.console, "LNS.GetIconID: Failed to open database")
+        return 0
+    end
+
+    local iconID = 0
+    local qry = string.format("SELECT icon FROM Items WHERE item_id = %d", itemID)
+    local stmt = db:prepare(qry)
+
+    if not stmt then
+        Logger.Debug(LNS.guiLoot.console, "LNS.GetIconID: Failed to prepare statement:", qry)
+        db:close()
+        return 0
+    end
+
+    local found = false
     for row in stmt:nrows() do
         iconID = row.icon
-        LNS.ItemIcons[itemID] = row.icon
+        LNS.ItemIcons[itemID] = iconID
+        found = true
     end
 
     stmt:finalize()
-    db:exec("COMMIT")
     db:close()
+
+    if not found then
+        Logger.Debug(LNS.guiLoot.console, "LNS.GetIconID: Item ID %d not found in database", itemID)
+    end
 
     return iconID
 end
@@ -1476,7 +1507,75 @@ function LNS.addToItemDB(item)
             return
         end
     end
-    if LNS.ItemNames[item.ID()] ~= nil then return end
+    local itemID                            = item.ID()
+    local itemName                          = item.Name()
+    local itemIcon                          = item.Icon()
+    local value                             = item.Value() or 0
+    LNS.ItemNames[itemID]                   = itemName
+    LNS.ItemIcons[itemID]                   = itemIcon
+
+    LNS.ALLITEMS[itemID]                    = {}
+    LNS.ALLITEMS[itemID].Name               = item.Name()
+    LNS.ALLITEMS[itemID].NoDrop             = item.NoDrop()
+    LNS.ALLITEMS[itemID].NoTrade            = item.NoTrade()
+    LNS.ALLITEMS[itemID].Tradeskills        = item.Tradeskills()
+    LNS.ALLITEMS[itemID].Quest              = item.Quest()
+    LNS.ALLITEMS[itemID].Lore               = item.Lore()
+    LNS.ALLITEMS[itemID].Augment            = item.AugType() > 0
+    LNS.ALLITEMS[itemID].Stackable          = item.Stackable()
+    LNS.ALLITEMS[itemID].Value              = LNS.valueToCoins(value) or 0
+    LNS.ALLITEMS[itemID].Tribute            = item.Tribute() or 0
+    LNS.ALLITEMS[itemID].StackSize          = item.StackSize() or 0
+    LNS.ALLITEMS[itemID].Clicky             = item.Clicky() or nil
+    LNS.ALLITEMS[itemID].AugType            = item.AugType() or 0
+    LNS.ALLITEMS[itemID].STR                = item.STR() or 0
+    LNS.ALLITEMS[itemID].DEX                = item.DEX() or 0
+    LNS.ALLITEMS[itemID].AGI                = item.AGI() or 0
+    LNS.ALLITEMS[itemID].STA                = item.STA() or 0
+    LNS.ALLITEMS[itemID].INT                = item.INT() or 0
+    LNS.ALLITEMS[itemID].WIS                = item.WIS() or 0
+    LNS.ALLITEMS[itemID].CHA                = item.CHA() or 0
+    LNS.ALLITEMS[itemID].Mana               = item.Mana() or 0
+    LNS.ALLITEMS[itemID].HP                 = item.HP() or 0
+    LNS.ALLITEMS[itemID].AC                 = item.AC() or 0
+    LNS.ALLITEMS[itemID].HPRegen            = item.HPRegen() or 0
+    LNS.ALLITEMS[itemID].ManaRegen          = item.ManaRegen() or 0
+    LNS.ALLITEMS[itemID].Haste              = item.Haste() or 0
+    LNS.ALLITEMS[itemID].Link               = item.ItemLink('CLICKABLE')() or 'NULL'
+    LNS.ALLITEMS[itemID].Weight             = (item.Weight() or 0) * 10
+    LNS.ALLITEMS[itemID].Classes            = item.Classes() or 0
+    LNS.ALLITEMS[itemID].ClassList          = LNS.retrieveClassList(item)
+    LNS.ALLITEMS[itemID].svFire             = item.svFire() or 0
+    LNS.ALLITEMS[itemID].svCold             = item.svCold() or 0
+    LNS.ALLITEMS[itemID].svDisease          = item.svDisease() or 0
+    LNS.ALLITEMS[itemID].svPoison           = item.svPoison() or 0
+    LNS.ALLITEMS[itemID].svCorruption       = item.svCorruption() or 0
+    LNS.ALLITEMS[itemID].svMagic            = item.svMagic() or 0
+    LNS.ALLITEMS[itemID].SpellDamage        = item.SpellDamage() or 0
+    LNS.ALLITEMS[itemID].SpellShield        = item.SpellShield() or 0
+    LNS.ALLITEMS[itemID].Races              = item.Races() or 0
+    LNS.ALLITEMS[itemID].RaceList           = LNS.retrieveRaceList(item)
+    LNS.ALLITEMS[itemID].Collectible        = item.Collectible()
+    LNS.ALLITEMS[itemID].Attack             = item.Attack() or 0
+    LNS.ALLITEMS[itemID].Damage             = item.Damage() or 0
+    LNS.ALLITEMS[itemID].WeightReduction    = item.WeightReduction() or 0
+    LNS.ALLITEMS[itemID].Size               = item.Size() or 0
+    LNS.ALLITEMS[itemID].Icon               = itemIcon
+    LNS.ALLITEMS[itemID].StrikeThrough      = item.StrikeThrough() or 0
+    LNS.ALLITEMS[itemID].HeroicAGI          = item.HeroicAGI() or 0
+    LNS.ALLITEMS[itemID].HeroicCHA          = item.HeroicCHA() or 0
+    LNS.ALLITEMS[itemID].HeroicDEX          = item.HeroicDEX() or 0
+    LNS.ALLITEMS[itemID].HeroicINT          = item.HeroicINT() or 0
+    LNS.ALLITEMS[itemID].HeroicSTA          = item.HeroicSTA() or 0
+    LNS.ALLITEMS[itemID].HeroicSTR          = item.HeroicSTR() or 0
+    LNS.ALLITEMS[itemID].HeroicSvCold       = item.HeroicSvCold() or 0
+    LNS.ALLITEMS[itemID].HeroicSvCorruption = item.HeroicSvCorruption() or 0
+    LNS.ALLITEMS[itemID].HeroicSvDisease    = item.HeroicSvDisease() or 0
+    LNS.ALLITEMS[itemID].HeroicSvFire       = item.HeroicSvFire() or 0
+    LNS.ALLITEMS[itemID].HeroicSvMagic      = item.HeroicSvMagic() or 0
+    LNS.ALLITEMS[itemID].HeroicSvPoison     = item.HeroicSvPoison() or 0
+    LNS.ALLITEMS[itemID].HeroicWIS          = item.HeroicWIS() or 0
+
 
     -- insert the item into the database
 
@@ -1577,68 +1676,67 @@ function LNS.addToItemDB(item)
 
     local success, errmsg = pcall(function()
         stmt:bind_values(
-            item.ID(),
-            item.Name(),
-            item.NoDrop() and 1 or 0,
-            item.NoTrade() and 1 or 0,
-            item.Tradeskills() and 1 or 0,
-            item.Quest() and 1 or 0,
-            item.Lore() and 1 or 0,
-            item.AugType() > 0 and 1 or 0,
-            item.Stackable() and 1 or 0,
-            item.Value() or 0,
-            item.Tribute() or 0,
-            item.StackSize() or 0,
-            item.Clicky() or nil,
-            item.AugType() or 0,
-            item.STR() or 0,
-            item.DEX() or 0,
-            item.AGI() or 0,
-            item.STA() or 0,
-            item.INT() or 0,
-            item.WIS() or 0,
-            item.CHA() or 0,
-            item.Mana() or 0,
-            item.HP() or 0,
-            item.AC() or 0,
-            item.HPRegen() or 0,
-            item.ManaRegen() or 0,
-            item.Haste() or 0,
-            item.ItemLink('CLICKABLE')() or nil,
-            (item.Weight() or 0) * 10,
-            item.Classes() or 0,
-            LNS.retrieveClassList(item),
-            item.svFire() or 0,
-            item.svCold() or 0,
-            item.svDisease() or 0,
-            item.svPoison() or 0,
-            item.svCorruption() or 0,
-            item.svMagic() or 0,
-            item.SpellDamage() or 0,
-            item.SpellShield() or 0,
-            item.Races() or 0,
-            LNS.retrieveRaceList(item),
-            item.Collectible() and 1 or 0,
-            item.Attack() or 0,
-            item.Damage() or 0,
-            item.WeightReduction() or 0,
-            item.Size() or 0,
-            item.Icon() or 0,
-            item.StrikeThrough() or 0,
-            item.HeroicAGI() or 0,
-            item.HeroicCHA() or 0,
-            item.HeroicDEX() or 0,
-            item.HeroicINT() or 0,
-            item.HeroicSTA() or 0,
-            item.HeroicSTR() or 0,
-            item.HeroicSvCold() or 0,
-            item.HeroicSvCorruption() or 0,
-            item.HeroicSvDisease() or 0,
-            item.HeroicSvFire() or 0,
-            item.HeroicSvMagic() or 0,
-            item.HeroicSvPoison() or 0,
-            item.HeroicWIS() or 0
-        )
+            itemID,
+            itemName,
+            LNS.ALLITEMS[itemID].NoDrop and 1 or 0,
+            LNS.ALLITEMS[itemID].NoTrade and 1 or 0,
+            LNS.ALLITEMS[itemID].Tradeskills and 1 or 0,
+            LNS.ALLITEMS[itemID].Quest and 1 or 0,
+            LNS.ALLITEMS[itemID].Lore and 1 or 0,
+            LNS.ALLITEMS[itemID].Augment and 1 or 0,
+            LNS.ALLITEMS[itemID].Stackable and 1 or 0,
+            value,
+            LNS.ALLITEMS[itemID].Tribute,
+            LNS.ALLITEMS[itemID].StackSize,
+            LNS.ALLITEMS[itemID].Clicky,
+            LNS.ALLITEMS[itemID].AugType,
+            LNS.ALLITEMS[itemID].STR,
+            LNS.ALLITEMS[itemID].DEX,
+            LNS.ALLITEMS[itemID].AGI,
+            LNS.ALLITEMS[itemID].STA,
+            LNS.ALLITEMS[itemID].INT,
+            LNS.ALLITEMS[itemID].WIS,
+            LNS.ALLITEMS[itemID].CHA,
+            LNS.ALLITEMS[itemID].Mana,
+            LNS.ALLITEMS[itemID].HP,
+            LNS.ALLITEMS[itemID].AC,
+            LNS.ALLITEMS[itemID].HPRegen,
+            LNS.ALLITEMS[itemID].ManaRegen,
+            LNS.ALLITEMS[itemID].Haste,
+            LNS.ALLITEMS[itemID].Link,
+            LNS.ALLITEMS[itemID].Weight,
+            LNS.ALLITEMS[itemID].Classes,
+            LNS.ALLITEMS[itemID].ClassList,
+            LNS.ALLITEMS[itemID].svFire,
+            LNS.ALLITEMS[itemID].svCold,
+            LNS.ALLITEMS[itemID].svDisease,
+            LNS.ALLITEMS[itemID].svPoison,
+            LNS.ALLITEMS[itemID].svCorruption,
+            LNS.ALLITEMS[itemID].svMagic,
+            LNS.ALLITEMS[itemID].SpellDamage,
+            LNS.ALLITEMS[itemID].SpellShield,
+            LNS.ALLITEMS[itemID].Races,
+            LNS.ALLITEMS[itemID].RaceList,
+            LNS.ALLITEMS[itemID].Collectible and 1 or 0,
+            LNS.ALLITEMS[itemID].Attack,
+            LNS.ALLITEMS[itemID].Damage,
+            LNS.ALLITEMS[itemID].WeightReduction,
+            LNS.ALLITEMS[itemID].Size,
+            itemIcon,
+            LNS.ALLITEMS[itemID].StrikeThrough,
+            LNS.ALLITEMS[itemID].HeroicAGI,
+            LNS.ALLITEMS[itemID].HeroicCHA,
+            LNS.ALLITEMS[itemID].HeroicDEX,
+            LNS.ALLITEMS[itemID].HeroicINT,
+            LNS.ALLITEMS[itemID].HeroicSTA,
+            LNS.ALLITEMS[itemID].HeroicSTR,
+            LNS.ALLITEMS[itemID].HeroicSvCold,
+            LNS.ALLITEMS[itemID].HeroicSvCorruption,
+            LNS.ALLITEMS[itemID].HeroicSvDisease,
+            LNS.ALLITEMS[itemID].HeroicSvFire,
+            LNS.ALLITEMS[itemID].HeroicSvMagic,
+            LNS.ALLITEMS[itemID].HeroicSvPoison,
+            LNS.ALLITEMS[itemID].HeroicWIS)
         stmt:step()
     end)
 
@@ -1649,72 +1747,6 @@ function LNS.addToItemDB(item)
     stmt:finalize()
     db:exec("COMMIT")
     db:close()
-
-    -- insert the item into the lua table for easier lookups
-
-    local itemID                            = item.ID()
-    LNS.ItemNames[itemID]                   = item.Name()
-    LNS.ALLITEMS[itemID]                    = {}
-    LNS.ALLITEMS[itemID].Name               = item.Name()
-    LNS.ALLITEMS[itemID].NoDrop             = item.NoDrop()
-    LNS.ALLITEMS[itemID].NoTrade            = item.NoTrade()
-    LNS.ALLITEMS[itemID].Tradeskills        = item.Tradeskills()
-    LNS.ALLITEMS[itemID].Quest              = item.Quest()
-    LNS.ALLITEMS[itemID].Lore               = item.Lore()
-    LNS.ALLITEMS[itemID].Augment            = item.AugType() > 0
-    LNS.ALLITEMS[itemID].Stackable          = item.Stackable()
-    LNS.ALLITEMS[itemID].Value              = LNS.valueToCoins(item.Value())
-    LNS.ALLITEMS[itemID].Tribute            = item.Tribute()
-    LNS.ALLITEMS[itemID].StackSize          = item.StackSize()
-    LNS.ALLITEMS[itemID].Clicky             = item.Clicky()
-    LNS.ALLITEMS[itemID].AugType            = item.AugType()
-    LNS.ALLITEMS[itemID].STR                = item.STR()
-    LNS.ALLITEMS[itemID].DEX                = item.DEX()
-    LNS.ALLITEMS[itemID].AGI                = item.AGI()
-    LNS.ALLITEMS[itemID].STA                = item.STA()
-    LNS.ALLITEMS[itemID].INT                = item.INT()
-    LNS.ALLITEMS[itemID].WIS                = item.WIS()
-    LNS.ALLITEMS[itemID].CHA                = item.CHA()
-    LNS.ALLITEMS[itemID].Mana               = item.Mana()
-    LNS.ALLITEMS[itemID].HP                 = item.HP()
-    LNS.ALLITEMS[itemID].AC                 = item.AC()
-    LNS.ALLITEMS[itemID].HPRegen            = item.HPRegen()
-    LNS.ALLITEMS[itemID].ManaRegen          = item.ManaRegen()
-    LNS.ALLITEMS[itemID].Haste              = item.Haste()
-    LNS.ALLITEMS[itemID].Classes            = item.Classes()
-    LNS.ALLITEMS[itemID].ClassList          = LNS.retrieveClassList(item)
-    LNS.ALLITEMS[itemID].svFire             = item.svFire()
-    LNS.ALLITEMS[itemID].svCold             = item.svCold()
-    LNS.ALLITEMS[itemID].svDisease          = item.svDisease()
-    LNS.ALLITEMS[itemID].svPoison           = item.svPoison()
-    LNS.ALLITEMS[itemID].svCorruption       = item.svCorruption()
-    LNS.ALLITEMS[itemID].svMagic            = item.svMagic()
-    LNS.ALLITEMS[itemID].SpellDamage        = item.SpellDamage()
-    LNS.ALLITEMS[itemID].SpellShield        = item.SpellShield()
-    LNS.ALLITEMS[itemID].Damage             = item.Damage()
-    LNS.ALLITEMS[itemID].Weight             = item.Weight()
-    LNS.ALLITEMS[itemID].Size               = item.Size()
-    LNS.ALLITEMS[itemID].WeightReduction    = item.WeightReduction()
-    LNS.ALLITEMS[itemID].Races              = item.Races() or 0
-    LNS.ALLITEMS[itemID].RaceList           = LNS.retrieveRaceList(item)
-    LNS.ALLITEMS[itemID].Icon               = item.Icon()
-    LNS.ALLITEMS[itemID].Attack             = item.Attack()
-    LNS.ALLITEMS[itemID].Collectible        = item.Collectible()
-    LNS.ALLITEMS[itemID].StrikeThrough      = item.StrikeThrough()
-    LNS.ALLITEMS[itemID].HeroicAGI          = item.HeroicAGI()
-    LNS.ALLITEMS[itemID].HeroicCHA          = item.HeroicCHA()
-    LNS.ALLITEMS[itemID].HeroicDEX          = item.HeroicDEX()
-    LNS.ALLITEMS[itemID].HeroicINT          = item.HeroicINT()
-    LNS.ALLITEMS[itemID].HeroicSTA          = item.HeroicSTA()
-    LNS.ALLITEMS[itemID].HeroicSTR          = item.HeroicSTR()
-    LNS.ALLITEMS[itemID].HeroicSvCold       = item.HeroicSvCold()
-    LNS.ALLITEMS[itemID].HeroicSvCorruption = item.HeroicSvCorruption()
-    LNS.ALLITEMS[itemID].HeroicSvDisease    = item.HeroicSvDisease()
-    LNS.ALLITEMS[itemID].HeroicSvFire       = item.HeroicSvFire()
-    LNS.ALLITEMS[itemID].HeroicSvMagic      = item.HeroicSvMagic()
-    LNS.ALLITEMS[itemID].HeroicSvPoison     = item.HeroicSvPoison()
-    LNS.ALLITEMS[itemID].HeroicWIS          = item.HeroicWIS()
-    LNS.ALLITEMS[itemID].Link               = item.ItemLink('CLICKABLE')()
 end
 
 function LNS.findItemInDb(itemName, itemId)
@@ -1757,18 +1789,18 @@ function LNS.bulkSet(item_table, setting, classes, which_table, delete_items)
     db:exec("PRAGMA journal_mode=WAL;")
 
     local qry = string.format([[
-        INSERT INTO %s (item_id, item_name, item_rule, item_rule_classes, item_link)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(item_id) DO UPDATE SET
-            item_name = excluded.item_name,
-            item_rule = excluded.item_rule,
-            item_rule_classes = excluded.item_rule_classes,
-            item_link = excluded.item_link;
-    ]], which_table)
+INSERT INTO %s (item_id, item_name, item_rule, item_rule_classes, item_link)
+VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(item_id) DO UPDATE SET
+item_name = excluded.item_name,
+item_rule = excluded.item_rule,
+item_rule_classes = excluded.item_rule_classes,
+item_link = excluded.item_link;
+]], which_table)
     if delete_items then
         qry = string.format([[
-            DELETE FROM %s WHERE item_id = ?;
-        ]], which_table)
+DELETE FROM %s WHERE item_id = ?;
+]], which_table)
     end
     local stmt = db:prepare(qry)
 
@@ -2078,15 +2110,15 @@ function LNS.modifyItemRule(itemID, action, tableName, classes, link)
         -- UPSERT operation
         -- if tableName == "Normal_Rules" then
         sql  = string.format([[
-                INSERT INTO %s
-                (item_id, item_name, item_rule, item_rule_classes, item_link)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT(item_id) DO UPDATE SET
-                item_name                                    = excluded.item_name,
-                item_rule                                    = excluded.item_rule,
-                item_rule_classes                                    = excluded.item_rule_classes,
-                item_link                                    = excluded.item_link
-                ]], tableName)
+INSERT INTO %s
+(item_id, item_name, item_rule, item_rule_classes, item_link)
+VALUES (?, ?, ?, ?, ?)
+ON CONFLICT(item_id) DO UPDATE SET
+item_name                                    = excluded.item_name,
+item_rule                                    = excluded.item_rule,
+item_rule_classes                                    = excluded.item_rule_classes,
+item_link                                    = excluded.item_link
+]], tableName)
         stmt = db:prepare(sql)
         if stmt then
             stmt:bind_values(itemID, itemName, action, classes, link)
@@ -4143,11 +4175,9 @@ function LNS.drawTable(label)
         local filteredItemKeys = {}
         for id, rule in pairs(LNS[varSub .. 'Rules']) do
             if LNS.SearchLootTable(LNS.TempSettings['Search' .. varSub], LNS.ItemNames[id], rule) then
-                local iconID = 0 -- LNS.ItemIcons[id] ~= nil and LNS.ItemIcons[id] or 0
+                local iconID = LNS.ItemIcons[id] or 0
                 local itemLink = ''
-                if LNS.ItemIcons[id] == nil then
-                    iconID = LNS.GetIconID(itemID)
-                end
+
                 if iconID == 0 then
                     if LNS.ALLITEMS[id] then
                         iconID = LNS.ALLITEMS[id].Icon or 0
