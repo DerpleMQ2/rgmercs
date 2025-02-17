@@ -2382,15 +2382,26 @@ local _ClassConfig = {
             DisplayName = "Do AE Damage",
             Category = "Damage Spells",
             Index = 5,
-            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells, Discs and AA. **WILL BREAK MEZ**",
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
+                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
+        ['DoAETap']           = {
+            DisplayName = "Use AE Hate/LifeTap",
+            Category = "Damage Spells",
+            Index = 6,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("AETap") end,
+            RequiresLoadoutChange = true,
+            Default = false,
+            FAQ = "Why is my Shadow Knight not using the AE Tap (Insidious) Line?",
+            Answer = "The Insidious AE Hate Life Tap is not enabled by default, you may need to select it.",
+        },
         ['AETargetCnt']       = {
             DisplayName = "AE Target Count",
             Category = "Damage Spells",
-            Index = 6,
+            Index = 7,
             Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
             Default = 2,
             Min = 1,
@@ -2402,7 +2413,7 @@ local _ClassConfig = {
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
             Category = "Damage Spells",
-            Index = 7,
+            Index = 8,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
             Default = 5,
@@ -2415,23 +2426,13 @@ local _ClassConfig = {
         ['SafeAEDamage']      = {
             DisplayName = "AE Proximity Check",
             Category = "Damage Spells",
-            Index = 8,
+            Index = 9,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Proximity Check?",
             Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
                 "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
-        },
-        ['DoAETap']           = {
-            DisplayName = "Use AE Hate/LifeTap",
-            Category = "Damage Spells",
-            Index = 9,
-            Tooltip = function() return Ui.GetDynamicTooltipForSpell("AETap") end,
-            RequiresLoadoutChange = true,
-            Default = false,
-            FAQ = "Why is my Shadow Knight not using the AE Tap (Insidious) Line?",
-            Answer = "The Insidious AE Hate Life Tap is not enabled by default, you may need to select it.",
         },
 
         --Hate Tools
