@@ -1560,6 +1560,11 @@ function Casting.AutoMed()
         return
     end
 
+    if Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(90) then
+        Logger.log_verbose("Sit check returning early due to aggro.")
+        return
+    end
+
     -- Allow sufficient time for the player to do something before char plunks down. Spreads out med sitting too.
     if Targeting.GetXTHaterCount() == 0 and Config:GetTimeSinceLastMove() < math.random(Config:GetSetting('AfterCombatMedDelay')) then return end
 
@@ -1613,9 +1618,9 @@ function Casting.AutoMed()
 
     -- This could likely be refactored
     if me.Sitting() and not Casting.Memorizing then
-        if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or Targeting.IHaveAggro(90)) then
+        if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or ((Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(90)))) then
             Config.Globals.InMedState = false
-            Logger.log_debug("Forcing stand - Aggro threshold reached.")
+            Logger.log_debug("Forcing stand - Combat or aggro threshold reached.")
             me.Stand()
             return
         end
