@@ -1165,14 +1165,16 @@ return {
                 name = "SingleClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not Config:GetSetting('DoAEDamage') and Casting.TargetedDiscReady(discSpell, target.ID())
+                    if Config:GetSetting('DoAEDamage') then return false end
+                    return Casting.TargetedDiscReady(discSpell, target.ID())
                 end,
             },
             {
                 name = "AEClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Config:GetSetting('DoAEDamage') and Casting.TargetedDiscReady(discSpell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    return Casting.TargetedDiscReady(discSpell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
@@ -1793,7 +1795,8 @@ return {
             DisplayName = "Do AE Damage",
             Category = "Combat",
             Index = 1,
-            Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
+                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",

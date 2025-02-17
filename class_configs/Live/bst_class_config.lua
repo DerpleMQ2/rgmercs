@@ -1104,7 +1104,7 @@ return {
                 name = "Icelance2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Config:GetSetting("DoAEDamage") and self:GetResolvedActionMapItem("AERoar") then return false end
+                    if Config:GetSetting("DoAERoar") then return false end
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1112,7 +1112,7 @@ return {
                 name = "AERoar",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting("DoAEDamage") then return false end
+                    if not (Config:GetSetting("DoAERoar") and Config:GetSetting("DoAEDamage")) then return false end
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID()) and
                         self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
@@ -1177,14 +1177,16 @@ return {
                 name = "SingleClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not Config:GetSetting('DoAEDamage') and Casting.TargetedDiscReady(discSpell, target.ID())
+                    if Config:GetSetting('DoAEDamage') then return false end
+                    return Casting.TargetedDiscReady(discSpell, target.ID())
                 end,
             },
             {
                 name = "AEClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Config:GetSetting('DoAEDamage') and Casting.TargetedDiscReady(discSpell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    if not Config:GetSetting('DoAEDamage') then return false end
+                    return Casting.TargetedDiscReady(discSpell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
@@ -1444,24 +1446,24 @@ return {
             spells = {
                 { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHeals') end, },
                 { name = "Icelance1", },
-                { name = "AERoar",       cond = function(self) return Config:GetSetting('DoAEDamage') end, },
-                { name = "Icelance2",    cond = function(self) return not Config:GetSetting('DoAEDamage') or not self:GetResolvedActionMapItem("AERoar") end, },
+                { name = "AERoar",       cond = function(self) return Config:GetSetting('DoAERoar') end, },
+                { name = "Icelance2", },
             },
         },
         {
             gem = 3,
             spells = {
                 { name = "Icelance1", },
-                { name = "AERoar",    cond = function(self) return Config:GetSetting('DoAEDamage') end, },
-                { name = "Icelance2", cond = function(self) return not Config:GetSetting('DoAEDamage') or not self:GetResolvedActionMapItem("AERoar") end, },
+                { name = "AERoar",    cond = function(self) return Config:GetSetting('DoAERoar') end, },
+                { name = "Icelance2", },
                 { name = "BloodDot", },
             },
         },
         {
             gem = 4,
             spells = {
-                { name = "AERoar",    cond = function(self) return Config:GetSetting('DoAEDamage') end, },
-                { name = "Icelance2", cond = function(self) return not Config:GetSetting('DoAEDamage') or not self:GetResolvedActionMapItem("AERoar") end, },
+                { name = "AERoar",    cond = function(self) return Config:GetSetting('DoAERoar') end, },
+                { name = "Icelance2", },
                 { name = "BloodDot", },
                 { name = "ColdDot",   cond = function(self) return Config:GetSetting('DoDot') end, },
             },
@@ -1784,15 +1786,25 @@ return {
             DisplayName = "Do AE Damage",
             Category = "Combat",
             Index = 1,
-            Tooltip = "**WILL BREAK MEZ** Use AE damage Discs and AA. **WILL BREAK MEZ**",
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
+                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
+        ['DoAERoar']       = {
+            DisplayName = "Use AE Roar",
+            Category = "Combat",
+            Index = 2,
+            Tooltip = "Use your AE Roar (Timer 11) spell line.",
+            Default = false,
+            FAQ = "Why am I not using the Roar line? It is better than this weak Ice Lance?",
+            Answer = "Enable Use AE Roar to memorize the spell.\nNote that Do AE Damage must also be enabled for the Roar to be used.",
+        },
         ['AETargetCnt']    = {
             DisplayName = "AE Target Count",
             Category = "Combat",
-            Index = 2,
+            Index = 3,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
             Min = 1,
@@ -1804,7 +1816,7 @@ return {
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
             Category = "Damage Spells",
-            Index = 3,
+            Index = 4,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
             Default = 5,
@@ -1817,7 +1829,7 @@ return {
         ['SafeAEDamage']   = {
             DisplayName = "AE Proximity Check",
             Category = "Combat",
-            Index = 4,
+            Index = 5,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Proximity Check?",
@@ -1828,7 +1840,7 @@ return {
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
             Category = "Combat",
-            Index = 5,
+            Index = 6,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
             Min = 1,
@@ -1840,7 +1852,7 @@ return {
         ['AggroFeign']     = {
             DisplayName = "Emergency Feign",
             Category = "Combat",
-            Index = 6,
+            Index = 7,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
             FAQ = "How do I use my Feign Death?",
@@ -1850,7 +1862,7 @@ return {
         ['DoCoating']      = {
             DisplayName = "Use Coating",
             Category = "Combat",
-            Index = 7,
+            Index = 8,
             Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
             Default = false,
             FAQ = "What is a Coating?",
@@ -1859,7 +1871,7 @@ return {
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
             Category = "Combat",
-            Index = 8,
+            Index = 9,
             Tooltip = "Click your chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             ConfigType = "Advanced",

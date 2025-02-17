@@ -618,7 +618,7 @@ return {
             return true
         end,
         RainCheck = function(target) -- I made a funny
-            if not Config:GetSetting('DoRain') or not Config:GetSetting('DoAEDamage') then return false end
+            if not (Config:GetSetting('DoRain') and Config:GetSetting('DoAEDamage')) then return false end
             return Targeting.GetTargetDistance() >= Config:GetSetting('RainDistance') and
                 (Targeting.GetTargetPctHPs(target) >= Config:GetSetting('HPStopBigNuke') or Targeting.IsNamed(target))
         end,
@@ -693,7 +693,7 @@ return {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning() and
-                    not (Core.IsModeActive('PBAE(LowLevel)') and not self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
+                    not (Core.IsModeActive('PBAE(LowLevel)') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
         {
@@ -705,7 +705,7 @@ return {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning() and
-                    not (Core.IsModeActive('PBAE(LowLevel)') and not self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
+                    not (Core.IsModeActive('PBAE(LowLevel)') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
         {
@@ -717,7 +717,7 @@ return {
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning() and
-                    not (Core.IsModeActive('PBAE(LowLevel)') and not self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
+                    not (Core.IsModeActive('PBAE(LowLevel)') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
         {
@@ -969,7 +969,7 @@ return {
                 name = "AEBeam",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAEDamage') then return false end
+                    if not (Config:GetSetting('DoAEBeam') and Config:GetSetting('DoAEDamage')) then return false end
                     return Casting.TargetedSpellReady(spell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('BeamTargetCnt'), true)
                 end,
             },
@@ -984,7 +984,7 @@ return {
                 name = "PBFlame",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAEDamage') then return false end
+                    if not (Config:GetSetting('DoPBAE') and Config:GetSetting('DoAEDamage')) then return false end
                     return Casting.TargetedSpellReady(spell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
                 end,
             },
@@ -1487,7 +1487,8 @@ return {
             Category = "AE Damage",
             Index = 4,
             RequiresLoadoutChange = true,
-            Tooltip = "**WILL BREAK MEZ** Use your PB AE Spells (of Flame Line). **WILL BREAK MEZ**",
+            Tooltip =
+            "**WILL BREAK MEZ** Use your PB AE Spells (of Flame Line). **WILL BREAK MEZ**\nPlease note, that by necessity, the PBAELowLevel mode will NOT respect this setting.",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",

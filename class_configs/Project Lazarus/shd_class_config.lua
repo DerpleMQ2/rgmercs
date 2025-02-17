@@ -1562,7 +1562,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.SpearNuke,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAEDamage') then return false end
+                    if not (Config:GetSetting('DoAESpearNuke') and Config:GetSetting('DoAEDamage')) then return false end
                     return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
@@ -1623,7 +1623,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.AEBuffTap,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAEBuffTap') or not Config:GetSetting('DoAEDamage') then return false end
+                    if not (Config:GetSetting('DoAEBuffTap') and Config:GetSetting('DoAEDamage')) then return false end
                     return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.SpellStacksOnMe(spell.Trigger) and Casting.TargetedSpellReady(spell, target.ID()) and
                         self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
@@ -1661,7 +1661,7 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
-                { name = "AESpearNuke", cond = function(self) return Config:GetSetting('DoAEDamage') end, },
+                { name = "AESpearNuke", cond = function(self) return Config:GetSetting('DoAESpearNuke') end, },
                 { name = "SpearNuke", },
             },
         },
@@ -2306,30 +2306,43 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not using Dire Dot?",
             Answer = "Dire Dot is not enabled by default, you may need to select it.",
         },
+        ['DoAEDamage']        = {
+            DisplayName = "Do AE Damage",
+            Category = "Damage Spells",
+            Index = 5,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
+                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['DoAESpearNuke']     = {
+            DisplayName = "Use AE Spear",
+            Category = "Damage Spells",
+            Index = 6,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("AESpearNuke") end,
+            Default = false,
+            RequiresLoadoutChange = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I still using a lower-level spear spell?",
+            Answer =
+            "Recently, the three best Spears on Laz were converted to AE spells. Enable Use AE Spear for these spells to be memorized.\nAE Damage must also be enabled for them to be used.",
+        },
         ['DoAEBuffTap']       = {
             DisplayName = "Use AE Buff Tap",
             Category = "Damage Spells",
-            Index = 5,
+            Index = 7,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("AEBuffTap") end,
             Default = false,
             RequiresLoadoutChange = true,
             ConfigType = "Advanced",
             FAQ = "Why is my Shadow Knight Not using the AE Buff Tap?",
-            Answer = "Please ensure you have selected the option in Spell Damage and not that AE Damage must be enabled for it to cast.",
-        },
-        ['DoAEDamage']        = {
-            DisplayName = "Do AE Damage",
-            Category = "Damage Spells",
-            Index = 6,
-            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells, Discs and AA. **WILL BREAK MEZ**",
-            Default = false,
-            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
-            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+            Answer = "Please ensure you have selected the option on the Damage Spells tab.\nNote that AE Damage must be enabled for it to cast.",
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Target Count",
             Category = "Damage Spells",
-            Index = 7,
+            Index = 8,
             Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
             Default = 2,
             Min = 1,
@@ -2341,7 +2354,7 @@ local _ClassConfig = {
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
             Category = "Damage Spells",
-            Index = 8,
+            Index = 9,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
             Default = 5,
@@ -2354,7 +2367,7 @@ local _ClassConfig = {
         ['SafeAEDamage']      = {
             DisplayName = "AE Proximity Check",
             Category = "Damage Spells",
-            Index = 9,
+            Index = 10,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Proximity Check?",
