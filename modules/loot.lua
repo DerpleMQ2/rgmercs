@@ -27,17 +27,28 @@ Module.ClassFAQ          = {}
 
 Module.DefaultConfig     = {
 	['DoLoot']                                 = {
-		DisplayName = "DoLoot",
+		DisplayName = "Load LootNScoot",
 		Category = "Loot N Scoot",
-		Tooltip = "Enables Loot Settings for Looting",
+		Index = 1,
+		Tooltip = "Load the integrated LootNScoot in directed mode. Turning this off will unload the looting script.",
 		Default = true,
-		FAQ = "Why are my goobers not looting?",
-		Answer = "You most likely have [DoLoot] turned off.",
+		FAQ = "What is this silver coin thing? How do I turn it off?",
+		Answer = "The silver coin is our integration of LootNScoot, looting automation for Emu. It can be disabled as you choose.",
+	},
+	['LootCorpses']                            = {
+		DisplayName = "Loot Corpses",
+		Category = "Loot N Scoot",
+		Index = 2,
+		Tooltip = "Enable LootNScoot to loot corpses for you.",
+		Default = true,
+		FAQ = "I have LootNScoot loaded, why am I not looting?",
+		Answer = "Ensure you have enabled Loot Corpses, and note that Combat Looting is the setting that controls looting while in combat.",
 	},
 	['CombatLooting']                          = {
-		DisplayName = "CombatLooting",
+		DisplayName = "Combat Looting",
 		Category = "Loot N Scoot",
-		Tooltip = "Enables Looting during combat",
+		Index = 3,
+		Tooltip = "Enables looting during combat.",
 		Default = false,
 		FAQ = "How do i make sure my guys are looting during combat?, incase I die or something.",
 		Answer = "You can enable [CombatLooting] to loot during combat, I recommend only having one or 2 characters do this and NOT THE MA!!.",
@@ -45,6 +56,7 @@ Module.DefaultConfig     = {
 	['LootRespectMedState']                    = {
 		DisplayName = "Respect Med State",
 		Category = "Loot N Scoot",
+		Index = 4,
 		Tooltip = "Hold looting if you are currently meditating.",
 		Default = false,
 		FAQ = "Why is the PC sitting there and not medding?",
@@ -53,7 +65,7 @@ Module.DefaultConfig     = {
 	},
 	[string.format("%s_Popped", Module._name)] = {
 		DisplayName = Module._name .. " Popped",
-		Category = "Loot N Scoot",
+		Category = "Custom",
 		Tooltip = Module._name .. " Pop Out Into Window",
 		Default = false,
 		FAQ = "Can I pop out the " .. Module._name .. " module into its own window?",
@@ -268,7 +280,7 @@ function Module:LootMessageHandler()
 end
 
 function Module:GiveTime(combat_state)
-	if not Config:GetSetting('DoLoot') then return end
+	if not Config:GetSetting('DoLoot') or not Config:GetSetting('LootCorpses') then return end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 

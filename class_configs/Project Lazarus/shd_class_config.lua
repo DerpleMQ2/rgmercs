@@ -438,7 +438,7 @@ local _ClassConfig = {
             "Touch of the Devourer",
             "Touch of Inruku",
             "Touch of Innoruuk",
-            "Touch of Volatis",
+            --"Touch of Volatis", -- Drain Soul buffed on Lazarus and is superior to this.
             "Drain Soul",
             "Drain Spirit",
             "Spirit Tap",
@@ -1535,7 +1535,7 @@ local _ClassConfig = {
                 -- tooltip = Tooltips.Bash,
                 cond = function(self, abilityName, target)
                     return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target) and
-                        (Core.ShieldEquipped() or Casting.CanUseAA("Improved Bash"))
+                        (Core.ShieldEquipped() or Casting.CanUseAA("2 Hand Bash"))
                 end,
             },
             {
