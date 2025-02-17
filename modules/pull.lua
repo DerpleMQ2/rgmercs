@@ -87,7 +87,7 @@ Module.Constants.PullAbilities         = {
         DisplayName = "Pet Pull",
         LOS = false,
         cond = function(self)
-            return Config.Constants.RGPetClass:contains(Config.Globals.CurLoadedClass)
+            return Config.Constants.RGPetClass:contains(Config.Globals.CurLoadedClass) and Config:GetSetting('DoPetCommands')
         end,
     },
     {
@@ -2018,7 +2018,7 @@ function Module:GiveTime(combat_state)
                     mq.delay(10)
                 end
 
-                if Casting.CanUseAA("Companion's Discipline") then
+                if Casting.CanUseAA("Companion's Discipline") or (Core.OnLaz() and Casting.CanUseAA("Pet Discipline")) then
                     Core.DoCmd("/squelch /pet ghold on")
                 end
                 Core.DoCmd("/squelch /pet back off")

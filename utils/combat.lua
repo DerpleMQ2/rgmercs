@@ -163,7 +163,7 @@ function Combat.KillPCPet()
     local problemPetOwner = mq.TLO.Spawn(string.format("id %d", mq.TLO.Me.XTarget(1).ID())).Master.CleanName()
 
     if problemPetOwner == mq.TLO.Me.DisplayName() then
-        Core.DoCmd("/pet leave", problemPetOwner)
+        Core.DoCmd("/pet leave")
     else
         Core.DoCmd("/dex %s /pet leave", problemPetOwner)
     end
@@ -611,7 +611,7 @@ function Combat.PetAttack(targetId, sendSwarm)
     if not target() then return end
     if pet.ID() == 0 then return end
 
-    if (not pet.Combat() or pet.Target.ID() ~= target.ID()) and Targeting.TargetIsType("NPC", target) then
+    if Config:GetSetting('DoPetCommands') and (not pet.Combat() or pet.Target.ID() ~= target.ID()) and Targeting.TargetIsType("NPC", target) then
         Core.DoCmd("/squelch /pet attack %d", targetId)
         if sendSwarm then
             Core.DoCmd("/squelch /pet swarm")

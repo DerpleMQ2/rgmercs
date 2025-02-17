@@ -618,7 +618,7 @@ return {
             return true
         end,
         RainCheck = function(target) -- I made a funny
-            if not Config:GetSetting('DoRain') then return false end
+            if not Config:GetSetting('DoRain') or not Config:GetSetting('DoAEDamage') then return false end
             return Targeting.GetTargetDistance() >= Config:GetSetting('RainDistance') and
                 (Targeting.GetTargetPctHPs(target) >= Config:GetSetting('HPStopBigNuke') or Targeting.IsNamed(target))
         end,
@@ -1454,7 +1454,8 @@ return {
             DisplayName = "Do AE Damage",
             Category = "AE Damage",
             Index = 1,
-            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**",
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
+                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
