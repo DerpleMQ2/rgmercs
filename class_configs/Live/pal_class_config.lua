@@ -1056,7 +1056,8 @@ return {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
+                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target) and
+                        (Core.ShieldEquipped() or Casting.CanUseAA("Improved Bash"))
                 end,
             },
             {
