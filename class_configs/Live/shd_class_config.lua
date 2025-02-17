@@ -38,13 +38,14 @@ local Tooltips     = {
     BondTap             = "Spell Line: LifeTap DOT",
     DireTap             = "Spell Line: LifeTap",
     LifeTap             = "Spell Line: LifeTap",
-    BuffTap             = "Spell Line: Dmg + Max HP Buff + Hate Increase",
+    MaxHPTap            = "Spell Line: Dmg + Max HP Buff + Hate Increase",
     BiteTap             = "Spell Line: LifeTap + ManaTap",
     ForPower            = "Spell Line: Hate Increase + Hate Increase DOT + AC Buff 'BY THE POWER OF GRAYSKULL, I HAVE THE POWER -- HE-MAN'",
     Terror              = "Spell Line: Hate Increase + Taunt",
     TempHP              = "Spell Line: Temporary Hitpoints (Decrease per Tick)",
     Dicho               = "Spell Line: Hate Increase + LifeTap",
-    Torrent             = "Spell Line: Attack Tap",
+    PowerTapAC          = "Spell Line: AC Tap",
+    PowerTapAtk         = "Spell Line: Attack Tap",
     SnareDot            = "Spell Line: Snare + HP DOT",
     Acrimony            = "Spell Increase: Aggrolock + LifeTap DOT + Hate Generation",
     SpiteStrike         = "Spell Line: LifeTap + Caster 1H Blunt Increase + Target Armor Decrease",
@@ -69,10 +70,11 @@ local Tooltips     = {
     ViciousBiteOfChaos  = "Spell: Duration LifeTap + Mana Return",
     Bash                = "Use Bash Ability",
     Slam                = "Use Slam Ability",
+    HateBuff            = "Spell/AA: Increase Hate Generation",
 }
 
 local _ClassConfig = {
-    _version            = "1.5 - Live",
+    _version            = "1.6 - Live",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -485,9 +487,9 @@ local _ClassConfig = {
             "Life Leech",
             "Lifedraw",
             "Lifespike",
-            "Lifetap", -- Level 8
+            "Lifetap",    -- Level 8
         },
-        ['AETap'] = {  --Lifetap/Hate up to 30 targets, level 98+
+        ['AELifeTap'] = { --Lifetap/Hate up to 30 targets, level 98+
             "Insidious Repudiation",
             "Insidious Renunciation",
             "Insidious Rejection",
@@ -495,7 +497,7 @@ local _ClassConfig = {
             "Deceitful Deflection",
             "Insidious Deflection",
         },
-        ['BuffTap'] = {
+        ['MaxHPTap'] = {
             "Touch of Mortimus",
             "Touch of Namdrows",
             "Touch of Zlandicar",
@@ -594,15 +596,26 @@ local _ClassConfig = {
             "Ecliptic Fang",
             "Reciprocal Fang",
         },
-        ['Torrent'] = {
-            "Torrent of Hate",  -- Level 54
-            "Torrent of Pain",  -- Level 56
-            "Torrent of Agony", -- Level 100
-            "Torrent of Misery",
-            "Torrent of Suffering",
-            "Torrent of Anguish",
-            "Torrent of Melancholy",
+        ['PowerTapAC'] = {
             "Torrent of Desolation",
+            "Torrent of Melancholy",
+            "Torrent of Anguish",
+            "Torrent of Suffering",
+            "Torrent of Misery",
+            "Torrent of Agony", -- Level 100
+            "Theft of Agony",
+            "Theft of Pain",
+            "Aura of Pain",
+            "Torrent of Pain",
+            "Shroud of Pain",
+            "Scream of Pain",
+        },
+        ['PowerTapAtk'] = {
+            "Theft of Hate",
+            "Aura of Hate",
+            "Torrent of Hate",
+            "Shroud of Hate",
+            "Scream of Hate",
         },
         ['SnareDot'] = {
             "Clinging Darkness", -- Level 11
@@ -665,7 +678,7 @@ local _ClassConfig = {
             "Ignominious Influence",
             "Incensive Influence",
         },
-        ['VisageBuff'] = {       --9 minute reuse makes these somewhat ridiculous to gem on the fly.
+        ['HateBuff'] = {         --9 minute reuse makes these somewhat ridiculous to gem on the fly.
             "Voice of Thule",    -- level 60, 12% hate
             "Voice of Terris",   -- level 55, 10% hate
             "Voice of Death",    -- level 50, 6% hate
@@ -1006,11 +1019,21 @@ local _ClassConfig = {
             {
                 name = "Voice of Thule",
                 type = "AA",
-                tooltip = Tooltips.VOT,
+                tooltip = Tooltips.HateBuff,
                 active_cond = function(self, aaName) return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID()) end,
                 cond = function(self, aaName)
-                    if not Config:GetSetting('UseVoT') then return false end
+                    if not Config:GetSetting('DoHateBuff') then return false end
                     return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "HateBuff",
+                type = "Spell",
+                tooltip = Tooltips.HateBuff,
+                active_cond = function(self, spell) return Casting.BuffActiveByID(spell) end,
+                cond = function(self, spell)
+                    if not Config:GetSetting('DoHateBuff') or Casting.CanUseAA('Voice of Thule') or not Casting.CastReady(spell.RankName) then return false end
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1218,10 +1241,10 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "AETap",
+                name = "AELifeTap",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not (Config:GetSetting('DoAETap') and Config:GetSetting('DoAEDamage')) then return false end
+                    if not (Config:GetSetting('DoAELifeTap') and Config:GetSetting('DoAEDamage')) then return false end
                     return Casting.SpellReady(spell) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
@@ -1517,10 +1540,10 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "AETap",
+                name = "AELifeTap",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not (Config:GetSetting('DoAETap') and Config:GetSetting('DoAEDamage')) then return false end
+                    if not (Config:GetSetting('DoAELifeTap') and Config:GetSetting('DoAEDamage')) then return false end
                     local myHP = mq.TLO.Me.PctHPs()
                     return Casting.TargetedSpellReady(spell, target.ID()) and
                         (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap'))) and
@@ -1667,20 +1690,29 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Torrent",
+                name = "PowerTapAC",
                 type = "Spell",
-                tooltip = Tooltips.Torrent,
+                tooltip = Tooltips.PowerTapAC,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoTorrent') or not spell or not spell() then return false end
-                    return not mq.TLO.Me.Buff(spell.Name() .. " Recourse")() and Casting.TargetedSpellReady(spell, target.ID())
+                    if not Config:GetSetting('DoACTap') or not spell or not spell() then return false end
+                    return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
-                name = "BuffTap",
+                name = "PowerTapAtk",
                 type = "Spell",
-                tooltip = Tooltips.BuffTap,
+                tooltip = Tooltips.PowerTapAtk,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoBuffTap') then return false end
+                    if not Config:GetSetting('DoAtkTap') or not spell or not spell() then return false end
+                    return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.TargetedSpellReady(spell, target.ID())
+                end,
+            },
+            {
+                name = "MaxHPTap",
+                type = "Spell",
+                tooltip = Tooltips.MaxHPTap,
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoMaxHPTap') or not spell or not spell() then return false end
                     return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.SpellStacksOnMe(spell.Trigger) and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1776,15 +1808,16 @@ local _ClassConfig = {
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
+                { name = "MaxHPTap",    cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "LifeTap2", },
             },
         },
@@ -1813,15 +1846,16 @@ local _ClassConfig = {
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
+                { name = "MaxHPTap",    cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1854,17 +1888,19 @@ local _ClassConfig = {
                 { name = "BondTap",       cond = function(self) return Config:GetSetting('DoBondTap') end, },
                 { name = "PoisonDot",     cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
+                { name = "MaxHPTap",    cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
+                { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1896,17 +1932,18 @@ local _ClassConfig = {
                 { name = "BondTap",       cond = function(self) return Config:GetSetting('DoBondTap') end, },
                 { name = "PoisonDot",     cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
+                { name = "MaxHPTap",    cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1932,17 +1969,18 @@ local _ClassConfig = {
                 { name = "BondTap",       cond = function(self) return Config:GetSetting('DoBondTap') end, },
                 { name = "PoisonDot",     cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
+                { name = "MaxHPTap",    cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1962,17 +2000,18 @@ local _ClassConfig = {
                 { name = "BondTap",       cond = function(self) return Config:GetSetting('DoBondTap') end, },
                 { name = "PoisonDot",     cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
+                { name = "MaxHPTap",    cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -1987,20 +2026,22 @@ local _ClassConfig = {
             gem = 10,
             cond = function(self) return mq.TLO.Me.NumGems() >= 11 end,
             spells = {
+                { name = "TempHP",        cond = function(self) return Config:GetSetting('DoTempHP') and mq.TLO.Me.NumGems() < 13 end, }, --level 84, this spell starts in a long recast so I prefer to keep it on the bar.
                 { name = "BondTap",       cond = function(self) return Config:GetSetting('DoBondTap') end, },
                 { name = "PoisonDot",     cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
+                { name = "MaxHPTap",    cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -2015,20 +2056,20 @@ local _ClassConfig = {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "TempHP",        cond = function(self) return Config:GetSetting('DoTempHP') end, }, --level 84, this spell starts in a long recast so I prefer to keep it on the bar.
+                { name = "TempHP",        cond = function(self) return Config:GetSetting('DoTempHP') and mq.TLO.Me.NumGems() < 14 end, }, --level 84, this spell starts in a long recast so I prefer to keep it on the bar.
+                { name = "Skin",          cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },              -- level 70, while not as bad as the TempHP line, also starts in a recast. Placed higher before level 106.
                 { name = "PoisonDot",     cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
-                { name = "Skin",     cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
+                { name = "MaxHPTap", cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -2043,19 +2084,20 @@ local _ClassConfig = {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Skin",          cond = function(self) return Core.IsTanking() end, }, -- level 70, while not as bad as the TempHP line, also starts in a recast. Placed higher before level 106.
+                { name = "TempHP",        cond = function(self) return Config:GetSetting('DoTempHP') and mq.TLO.Me.NumGems() == 14 end, }, --level 84, this spell starts in a long recast so I prefer to keep it on the bar.
+                { name = "Skin",          cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 14 end, },               -- level 70, while not as bad as the TempHP line, also starts in a recast. Placed higher before level 106.
                 { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
                 {
-                    name = "Torrent",
+                    name = "PowerTapAC",
                     cond = function(self)
                         local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoTorrent') and (level <= 65 or level >= 100)
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
                     end,
                 },
-                { name = "BuffTap",  cond = function(self) return Config:GetSetting('DoBuffTap') end, },
+                { name = "MaxHPTap", cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
                 { name = "HealBurn", cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
                 { name = "LifeTap2", },
                 {
                     name = "Terror2",
@@ -2070,17 +2112,53 @@ local _ClassConfig = {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
-                { name = "HealBurn", cond = function(self) return Core.IsTanking() end, }, --level 103, this may be overwritten by pauses but it is fine, it has a low refresh time. At least it will be there on start.
+                { name = "Skin",          cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() == 14 end, }, -- level 70, while not as bad as the TempHP line, also starts in a recast. Placed higher before level 106.
+                { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
+                { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                {
+                    name = "PowerTapAC",
+                    cond = function(self)
+                        local level = mq.TLO.Me.Level()
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
+                    end,
+                },
+                { name = "MaxHPTap", cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "HealBurn", cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 14 end, },
+                { name = "LifeTap2", },
+                {
+                    name = "Terror2",
+                    cond = function(self)
+                        local setting = Config:GetSetting('DoTerror')
+                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
+                    end,
+                },
             },
         },
         { -- Level 125
             gem = 14,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "AETap",    cond = function(self) return Config:GetSetting('DoAETap') end, },
-                { name = "HealBurn", cond = function(self) return Core.IsTanking() end, }, --level 103, this may be overwritten by pauses but it is fine, it has a low refresh time. At least it will be there on start.
+                { name = "CorruptionDot", cond = function(self) return Config:GetSetting('DoCorruptionDot') end, },
+                { name = "AELifeTap",     cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
+                { name = "DireDot",       cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                {
+                    name = "PowerTapAC",
+                    cond = function(self)
+                        local level = mq.TLO.Me.Level()
+                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
+                    end,
+                },
+                { name = "MaxHPTap", cond = function(self) return Config:GetSetting('DoMaxHPTap') end, },
+                { name = "HealBurn", cond = function(self) return Core.IsTanking() end, },
                 { name = "LifeTap2", },
+                {
+                    name = "Terror2",
+                    cond = function(self)
+                        local setting = Config:GetSetting('DoTerror')
+                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
+                    end,
+                },
             },
         },
     },
@@ -2217,28 +2295,6 @@ local _ClassConfig = {
             FAQ = "I have new buffs but I am still using DLU, why?",
             Answer = "Toggle to Overwrite DLU with single buffs when appropriate from the Buffs/Debuffs tab. This is disabled by default to speed up buffing.",
         },
-        ['DoTorrent']         = {
-            DisplayName = "Use Torrents",
-            Category = "Buffs/Debuffs",
-            Index = 6,
-            Tooltip = function() return Ui.GetDynamicTooltipForSpell("Torrent") end,
-            RequiresLoadoutChange = true,
-            Default = true,
-            ConfigType = "Advanced",
-            FAQ = "When should I be using Torrents?",
-            Answer = "Generally, this is only advised at 100+ when you can benefit from the increased AC. Some early level ranges may find their use appropriate.",
-        },
-        ['DoBuffTap']         = {
-            DisplayName = "Use Buff Tap",
-            Category = "Buffs/Debuffs",
-            Index = 7,
-            Tooltip = function() return Ui.GetDynamicTooltipForSpell("BuffTap") end,
-            Default = false,
-            RequiresLoadoutChange = true,
-            ConfigType = "Advanced",
-            FAQ = "Why is my Shadow Knight Not using Buff Tap?",
-            Answer = "The term is a misnomer; contrary to common belief, these spells are not Life Taps. The HP buff is negligible in most situations.",
-        },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
             Category = "Buffs/Debuffs",
@@ -2308,10 +2364,44 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not using Dicho on cooldown for more DPS?",
             Answer = "The default HP% to begin using Dicho is set to only use them if the SHD could benefit from the healing and can be adjusted.",
         },
+        ['DoACTap']           = {
+            DisplayName = "Use AC Tap",
+            Category = "Taps",
+            Index = 6,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("PowerTapAC") end,
+            RequiresLoadoutChange = true,
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I not using my AC Tap?",
+            Answer = "AC Taps have a large period of receiving no updates (between 71 and 99). We will avoid using them after Level 75 until they are updated again.",
+        },
+        ['DoAtkTap']          = {
+            DisplayName = "Use Attack Tap",
+            Category = "Taps",
+            Index = 7,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("PowerTapAtk") end,
+            RequiresLoadoutChange = true,
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I not using my Attack Tap?",
+            Answer = "Attack Taps don't receive an update after level 70; by default we will not use them after level 75.",
+        },
+        ['DoMaxHPTap']        = {
+            DisplayName = "Use Max HP Tap",
+            Category = "Taps",
+            Index = 8,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("MaxHPTap") end,
+            Default = false,
+            RequiresLoadoutChange = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I not using the Max HP Buff Tap?",
+            Answer = "The description can be misleading, these spells are not Life Taps. At some level ranges, the HP Buff is negligible.\n" ..
+                "You can enable the Max HP tap buff on the Taps tab.",
+        },
         ['DoLeechTouch']      = {
             DisplayName = "Leech Touch Use:",
             Category = "Taps",
-            Index = 6,
+            Index = 9,
             Tooltip = "When to use Leech Touch",
             Type = "Combo",
             ComboOptions = { 'On critically low HP', 'As DD during burns', 'For HP or DD', },
@@ -2325,7 +2415,7 @@ local _ClassConfig = {
         ['DoThoughtLeech']    = {
             DisplayName = "Thought Leech Use:",
             Category = "Taps",
-            Index = 7,
+            Index = 10,
             Tooltip = "When to use Thought Leech",
             Type = "Combo",
             ComboOptions = { 'On critically low mana', 'As DD during burns', 'For Mana or DD', },
@@ -2337,10 +2427,10 @@ local _ClassConfig = {
             Answer = "You can choose the conditions under which you will use Thought Leech on the Taps tab.",
         },
 
-        --Damage Spells
+        --DoT Spells
         ['DoBondTap']         = {
             DisplayName = "Use Bond Dot",
-            Category = "Damage Spells",
+            Category = "DoT Spells",
             Index = 1,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("BondTap") end,
             RequiresLoadoutChange = true,
@@ -2350,7 +2440,7 @@ local _ClassConfig = {
         },
         ['DoPoisonDot']       = {
             DisplayName = "Use Poison Dot",
-            Category = "Damage Spells",
+            Category = "DoT Spells",
             Index = 2,
             ToolTip = function() return Ui.GetDynamicTooltipForSpell("PoisonDot") end,
             RequiresLoadoutChange = true,
@@ -2360,7 +2450,7 @@ local _ClassConfig = {
         },
         ['DoCorruptionDot']   = {
             DisplayName = "Use Corrupt Dot",
-            Category = "Damage Spells",
+            Category = "DoT Spells",
             Index = 3,
             Tooltip = function() return Ui.GetDynamicTooltipForSpell("CorruptDot") end,
             RequiresLoadoutChange = true,
@@ -2370,29 +2460,31 @@ local _ClassConfig = {
         },
         ['DoDireDot']         = {
             DisplayName = "Use Dire Dot",
-            Category = "Damage Spells",
+            Category = "DoT Spells",
             Index = 4,
-            Tooltip = function() return Ui.GetDynamicTooltipForSpell("Dicho") end,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("DireDot") end,
             RequiresLoadoutChange = true,
             Default = false,
             FAQ = "Why is my Shadow Knight not using Dire Dot?",
             Answer = "Dire Dot is not enabled by default, you may need to select it.",
         },
+
+        -- AE Damage
         ['DoAEDamage']        = {
             DisplayName = "Do AE Damage",
-            Category = "Damage Spells",
-            Index = 5,
+            Category = "AE Damage",
+            Index = 1,
             Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
                 "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['DoAETap']           = {
+        ['DoAELifeTap']       = {
             DisplayName = "Use AE Hate/LifeTap",
-            Category = "Damage Spells",
-            Index = 6,
-            Tooltip = function() return Ui.GetDynamicTooltipForSpell("AETap") end,
+            Category = "AE Damage",
+            Index = 2,
+            Tooltip = function() return Ui.GetDynamicTooltipForSpell("AELifeTap") end,
             RequiresLoadoutChange = true,
             Default = false,
             FAQ = "Why is my Shadow Knight not using the AE Tap (Insidious) Line?",
@@ -2400,8 +2492,8 @@ local _ClassConfig = {
         },
         ['AETargetCnt']       = {
             DisplayName = "AE Target Count",
-            Category = "Damage Spells",
-            Index = 7,
+            Category = "AE Damage",
+            Index = 3,
             Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
             Default = 2,
             Min = 1,
@@ -2412,8 +2504,8 @@ local _ClassConfig = {
         },
         ['MaxAETargetCnt']    = {
             DisplayName = "Max AE Targets",
-            Category = "Damage Spells",
-            Index = 8,
+            Category = "AE Damage",
+            Index = 4,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
             Default = 5,
@@ -2425,8 +2517,8 @@ local _ClassConfig = {
         },
         ['SafeAEDamage']      = {
             DisplayName = "AE Proximity Check",
-            Category = "Damage Spells",
-            Index = 9,
+            Category = "AE Damage",
+            Index = 5,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Proximity Check?",
@@ -2436,15 +2528,17 @@ local _ClassConfig = {
         },
 
         --Hate Tools
-        ['UseVoT']            = {
-            DisplayName = "Use VoT AA",
+        ['DoHateBuff']        = {
+            DisplayName = "Use Hate Buff",
             Category = "Hate Tools",
             Index = 1,
-            Tooltip = "Use Hate Buff AA. Spells currently not used because of low values and long refresh times.",
-            Default = true,
+            Tooltip = "Use your Visage buff (Voice of ... line). If the AA is not available, we will use/memorize the spell if we have enough open slots.",
+            Default = Casting.CanUseAA("Voice of Thule"),
             ConfigType = "Advanced",
-            FAQ = "Why do we only use Voice of Thule, and not the aggro spells?",
-            Answer = "Very high refresh times paired with low gem slots and low aggro increase %'s are why we wait for the AA. They can be manually cast, if desired.",
+            RequiresLoadoutChange = true,
+            FAQ = "Why am I not using my Visage Buff, Voice of ...?",
+            Answer = "If you have the option selected in Buffs/Debuffs, you may not have enough spell gems to keep the spell on your bar with other options.\n" ..
+                "Do to the incredibly long recast time (around 9 minutes), we will not memorize these to use them on the fly.",
         },
         ['DoTerror']          = {
             DisplayName = "Terror Taunts:",
