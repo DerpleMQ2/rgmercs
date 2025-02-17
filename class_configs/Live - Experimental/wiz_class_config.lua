@@ -866,6 +866,13 @@ return {
         },
         ['Snare'] = {
             {
+                name = "Atol's Shackles",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Targeting.GetTargetPctHPs(target) < 50
+                end,
+            },
+            {
                 name = "SnareSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1303,7 +1310,7 @@ return {
             spells = {
                 { name = "CloudburstNuke", },
                 { name = "MagicJyll",      cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
-                { name = "SnareSpell",     cond = function() return Config:GetSetting('DoSnare') end, },
+                { name = "SnareSpell",     cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
             },
         },
         {
@@ -1329,6 +1336,7 @@ return {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "TwincastSpell", },
+                { name = "SnareSpell",    cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
             },
         },
         {
@@ -1379,32 +1387,7 @@ return {
             FAQ = "What do the different Modes Do?",
             Answer = "Wizard only has a single mode, but the spells used will adjust based on your level range.",
         },
-        ['DoChestClick']         = {
-            DisplayName = "Do Chest Click",
-            Category = "Utilities",
-            Tooltip = "Click your chest item",
-            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "How do I use my chest item Clicky?",
-            Answer = "Enable [DoChestClick] to use your chest item clicky.",
-        },
-        ['JoltAggro']            = {
-            DisplayName = "Jolt Aggro %",
-            Category = "Combat",
-            Tooltip = "Aggro at which to use Jolt",
-            Default = 90,
-            Min = 1,
-            Max = 100,
-            FAQ = "Can I customize when to use Jolt?",
-            Answer = "Yes, you can set the aggro % at which to use Jolt with the [JoltAggro] setting.",
-        },
-        ['DoManaBurn']           = {
-            DisplayName = "Use Mana Burn AA",
-            Category = "Combat",
-            Tooltip = "Enable usage of Mana Burn",
-            Default = true,
-            FAQ = "Can I use Mana Burn?",
-            Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
-        },
+
         -- Low Level
         ['ElementChoice']        = {
             DisplayName = "Element Choice:",
@@ -1435,6 +1418,7 @@ return {
             DisplayName = "Do Rain",
             Category = "DPS Low Level",
             Index = 3,
+            RequiresLoadoutChange = true,
             ConfigType = "Advanced",
             Tooltip = "**WILL BREAK MEZ** Use your selected element's Rain Spell as a single-target nuke. **WILL BREAK MEZ***",
             Default = false,
@@ -1479,6 +1463,7 @@ return {
             DisplayName = "Use Beam Spells",
             Category = "AE Damage",
             Index = 2,
+            RequiresLoadoutChange = true,
             Tooltip = "**WILL BREAK MEZ** Use your Frontal AE Spells (Beam Line). **WILL BREAK MEZ**",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
@@ -1500,6 +1485,7 @@ return {
             DisplayName = "Use PBAE Spells",
             Category = "AE Damage",
             Index = 4,
+            RequiresLoadoutChange = true,
             Tooltip = "**WILL BREAK MEZ** Use your PB AE Spells (of Flame Line). **WILL BREAK MEZ**",
             Default = false,
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
@@ -1542,11 +1528,31 @@ return {
                 "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
 
-        -- Buffs/Debuffs
+        -- Spells and Abilities
+        ['JoltAggro']            = {
+            DisplayName = "Jolt Aggro %",
+            Category = "Spells and Abilities",
+            Index = 1,
+            Tooltip = "Aggro at which to use Jolt",
+            Default = 90,
+            Min = 1,
+            Max = 100,
+            FAQ = "Can I customize when to use Jolt?",
+            Answer = "Yes, you can set the aggro % at which to use Jolt with the [JoltAggro] setting.",
+        },
+        ['DoManaBurn']           = {
+            DisplayName = "Use Mana Burn AA",
+            Category = "Spells and Abilities",
+            Index = 2,
+            Tooltip = "Enable usage of Mana Burn",
+            Default = true,
+            FAQ = "Can I use Mana Burn?",
+            Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
+        },
         ['DoSnare']              = {
             DisplayName = "Use Snares",
-            Category = "Buffs/Debuffs",
-            Index = 1,
+            Category = "Spells and Abilities",
+            Index = 3,
             Tooltip = "Use Snare Spells.",
             Default = false,
             RequiresLoadoutChange = true,
@@ -1555,8 +1561,8 @@ return {
         },
         ['SnareCount']           = {
             DisplayName = "Snare Max Mob Count",
-            Category = "Buffs/Debuffs",
-            Index = 2,
+            Category = "Spells and Abilities",
+            Index = 4,
             Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
             Default = 3,
             Min = 1,
@@ -1565,11 +1571,20 @@ return {
             Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
                 "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
-
-        -- Utilities
+        ['DoChestClick']         = {
+            DisplayName = "Do Chest Click",
+            Category = "Spells and Abilities",
+            Index = 5,
+            Tooltip = "Click your chest item",
+            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
+            FAQ = "How do I use my chest item Clicky?",
+            Answer = "Enable [DoChestClick] to use your chest item clicky.",
+        },
         ['GambitManaPct']        = {
             DisplayName = "Gambit Mana %",
-            Category = "Utilities",
+            Category = "Spells and Abilities",
+            Index = 6,
+            ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using your Gambit line.",
             Default = 80,
             Min = 1,
@@ -1579,7 +1594,9 @@ return {
         },
         ['HarvestManaPct']       = {
             DisplayName = "Harvest Mana %",
-            Category = "Utilities",
+            Category = "Spells and Abilities",
+            Index = 7,
+            ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using a harvest spell or aa.",
             Default = 85,
             Min = 1,
@@ -1589,7 +1606,9 @@ return {
         },
         ['CombatHarvestManaPct'] = {
             DisplayName = "Combat Harvest %",
-            Category = "Utilities",
+            Category = "Spells and Abilities",
+            Index = 8,
+            ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using a harvest spell or aa in Combat.",
             Default = 60,
             Min = 1,
@@ -1597,7 +1616,6 @@ return {
             FAQ = "How do I use Harvest Spells?",
             Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
         },
-
         --Orphaned
         ['WeaveAANukes']         = {
             DisplayName = "Orphaned",
