@@ -7,7 +7,7 @@ local ItemManager  = require("utils.item_manager")
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
-    _version            = "1.3 - Project Lazarus",
+    _version            = "2.2 - Project Lazarus",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,

@@ -7,7 +7,7 @@ local Comms        = require("utils.comms")
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
-    _version              = "1.2 - Live",
+    _version              = "2.1 - Live",
     _author               = "Algar, Derple",
     ['ModeChecks']        = {
         IsHealing = function() return true end,

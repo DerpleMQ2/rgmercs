@@ -704,7 +704,7 @@ local _ClassConfig = {
         },
         ['ManaBear'] = {
             --Druid Mana Bear Growth Line
-            -- [] = "Nature Walker's Behest",
+            "Nature Walker's Behest",
             "Nurturing Growth",
             "Nourishing Growth",
             "Sustaining Growth",

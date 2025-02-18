@@ -74,7 +74,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version            = "1.6 - Live",
+    _version            = "2.2 - Live",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
