@@ -704,11 +704,13 @@ local _ClassConfig = {
         },
         ['ManaBear'] = {
             --Druid Mana Bear Growth Line
-            "Nature Walker's Behest",
             "Nurturing Growth",
             "Nourishing Growth",
             "Sustaining Growth",
             "Bolstered Growth",
+        },
+        ['PetSpell'] = {
+            "Nature Walker's Behest",
         },
     },
     ['HealRotationOrder'] = {
@@ -844,6 +846,15 @@ local _ClassConfig = {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and Core.OkayToNotHeal() and Casting.DoBuffCheck() and Casting.AmIBuffable()
+            end,
+        },
+        { --Summon pet even when buffs are off on emu
+            name = 'PetSummon',
+            targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            load_cond = function(self) return Core.OnEMU() end,
+            cond = function(self, combat_state)
+                if not Config:GetSetting('DoPet') or mq.TLO.Me.Pet.ID() ~= 0 then return false end
+                return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.DoPetCheck() and Casting.AmIBuffable()
             end,
         },
         {
@@ -1154,7 +1165,7 @@ local _ClassConfig = {
                 name = "Swarm of Fireflies",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return target.ID() == (mq.TLO.Group.MainTank.ID() or 0) and Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.AltAbility(aaName).Spell, target)
+                    return target.ID() == (mq.TLO.Group.MainTank.ID() or 0) and Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
             {
@@ -1173,7 +1184,7 @@ local _ClassConfig = {
                 end,
                 cond = function(self, aaName, target)
                     local bookSpell = self:GetResolvedActionMapItem('MoveSpells')
-                    local aaSpell = mq.TLO.AltAbility(aaName).Spell
+                    local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
                     if not Config:GetSetting('DoMoveBuffs') or (bookSpell and bookSpell.Level() or 999) > (aaSpell.Level() or 0) then return false end
 
                     return Casting.GroupBuffCheck(aaSpell, target)
@@ -1306,6 +1317,14 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName)
                 end,
+            },
+        },
+        ['PetSummon'] = {
+            {
+                name = "PetSpell",
+                type = "Spell",
+                active_cond = function() return mq.TLO.Me.Pet.ID() ~= 0 end,
+                cond = function() return true end,
             },
         },
     },
