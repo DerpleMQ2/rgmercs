@@ -676,6 +676,9 @@ local _ClassConfig = {
             "Chloroplast",
             "Regeneration", -- Level 22
         },
+        ["ShrinkSpell"] = {
+            "Shrink",
+        },
     },
     ['HelperFunctions']   = {
         DoRez = function(self, corpseId)
@@ -1447,12 +1450,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Group Shrink",
-                type = "AA",
-                active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
-                cond = function(self) return Config:GetSetting('DoGroupShrink') and mq.TLO.Me.Height() > 2.2 end,
-            },
-            {
                 name = "SlowProcBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1538,6 +1535,33 @@ local _ClassConfig = {
                 cond = function(self, spell, target) --We get Tala'tak at 74, but don't get the AA version until 90
                     if not Config:GetSetting('DoRunSpeed') or (mq.TLO.Me.AltAbility("Lupine Spirit").Rank() or -1) > 3 then return false end
                     return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "Group Shrink",
+                type = "AA",
+                active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoGroupShrink') then return false end
+                    return target.Height() > 2.2 and Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "Shrink",
+                type = "AA",
+                active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoGroupShrink') or Casting.CanUseAA("Group Shrink") then return false end
+                    return target.Height() > 2.2 and Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
+                name = "ShrinkSpell",
+                type = "Spell",
+                active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoGroupShrink') or Casting.CanUseAA("Group Shrink") or Casting.CanUseAA("Shrink") then return false end
+                    return target.Height() > 2.2 and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
