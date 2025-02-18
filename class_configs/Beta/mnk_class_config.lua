@@ -156,10 +156,10 @@ local _ClassConfig = {
             --- Fists of Wu - Double Attack
             "Fists Of Wu",
         },
-        ['EarthForce'] = {
-            -- EarthForce - Melee Mitigation
+        ['EarthDisc'] = {
+            -- EarthDisc - Melee Mitigation
             "Earthwalk Discipline",
-            "EarthForce Discipline",
+            "Earthforce Discipline",
         },
         ['ShadedStep'] = {
             -- ShadedStep - Dodge Bonus 18 Seconds
@@ -187,7 +187,7 @@ local _ClassConfig = {
             "Echo of Flinching",
             "Echo of Diversion",
         },
-        ['Iron'] = {
+        ['FistDisc'] = {
             "Ashenhand Discipline",
             "Scaledfist Discipline",
             "Ironfist Discipline",
@@ -219,7 +219,7 @@ local _ClassConfig = {
     ['HelperFunctions'] = {
         BurnDiscCheck = function(self)
             if mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') then return false end
-            local burnDisc = { "Heel", "Speed", "Ironfist", "Palm", }
+            local burnDisc = { "Heel", "Speed", "FistDisc", "Palm", }
             for _, buffName in ipairs(burnDisc) do
                 local resolvedDisc = self:GetResolvedActionMapItem(buffName)
                 if resolvedDisc and resolvedDisc.RankName() == mq.TLO.Me.ActiveDisc.Name() then return false end
@@ -433,7 +433,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Ironfist",
+                name = "FistDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
@@ -570,7 +570,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "EarthForce",
+                name = "EarthDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
                     return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
