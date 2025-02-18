@@ -1105,7 +1105,7 @@ local _ClassConfig = {
             {
                 name = "Death Bloom",
                 type = "AA",
-                active_cond = function(self, aaName) return Casting.SongActiveByName(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
+                active_cond = function(self, aaName) return Casting.SongActiveByName(mq.TLO.AltAbility(aaName).Spell()) end,
                 cond = function(self, aaName) return Casting.AAReady(aaName) and mq.TLO.Me.PctMana() < Config:GetSetting('DeathBloomPercent') end,
             },
             {

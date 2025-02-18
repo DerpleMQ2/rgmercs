@@ -1437,7 +1437,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if target.ID() ~= Core.GetMainAssistId() then return false end
-                    return Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.AltAbility(aaName).Spell, target)
+                    return Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
             {
@@ -1489,7 +1489,7 @@ local _ClassConfig = {
                 active_cond = function(self, aaName) return mq.TLO.Me.Haste() end,
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoHaste') then return false end
-                    return mq.TLO.Me.Level() < 111 and Casting.GroupBuffCheck(mq.TLO.AltAbility(aaName).Spell, target)
+                    return mq.TLO.Me.Level() < 111 and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
             {

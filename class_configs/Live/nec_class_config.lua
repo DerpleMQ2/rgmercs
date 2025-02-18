@@ -764,6 +764,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'Scent',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoScentDebuff') end,
+            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck()
+            end,
+        },
+        {
             name = 'DPS',
             state = 1,
             steps = 1,
@@ -827,6 +837,22 @@ local _ClassConfig = {
                 end,
             },
         },
+        ['Scent'] = {
+            {
+                name = "Scent of Thule",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
+                end,
+            },
+            {
+                name = "ScentDebuff",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                end,
+            },
+        },
         ['DPS'] = {
             {
                 name = "Wake the Dead",
@@ -840,13 +866,6 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName) and mq.TLO.Me.PctMana() < Config:GetSetting('DeathBloomPercent') and mq.TLO.Me.PctHPs() > 50
-                end,
-            },
-            {
-                name = "Scent of Thule",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and Targeting.GetXTHaterCount() > 1
                 end,
             },
             {
@@ -876,11 +895,6 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     return Config:GetSetting('DoLifeBurn') and Casting.SelfBuffAACheck(aaName) and mq.TLO.Me.PctAggro() <= 25
                 end,
-            },
-            {
-                name = "ScentDebuff",
-                type = "Spell",
-                cond = function(self, spell) return Casting.DetSpellCheck(spell) and Casting.DebuffConCheck() end,
             },
             {
                 name = "ChaoticDebuff",
@@ -1289,7 +1303,7 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "CharmSpell",  cond = function(self) return Config:GetSetting('CharmOn') end, },
-                { name = "ScentDebuff", cond = function(self) return mq.TLO.Me.Level() < 89 end, },
+                { name = "ScentDebuff", cond = function(self) return Config:GetSetting('DoScentDebuff') and not Casting.CanUseAA("Scent of Thule") end, },
                 { name = "Disease3", },
                 { name = "Disease1", },
                 { name = "Disease2", },
@@ -1477,8 +1491,16 @@ local _ClassConfig = {
             FAQ = "I want to stop Liching at a certain Mana %, how do I do that?",
             Answer = "Set the [StopLichMana] setting to the desired % of Mana you want to stop Liching at.",
         },
+        ['DoScentDebuff']     = {
+            DisplayName = "Use Scent Debuff",
+            Category = "Spells and Abilities",
+            Tooltip = "Use your Scent debuff spells or AA.",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = false,
+            FAQ = "Why am I not using a Scent debuff?",
+            Answer = "You can enable Scent use on the Spells and Abilities tab.",
+        },
     },
-
 }
 
 return _ClassConfig

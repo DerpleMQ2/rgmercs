@@ -704,7 +704,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     return Config:GetSetting('DoAlliance') and Casting.CanAlliance() and
-                        not Casting.TargetHasBuff(mq.TLO.AltAbility(aaName).Spell)
+                        not Casting.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
