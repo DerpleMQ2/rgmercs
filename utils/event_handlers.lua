@@ -24,7 +24,7 @@ mq.event("CantSee", "You cannot see your target.", function()
     end
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-        Logger.log_info("\ayWe are in Pull_State PULLING and Cannot see our target!")
+        Logger.log_debug("\ayWe are in Pull_State PULLING and Cannot see our target!")
         Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.5)
         mq.delay("2s", function() return mq.TLO.Navigation.Active() end)
     else
@@ -32,10 +32,10 @@ mq.event("CantSee", "You cannot see your target.", function()
 
         local classConfig = Modules:ExecModule("Class", "GetClassConfig")
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
-            Logger.log_info("\ayWe are in COMBAT and Cannot see our target - using custom combatNav!")
+            Logger.log_debug("\ayWe are in COMBAT and Cannot see our target - using custom combatNav!")
             Core.SafeCallFunc("Ranger Custom Nav", classConfig.HelperFunctions.combatNav, true)
         else
-            Logger.log_info("\ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
+            Logger.log_debug("\ayWe are in COMBAT and Cannot see our target - using generic combatNav!")
             if Config:GetSetting('DoAutoEngage') then
                 if Combat.OkToEngage(target.ID() or 0) then
                     Core.DoCmd("/squelch /face fast")
@@ -124,7 +124,7 @@ local function tooFarHandler()
     local target = mq.TLO.Target
 
     if Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
-        Logger.log_info("\ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
+        Logger.log_debug("\ayWe are in Pull_State PULLING and too far from our target! target(%s) targetDistance(%d)",
             Targeting.GetTargetCleanName(),
             Targeting.GetTargetDistance())
         Core.DoCmd("/nav id %d distance=%d lineofsight=on log=off", target.ID() or 0, (target.Distance3D() or 0) * 0.7)
@@ -136,7 +136,7 @@ local function tooFarHandler()
         if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.combatNav then
             Core.SafeCallFunc("Custom Nav", classConfig.HelperFunctions.combatNav)
         elseif Config:GetSetting('DoMelee') then
-            Logger.log_info("\ayWe are in COMBAT and too far from our target!")
+            Logger.log_debug("\ayWe are in COMBAT and too far from our target!")
             if Config:GetSetting('DoAutoEngage') then
                 if Combat.OkToEngage(target.ID() or 0) then
                     Core.DoCmd("/squelch /face fast")
