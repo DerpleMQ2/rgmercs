@@ -7,7 +7,7 @@ local Casting      = require("utils.casting")
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
-    _version              = "1.2 - Project Lazarus",
+    _version              = "2.1 - Project Lazarus",
     _author               = "Algar, Derple",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
