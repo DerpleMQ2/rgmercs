@@ -214,15 +214,15 @@ local _ClassConfig = {
             "Rune of Rikkukin",
             "Rune of the Scale",
         },
-        ['AggroRune'] = {
-            "Disquieting Rune",
-            "Ghastly Rune",
-            "Horrendous Rune",
-            "Dreadful Rune",
-            "Frightening Rune",
-            "Terrifying Rune",
-            "Horrifying Rune",
-        },
+        -- ['AggroRune'] = {
+        --     "Disquieting Rune",
+        --     "Ghastly Rune",
+        --     "Horrendous Rune",
+        --     "Dreadful Rune",
+        --     "Frightening Rune",
+        --     "Terrifying Rune",
+        --     "Horrifying Rune",
+        -- },
         ['AggroBuff'] = {
             "Horrifying Visage",
             "Haunting Visage",
@@ -259,21 +259,21 @@ local _ClassConfig = {
             "Legion of Alendar",
             "Circle of Alendar",
         },
-        ['SingleDotShield'] = {
-            "Aegis of Xetheg",
-            "Aegis of Cekenar",
-            "Aegis of Milyex",
-            "Aegis of the Indagator",
-            "Aegis of the Keeper",
-        },
-        ['GroupDotShield'] = {
-            "Legion of Dhakka",
-            "Legion of Xetheg",
-            "Legion of Cekenar",
-            "Legion of Milyex",
-            "Legion of the Indagator",
-            "Legion of the Keeper",
-        },
+        -- ['SingleDotShield'] = {
+        --     "Aegis of Xetheg",
+        --     "Aegis of Cekenar",
+        --     "Aegis of Milyex",
+        --     "Aegis of the Indagator",
+        --     "Aegis of the Keeper",
+        -- },
+        -- ['GroupDotShield'] = {
+        --     "Legion of Dhakka",
+        --     "Legion of Xetheg",
+        --     "Legion of Cekenar",
+        --     "Legion of Milyex",
+        --     "Legion of the Indagator",
+        --     "Legion of the Keeper",
+        -- },
         ['SingleMeleeShield'] = {
             "Gloaming Auspice",
             "Eclipsed Auspice",
@@ -308,6 +308,8 @@ local _ClassConfig = {
             "Mana Reiterate",
             "Mana Resurgence",
             "Mana Recursion",
+            "Mana Recursion",
+            "Mana Flare",
         },
         ['AllianceSpell'] = {
             "Chromatic Conjunction",
@@ -1055,15 +1057,15 @@ local _ClassConfig = {
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
-            {
-                name = "GroupDotShield",
-                type = "Spell",
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoGroupDotShield') then return false end
-                    return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
-                end,
-            },
+            -- {
+            --     name = "GroupDotShield",
+            --     type = "Spell",
+            --     active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+            --     cond = function(self, spell, target)
+            --         if not Config:GetSetting('DoGroupDotShield') then return false end
+            --         return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
+            --     end,
+            -- },
             {
                 name = "GroupAuspiceBuff",
                 type = "Spell",
@@ -1093,7 +1095,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    if not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+                    if not Config:GetSetting('DoProcBuff') or not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1102,25 +1104,25 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoGroupAbsorb') or not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+                    if Config:GetSetting('RuneChoice') ~= 2 then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
-            {
-                name = "AggroRune",
-                type = "Spell",
-                active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAggroRune') or not Config.Constants.RGTank:contains(target.Class.ShortName()) then return false end
-                    return Casting.GroupBuffCheck(spell, target)
-                end,
-            },
+            -- {
+            --     name = "AggroRune",
+            --     type = "Spell",
+            --     active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
+            --     cond = function(self, spell, target)
+            --         if not Config:GetSetting('DoAggroRune') or not Config.Constants.RGTank:contains(target.Class.ShortName()) then return false end
+            --         return Casting.GroupBuffCheck(spell, target)
+            --     end,
+            -- },
             {
                 name = "SingleRune",
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoGroupAbsorb') then return false end
+                    if Config:GetSetting('RuneChoice') ~= 1 then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
@@ -1437,7 +1439,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Config:GetSetting('DoTash') and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and not mq.TLO.Target.Tashed() and
-                        Targeting.GetXTHaterCount() > 1 and Casting.TargetedAAReady(aaName, target.ID())
+                        Casting.TargetedAAReady(aaName, target.ID())
                 end,
             },
         },
@@ -1512,7 +1514,7 @@ local _ClassConfig = {
                 { name = "CharmSpell",     cond = function(self) return Config:GetSetting('CharmOn') and Core.IsModeActive("ModernEra") end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') and Core.IsModeActive("ModernEra") end, },
                 { name = "TashSpell",      cond = function(self) return not Casting.CanUseAA("Bite of Tashani") end, },
-                { name = "SpellProcBuff", },
+                { name = "SpellProcBuff",  cond = function(self) return Config:GetSetting('DoProcBuff') end, },
             },
         },
         {
@@ -1555,15 +1557,18 @@ local _ClassConfig = {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "NdtBuff", cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "ManaDot", cond = function(self) return true end, },
+                { name = "NdtBuff",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDot",       cond = function(self) return true end, },
+                { name = "SpellProcBuff", cond = function(self) return Config:GetSetting('DoProcBuff') end, },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SingleRune", cond = function(self) return true end, },
+                { name = "SingleRune",    cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",     cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "SpellProcBuff", cond = function(self) return Config:GetSetting('DoProcBuff') end, },
             },
         },
         {
@@ -1577,7 +1582,7 @@ local _ClassConfig = {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SpellProcBuff", cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "SpellProcBuff", cond = function(self) return Config:GetSetting('DoProcBuff') and Core.IsModeActive("ModernEra") end, },
                 { name = "DichoSpell",    cond = function(self) return true end, },
             },
         },
@@ -1618,7 +1623,7 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig']   = {
-        ['Mode']             = {
+        ['Mode']           = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this PC. Default: The original RGMercs Config. ModernEra: DPS rotation and spellset aimed at modern live play (~90+)",
@@ -1633,7 +1638,7 @@ local _ClassConfig = {
                 "The ModernEra Mode is designed to be used with the ModernEra DPS rotation and spellset.\n" ..
                 "It should function well starting around level 90, but may not fully come into its own for a few levels after.",
         },
-        ['UseAura']          = {
+        ['UseAura']        = {
             DisplayName = "Aura Selection:",
             Category = "Buffs",
             Index = 1,
@@ -1648,7 +1653,7 @@ local _ClassConfig = {
             Answer = "Aura choice can be made on the buff tab.\n" ..
                 "Once the PC has purchased Auroria Mastery, this setting is ignored in favor of using the AA.",
         },
-        ['DoArcanumWeave']   = {
+        ['DoArcanumWeave'] = {
             DisplayName = "Weave Arcanums",
             Category = "Buffs",
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
@@ -1658,7 +1663,7 @@ local _ClassConfig = {
             Answer =
             "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
-        ['AESlowCount']      = {
+        ['AESlowCount']    = {
             DisplayName = "Slow Count",
             Category = "Debuffs",
             Tooltip = "Number of XT Haters before we start AE slowing",
@@ -1669,7 +1674,7 @@ local _ClassConfig = {
             Answer = "The [AESlowCount] setting determines the number of XT Haters before we start AE slowing.\n" ..
                 "If you are not AE slowing, you may need to adjust the [AESlowCount] setting.",
         },
-        ['DoTash']           = {
+        ['DoTash']         = {
             DisplayName = "Do Tash",
             Category = "Debuffs",
             Tooltip = "Cast Tash Spells",
@@ -1679,7 +1684,7 @@ local _ClassConfig = {
             Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
                 "If you are not Tashing, you may need to Enable the [DoTash] setting.",
         },
-        ['DoDot']            = {
+        ['DoDot']          = {
             DisplayName = "Cast DOTs",
             Category = "Combat",
             Tooltip = "Enable casting Damage Over Time spells. (Dots always used for ModernEra Mode)",
@@ -1687,7 +1692,7 @@ local _ClassConfig = {
             FAQ = "I turned Cast DOTS off, why am I still using them?",
             Answer = "The Modern Era mode does not respect this setting, as DoTs are integral to the DPS rotation.",
         },
-        ['DoSlow']           = {
+        ['DoSlow']         = {
             DisplayName = "Cast Slow",
             Category = "Debuffs",
             Tooltip = "Enable casting Slow spells.",
@@ -1697,7 +1702,7 @@ local _ClassConfig = {
             Answer = "The [DoSlow] setting determines whether or not your PC will cast Slow spells.\n" ..
                 "If you are not Slowing, you may need to Enable the [DoSlow] setting.",
         },
-        ['DoCripple']        = {
+        ['DoCripple']      = {
             DisplayName = "Cast Cripple",
             Category = "Debuffs",
             Tooltip = "Enable casting Cripple spells.",
@@ -1708,7 +1713,7 @@ local _ClassConfig = {
                 "If you are not Crippling, you may need to Enable the [DoCripple] setting.\n" ..
                 "Please note that eventually, Cripple and Slow lines are merged together in the Helix line.",
         },
-        ['DoDicho']          = {
+        ['DoDicho']        = {
             DisplayName = "Cast Dicho",
             Category = "Combat",
             Tooltip = "Enable casting Dicho spells.(Dicho always used for ModernEra Mode)",
@@ -1717,7 +1722,7 @@ local _ClassConfig = {
             Answer = "The Cast Dicho setting determines whether or not your PC will cast Dicho spells.\n" ..
                 "Modern Era mode will always use the Dicho spell as a core part of its function.",
         },
-        ['DoNDTBuff']        = {
+        ['DoNDTBuff']      = {
             DisplayName = "Cast NDT",
             Category = "Buffs",
             Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).",
@@ -1727,34 +1732,51 @@ local _ClassConfig = {
             Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
                 "Please note that the single target versions are only set to be used on melee.",
         },
-        ['DoGroupAbsorb']    = {
-            DisplayName = "Do Group Absorb",
+        ['RuneChoice']     = {
+            DisplayName = "Rune Selection:",
             Category = "Buffs",
-            Tooltip = "Enable casting the Group Absorb line with -Hate Proc. If disabled, single target runes will be used.",
-            Default = true,
-            FAQ = "Why am I not using Group Absorb?",
-            Answer = "The [DoGroupAbsorb] setting determines whether or not your PC will cast the Group Absorb line with -Hate Proc.\n" ..
-                "If you are not using Group Absorb, you will revert to using single target rune spells instead.",
+            Index = 1,
+            Tooltip = "Select which line of Rune spells you prefer to use.\nPlease note that after level 73, the group rune has a built-in hate reduction when struck.",
+            Type = "Combo",
+            ComboOptions = { 'Single Target', 'Group', 'Off', },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+            RequiresLoadoutChange = true,
+            FAQ = "Why am I putting an aggro-reducing buff on the tank?",
+            Answer =
+            "You can configure your rune selections to use a single-target hate increasing rune on the tank, while using group (hate reducing) or single target runes on others.",
         },
-        ['DoGroupDotShield'] = {
-            DisplayName = "Do Group DoT Shield",
+        -- ['DoAggroRune']      = {
+        --     DisplayName = "Do Aggro Rune",
+        --     Category = "Buffs",
+        --     Index = 2,
+        --     Tooltip = "Enable casting the Tank Aggro Rune",
+        --     Default = true,
+        --     FAQ = "Why am I not using the Aggro Rune?",
+        --     Answer = "The [DoAggroRune] setting determines whether or not your PC will cast the Tank Aggro Rune.\n" ..
+        --         "If you are not using the Aggro Rune, you may need to Enable the [DoAggroRune] setting.",
+        -- },
+        -- ['DoGroupDotShield'] = {
+        --     DisplayName = "Do Group DoT Shield",
+        --     Category = "Buffs",
+        --     Index = 3,
+        --     Tooltip = "Enable casting the Group DoT Shield Line.",
+        --     Default = true,
+        --     FAQ = "Why am I not using Group DoT Shield?",
+        --     Answer = "The [DoGroupDotShield] setting determines whether or not your PC will cast the Group DoT Shield Line.\n" ..
+        --         "If you are not using Group DoT Shield, you may need to Enable the [DoGroupDotShield] setting.",
+        -- },
+        ['DoProcBuff']     = {
+            DisplayName = "Do Spellproc Buff",
             Category = "Buffs",
-            Tooltip = "Enable casting the Group DoT Shield Line.",
+            Index = 4,
+            Tooltip = "Enable casting the spell proc (Mana ... ) line.",
             Default = true,
-            FAQ = "Why am I not using Group DoT Shield?",
-            Answer = "The [DoGroupDotShield] setting determines whether or not your PC will cast the Group DoT Shield Line.\n" ..
-                "If you are not using Group DoT Shield, you may need to Enable the [DoGroupDotShield] setting.",
+            FAQ = "Why am I using a spell proc buff on ... class?",
+            Answer = "By default, the spell proc buff will be used on any casters (including tanks/hybrids). You can change this option on the Buffs tab.",
         },
-        ['DoAggroRune']      = {
-            DisplayName = "Do Aggro Rune",
-            Category = "Buffs",
-            Tooltip = "Enable casting the Tank Aggro Rune",
-            Default = true,
-            FAQ = "Why am I not using the Aggro Rune?",
-            Answer = "The [DoAggroRune] setting determines whether or not your PC will cast the Tank Aggro Rune.\n" ..
-                "If you are not using the Aggro Rune, you may need to Enable the [DoAggroRune] setting.",
-        },
-        ['DoStripBuff']      = {
+        ['DoStripBuff']    = {
             DisplayName = "Do Strip Buffs",
             Category = "Debuffs",
             Tooltip = "Enable removing beneficial enemy effects.",
@@ -1763,7 +1785,7 @@ local _ClassConfig = {
             Answer = "The [DoStripBuff] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
                 "If you are not stripping buffs, you may need to Enable the [DoStripBuff] setting.",
         },
-        ['DoChestClick']     = {
+        ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
             Category = "Combat",
             Tooltip = "Click your equipped chest item during burns.",

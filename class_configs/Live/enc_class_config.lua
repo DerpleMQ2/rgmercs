@@ -320,6 +320,8 @@ local _ClassConfig = {
             "Mana Reiteration",
             "Mana Reiterate",
             "Mana Resurgence",
+            "Mana Recursion",
+            "Mana Flare",
         },
         ['AllianceSpell'] = {
             "Chromatic Covariance",
@@ -1081,7 +1083,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    if not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+                    if not Config:GetSetting('UseProcBuff') or not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1090,7 +1092,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoGroupAbsorb') or not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+                    if Config:GetSetting('RuneChoice') ~= 2 or ((spell and spell.Level() or 0) > 73 and Config.Constants.RGTank:contains(target.Class.ShortName())) then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
@@ -1108,7 +1110,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoGroupAbsorb') then return false end
+                    if Config:GetSetting('RuneChoice') ~= 1 then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
@@ -1482,6 +1484,7 @@ local _ClassConfig = {
                 { name = "CharmSpell",     cond = function(self) return Config:GetSetting('CharmOn') and Core.IsModeActive("ModernEra") end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') and Core.IsModeActive("ModernEra") end, },
                 { name = "TashSpell", },
+                { name = "SpellProcBuff",  cond = function(self) return Config:GetSetting('DoProcBuff') end, },
             },
         },
         {
@@ -1519,21 +1522,24 @@ local _ClassConfig = {
                 { name = "ManaNuke",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
                 { name = "CrippleSpell",   cond = function(self) return Config:GetSetting('DoCripple') and mq.TLO.Me.Level() < 88 end, },
                 { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "SpellProcBuff",  cond = function(self) return Config:GetSetting('DoProcBuff') end, },
             },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "NdtBuff", cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "ManaDot", cond = function(self) return true end, },
+                { name = "NdtBuff",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDot",       cond = function(self) return true end, },
+                { name = "SpellProcBuff", cond = function(self) return Config:GetSetting('DoProcBuff') end, },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SingleRune", cond = function(self) return true end, },
+                { name = "SingleRune", cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",  cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
             },
         },
         {
@@ -1547,7 +1553,7 @@ local _ClassConfig = {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SpellProcBuff", cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "SpellProcBuff", cond = function(self) return Config:GetSetting('DoProcBuff') and Core.IsModeActive("ModernEra") end, },
                 { name = "DichoSpell",    cond = function(self) return true end, },
             },
         },
@@ -1698,32 +1704,49 @@ local _ClassConfig = {
             Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
                 "Please note that the single target versions are only set to be used on melee.",
         },
-        ['DoGroupAbsorb']    = {
-            DisplayName = "Do Group Absorb",
+        ['RuneChoice']       = {
+            DisplayName = "Rune Selection:",
             Category = "Buffs",
-            Tooltip = "Enable casting the Group Absorb line with -Hate Proc. If disabled, single target runes will be used.",
+            Index = 1,
+            Tooltip = "Select which line of Rune spells you prefer to use.\nPlease note that after level 73, the group rune has a built-in hate reduction when struck.",
+            Type = "Combo",
+            ComboOptions = { 'Single Target', 'Group', 'Off', },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+            RequiresLoadoutChange = true,
+            FAQ = "Why am I putting an aggro-reducing buff on the tank?",
+            Answer =
+            "You can configure your rune selections to use a single-target hate increasing rune on the tank, while using group (hate reducing) or single target runes on others.",
+        },
+        ['DoAggroRune']      = {
+            DisplayName = "Do Aggro Rune",
+            Category = "Buffs",
+            Index = 2,
+            Tooltip = "Enable casting the Tank Aggro Rune",
             Default = true,
-            FAQ = "Why am I not using Group Absorb?",
-            Answer = "The [DoGroupAbsorb] setting determines whether or not your PC will cast the Group Absorb line with -Hate Proc.\n" ..
-                "If you are not using Group Absorb, you will revert to using single target rune spells instead.",
+            FAQ = "Why am I not using the Aggro Rune?",
+            Answer = "The [DoAggroRune] setting determines whether or not your PC will cast the Tank Aggro Rune.\n" ..
+                "If you are not using the Aggro Rune, you may need to Enable the [DoAggroRune] setting.",
         },
         ['DoGroupDotShield'] = {
             DisplayName = "Do Group DoT Shield",
             Category = "Buffs",
+            Index = 3,
             Tooltip = "Enable casting the Group DoT Shield Line.",
             Default = true,
             FAQ = "Why am I not using Group DoT Shield?",
             Answer = "The [DoGroupDotShield] setting determines whether or not your PC will cast the Group DoT Shield Line.\n" ..
                 "If you are not using Group DoT Shield, you may need to Enable the [DoGroupDotShield] setting.",
         },
-        ['DoAggroRune']      = {
-            DisplayName = "Do Aggro Rune",
+        ['DoProcBuff']       = {
+            DisplayName = "Do Spellproc Buff",
             Category = "Buffs",
-            Tooltip = "Enable casting the Tank Aggro Rune",
+            Index = 4,
+            Tooltip = "Enable casting the spell proc (Mana ... ) line.",
             Default = true,
-            FAQ = "Why am I not using the Aggro Rune?",
-            Answer = "The [DoAggroRune] setting determines whether or not your PC will cast the Tank Aggro Rune.\n" ..
-                "If you are not using the Aggro Rune, you may need to Enable the [DoAggroRune] setting.",
+            FAQ = "Why am I using a spell proc buff on ... class?",
+            Answer = "By default, the spell proc buff will be used on any casters (including tanks/hybrids). You can change this option on the Buffs tab.",
         },
         ['DoStripBuff']      = {
             DisplayName = "Do Strip Buffs",
