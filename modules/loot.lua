@@ -264,18 +264,17 @@ function Module:LootMessageHandler()
 		local who = mail.Who or ''
 		local CombatLooting = mail.CombatLooting or false
 		local currSetting = Config:GetSetting('CombatLooting')
+
 		if who ~= Config.Globals.CurLoadedChar then return end
+
 		if currSetting ~= CombatLooting then
 			Config:SetSetting('CombatLooting', CombatLooting)
 		end
-		if subject == "done_looting" and who == Config.Globals.CurLoadedChar then
+
+		if subject == ('done_looting' or 'done_processing') then
 			Module.TempSettings.Looting = false
-		end
-		if subject == 'processing' and who == Config.Globals.CurLoadedChar then
+		elseif subject == 'processing' then
 			Module.TempSettings.Looting = true
-		end
-		if subject == 'done_processing' and who == Config.Globals.CurLoadedChar then
-			Module.TempSettings.Looting = false
 		end
 	end)
 end
@@ -292,7 +291,6 @@ function Module:GiveTime(combat_state)
 
 	local deadCount = mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', 100))()
 
-
 	if self.Actor == nil then self:LootMessageHandler() end
 	-- send actors message to loot
 	if (combat_state ~= "Combat" or Config:GetSetting('CombatLooting')) and deadCount > 0 then
@@ -302,14 +300,11 @@ function Module:GiveTime(combat_state)
 			self.TempSettings.Looting = true
 		end
 	end
+
 	if self.TempSettings.Looting then
 		Logger.log_verbose("\ay[LOOT]: \aoPausing for \atLoot Actions")
 		Module.DoLooting()
 	end
-	-- if Module.settings.CombatLooting ~= Module.TempSettings.CombatLooting then
-	-- 	Module.Actor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', },
-	-- 		{ who = Config.Globals.CurLoadedChar, directions = 'combatlooting', CombatLooting = Module.settings.CombatLooting, })
-	-- end
 end
 
 function Module:OnDeath()
