@@ -152,7 +152,7 @@ end
 ---@param useactors boolean
 ---@param caller string
 ---@param report boolean|nil
-function guiLoot.GetSettings(names,  record, imported, useactors, caller, report)
+function guiLoot.GetSettings(names, record, imported, useactors, caller, report)
 	local repVal = report and not guiLoot.showReport
 	guiLoot.imported = imported
 	guiLoot.hideNames = names
@@ -511,6 +511,20 @@ local function evalRule(item)
 			ImGui.Text("Can Use Item")
 			ImGui.EndTooltip()
 		end
+	elseif string.find(item, 'Ignore') or string.find(item, 'Left') then
+		ImGui.TextColored(0.976, 0.218, 0.244, 1.000, Icons.MD_NOT_INTERESTED)
+		if ImGui.IsItemHovered() then
+			ImGui.BeginTooltip()
+			ImGui.Text("Ignore Item")
+			ImGui.EndTooltip()
+		end
+	elseif string.find(item, 'Bank') then
+		ImGui.TextColored(0.162, 0.785, 0.877, 1.000, Icons.MD_ACCOUNT_BALANCE)
+		if ImGui.IsItemHovered() then
+			ImGui.BeginTooltip()
+			ImGui.Text("Bank Item")
+			ImGui.EndTooltip()
+		end
 	else
 		ImGui.Text(item)
 	end
@@ -764,181 +778,6 @@ function guiLoot.lootedReport_GUI()
 	if not openRepGUI then
 		guiLoot.showReport = false
 	end
-end
-
-function guiLoot.drawRecord()
-	if not guiLoot.PastHistory then return end
-
-	local openWin, showRecord = ImGui.Begin("Loot PastHistory##" .. script, true)
-	ImGui.SetWindowFontScale(ZoomLvl)
-	if not openWin then
-		guiLoot.PastHistory = false
-	end
-
-	if showRecord then
-		if ImGui.CollapsingHeader('Manage') then
-			-- Clear History and Close Buttons
-			if ImGui.Button("Clear History File") then
-				guiLoot.SessionLootRecord = {}
-				mq.pickle(recordFile, guiLoot.SessionLootRecord)
-			end
-			ImGui.SameLine()
-			if ImGui.Button("Close") then
-				guiLoot.PastHistory = false
-			end
-		end
-
-		-- Pagination Variables
-		local filteredTable = {}
-		for i = 1, #guiLoot.SessionLootRecord do
-			local item = guiLoot.SessionLootRecord[i]
-			if item then
-				if guiLoot.TempSettings.FilterHistory ~= '' then
-					local filterString = guiLoot.TempSettings.FilterHistory:lower()
-					filterString = filterString:gsub("%:", ""):gsub("%-", "")
-					local filterTS = item.TimeStamp:gsub("%:", ""):gsub("%-", "")
-					local filterDate = item.Date:gsub("%:", ""):gsub("%-", "")
-					if not (string.find(item.Item:lower(), filterString) or
-							string.find(filterDate, filterString) or
-							string.find(filterTS, filterString) or
-							string.find(item.Looter:lower(), filterString) or
-							string.find(item.Action:lower(), filterString) or
-							string.find(item.CorpseName:lower(), filterString) or
-							string.find(item.Zone:lower(), filterString)) then
-						goto continue
-					end
-				end
-				table.insert(filteredTable, item)
-			end
-			::continue::
-		end
-		table.sort(filteredTable, function(a, b)
-			return a.Date .. a.TimeStamp > b.Date .. b.TimeStamp
-		end)
-		ImGui.SeparatorText("Loot History")
-		guiLoot.pageSize = guiLoot.pageSize or 20 -- Items per page
-		guiLoot.currentPage = guiLoot.currentPage or 1
-		local totalItems = #guiLoot.SessionLootRecord
-		local totalFilteredItems = #filteredTable
-		local totalPages = math.max(1, math.ceil(totalFilteredItems / guiLoot.pageSize))
-
-		-- Filter Input
-		ImGui.SetNextItemWidth(150)
-		guiLoot.TempSettings.FilterHistory = ImGui.InputTextWithHint("##FilterHistory", "Filter by Fields", guiLoot.TempSettings.FilterHistory)
-		ImGui.SameLine()
-		if ImGui.SmallButton(Icons.MD_DELETE_SWEEP) then
-			guiLoot.TempSettings.FilterHistory = ''
-		end
-		ImGui.SameLine()
-		ImGui.Text("Found: ")
-		ImGui.SameLine()
-		ImGui.TextColored(ImVec4(0, 1, 1, 1), tostring(totalFilteredItems))
-		ImGui.SameLine()
-		ImGui.Text("Total: ")
-		ImGui.SameLine()
-		ImGui.TextColored(ImVec4(1, 1, 0, 1), tostring(totalItems))
-
-		-- Clamp the current page
-		guiLoot.currentPage = math.max(1, math.min(guiLoot.currentPage, totalPages))
-
-		-- Navigation Buttons
-		if ImGui.Button(Icons.FA_BACKWARD) then
-			guiLoot.currentPage = 1
-		end
-		ImGui.SameLine()
-		if ImGui.ArrowButton("##Previous", ImGuiDir.Left) and guiLoot.currentPage > 1 then
-			guiLoot.currentPage = guiLoot.currentPage - 1
-		end
-		ImGui.SameLine()
-		ImGui.Text(string.format("Page %d of %d", guiLoot.currentPage, totalPages))
-		ImGui.SameLine()
-		if ImGui.ArrowButton("##Next", ImGuiDir.Right) and guiLoot.currentPage < totalPages then
-			guiLoot.currentPage = guiLoot.currentPage + 1
-		end
-		ImGui.SameLine()
-		if ImGui.Button(Icons.FA_FORWARD) then
-			guiLoot.currentPage = totalPages
-		end
-
-		ImGui.SameLine()
-
-		ImGui.Text("Items Per Page")
-		ImGui.SameLine()
-		ImGui.SetNextItemWidth(80)
-		if ImGui.BeginCombo('##pageSize', tostring(guiLoot.pageSize)) then
-			for i = 1, 200 do
-				if i % 25 == 0 then
-					if ImGui.Selectable(tostring(i), guiLoot.pageSize == i) then
-						guiLoot.pageSize = i
-					end
-				end
-			end
-			ImGui.EndCombo()
-		end
-
-
-		-- Table
-
-		if ImGui.BeginTable("Items History", 7, bit32.bor(ImGuiTableFlags.ScrollX, ImGuiTableFlags.ScrollY,
-				ImGuiTableFlags.Hideable, ImGuiTableFlags.Reorderable, ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders, ImGuiTableFlags.RowBg)) then
-			ImGui.TableSetupColumn("Date", ImGuiTableColumnFlags.WidthFixed, 100)
-			ImGui.TableSetupColumn("TimeStamp", ImGuiTableColumnFlags.WidthFixed, 100)
-			ImGui.TableSetupColumn("Item", ImGuiTableColumnFlags.WidthFixed, 150)
-			ImGui.TableSetupColumn("Looter", ImGuiTableColumnFlags.WidthFixed, 75)
-			ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.WidthFixed, 75)
-			ImGui.TableSetupColumn("Corpse", ImGuiTableColumnFlags.WidthFixed, 100)
-			ImGui.TableSetupColumn("Zone", ImGuiTableColumnFlags.WidthFixed, 100)
-			ImGui.TableHeadersRow()
-
-			-- Calculate start and end indices for pagination
-			local startIdx = (guiLoot.currentPage - 1) * guiLoot.pageSize + 1
-			local endIdx = math.min(startIdx + guiLoot.pageSize - 1, totalFilteredItems)
-
-			for i = startIdx, endIdx do
-				local item = filteredTable[i]
-				if item then
-					if guiLoot.TempSettings.FilterHistory ~= '' then
-						local filterString = guiLoot.TempSettings.FilterHistory:lower()
-						filterString = filterString:gsub("%:", ""):gsub("%-", "")
-						local filterTS = item.TimeStamp:gsub("%:", ""):gsub("%-", "")
-						local filterDate = item.Date:gsub("%:", ""):gsub("%-", "")
-						if not (string.find(item.Item:lower(), filterString) or
-								string.find(filterDate, filterString) or
-								string.find(filterTS, filterString) or
-								string.find(item.Looter:lower(), filterString) or
-								string.find(item.Action:lower(), filterString) or
-								string.find(item.CorpseName:lower(), filterString) or
-								string.find(item.Zone:lower(), filterString)) then
-							goto continue
-						end
-					end
-
-					ImGui.TableNextColumn()
-					ImGui.TextColored(ImVec4(1, 1, 0, 1), item.Date)
-					ImGui.TableNextColumn()
-					ImGui.TextColored(ImVec4(0, 1, 1, 1), item.TimeStamp)
-					ImGui.TableNextColumn()
-					ImGui.Text(item.Item)
-					if ImGui.IsItemHovered() and ImGui.IsItemClicked(0) then
-						mq.cmdf('/executelink %s', item.Link)
-					end
-					ImGui.TableNextColumn()
-					ImGui.TextColored(ImVec4(1.000, 0.557, 0.000, 1.000), item.Looter)
-					ImGui.TableNextColumn()
-					ImGui.Text(item.Action == 'Looted' and 'Keep' or item.Action)
-					ImGui.TableNextColumn()
-					ImGui.TextColored(ImVec4(0.976, 0.518, 0.844, 1.000), item.CorpseName)
-					ImGui.TableNextColumn()
-					ImGui.Text(item.Zone)
-					::continue::
-				end
-			end
-			ImGui.EndTable()
-		end
-	end
-
-	ImGui.SetWindowFontScale(1)
-	ImGui.End()
 end
 
 function guiLoot.lootedConf_GUI()
