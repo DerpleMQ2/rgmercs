@@ -280,7 +280,7 @@ function Module:LootMessageHandler()
 end
 
 function Module:GiveTime(combat_state)
-	if not Config:GetSetting('DoLoot') then return end
+	if not Config:GetSetting('DoLoot') or not Config:GetSetting('LootCorpses') then return end
 
 	if not Core.OkayToNotHeal() or mq.TLO.Me.Invis() or Casting.IAmFeigning() then return end
 
