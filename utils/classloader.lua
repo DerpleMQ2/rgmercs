@@ -18,11 +18,12 @@ function ClassLoader.getClassConfigFileName(class)
     local configFile = customConfig and customConfigFile or string.format("%s/%s/%s_class_config.lua", baseConfigDir, classConfigDir, class:lower())
 
     if not Files.file_exists(configFile) then
-        -- Fall back to live.
+        -- Fall back to the appropriate config.
         local oldConfig = configFile
         customConfig = false
-        configFile = string.format("%s/Live/%s_class_config.lua", baseConfigDir, class:lower())
-        Logger.log_error("Could not find requested class config %s falling back to %s", oldConfig, configFile)
+        local folder = Core.OnLaz() and "Project Lazarus" or "Live"
+        configFile = string.format("%s/%s/%s_class_config.lua", baseConfigDir, folder, class:lower())
+        Logger.log_error("Could not find requested class config:\n \ay(%s)\n\awFalling back to:\n\ag%s", oldConfig, configFile)
     end
 
     return configFile, customConfig
@@ -31,15 +32,14 @@ end
 ---@param class string # EQ Class ShortName
 function ClassLoader.load(class)
     local classConfigFile, customConfig = ClassLoader.getClassConfigFileName(class)
-    Logger.log_info("Loading Base Config: %s", classConfigFile)
+    Logger.log_info("Loading Base Config:\n\ag%s", classConfigFile)
 
     if Files.file_exists(classConfigFile) then
         local config, err = loadfile(classConfigFile)
         if not config or err then
-            Logger.log_error("Failed to Load Custom Core Class Config: %s", classConfigFile)
+            Logger.log_error("Failed to load custom class config:\n\ay%s", classConfigFile)
         else
             local classConfig
-            Logger.log_info("\agFull Config Loaded")
             classConfig = config()
             classConfig.IsCustom = customConfig
             return classConfig
