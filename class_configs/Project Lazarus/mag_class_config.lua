@@ -1789,7 +1789,7 @@ _ClassConfig      = {
         },
         ['Summon ModRods'] = {
             {
-                name = "Summon Modulation Shard",
+                name = "Large Modulation Shard",
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('SummonModRods') or not Casting.CanUseAA(aaName) then return false end
@@ -1804,10 +1804,40 @@ _ClassConfig      = {
                 end,
             },
             {
+                name = "Medium Modulation Shard",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('SummonModRods') or not Casting.CanUseAA(aaName) or Casting.CanUseAA("Large Modulation Shard") then return false end
+                    local modRodItem = mq.TLO.Spell(aaName).RankName.Base(1)()
+                    return modRodItem and Casting.AAReady(aaName) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
+                        (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+                post_activate = function(self, aaName, success)
+                    if success then
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, aaName, "group")
+                    end
+                end,
+            },
+            {
+                name = "Small Modulation Shard",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('SummonModRods') or not Casting.CanUseAA(aaName) or Casting.CanUseAA("Medium Modulation Shard") then return false end
+                    local modRodItem = mq.TLO.Spell(aaName).RankName.Base(1)()
+                    return modRodItem and Casting.AAReady(aaName) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
+                        (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+                post_activate = function(self, aaName, success)
+                    if success then
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, aaName, "group")
+                    end
+                end,
+            },
+            {
                 name = "ManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Casting.CanUseAA("Summon Modulation Shard") or not Config:GetSetting('SummonModRods') then return false end
+                    if Casting.CanUseAA("Small Modulation Shard") or not Config:GetSetting('SummonModRods') then return false end
                     local modRodItem = spell.RankName.Base(1)()
                     return modRodItem and Casting.SpellReady(spell) and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
                         (mq.TLO.Cursor.ID() or 0) == 0
