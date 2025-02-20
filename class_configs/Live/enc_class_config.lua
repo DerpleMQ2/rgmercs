@@ -882,7 +882,7 @@ local _ClassConfig = {
     },
     ['HelperFunctions'] = { --used to autoinventory our azure crystal after summon
         StashCrystal = function()
-            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Spell("Azure Mind Crystal").Base(1)() end)
+            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Me.AltAbility("Azure Mind Crystal").Spell.Base(1)() end)
 
             if not mq.TLO.Cursor() then
                 Logger.log_debug("No valid item found on cursor, item handling aborted.")
@@ -1197,20 +1197,6 @@ local _ClassConfig = {
                     return Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() >= 90 and Casting.AAReady(aaName)
                 end,
 
-            },
-            {
-                name = "UseAzureMindCrystal",
-                type = "CustomFunc",
-                cond = function(self)
-                    if not Casting.CanUseAA("Azure Mind Crystal") then return false end
-                    local crystal = mq.TLO.FindItem("Azure Mind Crystal")
-                    if not crystal or crystal() then return false end
-                    return crystal.TimerReady() == 0 and mq.TLO.Me.PctMana() <= Config:GetSetting('ModRodManaPct')
-                end,
-                custom_func = function(self)
-                    local crystal = mq.TLO.FindItem("Azure Mind Crystal")
-                    return Casting.UseItem(crystal.Name(), mq.TLO.Me.ID())
-                end,
             },
         },
         ['DPS(Default)'] = {

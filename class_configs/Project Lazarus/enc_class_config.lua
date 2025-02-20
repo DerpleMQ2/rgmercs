@@ -1,6 +1,6 @@
 local mq           = require('mq')
 local Config       = require('utils.config')
-local Modules      = require("utils.modules")
+local Comms        = require("utils.comms")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
@@ -859,9 +859,9 @@ local _ClassConfig = {
             end,
         },
     },
-    ['HelperFunctions'] = { --used to autoinventory our azure crystal after summon
+    ['HelperFunctions'] = { --used to autoinventory our azure crystal after summon. Crystal is a group-wide spell on Laz.
         StashCrystal = function()
-            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Spell("Azure Mind Crystal").Base(1)() end)
+            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Me.AltAbility("Azure Mind Crystal").Spell.Base(1)() end)
 
             if not mq.TLO.Cursor() then
                 Logger.log_debug("No valid item found on cursor, item handling aborted.")
@@ -869,8 +869,10 @@ local _ClassConfig = {
             end
 
             Logger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
-            mq.delay(150)
-            Core.DoCmd("/autoinventory")
+
+            Comms.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
+            mq.delay(250)
+            Core.DoGroupCmd("/autoinventory")
         end,
     },
     ['Rotations']       = {
@@ -1224,20 +1226,6 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctAggro() >= 90 and Casting.AAReady(aaName)
                 end,
 
-            },
-            {
-                name = "UseAzureMindCrystal",
-                type = "CustomFunc",
-                cond = function(self)
-                    if not Casting.CanUseAA("Azure Mind Crystal") then return false end
-                    local crystal = mq.TLO.FindItem("Azure Mind Crystal")
-                    if not crystal or crystal() then return false end
-                    return crystal.TimerReady() == 0 and mq.TLO.Me.PctMana() <= Config:GetSetting('ModRodManaPct')
-                end,
-                custom_func = function(self)
-                    local crystal = mq.TLO.FindItem("Azure Mind Crystal")
-                    return Casting.UseItem(crystal.Name(), mq.TLO.Me.ID())
-                end,
             },
         },
         ['DPS(Default)'] = {
