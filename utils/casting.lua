@@ -63,7 +63,7 @@ function Casting.TargetHasBuff(spell, buffTarget)
     for i = 1, numEffects do
         local triggerSpell = spell.Trigger(i)
         if triggerSpell and triggerSpell() then
-            ret = (target.FindBuff("id " .. tostring(triggerSpell.ID())).ID() or 0) > 0
+            ret = (target.FindBuff("id " .. tostring(triggerSpell.ID())).ID() or 0) > 0 --
             Logger.log_verbose("TargetHasBuff() Searching for trigger spell ID: %d on %s :: %s", triggerSpell.ID(), target.DisplayName(), Strings.BoolToColorString(ret))
             if ret then return true end
 
@@ -101,7 +101,8 @@ function Casting.SpellStacksOnTarget(spell)
 
     for i = 1, numEffects do
         local triggerSpell = spell.Trigger(i)
-        if triggerSpell and triggerSpell() then
+        --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
+        if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
             if not triggerSpell.StacksTarget() then return false end
         end
     end
@@ -121,7 +122,8 @@ function Casting.SpellStacksOnMe(spell)
 
     for i = 1, numEffects do
         local triggerSpell = spell.Trigger(i)
-        if triggerSpell and triggerSpell() then
+        --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
+        if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
             if not triggerSpell.Stacks() then return false end
         end
     end
@@ -172,7 +174,8 @@ function Casting.PeerHasBuff(spell, peerName)
 
     for i = 1, numEffects do
         local triggerSpell = spell.Trigger(i)
-        if triggerSpell and triggerSpell() and not checkedEffects[triggerSpell.ID()] then
+        --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0
+        if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 and not checkedEffects[triggerSpell.ID()] then
             table.insert(effectsToCheck, triggerSpell.ID())
             if triggerSpell.ID() ~= triggerSpell.RankName.ID() then
                 table.insert(effectsToCheck, triggerSpell.RankName.ID())
@@ -247,7 +250,8 @@ function Casting.GroupBuffCheck(spell, target, spellID)
             local triggerCt = 0
             for i = 1, numEffects do
                 local triggerSpell = mq.TLO.Spell(spellID).RankName.Trigger(i)
-                if triggerSpell and triggerSpell() then
+                --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
+                if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
                     local triggerRankResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", triggerSpell.ID()), 1000)
                     --Logger.log_verbose("GroupBuffCheck() DanNet result for trigger %d of %d (%s, %s): %s", i, numEffects, triggerSpell.Name(), triggerSpell.ID(), triggerRankResult)
                     if triggerRankResult == "NULL" then
@@ -263,7 +267,7 @@ function Casting.GroupBuffCheck(spell, target, spellID)
                     end
                     triggerCt = triggerCt + 1
                 else
-                    Logger.log_verbose("\ayGroupBuffCheck() DanNet found no triggers for %s(ID:%d), let's check stacking.", spellName, spellID)
+                    Logger.log_verbose("\ayGroupBuffCheck() DanNet found no valid triggers for %s(ID:%d), let's check stacking.", spellName, spellID)
                 end
             end
             if triggerCt >= numEffects then
@@ -317,19 +321,19 @@ function Casting.SelfBuffAACheck(aaName)
     local triggerNotActive = not Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
     local auraNotActive = not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID()
     local stacks = Casting.SpellStacksOnMe(mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name()))
-    local triggerStacks = (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
+    --local triggerStacks = (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() == 0 or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
+    -- trigger is already checked in SpellStacksOnMe, testing.
 
-    --[[
-    Logger.log_verbose("SelfBuffAACheck(%s) abilityReady(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s) triggerStacks(%s)", aaName,
+    Logger.log_verbose("SelfBuffAACheck(%s) abilityReady(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s)", aaName, -- triggerStacks(%s)
         Strings.BoolToColorString(abilityReady),
         Strings.BoolToColorString(buffNotActive),
         Strings.BoolToColorString(triggerNotActive),
         Strings.BoolToColorString(auraNotActive),
-        Strings.BoolToColorString(stacks),
-        Strings.BoolToColorString(triggerStacks))
-    ]] --
+        Strings.BoolToColorString(stacks))
+    --Strings.BoolToColorString(triggerStacks))
 
-    return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks and triggerStacks
+
+    return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks -- and triggerStacks
 end
 
 --- Checks if a song is active by its name.
