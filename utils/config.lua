@@ -759,7 +759,7 @@ Config.DefaultConfig = {
         Index = 14,
         Tooltip = "Which version of class configs to Load",
         Type = "Custom",
-        Default = "Live",
+        Default = mq.TLO.EverQuest.Server() == "Project Lazarus" and "Project Lazarus" or "Live",
         ConfigType = "Advanced",
         FAQ = "How do I load configuration file for different servers types?",
         Answer = "You can change the config type by selecting a different Server Type from the main panel.",
