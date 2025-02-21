@@ -1851,21 +1851,20 @@ function LNS.bulkSet(item_table, setting, classes, which_table, delete_items)
     db:exec("PRAGMA journal_mode=WAL;")
 
     local qry = string.format([[
-INSERT INTO %s (item_id, item_name, item_rule, item_rule_classes, item_link)
-VALUES (?, ?, ?, ?, ?)
-ON CONFLICT(item_id) DO UPDATE SET
-item_name = excluded.item_name,
-item_rule = excluded.item_rule,
-item_rule_classes = excluded.item_rule_classes,
-item_link = excluded.item_link;
-]], which_table)
+        INSERT INTO %s (item_id, item_name, item_rule, item_rule_classes, item_link)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(item_id) DO UPDATE SET
+        item_name = excluded.item_name,
+        item_rule = excluded.item_rule,
+        item_rule_classes = excluded.item_rule_classes,
+        item_link = excluded.item_link;
+        ]], which_table)
     if delete_items then
         qry = string.format([[
 DELETE FROM %s WHERE item_id = ?;
 ]], which_table)
     end
     local stmt = db:prepare(qry)
-
     if not stmt then
         db:close()
         return
@@ -1876,6 +1875,7 @@ DELETE FROM %s WHERE item_id = ?;
     for itemID, data in pairs(item_table) do
         local itemName = LNS.ItemNames[itemID] or nil
         local itemLink = data.Link
+        Logger.Warn(LNS.guiLoot.console, "Query: %s, itemID %s itemName %s, setting %s", qry, itemID, itemName, setting)
 
         if itemName then
             if not delete_items then
@@ -2719,7 +2719,7 @@ function LNS.getRule(item, fromFunction, index)
     end
 
     -- Evaluate new rules if no valid rule exists
-    if lootRule == "NULL" or newRule then
+    if (lootRule == "NULL" or newRule) and ruletype == 'Normal' then
         lootRule = 'Ignore'
         lootDecision = LNS.checkDecision(item, lootRule)
 
@@ -2730,9 +2730,8 @@ function LNS.getRule(item, fromFunction, index)
         end
 
         local checkVal, checkRule, checkDecision = LNS.checkTS(lootRule, lootDecision, tradeskill)
-        if checkVal then
+        if checkVal and ruletype == 'Normal' then
             lootRule = checkRule
-            lootDecision = checkDecision
             tsCheck = true
         else
             lootRule = lootDecision
@@ -2766,7 +2765,7 @@ function LNS.getRule(item, fromFunction, index)
     end
 
     -- Handle Spell Drops
-    if LNS.Settings.KeepSpells and LNS.checkSpells(itemName) then
+    if LNS.Settings.KeepSpells and LNS.checkSpells(itemName) and ruletype == 'Normal' then
         lootDecision = "Keep"
         dbgTbl = {
             Lookup = '\ax\ag Check for SPELLS',
@@ -2830,7 +2829,7 @@ function LNS.getRule(item, fromFunction, index)
         Logger.Debug(LNS.guiLoot.console, dbgTbl)
     end
 
-    if newRule then
+    if newRule and ruletype == 'Normal' then
         if sellPrice > 0 then
             lootNewItemRule = 'Sell'
         elseif tributeValue > 0 and not equipable then
@@ -4035,23 +4034,23 @@ function LNS.guiExport()
             end
 
             if ImGui.MenuItem('Sell Stuff##') then
-                LNS.processItems('Sell')
+                mq.cmdf('/lns sellstuff')
             end
 
             if ImGui.MenuItem('Restock##') then
-                LNS.processItems('Buy')
+                mq.cmdf('/lns restock')
             end
 
             if ImGui.MenuItem('Tribute Stuff##') then
-                LNS.processItems('Tribute')
+                mq.cmdf('/lns tributestuff')
             end
 
             if ImGui.MenuItem('Bank##') then
-                LNS.processItems('Bank')
+                mq.cmdf('/lns bank')
             end
 
             if ImGui.MenuItem('Cleanup##') then
-                LNS.processItems('Destroy')
+                mq.cmdf('/lns cleanup')
             end
 
             ImGui.EndMenu()
@@ -4361,36 +4360,37 @@ function LNS.drawTable(label)
 
         -- Clamp CurrentPage to valid range
         LNS.CurrentPage = math.max(1, math.min(LNS.CurrentPage, totalPages))
-
-        -- Navigation buttons
-        if ImGui.Button(Icons.FA_BACKWARD) then
-            LNS.CurrentPage = 1
-        end
-        ImGui.SameLine()
-        if ImGui.ArrowButton("##Previous", ImGuiDir.Left) and LNS.CurrentPage > 1 then
-            LNS.CurrentPage = LNS.CurrentPage - 1
-        end
-        ImGui.SameLine()
-        ImGui.Text(("Page %d of %d"):format(LNS.CurrentPage, totalPages))
-        ImGui.SameLine()
-        if ImGui.ArrowButton("##Next", ImGuiDir.Right) and LNS.CurrentPage < totalPages then
-            LNS.CurrentPage = LNS.CurrentPage + 1
-        end
-        ImGui.SameLine()
-        if ImGui.Button(Icons.FA_FORWARD) then
-            LNS.CurrentPage = totalPages
-        end
-
-        ImGui.SameLine()
-        ImGui.SetNextItemWidth(80)
-        if ImGui.BeginCombo("Max Items", tostring(ITEMS_PER_PAGE)) then
-            for i = 10, 100, 10 do
-                if ImGui.Selectable(tostring(i), ITEMS_PER_PAGE == i) then
-                    ITEMS_PER_PAGE = i
-                end
+        if totalPages > 0 then
+            -- Navigation buttons
+            if ImGui.Button(Icons.FA_BACKWARD) then
+                LNS.CurrentPage = 1
             end
-            ImGui.EndCombo()
+            ImGui.SameLine()
+            if ImGui.ArrowButton("##Previous", ImGuiDir.Left) and LNS.CurrentPage > 1 then
+                LNS.CurrentPage = LNS.CurrentPage - 1
+            end
+            ImGui.SameLine()
+            ImGui.Text(("Page %d of %d"):format(LNS.CurrentPage, totalPages))
+            ImGui.SameLine()
+            if ImGui.ArrowButton("##Next", ImGuiDir.Right) and LNS.CurrentPage < totalPages then
+                LNS.CurrentPage = LNS.CurrentPage + 1
+            end
+            ImGui.SameLine()
+            if ImGui.Button(Icons.FA_FORWARD) then
+                LNS.CurrentPage = totalPages
+            end
+            ImGui.SameLine()
+            ImGui.SetNextItemWidth(80)
+            if ImGui.BeginCombo("Max Items", tostring(ITEMS_PER_PAGE)) then
+                for i = 10, 100, 10 do
+                    if ImGui.Selectable(tostring(i), ITEMS_PER_PAGE == i) then
+                        ITEMS_PER_PAGE = i
+                    end
+                end
+                ImGui.EndCombo()
+            end
         end
+
         -- Calculate the range of items to display
         local startIndex = (LNS.CurrentPage - 1) * ITEMS_PER_PAGE + 1
         local endIndex = math.min(startIndex + ITEMS_PER_PAGE - 1, totalItems)
@@ -4442,6 +4442,7 @@ function LNS.drawTable(label)
                     LNS.TempSettings.BulkSet[itemID] = { Rule = LNS.TempSettings.BulkRule, Link = LNS[varSub .. 'Link'][itemID] or "NULL", }
                 end
                 LNS.TempSettings.doBulkSet = true
+                LNS.TempSettings.bulkDelete = false
             end
             ImGui.SameLine()
             if ImGui.Button("Delete All") then
@@ -4845,7 +4846,8 @@ function LNS.drawItemsTables()
                             local itemID = filteredItems[i].id
                             LNS.TempSettings.BulkSet[itemID] = { Rule = LNS.TempSettings.BulkRule, Link = LNS.ALLITEMS[itemID].Link, }
                         end
-                        LNS.TempSettings.doBulkSet = true
+                        LNS.TempSettings.bulkDelete = false
+                        LNS.TempSettings.doBulkSet  = true
                     end
 
                     ImGui.Unindent(2)
@@ -6018,13 +6020,11 @@ while not LNS.Terminate do
     end
 
     if LNS.TempSettings.doBulkSet then
-        local doDelete = false
-        if LNS.TempSettings.bulkDelete then
-            doDelete = true
-        end
-        LNS.bulkSet(LNS.TempSettings.BulkSet, LNS.TempSettings.BulkRule, LNS.TempSettings.BulkClasses, LNS.TempSettings.BulkSetTable, doDelete)
+        local doDelete = LNS.TempSettings.bulkDelete
+        LNS.bulkSet(LNS.TempSettings.BulkSet, LNS.TempSettings.BulkRule,
+            LNS.TempSettings.BulkClasses, LNS.TempSettings.BulkSetTable, doDelete)
         LNS.TempSettings.doBulkSet = false
-        LNS.TempSettings.bulkDelete = true
+        LNS.TempSettings.bulkDelete = false
     end
 
     if LNS.guiLoot ~= nil then
