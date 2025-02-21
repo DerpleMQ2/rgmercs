@@ -5,7 +5,7 @@ local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
-    _version              = "(EXPERIMENTAL) 1.2 - Live HealMode only, Heal/DPS Improvements",
+    _version              = "Alpha 1.2 - Laz (Heal Mode Only)",
     _author               = "Algar (based on default by Derple)",
     ['ModeChecks']        = {
         IsHealing = function() return true end,
@@ -997,6 +997,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Storm Strike",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.TargetedAAReady(aaName, target.ID())
+                end,
+            },
+            {
                 name = "WinterFireDD",
                 type = "Spell",
                 cond = function(self, spell, target)
@@ -1050,7 +1057,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Group Spirit of the Great Wolf",
+                name = "Group Spirit of the Black Wolf",
                 type = "AA",
                 active_cond = function(self, aaName)
                     return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName)
@@ -1136,7 +1143,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Season's Wrath",
+                name = "Hand of Ro",
                 type = "AA",
                 cond = function(self, aaName, target)
                     return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
@@ -1274,7 +1281,7 @@ local _ClassConfig = {
                 cond = function(self, spell) return (spell and spell() and spell.MyCastTime() or 999999) < 30000 end,
             },
             {
-                name = "Group Spirit of the Great Wolf",
+                name = "Spirit of the Black Wolf",
                 type = "AA",
                 active_cond = function(self, aaName)
                     return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName)
@@ -1282,17 +1289,6 @@ local _ClassConfig = {
                 end,
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "Spirit of the Great Wolf",
-                type = "AA",
-                active_cond = function(self, aaName)
-                    return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName)
-                        .Spell.ID())
-                end,
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and mq.TLO.Me.AltAbility(aaName).Spell.RankName.Stacks()
                 end,
             },
             {

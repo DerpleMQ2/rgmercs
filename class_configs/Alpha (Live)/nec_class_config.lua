@@ -16,7 +16,7 @@ local Casting      = require("utils.casting")
 local Comms        = require("utils.comms")
 
 local _ClassConfig = {
-    _version            = "Experimental - Modern Era Live 1.1",
+    _version            = "Alpha 1.1 - Live (Modern Era DPS Only)",
     _author             = "Algar",
     ['Modes']           = {
         'ModernEra',
