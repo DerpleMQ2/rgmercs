@@ -12,7 +12,7 @@ local Core      = require("utils.core")
 local Logger    = require("utils.logger")
 
 return {
-    _version            = "Experimental 1.4 (1-100 or 110+, 100-110 WIP)",
+    _version            = "Alpha 1.4 - Live (1-70 or 110-125)",
     _author             = "Algar",
     ['Modes']           = {
         'DPS',
