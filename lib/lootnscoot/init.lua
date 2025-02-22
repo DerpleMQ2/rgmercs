@@ -1913,7 +1913,7 @@ DELETE FROM %s WHERE item_id = ?;
     for itemID, data in pairs(item_table) do
         local itemName = LNS.ItemNames[itemID] or nil
         local itemLink = data.Link
-        Logger.Warn(LNS.guiLoot.console, "Query: %s, itemID %s itemName %s, setting %s", qry, itemID, itemName, setting)
+        Logger.Debug(LNS.guiLoot.console, "Query: %s, itemID %s itemName %s, setting %s", qry, itemID, itemName, setting)
 
         if itemName then
             if not delete_items then
