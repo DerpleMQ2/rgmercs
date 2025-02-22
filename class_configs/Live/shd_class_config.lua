@@ -875,18 +875,16 @@ local _ClassConfig = {
             {
                 name = "EndRegen",
                 type = "Disc",
-                tooltip = Tooltips.EndRegen,
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.Level() < 106 and mq.TLO.Me.PctEndurance() < 15
+                    if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
                 end,
             },
-            --If these tables were combined, errors could occur... there is no other good way I can think of to ensure a timer 13 ability that can be used in combat is scribed.
             {
                 name = "CombatEndRegen",
                 type = "Disc",
-                tooltip = Tooltips.CombatEndRegen,
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.Level() > 105 and mq.TLO.Me.PctEndurance() < 15
+                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
@@ -1410,7 +1408,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SnareDot,
                 cond = function(self, spell, target)
                     if Casting.CanUseAA("Encroaching Darkness") then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Targeting.GetTargetPctHPs(target) < 50
+                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Targeting.GetAutoTargetPctHPs() < 50
                 end,
             },
         },

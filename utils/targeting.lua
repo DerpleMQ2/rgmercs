@@ -440,4 +440,9 @@ function Targeting.SetForceBurn(targetId)
         Targeting.ForceBurnTargetID)
 end
 
+function Targeting.TargetIsMA(target)
+    if not target or not target() then return false end
+    return target.ID() == Core.GetMainAssistId()
+end
+
 return Targeting

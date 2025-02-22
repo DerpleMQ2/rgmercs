@@ -1285,7 +1285,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return not Config:GetSetting('DoFire') and Casting.DetSpellCheck(spell) and
-                        Targeting.GetTargetPctHPs(target) < Config:GetSetting('NukePct') and
+                        Targeting.GetAutoTargetPctHPs() < Config:GetSetting('NukePct') and
                         Config:GetSetting('DoNuke')
                 end,
             },
@@ -1294,7 +1294,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return not Config:GetSetting('DoFire') and Casting.DetSpellCheck(spell) and
-                        Targeting.GetTargetPctHPs(target) < Config:GetSetting('NukePct') and
+                        Targeting.GetAutoTargetPctHPs() < Config:GetSetting('NukePct') and
                         Config:GetSetting('DoNuke')
                 end,
             },
@@ -1310,7 +1310,7 @@ local _ClassConfig = {
                 name = "SnareSpells",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(spell) and Targeting.GetTargetPctHPs(target) < 50
+                    return Config:GetSetting('DoSnare') and Casting.DetSpellCheck(spell) and Targeting.GetAutoTargetPctHPs() < 50
                 end,
             },
             {

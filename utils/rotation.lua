@@ -137,45 +137,59 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
     if entry.type:lower() == "spell" then
         local spell = resolvedActionMap[entry.name]
 
-        if not spell or not spell() then
-            ret = false
-        else
-            ret = Casting.UseSpell(spell.RankName(), targetId, bAllowMem, entry.allowDead, entry.overrideWaitForGlobalCooldown, entry.retries)
+        if not spell or not spell() then return false end
 
-            Logger.log_debug("Trying To Cast %s - %s :: %s", entry.name, spell.RankName(),
-                ret and "\agSuccess" or "\arFailed!")
+        if Casting.SpellReady(spell, bAllowMem) then
+            ret = Casting.UseSpell(spell.RankName(), targetId, bAllowMem, entry.allowDead, entry.overrideWaitForGlobalCooldown, entry.retries)
         end
+        Logger.log_verbose("Trying to cast %s - %s :: %s", entry.name, spell.RankName(),
+            ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.type:lower() == "song" then
-        local spell = resolvedActionMap[entry.name]
+        local songSpell = resolvedActionMap[entry.name]
 
-        if not spell or not spell() then
-            ret = false
-        else
-            ret = Casting.UseSong(spell.RankName(), targetId, bAllowMem, entry.retries)
+        if not songSpell or not songSpell() then return false end
 
-            Logger.log_debug("Trying To Cast %s - %s :: %s", entry.name, spell.RankName(),
-                ret and "\agSuccess" or "\arFailed!")
+        if Casting.SongReady(songSpell) then
+            ret = Casting.UseSong(songSpell.RankName(), targetId, bAllowMem, entry.retries)
         end
+        Logger.log_verbose("Trying to sing %s - %s :: %s", entry.name, songSpell.RankName(),
+            ret and "\agSuccess" or "\arFailed!")
     end
 
-    if entry.type:lower() == "aa" then
+    if entry.type:lower() == "disc" then
+        local discSpell = resolvedActionMap[entry.name]
+
+        if not discSpell then return false end
+
+        if Casting.DiscReady(discSpell) then
+            ret = Casting.UseDisc(discSpell, targetId)
+        end
+        Logger.log_verbose("Trying to perform %s - %s :: %s", entry.name, discSpell.RankName(),
+            ret and "\agSuccess" or "\arFailed!")
+    end
+
+    if entry.type:lower() == "aa" then -- why are AA and abilities fired immediately and not returned? Find out.
         if Casting.AAReady(entry.name) then
             Casting.UseAA(entry.name, targetId, entry.allowDead, entry.retries)
             ret = true
         else
             ret = false
         end
+        Logger.log_verbose("Trying to activate %s :: %s", entry.name,
+            ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.type:lower() == "ability" then
-        if Casting.AbilityReady(entry.name) then
+        if Casting.AbilityReady(entry.name, mq.TLO.Spawn(targetId)) then
             Casting.UseAbility(entry.name)
             ret = true
         else
             ret = false
         end
+        Logger.log_verbose("Trying to %s :: %s", entry.name,
+            ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.type:lower() == "customfunc" then
@@ -185,17 +199,6 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
             ret = false
         end
         --Logger.log_verbose("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, Strings.BoolToColorString(ret))
-    end
-
-    if entry.type:lower() == "disc" then
-        local discSpell = resolvedActionMap[entry.name]
-        if not discSpell then
-            ret = false
-        else
-            Logger.log_debug("Using Disc \ao =>> \ag %s [%s] \ao <<=", entry.name,
-                (discSpell() and discSpell.RankName() or "None"))
-            ret = Casting.UseDisc(discSpell, targetId)
-        end
     end
 
     if entry.post_activate then

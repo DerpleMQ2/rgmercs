@@ -620,7 +620,7 @@ return {
         RainCheck = function(target) -- I made a funny
             if not (Config:GetSetting('DoRain') and Config:GetSetting('DoAEDamage')) then return false end
             return Targeting.GetTargetDistance() >= Config:GetSetting('RainDistance') and
-                (Targeting.GetTargetPctHPs(target) >= Config:GetSetting('HPStopBigNuke') or Targeting.IsNamed(target))
+                (Targeting.GetAutoTargetPctHPs() >= Config:GetSetting('HPStopBigNuke') or Targeting.IsNamed(target))
         end,
     },
     ['RotationOrder']   = {
@@ -756,74 +756,55 @@ return {
             {
                 name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Arcane Fury",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Fury of the Gods",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Spire of Arcanum",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Improved Twincast",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not Casting.BuffActiveByName("Twincast")
+                cond = function(self)
+                    return not Casting.BuffActiveByName("Twincast")
                 end,
             },
             {
                 name = "Arcane Destruction",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not mq.TLO.Me.Buff("Spire of Arcanum")
+                cond = function(self)
+                    return not mq.TLO.Me.Buff("Spire of Arcanum")
                 end,
             },
             {
                 name = "Frenzied Devastation",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not mq.TLO.Me.Buff("Spire of Arcanum")
+                cond = function(self)
+                    return not mq.TLO.Me.Buff("Spire of Arcanum")
                 end,
             },
             {
                 name = "Silent Casting",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Mana Burn",
                 type = "AA",
-                cond = function(self, aaName, target)
+                cond = function(self)
                     if not Config:GetSetting('DoManaBurn') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and not Casting.TargetHasBuffByName("Mana Burn") and
-                        Casting.HaveManaToNuke()
+                    return not Casting.TargetHasBuffByName("Mana Burn") and Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "Call of Xuzl",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
         },
         ['Aggro Management'] =
@@ -832,35 +813,35 @@ return {
                 name = "Mind Crash",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
                 end,
             },
             {
                 name = "Arcane Whisper",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
                 end,
             },
             {
                 name = "A Hole in Space",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.IHaveAggro(100)
+                cond = function(self)
+                    return Targeting.IHaveAggro(100)
                 end,
             },
             {
                 name = "Concussion",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
+                cond = function(self)
+                    return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
             },
             {
                 name = "JoltSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
+                cond = function(self)
+                    return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
             },
         },
@@ -869,14 +850,14 @@ return {
                 name = "Atol's Shackles",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Targeting.GetTargetPctHPs(target) < 50
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Targeting.GetAutoTargetPctHPs() < 50
                 end,
             },
             {
                 name = "SnareSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Targeting.GetTargetPctHPs(target) < 50
+                    return Casting.DetSpellCheck(spell) and Targeting.GetAutoTargetPctHPs() < 50
                 end,
             },
         },
@@ -885,31 +866,31 @@ return {
             {
                 name = "TwincastSpell",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell) and not mq.TLO.Me.Buff("Improved Twincast")()
+                cond = function(self)
+                    return not mq.TLO.Me.Buff("Improved Twincast")()
                 end,
             },
             {
                 name = "GambitSpell",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('GambitManaPct')
+                cond = function(self)
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('GambitManaPct')
                 end,
             },
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 allowDead = true,
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
+                cond = function(self)
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 allowDead = true,
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
+                cond = function(self)
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
                 end,
             },
         },
@@ -917,150 +898,120 @@ return {
             {
                 name = "Lower Element",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.TargetedAAReady(aaName, target.ID())
+                cond = function(self, aaName)
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
                 name = "Force of Ice",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Force of Will",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Force of Flame",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
         },
         ['DPS(HighLevel)'] = {
             {
                 name = "VortexNuke",
                 type = "Spell",
-                cond = function(self, spell, target) --using DotSpellCheck to leverage HPStopDot settings to ensure we aren't casting just before trash dies (default: stop at 25% on named, 50% on trash)
-                    return (Casting.DetGambitCheck() or Casting.DotSpellCheck(spell)) and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self, spell) --using DotSpellCheck to leverage HPStopDot settings to ensure we aren't casting just before trash dies (default: stop at 25% on named, 50% on trash)
+                    return (Casting.DetGambitCheck() or Casting.DotSpellCheck(spell))
                 end,
             },
             {
                 name = "CloudburstNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return (Casting.DetGambitCheck() or mq.TLO.Me.Song("Evoker's Synergy")()) and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return (Casting.DetGambitCheck() or mq.TLO.Me.Song("Evoker's Synergy")())
                 end,
             },
             {
                 name = "FuseNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
             {
                 name = "AEBeam",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self)
                     if not (Config:GetSetting('DoAEBeam') and Config:GetSetting('DoAEDamage')) then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('BeamTargetCnt'), true)
+                    return self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('BeamTargetCnt'), true)
                 end,
             },
             {
                 name = "FireClaw",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID()) and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID())
                 end,
             },
             {
                 name = "PBFlame",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self)
                     if not (Config:GetSetting('DoPBAE') and Config:GetSetting('DoAEDamage')) then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
+                    return self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
                 end,
             },
             {
                 name = "FireEtherealNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
             {
                 name = "WildNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.DetGambitCheck() and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return Casting.DetGambitCheck()
                 end,
             },
             {
                 name = "IceEtherealNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
         },
         ['DPS(MidLevel)'] = {
             {
                 name = "SnapNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
             {
                 name = "FireEtherealNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.DetGOMCheck() or (Casting.BurnCheck() and Casting.HaveManaToNuke))
+                cond = function(self)
+                    return (Casting.DetGOMCheck() or (Casting.BurnCheck() and Casting.HaveManaToNuke))
                 end,
             },
             {
                 name = "IceEtherealNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.DetGOMCheck() or (Casting.BurnCheck() and Casting.HaveManaToNuke))
+                cond = function(self)
+                    return (Casting.DetGOMCheck() or (Casting.BurnCheck() and Casting.HaveManaToNuke))
                 end,
             },
             {
                 name = "WildNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
             {
                 name = "WildNuke2",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
             {
                 name = "ChaosNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
         },
         ['DPS(FireLowLevel)'] = {
             {
                 name = "StunSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoStun') then return false end
-                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1068,22 +1019,22 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "BigFireNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('HPStopBigNuke') and not Targeting.IsNamed(target)) then return false end
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    if (Targeting.GetAutoTargetPctHPs() < Config:GetSetting('HPStopBigNuke') and not Targeting.IsNamed(target)) then return false end
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "FireNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
         },
@@ -1091,9 +1042,9 @@ return {
             {
                 name = "StunSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoStun') then return false end
-                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
@@ -1101,22 +1052,22 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "BigIceNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    if (Targeting.GetAutoTargetPctHPs() < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "IceNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
         },
@@ -1124,24 +1075,24 @@ return {
             {
                 name = "StunSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoStun') then return false end
-                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.HaveManaToDebuff() or Casting.BurnCheck()) and Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "BigMagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if (Targeting.GetTargetPctHPs(target) < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    if (Targeting.GetAutoTargetPctHPs() < Config:GetSetting('BigNukeMinHealth') and not Targeting.IsNamed(target)) then return false end
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
         },
@@ -1149,29 +1100,29 @@ return {
             {
                 name = "PBTimer4",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "FireJyll",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "IceJyll",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "MagicJyll",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
                 end,
             },
         },
@@ -1229,15 +1180,15 @@ return {
             {
                 name = "Harvest of Druzzil",
                 type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady(aaName)
+                cond = function(self)
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
             {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.SpellReady(spell)
+                    return Casting.GemReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
             {

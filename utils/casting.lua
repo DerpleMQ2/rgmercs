@@ -317,7 +317,7 @@ end
 --- @param aaName string The name of the AA ability to check.
 --- @return boolean Returns true if the AA ability is available for self-buffing, false otherwise.
 function Casting.SelfBuffAACheck(aaName)
-    local abilityReady = mq.TLO.Me.AltAbilityReady(aaName)()
+    if not mq.TLO.Me.AltAbilityReady(aaName)() then return false end
     local buffNotActive = not Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID())
     local triggerNotActive = not Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
     local auraNotActive = not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID()
@@ -325,8 +325,7 @@ function Casting.SelfBuffAACheck(aaName)
     --local triggerStacks = (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() == 0 or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
     -- trigger is already checked in SpellStacksOnMe, testing.
 
-    Logger.log_verbose("SelfBuffAACheck(%s) abilityReady(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s)", aaName, -- triggerStacks(%s)
-        Strings.BoolToColorString(abilityReady),
+    Logger.log_verbose("SelfBuffAACheck(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s)", aaName, -- triggerStacks(%s)
         Strings.BoolToColorString(buffNotActive),
         Strings.BoolToColorString(triggerNotActive),
         Strings.BoolToColorString(auraNotActive),
@@ -334,7 +333,7 @@ function Casting.SelfBuffAACheck(aaName)
     --Strings.BoolToColorString(triggerStacks))
 
 
-    return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks -- and triggerStacks
+    return buffNotActive and triggerNotActive and auraNotActive and stacks -- and triggerStacks
 end
 
 --- Checks if a song is active by its name.
@@ -503,25 +502,6 @@ function Casting.CanAlliance()
     return true
 end
 
---- Checks if a specific Alternate Advancement (AA) ability is ready to use.
---- @param aaName string The name of the AA ability to check.
---- @return boolean Returns true if the AA ability is ready, false otherwise.
-function Casting.AAReady(aaName)
-    local canUse = Casting.CanUseAA(aaName)
-    local ready = mq.TLO.Me.AltAbilityReady(aaName)()
-    local spell = mq.TLO.Me.AltAbility(aaName).Spell
-    Logger.log_super_verbose("AAReady(%s): ready(%s) canUse(%s) haveMana(%s) haveEnd(%s)", aaName, Strings.BoolToColorString(ready), Strings.BoolToColorString(canUse),
-        Strings.BoolToColorString(mq.TLO.Me.CurrentMana() >= (spell.Mana() or 0)), Strings.BoolToColorString(mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0)))
-    return ready and canUse and (mq.TLO.Me.CurrentMana() >= (spell.Mana() or 0) or mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0))
-end
-
---- Checks if a given ability is ready to be used.
---- @param abilityName string The name of the ability to check.
---- @return boolean True if the ability is ready, false otherwise.
-function Casting.AbilityReady(abilityName)
-    return mq.TLO.Me.AbilityReady(abilityName)()
-end
-
 --- Retrieves the rank of a specified Alternate Advancement (AA) ability.
 --- @param aaName string The name of the AA ability.
 --- @return number The rank of the specified AA ability.
@@ -538,30 +518,6 @@ function Casting.IsActiveDisc(name)
 
     return (spell() and spell.IsSkill() and spell.Duration.TotalSeconds() > 0 and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and
         true or false
-end
-
---- Checks if a player character's spell is ready to be cast.
----
---- @param spell MQSpell The name of the spell to check.
---- @return boolean Returns true if the spell is ready, false otherwise.
-function Casting.SpellReady(spell)
-    if not spell or not spell() then return false end
-    local me = mq.TLO.Me
-
-    if me.Stunned() then return false end
-
-    return me.CurrentMana() > spell.Mana() and not me.Casting() and me.Book(spell.RankName.Name())() ~= nil and
-        not (me.Moving() and (spell.MyCastTime() or -1) > 0)
-end
-
---- Checks if a given discipline spell is ready to be used by the player character.
---- @param discSpell MQSpell The name of the discipline spell to check.
---- @return boolean Returns true if the discipline spell is ready, false otherwise.
-function Casting.DiscReady(discSpell)
-    if not discSpell or not discSpell() then return false end
-    Logger.log_super_verbose("DiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
-        Strings.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
-    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
 end
 
 --- Checks if a given PC discipline spell is ready to be used on the NPC Target.
@@ -1757,6 +1713,102 @@ end
 function Casting.GemReady(spell) -- split from CastReady so we don't have to pass RankName in class configs. If we change SpellReady, we break custom configs
     if not spell or not spell() then return false end
     return mq.TLO.Me.SpellReady(spell.RankName.Name())()
+end
+
+function Casting.CastCheck(spell, bAllowMove)
+    if not spell or not spell() then return false end
+
+    local me = mq.TLO.Me
+    local castingCheck = not (me.Casting() or mq.TLO.Window("CastingWindow").Open())
+    local movingCheck = bAllowMove == true or Core.MyClassIs("brd") or not (me.Moving() and (spell.MyCastTime() or -1) > 0)
+    local manaCheck = (Config.Globals.InMedState and (me.CurrentMana() - (2 * me.ManaRegen())) or me.CurrentMana()) >= spell.Mana()
+    local endCheck = (Config.Globals.InMedState and (me.CurrentEndurance() - (2 * me.EnduranceRegen())) or me.CurrentEndurance()) >= spell.EnduranceCost()
+    ---@diagnostic disable-next-line: undefined-field -- Feared is a valid data member
+    local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed())
+
+    Logger.log_super_verbose("CastCheck for %s (%d): CastingCheck(%s), MovingCheck(%s), ManaCheck(%s), EndCheck(%s), ControlCheck(%s)", spell.Name(), spell.ID(),
+        Strings.BoolToColorString(castingCheck), Strings.BoolToColorString(movingCheck), Strings.BoolToColorString(manaCheck), Strings.BoolToColorString(endCheck),
+        Strings.BoolToColorString(controlCheck))
+
+    return castingCheck and movingCheck and manaCheck and endCheck and controlCheck
+end
+
+--- Checks if a player character's spell is ready to be cast.
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean Returns true if the spell is ready, false otherwise.
+function Casting.SpellReady(spell, skipGemTimer)
+    if not spell or not spell() then return false end
+
+    local bookCheck = mq.TLO.Me.Book(spell.RankName.Name())()
+    local gemTimerCheck = skipGemTimer or mq.TLO.Me.SpellReady(spell.RankName.Name())()
+    local canCast = Casting.CastCheck(spell)
+
+    Logger.log_super_verbose("SpellReady for %s(%d): BookCheck(%s), GemTimerCheck(%s), CanCast(%s)", spell.RankName(), spell.ID(), Strings.BoolToColorString(bookCheck),
+        Strings.BoolToColorString(gemTimerCheck), Strings.BoolToColorString(canCast))
+
+    return bookCheck and gemTimerCheck and canCast
+end
+
+--- Checks if a given discipline spell is ready to be used by the player character.
+--- @param songSpell MQSpell The name of the song spell to check.
+--- @return boolean Returns true if the song is ready, false otherwise.
+function Casting.SongReady(songSpell)
+    if not songSpell or not songSpell() then return false end
+
+    local ready = mq.TLO.Me.SpellReady(songSpell.RankName.Name())()
+    local canCast = Casting.CastCheck(songSpell, true)
+
+    Logger.log_super_verbose("DiscReady for %s(%d): Ready(%s), CanCast(%s)", songSpell.RankName.Name(), songSpell.ID(), Strings.BoolToColorString(ready),
+        Strings.BoolToColorString(canCast))
+
+    return ready and canCast
+end
+
+--- Checks if a given discipline spell is ready to be used by the player character.
+--- @param discSpell MQSpell The name of the discipline spell to check.
+--- @return boolean Returns true if the discipline is ready, false otherwise.
+function Casting.DiscReady(discSpell)
+    if not discSpell or not discSpell() then return false end
+
+    local ready = mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
+    local canCast = Casting.CastCheck(discSpell, true)
+
+    Logger.log_super_verbose("DiscReady for %s(%d): Ready(%s), CanCast(%s)", discSpell.RankName.Name(), discSpell.ID(), Strings.BoolToColorString(ready),
+        Strings.BoolToColorString(canCast))
+
+    return ready and canCast
+end
+
+--- Checks if a specific Alternate Advancement (AA) ability is ready to use.
+--- @param aaName string The name of the AA ability to check.
+--- @return boolean Returns true if the AA ability is ready, false otherwise.
+function Casting.AAReady(aaName)
+    local me = mq.TLO.Me
+    if not me.AltAbility(aaName) then return false end
+
+    local spell = me.AltAbility(aaName).Spell
+    local ready = me.AltAbilityReady(aaName)()
+    local canCast = Casting.CastCheck(spell)
+
+    Logger.log_super_verbose("AAReady for AA %s (aaSpell: %s, %d): Ready(%s), CanCast(%s)", aaName, spell.Name(), spell.ID(), Strings.BoolToColorString(ready),
+        Strings.BoolToColorString(canCast))
+
+    return ready and canCast
+end
+
+--- Checks if a given ability is ready to be used.
+--- @param abilityName string The name of the ability to check.
+--- @return boolean True if the ability is ready, false otherwise.
+function Casting.AbilityReady(abilityName, target)
+    if not target or not target() then return false end
+
+    local ready = mq.TLO.Me.AbilityReady(abilityName)()
+    local inRange = Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target)
+
+    Logger.log_super_verbose("AbilityReady for  %s: Ready(%s), In-Range(%s)", abilityName, Strings.BoolToColorString(ready),
+        Strings.BoolToColorString(inRange))
+
+    return ready and inRange
 end
 
 return Casting

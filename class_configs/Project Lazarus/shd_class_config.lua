@@ -838,18 +838,16 @@ local _ClassConfig = {
             {
                 name = "EndRegen",
                 type = "Disc",
-                tooltip = Tooltips.EndRegen,
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.Level() < 106 and mq.TLO.Me.PctEndurance() < 15
+                    if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
-            --If these tables were combined, errors could occur... there is no other good way I can think of to ensure a timer 13 ability that can be used in combat is scribed.
             {
                 name = "CombatEndRegen",
                 type = "Disc",
-                tooltip = Tooltips.CombatEndRegen,
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.Level() > 105 and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
@@ -958,7 +956,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Skin,
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 60
+                    return Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 60
                 end,
             },
             {
@@ -968,7 +966,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
                     if not Config:GetSetting('DoTempHP') or not Casting.GemReady(spell) then return false end
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
+                    return Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
                 end,
             },
             {
@@ -977,7 +975,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.HealBurn,
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 30
+                    return Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
             {
@@ -1031,7 +1029,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.Pet.ID() > 0 end,
                 cond = function(self, spell)
                     if mq.TLO.Me.Pet.ID() ~= 0 or not Config:GetSetting('DoPet') then return false end
-                    return Casting.SpellReady(spell) and Casting.ReagentCheck(spell)
+                    return Casting.ReagentCheck(spell)
                 end,
             },
         },
@@ -1042,14 +1040,14 @@ local _ClassConfig = {
                 tooltip = Tooltips.PetHaste,
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName) ~= nil end,
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SelfBuffPetCheck(spell)
+                    return Casting.SelfBuffPetCheck(spell)
                 end,
             },
             {
                 name = "Fortify Companion",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
         },
@@ -1062,8 +1060,8 @@ local _ClassConfig = {
                 name = "Armor of Experience",
                 type = "AA",
                 tooltip = Tooltips.ArmorofExperience,
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 25 and Config:GetSetting('DoVetAA')
+                cond = function(self)
+                    return mq.TLO.Me.PctHPs() < 25 and Config:GetSetting('DoVetAA')
                 end,
             },
             --Note that on named we may already have a mantle/carapace running already, could make this remove other discs, but meh, Shield Flash still a thing.
@@ -1077,7 +1075,7 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and not mq.TLO.Me.ActiveDisc.ID() and Casting.DiscReady(discSpell) and
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and not mq.TLO.Me.ActiveDisc.ID() and
                         (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000
                 end,
             },
@@ -1090,16 +1088,16 @@ local _ClassConfig = {
                         Core.SafeCallFunc("Equip Shield", ItemManager.BandolierSwap, "Shield")
                     end
                 end,
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline"
+                cond = function(self)
+                    return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline"
                 end,
             },
             {
                 name = "LeechCurse",
                 type = "Disc",
                 tooltip = Tooltips.LeechCurse,
-                cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and not mq.TLO.Me.ActiveDisc.ID() and Casting.DiscReady(discSpell)
+                cond = function(self)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             --Influence is in an odd place with Carapace. Usage is very subjective and may be more nuanced than automation can support. Placed here as an alternative to Carapace in low health situations to get you topped back off again for tanks. Should be used in burn for non-tanks (adding non-tank stuff is TODO)
@@ -1107,16 +1105,16 @@ local _ClassConfig = {
                 name = "InfluenceDisc",
                 type = "Disc",
                 tooltip = Tooltips.InfluenceDisc,
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID() and Core.IsTanking()
+                cond = function(self)
+                    return not mq.TLO.Me.ActiveDisc.ID() and Core.IsTanking()
                 end,
             },
             {
                 name = "Carapace",
                 type = "Disc",
                 tooltip = Tooltips.Carapace,
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self)
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
@@ -1132,8 +1130,8 @@ local _ClassConfig = {
                 name = "Mantle",
                 type = "Disc",
                 tooltip = Tooltips.Mantle,
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self)
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             --if we made it this far let's reset our dicho/dire and hope for the best!
@@ -1141,9 +1139,6 @@ local _ClassConfig = {
                 name = "Forceful Rejuvenation",
                 type = "AA",
                 tooltip = Tooltips.ForcefulRejuv,
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
         },
         ['HateTools'] = {
@@ -1153,7 +1148,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.AgelessEnmity,
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
+                    return Targeting.GetAutoTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
                 end,
             },
             --used to jumpstart hatred on named from the outset and prevent early rips from burns
@@ -1161,8 +1156,8 @@ local _ClassConfig = {
                 name = "Acrimony",
                 type = "Disc",
                 tooltip = Tooltips.Acrimony,
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell) and Targeting.IsNamed(mq.TLO.Target)
+                cond = function(self, discSpell, target)
+                    return Targeting.IsNamed(target)
                 end,
             },
             --used to reinforce hatred on named
@@ -1172,81 +1167,80 @@ local _ClassConfig = {
                 tooltip = Tooltips.VeilofDarkness,
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.IsNamed(mq.TLO.Target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
+                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
                 end,
             },
             {
                 name = "AETaunt",
                 type = "Spell",
                 tooltip = Tooltips.AETaunt,
-                cond = function(self, spell)
+                cond = function(self)
                     if Config:GetSetting('AETauntSpell') == 1 then return false end
-                    return Casting.SpellReady(spell) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
                 name = "Explosion of Hatred",
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfHatred,
-                cond = function(self, aaName, target)
+                cond = function(self)
                     if not Config:GetSetting('AETauntAA') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
                 name = "Explosion of Spite",
                 type = "AA",
                 tooltip = Tooltips.ExplosionOfSpite,
-                cond = function(self, aaName)
+                cond = function(self)
                     if not Config:GetSetting('AETauntAA') then return false end
-                    return Casting.AAReady(aaName) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
                 name = "Projection of Doom",
                 type = "AA",
                 tooltip = Tooltips.ProjectionofDoom,
-                cond = function(self, aaName)
+                cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
             {
                 name = "Taunt",
                 type = "Ability",
                 tooltip = Tooltips.Taunt,
-                cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetID() > 0 and
-                        Targeting.GetTargetDistance() < 30
+                cond = function(self)
+                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetID() > 0
                 end,
             },
             {
                 name = "Terror",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
-                cond = function(self, spell, target)
+                cond = function(self)
                     if Config:GetSetting('DoTerror') == 1 then return false end
                     ---@diagnostic disable-next-line: undefined-field
-                    return Casting.TargetedSpellReady(spell, target.ID()) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
             },
             {
                 name = "Terror2",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if Config:GetSetting('DoTerror') == 1 then return false end
                     ---@diagnostic disable-next-line: undefined-field
-                    return Casting.SpellLoaded(spell) and Casting.TargetedSpellReady(spell, target.ID()) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                    return Casting.SpellLoaded(spell) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
             },
             {
                 name = "ForPower",
                 type = "Spell",
                 tooltip = Tooltips.ForPower,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoForPower') then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
         },
@@ -1254,41 +1248,30 @@ local _ClassConfig = {
             {
                 name = "Visage of Death",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Crimson",
                 type = "Disc",
                 tooltip = Tooltips.Crimson,
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
-                    return Casting.AAReady(aaName)
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
             {
                 name = "Harm Touch",
                 type = "AA",
                 tooltip = Tooltips.HarmTouch,
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Thought Leech",
                 type = "AA",
                 tooltip = Tooltips.ThoughtLeech,
-                cond = function(self, aaName, target)
-                    if Config:GetSetting('DoThoughtLeech') == 1 then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID())
+                cond = function(self)
+                    return Config:GetSetting('DoThoughtLeech') ~= 1
                 end,
             },
             {
@@ -1296,56 +1279,46 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ThoughtLeech,
                 cond = function(self, aaName, target)
-                    if Config:GetSetting('DoLeechTouch') == 1 then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID())
+                    return Config:GetSetting('DoLeechTouch') ~= 1
                 end,
             },
             {
                 name = "Spire of the Reavers",
                 type = "AA",
                 tooltip = Tooltips.SpireoftheReavers,
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Chattering Bones",
                 type = "AA",
                 tooltip = Tooltips.ChatteringBones,
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "T`Vyl's Resolve",
                 type = "AA",
                 tooltip = Tooltips.Tvyls,
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "SpiteStrike",
                 type = "Disc",
                 tooltip = Tooltips.SpikeStrike,
-                cond = function(self, discSpell)
-                    return not Core.IsTanking() and Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self)
+                    return not Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "UnholyAura",
                 type = "Disc",
                 tooltip = Tooltips.UnholyAura,
-                cond = function(self, discSpell)
-                    return not Core.IsTanking() and Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self)
+                    return not Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "InfluenceDisc",
                 type = "Disc",
                 tooltip = Tooltips.InfluenceDisc,
-                cond = function(self, discSpell)
-                    return not Core.IsTanking() and Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self)
+                    return not Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
         },
@@ -1354,8 +1327,8 @@ local _ClassConfig = {
                 name = "Encroaching Darkness",
                 tooltip = Tooltips.EncroachingDarkness,
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
+                cond = function(self, aaName)
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
@@ -1364,7 +1337,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.SnareDot,
                 cond = function(self, spell, target)
                     if Casting.CanUseAA("Encroaching Darkness") then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Targeting.GetTargetPctHPs(target) < 50
+                    return Casting.DetSpellCheck(spell) and Targeting.GetAutoTargetPctHPs() < 50
                 end,
             },
         },
@@ -1374,7 +1347,8 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.MeleeMit,
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not (discSpell.Level() < 108 and mq.TLO.Me.ActiveDisc.ID())
+                    if not Core.IsTanking() then return false end
+                    return not ((discSpell.Level() or 0) < 108 and mq.TLO.Me.ActiveDisc.ID())
                 end,
             },
             {
@@ -1398,45 +1372,45 @@ local _ClassConfig = {
                 name = "Carapace",
                 type = "Disc",
                 tooltip = Tooltips.Carapace,
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and
-                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return not mq.TLO.Me.ActiveDisc.ID() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
                 name = "Mantle",
                 type = "Disc",
                 tooltip = Tooltips.Mantle,
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and
-                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return not mq.TLO.Me.ActiveDisc.ID() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
                 name = "Guardian",
                 type = "Disc",
                 tooltip = Tooltips.Guardian,
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and
-                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return not mq.TLO.Me.ActiveDisc.ID() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
                 name = "UnholyAura",
                 type = "Disc",
                 tooltip = Tooltips.UnholyAura,
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and
-                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return not mq.TLO.Me.ActiveDisc.ID() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
                 name = "Purity of Death",
                 type = "AA",
                 tooltip = Tooltips.PurityofDeath,
-                cond = function(self, aaName)
+                cond = function(self)
                     ---@diagnostic disable-next-line: undefined-field
-                    return mq.TLO.Me.TotalCounters() > 0 and Casting.AAReady(aaName)
+                    return mq.TLO.Me.TotalCounters() > 0
                 end,
             },
         },
@@ -1448,7 +1422,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.LeechTouch,
                 cond = function(self, aaName, target)
                     if Config:GetSetting('DoLeechTouch') == 2 then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and mq.TLO.Me.PctHPs() < 25
+                    return mq.TLO.Me.PctHPs() < 25
                 end,
             },
             --the trick with the next two is to find a sweet spot between using discs and long term CD abilities (we want these to trigger so those don't need to) and using them needlessly (which isn't much of a damage increase). Trying to get it dialed in for a good default value.
@@ -1456,10 +1430,10 @@ local _ClassConfig = {
                 name = "Dicho",
                 type = "Spell",
                 tooltip = Tooltips.Dicho,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoDicho') then return false end
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.TargetedSpellReady(spell, target.ID()) and
+                    return Casting.GemReady(spell) and
                         (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartDicho')))
                 end,
             },
@@ -1470,7 +1444,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDireTap') then return false end
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.TargetedSpellReady(spell, target.ID()) and
+                    return Casting.GemReady(spell) and
                         (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartDireTap')))
                 end,
             },
@@ -1478,9 +1452,9 @@ local _ClassConfig = {
                 name = "LifeTap",
                 type = "Spell",
                 tooltip = Tooltips.LifeTap,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.TargetedSpellReady(spell, target.ID()) and
+                    return Casting.GemReady(spell) and
                         (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap')))
                 end,
             },
@@ -1488,9 +1462,9 @@ local _ClassConfig = {
                 name = "AELifeTap", --conditions on this may require further tuning, right now it does not respect the start tap settings
                 type = "Spell",
                 tooltip = Tooltips.AELifeTap,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not (Config:GetSetting('DoAELifeTap') and Config:GetSetting('DoAEDamage')) or not spell or not spell() then return false end
-                    return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.SpellStacksOnMe(spell.Trigger) and Casting.TargetedSpellReady(spell, target.ID()) and
+                    return Casting.GemReady(spell) and not mq.TLO.Me.Buff(spell.Trigger())() and Casting.SpellStacksOnMe(spell.Trigger) and
                         self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
@@ -1498,17 +1472,17 @@ local _ClassConfig = {
                 name = "ReflexStrike",
                 type = "Disc",
                 tooltip = Tooltips.ReflexStrike,
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell) and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
+                cond = function(self)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
             },
             {
                 name = "LifeTap2",
                 type = "Spell",
                 tooltip = Tooltips.LifeTap,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.TargetedSpellReady(spell, target.ID()) and
+                    return Casting.GemReady(spell) and
                         (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap')))
                 end,
             },
@@ -1518,47 +1492,35 @@ local _ClassConfig = {
                 name = "ReflexStrike",
                 type = "Disc",
                 tooltip = Tooltips.ReflexStrike,
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell) and (mq.TLO.Group.Injured(80)() or 0) > 2
+                cond = function(self)
+                    return (mq.TLO.Group.Injured(80)() or 0) > 2
                 end,
             },
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 tooltip = Tooltips.CombatEndRegen,
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                cond = function(self)
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "Vicious Bite of Chaos",
                 type = "AA",
                 tooltip = Tooltips.ViciousBiteOfChaos,
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Unbridled Strike of Fear",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Blade",
                 type = "Disc",
                 tooltip = Tooltips.Blade,
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Gift of the Quick Spear",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Thought Leech",
@@ -1566,25 +1528,21 @@ local _ClassConfig = {
                 tooltip = Tooltips.ThoughtLeech,
                 cond = function(self, aaName, target)
                     if Config:GetSetting('DoThoughtLeech') == 2 then return false end
-                    return mq.TLO.Me.PctMana() < 10 and Casting.TargetedAAReady(aaName, target.ID())
+                    return mq.TLO.Me.PctMana() < 10
                 end,
             },
             {
                 name = "Bash",
                 type = "Ability",
                 -- tooltip = Tooltips.Bash,
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target) and
-                        (Core.ShieldEquipped() or Casting.CanUseAA("2 Hand Bash"))
+                cond = function(self)
+                    return (Core.ShieldEquipped() or Casting.CanUseAA("2 Hand Bash"))
                 end,
             },
             {
                 name = "Slam",
                 type = "Ability",
                 tooltip = Tooltips.Slam,
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
         },
         ['Combat'] = {
@@ -1592,18 +1550,18 @@ local _ClassConfig = {
                 name = "BondTap",
                 type = "Spell",
                 tooltip = Tooltips.BondTap,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoBondTap') then return false end
-                    return (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.DotSpellCheck(spell)
                 end,
             },
             {
                 name = "AESpearNuke",
                 type = "Spell",
                 tooltip = Tooltips.SpearNuke,
-                cond = function(self, spell, target)
+                cond = function(self)
                     if not (Config:GetSetting('DoAESpearNuke') and Config:GetSetting('DoAEDamage')) then return false end
-                    return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
@@ -1611,25 +1569,25 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.AESpearNuke,
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and (Casting.HaveManaToNuke() or Casting.BurnCheck())
+                    return (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
             {
                 name = "PoisonDot",
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoPoisonDot') then return false end
-                    return (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.DotSpellCheck(spell)
                 end,
             },
             {
                 name = "CorruptionDot",
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoCorruptionDot') then return false end
-                    return (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.DotSpellCheck(spell)
                 end,
             },
             {
@@ -1638,15 +1596,15 @@ local _ClassConfig = {
                 tooltip = Tooltips.DireDot,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDireDot') then return false end
-                    return (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.DotSpellCheck(spell) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.DotSpellCheck(spell)
                 end,
             },
             {
                 name = "BiteTap",
                 type = "Spell",
                 tooltip = Tooltips.BiteTap,
-                cond = function(self, spell, target) --no mana check here because this returns half the mana cost to the entire group. can adjust later as needed.
-                    return Casting.TargetedSpellReady(spell, target.ID()) and mq.TLO.Me.PctHPs() <= Config:GetSetting('StartLifeTap')
+                cond = function(self) --no mana check here because this returns half the mana cost to the entire group. can adjust later as needed.
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('StartLifeTap')
                 end,
             },
             {
@@ -1655,7 +1613,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.PowerTapAC,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoACTap') or not spell or not spell() then return false end
-                    return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.TargetedSpellReady(spell, target.ID())
+                    return not mq.TLO.Me.Buff(spell.Trigger())()
                 end,
             },
             {
@@ -1664,7 +1622,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.PowerTapAtk,
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoAtkTap') or not spell or not spell() then return false end
-                    return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.TargetedSpellReady(spell, target.ID())
+                    return not mq.TLO.Me.Buff(spell.Trigger())()
                 end,
             },
         },
