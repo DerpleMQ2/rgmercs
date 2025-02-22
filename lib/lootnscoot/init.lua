@@ -220,50 +220,53 @@ if LNS.guiLoot ~= nil then
     LNS.guiLoot.GetSettings(LNS.Settings.HideNames, LNS.Settings.LookupLinks, true, true, 'lootnscoot', false)
 end
 
-LNS.DirectorScript         = 'none'
-LNS.BuyItemsTable          = {}
-LNS.ALLITEMS               = {}
-LNS.GlobalItemsRules       = {}
-LNS.NormalItemsRules       = {}
-LNS.NormalItemsClasses     = {}
-LNS.GlobalItemsClasses     = {}
-LNS.NormalItemsLink        = {}
-LNS.GlobalItemsLink        = {}
-LNS.NewItems               = {}
-LNS.TempSettings           = {}
-LNS.PersonalItemsRules     = {}
-LNS.PersonalItemsClasses   = {}
-LNS.PersonalItemsLink      = {}
-LNS.NewItemDecisions       = nil
-LNS.ItemNames              = {}
-LNS.ItemIcons              = {}
-LNS.NewItemsCount          = 0
-LNS.TempItemClasses        = "All"
-LNS.itemSelectionPending   = false -- Flag to indicate an item selection is in progress
-LNS.pendingItemData        = nil   -- Temporary storage for item data
-LNS.doImportInventory      = false
-LNS.TempModClass           = false
-LNS.ShowUI                 = false
-LNS.Terminate              = true
-LNS.Boxes                  = {}
-LNS.LootNow                = false
-LNS.histCurrentPage        = 1
-LNS.histItemsPerPage       = 25
-LNS.histTotalPages         = 1
-LNS.histTotalItems         = 0
-LNS.HistoricalDates        = {}
-LNS.HistoryDataDate        = {}
-LNS.PersonalTableName      = string.format("%s_Rules", MyName)
-LNS.TempSettings.Edit      = {}
-local tableList            = {
+LNS.DirectorScript               = 'none'
+LNS.BuyItemsTable                = {}
+LNS.ALLITEMS                     = {}
+LNS.GlobalItemsRules             = {}
+LNS.NormalItemsRules             = {}
+LNS.NormalItemsClasses           = {}
+LNS.GlobalItemsClasses           = {}
+LNS.NormalItemsLink              = {}
+LNS.GlobalItemsLink              = {}
+LNS.NewItems                     = {}
+LNS.TempSettings                 = {}
+LNS.PersonalItemsRules           = {}
+LNS.PersonalItemsClasses         = {}
+LNS.PersonalItemsLink            = {}
+LNS.NewItemDecisions             = nil
+LNS.ItemNames                    = {}
+LNS.ItemIcons                    = {}
+LNS.NewItemsCount                = 0
+LNS.TempItemClasses              = "All"
+LNS.itemSelectionPending         = false -- Flag to indicate an item selection is in progress
+LNS.pendingItemData              = nil   -- Temporary storage for item data
+LNS.doImportInventory            = false
+LNS.TempModClass                 = false
+LNS.ShowUI                       = false
+LNS.Terminate                    = true
+LNS.Boxes                        = {}
+LNS.LootNow                      = false
+LNS.histCurrentPage              = 1
+LNS.histItemsPerPage             = 25
+LNS.histTotalPages               = 1
+LNS.histTotalItems               = 0
+LNS.HistoricalDates              = {}
+LNS.HistoryDataDate              = {}
+LNS.PersonalTableName            = string.format("%s_Rules", MyName)
+LNS.TempSettings.Edit            = {}
+LNS.TempSettings.UpdatedBuyItems = {}
+LNS.TempSettings.DeletedBuyKeys  = {}
+
+local tableList                  = {
     "Global_Items", "Normal_Items", LNS.PersonalTableName,
 }
-local tableListRules       = {
+local tableListRules             = {
     "Global_Rules", "Normal_Rules", LNS.PersonalTableName,
 }
 
 -- FORWARD DECLARATIONS
-LNS.AllItemColumnListIndex = {
+LNS.AllItemColumnListIndex       = {
     [1]  = 'name',
     [2]  = 'sell_value',
     [3]  = 'tribute_value',
@@ -3434,8 +3437,8 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
     eval = doWhat
     if doWhat == 'Destroy' then
         mq.delay(10000, function() return mq.TLO.Cursor.ID() == corpseItemID end)
-        eval = isGlobalItem and 'Global Destroy' or 'Destroy'
-        eval = isPersonalItem and 'Personal Destroy' or eval
+        eval = isGlobalItem == true and 'Global Destroy' or 'Destroy'
+        eval = isPersonalItem == true and 'Personal Destroy' or eval
         mq.cmdf('/destroy')
         dbgTbl = {
             Lookup = 'loot.lootItem()',
@@ -3452,13 +3455,13 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
     -- Handle quest item logic
     if qKeep == nil then qKeep = 0 end
     if qKeep > 0 and doWhat == 'Keep' then
-        eval            = isGlobalItem and 'Global Quest' or 'Quest'
-        eval            = isPersonalItem and 'Personal Quest' or eval
+        eval            = isGlobalItem == true and 'Global Quest' or 'Quest'
+        eval            = isPersonalItem == true and 'Personal Quest' or eval
         local countHave = mq.TLO.FindItemCount(itemName)() + mq.TLO.FindItemBankCount(itemName)()
         LNS.report("\awQuest Item:\ag %s \awCount:\ao %s \awof\ag %s", itemLink, tostring(countHave), qKeep)
     else
-        eval = isGlobalItem and 'Global ' .. doWhat or doWhat
-        eval = isPersonalItem and 'Personal ' .. doWhat or eval
+        eval = isGlobalItem == true and 'Global ' .. doWhat or doWhat
+        eval = isPersonalItem == true and 'Personal ' .. doWhat or eval
         LNS.report('%sing \ay%s\ax', eval, itemLink)
     end
 
@@ -3764,6 +3767,7 @@ function LNS.RestockItems()
         local tmpVal = tonumber(qty) or 0
         rowNum       = mq.TLO.Window("MerchantWnd/MW_ItemList").List(string.format("=%s", itemName), 2)() or 0
         mq.delay(20)
+        ::need_more::
         local onHand = mq.TLO.FindItemCount(itemName)()
         local tmpQty = tmpVal - onHand
         if rowNum ~= 0 and tmpQty > 0 then
@@ -3777,6 +3781,11 @@ function LNS.RestockItems()
             Logger.Info(LNS.guiLoot.console, "\agBuying\ay " .. mq.TLO.Window("QuantityWnd/QTYW_SliderInput").Text() .. "\at " .. itemName)
             mq.TLO.Window("QuantityWnd/QTYW_Accept_Button").LeftMouseUp()
             mq.delay(100)
+            onHand = mq.TLO.FindItemCount(itemName)()
+            if onHand < tmpVal then
+                goto need_more
+                Logger.Info(LNS.guiLoot.console, "\ayStack Max Size \axis \arLess\ax than \ax%s \aoHave\ax: \at%s\ax \agBuying\ax: \ay%s", tmpVal, onHand, tmpQty)
+            end
         end
         mq.delay(500, function() return mq.TLO.FindItemCount(itemName)() == qty end)
     end
@@ -3899,13 +3908,13 @@ function LNS.processItems(action)
     ProcessItemsState = action
     LNS.informProcessing()
     -- Helper function to process individual items based on action
-    local function processItem(item, action, bag, slot)
+    local function processItem(item, todo, bag, slot)
         if not item or not item.ID() then return end
         local itemID = item.ID()
         local rule   = LNS.GlobalItemsRules[itemID] and LNS.GlobalItemsRules[itemID] or LNS.NormalItemsRules[itemID]
         rule         = LNS.PersonalItemsRules[itemID] and LNS.PersonalItemsRules[itemID] or rule
-        if rule == action then
-            if action == 'Sell' then
+        if rule == todo then
+            if todo == 'Sell' then
                 if not mq.TLO.Window('MerchantWnd').Open() then
                     if not LNS.goToVendor() or not LNS.openVendor() then return end
                 end
@@ -3913,16 +3922,16 @@ function LNS.processItems(action)
                 LNS.SellToVendor(itemID, bag, slot, item.Name())
                 totalPlat = totalPlat + sellPrice
                 mq.delay(1)
-            elseif action == 'Tribute' then
+            elseif todo == 'Tribute' then
                 if not mq.TLO.Window('TributeMasterWnd').Open() then
                     if not LNS.goToVendor() or not LNS.openTribMaster() then return end
                 end
                 mq.cmdf('/keypress OPEN_INV_BAGS')
                 mq.delay(1000, LNS.AreBagsOpen)
                 LNS.TributeToVendor(item, bag, slot)
-            elseif action == ('Destroy' or 'Cleanup') then
+            elseif todo == ('Destroy' or 'Cleanup') then
                 LNS.DestroyItem(item, bag, slot)
-            elseif action == 'Bank' then
+            elseif todo == 'Bank' then
                 if not mq.TLO.Window('BigBankWnd').Open() then
                     if not LNS.goToVendor() or not LNS.openBanker() then return end
                 end
@@ -4564,6 +4573,7 @@ function LNS.drawTable(label)
                 ImGui.TableSetupColumn("Rule", ImGuiTableColumnFlags.WidthFixed, 40)
                 ImGui.TableSetupColumn('Classes', ImGuiTableColumnFlags.WidthFixed, 90)
             end
+            ImGui.TableSetupScrollFreeze(colCount, 1)
             ImGui.TableHeadersRow()
 
             if LNS[label .. 'ItemsRules'] ~= nil then
@@ -4678,27 +4688,11 @@ function LNS.drawItemsTables()
             if LNS.TempSettings.BuyItems == nil then
                 LNS.TempSettings.BuyItems = {}
             end
-            ImGui.Text("Delete the Item Name to remove it from the table")
+            -- ImGui.Text("Delete the Item Name to remove it from the table")
 
-            if ImGui.SmallButton("Save Changes##BuyItems") then
-                for k, v in pairs(LNS.TempSettings.UpdatedBuyItems) do
-                    if k ~= "" then
-                        LNS.BuyItemsTable[k] = v
-                    end
-                end
-
-                for k in pairs(LNS.TempSettings.DeletedBuyKeys) do
-                    LNS.BuyItemsTable[k] = nil
-                    LNS.TempSettings.NeedSave = true
-                    LNS.TempSettings.NewBuyItem = ""
-                    LNS.TempSettings.NewBuyQty = 1
-                end
-
-                LNS.TempSettings.UpdatedBuyItems = {}
-                LNS.TempSettings.DeletedBuyKeys = {}
-
-                LNS.TempSettings.NeedSave = true
-            end
+            -- if ImGui.SmallButton("Save Changes##BuyItems") then
+            --     LNS.TempSettings.NeedSave = true
+            -- end
 
             ImGui.SeparatorText("Add New Item")
             if ImGui.BeginTable("AddItem", 2, ImGuiTableFlags.Borders) then
@@ -4753,9 +4747,6 @@ function LNS.drawItemsTables()
                 local numDisplayColumns = col / 2
 
                 if LNS.BuyItemsTable ~= nil and LNS.TempSettings.SortedBuyItemKeys ~= nil then
-                    LNS.TempSettings.UpdatedBuyItems = {}
-                    LNS.TempSettings.DeletedBuyKeys = {}
-
                     local numItems = #LNS.TempSettings.SortedBuyItemKeys
                     local numRows = math.ceil(numItems / numDisplayColumns)
 
@@ -4765,34 +4756,40 @@ function LNS.drawItemsTables()
                             local k = LNS.TempSettings.SortedBuyItemKeys[index]
                             if k then
                                 local v = LNS.BuyItemsTable[k]
+                                ImGui.PushID(k .. v)
 
                                 LNS.TempSettings.BuyItems[k] = LNS.TempSettings.BuyItems[k] or
                                     { Key = k, Value = v, }
 
                                 ImGui.TableNextColumn()
 
-                                ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
-                                local newKey = ImGui.InputText("##Key" .. k, LNS.TempSettings.BuyItems[k].Key)
+                                ImGui.Text(LNS.TempSettings.BuyItems[k].Key)
 
                                 ImGui.TableNextColumn()
-                                ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
+                                ImGui.SetNextItemWidth(60)
+
                                 local newValue = ImGui.InputText("##Value" .. k,
                                     LNS.TempSettings.BuyItems[k].Value)
 
-                                if newValue ~= v and newKey == k then
-                                    if newValue == "" then newValue = "NULL" end
-                                    LNS.TempSettings.UpdatedBuyItems[newKey] = newValue
-                                elseif newKey ~= "" and newKey ~= k then
+                                ImGui.SameLine()
+                                ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(1.0, 0.4, 0.4, 0.4))
+                                if ImGui.SmallButton(Icons.MD_DELETE) then
                                     LNS.TempSettings.DeletedBuyKeys[k] = true
-                                    if newValue == "" then newValue = "NULL" end
-                                    LNS.TempSettings.UpdatedBuyItems[newKey] = newValue
-                                elseif newKey ~= k and newKey == "" then
-                                    LNS.TempSettings.DeletedBuyKeys[k] = true
+                                    LNS.TempSettings.NeedSave = true
                                 end
+                                ImGui.PopStyleColor()
+                                ImGui.SameLine()
+                                ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.4, 1.0, 0.4, 0.4))
+                                if ImGui.SmallButton(Icons.MD_SAVE) then
+                                    LNS.TempSettings.UpdatedBuyItems[k] = newValue
+                                    LNS.TempSettings.NeedSave = true
+                                end
+                                ImGui.PopStyleColor()
 
-                                LNS.TempSettings.BuyItems[k].Key = newKey
+                                LNS.TempSettings.BuyItems[k].Key = k
                                 LNS.TempSettings.BuyItems[k].Value = newValue
                                 -- end
+                                ImGui.PopID()
                             end
                         end
                     end
@@ -4995,7 +4992,7 @@ function LNS.drawItemsTables()
                             ImGui.TableSetupColumn(label, ImGuiTableColumnFlags.DefaultHide)
                         end
                     end
-                    ImGui.TableSetupScrollFreeze(1, 1)
+                    ImGui.TableSetupScrollFreeze(2, 1)
                     ImGui.TableHeadersRow()
 
                     -- Render only the current page's items
@@ -6195,6 +6192,20 @@ while not LNS.Terminate do
     end
 
     if LNS.TempSettings.NeedSave then
+        for k, v in pairs(LNS.TempSettings.UpdatedBuyItems or {}) do
+            if k ~= "" then
+                LNS.BuyItemsTable[k] = v
+            end
+        end
+
+        LNS.TempSettings.UpdatedBuyItems = {}
+        for k in pairs(LNS.TempSettings.DeletedBuyKeys or {}) do
+            LNS.BuyItemsTable[k] = nil
+            LNS.TempSettings.NewBuyItem = ""
+            LNS.TempSettings.NewBuyQty = 1
+        end
+
+        LNS.TempSettings.DeletedBuyKeys = {}
         LNS.writeSettings()
         LNS.TempSettings.NeedSave = false
         LNS.sendMySettings()
