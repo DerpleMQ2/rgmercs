@@ -2812,6 +2812,11 @@ function LNS.getRule(item, fromFunction, index)
     -- Handle Spell Drops
     if LNS.Settings.KeepSpells and LNS.checkSpells(itemName) and ruletype == 'Normal' then
         lootDecision = "Keep"
+        lootNewItemRule = 'Keep'
+        if isNoDrop then
+            lootDecision = "Ask"
+            lootNewItemRule = 'Ask'
+        end
         dbgTbl = {
             Lookup = '\ax\ag Check for SPELLS',
             Decision = lootDecision,
@@ -2861,6 +2866,20 @@ function LNS.getRule(item, fromFunction, index)
                 lootNewItemRule = 'Keep'
                 lootDecision = 'Keep'
             end
+        end
+
+        if LNS.Settings.KeepSpells and LNS.checkSpells(itemName) then
+            lootDecision = "Ask"
+            lootNewItemRule = 'Ask'
+
+            dbgTbl = {
+                Lookup = '\ax\ag Check for SPELLS NODROP',
+                Decision = lootDecision,
+                Classes = lootClasses,
+                Item = itemName,
+                Link = lootLink,
+            }
+            Logger.Debug(LNS.guiLoot.console, dbgTbl)
         end
 
         dbgTbl = {
