@@ -2681,7 +2681,14 @@ function LNS.getRule(item, fromFunction, index)
             ruletype = 'Normal'
             lootNewItemRule = "Ask"
             lootDecision = "Ask"
+        else
+            lootRule = "Ignore"
+            ruletype = 'Normal'
+            lootNewItemRule = "Ignore"
+            lootDecision = "Ignore"
         end
+        newRule = true
+        goto skip_new_rule
     end
 
     if ruletype == ('Global') then
@@ -2739,7 +2746,7 @@ function LNS.getRule(item, fromFunction, index)
         newRule = true
         -- end
     end
-
+    ::skip_new_rule::
     lootNewItemRule = lootRule
 
     if lootRule == ('Sell' or 'Tribute') and ruletype == 'Normal' and not newRule and not tsCheck then
@@ -3164,25 +3171,27 @@ function LNS.RegisterActors()
             LNS[lootMessage.bulkLabel .. 'Link']    = lootMessage.bulkLink or {}
             return
         end
-        -- Handle actions
-        if lootMessage.noChange then
+        -- -- Handle actions
+
+        if lootMessage.entered then
             if lootedCorpses[lootMessage.corpse] then
                 lootedCorpses[lootMessage.corpse] = nil
             end
-
-            LNS.NewItems[itemID] = nil
-            if LNS.TempSettings.NewItemIDs ~= nil then
-                for idx, id in ipairs(LNS.TempSettings.NewItemIDs) do
-                    if id == itemID then
-                        table.remove(LNS.TempSettings.NewItemIDs, idx)
-                        break
-                    end
-                end
-            end
-            LNS.NewItemsCount = LNS.NewItemsCount - 1
-            Logger.Info(LNS.guiLoot.console, "loot.RegisterActors: \atNew Item Rule \ax\agConfirmed:\ax [\ay%s\ax] NewItemCount Remaining \ag%s\ax", itemLink, LNS.NewItemsCount)
-            return
         end
+        -- if lootMessage.noChange then
+        --     LNS.NewItems[itemID] = nil
+        --     if LNS.TempSettings.NewItemIDs ~= nil then
+        --         for idx, id in ipairs(LNS.TempSettings.NewItemIDs) do
+        --             if id == itemID then
+        --                 table.remove(LNS.TempSettings.NewItemIDs, idx)
+        --                 break
+        --             end
+        --         end
+        --     end
+        --     LNS.NewItemsCount = LNS.NewItemsCount - 1
+        --     Logger.Info(LNS.guiLoot.console, "loot.RegisterActors: \atNew Item Rule \ax\agConfirmed:\ax [\ay%s\ax] NewItemCount Remaining \ag%s\ax", itemLink, LNS.NewItemsCount)
+        --     return
+        -- end
 
         if action == 'addrule' or action == 'modifyitem' then
             Logger.Debug(LNS.guiLoot.console, dbgTbl)
@@ -3331,7 +3340,11 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
             return
         end
     end
-
+    if mq.TLO.Window('ConfirmationDialogBox').Open() then
+        Logger.Warn(LNS.guiLoot.console, "lootItem(): ConfirmationDialogBox is open. Closing it.")
+        mq.TLO.Window('ConfirmationDialogBox').DoClose()
+        mq.delay(1000, function() return not mq.TLO.Window('ConfirmationDialogBox').Open() end)
+    end
 
     mq.cmdf('/nomodkey /shift /itemnotify loot%s %s', index, button)
     mq.delay(1) -- Small delay to ensure command execution.
@@ -3432,7 +3445,7 @@ function LNS.lootCorpse(corpseID)
     end
 
     mq.doevents('CantLoot')
-    mq.delay(3000, function() return cantLootID > 0 or mq.TLO.Window('LootWnd').Open() end)
+    mq.delay(1000, function() return cantLootID > 0 or mq.TLO.Window('LootWnd').Open() end)
 
     if not mq.TLO.Window('LootWnd').Open() then
         if mq.TLO.Target.CleanName() then
@@ -3484,7 +3497,7 @@ function LNS.lootCorpse(corpseID)
 
     if mq.TLO.Cursor() then LNS.checkCursor() end
     mq.cmdf('/nomodkey /notify LootWnd LW_DoneButton leftmouseup')
-    mq.delay(5000, function() return not mq.TLO.Window('LootWnd').Open() end)
+    mq.delay(2000, function() return not mq.TLO.Window('LootWnd').Open() end)
 
     if mq.TLO.Spawn(('corpse id %s'):format(corpseID))() then
         cantLootList[corpseID] = os.time()
@@ -3566,6 +3579,7 @@ function LNS.lootMobs(limit)
             if not corpseID or corpseID <= 0 or LNS.corpseLocked(corpseID) or
                 (mq.TLO.Navigation.PathLength('spawn id ' .. corpseID)() or 100) > LNS.Settings.CorpseRadius then
                 Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Skipping corpse ID: %d.', corpseID)
+                table.remove(corpseList, _)
                 goto continue
             end
 
@@ -4262,6 +4276,7 @@ function LNS.SafeText(write_value)
     end
 end
 
+LNS.TempSettings.SelectedItems = {}
 function LNS.drawTable(label)
     local varSub = label .. 'Items'
 
@@ -4313,14 +4328,16 @@ function LNS.drawTable(label)
         end
         if ImGui.IsItemHovered() then ImGui.SetTooltip("Clear Search") end
 
-        local col = 3
-        col = math.max(3, math.floor(ImGui.GetContentRegionAvail() / 140))
-        local colCount = col + (col % 3)
-        if colCount % 3 ~= 0 then
-            if (colCount - 1) % 3 == 0 then
+        local col = 4
+        col = math.max(4, math.floor(ImGui.GetContentRegionAvail() / 140))
+        local colCount = col + (col % 4)
+        if colCount % 4 ~= 0 then
+            if (colCount - 1) % 4 == 0 then
                 colCount = colCount - 1
-            else
+            elseif (colCount - 2) % 4 == 0 then
                 colCount = colCount - 2
+            elseif (colCount - 3) % 4 == 0 then
+                colCount = colCount - 3
             end
         end
 
@@ -4435,21 +4452,40 @@ function LNS.drawTable(label)
 
             ImGui.PopID()
             ImGui.SameLine()
-            if ImGui.Button("Set All") then
-                LNS.TempSettings.BulkSet = {}
+            if ImGui.Button("Select All") then
                 for i = startIndex, endIndex do
                     local itemID = filteredItems[i].id
-                    LNS.TempSettings.BulkSet[itemID] = { Rule = LNS.TempSettings.BulkRule, Link = LNS[varSub .. 'Link'][itemID] or "NULL", }
+                    LNS.TempSettings.SelectedItems[itemID] = true
+                end
+            end
+
+            ImGui.SameLine()
+            if ImGui.Button("Clear Selected") then
+                for id, selected in pairs(LNS.TempSettings.SelectedItems) do
+                    LNS.TempSettings.SelectedItems[id] = false
+                end
+            end
+
+            if ImGui.Button("Set Selected") then
+                LNS.TempSettings.BulkSet = {}
+                for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
+                    if isSelected then
+                        LNS.TempSettings.BulkSet[itemID] = {
+                            Rule = LNS.TempSettings.BulkRule,
+                            Link = LNS[varSub .. 'Link'][itemID] or "NULL",
+                        }
+                    end
                 end
                 LNS.TempSettings.doBulkSet = true
-                LNS.TempSettings.bulkDelete = false
             end
+
             ImGui.SameLine()
-            if ImGui.Button("Delete All") then
+            if ImGui.Button("Delete Selected") then
                 LNS.TempSettings.BulkSet = {}
-                for i = startIndex, endIndex do
-                    local itemID = filteredItems[i].id
-                    LNS.TempSettings.BulkSet[itemID] = { Rule = "Delete", Link = "NULL", }
+                for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
+                    if isSelected then
+                        LNS.TempSettings.BulkSet[itemID] = { Rule = "Delete", Link = "NULL", }
+                    end
                 end
                 LNS.TempSettings.doBulkSet = true
                 LNS.TempSettings.bulkDelete = true
@@ -4459,7 +4495,8 @@ function LNS.drawTable(label)
 
         if ImGui.BeginTable(label .. " Items", colCount, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable, ImGuiTableFlags.ScrollY), ImVec2(0.0, 0.0)) then
             ImGui.TableSetupScrollFreeze(colCount, 1)
-            for i = 1, colCount / 3 do
+            for i = 1, colCount / 4 do
+                ImGui.TableSetupColumn(Icons.FA_CHECK, ImGuiTableColumnFlags.WidthFixed, 30)
                 ImGui.TableSetupColumn("Item", ImGuiTableColumnFlags.WidthStretch)
                 ImGui.TableSetupColumn("Rule", ImGuiTableColumnFlags.WidthFixed, 40)
                 ImGui.TableSetupColumn('Classes', ImGuiTableColumnFlags.WidthFixed, 90)
@@ -4479,6 +4516,16 @@ function LNS.drawTable(label)
                     local itemName = LNS.ItemNames[itemID] or item.Name
                     if LNS.SearchLootTable(LNS.TempSettings['Search' .. varSub], item, setting) then
                         ImGui.TableNextColumn()
+                        ImGui.PushID(itemID .. "_checkbox")
+                        if LNS.TempSettings.SelectedItems[itemID] == nil then
+                            LNS.TempSettings.SelectedItems[itemID] = false
+                        end
+                        local isSelected = LNS.TempSettings.SelectedItems[itemID]
+                        isSelected = ImGui.Checkbox("##select", isSelected)
+                        LNS.TempSettings.SelectedItems[itemID] = isSelected
+                        ImGui.PopID()
+                        ImGui.TableNextColumn()
+
                         ImGui.Indent(2)
                         local btnColor, btnText = ImVec4(0.0, 0.6, 0.0, 0.4), Icons.FA_PENCIL
                         if LNS.ItemIcons[itemID] == nil then
@@ -4839,25 +4886,39 @@ function LNS.drawItemsTables()
                     end
 
                     ImGui.PopID()
-                    ImGui.SameLine()
-                    if ImGui.Button("Set All") then
-                        LNS.TempSettings.BulkSet = {}
+                    if ImGui.Button("Select All") then
                         for i = startIndex, endIndex do
                             local itemID = filteredItems[i].id
-                            LNS.TempSettings.BulkSet[itemID] = { Rule = LNS.TempSettings.BulkRule, Link = LNS.ALLITEMS[itemID].Link, }
+                            LNS.TempSettings.SelectedItems[itemID] = true
                         end
-                        LNS.TempSettings.bulkDelete = false
-                        LNS.TempSettings.doBulkSet  = true
                     end
 
+                    ImGui.SameLine()
+                    if ImGui.Button("Clear Selected") then
+                        for id, selected in pairs(LNS.TempSettings.SelectedItems) do
+                            LNS.TempSettings.SelectedItems[id] = false
+                        end
+                    end
+
+                    if ImGui.Button("Set Selected") then
+                        LNS.TempSettings.BulkSet = {}
+                        for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
+                            if isSelected then
+                                LNS.TempSettings.BulkSet[itemID] = {
+                                    Rule = LNS.TempSettings.BulkRule,
+                                    Link = LNS.ALLITEMS[itemID].Link or "NULL",
+                                }
+                            end
+                        end
+                        LNS.TempSettings.doBulkSet = true
+                    end
                     ImGui.Unindent(2)
-                end
-
-
-                -- Render the table
-                if ImGui.BeginTable("DB", 59, bit32.bor(ImGuiTableFlags.Borders,
+                end -- Render the table
+                if ImGui.BeginTable("DB", 60, bit32.bor(ImGuiTableFlags.Borders,
                         ImGuiTableFlags.Hideable, ImGuiTableFlags.Resizable, ImGuiTableFlags.ScrollX, ImGuiTableFlags.ScrollY, ImGuiTableFlags.Reorderable)) then
                     -- Set up column headers
+                    ImGui.TableSetupColumn(Icons.FA_CHECK, bit32.bor(ImGuiTableColumnFlags.NoHide, ImGuiTableColumnFlags.WidthFixed), 30)
+
                     for idx, label in pairs(LNS.AllItemColumnListIndex) do
                         if label == 'name' then
                             ImGui.TableSetupColumn(label, ImGuiTableColumnFlags.NoHide)
@@ -4872,7 +4933,15 @@ function LNS.drawItemsTables()
                     for i = startIndex, endIndex do
                         local id = filteredItems[i].id
                         local item = filteredItems[i].data
-
+                        ImGui.TableNextColumn()
+                        ImGui.PushID(id .. "_checkbox")
+                        if LNS.TempSettings.SelectedItems[id] == nil then
+                            LNS.TempSettings.SelectedItems[id] = false
+                        end
+                        local isSelected = LNS.TempSettings.SelectedItems[id]
+                        isSelected = ImGui.Checkbox("##select", isSelected)
+                        LNS.TempSettings.SelectedItems[id] = isSelected
+                        ImGui.PopID()
                         ImGui.PushID(id)
 
                         -- Render each column for the item
@@ -6025,6 +6094,7 @@ while not LNS.Terminate do
             LNS.TempSettings.BulkClasses, LNS.TempSettings.BulkSetTable, doDelete)
         LNS.TempSettings.doBulkSet = false
         LNS.TempSettings.bulkDelete = false
+        LNS.TempSettings.SelectedItems = {}
     end
 
     if LNS.guiLoot ~= nil then
