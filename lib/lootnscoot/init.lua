@@ -976,17 +976,48 @@ function LNS.commandHandler(...)
         elseif command == 'quit' or command == 'exit' then
             LNS.Terminate = true
         end
+        if command == 'buy' and mq.TLO.Cursor() ~= nil then
+            local itemName = mq.TLO.Cursor.Name()
+            LNS.BuyItemsTable[itemName] = 1
+            LNS.setBuyItem(itemName, 1)
+            LNS.TempSettings.NeedSave = true
+            LNS.TempSettings.NewBuyItem = ""
+            LNS.TempSettings.NewBuyQty = 1
+
+            Logger.Info(LNS.guiLoot.console, "Setting \ay%s\ax to \agBuy Item\ax", itemName)
+        end
     elseif #args == 2 then
-        local action, itemName = args[1], args[2]
+        local action, item_name = args[1], args[2]
         if validActions[action] then
-            local lootID = LNS.resolveItemIDbyName(itemName, false)
+            local lootID = LNS.resolveItemIDbyName(item_name, false)
             Logger.Warn(LNS.guiLoot.console, "lootID: %s", lootID)
             if lootID then
                 if LNS.ALLITEMS[lootID] then
                     LNS.addRule(lootID, 'NormalItems', validActions[action], 'All', LNS.ALLITEMS[lootID].Link)
-                    Logger.Info(LNS.guiLoot.console, "Setting \ay%s (%s)\ax to \ay%s\ax", itemName, lootID, validActions[action])
+                    Logger.Info(LNS.guiLoot.console, "Setting \ay%s (%s)\ax to \ay%s\ax", item_name, lootID, validActions[action])
                 end
             end
+        end
+        if action == 'buy' and mq.TLO.Cursor() ~= nil then
+            if tonumber(args[2]) then
+                local cursorItem = mq.TLO.Cursor.Name()
+                LNS.BuyItemsTable[cursorItem] = args[2]
+
+                LNS.setBuyItem(cursorItem, args[2])
+                LNS.TempSettings.NeedSave = true
+                LNS.TempSettings.NewBuyItem = ""
+                LNS.TempSettings.NewBuyQty = args[2]
+
+                Logger.Info(LNS.guiLoot.console, "Setting \ay%s\ax to \agBuy Item\ax", cursorItem)
+            end
+        elseif action == 'buy' and type(item_name) == 'string' then
+            LNS.BuyItemsTable[item_name] = 1
+            LNS.setBuyItem(item_name, 1)
+            LNS.TempSettings.NeedSave = true
+            LNS.TempSettings.NewBuyItem = ""
+            LNS.TempSettings.NewBuyQty = 1
+
+            Logger.Info(LNS.guiLoot.console, "Setting \ay%s\ax to \agBuy Item\ax", item_name)
         end
     elseif #args == 3 then
         if args[1] == 'globalitem' and args[2] == 'quest' and item() then
@@ -1007,6 +1038,13 @@ function LNS.commandHandler(...)
             else
                 Logger.Warn(LNS.guiLoot.console, "Item \ay%s\ax ID: %s\ax not found in loot.ALLITEMS.", itemName, itemID)
             end
+        elseif args[1] == 'buy' then
+            LNS.BuyItemsTable[args[2]] = args[3]
+            LNS.setBuyItem(args[2], args[3])
+            LNS.TempSettings.NeedSave = true
+            LNS.TempSettings.NewBuyItem = ""
+            LNS.TempSettings.NewBuyQty = args[3]
+            Logger.Info(LNS.guiLoot.console, "Setting \ay%s\ax to \agBuy Item\ax", args[2])
         end
     end
     LNS.writeSettings()
@@ -4451,8 +4489,8 @@ function LNS.drawTable(label)
             end
 
             ImGui.PopID()
-            ImGui.SameLine()
-            if ImGui.Button("Select All") then
+
+            if ImGui.Button(Icons.FA_CHECK .. " All") then
                 for i = startIndex, endIndex do
                     local itemID = filteredItems[i].id
                     LNS.TempSettings.SelectedItems[itemID] = true
@@ -4466,6 +4504,7 @@ function LNS.drawTable(label)
                 end
             end
 
+            ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.4, 1.0, 0.4, 0.4))
             if ImGui.Button("Set Selected") then
                 LNS.TempSettings.BulkSet = {}
                 for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
@@ -4478,8 +4517,12 @@ function LNS.drawTable(label)
                 end
                 LNS.TempSettings.doBulkSet = true
             end
+            ImGui.PopStyleColor()
+
 
             ImGui.SameLine()
+
+            ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(1.0, 0.4, 0.4, 0.4))
             if ImGui.Button("Delete Selected") then
                 LNS.TempSettings.BulkSet = {}
                 for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
@@ -4490,6 +4533,7 @@ function LNS.drawTable(label)
                 LNS.TempSettings.doBulkSet = true
                 LNS.TempSettings.bulkDelete = true
             end
+            ImGui.PopStyleColor()
             ImGui.Unindent(2)
         end
 
@@ -4626,6 +4670,9 @@ function LNS.drawItemsTables()
 
                 for k in pairs(LNS.TempSettings.DeletedBuyKeys) do
                     LNS.BuyItemsTable[k] = nil
+                    LNS.TempSettings.NeedSave = true
+                    LNS.TempSettings.NewBuyItem = ""
+                    LNS.TempSettings.NewBuyQty = 1
                 end
 
                 LNS.TempSettings.UpdatedBuyItems = {}
@@ -4886,7 +4933,7 @@ function LNS.drawItemsTables()
                     end
 
                     ImGui.PopID()
-                    if ImGui.Button("Select All") then
+                    if ImGui.Button(Icons.FA_CHECK .. " All") then
                         for i = startIndex, endIndex do
                             local itemID = filteredItems[i].id
                             LNS.TempSettings.SelectedItems[itemID] = true
@@ -4900,6 +4947,7 @@ function LNS.drawItemsTables()
                         end
                     end
 
+                    ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.4, 1.0, 0.4, 0.4))
                     if ImGui.Button("Set Selected") then
                         LNS.TempSettings.BulkSet = {}
                         for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
@@ -4912,6 +4960,8 @@ function LNS.drawItemsTables()
                         end
                         LNS.TempSettings.doBulkSet = true
                     end
+                    ImGui.PopStyleColor()
+
                     ImGui.Unindent(2)
                 end -- Render the table
                 if ImGui.BeginTable("DB", 60, bit32.bor(ImGuiTableFlags.Borders,
@@ -6129,6 +6179,7 @@ while not LNS.Terminate do
         LNS.writeSettings()
         LNS.TempSettings.NeedSave = false
         LNS.sendMySettings()
+        LNS.SortTables()
     end
 
     if LNS.TempSettings.LookUpItem then
