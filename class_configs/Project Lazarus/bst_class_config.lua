@@ -24,6 +24,10 @@ return {
             "Beast Tamer's Jerkin",
             "Savagesoul Jerkin of the Wilds",
         },
+        ['Coating'] = {
+            "Spirit Drinker's Coating",
+            "Blood Drinker's Coating",
+        },
     },
     ['AbilitySets']       = { --TODO/Under Consideration: Add AoE Roar line, add rotation entry (tie it to Do AoE setting), swap in instead of lance 2, especially since the last lance2 is level 112
         ['SwarmPet'] = {
@@ -117,6 +121,17 @@ return {
             "Kromtus Lance",   -- Level 102 - Timer 11
             "Restless Lance",  -- Level 112 - Timer 11
         },
+        ['AERoar'] = {
+            -- PBAE Roar Timer 11 Ice Nuke Fast Cast
+            "Glacial Roar",   -- Level 89 - Timer 11
+            "Frostrift Roar", -- Level 94 - Timer 11
+            "Kromrif Roar",   -- Level 99 - Timer 11
+            "Kromtus Roar",   -- Level 104 - Timer 11
+            "Frostbite Roar", -- Level 109 - Timer 11
+            "Restless Roar",  -- Level 114 - Timer 11
+            "Polar Roar",     -- Level 119 - Timer 11
+            "Hoarfrost Roar", -- Level 124 - Timer 11
+        },
         ['EndemicDot'] = {
             -- Disease DoT Instant Cast
             "Sicken",                -- Level 14
@@ -180,6 +195,7 @@ return {
             "Dissident Fury",  -- Level 106
             "Composite Fury",  -- Level 111
             "Ecliptic Fury",   -- Level 116
+            "Reciprocal Fury", -- Level 121
         },
         ['HealSpell'] = {
             "Salve",               -- Level 1
@@ -404,7 +420,6 @@ return {
             "Spiritual Radiance",
             "Spiritual Purity",
             "Spiritual Dominion",
-            "Spiritual Rejuvenation",
             "Spiritual Ascendance",
             "Spiritual Enlightenment",
             "Spiritual Epiphany",
@@ -425,6 +440,7 @@ return {
             "Venomous Covenant",    -- Level 108
             "Venomous Coalition",   -- Level 113
             "Venomous Conjunction", -- Level 118
+            "Venomous Covariance",  -- Level 123
         },
         ['PetBlockSpell'] = {
             "Ward of Calliav",       -- Level 49
@@ -451,6 +467,7 @@ return {
             "Auspice of Esianti",    -- Level 107
             "Auspice of Kildrukaun", -- Level 112
             "Auspice of Valia",      -- Level 117
+            "Auspice of Usira",      -- Level 122
         },
         ['PetHotSpell'] = {
             -- Pet Hot Spell
@@ -508,7 +525,6 @@ return {
             -- Group Attack+ Hp Buff
             "Spiritual Vigor",
             "Spiritual Vitality",
-            "Spiritual Vibrance",
             "Spiritual Vim",
             "Spiritual Vivacity",
             "Spiritual Verve",
@@ -518,6 +534,7 @@ return {
             "Spiritual Vivification",
             "Spiritual Vibrancy",
             "Spiritual Vehemence",
+            "Spiritual Vigor",
             "Spiritual Valiancy",
             --Single Target Atk+HP Buff* - Does Not Stack with Pally brells or Ranger Buff - is Middle ground Buff has HP & Atk
             "Spiritual Brawn",
@@ -601,6 +618,7 @@ return {
             "Reflexive Rending",
             "Reflexive Sundering",
             "Reflexive Riving",
+            "Reflexive Slashing", -- Level 124
         },
         ['VinDisc'] = {
             -- Vindication Disc
@@ -609,6 +627,7 @@ return {
             "Ikatiar's Vindication",
             "Kejaan's Vindication",
             "Ikatiar's Vindication",
+            "Xanathan's Vindication", -- Level 125
         },
     },
     ['HealRotationOrder'] = {
@@ -617,54 +636,47 @@ return {
             state = 1,
             steps = 1,
             load_cond = function() return Casting.CanUseAA("Mend Companion") or Casting.CanUseAA("Replenish Companion") end,
-            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('MainHealPoint') end,
+            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and Targeting.MainHealsNeeded(mq.TLO.Me.Pet) end,
         },
         {
             name = 'PetHealSpell',
             state = 1,
             steps = 1,
             load_cond = function() return Config:GetSetting('DoPetHeals') end,
-            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') end,
+            cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and Targeting.MainHealsNeeded(mq.TLO.Me.Pet) end,
         },
         {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
             load_cond = function() return Config:GetSetting('DoHeals') end,
-            cond = function(self, target) return (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint') end,
+            cond = function(self, target) return Targeting.MainHealsNeeded(target) end,
         },
     },
     ['HealRotations']     = {
-        ["PetHealAA"] = {
+        ['PetHealAA'] = {
             {
                 name = "Replenish Companion",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
+                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint')
                 end,
             },
             {
                 name = "Mend Companion",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint') and Casting.TargetedAAReady(aaName, target.ID(), true)
-                end,
             },
         },
-        ["PetHealSpell"] = {
+        ['PetHealSpell'] = {
             {
                 name = "PetHealSpell",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID(), true)
-                end,
             },
         },
-        ["MainHealPoint"] = {
+        ['MainHealPoint'] = {
             {
                 name = "HealSpell",
                 type = "Spell",
-                cond = function(self, spell, target) return Casting.TargetedSpellReady(spell, target.ID(), true) end,
             },
         },
     },
@@ -674,7 +686,7 @@ return {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.DoBuffCheck() and Casting.AmIBuffable()
+                return combat_state == "Downtime" and Casting.OkayToBuff() and Casting.AmIBuffable()
             end,
         },
         {
@@ -684,14 +696,14 @@ return {
                 return Casting.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.DoBuffCheck()
+                return combat_state == "Downtime" and Casting.OkayToBuff()
             end,
         },
         { --Summon pet even when buffs are off on emu
             name = 'PetSummon',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() == 0 and Casting.DoPetCheck() and Casting.AmIBuffable()
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() == 0 and Casting.OkayToPetBuff() and Casting.AmIBuffable()
             end,
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this
@@ -699,7 +711,7 @@ return {
             timer = 30,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.DoPetCheck()
+                return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
             end,
         },
         {
@@ -707,10 +719,10 @@ return {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return Targeting.GetXTHaterCount() > 0 and not Casting.IAmFeigning() and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
+                return Targeting.GetXTHaterCount() > 0 and
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
@@ -723,9 +735,9 @@ return {
                     Combat.FindWorstHurtManaXT(Config:GetSetting('FParaPct')), }
             end,
             cond = function(self, combat_state)
-                local downtime = combat_state == "Downtime" and Config:GetSetting('DowntimeFP') and Casting.DoBuffCheck()
-                local combat = combat_state == "Combat" and not Casting.IAmFeigning()
-                return (downtime or combat) and not Casting.BuffActive(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
+                local downtime = combat_state == "Downtime" and Config:GetSetting('DowntimeFP') and Casting.OkayToBuff()
+                local combat = combat_state == "Combat"
+                return (downtime or combat) and not Casting.IHaveBuff(mq.TLO.Me.AltAbility('Paragon of Spirit').Spell)
             end,
         },
         {
@@ -733,36 +745,36 @@ return {
             state = 1,
             steps = 1,
             load_cond = function() return Config:GetSetting('DoSlow') end,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck()
+                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
+                return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
         {
             name = 'Weaves',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
     },
@@ -770,13 +782,13 @@ return {
         FlurryActive = function(self)
             local fury = self.ResolvedActionMap['FuryDisc']
             local dicho = self.ResolvedActionMap['DichoSpell']
-            return (dicho and dicho() and Casting.SongActiveByName(dicho.Name()))
-                or (fury and fury() and Casting.SongActiveByName(fury.Name()))
+            return (dicho and dicho() and Casting.IHaveBuff(dicho.Name()))
+                or (fury and fury() and Casting.IHaveBuff(fury.Name()))
         end,
         DmgModActive = function(self) --Song active by name will check both Bestial Alignments (Self and Group)
             local disc = self.ResolvedActionMap['DmgModDisc']
-            return Casting.SongActiveByName("Bestial Alignment") or (disc and disc() and Casting.SongActiveByName(disc.Name()))
-                or Casting.BuffActiveByName("Ferociousness")
+            return Casting.IHaveBuff("Bestial Alignment") or (disc and disc() and Casting.IHaveBuff(disc.Name()))
+                or Casting.IHaveBuff("Ferociousness")
         end,
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
         AETargetCheck = function(printDebug)
@@ -804,77 +816,49 @@ return {
             {
                 name = "Bestial Bloodrage",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Group Bestial Alignment",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
             {
                 name = "Attack of the Warders",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Frenzy of Spirit",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Bloodlust",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "VinDisc",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Spire of the Savage Lord",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Companion's Fury",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and Casting.TargetHasBuff(item.Spell, mq.TLO.Me)
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Config:GetSetting('DoChestClick') and item() and Casting.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
                 name = "Frenzied Swipes",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "BloodDot",
@@ -882,50 +866,56 @@ return {
                 cond = function(self, spell, target)
                     local vinDisc = self.ResolvedActionMap['VinDisc']
                     if not vinDisc then return false end
-                    return Casting.BuffActive(vinDisc) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.IHaveBuff(vinDisc)
                 end,
             },
             {
                 name = "FuryDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Casting.DiscReady(discSpell) and not self.ClassConfig.HelperFunctions.FlurryActive(self)
+                    return not self.ClassConfig.HelperFunctions.FlurryActive(self)
                 end,
             },
             {
                 name = "Forceful Rejuvenation",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.FlurryActive(self) and
-                        (mq.TLO.Me.GemTimer(self.ResolvedActionMap['DichoSpell'])() or -1) > 15
+                    return not self.ClassConfig.HelperFunctions.FlurryActive(self) and (mq.TLO.Me.GemTimer(self.ResolvedActionMap['DichoSpell'])() or -1) > 15
                 end,
             },
             {
                 name = "DmgModDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
             {
                 name = "Ferociousness",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
             {
                 name = "Bestial Alignment",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
             {
                 name = "OoW_Chest",
                 type = "Item",
                 cond = function(self, itemName)
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                end,
+            },
+            {
+                name = "Intensity of the Resolute",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
         },
@@ -934,9 +924,8 @@ return {
                 name = "Sha's Reprisal",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
-                    return Casting.DetSpellCheck(aaSpell) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
-                        Casting.TargetedAAReady(aaName, target.ID())
+                    local aaSpell = Casting.GetAASpell(aaName)
+                    return Casting.DetAACheck(aaName) and (aaSpell.SlowPct() or 0) > (Targeting.GetTargetSlowedPct())
                 end,
             },
             {
@@ -944,8 +933,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Casting.CanUseAA("Sha's Reprisal") then return false end
-                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct()) and
-                        Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct())
                 end,
             },
         },
@@ -953,24 +941,39 @@ return {
             {
                 name = "Falsified Death",
                 type = "AA",
-                cond = function(self, aaName)
+                cond = function(self, aaName, target)
                     if not Config:GetSetting('AggroFeign') then return false end
-                    return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
-                        and Casting.AAReady(aaName) and not Core.IAmMA
+                    return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 99) and not Core.IAmMA
+                end,
+            },
+            {
+                name = "Armor of Experience",
+                type = "AA",
+                cond = function(self, aaName)
+                    if not Config:GetSetting('DoVetAA') then return false end
+                    return mq.TLO.Me.PctHPs() < 35
                 end,
             },
             {
                 name = "Warder's Gift",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (mq.TLO.Me.Pet.PctHPs() and mq.TLO.Me.Pet.PctHPs() > 50) and Casting.AAReady(aaName)
+                    return (mq.TLO.Me.Pet.PctHPs() and mq.TLO.Me.Pet.PctHPs() > 50)
                 end,
             },
             {
                 name = "Protection of the Warder",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Targeting.IHaveAggro(100) and Casting.AAReady(aaName)
+                    return Targeting.IHaveAggro(100)
+                end,
+            },
+            {
+                name = "Coating",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoCoating') then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
         },
@@ -978,9 +981,6 @@ return {
             {
                 name = "Focused Paragon of Spirits",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
         },
         ['DPS'] = {
@@ -996,14 +996,14 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('DoParagon') then return false end
-                    return (mq.TLO.Group.LowMana(Config:GetSetting('ParaPct'))() or -1) > 0 and Casting.AAReady(aaName)
+                    return (mq.TLO.Group.LowMana(Config:GetSetting('ParaPct'))() or -1) > 0
                 end,
             },
             {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and not self.ClassConfig.HelperFunctions.FlurryActive(self)
+                    return not self.ClassConfig.HelperFunctions.FlurryActive(self)
                 end,
             },
             {
@@ -1014,8 +1014,7 @@ return {
                     --This checks to see if the Growl portion is up on the pet (or about to expire) before using this, those who prefer the swarm pets can use the actual swarm pet spell in conjunction with this for mana savings.
                     --There are some instances where the Growl isn't needed, but that is a giant TODO and of minor benefit.
                     ---@diagnostic disable-next-line: undefined-field
-                    return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10 and Casting.TargetedSpellReady(spell, target.ID())
-                        and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
+                    return (mq.TLO.Pet.BuffDuration(spell.RankName.Trigger(2)).TotalSeconds() or 0) < 10
                 end,
             },
             {
@@ -1023,7 +1022,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
@@ -1031,7 +1030,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
@@ -1039,42 +1038,51 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
                 name = "Maelstrom",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "FrozenPoi",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "PoiBite",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "Icelance1",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "Icelance2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    if Config:GetSetting("DoAERoar") then return false end
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "AERoar",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not (Config:GetSetting("DoAERoar") and Config:GetSetting("DoAEDamage")) then return false end
+                    return Casting.HaveManaToNuke() and self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
@@ -1084,9 +1092,7 @@ return {
                     if not Config:GetSetting('DoSwarmPet') then return false end
                     --We will let Feralgia apply swarm pets if our pet currently doesn't have its Growl Effect.
                     local feralgia = self.ResolvedActionMap['Feralgia']
-                    return (feralgia and feralgia() and mq.TLO.Me.PetBuff(mq.TLO.Spell(feralgia).RankName.Trigger(2).ID()))
-                        and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
-                        and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
+                    return (feralgia and feralgia() and mq.TLO.Me.PetBuff(mq.TLO.Spell(feralgia).RankName.Trigger(2).ID())) and Casting.HaveManaToNuke()
                 end,
             },
         },
@@ -1094,79 +1100,54 @@ return {
             {
                 name = "Roar of Thunder",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Raven's Claw",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Gorilla Smash",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Feral Swipe",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Kick",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
             {
                 name = "Tiger Claw",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
             {
                 name = "Bite of the Asp",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Enduring Frenzy",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.GetTargetPctHPs() > 90 and Casting.TargetedAAReady(aaName, target.ID())
+                    return Targeting.GetTargetPctHPs() > 90
                 end,
             },
             {
                 name = "EndRegenProcDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return mq.TLO.Me.PctEndurance() < Config:GetSetting('ParaPct') and Casting.TargetedDiscReady(discSpell)
+                    return mq.TLO.Me.PctEndurance() < Config:GetSetting('ParaPct')
                 end,
             },
             {
                 name = "Chameleon Strike",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "SingleClaws",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    if Config:GetSetting('DoAEDamage') then return false end
-                    return Casting.TargetedDiscReady(discSpell, target.ID())
+                    return not Config:GetSetting('DoAEDamage')
                 end,
             },
             {
@@ -1174,28 +1155,25 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     if not Config:GetSetting('DoAEDamage') then return false end
-                    return Casting.TargetedDiscReady(discSpell, target.ID()) and self.ClassConfig.HelperFunctions.AETargetCheck(true)
+                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
             {
                 name = "Maul",
                 type = "Disc",
-                cond = function(self, discSpell, target)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "BestialBuffDisc",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return not Casting.BuffActive(discSpell) and Casting.DiscReady(discSpell)
+                    return not Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
                 name = "Consumption of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (mq.TLO.Me.PctHPs() > 90 and mq.TLO.Me.PctMana() < 60) and Casting.AAReady(aaName)
+                    return (mq.TLO.Me.PctHPs() > 90 and mq.TLO.Me.PctMana() < 60)
                 end,
             },
             {
@@ -1203,7 +1181,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     ---@diagnostic disable-next-line: undefined-field
-                    return mq.TLO.Me.TotalCounters() > 0 and Casting.AAReady(aaName)
+                    return mq.TLO.Me.TotalCounters() > 0
                 end,
             },
         },
@@ -1220,7 +1198,7 @@ return {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoAvatar') or not Config.Constants.RGMelee:contains(target.Class.ShortName()) then return false end
+                    if not Config:GetSetting('DoAvatar') or not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1229,10 +1207,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- Make sure this is gemmed due to long refresh, and only use the single target versions on classes that need it.
-                    if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2")) and (not Casting.GemReady(spell)
-                            or not Config.Constants.RGMelee:contains(target.Class.ShortName())) then
-                        return false
-                    end
+                    if ((spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target)) or not Casting.CastReady(spell) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1260,10 +1235,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- Only use the single target versions on classes that need it
-                    if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
-                        and not Config.Constants.RGMelee:contains(target.Class.ShortName()) then
-                        return false
-                    end
+                    if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1272,10 +1244,7 @@ return {
                 type = "Spell",
                 cond = function(self, spell, target)
                     -- Only use the single target versions on classes that need it
-                    if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
-                        and not Config.Constants.RGMelee:contains(target.Class.ShortName()) then
-                        return false
-                    end
+                    if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsAMelee(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1293,22 +1262,19 @@ return {
             {
                 name = "Gelid Rending",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Consumption of Spirit",
                 type = "AA",
                 cond = function(self, aaName)
-                    return (mq.TLO.Me.PctHPs() > 70 and mq.TLO.Me.PctMana() < 80) and Casting.AAReady(aaName)
+                    return (mq.TLO.Me.PctHPs() > 70 and mq.TLO.Me.PctMana() < 80)
                 end,
             },
             {
                 name = "Feralist's Unity",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1323,28 +1289,17 @@ return {
                 name = "Pact of The Wurine",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and Casting.AAReady(aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
-            -- TODO: Does anyone even want this?
-            --{
-            --    name = "VerifyFerocity",
-            --    type = "CustomFunc",
-            --    custom_func = function(self, targetId)
-            --        if not Config:GetSetting('DoCombatFero') or not Casting.TargetedSpellReady(self.ResolvedActionMap['SingleAtkBuff'], targetId, false) then return false end
-            --        -- TODO: Ferocity List?
-            --        return false
-            --    end,
-            --},
         },
         ['PetBuff'] = {
             {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return Config:GetSetting('DoEpic') and
-                        mq.TLO.FindItem(itemName)() and mq.TLO.Me.ItemReady(itemName)() and
-                        (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil and mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
+                    if not Config:GetSetting('DoEpic') then return false end
+                    return not mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() and not mq.TLO.Me.PetBuff("Might of the Wild Spirits")()
                 end,
             },
             {
@@ -1360,63 +1315,63 @@ return {
                 name = "AvatarSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Config:GetSetting('DoAvatar') and Casting.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoAvatar') and Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "RunSpeedBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Config:GetSetting('DoRunSpeed') and Casting.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoRunSpeed') and Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetOffenseBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not Config:GetSetting('DoTankPet')) and Casting.SelfBuffPetCheck(spell)
+                    return (not Config:GetSetting('DoTankPet')) and Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetDefenseBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Config:GetSetting('DoTankPet') and Casting.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoTankPet') and Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetSlowProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Config:GetSetting('DoPetSlow') and Casting.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoPetSlow') and Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetHaste",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SelfBuffPetCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetDamageProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return (not Config:GetSetting('DoTankPet')) and Casting.SelfBuffPetCheck(spell)
+                    return (not Config:GetSetting('DoTankPet')) and Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetHealProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SelfBuffPetCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "PetSpellGuard",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Config:GetSetting('DoSpellGuard') and Casting.SelfBuffPetCheck(spell)
+                    return Config:GetSetting('DoSpellGuard') and Casting.PetBuffCheck(spell)
                 end,
             },
             {
@@ -1424,21 +1379,21 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     if Config:GetSetting('DoFeralgia') then return false end
-                    return not Casting.SongActive(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Fortify Companion",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
+                    return Casting.PetBuffAACheck(aaName)
                 end,
             },
             {
                 name = "Taste of Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
+                    return Casting.PetBuffAACheck(aaName)
                 end,
             },
         },
@@ -1458,6 +1413,7 @@ return {
             spells = {
                 { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHeals') end, },
                 { name = "Icelance1", },
+                { name = "AERoar",       cond = function(self) return Config:GetSetting('DoAERoar') end, },
                 { name = "Icelance2", },
             },
         },
@@ -1465,6 +1421,7 @@ return {
             gem = 3,
             spells = {
                 { name = "Icelance1", },
+                { name = "AERoar",    cond = function(self) return Config:GetSetting('DoAERoar') end, },
                 { name = "Icelance2", },
                 { name = "BloodDot", },
             },
@@ -1472,6 +1429,7 @@ return {
         {
             gem = 4,
             spells = {
+                { name = "AERoar",    cond = function(self) return Config:GetSetting('DoAERoar') end, },
                 { name = "Icelance2", },
                 { name = "BloodDot", },
                 { name = "ColdDot",   cond = function(self) return Config:GetSetting('DoDot') end, },
@@ -1801,10 +1759,19 @@ return {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
+        ['DoAERoar']       = {
+            DisplayName = "Use AE Roar",
+            Category = "Combat",
+            Index = 2,
+            Tooltip = "Use your AE Roar (Timer 11) spell line.",
+            Default = false,
+            FAQ = "Why am I not using the Roar line? It is better than this weak Ice Lance?",
+            Answer = "Enable Use AE Roar to memorize the spell.\nNote that Do AE Damage must also be enabled for the Roar to be used.",
+        },
         ['AETargetCnt']    = {
             DisplayName = "AE Target Count",
             Category = "Combat",
-            Index = 2,
+            Index = 3,
             Tooltip = "Minimum number of valid targets before using AE Disciplines or AA.",
             Default = 2,
             Min = 1,
@@ -1816,7 +1783,7 @@ return {
         ['MaxAETargetCnt'] = {
             DisplayName = "Max AE Targets",
             Category = "Damage Spells",
-            Index = 3,
+            Index = 4,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
             Default = 5,
@@ -1829,7 +1796,7 @@ return {
         ['SafeAEDamage']   = {
             DisplayName = "AE Proximity Check",
             Category = "Combat",
-            Index = 4,
+            Index = 5,
             Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
             Default = false,
             FAQ = "Can you better explain the AE Proximity Check?",
@@ -1840,7 +1807,7 @@ return {
         ['EmergencyStart'] = {
             DisplayName = "Emergency HP%",
             Category = "Combat",
-            Index = 5,
+            Index = 6,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
             Min = 1,
@@ -1852,17 +1819,26 @@ return {
         ['AggroFeign']     = {
             DisplayName = "Emergency Feign",
             Category = "Combat",
-            Index = 6,
+            Index = 7,
             Tooltip = "Use your Feign AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
             Default = true,
             FAQ = "How do I use my Feign Death?",
             Answer = "Make sure you have [AggroFeign] enabled.\n" ..
                 "This will use your Feign Death AA when you have aggro at low health or aggro on a RGMercsNamed/SpawnMaster mob.",
         },
+        ['DoCoating']      = {
+            DisplayName = "Use Coating",
+            Category = "Combat",
+            Index = 8,
+            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Default = false,
+            FAQ = "What is a Coating?",
+            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
+        },
         ['DoChestClick']   = {
             DisplayName = "Do Chest Click",
             Category = "Combat",
-            Index = 7,
+            Index = 9,
             Tooltip = "Click your chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             ConfigType = "Advanced",

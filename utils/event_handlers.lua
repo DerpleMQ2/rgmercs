@@ -72,7 +72,7 @@ mq.event("TooClose", "Your target is too close to use a ranged weapon!", functio
     if Config:GetSetting('DoPull') and Modules:ExecModule("Pull", "IsPullState", "PULL_PULLING") then
         Logger.log_debug("TooCloseHandler: Pull Mode Detected.")
         local discSpell = mq.TLO.Spell("Throw Stone")
-        if Casting.TargetedDiscReady(discSpell) then
+        if Casting.DiscReady(discSpell) then
             Logger.log_debug("TooCloseHandler: Attempting to Throw Stone.")
             Casting.UseDisc(discSpell, mq.TLO.Target.ID())
         else

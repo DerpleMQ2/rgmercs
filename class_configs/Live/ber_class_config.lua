@@ -282,44 +282,43 @@ return {
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and
-                    Casting.DoBuffCheck() and Casting.AmIBuffable()
+                    Casting.OkayToBuff() and Casting.AmIBuffable()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    Casting.BurnCheck() and not Casting.IAmFeigning()
+                return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
         {
             name = 'DPS2',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
         {
             name = 'DPS3',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
     },
@@ -422,23 +421,21 @@ return {
                 name = "Communion of Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctEndurance() <= 75
+                    return mq.TLO.Me.PctEndurance() <= 75
                 end,
             },
             {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() <= 21 and
-                        not mq.TLO.Me.Invis()
+                    return mq.TLO.Me.PctEndurance() <= 21
                 end,
             },
             {
                 name = "BerAura",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.Aura(1).ID() and mq.TLO.Me.CombatAbilityReady(discSpell.RankName())() and
-                        mq.TLO.Me.PctEndurance() > 10
+                    return not mq.TLO.Me.Aura(1).ID() and mq.TLO.Me.PctEndurance() > 10
                 end,
             },
             {
@@ -450,14 +447,21 @@ return {
                     end
                 end,
             },
+            {
+                name = "ReflexDisc",
+                type = "Disc",
+                cond = function(self, discSpell)
+                    return Casting.SelfBuffCheck(discSpell)
+                end,
+            },
         },
-        ['Burn'] = { --If this burn rotation is optimal, we may wish to refactor with a helper function, a lot of duplicate code near the end. Fixing broken functionality first. - Algar
+        ['Burn'] = { --This really needs to be refactored with helper functions sometime. Other prioriities atm. Algar 3/2/25
             {
                 name = "PrimaryBurnDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
                     local discondisc = self:GetResolvedActionMapItem('DisconDisc')
-                    return not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName()
+                    return Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName()
                 end,
             },
             {
@@ -465,7 +469,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -473,7 +477,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -481,7 +485,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -489,7 +493,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -497,7 +501,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -505,7 +509,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -513,7 +517,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -521,7 +525,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -529,14 +533,14 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
                 name = "Coat",
                 type = "Item",
                 cond = function(self, itemName)
-                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return not mq.TLO.Me.PetBuff("Primal Fusion")()
                 end,
             },
             {
@@ -544,7 +548,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc() and not Casting.DiscReady(burndisc)
+                    return Casting.NoDiscActive() and not Casting.DiscReady(burndisc)
                 end,
             },
             {
@@ -552,7 +556,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -560,7 +564,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -570,7 +574,7 @@ return {
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
                     local cleavingdisc = self:GetResolvedActionMapItem('CleavingDisc')
                     local discondisc = self:GetResolvedActionMapItem('DisconDisc')
-                    return Casting.DiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
                         and not (Casting.DiscReady(burndisc) or Casting.DiscReady(cleavingdisc))
                 end,
             },
@@ -582,7 +586,7 @@ return {
                     local cleavingdisc = self:GetResolvedActionMapItem('CleavingDisc')
                     local discondisc = self:GetResolvedActionMapItem('DisconDisc')
                     local resolvedisc = self:GetResolvedActionMapItem('ResolveDisc')
-                    return Casting.DiscReady(discSpell) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
+                    return (Casting.NoDiscActive() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(discondisc).RankName())
                         and not (Casting.DiscReady(burndisc) or Casting.DiscReady(cleavingdisc) or Casting.DiscReady(resolvedisc))
                 end,
             },
@@ -590,14 +594,14 @@ return {
                 name = "War Cry of the Braxi",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Casting.SpellStacksOnMe(mq.TLO.Spell(aaName))
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
                 name = "HHEBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not Casting.AAReady("War Cry of the Braxi") and (not mq.TLO.Me.ActiveDisc.ID()) and Casting.SpellStacksOnMe(discSpell)
+                    return not Casting.AAReady("War Cry of the Braxi") and Casting.NoDiscActive() and Casting.SelfBuffCheck(discSpell)
                 end,
             },
         },
@@ -605,102 +609,77 @@ return {
             {
                 name = "Epic",
                 type = "Item",
-                cond = function(self, itemName)
-                    local epicItem = mq.TLO.FindItem(itemName)
-                    return Config:GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and
-                        epicItem.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoEpic') then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
                 name = "Frenzy",
                 type = "Ability",
-                cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)()
-                end,
             },
             {
                 name = "Dfrenzy",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Dvolley",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Daxeof",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Daxethrow",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "SharedBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not Casting.SongActiveByName(discSpell.RankName())
+                    return Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
                 name = "RageStrike",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Phantom",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Config:GetSetting('DoPet')
+                    return Config:GetSetting('DoPet')
                 end,
             },
             {
                 name = "SappingStrike",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Binding Axe",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return Config:GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
+                    return Config:GetSetting('DoIntimidate')
                 end,
             },
             {
                 name = "AESlice",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Config:GetSetting('DoAoe') and Casting.DiscReady(discSpell)
+                    return Config:GetSetting('DoAoe')
                 end,
             },
             {
                 name = "Alliance",
-                type = "AA",
-                cond = function(self, aaName)
+                type = "spell",
+                cond = function(self, spell)
                     return Config:GetSetting('DoAlliance') and Casting.CanAlliance() and
-                        not Casting.TargetHasBuff(mq.TLO.Me.AltAbility(aaName).Spell)
+                        not Casting.TargetHasBuff(spell)
                 end,
             },
             {
@@ -720,7 +699,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if not Config:GetSetting('DoDisconDisc') then return false end
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -734,39 +713,28 @@ return {
                 name = "FrenzyBoost",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not Casting.BuffActive(discSpell)
+                    return Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
                 name = "CryDmg",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not Casting.SongActiveByName(discSpell.Name() or "None")
+                    return Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
                 name = "Communion of Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctEndurance() <= 75
-                end,
-            },
-            {
-                name = "<<None>>",
-                name_func = function(self)
-                    if not self.ModuleLoaded then return "" end
-                    return mq.TLO.Spell("Reflexive Retaliation").RankName()
-                end,
-                type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
+                    return mq.TLO.Me.PctEndurance() <= 75
                 end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return Config:GetSetting('DoIntimidate') and mq.TLO.Me.AbilityReady(abilityName)()
+                    return Config:GetSetting('DoIntimidate')
                 end,
             },
         },
@@ -775,8 +743,8 @@ return {
                 name = "Battle Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Config:GetSetting('DoBattleLeap') and not Casting.SongActiveByName("Battle Leap Warcry") and
-                        not Casting.SongActiveByName("Group Bestial Alignment")
+                    return Config:GetSetting('DoBattleLeap') and not Casting.IHaveBuff("Battle Leap Warcry") and
+                        not Casting.IHaveBuff("Group Bestial Alignment")
                         ---@diagnostic disable-next-line: undefined-field --Defs are not updated with HeadWet
                         and not mq.TLO.Me.HeadWet() --Stops Leap from launching us above the water's surface
                 end,
@@ -785,7 +753,7 @@ return {
                 name = "Drawn to Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.GetTargetDistance() > 15
+                    return Targeting.GetTargetDistance() > 15
                 end,
             },
         },
@@ -793,16 +761,10 @@ return {
             {
                 name = "Dicho",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Bfrenzy",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
         },
     },

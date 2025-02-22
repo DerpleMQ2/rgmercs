@@ -87,8 +87,8 @@ local function generateSongList()
     end
 
     local function AddCriticalSongs()
-        ConditionallyAddSong("UseAEAAMez", "MezAESong", 85)
-        ConditionallyAddSong("UseSingleTgtMez", "MezSong", 15)
+        ConditionallyAddSong("DoAEMez", "MezAESong", 85)
+        ConditionallyAddSong("DoSTMez", "MezSong", 15)
         ConditionallyAddSong("DoSTSlow", "SlowSong", 23)
         ConditionallyAddSong("DoAESlow", "AESlowSong", 20)
         if Config:GetSetting('UseRunBuff') == 2 and myLevel >= 49 then
@@ -209,7 +209,7 @@ local _ClassConfig = {
     ['ModeChecks']      = {
         CanMez     = function() return true end,
         CanCharm   = function() return true end,
-        IsMezzing  = function() return Config:GetSetting('UseSingleTgtMez') or Config:GetSetting('UseAEAAMez') end,
+        IsMezzing  = function() return Config:GetSetting('MezOn') end,
         IsCuring   = function() return Config:GetSetting('UseCure') end,
         IsCharming = function() return Config:GetSetting('CharmOn') and mq.TLO.Pet.ID() == 0 end,
     },
@@ -231,6 +231,10 @@ local _ClassConfig = {
         ['SymphonyOfBattle'] = {
             "Rapier of Somber Notes",
             "Songblade of the Eternal",
+        },
+        ['Coating'] = {
+            "Spirit Drinker's Coating",
+            "Blood Drinker's Coating",
         },
     },
     ['AbilitySets']     = {
@@ -320,10 +324,10 @@ local _ClassConfig = {
             "Arcane Aria",
         },
         ['InsultSong'] = {
-            --Bard Timers alternate between 6 and 3 every expansion.
-            --If we have push and nopush from the same tier active this will lead to issues with InsultSong2/timer stacking.
-            --Choosing which to prioritize is problematic, but for now, nopush will be prioritized to potentially help reduce movement in combat.
-            --Do to current F2P expansion limits, the ToL push will be chosen over the NoS nopush, I see no good solution for this.
+            --Bard Timers alternate between 6 and 3 every expansion. (Update: TOB has thrown this on its head)
+            --We have to manage selection so we don't have insultsong2 using the same timer.
+            --To circumvent issues with f2p accounts, for now, Sogran's is prioritized over Nord's. The code to distinguish this is excessive IMO.
+            "Yaran's Disdain",  -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
             --"Nord's Disdain",       -- 118 nopush, timer 6, NoS
             "Sogran's Insult",  -- 117 push, timer 6, ToL
@@ -344,6 +348,7 @@ local _ClassConfig = {
             -- "Brusco's Boastful Bellow", --12,
         },
         ['InsultSong2'] = {
+            "Yaran's Disdain",  -- 123 nopush, timer 6, TOB *THIS TIMER MAY BE INCORRECT, does not follow pattern*
             "Eoreg's Insult",   -- 122 push, timer 3, LS
             --"Nord's Disdain",       -- 118 nopush, timer 6, NoS
             "Sogran's Insult",  -- 117 push, timer 6, ToL
@@ -360,7 +365,8 @@ local _ClassConfig = {
             "Venimor's Insult", -- 85, nopush, timer 3
         },
         ['DichoSong'] = {
-            -- DichoSong Level Range - 101 - 116
+            -- DichoSong Level Range - 101+
+            "Reciprocal Psalm",
             "Ecliptic Psalm",
             "Composite Psalm",
             "Dissident Psalm",
@@ -644,6 +650,7 @@ local _ClassConfig = {
 
         },
         ['AllianceSong'] = {
+            "Covariance of Sticks and Stones",
             "Conjunction of Sticks and Stones",
             "Alliance of Sticks and Stones",
             "Covenant of Sticks and Stones",
@@ -762,6 +769,17 @@ local _ClassConfig = {
             "Kelin's Lugubrious Lament", -- Level 8 (Max Mob Level of 60)
             "Silent Song of Quellious",  -- Level 61
             "Luvwen's Aria of Serenity", -- Level 66
+            "Whispersong of Veshma",     -- Level 71
+            "Elddar's Dawnsong",         -- Level 76
+            "Silence of the Void",       -- Level 81
+            "Silence of the Dreamer",    -- Level 86
+            "Silence of the Windsong",   -- Level 91
+            "Silence of the Forsaken",   -- Level 96
+            "Silence of the Silisia",    -- Level 101
+            "Silence of Jembel",         -- Level 106
+            "Silence of Zburator",       -- Level 111
+            "Silence of Quietus",        -- Level 116
+            "Silence of the Forgotten",  -- Level 121
         },
     },
     ['HelperFunctions'] = {
@@ -798,7 +816,7 @@ local _ClassConfig = {
             --an earlier version of this function checked your cast speed to add to this value, but cast speed TLO is always rounded down and is virtually always "2"
             if Targeting.GetXTHaterCount() == 0 then threshold = Config:GetSetting('RefreshDT') end
 
-            local res = Casting.SongMemed(songSpell) and
+            local res = Casting.SpellLoaded(songSpell) and
                 ((me.Buff(songSpell.Name()).Duration.TotalSeconds() or 999) <= threshold or
                     (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= threshold)
             Logger.log_verbose("\ayRefreshBuffSong(%s) => memed(%s), song: duration(%0.2f) < reusetime(%0.2f) buff: duration(%0.2f) < reusetime(%0.2f) --> result(%s)",
@@ -816,11 +834,7 @@ local _ClassConfig = {
         end,
         DotSongCheck = function(songSpell) --Check dot stacking, stop dotting when HP threshold is reached based on mob type, can't use utils function because we try to refresh just as the dot is ending
             if not songSpell or not songSpell() then return false end
-            local named = Targeting.IsNamed(mq.TLO.Target)
-            local targethp = Targeting.GetTargetPctHPs()
-
-            return Casting.SpellStacksOnTarget(songSpell) and ((named and (Config:GetSetting('NamedStopDOT') < targethp)) or
-                (not named and Config:GetSetting('HPStopDOT') < targethp))
+            return songSpell.StacksTarget() and Targeting.MobNotLowHP(Targeting.GetAutoTarget())
         end,
         GetDetSongDuration = function(songSpell) -- Checks target for duration remaining on dot songs
             local duration = mq.TLO.Target.FindBuff("name " .. songSpell.Name()).Duration.TotalSeconds() or 0
@@ -836,7 +850,7 @@ local _ClassConfig = {
             doFullRotation = true,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return not Casting.IAmFeigning() and not (combat_state == "Downtime" and mq.TLO.Me.Invis())
+                return not (combat_state == "Downtime" and mq.TLO.Me.Invis()) and not (Config:GetSetting('BardRespectMedState') and Config.Globals.InMedState)
             end,
         },
         {
@@ -845,7 +859,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and not (Casting.IAmFeigning() or mq.TLO.Me.Invis())
+                return combat_state == "Downtime" and not mq.TLO.Me.Invis() and not (Config:GetSetting('BardRespectMedState') and Config.Globals.InMedState)
             end,
         },
         {
@@ -855,8 +869,7 @@ local _ClassConfig = {
             doFullRotation = true,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return Targeting.GetXTHaterCount() > 0 and not Casting.IAmFeigning() and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self))
+                return Targeting.GetXTHaterCount() > 0 and (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self))
             end,
         },
         {
@@ -864,27 +877,27 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function() return Config:GetSetting("DoSTSlow") or Config:GetSetting("DoAESlow") or Config:GetSetting("DoDispel") end,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck()
+                return combat_state == "Combat" and Casting.OkayToDebuff()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
+                return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
         {
             name = 'Combat',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
         {
@@ -892,9 +905,9 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
     },
@@ -903,103 +916,60 @@ local _ClassConfig = {
             {
                 name = "Quick Time",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Funeral Dirge",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) -- and Config:GetSetting('UseFuneralDirge') --see note in config settings
-                end,
             },
             {
                 name = "Spire of the Minstrels",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Bladed Song",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Song of Stone",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Thousand Blades",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Flurry of Notes",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Dance of Blades",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
                 name = "Cacophony",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Frenzied Kicks",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
-                    return Casting.AAReady(aaName)
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
         },
         ['Debuff'] = {
-            -- {
-            --     name = "MezAESong",
-            --     type = "Song",
-            --     cond = function(self, songSpell)
-            --         if not (Config:GetSetting('MezOn') and Config:GetSetting('UseAEAAMez') and Casting.SongMemed(songSpell)) then return false end
-            --         return Targeting.GetXTHaterCount() >= Config:GetSetting("MezAECount") and (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0
-            --     end,
-            -- },
             {
                 name = "AESlowSong",
                 type = "Song",
@@ -1021,6 +991,14 @@ local _ClassConfig = {
                     return Config:GetSetting('DoDispel') and mq.TLO.Target.Beneficial()
                 end,
             },
+            {
+                name = "Dreadstone",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('UseDreadstone') then return false end
+                    return Casting.DetItemCheck(itemName, target)
+                end,
+            },
         },
         ['Combat'] = {
             -- Kludge that addresses bards not attempting to start attacking until after a song completes
@@ -1040,8 +1018,7 @@ local _ClassConfig = {
                 type = "Item",
                 cond = function(self, itemName)
                     if Config:GetSetting('UseEpic') == 1 then return false end
-                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and mq.TLO.FindItem(itemName)() and
-                        mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
             },
             {
@@ -1049,17 +1026,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if Config:GetSetting('UseFierceEye') == 1 then return false end
-                    return (Config:GetSetting('UseFierceEye') == 3 or (Config:GetSetting('UseFierceEye') == 2 and Casting.BurnCheck())) and
-                        Casting.AAReady(aaName)
-                end,
-            },
-            {
-                name = "Dreadstone",
-                type = "Item",
-                cond = function(self, itemName)
-                    -- This item is instant cast for free with almost no CD, just mash it forever when it's available
-                    if not Config:GetSetting('UseDreadstone') then return false end
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return (Config:GetSetting('UseFierceEye') == 3 or (Config:GetSetting('UseFierceEye') == 2 and Casting.BurnCheck()))
                 end,
             },
             {
@@ -1068,7 +1035,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ReflexStrike,
                 cond = function(self, discSpell)
                     local pct = Config:GetSetting('GroupManaPct')
-                    return Casting.TargetedDiscReady(discSpell) and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
+                    return (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
                 end,
             },
             {
@@ -1077,15 +1044,14 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if Config:GetSetting('UseBellow') == 1 then return false end
                     return ((Config:GetSetting('UseBellow') == 3 and mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct')) or (Config:GetSetting('UseBellow') == 2 and Casting.BurnCheck())) and
-                        Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.TargetedAAReady(aaName, target.ID())
+                        Casting.DetAACheck(aaName)
                 end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    if (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) < 2 then return false end
-                    return mq.TLO.Me.AbilityReady(abilityName)()
+                    return Casting.AARank("Intimidation") > 1
                 end,
             },
         },
@@ -1096,7 +1062,7 @@ local _ClassConfig = {
                 cond = function(self, songSpell)
                     if Config:GetSetting('UseDicho') == 1 then return false end
                     return (Config:GetSetting('UseDicho') == 3 and (mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct') or Casting.BurnCheck()))
-                        or (Config:GetSetting('UseDicho') == 2 and Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Quick Time").Spell.ID()))
+                        or (Config:GetSetting('UseDicho') == 2 and Casting.IHaveBuff(Casting.GetAASpell("Quick Time")))
                 end,
             },
             {
@@ -1104,14 +1070,14 @@ local _ClassConfig = {
                 type = "Song",
                 cond = function(self, songSpell)
                     if not Config:GetSetting('UseInsult') then return false end
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
+                    return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
                 end,
             },
             {
                 name = "FireDotSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseFireDots') and Casting.SongMemed(songSpell) then return false end
+                    if not Config:GetSetting('UseFireDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1121,7 +1087,7 @@ local _ClassConfig = {
                 name = "IceDotSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseIceDots') and Casting.SongMemed(songSpell) then return false end
+                    if not Config:GetSetting('UseIceDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1131,7 +1097,7 @@ local _ClassConfig = {
                 name = "PoisonDotSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UsePoisonDots') and Casting.SongMemed(songSpell) then return false end
+                    if not Config:GetSetting('UsePoisonDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1141,7 +1107,7 @@ local _ClassConfig = {
                 name = "DiseaseDotSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    if not Config:GetSetting('UseDiseaseDots') and Casting.SongMemed(songSpell) then return false end
+                    if not Config:GetSetting('UseDiseaseDots') then return false end
                     return self.ClassConfig.HelperFunctions.DotSongCheck(songSpell) and
                         -- If dot is about to wear off, recast
                         self.ClassConfig.HelperFunctions.GetDetSongDuration(songSpell) <= 3
@@ -1152,15 +1118,15 @@ local _ClassConfig = {
                 type = "Song",
                 cond = function(self, songSpell)
                     if not Config:GetSetting('UseInsult') then return false end
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
+                    return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
                 end,
             },
             {
                 name = "AllianceSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return Casting.SongMemed(songSpell) and Config:GetSetting('UseAlliance') and
-                        (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck()) and Casting.DetSpellCheck(songSpell)
+                    if not Config:GetSetting('UseAlliance') then return false end
+                    return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck()) and Casting.DetSpellCheck(songSpell)
                 end,
             },
             --used in combat when we have nothing else to refresh rather than standing there. Initial testing good, need more to ensure this doesn't interfere with Melody.
@@ -1224,7 +1190,7 @@ local _ClassConfig = {
                 cond = function(self, songSpell)
                     if not Config:GetSetting('UseCrescendo') then return false end
                     local pct = Config:GetSetting('GroupManaPct')
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
+                    return (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
                 end,
             },
             {
@@ -1355,14 +1321,14 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     if Config:GetSetting('UseRunBuff') ~= 1 then return false end
                     --refreshes slightly before expiry for better uptime
-                    return Casting.AAReady(aaName) and (mq.TLO.Me.Buff(mq.TLO.AltAbility(aaName).Spell.Trigger(1)).Duration.TotalSeconds() or 0) < 30
+                    return (mq.TLO.Me.Buff(mq.TLO.AltAbility(aaName).Spell.Trigger(1)).Duration.TotalSeconds() or 0) < 30
                 end,
             },
             {
                 name = "Rallying Solo", --Rallying Call theoretically possible but problematic, needs own rotation akin to Focused Paragon, etc
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and (mq.TLO.Me.PctEndurance() < 30 or mq.TLO.Me.PctMana() < 30)
+                    return (mq.TLO.Me.PctEndurance() < 30 or mq.TLO.Me.PctMana() < 30)
                 end,
             },
             {
@@ -1390,10 +1356,9 @@ local _ClassConfig = {
             {
                 name = "SymphonyOfBattle",
                 type = "Item",
-                targetId = function(self) return { mq.TLO.Me.ID(), } end,
-                cond = function(self, itemName)
+                cond = function(self, itemName, target)
                     if not Config:GetSetting('UseSoBItems') then return false end
-                    return Casting.SelfBuffCheck("Symphony of Battle") and mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
@@ -1411,7 +1376,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('DoVetAA') then return false end
-                    return mq.TLO.Me.PctHPs() < 35 and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() < 35
                 end,
             },
             {
@@ -1419,7 +1384,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('UseFading') then return false end
-                    return Casting.AAReady(aaName) and self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self)
+                    return self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self)
                     --I wanted to use XTAggroCount here but it doesn't include your current target in the number it returns and I don't see a good workaround. For Loop it is.
                 end,
             },
@@ -1427,14 +1392,22 @@ local _ClassConfig = {
                 name = "Hymn of the Last Stand",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
             },
             {
                 name = "Shield of Notes",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
+                end,
+            },
+            {
+                name = "Coating",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoCoating') then return false end
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.SelfBuffItemCheck(itemName)
                 end,
             },
         },
@@ -1479,10 +1452,21 @@ local _ClassConfig = {
                 "Healer will prioritize some gems to support healers.",
         },
         --Mana/Endurance Sustainment
+        ['BardRespectMedState'] = {
+            DisplayName = "Respect Med Settings",
+            Category = "Mana/End Sustain",
+            Index = 1,
+            Tooltip = "Allows the bard to meditate.\nPlease note that this comes at the cost of disabling all normal downtime actions while meditating.",
+            Default = false,
+            ConfigType = "Advanced",
+            FAQ = "Why isn't my bard meditating?",
+            Answer =
+            "If your bard is medding, you can enable the Respect Med Settings setting on the Mana/End Sustain tab. Please note that the bard will not take any downtime actions while medding!",
+        },
         ['SelfManaPct']         = {
             DisplayName = "Self Min Mana %",
             Category = "Mana/End Sustain",
-            Index = 1,
+            Index = 2,
             Tooltip = "Minimum Mana% to use Insult and Alliance outside of burns.",
             Default = 20,
             Min = 1,
@@ -1495,7 +1479,7 @@ local _ClassConfig = {
         ['SelfEndPct']          = {
             DisplayName = "Self Min End %",
             Category = "Mana/End Sustain",
-            Index = 2,
+            Index = 3,
             Tooltip = "Minimum End% to use Bellow or Dicho outside of burns.",
             Default = 20,
             Min = 1,
@@ -1508,7 +1492,7 @@ local _ClassConfig = {
         ['GroupManaPct']        = {
             DisplayName = "Group Mana %",
             Category = "Mana/End Sustain",
-            Index = 3,
+            Index = 4,
             Tooltip = "Mana% to begin managing group mana (See FAQ)",
             Default = 80,
             Min = 1,
@@ -1521,7 +1505,7 @@ local _ClassConfig = {
         ['GroupManaCt']         = {
             DisplayName = "Group Mana Count",
             Category = "Mana/End Sustain",
-            Index = 4,
+            Index = 5,
             Tooltip = "The number of party members (including yourself) that need to be under the above mana percentage.",
             Default = 2,
             Min = 1,
@@ -1707,7 +1691,7 @@ local _ClassConfig = {
             Tooltip = "When to use the Fierce Eye AA.",
             Type = "Combo",
             ComboOptions = { 'Never', 'Burns Only', 'All Combat', },
-            Default = 3,
+            Default = 2, --laz doesn't have the uptime of live
             Min = 1,
             Max = 3,
             ConfigType = "Advanced",
@@ -1941,10 +1925,10 @@ local _ClassConfig = {
             Answer = "You can enable Use Accelerando to use your Accelerando song." ..
                 "Options are (Never, In-Combat Only, Always, Out-of-Combat Only).",
         },
-        --Utility/Items/Misc
+        --Equipment
         ['UseEpic']             = {
             DisplayName = "Epic Use:",
-            Category = "Utility/Items/Misc",
+            Category = "Equipment",
             Index = 1,
             Tooltip = "Use Epic 1-Never 2-Burns 3-Always",
             Type = "Combo",
@@ -1959,7 +1943,7 @@ local _ClassConfig = {
         },
         ['DoChestClick']        = {
             DisplayName = "Chest Click",
-            Category = "Utility/Items/Misc",
+            Category = "Equipment",
             Index = 2,
             Tooltip = "Click your equipped chest item.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
@@ -1970,7 +1954,7 @@ local _ClassConfig = {
         },
         ['UseSoBItems']         = {
             DisplayName = "Symph. of Battle",
-            Category = "Utility/Items/Misc",
+            Category = "Equipment",
             Index = 3,
             Tooltip = "Click your Symphony of Battle items.",
             Default = false,
@@ -1980,7 +1964,7 @@ local _ClassConfig = {
         },
         ['UseDreadstone']       = {
             DisplayName = "Dreadstone",
-            Category = "Utility/Items/Misc",
+            Category = "Equipment",
             Index = 4,
             Tooltip = "Use your Dreadstone when able.",
             Default = false,
@@ -1988,10 +1972,19 @@ local _ClassConfig = {
             FAQ = "What does the Dreadstone option control?",
             Answer = "Possessed Dreadstone Minstrel's Rapier is a clicky 55% slow item rewarded by the quest \"The Depths of Fear\".",
         },
+        ['DoCoating']           = {
+            DisplayName = "Use Coating",
+            Category = "Equipment",
+            Index = 5,
+            Tooltip = "Click your Blood/Spirit Drinker's Coating in an emergency.",
+            Default = false,
+            FAQ = "What is a Coating?",
+            Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
+        },
         ['UseRunBuff']          = {
             DisplayName = "Runspeed Buff:",
-            Category = "Utility/Items/Misc",
-            Index = 5,
+            Category = "Utility/Misc",
+            Index = 1,
             Tooltip = "Select Runspeed Buff to use. NOTE: This setting may need user adjustment during the early level range!",
             Type = "Combo",
             ComboOptions = { 'AA', 'Song (Long Duration Only)', 'Song (Fastest Available)', 'Off', },
@@ -2004,8 +1997,8 @@ local _ClassConfig = {
         },
         ['UseEndBreath']        = {
             DisplayName = "Use Enduring Breath",
-            Category = "Utility/Items/Misc",
-            Index = 6,
+            Category = "Utility/Misc",
+            Index = 2,
             Tooltip = Tooltips.EndBreathSong,
             Default = false,
             ConfigType = "Advanced",
@@ -2014,8 +2007,8 @@ local _ClassConfig = {
         },
         ['DoVetAA']             = {
             DisplayName = "Use Vet AA",
-            Category = "Utility/Items/Misc",
-            Index = 7,
+            Category = "Utility/Misc",
+            Index = 3,
             Tooltip = "Use Veteran AA's in emergencies or during Burn",
             Default = true,
             ConfigType = "Advanced",
@@ -2024,8 +2017,8 @@ local _ClassConfig = {
         },
         ['EmergencyStart']      = {
             DisplayName = "Emergency HP%",
-            Category = "Utility/Items/Misc",
-            Index = 8,
+            Category = "Utility/Misc",
+            Index = 4,
             Tooltip = "Your HP % before we begin to use emergency mitigation abilities.",
             Default = 50,
             Min = 1,
@@ -2037,8 +2030,8 @@ local _ClassConfig = {
         },
         ['UseFading']           = {
             DisplayName = "Use Combat Escape",
-            Category = "Utility/Items/Misc",
-            Index = 9,
+            Category = "Utility/Misc",
+            Index = 5,
             Tooltip = "Use Fading Memories when you have aggro and you aren't the Main Assist.",
             Default = true,
             ConfigType = "Advanced",
@@ -2048,8 +2041,8 @@ local _ClassConfig = {
         },
         ['RefreshDT']           = {
             DisplayName = "Downtime Threshold",
-            Category = "Utility/Items/Misc",
-            Index = 10,
+            Category = "Utility/Misc",
+            Index = 6,
             Tooltip =
             "The duration threshold for refreshing a buff song outside of combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.",
             Default = 12,
@@ -2062,8 +2055,8 @@ local _ClassConfig = {
         },
         ['RefreshCombat']       = {
             DisplayName = "Combat Threshold",
-            Category = "Utility/Items/Misc",
-            Index = 11,
+            Category = "Utility/Misc",
+            Index = 7,
             Tooltip =
             "The duration threshold for refreshing a buff song in combat. ***WARNING: Editing this value can drastically alter your ability to maintain buff songs!*** This needs to be carefully tailored towards your song line-up.",
             Default = 6,

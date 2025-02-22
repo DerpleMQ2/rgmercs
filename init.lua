@@ -708,6 +708,7 @@ local function Main()
             -- clear the cache during state transition.
             Targeting.ClearSafeTargetCache()
             Targeting.ForceBurnTargetID = 0
+            Config.Globals.LastPulledID = 0
             Casting.LastBurnCheck = false
             Modules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
@@ -743,7 +744,7 @@ local function Main()
     if Combat.OkToEngage(Config.Globals.AutoTargetID) then
         Combat.EngageTarget(Config.Globals.AutoTargetID)
     else
-        if Targeting.GetXTHaterCount(true) > 0 and Targeting.GetTargetID() > 0 and not Core.IsMezzing() and not Core.IsCharming() then
+        if Targeting.GetXTHaterCount(true) > 0 and Targeting.GetTargetID() ~= (Config:GetSetting('DoPull') and Config.Globals.LastPulledID or 0) and not Core.IsMezzing() and not Core.IsCharming() and not (Core.IAmMA() and Targeting.IsSpawnXTHater(mq.TLO.Target.ID())) then
             Logger.log_debug("\ayClearing Target because we are not OkToEngage() and we are in combat!")
             Targeting.ClearTarget()
         end

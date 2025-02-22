@@ -194,8 +194,8 @@ function Combat.MATargetScan(radius, zradius)
     local aggroSearch    = string.format("npc radius %d zradius %d targetable playerstate 4", radius, zradius)
     local aggroSearchPet = string.format("npcpet radius %d zradius %d targetable playerstate 4", radius, zradius)
 
-    local lowestHP       = 101
-    local killId         = 0
+    local lowestHP       = Targeting.GetAutoTargetPctHPs() > 0 and Targeting.GetAutoTargetPctHPs() or 101
+    local killId         = Config.Globals.AutoTargetID or 0
 
     -- Maybe spawn search is failing us -- look through the xtarget list
     local xtCount        = mq.TLO.Me.XTarget()
@@ -211,7 +211,8 @@ function Combat.MATargetScan(radius, zradius)
                     -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                     -- get aggro data from the spawn data type.
                     if mq.TLO.Me.Level() >= 20 then
-                        if xtSpawn.PctAggro() < 100 and Core.IsTanking() then
+                        -- Added move check to prevent false positives on the pull from things like bard song aggro. Testing. Algar 3/5/25
+                        if xtSpawn.PctAggro() < 100 and not xtSpawn.Moving() and Core.IsTanking() then
                             -- Coarse check to determine if a mob is _not_ mezzed. No point in waking a mezzed mob if we don't need to.
                             if Config.Constants.RGMezAnims:contains(xtSpawn.Animation()) then
                                 Logger.log_verbose("\agHave not fully aggro'd %s -- returning %s [%d]",
@@ -355,41 +356,53 @@ function Combat.FindBestAutoTarget(validateFn)
                 Config.Globals.ForceTargetID = 0
             end
         else
+            local targetValid = (Targeting.TargetIsType("npc", target) or Targeting.TargetIsType("npcpet", target))
+                and target.Mezzed.ID() == nil and target.Charmed.ID() == nil
+                and Targeting.GetTargetDistance(target) < Config:GetSetting('AssistRange')
+                and Targeting.GetTargetDistanceZ(target) < 20
+                and Targeting.GetTargetAggressive(target)
+
             -- We need to handle manual targeting and autotargeting seperately
             if not Config:GetSetting('DoAutoTarget') then
-                -- Manual targeting let the manual user target any npc or npcpet.
-                if Config.Globals.AutoTargetID ~= target.ID() and
-                    (Targeting.TargetIsType("npc", target) or Targeting.TargetIsType("npcpet", target)) and
-                    Targeting.GetTargetDistance(target) < Config:GetSetting('AssistRange') and
-                    Targeting.GetTargetDistanceZ(target) < 20 and
-                    Targeting.GetTargetAggressive(target) and
-                    target.Mezzed.ID() == nil and target.Charmed.ID() == nil then
+                -- Manual targeting (or pull targeting) let the manual user target any npc or npcpet.
+                if Config.Globals.AutoTargetID ~= target.ID() and targetValid then
                     Logger.log_info("FindTarget(): Targeting: \ag%s\ax [ID: \ag%d\ax]", target.CleanName() or "None", target.ID())
                     Config.Globals.AutoTargetID = target.ID()
                 end
             else
-                -- If we're the main assist, we need to scan our nearby area and choose a target based on our built in algorithm. We
+                -- If we don't have an AutoTarget and we are using the AutoTarget System:
+                -- If we already have a target, we should check to see if we automatically pulled it, or if it is likely that we manually pulled it.)
+                --If not, we need to scan our nearby area and choose a target based on our built in algorithm. We
                 -- only need to do this if we don't already have a target. Assume if any mob runs into camp, we shouldn't reprioritize
                 -- unless specifically told.
 
                 if Config.Globals.AutoTargetID == 0 then
-                    -- If we currently don't have a target, we should see if there's anything nearby we should go after.
-                    Config.Globals.AutoTargetID = Combat.MATargetScan(Config:GetSetting('AssistRange'),
-                        Config:GetSetting('MAScanZRange'))
-                    Logger.log_verbose("MATargetScan returned %d -- Current Target: %s [%d]",
-                        Config.Globals.AutoTargetID, target.CleanName(), target.ID())
-                else
-                    -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
-                    -- Only be turned off by tank modes.
-                    if not Config:GetSetting('StayOnTarget') then
+                    if target.ID() > 0 then
+                        if target.ID() == Config.Globals.LastPulledID then
+                            Logger.log_verbose("It seems that we pulled %s(ID: %d), setting it as the initial AutoTarget.", target.CleanName(), target.ID())
+                            Config.Globals.AutoTargetID = Config.Globals.LastPulledID
+                        elseif (target and target.Distance3D() or 0) > Targeting.GetTargetMaxRangeTo(target) and targetValid then
+                            Logger.log_verbose("It seems that we manually pulled %s(ID: %d), setting it as the initial AutoTarget.", target.CleanName(), target.ID())
+                            Config.Globals.AutoTargetID = target.ID()
+                        end
+                    else
+                        -- Set our autotarget to the target MATargetScan chooses.
                         Config.Globals.AutoTargetID = Combat.MATargetScan(Config:GetSetting('AssistRange'),
                             Config:GetSetting('MAScanZRange'))
-                        local autoTarget = mq.TLO.Spawn(Config.Globals.AutoTargetID)
-                        Logger.log_verbose(
-                            "Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
-                            autoTarget.CleanName() or "None", Config.Globals.AutoTargetID or 0,
-                            target() and target.CleanName() or "None", target() and target.ID() or 0)
+                        Logger.log_verbose("MATargetScan returned %d -- Current Target: %s [%d]",
+                            Config.Globals.AutoTargetID, target.CleanName(), target.ID())
                     end
+                end
+                -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
+                -- Only be turned off by tank modes. -- Jokes on you, guy who wrote this... I have this off on all of my characters and have for months. - Algar
+                if not Config:GetSetting('StayOnTarget') then
+                    Config.Globals.AutoTargetID = Combat.MATargetScan(Config:GetSetting('AssistRange'),
+                        Config:GetSetting('MAScanZRange'))
+                    local autoTarget = mq.TLO.Spawn(Config.Globals.AutoTargetID)
+                    Logger.log_verbose(
+                        "Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
+                        autoTarget.CleanName() or "None", Config.Globals.AutoTargetID or 0,
+                        target() and target.CleanName() or "None", target() and target.ID() or 0)
                 end
             end
         end

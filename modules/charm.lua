@@ -712,10 +712,8 @@ function Module:ProcessCharmList()
 
 						Targeting.SetTarget(id)
 
-						mq.delay(500, function() return mq.TLO.Target.BuffsPopulated() end)
-
 						local maxWait = 5000
-						while not Casting.TargetedSpellReady(charmSpell.RankName.Name()) and maxWait > 0 do
+						while not Casting.SpellReady(charmSpell) and maxWait > 0 do
 							mq.delay(100)
 							maxWait = maxWait - 100
 						end

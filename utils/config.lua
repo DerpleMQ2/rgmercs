@@ -23,6 +23,7 @@ Config.Globals.MainAssist            = ""
 Config.Globals.ScriptDir             = ""
 Config.Globals.AutoTargetID          = 0
 Config.Globals.ForceTargetID         = 0
+Config.Globals.LastPulledID          = 0
 Config.Globals.SubmodulesLoaded      = false
 Config.Globals.PauseMain             = false
 Config.Globals.LastMove              = nil
@@ -802,29 +803,29 @@ Config.DefaultConfig = {
         FAQ = "Why am I not casting Debuffs?",
         Answer = "You can set the [ManaToDebuff] option to the minimum mana to casting debuffs at.",
     },
-    ['HPStopDOT']            = {
-        DisplayName = "Stop Dots (Trash):",
+    ['MobLowHP']             = {
+        DisplayName = "Mob Low HP:",
         Category = "Spells/Abils",
         Index = 2,
-        Tooltip = "Stop casting DOTs when trash mobs hit [x] HP %.",
+        Tooltip = "A mob is considered to be low HP (for the sake of Dots and other abilities) under x HP%.",
         Default = 50,
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
         FAQ = "Why am I not casting Dots?",
-        Answer = "The target may be to low health, Adjust [HPStopDOT] option to the minimum health of the target to stop casting dots at.",
+        Answer = "We will check the health of a mob with Mob Low HP or Named Low HP to determine whether to do things like cast Dots, or long nukes.",
     },
-    ['NamedStopDOT']         = {
-        DisplayName = "Stop Dots (Named):",
+    ['NamedLowHP']           = {
+        DisplayName = "Named Low HP:",
         Category = "Spells/Abils",
         Index = 3,
-        Tooltip = "Stop casting DOTs when named mobs hit [x] HP %.",
+        Tooltip = "A named mob is considered to be low HP (for the sake of Dots and other abilities) under x HP%.",
         Default = 25,
         Min = 1,
         Max = 100,
         ConfigType = "Advanced",
-        FAQ = "Why do I keep dotting the named when it is below [HPStokDot]?",
-        Answer = "Named Targets have their own setting for Stop Dot HP, Adjust [NamedStopDOT] option to the minimum health of the Named to stop casting dots at.",
+        FAQ = "Why do I keep dotting the named when it is below the Mob Low HP threshold?",
+        Answer = "Named Targets have their own setting for low HP, Adjust the Named Low HP option instead.",
     },
     ['CastReadyDelayFact']   = {
         DisplayName = "Cast Ready Delay Factor",
@@ -903,6 +904,16 @@ Config.DefaultConfig = {
         ConfigType = "Advanced",
         FAQ = "Why am I not standing up from Feign Death when it fails?",
         Answer = "You can set the [StandFailedFD] option to true to automatically stand up if you fail to Feign Death.",
+    },
+    ['RememLastSlot']        = {
+        DisplayName = "Mem After Buff:",
+        Category = "Spells/Abils",
+        Index = 6,
+        Tooltip = "Re-memorize the spell on the last gem after we use that gem to buff.",
+        Default = true,
+        ConfigType = "Advanced",
+        FAQ = "Why am I constantly rememorizing spells in the last slot?",
+        Answer = "You can disable the Re-Mem After Buff option to stop this behavior.",
     },
 
     -- [ Tank/MA ] --
@@ -1547,7 +1558,24 @@ Config.DefaultConfig = {
         FAQ = "What is a Reagent Announce?",
         Answer = "When a PC attempts to cast a spell he doesn't have a reagent for, he will announce this if the setting is enabled.",
     },
-
+    ['PullAnnounce']         = {
+        DisplayName = "Pull Announce",
+        Category = "Announcements",
+        Default = false,
+        Tooltip = "Set to announce pull-related messages in dannet.",
+        ConfigType = "Advanced",
+        FAQ = "How can I display a little more information about pulling module status?",
+        Answer = "You can enable Pull Announce in the Announcements tabs to be give verbose messages via DanNet.",
+    },
+    ['PullAnnounceGroup']    = {
+        DisplayName = "Pull Announce to Group",
+        Category = "Announcements",
+        Default = false,
+        Tooltip = "Set to announce pull-related messages in group. (Warning: Not recommended due to message spam!)",
+        ConfigType = "Advanced",
+        FAQ = "Why are these messages spamming my group or dannet channel?",
+        Answer = "You should check the Announcements tab to ensure that those settings are to your taste.",
+    },
 }
 
 Config.DefaultCategories = Set.new({})
