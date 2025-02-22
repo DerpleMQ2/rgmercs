@@ -549,7 +549,7 @@ function Casting.SpellReady(spell)
 
     if me.Stunned() then return false end
 
-    return me.CurrentMana() > spell.Mana() and not me.Casting() and me.Book(spell.RankName.Name())() ~= nil and
+    return me.CurrentMana() > spell.Mana() * (1 + (Config:GetSetting("ManaBufferToCast") * .1)) and not me.Casting() and me.Book(spell.RankName.Name())() ~= nil and
         not (me.Moving() and (spell.MyCastTime() or -1) > 0)
 end
 
@@ -598,7 +598,7 @@ function Casting.TargetedSpellReady(spellName, targetId, healingSpell)
 
     if not target or not target() then return false end
 
-    if me.SpellReady(spell.RankName.Name())() and me.CurrentMana() >= spell.Mana() then
+    if me.SpellReady(spell.RankName.Name())() and me.CurrentMana() > spell.Mana() * (1 + (Config:GetSetting("ManaBufferToCast") * .1)) then
         if not (me.Moving() and (spell.MyCastTime() or -1) > 0) and not me.Casting() and not Targeting.TargetIsType("corpse", target) then
             if target.LineOfSight() then
                 return true
@@ -639,7 +639,7 @@ function Casting.TargetedAAReady(aaName, targetId, healingSpell)
         return false
     end
 
-    if Casting.AAReady(aaName) and me.CurrentMana() >= ability.Spell.Mana() and me.CurrentEndurance() >= ability.Spell.EnduranceCost() then
+    if Casting.AAReady(aaName) and me.CurrentMana() > ability.Spell.Mana() * (1 + (Config:GetSetting("ManaBufferToCast") * .1)) and me.CurrentEndurance() >= ability.Spell.EnduranceCost() then
         if Core.MyClassIs("brd") or (not me.Moving() and not me.Casting()) then
             Logger.log_verbose("TargetedAAReady(%s) - Check LOS", aaName)
             if target.LineOfSight() then
@@ -1138,7 +1138,7 @@ function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
             return false
         end
 
-        if me.CurrentMana() < spell.Mana() then
+        if me.CurrentMana() < spell.Mana() * (1 + (Config:GetSetting("ManaBufferToCast") * .1)) then
             Logger.log_verbose("\arSinging Failed: I tried to cast a spell %s I don't have mana for it.",
                 songName)
             return false
@@ -1309,7 +1309,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
         end
 
         -- Check for enough mana -- just in case something has changed by this point...
-        if me.CurrentMana() < spell.Mana() then
+        if me.CurrentMana() < spell.Mana() * (1 + (Config:GetSetting("ManaBufferToCast") * .1)) then
             Logger.log_verbose("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have mana for it.",
                 spellName)
             return false

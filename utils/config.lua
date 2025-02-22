@@ -778,6 +778,18 @@ Config.DefaultConfig = {
         FAQ = "Why am I not casting Nukes?",
         Answer = "You can set the [ManaToNuke] option to the minimum mana to casting nukes at.",
     },
+    ['ManaBufferToCast']     = {
+        DisplayName = "Mana buffer to cast",
+        Category = "Spells/Abils",
+        Index = 1,
+        Tooltip = "Minimum % Mana over the spell req before casting. Measured in tenths of a percent. where 1 = 110 percent of the spell cost.",
+        Default = 2,
+        Min = 0,
+        Max = 10,
+        ConfigType = "Advanced",
+        FAQ = "Why am I constantly standing to cast but then sitting over and over?",
+        Answer = "You can set the [ManaBufferToCast] to avoid ghost mana ticks.",
+    },
     ['ManaToDot']            = {
         DisplayName = "Mana to Dot",
         Category = "Spells/Abils",
