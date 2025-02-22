@@ -4466,7 +4466,6 @@ function LNS.drawTable(label)
                 end
             end
 
-            ImGui.SameLine()
             if ImGui.Button("Set Selected") then
                 LNS.TempSettings.BulkSet = {}
                 for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
@@ -4901,7 +4900,6 @@ function LNS.drawItemsTables()
                         end
                     end
 
-                    ImGui.SameLine()
                     if ImGui.Button("Set Selected") then
                         LNS.TempSettings.BulkSet = {}
                         for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
