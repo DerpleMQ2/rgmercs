@@ -3445,7 +3445,7 @@ function LNS.lootCorpse(corpseID)
     end
 
     mq.doevents('CantLoot')
-    mq.delay(3000, function() return cantLootID > 0 or mq.TLO.Window('LootWnd').Open() end)
+    mq.delay(1000, function() return cantLootID > 0 or mq.TLO.Window('LootWnd').Open() end)
 
     if not mq.TLO.Window('LootWnd').Open() then
         if mq.TLO.Target.CleanName() then
@@ -3497,7 +3497,7 @@ function LNS.lootCorpse(corpseID)
 
     if mq.TLO.Cursor() then LNS.checkCursor() end
     mq.cmdf('/nomodkey /notify LootWnd LW_DoneButton leftmouseup')
-    mq.delay(5000, function() return not mq.TLO.Window('LootWnd').Open() end)
+    mq.delay(2000, function() return not mq.TLO.Window('LootWnd').Open() end)
 
     if mq.TLO.Spawn(('corpse id %s'):format(corpseID))() then
         cantLootList[corpseID] = os.time()
@@ -3579,6 +3579,7 @@ function LNS.lootMobs(limit)
             if not corpseID or corpseID <= 0 or LNS.corpseLocked(corpseID) or
                 (mq.TLO.Navigation.PathLength('spawn id ' .. corpseID)() or 100) > LNS.Settings.CorpseRadius then
                 Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Skipping corpse ID: %d.', corpseID)
+                table.remove(corpseList, _)
                 goto continue
             end
 
