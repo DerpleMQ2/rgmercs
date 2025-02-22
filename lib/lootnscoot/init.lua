@@ -3340,7 +3340,11 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
             return
         end
     end
-
+    if mq.TLO.Window('ConfirmationDialogBox').Open() then
+        Logger.Warn(LNS.guiLoot.console, "lootItem(): ConfirmationDialogBox is open. Closing it.")
+        mq.TLO.Window('ConfirmationDialogBox').DoClose()
+        mq.delay(1000, function() return not mq.TLO.Window('ConfirmationDialogBox').Open() end)
+    end
 
     mq.cmdf('/nomodkey /shift /itemnotify loot%s %s', index, button)
     mq.delay(1) -- Small delay to ensure command execution.
