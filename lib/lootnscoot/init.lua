@@ -2643,9 +2643,10 @@ end
 ---comment
 ---@param curRule string Current Rule
 ---@param onhand number Number of items on hand
+---@param curClasses string Current Classes
 ---@return string curDecision The new decision
 ---@return number qKeep The number of items to keep
-function LNS.checkQuest(curRule, onhand)
+function LNS.checkQuest(curRule, onhand, curClasses)
     local curDecision = curRule
     local qKeep = 0
     if string.find(curRule, "Quest") then
@@ -2664,6 +2665,7 @@ function LNS.checkQuest(curRule, onhand)
             }
             Logger.Debug(LNS.guiLoot.console, dbgTbl)
         end
+        curDecision = LNS.checkClasses(curDecision, curClasses, false)
     end
     return curDecision, qKeep
 end
@@ -2795,7 +2797,7 @@ function LNS.getRule(item, fromFunction, index)
         lootNewItemRule = lootDecision
     end
 
-    lootDecision, qKeep = LNS.checkQuest(lootRule, countHave)
+    lootDecision, qKeep = LNS.checkQuest(lootRule, countHave, lootClasses)
 
     -- Handle AlwaysAsk setting
     if alwaysAsk then
@@ -3766,11 +3768,11 @@ function LNS.RestockItems()
         Logger.Info(LNS.guiLoot.console, 'Checking \ao%s \axfor \at%s \axto \agRestock', mq.TLO.Target.CleanName(), itemName)
         local tmpVal = tonumber(qty) or 0
         rowNum       = mq.TLO.Window("MerchantWnd/MW_ItemList").List(string.format("=%s", itemName), 2)() or 0
-        mq.delay(20)
-        ::need_more::
+        mq.delay(200)
         local onHand = mq.TLO.FindItemCount(itemName)()
         local tmpQty = tmpVal - onHand
         if rowNum ~= 0 and tmpQty > 0 then
+            ::need_more::
             Logger.Info(LNS.guiLoot.console, "\ayRestocking \ax%s \aoHave\ax: \at%s\ax \agBuying\ax: \ay%s", itemName, onHand, tmpQty)
             mq.TLO.Window("MerchantWnd/MW_ItemList").Select(rowNum)()
             mq.delay(100)
@@ -3780,11 +3782,12 @@ function LNS.RestockItems()
             mq.delay(100, function() return mq.TLO.Window("QuantityWnd/QTYW_SliderInput").Text() == tostring(tmpQty) end)
             Logger.Info(LNS.guiLoot.console, "\agBuying\ay " .. mq.TLO.Window("QuantityWnd/QTYW_SliderInput").Text() .. "\at " .. itemName)
             mq.TLO.Window("QuantityWnd/QTYW_Accept_Button").LeftMouseUp()
-            mq.delay(100)
+            mq.delay(500)
             onHand = mq.TLO.FindItemCount(itemName)()
             if onHand < tmpVal then
+                Logger.Info(LNS.guiLoot.console, "\ayStack Max Size \axis \arLess\ax than \ax%s \aoHave\ax: \at%s\ax", tmpVal, onHand)
+                tmpQty = tmpVal - onHand
                 goto need_more
-                Logger.Info(LNS.guiLoot.console, "\ayStack Max Size \axis \arLess\ax than \ax%s \aoHave\ax: \at%s\ax \agBuying\ax: \ay%s", tmpVal, onHand, tmpQty)
             end
         end
         mq.delay(500, function() return mq.TLO.FindItemCount(itemName)() == qty end)
