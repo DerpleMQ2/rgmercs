@@ -367,7 +367,6 @@ local _ClassConfig = {
             "Wildstalker's Unity",
         },
         ["Protectionbuff"] = {
-            "Riftwind's Protection",
             "Force of Nature",
             "Warder's Protection",
             "Protection of the Wild",
@@ -498,8 +497,9 @@ local _ClassConfig = {
             "Cloak of Quills",
             "Cloak of Feathers",
             "Cloak of Scales",
-            "Call of the Rathe",
             "Guard of the Earth",
+            "Call of the Rathe",
+            "Call of Earth",
             "Riftwind's Protection",
         },
         ["BowDisc"] = {
