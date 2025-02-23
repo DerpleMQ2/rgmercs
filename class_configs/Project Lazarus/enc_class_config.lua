@@ -1082,7 +1082,7 @@ local _ClassConfig = {
                 active_cond = function(self, spell) return mq.TLO.Me.FindBuff("id " .. tostring(spell.ID()))() ~= nil end,
                 cond = function(self, spell, target)
                     --NDT will not be cast or memorized if it isn't already on the bar due to a very long refresh time
-                    if not Config:GetSetting('DoNDTBuff') or not Casting.CastReady(spell.RankName) then return false end
+                    if not Config:GetSetting('DoNDTBuff') or not Casting.GemReady(spell) then return false end
                     --Single target versions of the spell will only be used on Melee, group versions will be cast if they are missing from any groupmember
                     if (spell and spell() and ((spell.TargetType() or ""):lower() ~= "group v2"))
                         and not Config.Constants.RGMelee:contains(target.Class.ShortName()) then

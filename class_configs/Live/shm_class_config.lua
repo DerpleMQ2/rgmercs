@@ -762,7 +762,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoHealOverTime') or not Targeting.GroupedWithTarget(target) then return false end
-                    return Casting.CastReady(spell.RankName) and Casting.TargetedSpellReady(spell, target.ID(), true)
+                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
                         and Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -772,7 +772,7 @@ local _ClassConfig = {
                 name = "InterventionHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (target.PctHPs() or 999) <= Config:GetSetting('BigHealPoint') and Casting.CastReady(spell.RankName) and
+                    return (target.PctHPs() or 999) <= Config:GetSetting('BigHealPoint') and Casting.GemReady(spell) and
                         Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
@@ -787,14 +787,14 @@ local _ClassConfig = {
                 name = "RecourseHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.CastReady(spell.RankName) and Casting.SpellReady(spell)
+                    return Casting.GemReady(spell) and Casting.SpellReady(spell)
                 end,
             },
             {
                 name = "AESpiritualHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.CastReady(spell.RankName) and Casting.SpellReady(spell)
+                    return Casting.GemReady(spell) and Casting.SpellReady(spell)
                 end,
             },
             {
@@ -818,7 +818,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoHealOverTime') then return false end
-                    return Casting.CastReady(spell.RankName) and Casting.GroupBuffCheck(spell, target)
+                    return Casting.GemReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },
@@ -835,7 +835,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Targeting.GroupedWithTarget(target) then return false end
-                    return Casting.CastReady(spell.RankName) and Casting.TargetedSpellReady(spell, target.ID(), true)
+                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
                 end,
             },
             {
@@ -1039,7 +1039,7 @@ local _ClassConfig = {
                 type = "Spell",
                 retries = 0,
                 cond = function(self, spell)
-                    return Casting.CastReady(spell.RankName) and Casting.SpellReady(spell) and
+                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and
                         not Casting.SongActiveByName("Healing Twincast")
                 end,
             },
@@ -1049,7 +1049,7 @@ local _ClassConfig = {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell.RankName) and Casting.SpellReady(spell) and Casting.GroupBuffCheck(spell, target)
+                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1057,7 +1057,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.GetResolvedActionMapItem('DichoSpell') then return false end
-                    return Casting.CastReady(spell.RankName) and Casting.SpellReady(spell) and Casting.GroupBuffCheck(spell, target)
+                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },
@@ -1208,7 +1208,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS') then return false end
-                    return Casting.CastReady(spell.RankName) and Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and
+                    return Casting.GemReady(spell) and Casting.DotSpellCheck(spell) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and
                         Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
@@ -1276,7 +1276,7 @@ local _ClassConfig = {
                 allowDead = true,
                 cond = function(self, spell)
                     if not (Config:GetSetting('DoSpellCanni') and Config:GetSetting('DoCombatCanni')) then return false end
-                    return Casting.CastReady(spell.RankName()) and Casting.SpellReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and
+                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and
                         mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
                 end,
             },
@@ -1343,7 +1343,7 @@ local _ClassConfig = {
                 name = "CanniSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Config:GetSetting('DoSpellCanni') and Casting.CastReady(spell.RankName()) and
+                    return Config:GetSetting('DoSpellCanni') and Casting.GemReady(spell) and
                         mq.TLO.Me.PctMana() < Config:GetSetting('SpellCanniManaPct') and
                         mq.TLO.Me.PctHPs() >= Config:GetSetting('SpellCanniMinHP')
                 end,
@@ -1446,7 +1446,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoTempHP') then return false end
-                    return Targeting.TargetClassIs("WAR", target) and Casting.CastReady(spell.RankName) and Casting.GroupBuffCheck(spell, target)
+                    return Targeting.TargetClassIs("WAR", target) and Casting.GemReady(spell) and Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1474,7 +1474,7 @@ local _ClassConfig = {
                 name = "LowLvlAtkBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return mq.TLO.Me.Level() < 86 and Config.Constants.RGMelee:contains(target.Class.ShortName()) and Casting.CastReady(spell.RankName) and
+                    return mq.TLO.Me.Level() < 86 and Config.Constants.RGMelee:contains(target.Class.ShortName()) and Casting.GemReady(spell) and
                         Casting.GroupBuffCheck(spell, target)
                 end,
             },

@@ -1747,4 +1747,9 @@ function Casting.AbilityRangeCheck(target)
     return Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target)
 end
 
+function Casting.GemReady(spell) -- split from CastReady so we don't have to pass RankName in class configs. If we change SpellReady, we break custom configs
+    if not spell or not spell() then return false end
+    return mq.TLO.Me.SpellReady(spell.RankName.Name())()
+end
+
 return Casting

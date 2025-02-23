@@ -967,7 +967,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.TempHP,
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoTempHP') or not Casting.CastReady(spell.RankName) then return false end
+                    if not Config:GetSetting('DoTempHP') or not Casting.GemReady(spell) then return false end
                     return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
                 end,
             },
@@ -996,7 +996,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.HateBuff,
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell) end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoHateBuff') or Casting.CanUseAA('Voice of Thule') or not Casting.CastReady(spell.RankName) then return false end
+                    if not Config:GetSetting('DoHateBuff') or Casting.CanUseAA('Voice of Thule') or not Casting.GemReady(spell) then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
