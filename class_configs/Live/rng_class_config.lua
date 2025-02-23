@@ -1488,11 +1488,10 @@ local _ClassConfig = {
                 name = "Epic",
                 type = "Item",
                 tooltip = Tooltips.Epic,
-                cond = function(self)
-                    return not mq.TLO.Me.ActiveDisc.ID()
+                cond = function(self, itemName)
+                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
-
         },
         ['Defense'] = {
             {
@@ -1674,7 +1673,7 @@ local _ClassConfig = {
     },
     ['HelperFunctions']   = {
         combatNav = function(forceMove)
-            if not mq.TLO.Me.AutoFire() then
+            if not Config:GetSetting('DoMelee') and not mq.TLO.Me.AutoFire() then
                 Core.DoCmd('/squelch face')
                 Core.DoCmd('/autofire on')
             end
