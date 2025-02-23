@@ -724,7 +724,7 @@ return {
             name = 'DPS(PBAELowLevel)',
             state = 1,
             steps = 1,
-            load_cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end,
+            load_cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end,
             doFullRotation = true,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
@@ -1150,28 +1150,28 @@ return {
                 name = "PBTimer4",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.GemReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "FireJyll",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.GemReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "IceJyll",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.GemReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
             {
                 name = "MagicJyll",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.CastReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.GemReady(spell) and Casting.HaveManaToNuke() and Casting.TargetedSpellReady(spell, target.ID())
                 end,
             },
         },
@@ -1282,7 +1282,7 @@ return {
             spells = {
                 { name = "FireClaw", },
                 { name = "WildNuke", },
-                { name = "PBTimer4",  cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
+                { name = "PBTimer4",  cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
                 { name = "StunSpell", cond = function() return Config:GetSetting('DoStun') end, },
             },
         },
@@ -1290,7 +1290,7 @@ return {
             gem = 4,
             spells = {
                 { name = "FireEtherealNuke", },
-                { name = "FireJyll",         cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
+                { name = "FireJyll",         cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
                 { name = "FireRain",         cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 1 end, },
                 { name = "IceRain",          cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 2 end, },
                 { name = "EvacSpell", },
@@ -1301,7 +1301,7 @@ return {
             gem = 5,
             spells = {
                 { name = "IceEtherealNuke", },
-                { name = "IceJyll",         cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
+                { name = "IceJyll",         cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
                 { name = "JoltSpell", },
             },
         },
@@ -1309,7 +1309,7 @@ return {
             gem = 6,
             spells = {
                 { name = "CloudburstNuke", },
-                { name = "MagicJyll",      cond = function() return Core.IsModeActive('PBAELowLevel') and mq.TLO.Me.Level() < 71 end, },
+                { name = "MagicJyll",      cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
                 { name = "SnareSpell",     cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
             },
         },
