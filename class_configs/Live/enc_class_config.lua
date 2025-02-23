@@ -1083,7 +1083,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('UseProcBuff') or not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
+                    if not Config:GetSetting('DoProcBuff') or not Config.Constants.RGCasters:contains(target.Class.ShortName()) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
