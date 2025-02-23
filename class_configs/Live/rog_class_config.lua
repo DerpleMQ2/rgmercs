@@ -290,57 +290,45 @@ return {
                 name = "Frenzied",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "Twisted",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "Executioner",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "EdgeDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "Rogue's Fury",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Pinpoint",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "MarkDisc",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Spire of the Rake",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = mq.TLO.Me.Inventory("Chest").Name(),
@@ -354,54 +342,39 @@ return {
             {
                 name = "PoisonBlade",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Dicho",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Shadow's Flanking",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Rake's Rampage",
                 type = "AA",
                 cond = function(self, aaName)
-                    local speedDisc = self:GetResolvedActionMapItem("Speed")
                     if not Config:GetSetting("DoAEDamage") then return false end
-                    return Casting.AAReady(aaName) and self.ClassConfig.HelperFunctions.AETargetCheck(self)
+                    return self.ClassConfig.HelperFunctions.AETargetCheck(self)
                 end,
             },
             {
                 name = "Focused Rake's Rampage",
                 type = "AA",
                 cond = function(self, aaName)
-                    if Config:GetSetting("DoAEDamage") then return false end
-                    return Casting.AAReady(aaName)
+                    return not Config:GetSetting("DoAEDamage")
                 end,
             },
             {
                 name = "Phantom",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
-                    return Casting.AAReady(aaName)
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
         },
@@ -419,28 +392,28 @@ return {
                 name = "Knifeplay",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "AspDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "ProcBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
@@ -448,7 +421,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if not Config:GetSetting('DoAlliance') then return false end
-                    return Casting.TargetedDiscReady(discSpell) and not Casting.TargetHasBuffByName(discSpell.Trigger(1))
+                    return not Casting.TargetHasBuffByName(discSpell.Trigger(1))
                 end,
             },
             {
@@ -464,7 +437,7 @@ return {
                 name = "Assassin's Premonition",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Casting.BurnCheck()
+                    return Casting.BurnCheck()
                 end,
             },
         },
@@ -473,72 +446,49 @@ return {
                 name = "Backstab",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    if not Casting.CanUseAA("Chaotic Stab") and not mq.TLO.Stick.Behind() then return false end
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
+                    return Casting.CanUseAA("Chaotic Stab") or mq.TLO.Stick.Behind()
                 end,
             },
             {
                 name = "Carve",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "SecretBlade",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "FellStrike",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Jugular",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Twisted Shank",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Puncture",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "DaggerThrow",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             { --Check ToT to ensure we are not boosting the hate generation of someone we shouldn't be
                 name = "HateDebuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell) and mq.TLO.Me.TargetOfTarget.ID() == (mq.TLO.Group.MainTank.ID() or Core.GetMainAssistId())
+                    return mq.TLO.Me.TargetOfTarget.ID() == (mq.TLO.Group.MainTank.ID() or Core.GetMainAssistId())
                 end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    if (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) < 2 then return false end
-                    return mq.TLO.Me.AbilityReady(abilityName)()
+                    return (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) > 1
                 end,
             },
         },
@@ -547,7 +497,7 @@ return {
                 name = "Escape",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.IHaveAggro(100)
+                    return Targeting.IHaveAggro(100)
                 end,
             },
             {
@@ -555,15 +505,12 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('DoVetAA') then return false end
-                    return mq.TLO.Me.PctHPs() < 35 and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() < 35
                 end,
             },
             {
                 name = "Tumble",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Coating",
@@ -578,7 +525,7 @@ return {
                 name = "CADisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Targeting.IHaveAggro(100)
+                    return Targeting.IHaveAggro(100)
                 end,
             },
         },
@@ -587,7 +534,7 @@ return {
                 name = "ThiefBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.SelfBuffCheck(discSpell) and Casting.DiscReady(discSpell)
+                    return Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
@@ -595,14 +542,14 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {

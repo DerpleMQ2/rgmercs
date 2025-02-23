@@ -921,58 +921,34 @@ local _ClassConfig = {
             {
                 name = "Quick Time",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Funeral Dirge",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) -- and Config:GetSetting('UseFuneralDirge') --see note in config settings
-                end,
             },
             {
                 name = "Spire of the Minstrels",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Bladed Song",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Song of Stone",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Thousand Blades",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Flurry of Notes",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Dance of Blades",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = mq.TLO.Me.Inventory("Chest").Name(),
@@ -989,23 +965,16 @@ local _ClassConfig = {
             {
                 name = "Cacophony",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Frenzied Kicks",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
-                    return Casting.AAReady(aaName)
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
         },
@@ -1059,8 +1028,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if Config:GetSetting('UseFierceEye') == 1 then return false end
-                    return (Config:GetSetting('UseFierceEye') == 3 or (Config:GetSetting('UseFierceEye') == 2 and Casting.BurnCheck())) and
-                        Casting.AAReady(aaName)
+                    return (Config:GetSetting('UseFierceEye') == 3 or (Config:GetSetting('UseFierceEye') == 2 and Casting.BurnCheck()))
                 end,
             },
             {
@@ -1078,7 +1046,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.ReflexStrike,
                 cond = function(self, discSpell)
                     local pct = Config:GetSetting('GroupManaPct')
-                    return Casting.TargetedDiscReady(discSpell) and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
+                    return (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
                 end,
             },
             {
@@ -1087,15 +1055,14 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     if Config:GetSetting('UseBellow') == 1 then return false end
                     return ((Config:GetSetting('UseBellow') == 3 and mq.TLO.Me.PctEndurance() > Config:GetSetting('SelfEndPct')) or (Config:GetSetting('UseBellow') == 2 and Casting.BurnCheck())) and
-                        Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.TargetedAAReady(aaName, target.ID())
+                        Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    if (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) < 2 then return false end
-                    return mq.TLO.Me.AbilityReady(abilityName)()
+                    return (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) > 1
                 end,
             },
         },
@@ -1114,7 +1081,7 @@ local _ClassConfig = {
                 type = "Song",
                 cond = function(self, songSpell)
                     if not Config:GetSetting('UseInsult') then return false end
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
+                    return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
                 end,
             },
             {
@@ -1162,7 +1129,7 @@ local _ClassConfig = {
                 type = "Song",
                 cond = function(self, songSpell)
                     if not Config:GetSetting('UseInsult') then return false end
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
+                    return (mq.TLO.Me.PctMana() > Config:GetSetting('SelfManaPct') or Casting.BurnCheck())
                 end,
             },
             {
@@ -1234,7 +1201,7 @@ local _ClassConfig = {
                 cond = function(self, songSpell)
                     if not Config:GetSetting('UseCrescendo') then return false end
                     local pct = Config:GetSetting('GroupManaPct')
-                    return (mq.TLO.Me.GemTimer(songSpell.RankName.Name())() or -1) == 0 and (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
+                    return (mq.TLO.Group.LowMana(pct)() or -1) >= Config:GetSetting('GroupManaCt')
                 end,
             },
             {
@@ -1365,14 +1332,14 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     if Config:GetSetting('UseRunBuff') ~= 1 then return false end
                     --refreshes slightly before expiry for better uptime
-                    return Casting.AAReady(aaName) and (mq.TLO.Me.Buff(mq.TLO.AltAbility(aaName).Spell.Trigger(1)).Duration.TotalSeconds() or 0) < 30
+                    return (mq.TLO.Me.Buff(mq.TLO.AltAbility(aaName).Spell.Trigger(1)).Duration.TotalSeconds() or 0) < 30
                 end,
             },
             {
                 name = "Rallying Solo", --Rallying Call theoretically possible but problematic, needs own rotation akin to Focused Paragon, etc
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and (mq.TLO.Me.PctEndurance() < 30 or mq.TLO.Me.PctMana() < 30)
+                    return (mq.TLO.Me.PctEndurance() < 30 or mq.TLO.Me.PctMana() < 30)
                 end,
             },
             {
@@ -1421,7 +1388,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('DoVetAA') then return false end
-                    return mq.TLO.Me.PctHPs() < 35 and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() < 35
                 end,
             },
             {
@@ -1429,7 +1396,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('UseFading') then return false end
-                    return Casting.AAReady(aaName) and self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self)
+                    return self.ClassConfig.HelperFunctions.UnwantedAggroCheck(self)
                     --I wanted to use XTAggroCount here but it doesn't include your current target in the number it returns and I don't see a good workaround. For Loop it is.
                 end,
             },
@@ -1437,14 +1404,14 @@ local _ClassConfig = {
                 name = "Hymn of the Last Stand",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
             },
             {
                 name = "Shield of Notes",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
             },
             {

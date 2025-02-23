@@ -737,13 +737,13 @@ local _ClassConfig = {
         },
     },
     ['HealRotations']     = {
-        ["BigHealPoint"] = {
+        ['BigHealPoint'] = {
             {
                 name = "QuickGroupHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Targeting.GroupedWithTarget(target) then return false end
-                    return Casting.GemReady(spell) and Targeting.TargetIsMA(target)
+                    return Targeting.TargetIsMA(target)
                 end,
             },
             {
@@ -777,7 +777,7 @@ local _ClassConfig = {
                 type = "AA",
             },
         },
-        ["GroupHealPoint"] = {
+        ['GroupHealPoint'] = {
             {
                 name = "Blessing of Tunare",
                 type = "AA",
@@ -788,9 +788,6 @@ local _ClassConfig = {
             {
                 name = "QuickGroupHeal",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GemReady(spell)
-                end,
             },
             {
                 name = "Wildtender's Survival",
@@ -799,32 +796,20 @@ local _ClassConfig = {
             {
                 name = "LongGroupHeal",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GemReady(spell)
-                end,
             },
         },
-        ["MainHealPoint"] = {
+        ['MainHealPoint'] = {
             {
                 name = "QuickHeal",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GemReady(spell)
-                end,
             },
             {
                 name = "QuickHealSurge",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GemReady(spell)
-                end,
             },
             {
                 name = "LongHeal1",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GemReady(spell)
-                end,
             },
         },
     },
@@ -944,7 +929,6 @@ local _ClassConfig = {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    if not Casting.GemReady(spell) then return false end
                     return (Casting.HaveManaToNuke() or Casting.BurnCheck()) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= Config:GetSetting('LightHealPoint')
                 end,
             },
@@ -1028,14 +1012,14 @@ local _ClassConfig = {
                 name = "Distant Conflagration",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.Buff("Twincast").ID() == 0
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.BuffActiveByName("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -1080,8 +1064,8 @@ local _ClassConfig = {
             {
                 name = "TwincastSpell",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GemReady(spell) and mq.TLO.Me.Buff("Twincast").ID() == 0
+                cond = function(self)
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
         },

@@ -313,7 +313,7 @@ local _ClassConfig = {
                     return Casting.AuraActiveByName(discSpell.RankName.Name())
                 end,
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.Aura(1).ID() and Casting.DiscReady(discSpell)
+                    return not mq.TLO.Me.Aura(1).ID()
                 end,
             },
             {
@@ -321,28 +321,28 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "Breaths",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "Mend",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.PctHPs() < 50
+                    return mq.TLO.Me.PctHPs() < 50
                 end,
             },
         },
@@ -353,7 +353,7 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     if not Config:GetSetting('AggroFeign') then return false end
                     return (mq.TLO.Me.PctHPs() <= 40 and Targeting.IHaveAggro(100)) or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99)
-                        and Casting.AAReady(aaName) and not Core.IAmMA
+                        and not Core.IAmMA
                 end,
             },
             {
@@ -361,14 +361,14 @@ local _ClassConfig = {
                 type = "Ability",
                 cond = function(self, abilityName)
                     if not Config:GetSetting('AggroFeign') then return false end
-                    return Targeting.IHaveAggro(95) and mq.TLO.Me.AbilityReady(abilityName)() and not Core.IAmMA
+                    return Targeting.IHaveAggro(95) and not Core.IAmMA
                 end,
             },
             {
                 name = "Defy Death",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() < 25 and Casting.DiscReady(discSpell)
+                    return mq.TLO.Me.PctHPs() < 25
                 end,
             },
             {
@@ -376,14 +376,14 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('DoVetAA') then return false end
-                    return mq.TLO.Me.PctHPs() < 35 and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() < 35
                 end,
             },
             {
                 name = "Mend",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart')
+                    return mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart')
                 end,
             },
             {
@@ -407,58 +407,34 @@ local _ClassConfig = {
             { -- 5m reuse
                 name = "Dicho",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             { -- 5m reuse
                 name = "Ton Po's Stance",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Heel",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
             },
             {
                 name = "Speed",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
             },
             {
                 name = "FistDisc",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
             },
             {
                 name = "Palm",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
-                end,
             },
             {
                 name = "Spire of the Sensei",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Infusion of Thunder",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = mq.TLO.Me.Inventory("Chest").Name(),
@@ -472,15 +448,12 @@ local _ClassConfig = {
             { --10m reuse
                 name = "CraneStance",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             { --20m reuse, using NOT burndisccheck means we will only use this with a burn disc active
                 name = "Poise",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             { --pairs with Speed Focus Disc, AE, T2
@@ -489,7 +462,7 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     local speedDisc = self:GetResolvedActionMapItem("Speed")
                     if not Config:GetSetting("DoAEDamage") or not speedDisc then return false end
-                    return Casting.AAReady(aaName) and mq.TLO.Me.ActiveDisc.Name() == speedDisc.RankName() and self.ClassConfig.HelperFunctions.AETargetCheck()
+                    return mq.TLO.Me.ActiveDisc.Name() == speedDisc.RankName() and self.ClassConfig.HelperFunctions.AETargetCheck()
                 end,
             },
             { --pairs with Speed Focus Disc, single target, T2
@@ -498,29 +471,25 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     local speedDisc = self:GetResolvedActionMapItem("Speed")
                     if Config:GetSetting("DoAEDamage") or not speedDisc then return false end
-                    return Casting.AAReady(aaName) and mq.TLO.Me.ActiveDisc.Name() == speedDisc.RankName()
+                    return mq.TLO.Me.ActiveDisc.Name() == speedDisc.RankName()
                 end,
             },
             {
                 name = "Silent Strikes",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) and (mq.TLO.Me.PctAggro() or 0) > 60
+                cond = function(self, aaName, target)
+                    return Targeting.IsNamed(target) and (mq.TLO.Me.PctAggro() or 0) > 60
                 end,
             },
             {
                 name = "Swift Tails' Chant",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
-                    return Casting.AAReady(aaName)
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
         },
@@ -529,21 +498,21 @@ local _ClassConfig = {
                 name = "CombatEndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "Drunken",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Casting.SelfBuffCheck(discSpell)
+                    return Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
                 name = "Zan Fi's Whistle",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Casting.SelfBuffAACheck(aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -551,7 +520,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if mq.TLO.Me.Level() >= 100 then return false end
-                    return Casting.DiscReady(discSpell) and Casting.SelfBuffCheck(discSpell)
+                    return Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
@@ -559,21 +528,21 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if not Config:GetSetting('DoAlliance') then return false end
-                    return Casting.TargetedDiscReady(discSpell) and not Casting.TargetHasBuffByName(discSpell.Trigger(1))
+                    return not Casting.TargetHasBuffByName(discSpell.Trigger(1))
                 end,
             },
             {
                 name = "Storm",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "EarthDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
         },
@@ -581,118 +550,80 @@ local _ClassConfig = {
             {
                 name = "Synergy",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Curse",
                 type = "Disc",
                 cond = function(self, discSpell) --DotSpellCheck used in part to not blow this on low-health mobs
-                    return Casting.TargetedDiscReady(discSpell) and Casting.DotSpellCheck(discSpell)
+                    return Casting.DotSpellCheck(discSpell)
                 end,
             },
             {
                 name = "Two-Finger Wasp Touch",
                 type = "AA",
                 cond = function(self, aaName, target) --DotSpellCheck used in part to not blow this on low-health mobs
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DotSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
+                    return Casting.DotSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
                 name = "Fists",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Fang",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Shuriken",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Five Point Palm",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.TargetedAAReady(aaName)
-                end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    if (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) < 2 then return false end
-                    return mq.TLO.Me.AbilityReady(abilityName)()
+                    return (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) > 1
                 end,
             },
             {
                 name = "Flying Kick",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
             {
                 name = "Eagle Strike",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    if mq.TLO.Me.PctEndurance() > 25 then return false end
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
+                    return mq.TLO.Me.PctEndurance() < 25
                 end,
             },
             {
                 name = "Tiger Claw",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
         },
         ['Precision'] = {
             {
                 name = "Precision5",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Precision4",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Precision3",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Precision2",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Precision1",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
         },
     },

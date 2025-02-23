@@ -1132,34 +1132,28 @@ local _ClassConfig = {
             {
                 name = "Glyph Spray",
                 type = "AA",
-                cond = function(self)
-                    return ((Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
-                        Core.GetMainAssistPctHPs() < 40)
+                cond = function(self, aaName, target)
+                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() < 40)
                 end,
             },
             {
                 name = "Reactive Rune",
                 type = "AA",
-                cond = function(self)
-                    return ((Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Target.Level() > mq.TLO.Me.Level()) or
-                        Core.GetMainAssistPctHPs() < 40)
+                cond = function(self, aaName, target)
+                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() < 40)
                 end,
             },
             -- { --this can be readded once we creat a post_activate to cancel the debuff you receive after
             --     name = "Self Stasis",
             --     type = "AA",
             --     cond = function(self, aaName)
-            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30 and
-            --             Casting.AAReady(aaName)
-            --     end,
+            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30            --     end,
             -- },
             -- { --This can interrupt spellcasting which can just make something worse. Let us trust healers and tanks.
             --     name = "Dimensional Instability",
             --     type = "AA",
             --     cond = function(self, aaName)
-            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30 and
-            --             Casting.AAReady(aaName)
-            --     end,
+            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30            --     end,
             -- },
             {
                 name = "Beguiler's Directed Banishment",
@@ -1190,9 +1184,7 @@ local _ClassConfig = {
             --     name = "Dimensional Shield",
             --     type = "AA",
             --     cond = function(self, aaName)
-            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 80 and
-            --             Casting.AAReady(aaName)
-            --     end,
+            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 80            --     end,
 
             -- },
             {
@@ -1205,16 +1197,16 @@ local _ClassConfig = {
             {
                 name = "Arcane Whisper",
                 type = "AA",
-                cond = function(self)
-                    return Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() >= 90
+                cond = function(self, aaName, target)
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() >= 90
                 end,
 
             },
             {
                 name = "Silent Casting",
                 type = "AA",
-                cond = function(self)
-                    return Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() >= 90
+                cond = function(self, aaName, target)
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() >= 90
                 end,
 
             },
@@ -1231,9 +1223,9 @@ local _ClassConfig = {
             {
                 name = "StripBuffSpell",
                 type = "Spell",
-                cond = function(self)
+                cond = function(self, spell, target)
                     if not Config:GetSetting('DoStripBuff') then return false end
-                    return mq.TLO.Target.Beneficial()
+                    return target.Beneficial()
                 end,
             },
             {
@@ -1405,14 +1397,14 @@ local _ClassConfig = {
                 name = "TashSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Config:GetSetting('DoTash') and Casting.DetSpellCheck(spell) and not mq.TLO.Target.Tashed()
+                    return Config:GetSetting('DoTash') and Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "Bite of Tashani",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Config:GetSetting('DoTash') and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell) and not mq.TLO.Target.Tashed()
+                    return Config:GetSetting('DoTash') and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
         },

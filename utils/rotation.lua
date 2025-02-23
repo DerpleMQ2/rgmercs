@@ -166,7 +166,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
         if Casting.DiscReady(discSpell) then
             ret = Casting.UseDisc(discSpell, targetId)
         end
-        Logger.log_verbose("Trying to perform %s - %s :: %s", entry.name, discSpell.RankName(),
+        Logger.log_verbose("Trying to do %s - %s :: %s", entry.name, discSpell.RankName(),
             ret and "\agSuccess" or "\arFailed!")
     end
 

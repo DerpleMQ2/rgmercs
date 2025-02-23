@@ -1246,7 +1246,7 @@ _ClassConfig      = {
         end,
     },
     ['Rotations']         = {
-        ["PetSummon"] = {
+        ['PetSummon'] = {
             {
                 name = "Pet Summon",
                 type = "CustomFunc",
@@ -1272,7 +1272,7 @@ _ClassConfig      = {
                 custom_func = function(self) return self.ClassConfig.HelperFunctions.pet_management(self) end,
             },
         },
-        ["PetHealPoint"] = {
+        ['PetHealPoint'] = {
             {
                 name = "PetHealSpell",
                 type = "Spell",
@@ -1470,6 +1470,9 @@ _ClassConfig      = {
             {
                 name = "Improved Twincast",
                 type = "AA",
+                cond = function(self)
+                    return not mq.TLO.Me.Buff("Twincast")()
+                end,
             },
             {
                 name = "Servant of Ro",

@@ -808,10 +808,10 @@ local _ClassConfig = {
         { --Offensive actions to temporarily boost damage dealt
             name = 'Burn',
             state = 1,
-            steps = 1,
+            steps = 2,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
             end,
         },
         { --Non-spell actions that can be used during/between casts
@@ -1210,8 +1210,8 @@ local _ClassConfig = {
                 name = "Taunt",
                 type = "Ability",
                 tooltip = Tooltips.Taunt,
-                cond = function(self)
-                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetID() > 0
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
                 end,
             },
             {
@@ -1433,8 +1433,7 @@ local _ClassConfig = {
                 cond = function(self, spell)
                     if not Config:GetSetting('DoDicho') then return false end
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.GemReady(spell) and
-                        (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartDicho')))
+                    return (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartDicho')))
                 end,
             },
             {
@@ -1444,8 +1443,7 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDireTap') then return false end
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.GemReady(spell) and
-                        (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartDireTap')))
+                    return (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartDireTap')))
                 end,
             },
             {
@@ -1454,8 +1452,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell)
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.GemReady(spell) and
-                        (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap')))
+                    return (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap')))
                 end,
             },
             {
@@ -1464,7 +1461,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.AELifeTap,
                 cond = function(self, spell)
                     if not (Config:GetSetting('DoAELifeTap') and Config:GetSetting('DoAEDamage')) or not spell or not spell() then return false end
-                    return Casting.GemReady(spell) and not mq.TLO.Me.Buff(spell.Trigger())() and Casting.SpellStacksOnMe(spell.Trigger) and
+                    return not mq.TLO.Me.Buff(spell.Trigger())() and Casting.SpellStacksOnMe(spell.Trigger) and
                         self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
@@ -1482,8 +1479,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell)
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.GemReady(spell) and
-                        (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap')))
+                    return (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.HaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartLifeTap')))
                 end,
             },
         },

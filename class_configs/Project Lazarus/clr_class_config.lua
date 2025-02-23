@@ -782,7 +782,7 @@ local _ClassConfig = {
         },
     },
     ['HealRotations']     = {
-        ["GroupHeal(98+)"] = {
+        ['GroupHeal(98+)'] = {
             {
                 name = "DichoHeal",
                 type = "Spell",
@@ -819,7 +819,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ["BigHeal(65+)"] = {
+        ['BigHeal(65+)'] = {
             {
                 name = "ClutchHeal",
                 type = "Spell",
@@ -894,7 +894,7 @@ local _ClassConfig = {
                 type = "AA",
             },
         },
-        ["MainHeal(101+)"] = {
+        ['MainHeal(101+)'] = {
             {
                 name = "Focused Celestial Regeneration",
                 type = "AA",
@@ -925,7 +925,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ["GroupHeal(1-97)"] = { --Level 1-97
+        ['GroupHeal(1-97)'] = { --Level 1-97
             {
                 name = "Beacon of Life",
                 type = "AA",
@@ -957,7 +957,7 @@ local _ClassConfig = {
                 type = "Spell",
             },
         },
-        ["MainHeal(70-100)"] = { --Level 70-100
+        ['MainHeal(70-100)'] = { --Level 70-100
             {
                 name = "Focused Celestial Regeneration",
                 type = "AA",
@@ -1019,7 +1019,7 @@ local _ClassConfig = {
                 end,
             },
         },
-        ["Heal(1-69)"] = { --Level 1-69, includes Main and emergency Remedy
+        ['Heal(1-69)'] = { --Level 1-69, includes Main and emergency Remedy
             {
                 name = "RemedyHeal",
                 type = "Spell",
@@ -1351,7 +1351,7 @@ local _ClassConfig = {
                 name = "Divine Guardian",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if target.ID() ~= Core.GetMainAssistId() then return false end
+                    if not Targeting.TargetIsMA(target) then return false end
                     return Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
@@ -1392,7 +1392,7 @@ local _ClassConfig = {
             --     name = "GroupVieBuff",
             --     type = "Spell",
             --     cond = function(self, spell, target)
-            --         if not Config:GetSetting('DoVieBuff') or (target.ID() == Core.GetMainAssistId() and self:GetResolvedActionMapItem('ShiningBuff')) then return false end
+            --         if not Config:GetSetting('DoVieBuff') or (Targeting.TargetIsMA(target) and self:GetResolvedActionMapItem('ShiningBuff')) then return false end
             --         return Casting.GroupBuffCheck(spell, target)
             --     end,
             -- },
@@ -1400,7 +1400,7 @@ local _ClassConfig = {
             --     name = "ShiningBuff",
             --     type = "Spell",
             --     cond = function(self, spell, target)
-            --         if target.ID() ~= Core.GetMainAssistId() then return false end
+            --         if not Targeting.TargetIsMA(target) then return false end
             --         return Casting.GroupBuffCheck(spell, target)
             --     end,
             -- },
@@ -1408,7 +1408,7 @@ local _ClassConfig = {
                 name = "SingleVieBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoVieBuff') or self:GetResolvedActionMapItem('GroupVieBuff') or target.ID() ~= Core.GetMainAssistId() then return false end
+                    if not Config:GetSetting('DoVieBuff') or self:GetResolvedActionMapItem('GroupVieBuff') or not Targeting.TargetIsMA(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1416,7 +1416,7 @@ local _ClassConfig = {
                 name = "DivineBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDivineBuff') or target.ID() ~= Core.GetMainAssistId() then return false end
+                    if not Config:GetSetting('DoDivineBuff') or not Targeting.TargetIsMA(target) then return false end
                     return Casting.GemReady(spell) and Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },

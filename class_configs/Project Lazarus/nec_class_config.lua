@@ -821,14 +821,14 @@ local _ClassConfig = {
                 name = "Death Peace",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not Casting.IAmFeigning() and Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 75
+                    return not Casting.IAmFeigning() and mq.TLO.Me.PctHPs() < 75
                 end,
             },
             {
                 name = "Harm Shield",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not Casting.IAmFeigning() and Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() >= 75
+                    return not Casting.IAmFeigning() and mq.TLO.Me.PctHPs() >= 75
                 end,
             },
             {
@@ -848,14 +848,14 @@ local _ClassConfig = {
                 name = "Scent of Thule",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
+                    return Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
                 name = "ScentDebuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
         },
@@ -919,12 +919,10 @@ local _ClassConfig = {
             {
                 name = "DichoSpell",
                 type = "Spell",
-                cond = function(self, _) return true end,
             },
             {
                 name = "SwarmPet",
                 type = "Spell",
-                cond = function(self, _) return true end,
             },
             {
                 name = "SnareDot",
@@ -1095,20 +1093,16 @@ local _ClassConfig = {
             {
                 name = "Companion's Fury",
                 type = "AA",
-                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Rise of Bones",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName) and Targeting.IsNamed(mq.TLO.Target)
+                cond = function(self, aaName, target)
+                    return Casting.SelfBuffAACheck(aaName) and Targeting.IsNamed(target)
                 end,
             },
             {
@@ -1197,7 +1191,7 @@ local _ClassConfig = {
                 name = "Death Bloom",
                 type = "AA",
                 active_cond = function(self, aaName) return Casting.SongActiveByName(mq.TLO.AltAbility(aaName).Spell.RankName()) end,
-                cond = function(self, aaName) return Casting.AAReady(aaName) and mq.TLO.Me.PctMana() < Config:GetSetting('DeathBloomPercent') end,
+                cond = function(self, aaName) return mq.TLO.Me.PctMana() < Config:GetSetting('DeathBloomPercent') end,
             },
         },
         ['PetSummon'] = { --TODO: Double check these lists to ensure someone leveling doesn't have to change options to keep pets current at lower levels
@@ -1247,14 +1241,14 @@ local _ClassConfig = {
                 name = "Aegis of Kildrukaun",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
             {
                 name = "Fortify Companion",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell) and Casting.AAReady(aaName)
+                    return Casting.SelfBuffPetCheck(mq.TLO.Me.AltAbility(aaName).Spell)
                 end,
             },
         },

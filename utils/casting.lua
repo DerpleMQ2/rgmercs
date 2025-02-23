@@ -1803,7 +1803,7 @@ function Casting.AbilityReady(abilityName, target)
     if not target or not target() then return false end
 
     local ready = mq.TLO.Me.AbilityReady(abilityName)()
-    local inRange = Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target)
+    local inRange = Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target) or abilityName:lower() == "taunt"
 
     Logger.log_super_verbose("AbilityReady for  %s: Ready(%s), In-Range(%s)", abilityName, Strings.BoolToColorString(ready),
         Strings.BoolToColorString(inRange))

@@ -750,7 +750,7 @@ return {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.BuffActiveByName("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -961,7 +961,7 @@ return {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not Casting.DetGambitCheck() and mq.TLO.Me.Buff("Twincast").ID() == 0 and not Casting.BuffActiveByName("Improved Twincast")
+                    return not Casting.DetGambitCheck() and not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {

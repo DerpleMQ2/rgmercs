@@ -422,7 +422,7 @@ return {
                 name = "Communion of Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctEndurance() <= 75
+                    return mq.TLO.Me.PctEndurance() <= 75
                 end,
             },
             {
@@ -465,7 +465,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -473,7 +473,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -481,7 +481,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -489,7 +489,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -497,7 +497,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -505,7 +505,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -513,7 +513,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -521,7 +521,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -529,7 +529,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -552,7 +552,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -560,7 +560,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     local burndisc = self:GetResolvedActionMapItem('PrimaryBurnDisc')
-                    return Casting.AAReady(aaName) and (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
+                    return (not mq.TLO.Me.ActiveDisc() or mq.TLO.Me.ActiveDisc() == mq.TLO.Spell(burndisc).RankName())
                 end,
             },
             {
@@ -590,7 +590,7 @@ return {
                 name = "War Cry of the Braxi",
                 type = "Disc",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Casting.SpellStacksOnMe(mq.TLO.Spell(aaName))
+                    return Casting.SpellStacksOnMe(mq.TLO.Spell(aaName))
                 end,
             },
             {
@@ -677,9 +677,6 @@ return {
             {
                 name = "Binding Axe",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Intimidation",
@@ -748,7 +745,7 @@ return {
                 name = "Communion of Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctEndurance() <= 75
+                    return mq.TLO.Me.PctEndurance() <= 75
                 end,
             },
             {
@@ -785,7 +782,7 @@ return {
                 name = "Drawn to Blood",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.GetTargetDistance() > 15
+                    return Targeting.GetTargetDistance() > 15
                 end,
             },
         },

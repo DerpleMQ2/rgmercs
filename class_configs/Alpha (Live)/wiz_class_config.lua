@@ -773,7 +773,7 @@ return {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.BuffActiveByName("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -867,7 +867,7 @@ return {
                 name = "TwincastSpell",
                 type = "Spell",
                 cond = function(self)
-                    return not mq.TLO.Me.Buff("Improved Twincast")()
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -946,7 +946,7 @@ return {
                 name = "FireClaw",
                 type = "Spell",
                 cond = function(self)
-                    return not Casting.BuffActiveByID(mq.TLO.Me.AltAbility("Improved Twincast").Spell.ID())
+                    return not mq.TLO.Me.Buff("Improved Twincast")()
                 end,
             },
             {

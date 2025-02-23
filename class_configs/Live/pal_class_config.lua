@@ -793,8 +793,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt') and
-                        Casting.AAReady(aaName)
+                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
                 end,
             },
             {
@@ -802,15 +801,14 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not mq.TLO.Group() then return false end
-                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt') and
-                        Casting.AAReady(aaName)
+                    return mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
                 end,
             },
             {
                 name = "Lay on Hands",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
+                    return Targeting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
                 end,
             },
         },
@@ -870,57 +868,48 @@ return {
                 name = "Spire of Chivalry",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.Level() < 80 and Casting.AAReady(aaName) and not Casting.SongActiveByName('Group Armor of the Inquisitor') and
+                    return mq.TLO.Me.Level() < 80 and not Casting.SongActiveByName('Group Armor of the Inquisitor') and
                         not Casting.SongActiveByName('Armor of the Inquisitor') and not Casting.BuffActiveByName('Spire of Chivalry')
                 end,
             },
             {
                 name = "Valorous Rage",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Inquisitor's Judgment",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Thunder of Karana",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Config:GetSetting('DoNuke')
+                    return Config:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "Group Armor of The Inquisitor",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Undeadburn",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.TargetedDiscReady(discSpell)
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Righteousstrike",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.ActiveDisc.ID() and Casting.TargetedDiscReady(discSpell)
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "Healproc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not Core.IsTanking() and Casting.SpellReady(spell)
+                    return not Core.IsTanking()
                 end,
             },
         },
@@ -954,7 +943,7 @@ return {
                 name = "Shield Flash",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < Config:GetSetting('FlashHP')
+                    return mq.TLO.Me.PctHPs() < Config:GetSetting('FlashHP')
                 end,
             },
             {
@@ -1020,21 +1009,21 @@ return {
                 name = "Hallowed Lodestar",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.GetXTHaterCount() > 2
+                    return Targeting.GetXTHaterCount() > 2
                 end,
             },
             {
                 name = "Beacon of the Righteous",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.GetXTHaterCount() > 2
+                    return Targeting.GetXTHaterCount() > 2
                 end,
             },
             {
                 name = "Heroic Leap",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.GetXTHaterCount() > 2
+                    return Targeting.GetXTHaterCount() > 2
                 end,
             },
             {
@@ -1042,14 +1031,14 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     return (mq.TLO.Me.AltAbility(aaName).Rank() or 0) > 7 and not Casting.BuffActiveByName("Knight's Yaulp") and
-                        Targeting.GetTargetDistance() < 30 and Casting.AAReady(aaName)
+                        Targeting.GetTargetDistance() < 30
                 end,
             },
             {
                 name = "Taunt",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetDistance() < 30
+                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetDistance() < 30
                 end,
             },
             {
@@ -1112,50 +1101,35 @@ return {
             {
                 name = "Armor of the Inquisitor",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Healtaunt",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "HealNuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "Lowaggronuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "Dicho",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "AntiUndeadNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
                 name = "Vanquish The Fallen",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
@@ -1186,7 +1160,7 @@ return {
                 name = "Marr's Gift",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctMana() <= 60
+                    return mq.TLO.Me.PctMana() <= 60
                 end,
             },
             {
@@ -1259,14 +1233,14 @@ return {
                 name = "Vanquish The Fallen",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
                 name = "Disruptive Persecution",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.AltAbility(aaName).Rank() >= 3 and not Casting.BuffActiveByName("Knight's Yaulp")
+                    return mq.TLO.Me.AltAbility(aaName).Rank() >= 3 and not Casting.BuffActiveByName("Knight's Yaulp")
                 end,
             },
             {
@@ -1390,7 +1364,7 @@ return {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSalvation') then return false end
-                    return Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
+                    return Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
         },

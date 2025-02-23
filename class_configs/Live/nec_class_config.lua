@@ -815,14 +815,14 @@ local _ClassConfig = {
                 name = "Death Peace",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not Casting.IAmFeigning() and Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 75
+                    return not Casting.IAmFeigning() and mq.TLO.Me.PctHPs() < 75
                 end,
             },
             {
                 name = "Harm Shield",
                 type = "AA",
                 cond = function(self, aaName)
-                    return not Casting.IAmFeigning() and Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() >= 75
+                    return not Casting.IAmFeigning() and mq.TLO.Me.PctHPs() >= 75
                 end,
             },
             {
@@ -1089,14 +1089,10 @@ local _ClassConfig = {
             {
                 name = "Companion's Fury",
                 type = "AA",
-                cond = function(self, aaName) return Casting.AAReady(aaName) end,
             },
             {
                 name = "Rise of Bones",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Focus of Arcanum",

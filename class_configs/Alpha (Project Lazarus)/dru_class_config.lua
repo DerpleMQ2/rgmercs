@@ -737,7 +737,7 @@ local _ClassConfig = {
         },
     },
     ['HealRotations']     = {
-        ["BigHealPoint"] = {
+        ['BigHealPoint'] = {
             {
                 name = "QuickGroupHeal",
                 type = "Spell",
@@ -777,7 +777,7 @@ local _ClassConfig = {
                 type = "AA",
             },
         },
-        ["GroupHealPoint"] = {
+        ['GroupHealPoint'] = {
             {
                 name = "Blessing of Tunare",
                 type = "AA",
@@ -798,7 +798,7 @@ local _ClassConfig = {
                 type = "Spell",
             },
         },
-        ["MainHealPoint"] = {
+        ['MainHealPoint'] = {
             {
                 name = "QuickHeal",
                 type = "Spell",
@@ -927,14 +927,14 @@ local _ClassConfig = {
                 name = "Distant Conflagration",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.Buff("Twincast").ID() == 0
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.BuffActiveByName("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -980,7 +980,7 @@ local _ClassConfig = {
                 name = "TwincastSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.Buff("Twincast").ID() == 0
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
         },

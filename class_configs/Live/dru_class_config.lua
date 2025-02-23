@@ -829,107 +829,79 @@ local _ClassConfig = {
         },
     },
     ['HealRotations']     = {
-        ["BigHealPoint"] = {
+        ['BigHealPoint'] = {
             {
                 name = "QuickHealSurge",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "QuickGroupHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.SpellReady(spell) and (target.ID() or 0) == Core.GetMainAssistId()
+                    return Targeting.TargetIsMA(target)
                 end,
             },
             {
                 name = "Blessing of Tunare",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName) and (target.ID() or 0) == Core.GetMainAssistId()
+                    return Targeting.TargetIsMA(target)
                 end,
             },
             {
                 name = "Wildtender's Survival",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName) and (target.ID() or 0) == Core.GetMainAssistId()
+                    return Targeting.TargetIsMA(target)
                 end,
             },
             {
                 name = "Swarm of Fireflies",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Convergence of Spirits",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Forceful Rejuvenation",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
         },
-        ["GroupHealPoint"] = {
+        ['GroupHealPoint'] = {
             {
                 name = "Blessing of Tunare",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName) and (target.PctHPs() or 999) < Config:GetSetting('BigHealPoint')
+                    return (target.PctHPs() or 999) < Config:GetSetting('BigHealPoint')
                 end,
             },
             {
                 name = "QuickGroupHeal",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "Wildtender's Survival",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "LongGroupHeal",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
 
         },
-        ["MainHealPoint"] = {
+        ['MainHealPoint'] = {
             {
                 name = "QuickHeal",
                 type = "Spell",
-                cond = function(self, _) return true end,
             },
             {
                 name = "LongHeal1",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "LongHeal2",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
         },
     },
@@ -1027,9 +999,6 @@ local _ClassConfig = {
             {
                 name = "Silent Casting",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Season's Wrath",
@@ -1188,65 +1157,38 @@ local _ClassConfig = {
             {
                 name = "Nature's Boon",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Spirit of the Wood",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Swarm of the Fireflies",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Distant Conflagration",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Nature's Guardian",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Spirits of Nature",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Destructive Vortex",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Nature's Fury",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
             {
                 name = "Spire of Nature",
                 type = "AA",
-                cond = function(self, aaName)
-                    return true
-                end,
             },
         },
         ['Twin Heal'] = {
@@ -1254,7 +1196,7 @@ local _ClassConfig = {
                 name = "TwinHealNuke",
                 type = "Spell",
                 retries = 0,
-                cond = function(self, spell) return Casting.SpellReady(spell) and not Casting.SongActiveByName("Healing Twincast") end,
+                cond = function(self, spell) return not Casting.SongActiveByName("Healing Twincast") end,
             },
         },
         ['Debuff'] = {
@@ -1326,7 +1268,7 @@ local _ClassConfig = {
                 name = "Swarm of Fireflies",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return target.ID() == (mq.TLO.Group.MainTank.ID() or 0) and Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
+                    return Targeting.TargetIsMA(target) and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
             {
@@ -1409,7 +1351,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return true end,
                 cond = function(self, aaName, target)
-                    return target.ID() == Core.GetMainAssistId() and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
+                    return Targeting.TargetIsMA(target) and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
                 end,
             },
         },
@@ -1486,7 +1428,6 @@ local _ClassConfig = {
                 name = "PetSpell",
                 type = "Spell",
                 active_cond = function() return mq.TLO.Me.Pet.ID() ~= 0 end,
-                cond = function() return true end,
             },
         },
     },
