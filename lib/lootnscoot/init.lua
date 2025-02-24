@@ -3486,7 +3486,7 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
 
     -- Check for full inventory
     if areFull == true then
-        LNS.report('My bags are full, I can\'t loot anymore! Turning OFF Looting Items until we sell.')
+        LNS.report('My bags are full, I can\'t loot anymore! \aoOnly Looting \ayCoin\ax and Items I have \atStack Space\ax for')
     end
 
     Logger.Debug(LNS.guiLoot.console, "\aoINSERT HISTORY CHECK 4\ax: \ayAction\ax: \at%s\ax, Item: \ao%s\ax, \atLink: %s", eval, itemName, itemLink)
