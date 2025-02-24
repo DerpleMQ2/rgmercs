@@ -2814,24 +2814,6 @@ function LNS.getRule(item, fromFunction, index)
         Logger.Debug(LNS.guiLoot.console, dbgTbl)
     end
 
-    -- Handle Spell Drops
-    if LNS.Settings.KeepSpells and LNS.checkSpells(itemName) and ruletype == 'Normal' then
-        lootDecision = "Keep"
-        lootNewItemRule = 'Keep'
-        if isNoDrop then
-            lootDecision = "Ask"
-            lootNewItemRule = 'Ask'
-        end
-        dbgTbl = {
-            Lookup = '\ax\ag Check for SPELLS',
-            Decision = lootDecision,
-            Classes = lootClasses,
-            Item = itemName,
-            Link = lootLink,
-        }
-        Logger.Debug(LNS.guiLoot.console, dbgTbl)
-    end
-
     Logger.Debug(LNS.guiLoot.console, "\aoLookup Decision \ax\ay Start\ax\ao FINAL CHECKS\ax: \at%s\ax, \ayClasses\ax: \at%s\ax, Item: \ao%s\ax, \atLink: %s", lootDecision,
         lootClasses,
         itemName,
@@ -2916,6 +2898,24 @@ function LNS.getRule(item, fromFunction, index)
     end
 
     -- OVERRIDES DECISIONS
+
+    -- Handle Spell Drops
+    if LNS.Settings.KeepSpells and LNS.checkSpells(itemName) and ruletype == 'Normal' then
+        lootDecision = "Keep"
+        lootNewItemRule = 'Keep'
+        if isNoDrop then
+            lootDecision = "Ask"
+            lootNewItemRule = 'Ask'
+        end
+        dbgTbl = {
+            Lookup = '\ax\ag Check for SPELLS',
+            Decision = lootDecision,
+            Classes = lootClasses,
+            Item = itemName,
+            Link = lootLink,
+        }
+        Logger.Debug(LNS.guiLoot.console, dbgTbl)
+    end
 
     -- Handle LootStackableOnly setting incase this was changed after the first check.
     if not stackable and LNS.Settings.StackableOnly then
@@ -3747,7 +3747,11 @@ function LNS.bankItem(itemID, bag, slot)
     mq.cmdf(notify)
     mq.delay(10000, function() return mq.TLO.Cursor() end)
     mq.cmdf('/notify BigBankWnd BIGB_AutoButton leftmouseup')
-    mq.delay(10000, function() return not mq.TLO.Cursor() end)
+    mq.delay(1000, function() return not mq.TLO.Cursor() end)
+    if mq.TLO.Cursor() ~= nil then
+        mq.cmd("/autoinventory")
+        Logger.Warn(LNS.guiLoot.console, "Banking \ayNO Free Slot \axInventorying and trying next item...")
+    end
 end
 
 function LNS.markTradeSkillAsBank()
