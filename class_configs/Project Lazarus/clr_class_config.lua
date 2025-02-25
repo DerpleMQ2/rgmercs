@@ -1007,7 +1007,7 @@ local _ClassConfig = {
                 name = "CompleteHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting("DoCompleteHeal") or target.ID() ~= Core.GetMainAssistId() then return false end
+                    if not Config:GetSetting("DoCompleteHeal") or not Targeting.TargetIsMA(target) then return false end
                     return (target.PctHPs() or 999) <= Config:GetSetting('CompleteHealPct')
                 end,
             },
@@ -1015,7 +1015,7 @@ local _ClassConfig = {
                 name = "HealingLight",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return not (Config:GetSetting("DoCompleteHeal") and target.ID() == Core.GetMainAssistId())
+                    return not (Config:GetSetting("DoCompleteHeal") and Targeting.TargetIsMA(target))
                 end,
             },
         },
