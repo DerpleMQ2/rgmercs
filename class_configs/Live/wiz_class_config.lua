@@ -753,7 +753,7 @@ return {
                 name = "Improved Twincast",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.BuffActiveByName("Twincast")
+                    return not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -767,7 +767,7 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
             {
@@ -847,7 +847,7 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
             {
@@ -862,23 +862,14 @@ return {
             {
                 name = "Force of Ice",
                 type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Ice")
-                end,
             },
             {
                 name = "Force of Will",
                 type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Will")
-                end,
             },
             {
                 name = "Force of Flame",
                 type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Flame")
-                end,
             },
         },
         ['Gift of Mana'] = {
@@ -964,7 +955,7 @@ return {
                 name = "DichoSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not Casting.DetGambitCheck() and mq.TLO.Me.Buff("Twincast").ID() == 0 and not Casting.BuffActiveByName("Improved Twincast")
+                    return not Casting.DetGambitCheck() and not mq.TLO.Me.Buff("Twincast")()
                 end,
             },
             {
@@ -1120,7 +1111,7 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
             {
