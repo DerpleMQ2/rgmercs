@@ -863,8 +863,8 @@ return {
                 name = "Spire of Chivalry",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.Level() < 80 and Casting.AAReady(aaName) and not Casting.SongActiveByName('Group Armor of the Inquisitor') and
-                        not Casting.SongActiveByName('Armor of the Inquisitor') and not Casting.BuffActiveByName('Spire of Chivalry')
+                    return mq.TLO.Me.Level() < 80 and not Casting.SongActiveByName('Group Armor of the Inquisitor') and not Casting.SongActiveByName('Armor of the Inquisitor') and
+                        not Casting.BuffActiveByName('Spire of Chivalry')
                 end,
             },
             {
@@ -981,16 +981,14 @@ return {
                 name = "TotLightHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "BurstHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
@@ -1146,24 +1144,21 @@ return {
                 name = "TotLightHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "BurstHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "DebuffNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        ((Targeting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
+                    return ((Targeting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
                 end,
             },
             {

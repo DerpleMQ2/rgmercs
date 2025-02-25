@@ -868,8 +868,8 @@ return {
                 name = "Spire of Chivalry",
                 type = "AA",
                 cond = function(self, aaName)
-                    return mq.TLO.Me.Level() < 80 and not Casting.SongActiveByName('Group Armor of the Inquisitor') and
-                        not Casting.SongActiveByName('Armor of the Inquisitor') and not Casting.BuffActiveByName('Spire of Chivalry')
+                    return mq.TLO.Me.Level() < 80 and not Casting.SongActiveByName('Group Armor of the Inquisitor') and not Casting.SongActiveByName('Armor of the Inquisitor') and
+                        not Casting.BuffActiveByName('Spire of Chivalry')
                 end,
             },
             {
@@ -883,9 +883,6 @@ return {
             {
                 name = "Thunder of Karana",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Config:GetSetting('DoNuke')
-                end,
             },
             {
                 name = "Group Armor of The Inquisitor",
@@ -951,8 +948,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and
-                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
@@ -960,8 +956,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and
-                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
@@ -969,8 +964,7 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and
-                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
@@ -978,31 +972,28 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell, target)
                     return Core.IsModeActive('Tank') and
-                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and
-                        mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and not mq.TLO.Me.ActiveDisc.ID()
+                        (mq.TLO.SpawnCount("NPC radius 60 zradius 50")() > 2 or Targeting.IsNamed(target)) and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
                 name = "meleemit",
                 type = "Disc",
                 cond = function(self, discSpell, target)
-                    return Casting.DiscReady(discSpell) and not (discSpell.Level() < 108 and mq.TLO.Me.ActiveDisc.ID())
+                    return not ((discSpell.Level() or 0) < 108 and mq.TLO.Me.ActiveDisc.ID())
                 end,
             },
             {
                 name = "TotLightHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "BurstHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
@@ -1037,66 +1028,56 @@ return {
             {
                 name = "Taunt",
                 type = "Ability",
-                cond = function(self, abilityName)
-                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetDistance() < 30
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
                 end,
             },
             {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target) and
-                        (Core.ShieldEquipped() or Casting.CanUseAA("Improved Bash"))
+                    return Core.ShieldEquipped() or Casting.CanUseAA("2 Hand Bash")
                 end,
             },
             {
                 name = "Disarm",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
             {
                 name = "Challengetaunt",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and not Casting.TargetHasBuff(spell)
+                    return not Casting.TargetHasBuff(spell)
                 end,
             },
             {
                 name = "StunTimer4",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.DetSpellCheck(spell)
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "StunTimer5",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.DetSpellCheck(spell)
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "LessonStun",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.DetSpellCheck(spell)
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "CrushTimer5",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "CrushTimer6",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "Armor of the Inquisitor",
@@ -1145,16 +1126,10 @@ return {
             {
                 name = "Bash",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
             {
                 name = "Disarm",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
             {
                 name = "Marr's Gift",
@@ -1167,67 +1142,61 @@ return {
                 name = "Dicho",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= 35
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) <= 35
                 end,
             },
             {
                 name = "TotLightHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "BurstHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "DebuffNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and
-                        ((Targeting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
+                    return ((Targeting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
                 end,
             },
             {
                 name = "AntiUndeadNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
+                    return Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
             {
                 name = "Reverseds",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.TargetHasBuff(spell) and Config:GetSetting('DoReverseDS')
+                    return Casting.TargetHasBuff(spell) and Config:GetSetting('DoReverseDS')
                 end,
             },
             {
                 name = "Lowaggronuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Config:GetSetting('DoNuke')
+                    return Config:GetSetting('DoNuke')
                 end,
             },
             {
                 name = "CrushTimer6",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Config:GetSetting('DoNuke') and (mq.TLO.Me.SecondaryPctAggro() or 0) > 60
+                    return Config:GetSetting('DoNuke') and (mq.TLO.Me.SecondaryPctAggro() or 0) > 60
                 end,
             },
             {
                 name = "HealNuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "Vanquish The Fallen",
@@ -1257,7 +1226,7 @@ return {
                 name = "aurabuff1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and not Casting.AuraActiveByName(spell.RankName.Name()) and mq.TLO.Me.PctEndurance() > 10
+                    return not Casting.AuraActiveByName(spell.RankName.Name()) and mq.TLO.Me.PctEndurance() > 10
                 end,
             },
             {
@@ -1271,14 +1240,14 @@ return {
                 name = "ArmorSelfBuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "FuryProc",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1286,42 +1255,42 @@ return {
                 type = "Spell",
                 cond = function(self, spell) --use this always until we have a Fury proc, and optionally after that, up until the point that Fury is rolled into DPU
                     if (mq.TLO.Me.AltAbility("Divine Protector's Unity").Rank() or 0) > 1 or (self:GetResolvedActionMapItem("FuryProc") and not Config:GetSetting('DoUndeadProc')) then return false end
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Remorse",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Piety",
                 type = "Spell",
                 cond = function(self, spell)
-                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return not self.ClassConfig.HelperFunctions.castDPU(self) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Preservation",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
+                    return Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
                 end,
             },
             {
                 name = "TempHP",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
+                    return Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
                 end,
             },
             {
                 name = "Incoming",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
+                    return Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank")
                 end,
             },
             {
@@ -1347,7 +1316,7 @@ return {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell)
                     if Config:GetSetting('AegoSymbol') ~= 1 then return false end
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1356,7 +1325,7 @@ return {
                 active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
                 cond = function(self, spell)
                     if Config:GetSetting('AegoSymbol') ~= 2 then return false end
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {

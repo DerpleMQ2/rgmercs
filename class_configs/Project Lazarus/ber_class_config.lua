@@ -120,7 +120,7 @@ return {
             "Phantom Assailant",
         },
         ['Alliance'] = {
-            "Demolisher's,",
+            "Demolisher's Alliance,",
             "Mangler's Covenant",
             "Vindicator's Coalition",
             "Conqueror's Conjunction",

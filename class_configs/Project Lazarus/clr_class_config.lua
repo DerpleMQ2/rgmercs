@@ -838,7 +838,7 @@ local _ClassConfig = {
             --     name = "DichoHeal",
             --     type = "Spell",
             --     cond = function(self, spell, target)
-            --         return Casting.GemReady(spell) and Casting.SpellReady(spell) and target.ID() == Core.GetMainAssistId
+            --         return Targeting.TargetIsMA(target)
             --     end,
             -- },
             {
@@ -1199,8 +1199,7 @@ local _ClassConfig = {
             --     retries = 0,
             --     cond = function(self, spell)
             --         if not Config:GetSetting('DoTwinHeal') then return false end
-            --         return Casting.GemReady(spell) and Casting.SpellReady(spell) and
-            --             not Casting.SongActiveByName("Healing Twincast")
+            --         return not Casting.SongActiveByName("Healing Twincast")
             --     end,
             -- },
             {
@@ -1216,7 +1215,7 @@ local _ClassConfig = {
             --     type = "Spell",
             --     cond = function(self, spell, target)
             --         if Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint') then return false end
-            --         return Casting.GemReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+            --         return (Casting.HaveManaToNuke() or Casting.BurnCheck())
             --     end,
             -- },
             -- {
@@ -1224,16 +1223,14 @@ local _ClassConfig = {
             --     type = "Spell",
             --     cond = function(self, spell, target)
             --         if Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint') then return false end
-            --         return Casting.GemReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
-            --     end,
+            --         return (Casting.HaveManaToNuke() or Casting.BurnCheck())            --     end,
             -- },
             -- {
             --     name = "NukeHeal3",
             --     type = "Spell",
             --     cond = function(self, spell, target)
             --         if Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint') then return false end
-            --         return Casting.GemReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
-            --     end,
+            --         return (Casting.HaveManaToNuke() or Casting.BurnCheck())            --     end,
             -- },
             {
                 name = "Yaulp",
@@ -1318,7 +1315,7 @@ local _ClassConfig = {
                     if mq.TLO.Me.Aura(1)() then mq.TLO.Me.Aura(1).Remove() end
                 end,
                 cond = function(self, aaName)
-                    return not Casting.AuraActiveByName("Aura of Pious Divinity") and Casting.AAReady(aaName)
+                    return not Casting.AuraActiveByName("Aura of Pious Divinity")
                 end,
             },
             {

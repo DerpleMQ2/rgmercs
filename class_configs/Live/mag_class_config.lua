@@ -885,9 +885,9 @@ _ClassConfig      = {
             steps = 1,
             load_cond = function() return Config:GetSetting('DoMalo') or Config:GetSetting('DoAEMalo') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-            cond = function(self, combat_state, targetId)
+            cond = function(self, combat_state)
                 return combat_state == "Combat" and not Casting.IAmFeigning() and Casting.DebuffConCheck() and
-                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
+                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(Targeting.GetAutoTarget()))
             end,
         },
         {
@@ -1416,8 +1416,8 @@ _ClassConfig      = {
             {
                 name = "AllianceBuff",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Targeting.IsNamed(mq.TLO.Target) and not Casting.TargetHasBuff(spell) and
+                cond = function(self, spell, target)
+                    return Targeting.IsNamed(target) and not Casting.TargetHasBuff(spell) and
                         Config:GetSetting('DoAlliance') and Casting.CanAlliance()
                 end,
             },
@@ -1579,8 +1579,8 @@ _ClassConfig      = {
             --   {
             --       name = "AllianceBuff",
             --       type = "Spell",
-            --      cond = function(self, spell)
-            --           return Targeting.IsNamed(mq.TLO.Target) and not Casting.TargetHasBuff(spell) and
+            --      cond = function(self, spell, target)
+            --           return Targeting.IsNamed(target) and not Casting.TargetHasBuff(spell) and
             --               Config:GetSetting('DoAlliance') and Casting.CanAlliance()
             --       end,
             --    },

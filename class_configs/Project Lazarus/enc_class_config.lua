@@ -794,9 +794,9 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return Config:GetSetting('DoTash') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-            cond = function(self, combat_state, targetId)
+            cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
-                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
+                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(Targeting.GetAutoTarget()))
             end,
         },
         { --Slow and Tash separated so we use both before we start DPS
@@ -805,9 +805,9 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return Config:GetSetting('DoSlow') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-            cond = function(self, combat_state, targetId)
+            cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
-                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
+                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(Targeting.GetAutoTarget()))
             end,
         },
         {

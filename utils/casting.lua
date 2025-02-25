@@ -298,7 +298,7 @@ end
 --- @return boolean Returns true if the DoT spell can fire, false otherwise.
 function Casting.DotSpellCheck(spell)
     if not spell or not spell() then return false end
-    local named = Targeting.IsNamed(mq.TLO.Target)
+    local named = Targeting.IsNamed(Targeting.GetAutoTarget())
     local targethp = Targeting.GetTargetPctHPs()
 
     return not Casting.TargetHasBuff(spell) and Casting.SpellStacksOnTarget(spell) and
@@ -1435,7 +1435,7 @@ end
 function Casting.BurnCheck()
     local settings = Config:GetSettings()
     local autoBurn = settings.BurnAuto and
-        ((Targeting.GetXTHaterCount() >= settings.BurnMobCount) or (Targeting.IsNamed(mq.TLO.Target) and settings.BurnNamed))
+        ((Targeting.GetXTHaterCount() >= settings.BurnMobCount) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and settings.BurnNamed))
     local alwaysBurn = (settings.BurnAlways and settings.BurnAuto)
     local forcedBurn = Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()
 
@@ -1687,7 +1687,7 @@ end
 --- @return boolean True if the target matches the Con requirements for debuffing.
 function Casting.DebuffConCheck()
     local conLevel = (Config.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
-    return conLevel >= Config:GetSetting('DebuffMinCon') or (Targeting.IsNamed(mq.TLO.Target) and Config:GetSetting('DebuffNamedAlways'))
+    return conLevel >= Config:GetSetting('DebuffMinCon') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('DebuffNamedAlways'))
 end
 
 --- Determines whether the utility should shrink.

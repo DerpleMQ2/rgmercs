@@ -834,15 +834,6 @@ local _ClassConfig = {
                     return Casting.GemReady(spell) and mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
                 end,
             },
-            -- {
-            --     name = "WaveHeal2",
-            --     type = "Spell",
-            --     cond = function(self, spell)
-            --         if not mq.TLO.Group() then return false end
-            --         return Casting.SpellLoaded(spell) and Casting.SpellReady(spell) and
-            --             mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
-            --     end,
-            -- },
             {
                 name = "Aurora",
                 type = "Spell",
@@ -1307,9 +1298,6 @@ local _ClassConfig = {
             -- {
             -- name = "Inquisitor's Judgment",
             -- type = "AA",
-            -- cond = function(self, aaName)
-            -- return Casting.AAReady(aaName)
-            -- end,
             -- },
         },
         ['Defenses'] = {
@@ -1468,58 +1456,6 @@ local _ClassConfig = {
                 name = "Force of Disruption",
                 type = "AA",
             },
-            --below stuff thrown in, not vetted
-            -- {
-            -- name = "Healtaunt",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID())
-            -- end,
-            -- },
-            -- {
-            --     name = "Force of Disruption",
-            --     type = "AA",
-            --     cond = function(self, aaName)
-            --         return (mq.TLO.Me.AltAbility(aaName).Rank() or 0) > 7 and not Casting.BuffActiveByName("Knight's Yaulp") and
-            --             Targeting.GetTargetDistance() < 30 and Casting.AAReady(aaName)
-            --     end,
-            -- },
-            -- {
-            -- name = "StunTimer5",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
-            -- end,
-            -- },
-            -- {
-            --     name = "LessonStun",
-            --     type = "Spell",
-            --     cond = function(self, spell)
-            --         return Casting.SpellReady(spell) and Casting.DetSpellCheck(spell)
-            --     end,
-            -- },
-            -- {
-            -- name = "DebuffNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID()) and
-            -- ((Targeting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
-            -- end,
-            -- },
-            -- {
-            -- name = "AntiUndeadNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID()) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
-            -- end,
-            -- },
-            -- {
-            -- name = "Reverseds",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID()) and Casting.TargetHasBuff(spell) and Config:GetSetting('DoReverseDS')
-            -- end,
-            -- },
         },
         ['Weapon Management'] = {
             {

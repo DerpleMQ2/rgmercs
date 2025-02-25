@@ -6,9 +6,9 @@
 local mq        = require('mq')
 local Config    = require('utils.config')
 local Modules   = require("utils.modules")
-local Comms     = require("utils.comms")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
+local Comms     = require("utils.comms")
 
 return {
     _version         = "1.0 - Project Lazarus",
@@ -31,13 +31,14 @@ return {
     },
     ['AbilitySets']  = {
         ['AllianceSpell'] = {
-            "Malarian Mantle",
+            "Frostbound Covariance",
             "Frostbound Conjunction",
             "Frostbound Coalition",
             "Frostbound Covenant",
             "Frostbound Alliance",
         },
         ['DichoSpell'] = {
+            "Reciprocal Fire",
             "Ecliptic Fire",
             "Composite Fire",
             "Dissident Fire",
@@ -152,6 +153,7 @@ return {
         },
         ['VortexNuke'] = {
             -- NOTE: ${Spell[${VortexNuke}].ResistType} can be used to determine which resist type is getting debuffed
+            "Chromospheric Vortex",
             "Shadebright Vortex",
             "Thaumaturgic Vortex",
             "Stormjolt Vortex",
@@ -341,6 +343,7 @@ return {
             "Musing Gambit",
             "Quiescent Gambit",
             "Bucolic Gambit",
+            "Contemplative Gambit",
         },
         ['PetSpell'] = {
             "Kindleheart's Pyroblade",
@@ -601,7 +604,7 @@ return {
 
 
                     for _, port in ipairs(evacSpells) do
-                        if me.Class.Name() == 'Wizard' and me.Level()>= 57 and port == 'Evacuate' then
+                        if me.Class.Name() == 'Wizard' and me.Level() >= 57 and port == 'Evacuate' then
                             portName = port
                             break
                         elseif me.Class.Name() == 'Wizard' and me.Level() >= 18 and port == 'Lesser Evacuate' then
@@ -764,7 +767,7 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
             {
@@ -844,7 +847,7 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
             {
@@ -859,23 +862,14 @@ return {
             {
                 name = "Force of Ice",
                 type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Ice")
-                end,
             },
             {
                 name = "Force of Will",
                 type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Will")
-                end,
             },
             {
                 name = "Force of Flame",
                 type = "AA",
-                cond = function(self)
-                    return Casting.AAReady("Force of Flame")
-                end,
             },
         },
         ['Gift of Mana'] = {
@@ -1117,7 +1111,7 @@ return {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.AAReady("Harvest of Druzzil")
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
             {

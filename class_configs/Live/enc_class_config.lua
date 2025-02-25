@@ -825,9 +825,9 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return Config:GetSetting('DoTash') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-            cond = function(self, combat_state, targetId)
+            cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
-                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
+                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(Targeting.GetAutoTarget()))
             end,
         },
         { --Slow and Tash separated so we use both before we start DPS
@@ -836,9 +836,9 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return Config:GetSetting('DoSlow') or Config:GetSetting('DoCripple') end,
             targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
-            cond = function(self, combat_state, targetId)
+            cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.DebuffConCheck() and not Casting.IAmFeigning() and
-                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(mq.TLO.Spawn(targetId)))
+                    (Casting.HaveManaToDebuff() or Targeting.IsNamed(Targeting.GetAutoTarget()))
             end,
         },
         {
@@ -1248,7 +1248,7 @@ local _ClassConfig = {
                 name = "ManaDrainSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return (target.CurrentMana() or 0) > 10 and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return (target.CurrentMana() or 0) > 10 and (Casting.HaveManaToNuke() or Casting.BurnCheck())
                 end,
             },
         },

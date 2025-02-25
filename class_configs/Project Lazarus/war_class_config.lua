@@ -357,7 +357,7 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 --need to look at rotation and decide if it should fire during emergencies. leaning towards no
                 return combat_state == "Combat" and Core.IsTanking() and (mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart') or
-                    Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    Targeting.IsNamed(Targeting.GetAutoTarget()) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
@@ -385,7 +385,7 @@ local _ClassConfig = {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 75
+                    return mq.TLO.Me.PctEndurance() < 75
                 end,
             },
             {
@@ -395,7 +395,7 @@ local _ClassConfig = {
                     return Casting.AuraActiveByName(discSpell.RankName.Name())
                 end,
                 cond = function(self, discSpell)
-                    return not mq.TLO.Me.Aura(1).ID() and Casting.DiscReady(discSpell)
+                    return not mq.TLO.Me.Aura(1).ID()
                 end,
             },
             {
@@ -405,7 +405,7 @@ local _ClassConfig = {
                     return Casting.SongActive(discSpell)
                 end,
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not Casting.SongActive(discSpell)
+                    return not Casting.SongActive(discSpell)
                 end,
             },
             {
@@ -415,7 +415,7 @@ local _ClassConfig = {
                     return Casting.SongActive(discSpell)
                 end,
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not Casting.SongActive(discSpell)
+                    return not Casting.SongActive(discSpell)
                 end,
             },
             {
@@ -425,7 +425,7 @@ local _ClassConfig = {
                     return mq.TLO.Me.ActiveDisc.ID() == discSpell.ID()
                 end,
                 cond = function(self, discSpell)
-                    return Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and Casting.DiscReady(discSpell)
+                    return Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
             {
@@ -437,7 +437,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if not Config:GetSetting('DoAETaunt') or Config:GetSetting('SafeAETaunt') then return false end
-                    return Core.IsTanking() and Casting.DiscReady(discSpell) and not Casting.BuffActiveByID(discSpell.ID())
+                    return Core.IsTanking() and not Casting.BuffActiveByID(discSpell.ID())
                 end,
             },
             {
@@ -445,7 +445,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if Config:GetSetting('DoAETaunt') and not Config:GetSetting('SafeAETaunt') then return false end
-                    return Core.IsTanking() and Casting.DiscReady(discSpell) and not Casting.BuffActiveByID(discSpell.ID())
+                    return Core.IsTanking() and not Casting.BuffActiveByID(discSpell.ID())
                 end,
             },
             {
@@ -490,15 +490,15 @@ local _ClassConfig = {
                 name = "Ageless Enmity",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
+                    return Targeting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
                 end,
             },
             --used to jumpstart hatred on named from the outset and prevent early rips from burns
             {
                 name = "Attention",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell) and Targeting.IsNamed(mq.TLO.Target)
+                cond = function(self, discSpell, target)
+                    return Targeting.IsNamed(target)
                 end,
             },
             --used to reinforce hatred after it is initially established
@@ -507,7 +507,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
+                    return Targeting.GetTargetPctHPs() < 90 and (mq.TLO.Target.SecondaryPctAggro() or 0) > 70
                 end,
             },
             {
@@ -515,7 +515,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     --if not Config:GetSetting('AETauntAA') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
@@ -567,7 +567,7 @@ local _ClassConfig = {
             --     name = "AERoar",
             --     type = "Disc",
             --     cond = function(self, discSpell)
-            --         return Core.IsModeActive("Tank") and Casting.DiscReady(discSpell) and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
+            --         return Core.IsModeActive("Tank") and Targeting.GetXTHaterCount() >= Config:GetSetting('BurnMobCount') and
             --             Config:GetSetting('DoAEAgro')
             --     end,
             -- },
