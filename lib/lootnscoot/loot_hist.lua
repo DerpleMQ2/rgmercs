@@ -837,6 +837,7 @@ function guiLoot.lootedConf_GUI()
 end
 
 local function addRule(who, what, link, eval)
+	if type(eval) ~= 'string' then eval = 'Unknown' end
 	if lootTable[what] == nil then
 		lootTable[what] = {}
 		lootTable[what] = { Count = 0, Who = who, Link = link, Eval = eval or 'Unknown', }
