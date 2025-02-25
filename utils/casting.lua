@@ -7,6 +7,7 @@ local Comms           = require("utils.comms")
 local Targeting       = require("utils.targeting")
 local DanNet          = require('lib.dannet.helpers')
 local Logger          = require("utils.logger")
+local Combat          = require("utils.combat")
 
 local Casting         = { _version = '1.0', _name = "Casting", _author = 'Derple', }
 Casting.__index       = Casting
@@ -731,6 +732,12 @@ function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not veste
             return
             --elseif target() and target.ID() ~= Targeting.GetTargetID() then
             --Logger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) for %s is no longer your currentTarget(%d)", target.ID(), currentCast, Targeting.GetTargetID())
+        end
+
+        if (maxWaitOrig - maxWait) % 200 == 0 and Combat.DoCombatActions() and not mq.TLO.Me.Pet.Combat() then --alleviate pets standing around at early levels where mob HPs are low and cast times are long
+            if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
+                Combat.PetAttack(Config.Globals.AutoTargetID, true)
+            end
         end
 
         maxWait = maxWait - 20
