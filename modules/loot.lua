@@ -234,7 +234,7 @@ end
 function Module.DoLooting()
 	if not Module.TempSettings.Looting then return end
 
-	local maxWait = 10000
+	local maxWait = 5000
 	while Module.TempSettings.Looting do
 		if mq.TLO.Me.CombatState():lower() == "combat" and not Config:GetSetting('CombatLooting') then
 			Logger.log_debug("\ay[LOOT]: Aborting Actions due to combat!")
