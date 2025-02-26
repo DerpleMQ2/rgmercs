@@ -774,7 +774,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "War Sheol's Heroic Blade",
+                name = "Wars Sheol's Heroic Blade",
                 type = "AA",
             },
             {

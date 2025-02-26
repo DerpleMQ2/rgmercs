@@ -1792,7 +1792,7 @@ function Casting.AAReady(aaName)
     local ready = me.AltAbilityReady(aaName)()
     local aaSpell = me.AltAbility(aaName).Spell
 
-    Logger.log_verbose("AAReady for AA %s (aaSpell: %s, %d): Ready(%s).", aaName, aaSpell.Name(), aaSpell.ID(), Strings.BoolToColorString(ready))
+    Logger.log_verbose("AAReady for AA %s (aaSpell: %s, %d): Ready(%s).", aaName, (aaSpell.Name() or "None"), (aaSpell.ID() or 0), Strings.BoolToColorString(ready))
 
     return Casting.CastCheck(aaSpell)
 end
