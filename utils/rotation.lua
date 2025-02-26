@@ -151,7 +151,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
         if not songSpell or not songSpell() then return false end
 
-        if Casting.SongReady(songSpell) then
+        if Casting.SongReady(songSpell, bAllowMem) then
             ret = Casting.UseSong(songSpell.RankName(), targetId, bAllowMem, entry.retries)
         end
         Logger.log_verbose("Trying to sing %s - %s :: %s", entry.name, songSpell.RankName(),

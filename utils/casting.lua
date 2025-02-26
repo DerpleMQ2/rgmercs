@@ -1720,13 +1720,13 @@ function Casting.CastCheck(spell, bAllowMove)
 
     local me = mq.TLO.Me
     local castingCheck = not (me.Casting() or mq.TLO.Window("CastingWindow").Open())
-    local movingCheck = bAllowMove == true or Core.MyClassIs("brd") or not (me.Moving() and (spell.MyCastTime() or -1) > 0)
+    local movingCheck = bAllowMove or Core.MyClassIs("brd") or not (me.Moving() and (spell.MyCastTime() or -1) > 0)
     local manaCheck = (Config.Globals.InMedState and (me.CurrentMana() - (2 * me.ManaRegen())) or me.CurrentMana()) >= spell.Mana()
     local endCheck = (Config.Globals.InMedState and (me.CurrentEndurance() - (2 * me.EnduranceRegen())) or me.CurrentEndurance()) >= spell.EnduranceCost()
     ---@diagnostic disable-next-line: undefined-field -- Feared is a valid data member
     local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed())
 
-    Logger.log_super_verbose("CastCheck for %s (%d): CastingCheck(%s), MovingCheck(%s), ManaCheck(%s), EndCheck(%s), ControlCheck(%s)", spell.Name(), spell.ID(),
+    Logger.log_verbose("CastCheck for %s (%d): CastingCheck(%s), MovingCheck(%s), ManaCheck(%s), EndCheck(%s), ControlCheck(%s)", spell.Name(), spell.ID(),
         Strings.BoolToColorString(castingCheck), Strings.BoolToColorString(movingCheck), Strings.BoolToColorString(manaCheck), Strings.BoolToColorString(endCheck),
         Strings.BoolToColorString(controlCheck))
 
@@ -1739,29 +1739,32 @@ end
 function Casting.SpellReady(spell, skipGemTimer)
     if not spell or not spell() then return false end
 
+    local ready = mq.TLO.Me.SpellReady(spell.RankName.Name())()
     local bookCheck = mq.TLO.Me.Book(spell.RankName.Name())()
-    local gemTimerCheck = skipGemTimer or mq.TLO.Me.SpellReady(spell.RankName.Name())()
-    local canCast = Casting.CastCheck(spell)
 
-    Logger.log_super_verbose("SpellReady for %s(%d): BookCheck(%s), GemTimerCheck(%s), CanCast(%s)", spell.RankName(), spell.ID(), Strings.BoolToColorString(bookCheck),
-        Strings.BoolToColorString(gemTimerCheck), Strings.BoolToColorString(canCast))
+    Logger.log_verbose("SpellReady for %s(%d): BookCheck(%s), ReadyCheck(%s), Memorization Allowed (%s).", spell.RankName(), spell.ID(),
+        Strings.BoolToColorString(bookCheck), Strings.BoolToColorString(ready), Strings.BoolToColorString(skipGemTimer))
 
-    return bookCheck and gemTimerCheck and canCast
+    if not bookCheck or (not ready and not skipGemTimer) then return false end
+
+    return Casting.CastCheck(spell)
 end
 
 --- Checks if a given discipline spell is ready to be used by the player character.
 --- @param songSpell MQSpell The name of the song spell to check.
 --- @return boolean Returns true if the song is ready, false otherwise.
-function Casting.SongReady(songSpell)
+function Casting.SongReady(songSpell, skipGemTimer)
     if not songSpell or not songSpell() then return false end
 
     local ready = mq.TLO.Me.SpellReady(songSpell.RankName.Name())()
-    local canCast = Casting.CastCheck(songSpell, true)
+    local bookCheck = mq.TLO.Me.Book(songSpell.RankName.Name())()
 
-    Logger.log_super_verbose("DiscReady for %s(%d): Ready(%s), CanCast(%s)", songSpell.RankName.Name(), songSpell.ID(), Strings.BoolToColorString(ready),
-        Strings.BoolToColorString(canCast))
+    Logger.log_verbose("SongReady for %s(%d): BookCheck(%s), ReadyCheck(%s), Memorization Allowed (%s).", songSpell.RankName(), songSpell.ID(),
+        Strings.BoolToColorString(bookCheck), Strings.BoolToColorString(ready), Strings.BoolToColorString(skipGemTimer))
 
-    return ready and canCast
+    if not bookCheck or (not ready and not skipGemTimer) then return false end
+
+    return Casting.CastCheck(songSpell)
 end
 
 --- Checks if a given discipline spell is ready to be used by the player character.
@@ -1771,12 +1774,12 @@ function Casting.DiscReady(discSpell)
     if not discSpell or not discSpell() then return false end
 
     local ready = mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
-    local canCast = Casting.CastCheck(discSpell, true)
 
-    Logger.log_super_verbose("DiscReady for %s(%d): Ready(%s), CanCast(%s)", discSpell.RankName.Name(), discSpell.ID(), Strings.BoolToColorString(ready),
-        Strings.BoolToColorString(canCast))
+    Logger.log_verbose("DiscReady for %s(%d): Ready(%s)", discSpell.RankName.Name(), discSpell.ID(), Strings.BoolToColorString(ready))
 
-    return ready and canCast
+    if not ready then return false end
+
+    return Casting.CastCheck(discSpell, true)
 end
 
 --- Checks if a specific Alternate Advancement (AA) ability is ready to use.
@@ -1786,14 +1789,12 @@ function Casting.AAReady(aaName)
     local me = mq.TLO.Me
     if not me.AltAbility(aaName) then return false end
 
-    local spell = me.AltAbility(aaName).Spell
     local ready = me.AltAbilityReady(aaName)()
-    local canCast = Casting.CastCheck(spell)
+    local aaSpell = me.AltAbility(aaName).Spell
 
-    Logger.log_super_verbose("AAReady for AA %s (aaSpell: %s, %d): Ready(%s), CanCast(%s)", aaName, spell.Name(), spell.ID(), Strings.BoolToColorString(ready),
-        Strings.BoolToColorString(canCast))
+    Logger.log_verbose("AAReady for AA %s (aaSpell: %s, %d): Ready(%s).", aaName, aaSpell.Name(), aaSpell.ID(), Strings.BoolToColorString(ready))
 
-    return ready and canCast
+    return Casting.CastCheck(aaSpell)
 end
 
 --- Checks if a given ability is ready to be used.
@@ -1805,7 +1806,7 @@ function Casting.AbilityReady(abilityName, target)
     local ready = mq.TLO.Me.AbilityReady(abilityName)()
     local inRange = Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target) or abilityName:lower() == "taunt"
 
-    Logger.log_super_verbose("AbilityReady for  %s: Ready(%s), In-Range(%s)", abilityName, Strings.BoolToColorString(ready),
+    Logger.log_verbose("AbilityReady for  %s: Ready(%s), In-Range(%s)", abilityName, Strings.BoolToColorString(ready),
         Strings.BoolToColorString(inRange))
 
     return ready and inRange

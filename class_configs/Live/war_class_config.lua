@@ -385,7 +385,7 @@ local _ClassConfig = {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctEndurance() < 75
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
@@ -431,21 +431,24 @@ local _ClassConfig = {
             {
                 name = "Brace for Impact",
                 type = "AA",
+                cond = function(self, aaName, target)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
             },
             {
                 name = "HealHateAE",
                 type = "Disc",
-                cond = function(self, discSpell)
+                cond = function(self, discSpell, target)
                     if not Config:GetSetting('DoAETaunt') or Config:GetSetting('SafeAETaunt') then return false end
-                    return Core.IsTanking() and not Casting.BuffActiveByID(discSpell.ID())
+                    return Core.IsTanking() and Casting.GroupBuffCheck(discSpell, target)
                 end,
             },
             {
                 name = "HealHateSingle",
                 type = "Disc",
-                cond = function(self, discSpell)
+                cond = function(self, discSpell, target)
                     if Config:GetSetting('DoAETaunt') and not Config:GetSetting('SafeAETaunt') then return false end
-                    return Core.IsTanking() and not Casting.BuffActiveByID(discSpell.ID())
+                    return Core.IsTanking() and Casting.GroupBuffCheck(discSpell, target)
                 end,
             },
             {
