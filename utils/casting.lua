@@ -1794,6 +1794,8 @@ function Casting.AAReady(aaName)
 
     Logger.log_verbose("AAReady for AA %s (aaSpell: %s, %d): Ready(%s).", aaName, (aaSpell.Name() or "None"), (aaSpell.ID() or 0), Strings.BoolToColorString(ready))
 
+    if not ready then return false end
+
     return Casting.CastCheck(aaSpell)
 end
 
@@ -1804,12 +1806,12 @@ function Casting.AbilityReady(abilityName, target)
     if not target or not target() then return false end
 
     local ready = mq.TLO.Me.AbilityReady(abilityName)()
-    local inRange = Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target) or abilityName:lower() == "taunt"
 
-    Logger.log_verbose("AbilityReady for  %s: Ready(%s), In-Range(%s)", abilityName, Strings.BoolToColorString(ready),
-        Strings.BoolToColorString(inRange))
+    Logger.log_verbose("AbilityReady for  %s: Ready(%s)", abilityName, Strings.BoolToColorString(ready))
 
-    return ready and inRange
+    if not ready then return false end
+
+    return Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target) or abilityName:lower() == "taunt"
 end
 
 return Casting
