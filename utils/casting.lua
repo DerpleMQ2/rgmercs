@@ -322,16 +322,12 @@ function Casting.SelfBuffAACheck(aaName)
     local triggerNotActive = not Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
     local auraNotActive = not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID()
     local stacks = Casting.SpellStacksOnMe(mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name()))
-    --local triggerStacks = (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() == 0 or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
-    -- trigger is already checked in SpellStacksOnMe, testing.
 
     Logger.log_verbose("SelfBuffAACheck(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s)", aaName, -- triggerStacks(%s)
         Strings.BoolToColorString(buffNotActive),
         Strings.BoolToColorString(triggerNotActive),
         Strings.BoolToColorString(auraNotActive),
         Strings.BoolToColorString(stacks))
-    --Strings.BoolToColorString(triggerStacks))
-
 
     return buffNotActive and triggerNotActive and auraNotActive and stacks -- and triggerStacks
 end
@@ -1025,6 +1021,7 @@ function Casting.UseAbility(abilityName)
     Core.DoCmd("/doability %s", abilityName)
     mq.delay(8, function() return not me.AbilityReady(abilityName) end)
     Logger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", abilityName)
+    return true
 end
 
 --- Uses a discipline spell on a specified target.
@@ -1812,6 +1809,18 @@ function Casting.AbilityReady(abilityName, target)
     if not ready then return false end
 
     return Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target) or abilityName:lower() == "taunt"
+end
+
+function Casting.ItemReady(itemName)
+    if not mq.TLO.FindItem("=" .. itemName)() then return false end
+
+    local ready = mq.TLO.Me.ItemReady(itemName)()
+
+    Logger.log_verbose("ItemReady for  %s: Ready(%s)", itemName, Strings.BoolToColorString(ready))
+
+    if not ready then return false end
+
+    return true
 end
 
 return Casting

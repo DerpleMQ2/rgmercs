@@ -861,6 +861,13 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Focused Celestial Regeneration",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.TargetIsMA(target)
+                end,
+            },
+            {
                 name = "Blessing of Sanctuary",
                 type = "AA",
                 cond = function(self, aaName, target)
@@ -958,13 +965,6 @@ local _ClassConfig = {
             },
         },
         ['MainHeal(70-100)'] = { --Level 70-100
-            {
-                name = "Focused Celestial Regeneration",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.TargetIsMA(target)
-                end,
-            },
             {
                 name = "HealNuke",
                 type = "Spell",

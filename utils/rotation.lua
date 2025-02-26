@@ -102,36 +102,38 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
 
     if target and target() and target.ID() == targetId then
         if target.Mezzed() and target.Mezzed.ID() and not Config:GetSetting('AllowMezBreak') then
-            Logger.log_debug("  OkayToEngage() Target is mezzed and not AllowMezBreak --> Not Casting!")
+            Logger.log_debug("Target is mezzed and not AllowMezBreak --> Not Casting!")
             return false
         end
     end
 
     -- Run pre-activates
     if entry.pre_activate then
-        Logger.log_super_verbose("Running Pre-Activate for %s", entry.name)
+        Logger.log_verbose("Running pre-activate for %s.", entry.name)
         entry.pre_activate(caller, Rotation.GetEntryConditionArg(resolvedActionMap, entry))
     end
 
     if entry.type:lower() == "item" then
+        --Allow us to pass entry names directly for items in addition to Action Map tables
         local itemName = resolvedActionMap[entry.name]
-
         if not itemName then itemName = entry.name end
 
-        ret = Casting.UseItem(itemName, targetId)
+        if Casting.ItemReady(itemName) then
+            ret = Casting.UseItem(itemName, targetId)
+        end
+        Logger.log_verbose("Trying to use item %s :: %s", itemName, ret and "\agSuccess" or "\arFailed!")
     end
 
     -- different from items in that they are configured by the user instead of the class.
     if entry.type:lower() == "clickyitem" then
         local itemName = caller.settings[entry.name]
 
-        if not itemName or itemName:len() == 0 then
-            ret = false
-            Logger.log_debug("Unable to find item: %s", itemName)
-        else
-            Casting.UseItem(itemName, targetId)
-            ret = true
+        if not itemName or itemName:len() == 0 then return false end
+
+        if Casting.ItemReady(itemName) then
+            ret = Casting.UseItem(itemName, targetId)
         end
+        Logger.log_verbose("Trying to use clickyitem %s :: %s", itemName, ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.type:lower() == "spell" then
@@ -142,8 +144,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
         if Casting.SpellReady(spell, bAllowMem) then
             ret = Casting.UseSpell(spell.RankName(), targetId, bAllowMem, entry.allowDead, entry.overrideWaitForGlobalCooldown, entry.retries)
         end
-        Logger.log_verbose("Trying to cast %s - %s :: %s", entry.name, spell.RankName(),
-            ret and "\agSuccess" or "\arFailed!")
+        Logger.log_verbose("(Spell) Trying to use %s - %s :: %s", entry.name, spell.RankName(), ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.type:lower() == "song" then
@@ -154,8 +155,7 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
         if Casting.SongReady(songSpell, bAllowMem) then
             ret = Casting.UseSong(songSpell.RankName(), targetId, bAllowMem, entry.retries)
         end
-        Logger.log_verbose("Trying to sing %s - %s :: %s", entry.name, songSpell.RankName(),
-            ret and "\agSuccess" or "\arFailed!")
+        Logger.log_verbose("(Song) Trying to use %s - %s :: %s", entry.name, songSpell.RankName(), ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.type:lower() == "disc" then
@@ -166,42 +166,32 @@ function Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMe
         if Casting.DiscReady(discSpell) then
             ret = Casting.UseDisc(discSpell, targetId)
         end
-        Logger.log_verbose("Trying to do %s - %s :: %s", entry.name, discSpell.RankName(),
-            ret and "\agSuccess" or "\arFailed!")
+        Logger.log_verbose("(Disc) Trying to use %s - %s :: %s", entry.name, discSpell.RankName(), ret and "\agSuccess" or "\arFailed!")
     end
 
-    if entry.type:lower() == "aa" then -- why are AA and abilities fired immediately and not returned? Find out.
+    if entry.type:lower() == "aa" then
         if Casting.AAReady(entry.name) then
-            Casting.UseAA(entry.name, targetId, entry.allowDead, entry.retries)
-            ret = true
-        else
-            ret = false
+            ret = Casting.UseAA(entry.name, targetId, entry.allowDead, entry.retries)
         end
-        Logger.log_verbose("Trying to activate %s :: %s", entry.name,
-            ret and "\agSuccess" or "\arFailed!")
+        Logger.log_verbose("(AA) Trying to use %s :: %s", entry.name, ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.type:lower() == "ability" then
         if Casting.AbilityReady(entry.name, mq.TLO.Spawn(targetId)) then
-            Casting.UseAbility(entry.name)
-            ret = true
-        else
-            ret = false
+            ret = Casting.UseAbility(entry.name)
         end
-        Logger.log_verbose("Trying to %s :: %s", entry.name,
-            ret and "\agSuccess" or "\arFailed!")
+        Logger.log_verbose("(Ability) Trying to use %s :: %s", entry.name, ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.type:lower() == "customfunc" then
         if entry.custom_func then
             ret = Core.SafeCallFunc(string.format("Custom Func Entry: %s", entry.name), entry.custom_func, caller, targetId)
-        else
-            ret = false
         end
-        --Logger.log_verbose("Calling command \ao =>> \ag %s \ao <<= Ret => %s", entry.name, Strings.BoolToColorString(ret))
+        Logger.log_verbose("(Custom Function) Calling %s", entry.name, ret and "\agSuccess" or "\arFailed!")
     end
 
     if entry.post_activate then
+        Logger.log_verbose("Running post-activate for %s.", entry.name)
         entry.post_activate(caller, Rotation.GetEntryConditionArg(resolvedActionMap, entry), ret)
     end
 
