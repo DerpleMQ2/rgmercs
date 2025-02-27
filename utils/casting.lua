@@ -1812,7 +1812,7 @@ function Casting.AbilityReady(abilityName, target)
 end
 
 function Casting.ItemReady(itemName)
-    if not mq.TLO.FindItem("=" .. itemName)() then return false end
+    if not mq.TLO.FindItem("=" .. itemName).Clicky() then return false end
 
     local ready = mq.TLO.Me.ItemReady(itemName)()
 
