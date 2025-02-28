@@ -1721,7 +1721,7 @@ function Casting.CastCheck(spell, bAllowMove)
     local manaCheck = (Config.Globals.InMedState and (me.CurrentMana() - (2 * me.ManaRegen())) or me.CurrentMana()) >= spell.Mana()
     local endCheck = (Config.Globals.InMedState and (me.CurrentEndurance() - (2 * me.EnduranceRegen())) or me.CurrentEndurance()) >= spell.EnduranceCost()
     ---@diagnostic disable-next-line: undefined-field -- Feared is a valid data member
-    local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed())
+    local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed() or me.Mezzed())
 
     Logger.log_verbose("CastCheck for %s (%d): CastingCheck(%s), MovingCheck(%s), ManaCheck(%s), EndCheck(%s), ControlCheck(%s)", spell.Name(), spell.ID(),
         Strings.BoolToColorString(castingCheck), Strings.BoolToColorString(movingCheck), Strings.BoolToColorString(manaCheck), Strings.BoolToColorString(endCheck),

@@ -1308,7 +1308,7 @@ _ClassConfig      = {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    if not mq.TLO.Me.Pet.ID() > 0 then return false end
+                    if mq.TLO.Me.Pet.ID() == 0 then return false end
                     return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")()
                 end,
             },
