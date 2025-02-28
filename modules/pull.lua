@@ -391,10 +391,20 @@ Module.DefaultConfig                   = {
     ['PullRectangleZPoint']                    = {
         DisplayName = "Base Z Location",
         Category = "Pull Rectangle Points",
-        Tooltip = "Z Location height calculations for rectangle pull area.",
+        Tooltip = "Z Location base height for rectangle pull area.",
         Index = 5,
         Default = 0,
         Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+    },
+    ['PullRectangleZRadius']                   = {
+        DisplayName = "Rectangle Pulling Z radius",
+        Category = "Pull Rectangle Points",
+        Tooltip = "Z Location pull radius for rectangle pull area",
+        Index = 6,
+        Default = 30,
+        Min = 0,
         Max = 10000,
         ConfigType = "Advanced",
     },
@@ -1897,7 +1907,7 @@ function Module:GetPullableSpawns()
             if math.abs(spawn.Z() - checkZ) > self.settings.PullZRadius then
                 Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
                     math.abs(spawn.Z() - checkZ),
-                    self.settings.PullZRadius)
+                    self.settings.PullRectangleZRadius)
                 return false
             end
 
