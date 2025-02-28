@@ -1040,9 +1040,6 @@ local _ClassConfig = {
             {
                 name = "OoW_Chest",
                 type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItemCount(itemName)() ~= 0
-                end,
             },
             {
                 name = "Funeral Pyre",

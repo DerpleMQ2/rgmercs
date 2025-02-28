@@ -465,16 +465,12 @@ local _ClassConfig = {
                     return Casting.SelfBuffAACheck(aaName) and not Casting.SongActiveByName(aaName)
                 end,
             },
-            {
-                name_func = function() return mq.TLO.Me.Inventory("Charm").Name() or "None" end,
+            { --Charm Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Charm").Name() or "CharmClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Charm")
-                    return item() and Casting.TargetHasBuff(item.Spell, mq.TLO.Me)
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Charm")
-                    return Config:GetSetting('DoCharmClick') and item() and Casting.SelfBuffCheck(item.Spell) and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoCharmClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {
@@ -482,8 +478,8 @@ local _ClassConfig = {
                 type = "Item",
                 active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return Config:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
-                        mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
+                    if not Config:GetSetting('SummonArrows') then return false end
+                    return mq.TLO.FindItemCount("Ethereal Arrow")() < 101
                 end,
             },
         },
@@ -660,14 +656,13 @@ local _ClassConfig = {
                     return not (itemSpell and mq.TLO.Me.Buff(itemSpell)())
                 end,
             },
-            { --shares effect with Dicho Shield
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --shares effect with Dicho Shield --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                cond = function(self)
-                    if not Config:GetSetting('DoChestClick') then return false end
-                    local item = mq.TLO.Me.Inventory("Chest")
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
                     local dichoShield = Core.GetResolvedActionMapItem('DichoShield')
-                    return item() and item.TimerReady() == 0 and Casting.SpellStacksOnMe(item.Spell) and not mq.TLO.Me.Buff(dichoShield)
+                    return not mq.TLO.Me.Buff(dichoShield) and Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             { --shares effect with OoW Chest and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
@@ -692,8 +687,7 @@ local _ClassConfig = {
                 cond = function(self, itemName)
                     local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
                     local standDisc = Core.GetResolvedActionMapItem('StandDisc')
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and
-                        not mq.TLO.Me.Song(absorbDisc)()
+                    return mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and not mq.TLO.Me.Song(absorbDisc)()
                 end,
             },
             { --See above entries for notes
@@ -709,18 +703,16 @@ local _ClassConfig = {
             {
                 name = "Coating",
                 type = "Item",
-                cond = function(self, itemName)
+                cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
-                    local item = mq.TLO.FindItem(itemName)
-                    return item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             { --incredibly weak at high level, but low opportunity cost for use and optional
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    if not Config:GetSetting('DoEpic') then return false end
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return Config:GetSetting('DoEpic')
                 end,
             },
         },

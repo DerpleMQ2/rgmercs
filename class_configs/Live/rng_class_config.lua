@@ -1489,7 +1489,7 @@ local _ClassConfig = {
                 type = "Item",
                 tooltip = Tooltips.Epic,
                 cond = function(self, itemName)
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and not mq.TLO.Me.ActiveDisc.ID()
+                    return not mq.TLO.Me.ActiveDisc.ID()
                 end,
             },
         },

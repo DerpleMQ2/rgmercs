@@ -1326,8 +1326,8 @@ _ClassConfig      = {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")() and mq.TLO.FindItemCount(itemName)() ~= 0 and
-                        mq.TLO.FindItem(itemName).TimerReady() == 0 and mq.TLO.Me.Pet.ID() > 0
+                    if not mq.TLO.Me.Pet.ID() > 0 then return false end
+                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and not mq.TLO.Me.PetBuff("Elemental Conjuction")()
                 end,
             },
             {
@@ -1426,16 +1426,12 @@ _ClassConfig      = {
                     return false
                 end,
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {
@@ -1554,14 +1550,6 @@ _ClassConfig      = {
             },
         },
         ['DPS'] = {
-            {
-                name = "SelfModRod",
-                type = "Item",
-                cond = function(self)
-                    return mq.TLO.FindItemCount(Config:GetSetting('SelfModRod'))() == 0 and mq.TLO.Me.PctMana() < Config:GetSetting('ModRodManaPct') and
-                        mq.TLO.Me.PctHPs() >= 60
-                end,
-            },
             {
                 name = "SwarmPet",
                 type = "Spell",

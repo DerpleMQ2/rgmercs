@@ -1113,12 +1113,12 @@ return {
                     return Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
                 end,
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
         },
@@ -1212,12 +1212,12 @@ return {
                     return mq.TLO.Me.AltAbility(aaName).Rank() >= 3 and not Casting.BuffActiveByName("Knight's Yaulp")
                 end,
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
         },
@@ -1298,8 +1298,8 @@ return {
                 type = "Item",
                 active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return Config:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
-                        mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
+                    if not Config:GetSetting('SummonArrows') then return false end
+                    return mq.TLO.FindItemCount("Ethereal Arrow")() < 101
                 end,
             },
         },

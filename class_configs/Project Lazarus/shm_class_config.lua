@@ -826,9 +826,6 @@ local _ClassConfig = {
             {
                 name = "VP2Hammer",
                 type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
             },
             { --if we hit this we need intervention back ASAP
                 name = "Forceful Rejuvenation",
@@ -862,9 +859,6 @@ local _ClassConfig = {
             {
                 name = "VP2Hammer",
                 type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
             },
         },
     },
@@ -1139,8 +1133,7 @@ local _ClassConfig = {
                 type = "Item",
                 cond = function(self, itemName)
                     if Config:GetSetting('UseEpic') == 1 then return false end
-                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and mq.TLO.FindItem(itemName)() and
-                        mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
             },
             {

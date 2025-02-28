@@ -857,7 +857,7 @@ local _ClassConfig = {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName, target)
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and target.ID() == Core.GetMainAssistId
+                    return target.ID() == Core.GetMainAssistId
                 end,
             },
             {
@@ -892,9 +892,6 @@ local _ClassConfig = {
             {
                 name = "VP2Hammer",
                 type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
             },
             { --if we hit this we need spells back ASAP
                 name = "Forceful Rejuvenation",
@@ -927,9 +924,6 @@ local _ClassConfig = {
             {
                 name = "VP2Hammer",
                 type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
             },
         },
         ['GroupHeal(1-97)'] = { --Level 1-97

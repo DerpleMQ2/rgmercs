@@ -950,16 +950,12 @@ local _ClassConfig = {
                 name = "Dance of Blades",
                 type = "AA",
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and mq.TLO.Me.Song(item.Spell.RankName.Name())() ~= nil
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {
@@ -1000,6 +996,14 @@ local _ClassConfig = {
                     return Config:GetSetting('DoDispel') and mq.TLO.Target.Beneficial()
                 end,
             },
+            {
+                name = "Dreadstone",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('UseDreadstone') then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
+                end,
+            },
         },
         ['Combat'] = {
             -- Kludge that addresses bards not attempting to start attacking until after a song completes
@@ -1019,8 +1023,7 @@ local _ClassConfig = {
                 type = "Item",
                 cond = function(self, itemName)
                     if Config:GetSetting('UseEpic') == 1 then return false end
-                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and mq.TLO.FindItem(itemName)() and
-                        mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
             },
             {
@@ -1029,15 +1032,6 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     if Config:GetSetting('UseFierceEye') == 1 then return false end
                     return (Config:GetSetting('UseFierceEye') == 3 or (Config:GetSetting('UseFierceEye') == 2 and Casting.BurnCheck()))
-                end,
-            },
-            {
-                name = "Dreadstone",
-                type = "Item",
-                cond = function(self, itemName)
-                    -- This item is instant cast for free with almost no CD, just mash it forever when it's available
-                    if not Config:GetSetting('UseDreadstone') then return false end
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
                 end,
             },
             {
@@ -1367,10 +1361,9 @@ local _ClassConfig = {
             {
                 name = "SymphonyOfBattle",
                 type = "Item",
-                targetId = function(self) return { mq.TLO.Me.ID(), } end,
-                cond = function(self, itemName)
+                cond = function(self, itemName, target)
                     if not Config:GetSetting('UseSoBItems') then return false end
-                    return Casting.SelfBuffCheck("Symphony of Battle") and mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {
@@ -1417,10 +1410,9 @@ local _ClassConfig = {
             {
                 name = "Coating",
                 type = "Item",
-                cond = function(self, itemName)
+                cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
-                    local item = mq.TLO.FindItem(itemName)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Casting.ItemSpellCheck(itemName, target)
                 end,
             },
         },

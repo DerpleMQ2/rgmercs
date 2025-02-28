@@ -1342,17 +1342,12 @@ local _ClassConfig = {
                 name = "Chromatic Haze",
                 type = "AA",
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Casting.SongActive(item.Spell)
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    if not Config:GetSetting('DoChestClick') or not item or not item() then return false end
-                    return not Casting.SongActive(item.Spell) and Casting.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {

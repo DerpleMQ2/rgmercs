@@ -535,7 +535,7 @@ return {
                 name = "Coat",
                 type = "Item",
                 cond = function(self, itemName)
-                    return not mq.TLO.Me.PetBuff("Primal Fusion")() and mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return not mq.TLO.Me.PetBuff("Primal Fusion")()
                 end,
             },
             {
@@ -604,10 +604,9 @@ return {
             {
                 name = "Epic",
                 type = "Item",
-                cond = function(self, itemName)
-                    local epicItem = mq.TLO.FindItem(itemName)
-                    return Config:GetSetting('DoEpic') and epicItem() and epicItem.Spell.Stacks() and
-                        epicItem.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoEpic') then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {

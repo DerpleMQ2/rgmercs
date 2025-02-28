@@ -837,16 +837,12 @@ return {
                 name = "Companion's Fury",
                 type = "AA",
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and Casting.TargetHasBuff(item.Spell, mq.TLO.Me)
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Config:GetSetting('DoChestClick') and item() and Casting.SpellStacksOnMe(item.Spell) and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {
@@ -901,7 +897,7 @@ return {
                 name = "OoW_Chest",
                 type = "Item",
                 cond = function(self, itemName)
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and not self.ClassConfig.HelperFunctions.DmgModActive(self)
+                    return not self.ClassConfig.HelperFunctions.DmgModActive(self)
                 end,
             },
             {
@@ -964,10 +960,9 @@ return {
             {
                 name = "Coating",
                 type = "Item",
-                cond = function(self, itemName)
+                cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
-                    local item = mq.TLO.FindItem(itemName)
-                    return item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
         },
@@ -1287,9 +1282,8 @@ return {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName)
-                    return Config:GetSetting('DoEpic') and
-                        mq.TLO.FindItem(itemName)() and mq.TLO.Me.ItemReady(itemName)() and
-                        (mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() == nil and mq.TLO.Me.PetBuff("Might of the Wild Spirits")() == nil)
+                    if not Config:GetSetting('DoEpic') then return false end
+                    return not mq.TLO.Me.PetBuff("Savage Wildcaller's Blessing")() and not mq.TLO.Me.PetBuff("Might of the Wild Spirits")()
                 end,
             },
             {

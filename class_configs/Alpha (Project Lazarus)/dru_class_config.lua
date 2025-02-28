@@ -768,9 +768,6 @@ local _ClassConfig = {
             {
                 name = "VP2Hammer",
                 type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
             },
             {
                 name = "Forceful Rejuvenation",
@@ -914,13 +911,12 @@ local _ClassConfig = {
             },
         },
         ['HealBurn'] = {
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Config:GetSetting('DoChestClick') and item() and item.Spell.Stacks() and
-                        item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {

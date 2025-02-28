@@ -90,8 +90,8 @@ end
 --- Checks if a spell stacks on the target.
 --- @param spell MQSpell The name of the spell to check.
 --- @return boolean True if the spell stacks on the target, false otherwise.
-function Casting.SpellStacksOnTarget(spell)
-    local target = mq.TLO.Target
+function Casting.SpellStacksOnTarget(spell, target)
+    if not target then target = mq.TLO.Target end
 
     if not spell or not spell() then return false end
     if not target or not target() then return false end
@@ -1812,15 +1812,28 @@ function Casting.AbilityReady(abilityName, target)
 end
 
 function Casting.ItemReady(itemName)
-    if not mq.TLO.FindItem("=" .. itemName).Clicky() then return false end
+    if not Casting.ItemHasClicky(itemName) then return false end
 
     local ready = mq.TLO.Me.ItemReady(itemName)()
+    local levelCheck = mq.TLO.Me.Level() >= mq.TLO.FindItem("=" .. itemName).Clicky.RequiredLevel()
 
-    Logger.log_verbose("ItemReady for  %s: Ready(%s)", itemName, Strings.BoolToColorString(ready))
+    Logger.log_verbose("ItemReady for  %s: Ready(%s) LevelCheck(%s)", itemName, Strings.BoolToColorString(ready), Strings.BoolToColorString(levelCheck))
 
     if not ready then return false end
 
-    return true
+    return levelCheck
+end
+
+function Casting.ItemHasClicky(itemName)
+    return mq.TLO.FindItem("=" .. itemName).Clicky()
+end
+
+function Casting.ItemSpellCheck(itemName, target)
+    local itemClicky = mq.TLO.FindItem("=" .. itemName).Clicky
+    if not itemClicky or not itemClicky then return false end
+
+    local clickySpell = itemClicky.Spell
+    return not Casting.TargetHasBuff(clickySpell, target) and Casting.SpellStacksOnTarget(clickySpell, target)
 end
 
 return Casting

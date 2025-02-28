@@ -1121,17 +1121,12 @@ return {
                     return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and (mq.TLO.Me.GemTimer(spell.RankName.Name())() or -1) == 0
                 end,
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return Casting.BuffActive(item.Spell)
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    if not Config:GetSetting('DoChestClick') or not item or not item() then return false end
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.ItemSpellCheck(itemName, target)
                 end,
             },
         },

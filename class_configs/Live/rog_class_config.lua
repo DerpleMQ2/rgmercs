@@ -330,13 +330,12 @@ return {
                 name = "Spire of the Rake",
                 type = "AA",
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                cond = function(self)
-                    if not Config:GetSetting('DoChestClick') then return false end
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and item.TimerReady() == 0 and Casting.SpellStacksOnMe(item.Spell)
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {
@@ -384,8 +383,7 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     if Config:GetSetting('UseEpic') == 1 then return false end
-                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and mq.TLO.FindItem(itemName)() and
-                        mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
             },
             {
@@ -515,10 +513,9 @@ return {
             {
                 name = "Coating",
                 type = "Item",
-                cond = function(self, itemName)
+                cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
-                    local item = mq.TLO.FindItem(itemName)
-                    return item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell) and mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart')
+                    return Casting.ItemSpellCheck(itemName, target)
                 end,
             },
             {
