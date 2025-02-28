@@ -2062,17 +2062,46 @@ function Module:CheckForAbort(pullID)
 
     -- ignore distance if this is a manually requested pull
     if pullID ~= self.TempSettings.TargetSpawnID then
-        if not self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadius then
-            Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
-            return true
+        if self.settings.PullAreaType == 1 then
+            if not self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadius then
+                Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
+                return true
+            end
+
+
+            if self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadiusFarm then
+                Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
+                return true
+            end
+        elseif self.settings.PullAreaType == 2 then
+            local centerX = self.settings.PullCircleCenterX
+            local centerY = self.settings.PullCircleCenterY
+            local spawnX, spawnY = spawn.X(), spawn.Y()
+            local dx, dy = spawnX - centerX, spawnY - centerY
+            local distanceFromCenter = math.sqrt(dx * dx + dy * dy)
+
+            if distanceFromCenter > self.settings.PullRadius then
+                Logger.log_debug("\ar ALERT: Aborting: Spawn \am%s\aw (\at%d\aw) \aoOutside pull radius from center - Distance: %.2f, Max Allowed: %.2f",
+                    spawn.CleanName(), spawn.ID(), distanceFromCenter, self.settings.PullRadius)
+                return true
+            end
+        elseif self.settings.PullareaType == 3 then
+            -- Check if the spawn is within the rectangular pull area
+            local neX, neY = self.settings.PullNECorner.X, self.settings.PullNECorner.Y
+            local swX, swY = self.settings.PullSWCorner.X, self.settings.PullSWCorner.Y
+
+            -- Ensure min/max boundaries are correctly set
+            local minX, maxX = math.min(neX, swX), math.max(neX, swX)
+            local minY, maxY = math.min(neY, swY), math.max(neY, swY)
+
+            local spawnX, spawnY = spawn.X(), spawn.Y()
+
+            if spawnX < minX or spawnX > maxX or spawnY < minY or spawnY > maxY then
+                Logger.log_debug("\ar ALERT: Spawn \am%s\aw (\at%d\aw) \aoOutside defined pull area - (X: %.2f, Y: %.2f) not in bounds X[%.2f, %.2f], Y[%.2f, %.2f]",
+                    spawn.CleanName(), spawn.ID(), spawnX, spawnY, minX, maxX, minY, maxY)
+                return true
+            end
         end
-
-
-        if self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadiusFarm then
-            Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
-            return true
-        end
-
         if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
             Logger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targeting is enabled! \ax")
             return true
