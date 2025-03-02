@@ -779,7 +779,7 @@ end
 
 function Module:RunCounterRotation()
     --can make this a modular table if more "features" are added. recommend adding a timer akin to cures if so.
-    if Casting.SongActiveByName("Curse of Subjugation") then
+    if mq.TLO.Me.Song("Curse of Subjugation")() and not mq.TLO.Me.Song("Aureate's Bane")() then
         if Casting.AAReady("Aureate's Bane") then
             return Casting.UseAA("Aureate's Bane", mq.TLO.Me.ID())
         else
