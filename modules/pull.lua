@@ -80,9 +80,15 @@ Module.Constants.PullModes             = {
 }
 
 Module.Constants.PullAreaType          = {
-    "Radius from camp",
-    "Radius from point",
-    "Rectangle",
+    PullCircleCamp = 1,
+    PullCirclePoint = 2,
+    PullAreaRectangle = 3,
+}
+
+local PullAreaNames                    = {
+    [Module.Constants.PullAreaType.PullCircleCamp] = "Radius Around Camp",
+    [Module.Constants.PullAreaType.PullCirclePoint] = "Radius Around Point",
+    [Module.Constants.PullAreaType.PullAreaRectangle] = "Rectangle Pull Area",
 }
 
 Module.Constants.PullAbilities         = {
@@ -226,7 +232,7 @@ Module.DefaultConfig                   = {
     ['PullAreaType']                           = {
         DisplayName = "Pull Area Type",
         Category = "Pulling",
-        Tooltip = "1 = Circle around camp, 2 = Circle around point, 3 = Square",
+        Tooltip = "1 = Circle around camp, 2 = Circle around point, 3 = Rectangle Area",
         Type = "Custom",
         Default = 1,
         min = 1,
@@ -1052,8 +1058,9 @@ function Module:Render()
             end
         end
 
-        --LISIE FUCKERY
-        self.settings.PullAreaType, pressed = ImGui.Combo("Pull Area Type", self.settings.PullAreaType, self.Constants.PullAreaType, #self.Constants.PullAreaType)
+        --Pull Area Type dropdown
+        self.settings.PullAreaType, pressed = ImGui.Combo("Pull Area Type", self.settings.PullAreaType, self.Constants.PullAreaNames,
+            #self.Constants.PullAreaType)
         if pressed then
             self:SaveSettings(false)
         end
@@ -1615,7 +1622,7 @@ function Module:GetPullableSpawns()
     local maxPathRange = Config:GetSetting('MaxPathRange')
     local pullTargets
     local metaDataCache = {}
-    if self.settings.PullAreaType == 1 then
+    if self.settings.PullAreaType == self.Constants.PullAreaType.PullCircleCamp then
         if self:IsPullMode("Farm") then
             pullRadius = Config:GetSetting('PullRadiusFarm')
         elseif self:IsPullMode("Hunt") then
@@ -1756,7 +1763,7 @@ function Module:GetPullableSpawns()
 
             return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance
         end)
-    elseif self.settings.PullAreaType == 2 then
+    elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullCirclePoint then
         if self:IsPullMode("Farm") then
             pullRadius = Config:GetSetting('PullRadiusFarm')
         elseif self:IsPullMode("Hunt") then
@@ -1896,7 +1903,7 @@ function Module:GetPullableSpawns()
 
             return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance
         end)
-    elseif self.settings.PullAreaType == 3 then
+    elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullAreaRectangle then
         if self:IsPullMode("Farm") then
             pullRadius = Config:GetSetting('PullRadiusFarm')
         elseif self:IsPullMode("Hunt") then
@@ -2079,7 +2086,7 @@ function Module:CheckForAbort(pullID)
 
     -- ignore distance if this is a manually requested pull
     if pullID ~= self.TempSettings.TargetSpawnID then
-        if self.settings.PullAreaType == 1 then
+        if self.settings.PullAreaType == self.Constants.PullAreaType.PullCircleCamp then
             if not self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadius then
                 Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
                 return true
@@ -2090,7 +2097,7 @@ function Module:CheckForAbort(pullID)
                 Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
                 return true
             end
-        elseif self.settings.PullAreaType == 2 then
+        elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullCirclePoint then
             local centerX = self.settings.PullCircleCenterX
             local centerY = self.settings.PullCircleCenterY
             local spawnX, spawnY = spawn.X(), spawn.Y()
@@ -2102,7 +2109,7 @@ function Module:CheckForAbort(pullID)
                     spawn.CleanName(), spawn.ID(), distanceFromCenter, self.settings.PullRadius)
                 return true
             end
-        elseif self.settings.PullareaType == 3 then
+        elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullAreaRectangle then
             -- Check if the spawn is within the rectangular pull area
             local neX, neY = self.settings.PullNECorner.X, self.settings.PullNECorner.Y
             local swX, swY = self.settings.PullSWCorner.X, self.settings.PullSWCorner.Y
