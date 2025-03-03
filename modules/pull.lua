@@ -2111,12 +2111,12 @@ function Module:CheckForAbort(pullID)
             end
         elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullAreaRectangle then
             -- Check if the spawn is within the rectangular pull area
-            local neX, neY = self.settings.PullNECorner.X, self.settings.PullNECorner.Y
-            local swX, swY = self.settings.PullSWCorner.X, self.settings.PullSWCorner.Y
+            local nwX, nwY = self.settings.PullNWCornerX, self.settings.PullNWCornerY
+            local seX, seY = self.settings.PullSECornerX, self.settings.PullSECornerY
 
             -- Ensure min/max boundaries are correctly set
-            local minX, maxX = math.min(neX, swX), math.max(neX, swX)
-            local minY, maxY = math.min(neY, swY), math.max(neY, swY)
+            local minX, maxX = math.min(nwX, seX), math.max(nwX, seX)
+            local minY, maxY = math.min(nwY, seY), math.max(nwY, seY)
 
             local spawnX, spawnY = spawn.X(), spawn.Y()
 
