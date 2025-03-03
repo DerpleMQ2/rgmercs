@@ -85,7 +85,7 @@ Module.Constants.PullAreaType          = {
     PullAreaRectangle = 3,
 }
 
-local PullAreaNames                    = {
+Module.Constants.PullAreaNames         = {
     [Module.Constants.PullAreaType.PullCircleCamp] = "Radius Around Camp",
     [Module.Constants.PullAreaType.PullCirclePoint] = "Radius Around Point",
     [Module.Constants.PullAreaType.PullAreaRectangle] = "Rectangle Pull Area",
