@@ -86,9 +86,9 @@ Module.Constants.PullAreaType          = {
 }
 
 Module.Constants.PullAreaNames         = {
-    [Module.Constants.PullAreaType.PullCircleCamp] = "Radius Around Camp",
-    [Module.Constants.PullAreaType.PullCirclePoint] = "Radius Around Point",
-    [Module.Constants.PullAreaType.PullAreaRectangle] = "Rectangle Pull Area",
+    "Radius Around Camp",
+    "Radius Around Point",
+    "Rectangle Pull Area",
 }
 
 Module.Constants.PullAbilities         = {
@@ -1060,7 +1060,7 @@ function Module:Render()
 
         --Pull Area Type dropdown
         self.settings.PullAreaType, pressed = ImGui.Combo("Pull Area Type", self.settings.PullAreaType, self.Constants.PullAreaNames,
-            #self.Constants.PullAreaType)
+            #self.Constants.PullAreaNames)
         if pressed then
             self:SaveSettings(false)
         end
