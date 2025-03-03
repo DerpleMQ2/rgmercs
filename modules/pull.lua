@@ -330,6 +330,8 @@ Module.DefaultConfig                   = {
         Min = -10000,
         Max = 10000,
         ConfigType = "Advanced",
+        FAQ = "How do I set the center (Y) of my pull circle.",
+        Answer = "Set Pull Center Y to where you would like the Y point of your pull radius to be.",
     ['PullHPPct']                              = {
         DisplayName = "Puller HP %",
         Category = "Puller",
@@ -381,6 +383,8 @@ Module.DefaultConfig                   = {
         Min = -10000,
         Max = 10000,
         ConfigType = "Advanced",
+        FAQ = "How do I set the center (X) of my pull circle.",
+        Answer = "Set Pull Center X to where you would like the Y point of your pull radius to be.",
     ['PullBuffCount']                          = {
         DisplayName = "Min Buff Count",
         Category = "Puller",
@@ -401,6 +405,8 @@ Module.DefaultConfig                   = {
         Default = 0,
         Max = 10000,
         ConfigType = "Advanced",
+        FAQ = "How do I set the center (Z) of my pull circle.",
+        Answer = "Set Pull Center Z to where you would like the Y point of your pull radius to be.",
     },
     ['PullNWCornerX']                          = {
         DisplayName = "North West Corner X",
@@ -411,6 +417,8 @@ Module.DefaultConfig                   = {
         Min = -10000,
         Max = 10000,
         ConfigType = "Advanced",
+        FAQ = "How do I set the North West corner X location for rectangle pulls areas?",
+        Answer = "Set North West Corner X to where you would like the x point of your corner to be.",
     },
     ['PullNWCornerY']                          = {
         DisplayName = "North West Corner Y",
@@ -422,6 +430,9 @@ Module.DefaultConfig                   = {
         Max = 10000,
     },
         ConfigType = "Advanced",
+        FAQ = "How do I set the North West corner Y location for rectangle pulls areas?",
+        Answer = "Set North West Corner Y to where you would like the x point of your corner to be.",
+    },
     ['PullSECornerX']                          = {
         DisplayName = "South East Corner X",
         Category = "Pull Rectangle Points",
@@ -431,6 +442,8 @@ Module.DefaultConfig                   = {
         Min = -10000,
         Max = 10000,
         ConfigType = "Advanced",
+        FAQ = "How do I set the South east corner X location for rectangle pulls areas?",
+        Answer = "Set South East Corner X to where you would like the x point of your corner to be.",
     },
         DisplayName = "South East Corner Y",
     ['PullSECornerY']                          = {
@@ -441,6 +454,8 @@ Module.DefaultConfig                   = {
         Min = -10000,
         Max = 10000,
         ConfigType = "Advanced",
+        FAQ = "How do I set the South east corner Y location for rectangle pulls areas?",
+        Answer = "Set South East Corner Y to where you would like the x point of your corner to be.",
     },
     ['PullRectangleZPoint']                    = {
         DisplayName = "Base Z Location",
@@ -451,6 +466,8 @@ Module.DefaultConfig                   = {
         Min = -10000,
         Max = 10000,
         ConfigType = "Advanced",
+        FAQ = "How do I set the Z point to measure radius from with a rectangle pull area?",
+        Answer = "Set Base Z Location to where you would like the point to be.",
     },
     ['PullDebuffed']                           = {
         DisplayName = "Pull While Debuffed",
