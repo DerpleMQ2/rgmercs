@@ -3122,8 +3122,7 @@ function LNS.sendMySettings()
     }
     LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
     if Mode == 'directed' then
-        LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, },
-            { Subject = 'mysetting', Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
     end
     LNS.Boxes[MyName] = {}
     for k, v in pairs(LNS.Settings) do
@@ -3227,6 +3226,7 @@ function LNS.RegisterActors()
                     end
                 end
             end
+            LNS.TempSettings.SendSettings = true
         end
 
         if action == 'updatesettings' and who == MyName then
