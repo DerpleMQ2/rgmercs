@@ -228,7 +228,7 @@ local function loadSettings()
 		-- Load settings from the Lua config file
 		temp = {}
 		settings = dofile(configFile) or {}
-		if not settings[script] then
+		if settings[script] == nil then
 			settings[script] = {}
 			settings[script] = defaults
 		end
@@ -884,14 +884,9 @@ function guiLoot.RegisterActor()
 			local actionLabel = item.Eval
 
 			if guiLoot.hideNames then
-				if who ~= mq.TLO.Me() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = MyClass end
+				if who ~= mq.TLO.Me.Name() then who = mq.TLO.Spawn(string.format("%s", who)).Class.ShortName() else who = MyClass end
 			end
-			if guiLoot.recordData and item.Action == 'Looted' then
-				addRule(who, what, link, eval)
-			end
-			if guiLoot.recordData and item.Action == 'Destroyed' then
-				what = what .. '*'
-				link = link .. ' *Destroyed*'
+			if guiLoot.recordData and item.Action == ('Looted' or 'Destroyed') then
 				addRule(who, what, link, eval)
 			end
 			if cantWear then
@@ -904,25 +899,6 @@ function guiLoot.RegisterActor()
 			end
 			guiLoot.console:AppendText(text)
 
-
-			local line = string.format('\ao[\at%s\ax] %s %s %s Corpse \ax%s\ax (\at%s\ax)', lootEntry.LootedAt, who, actionLabel, what, corpseName, lootEntry.ID)
-			local i = getNextID(txtBuffer)
-			-- ZOOM Console hack
-			if i > 1 then
-				if txtBuffer[i - 1].Text == '' then i = i - 1 end
-			end
-			txtBuffer[i] = {
-				Text = line,
-			}
-			-- cleanup zoom buffer
-			-- Check if the buffer exceeds 1000 lines
-			local bufferLength = #txtBuffer
-			if bufferLength > 1000 then
-				-- Remove excess lines
-				for j = 1, bufferLength - 1000 do
-					table.remove(txtBuffer, 1)
-				end
-			end
 			local recordDate = os.date("%Y-%m-%d")
 			if guiLoot.SessionLootRecord == nil then
 				guiLoot.SessionLootRecord = {}
