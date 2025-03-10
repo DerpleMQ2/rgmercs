@@ -115,23 +115,25 @@ end
 
 function Module:SaveSettings(doBroadcast)
 	mq.pickle(getConfigFileName(), self.settings)
-	if self.settings.DoLoot == true then
-		local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
-		local localLNSRunning = mq.TLO.Lua.Script(LootScript).Status() == 'RUNNING' or false
-		if lnsRunning then
-			Core.DoCmd("/lua stop lootnscoot")
+	if self.SettingsLoaded then
+		if self.settings.DoLoot == true then
+			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
+			local localLNSRunning = mq.TLO.Lua.Script(LootScript).Status() == 'RUNNING' or false
+			if lnsRunning then
+				Core.DoCmd("/lua stop lootnscoot")
+			end
+
+			if not localLNSRunning then
+				Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
+			end
+
+			if not Module.Actor then Module:LootMessageHandler() end
+
+			Module.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
+				{ who = Config.Globals.CurLoadedChar, directions = 'combatlooting', CombatLooting = self.settings.CombatLooting, })
+		else
+			Core.DoCmd("/lua stop %s", LootnScootPath)
 		end
-
-		if not localLNSRunning then
-			Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
-		end
-
-		if not Module.Actor then Module:LootMessageHandler() end
-
-		Module.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
-			{ who = Config.Globals.CurLoadedChar, directions = 'combatlooting', CombatLooting = self.settings.CombatLooting, })
-	else
-		Core.DoCmd("/lua stop %s", LootnScootPath)
 	end
 	if doBroadcast == true then
 		Comms.BroadcastUpdate(self._name, "LoadSettings")
@@ -160,6 +162,7 @@ function Module:LoadSettings()
 	if needsSave then
 		self:SaveSettings(false)
 	end
+	self.SettingsLoaded = true
 end
 
 function Module:GetSettings()
@@ -181,18 +184,19 @@ end
 
 function Module:Init()
 	self:LoadSettings()
+	self:LootMessageHandler()
 	if not Core.OnEMU() then
 		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s",
 			mq.TLO.MacroQuest.BuildName())
 	else
 		if self.settings.DoLoot then
-			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
+			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING'
 			if lnsRunning then
 				Core.DoCmd("/lua stop lootnscoot")
+				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 			end
 			Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
-			Module:LootMessageHandler()
-			Module.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
+			self.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
 				{ who = Config.Globals.CurLoadedChar, directions = 'getcombatsetting', })
 		end
 		self.TempSettings.Looting = false
@@ -258,7 +262,7 @@ function Module.DoLooting()
 end
 
 function Module:LootMessageHandler()
-	Module.Actor = Actors.register('loot_module', function(message)
+	self.Actor = Actors.register('loot_module', function(message)
 		local mail = message()
 		local subject = mail.Subject or ''
 		local who = mail.Who or ''
