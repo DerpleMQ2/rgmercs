@@ -220,53 +220,59 @@ if LNS.guiLoot ~= nil then
     LNS.guiLoot.GetSettings(LNS.Settings.HideNames, LNS.Settings.LookupLinks, true, true, 'lootnscoot', false)
 end
 
-LNS.DirectorScript               = 'none'
-LNS.BuyItemsTable                = {}
-LNS.ALLITEMS                     = {}
-LNS.GlobalItemsRules             = {}
-LNS.NormalItemsRules             = {}
-LNS.NormalItemsClasses           = {}
-LNS.GlobalItemsClasses           = {}
-LNS.NormalItemsLink              = {}
-LNS.GlobalItemsLink              = {}
-LNS.NewItems                     = {}
-LNS.TempSettings                 = {}
-LNS.PersonalItemsRules           = {}
-LNS.PersonalItemsClasses         = {}
-LNS.PersonalItemsLink            = {}
-LNS.NewItemDecisions             = nil
-LNS.ItemNames                    = {}
-LNS.ItemIcons                    = {}
-LNS.NewItemsCount                = 0
-LNS.TempItemClasses              = "All"
-LNS.itemSelectionPending         = false -- Flag to indicate an item selection is in progress
-LNS.pendingItemData              = nil   -- Temporary storage for item data
-LNS.doImportInventory            = false
-LNS.TempModClass                 = false
-LNS.ShowUI                       = false
-LNS.Terminate                    = true
-LNS.Boxes                        = {}
-LNS.LootNow                      = false
-LNS.histCurrentPage              = 1
-LNS.histItemsPerPage             = 25
-LNS.histTotalPages               = 1
-LNS.histTotalItems               = 0
-LNS.HistoricalDates              = {}
-LNS.HistoryDataDate              = {}
-LNS.PersonalTableName            = string.format("%s_Rules", MyName)
-LNS.TempSettings.Edit            = {}
-LNS.TempSettings.UpdatedBuyItems = {}
-LNS.TempSettings.DeletedBuyKeys  = {}
+LNS.DirectorScript                  = 'none'
+LNS.DirectorLNSPath                 = 'none'
+LNS.BuyItemsTable                   = {}
+LNS.ALLITEMS                        = {}
+LNS.GlobalItemsRules                = {}
+LNS.NormalItemsRules                = {}
+LNS.NormalItemsClasses              = {}
+LNS.GlobalItemsClasses              = {}
+LNS.NormalItemsLink                 = {}
+LNS.GlobalItemsLink                 = {}
+LNS.NewItems                        = {}
+LNS.TempSettings                    = {}
+LNS.PersonalItemsRules              = {}
+LNS.PersonalItemsClasses            = {}
+LNS.PersonalItemsLink               = {}
+LNS.BoxKeys                         = {}
+LNS.NewItemDecisions                = nil
+LNS.ItemNames                       = {}
+LNS.ItemIcons                       = {}
+LNS.NewItemsCount                   = 0
+LNS.TempItemClasses                 = "All"
+LNS.itemSelectionPending            = false -- Flag to indicate an item selection is in progress
+LNS.pendingItemData                 = nil   -- Temporary storage for item data
+LNS.doImportInventory               = false
+LNS.TempModClass                    = false
+LNS.ShowUI                          = false
+LNS.Terminate                       = true
+LNS.Boxes                           = {}
+LNS.LootNow                         = false
+LNS.histCurrentPage                 = 1
+LNS.histItemsPerPage                = 25
+LNS.histTotalPages                  = 1
+LNS.histTotalItems                  = 0
+LNS.HistoricalDates                 = {}
+LNS.HistoryDataDate                 = {}
+LNS.PersonalTableName               = string.format("%s_Rules", MyName)
+LNS.TempSettings.Edit               = {}
+LNS.TempSettings.UpdatedBuyItems    = {}
+LNS.TempSettings.DeletedBuyKeys     = {}
+LNS.TempSettings.SortedSettingsKeys = {}
+LNS.TempSettings.SortedToggleKeys   = {}
+LNS.TempSettings.UpdateSettings     = false
+LNS.TempSettings.SendSettings       = false
 
-local tableList                  = {
+local tableList                     = {
     "Global_Items", "Normal_Items", LNS.PersonalTableName,
 }
-local tableListRules             = {
+local tableListRules                = {
     "Global_Rules", "Normal_Rules", LNS.PersonalTableName,
 }
 
 -- FORWARD DECLARATIONS
-LNS.AllItemColumnListIndex       = {
+LNS.AllItemColumnListIndex          = {
     [1]  = 'name',
     [2]  = 'sell_value',
     [3]  = 'tribute_value',
@@ -342,13 +348,15 @@ function LNS.SortTableColums(input_table, sorted_keys, num_columns)
 
     -- If sorted_keys is provided, use it, otherwise extract the keys from the input_table
     local keys = sorted_keys or {}
-    if #keys == 0 then
-        for k, _ in pairs(input_table) do
-            table.insert(keys, k)
+    if input_Table ~= nil then
+        if #keys == 0 then
+            for k, _ in pairs(input_table) do
+                table.insert(keys, k)
+            end
+            table.sort(keys, function(a, b)
+                return a < b
+            end)
         end
-        table.sort(keys, function(a, b)
-            return a < b
-        end)
     end
 
     local total_items = #keys
@@ -385,12 +393,27 @@ function LNS.SearchLootTable(search, key, value)
     end
 end
 
+function LNS.SortSettings()
+    LNS.TempSettings.SortedSettingsKeys = {}
+    LNS.TempSettings.SortedToggleKeys   = {}
+    for k in pairs(LNS.Settings) do
+        if settingsNoDraw[k] == nil then
+            if type(LNS.Settings[k]) == 'boolean' then
+                table.insert(LNS.TempSettings.SortedToggleKeys, k)
+            else
+                table.insert(LNS.TempSettings.SortedSettingsKeys, k)
+            end
+        end
+    end
+    table.sort(LNS.TempSettings.SortedToggleKeys, function(a, b) return a < b end)
+    table.sort(LNS.TempSettings.SortedSettingsKeys, function(a, b) return a < b end)
+end
+
 function LNS.SortTables()
     LNS.TempSettings.SortedGlobalItemKeys = {}
     LNS.TempSettings.SortedBuyItemKeys    = {}
     LNS.TempSettings.SortedNormalItemKeys = {}
-    LNS.TempSettings.SortedSettingsKeys   = {}
-    LNS.TempSettings.SortedToggleKeys     = {}
+
 
     for k in pairs(LNS.GlobalItemsRules) do
         table.insert(LNS.TempSettings.SortedGlobalItemKeys, k)
@@ -407,18 +430,6 @@ function LNS.SortTables()
     end
 
     table.sort(LNS.TempSettings.SortedNormalItemKeys, function(a, b) return a < b end)
-
-    for k in pairs(LNS.Settings) do
-        if settingsNoDraw[k] == nil then
-            if type(LNS.Settings[k]) == 'boolean' then
-                table.insert(LNS.TempSettings.SortedToggleKeys, k)
-            else
-                table.insert(LNS.TempSettings.SortedSettingsKeys, k)
-            end
-        end
-    end
-    table.sort(LNS.TempSettings.SortedToggleKeys, function(a, b) return a < b end)
-    table.sort(LNS.TempSettings.SortedSettingsKeys, function(a, b) return a < b end)
 end
 
 function LNS.SortKeys(input_table)
@@ -730,7 +741,9 @@ function LNS.loadSettings(firstRun)
     end
     LNS.Settings = {}
     LNS.Settings = tmpSettings
-
+    LNS.Boxes[MyName] = {}
+    LNS.Boxes[MyName] = LNS.Settings
+    table.insert(LNS.BoxKeys, MyName)
     LNS.guiLoot.openGUI = LNS.Settings.ShowConsole
 
     return needSave
@@ -766,7 +779,7 @@ function LNS.valueToCoins(sellVal)
 end
 
 function LNS.checkSpells(item_name)
-    if string.find(item_name, "Spell: ") then
+    if string.find(item_name, "Spell: ") or string.find(item_name, "Song: ") then
         Logger.Debug(LNS.guiLoot.console, "Loot::checkSpells() \ay%s\ax \agFound\ax a spell", item_name)
         return true
     end
@@ -786,7 +799,7 @@ function LNS.checkCursor()
         end
         currentItem = mq.TLO.Cursor()
         mq.cmdf('/autoinv')
-        mq.delay(10000, function() return not mq.TLO.Cursor() end)
+        mq.delay(3000, function() return not mq.TLO.Cursor() end)
     end
 end
 
@@ -942,7 +955,8 @@ function LNS.commandHandler(...)
         elseif command == 'bank' then
             LNS.processItems('Bank')
         elseif command == 'cleanup' then
-            LNS.processItems('Destroy')
+            -- LNS.processItems('Destroy')
+            LNS.TempSettings.NeedsCleanup = true
         elseif command == 'gui' or command == 'console' and LNS.guiLoot then
             LNS.guiLoot.openGUI = not LNS.guiLoot.openGUI
         elseif command == 'report' and LNS.guiLoot then
@@ -1179,7 +1193,9 @@ function LNS.enterNewItemRuleInfo(data_table)
         Logger.Debug(LNS.guiLoot.console, dbgTbl)
     end
     LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, modMessage)
-    LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, modMessage)
+    if Mode == 'directed' then
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, modMessage)
+    end
 end
 
 ------------------------------------
@@ -1311,7 +1327,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 
     db:exec("COMMIT")
     db:close()
-    mq.delay(1)
+
     local eval = action == 'Ignore' and 'Left' or action
     local actLabel = action == 'Destroy' and 'Destroyed' or action
     if action ~= 'Destroy' and action ~= 'Ignore' then
@@ -1598,7 +1614,9 @@ function LNS.addMyInventoryToDB()
     LNS.report(string.format("%s Imported %d items from Inventory, and %d items from the Bank, into the DB", MyName, counter, counterBank))
     local message = { who = MyName, Server = eqServer, action = 'ItemsDB_UPDATE', }
     LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-    LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
+    if Mode == 'directed' then
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
+    end
 end
 
 function LNS.addToItemDB(item)
@@ -1952,7 +1970,9 @@ DELETE FROM %s WHERE item_id = ?;
             bulkLink = LNS[localName .. 'Link'],
         }
         LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
+        if Mode == 'directed' then
+            LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
+        end
     end
     LNS.TempSettings.BulkSet = {}
 end
@@ -2216,7 +2236,9 @@ function LNS.addNewItem(corpseItem, itemRule, itemLink, corpseID)
     -- LNS.actorAddRule(itemID, itemName, 'Normal', itemRule, LNS.TempItemClasses, itemLink)
     LNS.addRule(itemID, 'NormalItems', itemRule, LNS.TempItemClasses, itemLink)
     LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, newMessage)
-    LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, newMessage)
+    if Mode == 'directed' then
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, newMessage)
+    end
 end
 
 ---comment: Takes in an item to modify the rules for, You can add, delete, or modify the rules for an item.
@@ -2242,15 +2264,21 @@ function LNS.modifyItemRule(itemID, action, tableName, classes, link)
     end
 
     -- Retrieve the item name from loot.ALLITEMS
-    local itemName = LNS.ALLITEMS[itemID] and LNS.ALLITEMS[itemID].Name
+    local itemName = LNS.ItemNames[itemID] ~= nil and LNS.ItemNames[itemID] or nil
     if not itemName then
         Logger.Warn(LNS.guiLoot.console, "Item ID \at%s\ax \arNOT\ax found in \ayloot.ALLITEMS", tostring(itemID))
         return
     end
 
+    if LNS.ALLITEMS[itemID] == nil then
+        LNS.ALLITEMS[itemID] = {}
+        LNS.ALLITEMS[itemID].Name = itemName
+    end
     -- Set default values
     if link == nil then
         link = LNS.ALLITEMS[itemID].Link or 'NULL'
+    else
+        LNS.ALLITEMS[itemID].Link = link
     end
     classes  = classes or 'All'
 
@@ -2278,15 +2306,15 @@ function LNS.modifyItemRule(itemID, action, tableName, classes, link)
         -- UPSERT operation
         -- if tableName == "Normal_Rules" then
         sql  = string.format([[
-INSERT INTO %s
-(item_id, item_name, item_rule, item_rule_classes, item_link)
-VALUES (?, ?, ?, ?, ?)
-ON CONFLICT(item_id) DO UPDATE SET
-item_name                                    = excluded.item_name,
-item_rule                                    = excluded.item_rule,
-item_rule_classes                                    = excluded.item_rule_classes,
-item_link                                    = excluded.item_link
-]], tableName)
+            INSERT INTO %s
+            (item_id, item_name, item_rule, item_rule_classes, item_link)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(item_id) DO UPDATE SET
+            item_name                                    = excluded.item_name,
+            item_rule                                    = excluded.item_rule,
+            item_rule_classes                                    = excluded.item_rule_classes,
+            item_link                                    = excluded.item_link
+            ]], tableName)
         stmt = db:prepare(sql)
         if stmt then
             stmt:bind_values(itemID, itemName, action, classes, link)
@@ -2326,7 +2354,9 @@ item_link                                    = excluded.item_link
             classes = classes,
         }
         LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
+        if Mode == 'directed' then
+            LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
+        end
     end
 end
 
@@ -3092,35 +3122,29 @@ end
 
 function LNS.sendMySettings()
     local tmpTable = {}
-    for k, v in pairs(LNS.Settings) do
-        if type(v) == 'table' then
-            tmpTable[k] = {}
-            for kk, vv in pairs(v) do
-                tmpTable[k][kk] = vv
-            end
-        else
-            tmpTable[k] = v
-        end
-    end
+    -- for k, v in pairs(LNS.Settings) do
+    --     if type(v) == 'table' then
+    --         tmpTable[k] = {}
+    --         for kk, vv in pairs(v) do
+    --             tmpTable[k][kk] = vv
+    --         end
+    --     else
+    --         tmpTable[k] = v
+    --     end
+    -- end
     local message = {
         who      = MyName,
         action   = 'sendsettings',
-        settings = tmpTable,
+        settings = LNS.Settings,
     }
+    LNS.Boxes[MyName] = LNS.Settings
     LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-    LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
-
-    LNS.Boxes[MyName] = {}
-    for k, v in pairs(LNS.Settings) do
-        if type(v) == 'table' then
-            LNS.Boxes[MyName][k] = {}
-            for kk, vv in pairs(v) do
-                LNS.Boxes[MyName][k][kk] = vv
-            end
-        else
-            LNS.Boxes[MyName][k] = v
-        end
+    if Mode == 'directed' then
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
     end
+
+    LNS.Boxes[MyName] = LNS.Settings
+
     LNS.TempSettings.LastSent = os.time()
 end
 
@@ -3132,11 +3156,17 @@ function LNS.finishedLooting()
 end
 
 function LNS.informProcessing()
-    LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, }, { Subject = "processing", Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+    if Mode == 'directed' then
+        LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
+            { Subject = "processing", Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+    end
 end
 
 function LNS.doneProcessing()
-    LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, }, { Subject = "done_processing", Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+    if Mode == 'directed' then
+        LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
+            { Subject = "done_processing", Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+    end
 end
 
 function LNS.RegisterActors()
@@ -3172,19 +3202,24 @@ function LNS.RegisterActors()
         if directions == 'combatlooting' then
             LNS.Settings.CombatLooting = combatLooting
             LNS.TempSettings.CombatLooting = combatLooting
-            LNS.sendMySettings()
-            LNS.writeSettings()
+            LNS.TempSettings.SentSettings = true
+            LNS.TempSettings.NeedSave = true
             return
         end
         if directions == 'getcombatsetting' then
-            LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
-                { Subject = 'mysetting', Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+            if Mode == 'directed' then
+                LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
+                    { Subject = 'mysetting', Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+            end
         end
         if itemName == 'NULL' then
             itemName = LNS.ItemNames[itemID] and LNS.ItemNames[itemID] or 'NULL'
         end
         if action == 'Hello' and who ~= MyName then
-            LNS.sendMySettings()
+            LNS.TempSettings.SendSettings = true
+            LNS.TempSettings[who] = {}
+            table.insert(LNS.BoxKeys, who)
+            table.sort(LNS.BoxKeys)
             return
         end
         if action == 'sendsettings' and who ~= MyName then
@@ -3193,32 +3228,38 @@ function LNS.RegisterActors()
             end
             if LNS.Boxes[who] == nil then LNS.Boxes[who] = {} end
 
-            LNS.Boxes[who] = {}
-            for k, v in pairs(boxSettings) do
-                if type(k) ~= 'table' then
-                    LNS.Boxes[who][k] = v
-                else
-                    LNS.Boxes[who][k] = {}
-                    for i, j in pairs(v) do
-                        LNS.Boxes[who][k][i] = j
-                    end
-                end
-            end
+            LNS.Boxes[who] = boxSettings
+            LNS.TempSettings[who] = boxSettings
+            -- for k, v in pairs(boxSettings) do
+            --     if type(k) ~= 'table' then
+            --         LNS.Boxes[who][k] = v
+            --     else
+            --         LNS.Boxes[who][k] = {}
+            --         for i, j in pairs(v) do
+            --             LNS.Boxes[who][k][i] = j
+            --         end
+            --     end
+            -- end
+            -- LNS.TempSettings.SendSettings = true
         end
 
-        if action == 'updatesettings' and who == MyName then
-            for k, v in pairs(boxSettings) do
-                if type(k) ~= 'table' then
-                    LNS.Settings[k] = v
-                else
-                    for i, j in pairs(v) do
-                        LNS.Settings[k][i] = j
-                    end
-                end
+        if action == 'updatesettings' then
+            -- for k, v in pairs(boxSettings) do
+            --     if type(k) ~= 'table' then
+            --         LNS.Settings[k] = v
+            --     else
+            --         for i, j in pairs(v) do
+            --             LNS.Settings[k][i] = j
+            --         end
+            --     end
+            -- end
+            LNS.Boxes[who] = boxSettings
+            LNS.TempSettings[who] = boxSettings
+            if who == MyName then
+                LNS.Settings = LNS.Boxes[who]
+                LNS.TempSettings[who] = boxSettings
+                LNS.TempSettings.UpdateSettings = true
             end
-            mq.pickle(SettingsFile, LNS.Settings)
-            LNS.loadSettings()
-            LNS.sendMySettings()
         end
 
         if server ~= eqServer then return end
@@ -3297,10 +3338,8 @@ function LNS.RegisterActors()
                     LNS.NewItemsCount)
             end
 
-            local db = LNS.OpenItemsSQL()
-            LNS.GetItemFromDB(itemName, itemID)
-            db:close()
-            LNS.lookupLootRule(itemID)
+            LNS.TempSettings.GetItem = { Name = itemName, ID = itemID, }
+            LNS.TempSettings.DoGet = true
 
             -- clean bags of items marked as destroy so we don't collect garbage
             if rule:lower() == 'destroy' then
@@ -3370,9 +3409,10 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
     local itemLink       = corpseItem.ItemLink('CLICKABLE')()
     local isGlobalItem   = LNS.Settings.GlobalLootOn and (LNS.GlobalItemsRules[corpseItemID] ~= nil or LNS.BuyItemsTable[corpseItemID] ~= nil)
     local isPersonalItem = LNS.PersonalItemsRules[corpseItemID] ~= nil
-    local tmpLabel       = corpseName:sub(1, corpseName:find("corpse") - 4)
+    local corpsePos      = corpseName:find("corpse")
+    local tmpLabel       = corpsePos and corpseName:sub(1, corpsePos - 4) or corpseName
     corpseName           = tmpLabel
-    local eval           = doWhat
+    local eval           = type(doWhat) == 'string' and doWhat or '?'
     local dbgTbl         = {}
     dbgTbl               = {
         Lookup = 'loot.lootItem()',
@@ -3385,7 +3425,7 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
     if corpseItem and not shouldLootActions[doWhat] then
         if (doWhat == 'Ignore' and not (LNS.Settings.DoDestroy and LNS.Settings.AlwaysDestroy)) or
             (doWhat == 'Destroy' and not LNS.Settings.DoDestroy) or (doWhat == 'Ask') or (cantWear and LNS.Settings.CanWear and corpseItem.NoDrop()) then
-            if dowhat == ('Ask' or 'Ignore') then
+            if doWhat == ('Ask' or 'Ignore') then
                 eval = 'Left'
             end
             dbgTbl = {
@@ -3436,11 +3476,13 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
         --     os.date('%Y-%m-%d'), os.date('%H:%M:%S'), itemLink, MyName, curZone, allItems, cantWear)
         return
     end
-    eval = doWhat
+    Logger.Debug(LNS.guiLoot.console, string.format("eval = %s", eval))
     if doWhat == 'Destroy' then
         mq.delay(10000, function() return mq.TLO.Cursor.ID() == corpseItemID end)
         eval = isGlobalItem == true and 'Global Destroy' or 'Destroy'
         eval = isPersonalItem == true and 'Personal Destroy' or eval
+        Logger.Debug(LNS.guiLoot.console, string.format("eval = %s", eval))
+
         mq.cmdf('/destroy')
         dbgTbl = {
             Lookup = 'loot.lootItem()',
@@ -3457,18 +3499,25 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
     -- Handle quest item logic
     if qKeep == nil then qKeep = 0 end
     if qKeep > 0 and doWhat == 'Keep' then
-        eval            = isGlobalItem == true and 'Global Quest' or 'Quest'
-        eval            = isPersonalItem == true and 'Personal Quest' or eval
+        eval = isGlobalItem == true and 'Global Quest' or 'Quest'
+        eval = isPersonalItem == true and 'Personal Quest' or eval
+        if type(eval) == 'boolean' then eval = 'Ask' end
+
         local countHave = mq.TLO.FindItemCount(itemName)() + mq.TLO.FindItemBankCount(itemName)()
         LNS.report("\awQuest Item:\ag %s \awCount:\ao %s \awof\ag %s", itemLink, tostring(countHave), qKeep)
     else
+        Logger.Debug(LNS.guiLoot.console, string.format("eval = %s", eval))
+
         eval = isGlobalItem == true and 'Global ' .. doWhat or doWhat
         eval = isPersonalItem == true and 'Personal ' .. doWhat or eval
+        if type(eval) == 'boolean' then eval = 'Ask' end
+
+        Logger.Debug(LNS.guiLoot.console, string.format("eval = %s", eval))
+
         LNS.report('%sing \ay%s\ax', eval, itemLink)
     end
 
     if doWhat == 'Ignore' then eval = 'Left' end
-
     -- Log looted items
     dbgTbl = {
         Lookup = 'loot.lootItem()',
@@ -3496,7 +3545,10 @@ function LNS.lootCorpse(corpseID)
     Logger.Debug(LNS.guiLoot.console, 'Enter lootCorpse')
     shouldLootActions.Destroy = LNS.Settings.DoDestroy
     shouldLootActions.Tribute = LNS.Settings.TributeKeep
-
+    if corpseID == nil then
+        Logger.Warn(LNS.guiLoot.console, "lootCorpse(): No corpseID provided.")
+        return false
+    end
     allItems = {}
     if mq.TLO.Cursor() then LNS.checkCursor() end
 
@@ -3514,7 +3566,7 @@ function LNS.lootCorpse(corpseID)
             Logger.Warn(LNS.guiLoot.console, "lootCorpse(): Can't loot %s right now", mq.TLO.Target.CleanName())
             cantLootList[corpseID] = os.time()
         end
-        return
+        return false
     end
 
     mq.delay(1000, function() return mq.TLO.Corpse.Items() end)
@@ -3527,7 +3579,7 @@ function LNS.lootCorpse(corpseID)
                 mq.cmdf('/lootall')
                 mq.delay("45s", function() return not mq.TLO.Window('LootWnd').Open() end)
             end
-            return
+            return false
         end
 
         noDropItems, loreItems = {}, {}
@@ -3576,12 +3628,17 @@ function LNS.lootCorpse(corpseID)
             LootedBy = MyName,
         }
         LNS.lootActor:send({ mailbox = 'looted', script = 'lootnscoot', }, message)
-        LNS.lootActor:send({ mailbox = 'looted', script = 'rgmercs/lib/lootnscoot', }, message)
+        if Mode == 'directed' then
+            LNS.lootActor:send({ mailbox = 'looted', script = LNS.DirectorLNSPath, }, message)
+        end
+        allItems = nil
     end
+    return true
 end
 
 function LNS.lootMobs(limit)
-    if mq.TLO.Me.Invis(0)() then
+    -- check for normal, undead, animal invis should not see rogue sneak\hide
+    if mq.TLO.Me.Invis(1)() or mq.TLO.Me.Invis(2)() or mq.TLO.Me.Invis(3)() then
         Logger.Warn(LNS.guiLoot.console, "lootMobs(): You are Invis and we don't want to break it so skipping.")
         LNS.finishedLooting()
         return
@@ -3661,9 +3718,9 @@ function LNS.lootMobs(limit)
             end
 
             corpse.DoTarget()
-            LNS.lootCorpse(corpseID)
-            didLoot                 = true
-            lootedCorpses[corpseID] = true
+            local check             = LNS.lootCorpse(corpseID)
+            didLoot                 = check
+            lootedCorpses[corpseID] = check
 
             ::continue::
         end
@@ -3926,6 +3983,17 @@ function LNS.processItems(action)
                     if not LNS.goToVendor() or not LNS.openVendor() then return end
                 end
                 local sellPrice = item.Value() and item.Value() / 1000 or 0
+                local stackSize = item.StackSize() or 0
+                local haveAmt = mq.TLO.FindItemCount(item.Name())()
+
+                if stackSize > 1 and haveAmt > 1 then
+                    if haveAmt > stackSize then
+                        sellPrice = sellPrice * stackSize
+                    else
+                        sellPrice = sellPrice * haveAmt
+                    end
+                end
+
                 LNS.SellToVendor(itemID, bag, slot, item.Name())
                 totalPlat = totalPlat + sellPrice
                 mq.delay(1)
@@ -5276,30 +5344,24 @@ function LNS.drawSettingIcon(setting)
 end
 
 function LNS.drawSwitch(settingName, who)
-    if who == MyName then
-        if LNS.Settings[settingName] then
+    if LNS.TempSettings[who] ~= nil then
+        if LNS.TempSettings[who][settingName] then
             ImGui.TextColored(0.3, 1.0, 0.3, 0.9, Icons.FA_TOGGLE_ON)
         else
             ImGui.TextColored(1.0, 0.3, 0.3, 0.8, Icons.FA_TOGGLE_OFF)
         end
         if ImGui.IsItemHovered() then
-            ImGui.SetTooltip("%s %s", settingName, LNS.Settings[settingName] and "Enabled" or "Disabled")
+            ImGui.SetTooltip("%s %s", settingName, LNS.TempSettings[who][settingName] and "Enabled" or "Disabled")
         end
         if ImGui.IsItemHovered() and ImGui.IsMouseClicked(0) then
-            LNS.Settings[settingName] = not LNS.Settings[settingName]
-            LNS.TempSettings.NeedSave = true
-        end
-    elseif LNS.Boxes[who] ~= nil then
-        if LNS.Boxes[who][settingName] then
-            ImGui.TextColored(0.3, 1.0, 0.3, 0.9, Icons.FA_TOGGLE_ON)
-        else
-            ImGui.TextColored(1.0, 0.3, 0.3, 0.8, Icons.FA_TOGGLE_OFF)
-        end
-        if ImGui.IsItemHovered() then
-            ImGui.SetTooltip("%s %s", settingName, LNS.Boxes[who][settingName] and "Enabled" or "Disabled")
-        end
-        if ImGui.IsItemHovered() and ImGui.IsMouseClicked(0) then
-            LNS.Boxes[who][settingName] = not LNS.Boxes[who][settingName]
+            LNS.TempSettings[who][settingName] = not LNS.TempSettings[who][settingName]
+            if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
+                LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
+                if who == MyName then
+                    LNS.Settings[settingName] = LNS.TempSettings[who][settingName]
+                    LNS.TempSettings.NeedSave = true
+                end
+            end
         end
     end
 end
@@ -5316,107 +5378,86 @@ function LNS.renderSettingsSection(who)
             colCount = colCount - 2
         end
     end
+
     ImGui.SameLine()
+
     if ImGui.SmallButton("Send Settings##LootnScoot") then
         if who == MyName then
-            for k, v in pairs(LNS.Boxes[MyName]) do
-                if type(v) == 'table' then
-                    for k2, v2 in pairs(v) do
-                        LNS.Settings[k][k2] = v2
-                    end
-                else
-                    LNS.Settings[k] = v
-                end
-            end
+            -- for k, v in pairs(LNS.Boxes[MyName]) do
+            --     if type(v) == 'table' then
+            --         for k2, v2 in pairs(v) do
+            --             LNS.Settings[k][k2] = v2
+            --         end
+            --     else
+            --         LNS.Settings[k] = v
+            --     end
+            -- end
+            LNS.Settings = LNS.Boxes[MyName]
             LNS.writeSettings()
             LNS.sendMySettings()
         else
-            local tmpSet = {}
-            for k, v in pairs(LNS.Boxes[who]) do
-                if type(v) == 'table' then
-                    tmpSet[k] = {}
-                    for k2, v2 in pairs(v) do
-                        tmpSet[k][k2] = v2
-                    end
-                else
-                    tmpSet[k] = v
-                end
-            end
+            local tmpSet = LNS.Boxes[who]
+            -- for k, v in pairs(LNS.Boxes[who]) do
+            --     if type(v) == 'table' then
+            --         tmpSet[k] = {}
+            --         for k2, v2 in pairs(v) do
+            --             tmpSet[k][k2] = v2
+            --         end
+            --     else
+            --         tmpSet[k] = v
+            --     end
+            -- end
             local message = {
                 action = 'updatesettings',
                 who = who,
                 settings = tmpSet,
             }
             LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-            LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
+            if Mode == 'directed' then
+                LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
+            end
         end
     end
     ImGui.SeparatorText("Clone Settings")
     ImGui.SetNextItemWidth(120)
-    local source
-    if LNS.TempSettings.CloneWho == nil then
-        source = "Select Source"
-    else
-        source = LNS.TempSettings.CloneWho
-    end
-    if ImGui.BeginCombo('##Source', source) then
-        for k, v in pairs(LNS.Boxes) do
-            if ImGui.Selectable(k, source == k) then
+
+    if ImGui.BeginCombo('##Source', LNS.TempSettings.CloneWho or "Select Source") then
+        for _, k in ipairs(LNS.BoxKeys) do
+            if ImGui.Selectable(k) then
                 LNS.TempSettings.CloneWho = k
             end
         end
         ImGui.EndCombo()
     end
+
     ImGui.SameLine()
-    local dest
-    if LNS.TempSettings.CloneTo == nil then
-        dest = "Select Destination"
-    else
-        dest = LNS.TempSettings.CloneTo
-    end
+
     ImGui.SetNextItemWidth(120)
-    if ImGui.BeginCombo('##Dest', dest) then
-        for k, v in pairs(LNS.Boxes) do
-            if ImGui.Selectable(k, dest == k) then
+    if ImGui.BeginCombo('##Dest', LNS.TempSettings.CloneTo or "Select Destination") then
+        for _, k in ipairs(LNS.BoxKeys) do
+            if ImGui.Selectable(k) then
                 LNS.TempSettings.CloneTo = k
             end
         end
         ImGui.EndCombo()
     end
+
     if LNS.TempSettings.CloneWho and LNS.TempSettings.CloneTo then
         ImGui.SameLine()
 
         if ImGui.SmallButton("Clone Settings") then
-            LNS.Boxes[LNS.TempSettings.CloneTo] = {}
-            for k, v in pairs(LNS.Boxes[LNS.TempSettings.CloneWho]) do
-                if type(v) == 'table' then
-                    LNS.Boxes[LNS.TempSettings.CloneTo][k] = {}
-                    for k2, v2 in pairs(v) do
-                        LNS.Boxes[LNS.TempSettings.CloneTo][k][k2] = v2
-                    end
-                else
-                    LNS.Boxes[LNS.TempSettings.CloneTo][k] = v
-                end
-            end
-            local tmpSet = {}
-            for k, v in pairs(LNS.Boxes[LNS.TempSettings.CloneTo]) do
-                if type(v) == 'table' then
-                    tmpSet[k] = {}
-                    for k2, v2 in pairs(v) do
-                        tmpSet[k][k2] = v2
-                    end
-                else
-                    tmpSet[k] = v
-                end
-            end
+            LNS.Boxes[LNS.TempSettings.CloneTo] = LNS.Boxes[LNS.TempSettings.CloneWho]
+            local tmpSet = LNS.Boxes[LNS.TempSettings.CloneWho]
             local message = {
                 action = 'updatesettings',
                 who = LNS.TempSettings.CloneTo,
                 settings = tmpSet,
             }
             LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-            LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, message)
-
+            if Mode == 'directed' then
+                LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
+            end
+            LNS.TempSettings.CloneWho = nil
             LNS.TempSettings.CloneTo = nil
         end
     end
@@ -5434,6 +5475,12 @@ function LNS.renderSettingsSection(who)
 
         for i, settingName in ipairs(sorted_settings) do
             if settingsNoDraw[settingName] == nil or settingsNoDraw[settingName] == false then
+                if LNS.TempSettings[who] == nil then
+                    LNS.TempSettings[who] = {}
+                end
+                if LNS.TempSettings[who][settingName] == nil then
+                    LNS.TempSettings[who][settingName] = LNS.Boxes[who][settingName]
+                end
                 if type(LNS.Boxes[who][settingName]) ~= "boolean" then
                     ImGui.PushID(settingName)
                     ImGui.TableNextColumn()
@@ -5443,10 +5490,25 @@ function LNS.renderSettingsSection(who)
                     ImGui.TableNextColumn()
                     if type(LNS.Boxes[who][settingName]) == "number" then
                         ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
-                        LNS.Boxes[who][settingName] = ImGui.InputInt("##" .. settingName, LNS.Boxes[who][settingName])
+
+                        LNS.TempSettings[who][settingName] = ImGui.InputInt("##" .. settingName, LNS.TempSettings[who][settingName])
+                        if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
+                            LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
+                            if who == MyName then
+                                LNS.Settings[settingName] = LNS.Boxes[who][settingName]
+                                LNS.TempSettings.NeedSave = true
+                            end
+                        end
                     elseif type(LNS.Boxes[who][settingName]) == "string" then
                         ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
-                        LNS.Boxes[who][settingName] = ImGui.InputText("##" .. settingName, LNS.Boxes[who][settingName])
+                        LNS.TempSettings[who][settingName] = ImGui.InputText("##" .. settingName, LNS.TempSettings[who][settingName])
+                        if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
+                            LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
+                            if who == MyName then
+                                LNS.Settings[settingName] = LNS.Boxes[who][settingName]
+                                LNS.TempSettings.NeedSave = true
+                            end
+                        end
                     end
                     ImGui.PopID()
                 end
@@ -5464,16 +5526,25 @@ function LNS.renderSettingsSection(who)
 
         for i, settingName in ipairs(sorted_toggles) do
             if settingsNoDraw[settingName] == nil or settingsNoDraw[settingName] == false then
+                if LNS.TempSettings[who] == nil then
+                    LNS.TempSettings[who] = {}
+                end
+                if LNS.TempSettings[who][settingName] == nil then
+                    LNS.TempSettings[who][settingName] = LNS.Boxes[who][settingName]
+                end
                 if type(LNS.Boxes[who][settingName]) == "boolean" then
                     ImGui.PushID(settingName)
                     ImGui.TableNextColumn()
                     ImGui.Indent(2)
                     -- ImGui.Text(settingName)
                     if ImGui.Selectable(settingName) then
-                        LNS.Boxes[who][settingName] = not LNS.Boxes[who][settingName]
-                        if who == MyName then
-                            LNS.Settings[settingName] = LNS.Boxes[who][settingName]
-                            LNS.TempSettings.NeedSave = true
+                        LNS.TempSettings[who][settingName] = not LNS.TempSettings[who][settingName]
+                        if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
+                            LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
+                            if who == MyName then
+                                LNS.Settings[settingName] = LNS.Boxes[who][settingName]
+                                LNS.TempSettings.NeedSave = true
+                            end
                         end
                     end
                     ImGui.Unindent(2)
@@ -6045,16 +6116,22 @@ function LNS.processArgs(args)
                 false)
         end
         LNS.DirectorScript = args[2]
+        LNS.DirectorLNSPath = string.format("%s/lib/lootnscoot", args[2])
         Mode = 'directed'
         LNS.Terminate = false
-        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, { action = 'Hello', Server = eqServer, who = MyName, })
-        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, { action = 'Hello', Server = eqServer, who = MyName, })
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', },
+            { action = 'Hello', Server = eqServer, who = MyName, })
+        if Mode == 'directed' then
+            LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, },
+                { action = 'Hello', Server = eqServer, who = MyName, })
+        end
     elseif args[1] == 'sellstuff' then
         LNS.processItems('Sell')
     elseif args[1] == 'tributestuff' then
         LNS.processItems('Tribute')
     elseif args[1] == 'cleanup' then
-        LNS.processItems('Destroy')
+        LNS.TempSettings.NeedsCleanup = true
+        -- LNS.processItems('Destroy')
     elseif args[1] == 'once' then
         LNS.lootMobs()
     elseif args[1] == 'standalone' then
@@ -6069,8 +6146,8 @@ function LNS.processArgs(args)
         end
         Mode = 'standalone'
         LNS.Terminate = false
-        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'rgmercs/lib/lootnscoot', }, { action = 'Hello', Server = eqServer, who = MyName, })
-        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, { action = 'Hello', Server = eqServer, who = MyName, })
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script == 'lootnscoot', },
+            { action = 'Hello', Server = eqServer, who = MyName, })
     end
 end
 
@@ -6080,6 +6157,7 @@ function LNS.init(args)
         LNS.Terminate = false
     end
     needsSave = LNS.loadSettings(true)
+    LNS.SortSettings()
     LNS.SortTables()
     LNS.RegisterActors()
     LNS.CheckBags()
@@ -6188,6 +6266,25 @@ while not LNS.Terminate do
 
     mq.doevents()
 
+    if LNS.TempSettings.UpdateSettings == true then
+        Logger.Info(LNS.guiLoot.console, "Updating Settings")
+        mq.pickle(SettingsFile, LNS.Settings)
+        LNS.loadSettings()
+        LNS.TempSettings.UpdateSettings = false
+    end
+
+    if LNS.TempSettings.SendSettings == true then
+        LNS.TempSettings.SendSettings = false
+        Logger.Info(LNS.guiLoot.console, "Sending Settings")
+        LNS.sendMySettings()
+    end
+
+    -- if LNS.TempSettings.WriteSettings then
+    --     LNS.writeSettings()
+    --     LNS.SortTables()
+    --     LNS.TempSettings.WriteSettings = false
+    -- end
+
     if LNS.TempSettings.ClearDateData then
         LNS.TempSettings.ClearDateData = false
         LNS.HistoryDataDate = {}
@@ -6196,6 +6293,18 @@ while not LNS.Terminate do
     if LNS.TempSettings.LookUpDateData then
         LNS.TempSettings.LookUpDateData = false
         LNS.LoadDateHistory(lookupDate)
+    end
+
+    if LNS.TempSettings.DoGet then
+        LNS.TempSettings.DoGet = false
+        if LNS.TempSettings.GetItem == nil then return end
+        local itemName = LNS.TempSettings.GetItem.Name or 'None'
+        local itemID = LNS.TempSettings.GetItem.ID or 0
+        local db = LNS.OpenItemsSQL()
+        LNS.GetItemFromDB(itemName, itemID)
+        db:close()
+        LNS.lookupLootRule(itemID)
+        LNS.TempSettings.GetItem = nil
     end
 
     if LNS.TempSettings.NeedSave then
