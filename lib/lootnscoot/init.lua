@@ -220,54 +220,58 @@ if LNS.guiLoot ~= nil then
     LNS.guiLoot.GetSettings(LNS.Settings.HideNames, LNS.Settings.LookupLinks, true, true, 'lootnscoot', false)
 end
 
-LNS.DirectorScript               = 'none'
-LNS.DirectorLNSPath              = 'none'
-LNS.BuyItemsTable                = {}
-LNS.ALLITEMS                     = {}
-LNS.GlobalItemsRules             = {}
-LNS.NormalItemsRules             = {}
-LNS.NormalItemsClasses           = {}
-LNS.GlobalItemsClasses           = {}
-LNS.NormalItemsLink              = {}
-LNS.GlobalItemsLink              = {}
-LNS.NewItems                     = {}
-LNS.TempSettings                 = {}
-LNS.PersonalItemsRules           = {}
-LNS.PersonalItemsClasses         = {}
-LNS.PersonalItemsLink            = {}
-LNS.NewItemDecisions             = nil
-LNS.ItemNames                    = {}
-LNS.ItemIcons                    = {}
-LNS.NewItemsCount                = 0
-LNS.TempItemClasses              = "All"
-LNS.itemSelectionPending         = false -- Flag to indicate an item selection is in progress
-LNS.pendingItemData              = nil   -- Temporary storage for item data
-LNS.doImportInventory            = false
-LNS.TempModClass                 = false
-LNS.ShowUI                       = false
-LNS.Terminate                    = true
-LNS.Boxes                        = {}
-LNS.LootNow                      = false
-LNS.histCurrentPage              = 1
-LNS.histItemsPerPage             = 25
-LNS.histTotalPages               = 1
-LNS.histTotalItems               = 0
-LNS.HistoricalDates              = {}
-LNS.HistoryDataDate              = {}
-LNS.PersonalTableName            = string.format("%s_Rules", MyName)
-LNS.TempSettings.Edit            = {}
-LNS.TempSettings.UpdatedBuyItems = {}
-LNS.TempSettings.DeletedBuyKeys  = {}
+LNS.DirectorScript                  = 'none'
+LNS.DirectorLNSPath                 = 'none'
+LNS.BuyItemsTable                   = {}
+LNS.ALLITEMS                        = {}
+LNS.GlobalItemsRules                = {}
+LNS.NormalItemsRules                = {}
+LNS.NormalItemsClasses              = {}
+LNS.GlobalItemsClasses              = {}
+LNS.NormalItemsLink                 = {}
+LNS.GlobalItemsLink                 = {}
+LNS.NewItems                        = {}
+LNS.TempSettings                    = {}
+LNS.PersonalItemsRules              = {}
+LNS.PersonalItemsClasses            = {}
+LNS.PersonalItemsLink               = {}
+LNS.NewItemDecisions                = nil
+LNS.ItemNames                       = {}
+LNS.ItemIcons                       = {}
+LNS.NewItemsCount                   = 0
+LNS.TempItemClasses                 = "All"
+LNS.itemSelectionPending            = false -- Flag to indicate an item selection is in progress
+LNS.pendingItemData                 = nil   -- Temporary storage for item data
+LNS.doImportInventory               = false
+LNS.TempModClass                    = false
+LNS.ShowUI                          = false
+LNS.Terminate                       = true
+LNS.Boxes                           = {}
+LNS.LootNow                         = false
+LNS.histCurrentPage                 = 1
+LNS.histItemsPerPage                = 25
+LNS.histTotalPages                  = 1
+LNS.histTotalItems                  = 0
+LNS.HistoricalDates                 = {}
+LNS.HistoryDataDate                 = {}
+LNS.PersonalTableName               = string.format("%s_Rules", MyName)
+LNS.TempSettings.Edit               = {}
+LNS.TempSettings.UpdatedBuyItems    = {}
+LNS.TempSettings.DeletedBuyKeys     = {}
+LNS.TempSettings.SortedSettingsKeys = {}
+LNS.TempSettings.SortedToggleKeys   = {}
+LNS.TempSettings.UpdateSettings     = false
+LNS.TempSettings.SendSettings       = false
 
-local tableList                  = {
+local tableList                     = {
     "Global_Items", "Normal_Items", LNS.PersonalTableName,
 }
-local tableListRules             = {
+local tableListRules                = {
     "Global_Rules", "Normal_Rules", LNS.PersonalTableName,
 }
 
 -- FORWARD DECLARATIONS
-LNS.AllItemColumnListIndex       = {
+LNS.AllItemColumnListIndex          = {
     [1]  = 'name',
     [2]  = 'sell_value',
     [3]  = 'tribute_value',
@@ -388,12 +392,27 @@ function LNS.SearchLootTable(search, key, value)
     end
 end
 
+function LNS.SortSettings()
+    LNS.TempSettings.SortedSettingsKeys = {}
+    LNS.TempSettings.SortedToggleKeys   = {}
+    for k in pairs(LNS.Settings) do
+        if settingsNoDraw[k] == nil then
+            if type(LNS.Settings[k]) == 'boolean' then
+                table.insert(LNS.TempSettings.SortedToggleKeys, k)
+            else
+                table.insert(LNS.TempSettings.SortedSettingsKeys, k)
+            end
+        end
+    end
+    table.sort(LNS.TempSettings.SortedToggleKeys, function(a, b) return a < b end)
+    table.sort(LNS.TempSettings.SortedSettingsKeys, function(a, b) return a < b end)
+end
+
 function LNS.SortTables()
     LNS.TempSettings.SortedGlobalItemKeys = {}
     LNS.TempSettings.SortedBuyItemKeys    = {}
     LNS.TempSettings.SortedNormalItemKeys = {}
-    LNS.TempSettings.SortedSettingsKeys   = {}
-    LNS.TempSettings.SortedToggleKeys     = {}
+
 
     for k in pairs(LNS.GlobalItemsRules) do
         table.insert(LNS.TempSettings.SortedGlobalItemKeys, k)
@@ -410,18 +429,6 @@ function LNS.SortTables()
     end
 
     table.sort(LNS.TempSettings.SortedNormalItemKeys, function(a, b) return a < b end)
-
-    for k in pairs(LNS.Settings) do
-        if settingsNoDraw[k] == nil then
-            if type(LNS.Settings[k]) == 'boolean' then
-                table.insert(LNS.TempSettings.SortedToggleKeys, k)
-            else
-                table.insert(LNS.TempSettings.SortedSettingsKeys, k)
-            end
-        end
-    end
-    table.sort(LNS.TempSettings.SortedToggleKeys, function(a, b) return a < b end)
-    table.sort(LNS.TempSettings.SortedSettingsKeys, function(a, b) return a < b end)
 end
 
 function LNS.SortKeys(input_table)
@@ -733,7 +740,8 @@ function LNS.loadSettings(firstRun)
     end
     LNS.Settings = {}
     LNS.Settings = tmpSettings
-
+    LNS.Boxes[MyName] = {}
+    LNS.Boxes[MyName] = LNS.Settings
     LNS.guiLoot.openGUI = LNS.Settings.ShowConsole
 
     return needSave
@@ -945,7 +953,8 @@ function LNS.commandHandler(...)
         elseif command == 'bank' then
             LNS.processItems('Bank')
         elseif command == 'cleanup' then
-            LNS.processItems('Destroy')
+            -- LNS.processItems('Destroy')
+            LNS.TempSettings.NeedsCleanup = true
         elseif command == 'gui' or command == 'console' and LNS.guiLoot then
             LNS.guiLoot.openGUI = not LNS.guiLoot.openGUI
         elseif command == 'report' and LNS.guiLoot then
@@ -2253,15 +2262,21 @@ function LNS.modifyItemRule(itemID, action, tableName, classes, link)
     end
 
     -- Retrieve the item name from loot.ALLITEMS
-    local itemName = LNS.ALLITEMS[itemID] and LNS.ALLITEMS[itemID].Name
+    local itemName = LNS.ItemNames[itemID] ~= nil and LNS.ItemNames[itemID] or nil
     if not itemName then
         Logger.Warn(LNS.guiLoot.console, "Item ID \at%s\ax \arNOT\ax found in \ayloot.ALLITEMS", tostring(itemID))
         return
     end
 
+    if LNS.ALLITEMS[itemID] == nil then
+        LNS.ALLITEMS[itemID] = {}
+        LNS.ALLITEMS[itemID].Name = itemName
+    end
     -- Set default values
     if link == nil then
         link = LNS.ALLITEMS[itemID].Link or 'NULL'
+    else
+        LNS.ALLITEMS[itemID].Link = link
     end
     classes  = classes or 'All'
 
@@ -3105,36 +3120,29 @@ end
 
 function LNS.sendMySettings()
     local tmpTable = {}
-    for k, v in pairs(LNS.Settings) do
-        if type(v) == 'table' then
-            tmpTable[k] = {}
-            for kk, vv in pairs(v) do
-                tmpTable[k][kk] = vv
-            end
-        else
-            tmpTable[k] = v
-        end
-    end
+    -- for k, v in pairs(LNS.Settings) do
+    --     if type(v) == 'table' then
+    --         tmpTable[k] = {}
+    --         for kk, vv in pairs(v) do
+    --             tmpTable[k][kk] = vv
+    --         end
+    --     else
+    --         tmpTable[k] = v
+    --     end
+    -- end
     local message = {
         who      = MyName,
         action   = 'sendsettings',
-        settings = tmpTable,
+        settings = LNS.Settings,
     }
+    LNS.Boxes[MyName] = LNS.Settings
     LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
     if Mode == 'directed' then
         LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
     end
-    LNS.Boxes[MyName] = {}
-    for k, v in pairs(LNS.Settings) do
-        if type(v) == 'table' then
-            LNS.Boxes[MyName][k] = {}
-            for kk, vv in pairs(v) do
-                LNS.Boxes[MyName][k][kk] = vv
-            end
-        else
-            LNS.Boxes[MyName][k] = v
-        end
-    end
+
+    LNS.Boxes[MyName] = LNS.Settings
+
     LNS.TempSettings.LastSent = os.time()
 end
 
@@ -3193,7 +3201,7 @@ function LNS.RegisterActors()
             LNS.Settings.CombatLooting = combatLooting
             LNS.TempSettings.CombatLooting = combatLooting
             LNS.TempSettings.SentSettings = true
-            LNS.TempSettings.WriteSettings = true
+            LNS.TempSettings.NeedSave = true
             return
         end
         if directions == 'getcombatsetting' then
@@ -3207,6 +3215,7 @@ function LNS.RegisterActors()
         end
         if action == 'Hello' and who ~= MyName then
             LNS.TempSettings.SendSettings = true
+            LNS.TempSettings[who] = {}
             return
         end
         if action == 'sendsettings' and who ~= MyName then
@@ -3215,32 +3224,38 @@ function LNS.RegisterActors()
             end
             if LNS.Boxes[who] == nil then LNS.Boxes[who] = {} end
 
-            LNS.Boxes[who] = {}
-            for k, v in pairs(boxSettings) do
-                if type(k) ~= 'table' then
-                    LNS.Boxes[who][k] = v
-                else
-                    LNS.Boxes[who][k] = {}
-                    for i, j in pairs(v) do
-                        LNS.Boxes[who][k][i] = j
-                    end
-                end
-            end
-            LNS.TempSettings.SendSettings = true
+            LNS.Boxes[who] = boxSettings
+            LNS.TempSettings[who] = boxSettings
+            -- for k, v in pairs(boxSettings) do
+            --     if type(k) ~= 'table' then
+            --         LNS.Boxes[who][k] = v
+            --     else
+            --         LNS.Boxes[who][k] = {}
+            --         for i, j in pairs(v) do
+            --             LNS.Boxes[who][k][i] = j
+            --         end
+            --     end
+            -- end
+            -- LNS.TempSettings.SendSettings = true
         end
 
-        if action == 'updatesettings' and who == MyName then
-            for k, v in pairs(boxSettings) do
-                if type(k) ~= 'table' then
-                    LNS.Settings[k] = v
-                else
-                    for i, j in pairs(v) do
-                        LNS.Settings[k][i] = j
-                    end
-                end
+        if action == 'updatesettings' then
+            -- for k, v in pairs(boxSettings) do
+            --     if type(k) ~= 'table' then
+            --         LNS.Settings[k] = v
+            --     else
+            --         for i, j in pairs(v) do
+            --             LNS.Settings[k][i] = j
+            --         end
+            --     end
+            -- end
+            LNS.Boxes[who] = boxSettings
+            LNS.TempSettings[who] = boxSettings
+            if who == MyName then
+                LNS.Settings = LNS.Boxes[who]
+                LNS.TempSettings[who] = boxSettings
+                LNS.TempSettings.UpdateSettings = true
             end
-            LNS.TempSettings.UpdateSettings = true
-            LNS.TempSettings.SendSettings = true
         end
 
         if server ~= eqServer then return end
@@ -5325,30 +5340,24 @@ function LNS.drawSettingIcon(setting)
 end
 
 function LNS.drawSwitch(settingName, who)
-    if who == MyName then
-        if LNS.Settings[settingName] then
+    if LNS.TempSettings[who] ~= nil then
+        if LNS.TempSettings[who][settingName] then
             ImGui.TextColored(0.3, 1.0, 0.3, 0.9, Icons.FA_TOGGLE_ON)
         else
             ImGui.TextColored(1.0, 0.3, 0.3, 0.8, Icons.FA_TOGGLE_OFF)
         end
         if ImGui.IsItemHovered() then
-            ImGui.SetTooltip("%s %s", settingName, LNS.Settings[settingName] and "Enabled" or "Disabled")
+            ImGui.SetTooltip("%s %s", settingName, LNS.TempSettings[who][settingName] and "Enabled" or "Disabled")
         end
         if ImGui.IsItemHovered() and ImGui.IsMouseClicked(0) then
-            LNS.Settings[settingName] = not LNS.Settings[settingName]
-            LNS.TempSettings.NeedSave = true
-        end
-    elseif LNS.Boxes[who] ~= nil then
-        if LNS.Boxes[who][settingName] then
-            ImGui.TextColored(0.3, 1.0, 0.3, 0.9, Icons.FA_TOGGLE_ON)
-        else
-            ImGui.TextColored(1.0, 0.3, 0.3, 0.8, Icons.FA_TOGGLE_OFF)
-        end
-        if ImGui.IsItemHovered() then
-            ImGui.SetTooltip("%s %s", settingName, LNS.Boxes[who][settingName] and "Enabled" or "Disabled")
-        end
-        if ImGui.IsItemHovered() and ImGui.IsMouseClicked(0) then
-            LNS.Boxes[who][settingName] = not LNS.Boxes[who][settingName]
+            LNS.TempSettings[who][settingName] = not LNS.TempSettings[who][settingName]
+            if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
+                LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
+                if who == MyName then
+                    LNS.Settings[settingName] = LNS.TempSettings[who][settingName]
+                    LNS.TempSettings.NeedSave = true
+                end
+            end
         end
     end
 end
@@ -5365,32 +5374,35 @@ function LNS.renderSettingsSection(who)
             colCount = colCount - 2
         end
     end
+
     ImGui.SameLine()
+
     if ImGui.SmallButton("Send Settings##LootnScoot") then
         if who == MyName then
-            for k, v in pairs(LNS.Boxes[MyName]) do
-                if type(v) == 'table' then
-                    for k2, v2 in pairs(v) do
-                        LNS.Settings[k][k2] = v2
-                    end
-                else
-                    LNS.Settings[k] = v
-                end
-            end
+            -- for k, v in pairs(LNS.Boxes[MyName]) do
+            --     if type(v) == 'table' then
+            --         for k2, v2 in pairs(v) do
+            --             LNS.Settings[k][k2] = v2
+            --         end
+            --     else
+            --         LNS.Settings[k] = v
+            --     end
+            -- end
+            LNS.Settings = LNS.Boxes[MyName]
             LNS.writeSettings()
             LNS.sendMySettings()
         else
-            local tmpSet = {}
-            for k, v in pairs(LNS.Boxes[who]) do
-                if type(v) == 'table' then
-                    tmpSet[k] = {}
-                    for k2, v2 in pairs(v) do
-                        tmpSet[k][k2] = v2
-                    end
-                else
-                    tmpSet[k] = v
-                end
-            end
+            local tmpSet = LNS.Boxes[who]
+            -- for k, v in pairs(LNS.Boxes[who]) do
+            --     if type(v) == 'table' then
+            --         tmpSet[k] = {}
+            --         for k2, v2 in pairs(v) do
+            --             tmpSet[k][k2] = v2
+            --         end
+            --     else
+            --         tmpSet[k] = v
+            --     end
+            -- end
             local message = {
                 action = 'updatesettings',
                 who = who,
@@ -5438,28 +5450,28 @@ function LNS.renderSettingsSection(who)
         ImGui.SameLine()
 
         if ImGui.SmallButton("Clone Settings") then
-            LNS.Boxes[LNS.TempSettings.CloneTo] = {}
-            for k, v in pairs(LNS.Boxes[LNS.TempSettings.CloneWho]) do
-                if type(v) == 'table' then
-                    LNS.Boxes[LNS.TempSettings.CloneTo][k] = {}
-                    for k2, v2 in pairs(v) do
-                        LNS.Boxes[LNS.TempSettings.CloneTo][k][k2] = v2
-                    end
-                else
-                    LNS.Boxes[LNS.TempSettings.CloneTo][k] = v
-                end
-            end
-            local tmpSet = {}
-            for k, v in pairs(LNS.Boxes[LNS.TempSettings.CloneTo]) do
-                if type(v) == 'table' then
-                    tmpSet[k] = {}
-                    for k2, v2 in pairs(v) do
-                        tmpSet[k][k2] = v2
-                    end
-                else
-                    tmpSet[k] = v
-                end
-            end
+            LNS.Boxes[LNS.TempSettings.CloneTo] = LNS.Boxes[LNS.TempSettings.CloneWho]
+            -- for k, v in pairs(LNS.Boxes[LNS.TempSettings.CloneWho]) do
+            --     if type(v) == 'table' then
+            --         LNS.Boxes[LNS.TempSettings.CloneTo][k] = {}
+            --         for k2, v2 in pairs(v) do
+            --             LNS.Boxes[LNS.TempSettings.CloneTo][k][k2] = v2
+            --         end
+            --     else
+            --         LNS.Boxes[LNS.TempSettings.CloneTo][k] = v
+            --     end
+            -- end
+            local tmpSet = LNS.Boxes[LNS.TempSettings.CloneWho]
+            -- for k, v in pairs(LNS.Boxes[LNS.TempSettings.CloneTo]) do
+            --     if type(v) == 'table' then
+            --         tmpSet[k] = {}
+            --         for k2, v2 in pairs(v) do
+            --             tmpSet[k][k2] = v2
+            --         end
+            --     else
+            --         tmpSet[k] = v
+            --     end
+            -- end
             local message = {
                 action = 'updatesettings',
                 who = LNS.TempSettings.CloneTo,
@@ -5487,6 +5499,12 @@ function LNS.renderSettingsSection(who)
 
         for i, settingName in ipairs(sorted_settings) do
             if settingsNoDraw[settingName] == nil or settingsNoDraw[settingName] == false then
+                if LNS.TempSettings[who] == nil then
+                    LNS.TempSettings[who] = {}
+                end
+                if LNS.TempSettings[who][settingName] == nil then
+                    LNS.TempSettings[who][settingName] = LNS.Boxes[who][settingName]
+                end
                 if type(LNS.Boxes[who][settingName]) ~= "boolean" then
                     ImGui.PushID(settingName)
                     ImGui.TableNextColumn()
@@ -5497,17 +5515,23 @@ function LNS.renderSettingsSection(who)
                     if type(LNS.Boxes[who][settingName]) == "number" then
                         ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
 
-                        LNS.Boxes[who][settingName] = ImGui.InputInt("##" .. settingName, LNS.Boxes[who][settingName])
-                        if who == MyName then
-                            LNS.Settings[settingName] = LNS.Boxes[who][settingName]
-                            LNS.TempSettings.NeedSave = true
+                        LNS.TempSettings[who][settingName] = ImGui.InputInt("##" .. settingName, LNS.TempSettings[who][settingName])
+                        if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
+                            LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
+                            if who == MyName then
+                                LNS.Settings[settingName] = LNS.Boxes[who][settingName]
+                                LNS.TempSettings.NeedSave = true
+                            end
                         end
                     elseif type(LNS.Boxes[who][settingName]) == "string" then
                         ImGui.SetNextItemWidth(ImGui.GetColumnWidth(-1))
-                        LNS.Boxes[who][settingName] = ImGui.InputText("##" .. settingName, LNS.Boxes[who][settingName])
-                        if who == MyName then
-                            LNS.Settings[settingName] = LNS.Boxes[who][settingName]
-                            LNS.TempSettings.NeedSave = true
+                        LNS.TempSettings[who][settingName] = ImGui.InputText("##" .. settingName, LNS.TempSettings[who][settingName])
+                        if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
+                            LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
+                            if who == MyName then
+                                LNS.Settings[settingName] = LNS.Boxes[who][settingName]
+                                LNS.TempSettings.NeedSave = true
+                            end
                         end
                     end
                     ImGui.PopID()
@@ -5526,16 +5550,25 @@ function LNS.renderSettingsSection(who)
 
         for i, settingName in ipairs(sorted_toggles) do
             if settingsNoDraw[settingName] == nil or settingsNoDraw[settingName] == false then
+                if LNS.TempSettings[who] == nil then
+                    LNS.TempSettings[who] = {}
+                end
+                if LNS.TempSettings[who][settingName] == nil then
+                    LNS.TempSettings[who][settingName] = LNS.Boxes[who][settingName]
+                end
                 if type(LNS.Boxes[who][settingName]) == "boolean" then
                     ImGui.PushID(settingName)
                     ImGui.TableNextColumn()
                     ImGui.Indent(2)
                     -- ImGui.Text(settingName)
                     if ImGui.Selectable(settingName) then
-                        LNS.Boxes[who][settingName] = not LNS.Boxes[who][settingName]
-                        if who == MyName then
-                            LNS.Settings[settingName] = LNS.Boxes[who][settingName]
-                            LNS.TempSettings.NeedSave = true
+                        LNS.TempSettings[who][settingName] = not LNS.TempSettings[who][settingName]
+                        if LNS.Boxes[who][settingName] ~= LNS.TempSettings[who][settingName] then
+                            LNS.Boxes[who][settingName] = LNS.TempSettings[who][settingName]
+                            if who == MyName then
+                                LNS.Settings[settingName] = LNS.Boxes[who][settingName]
+                                LNS.TempSettings.NeedSave = true
+                            end
                         end
                     end
                     ImGui.Unindent(2)
@@ -6121,7 +6154,8 @@ function LNS.processArgs(args)
     elseif args[1] == 'tributestuff' then
         LNS.processItems('Tribute')
     elseif args[1] == 'cleanup' then
-        LNS.processItems('Destroy')
+        LNS.TempSettings.NeedsCleanup = true
+        -- LNS.processItems('Destroy')
     elseif args[1] == 'once' then
         LNS.lootMobs()
     elseif args[1] == 'standalone' then
@@ -6147,6 +6181,7 @@ function LNS.init(args)
         LNS.Terminate = false
     end
     needsSave = LNS.loadSettings(true)
+    LNS.SortSettings()
     LNS.SortTables()
     LNS.RegisterActors()
     LNS.CheckBags()
@@ -6255,16 +6290,17 @@ while not LNS.Terminate do
 
     mq.doevents()
 
-    if LNS.TempSettings.UpdateSettings then
+    if LNS.TempSettings.UpdateSettings == true then
+        Logger.Info(LNS.guiLoot.console, "Updating Settings")
         mq.pickle(SettingsFile, LNS.Settings)
         LNS.loadSettings()
         LNS.TempSettings.UpdateSettings = false
     end
 
-    if LNS.TempSettings.SendSettings then
-        LNS.sendMySettings()
-        LNS.SortTables()
+    if LNS.TempSettings.SendSettings == true then
         LNS.TempSettings.SendSettings = false
+        Logger.Info(LNS.guiLoot.console, "Sending Settings")
+        LNS.sendMySettings()
     end
 
     -- if LNS.TempSettings.WriteSettings then
@@ -6295,7 +6331,7 @@ while not LNS.Terminate do
         LNS.TempSettings.GetItem = nil
     end
 
-    if LNS.TempSettings.NeedSave or LNS.TempSettings.WriteSettings then
+    if LNS.TempSettings.NeedSave then
         for k, v in pairs(LNS.TempSettings.UpdatedBuyItems or {}) do
             if k ~= "" then
                 LNS.BuyItemsTable[k] = v
@@ -6312,7 +6348,6 @@ while not LNS.Terminate do
         LNS.TempSettings.DeletedBuyKeys = {}
         LNS.writeSettings()
         LNS.TempSettings.NeedSave = false
-        LNS.TempSettings.WriteSettings = false
         LNS.sendMySettings()
         LNS.SortTables()
     end
