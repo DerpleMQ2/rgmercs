@@ -235,6 +235,7 @@ LNS.TempSettings                    = {}
 LNS.PersonalItemsRules              = {}
 LNS.PersonalItemsClasses            = {}
 LNS.PersonalItemsLink               = {}
+LNS.BoxKeys                         = {}
 LNS.NewItemDecisions                = nil
 LNS.ItemNames                       = {}
 LNS.ItemIcons                       = {}
@@ -742,6 +743,7 @@ function LNS.loadSettings(firstRun)
     LNS.Settings = tmpSettings
     LNS.Boxes[MyName] = {}
     LNS.Boxes[MyName] = LNS.Settings
+    table.insert(LNS.BoxKeys, MyName)
     LNS.guiLoot.openGUI = LNS.Settings.ShowConsole
 
     return needSave
@@ -3216,6 +3218,8 @@ function LNS.RegisterActors()
         if action == 'Hello' and who ~= MyName then
             LNS.TempSettings.SendSettings = true
             LNS.TempSettings[who] = {}
+            table.insert(LNS.BoxKeys, who)
+            table.sort(LNS.BoxKeys)
             return
         end
         if action == 'sendsettings' and who ~= MyName then
@@ -5416,62 +5420,34 @@ function LNS.renderSettingsSection(who)
     end
     ImGui.SeparatorText("Clone Settings")
     ImGui.SetNextItemWidth(120)
-    local source
-    if LNS.TempSettings.CloneWho == nil then
-        source = "Select Source"
-    else
-        source = LNS.TempSettings.CloneWho
-    end
-    if ImGui.BeginCombo('##Source', source) then
-        for k, v in pairs(LNS.Boxes) do
-            if ImGui.Selectable(k, source == k) then
+
+    if ImGui.BeginCombo('##Source', LNS.TempSettings.CloneWho or "Select Source") then
+        for _, k in ipairs(LNS.BoxKeys) do
+            if ImGui.Selectable(k) then
                 LNS.TempSettings.CloneWho = k
             end
         end
         ImGui.EndCombo()
     end
+
     ImGui.SameLine()
-    local dest
-    if LNS.TempSettings.CloneTo == nil then
-        dest = "Select Destination"
-    else
-        dest = LNS.TempSettings.CloneTo
-    end
+
     ImGui.SetNextItemWidth(120)
-    if ImGui.BeginCombo('##Dest', dest) then
-        for k, v in pairs(LNS.Boxes) do
-            if ImGui.Selectable(k, dest == k) then
+    if ImGui.BeginCombo('##Dest', LNS.TempSettings.CloneTo or "Select Destination") then
+        for _, k in ipairs(LNS.BoxKeys) do
+            if ImGui.Selectable(k) then
                 LNS.TempSettings.CloneTo = k
             end
         end
         ImGui.EndCombo()
     end
+
     if LNS.TempSettings.CloneWho and LNS.TempSettings.CloneTo then
         ImGui.SameLine()
 
         if ImGui.SmallButton("Clone Settings") then
             LNS.Boxes[LNS.TempSettings.CloneTo] = LNS.Boxes[LNS.TempSettings.CloneWho]
-            -- for k, v in pairs(LNS.Boxes[LNS.TempSettings.CloneWho]) do
-            --     if type(v) == 'table' then
-            --         LNS.Boxes[LNS.TempSettings.CloneTo][k] = {}
-            --         for k2, v2 in pairs(v) do
-            --             LNS.Boxes[LNS.TempSettings.CloneTo][k][k2] = v2
-            --         end
-            --     else
-            --         LNS.Boxes[LNS.TempSettings.CloneTo][k] = v
-            --     end
-            -- end
             local tmpSet = LNS.Boxes[LNS.TempSettings.CloneWho]
-            -- for k, v in pairs(LNS.Boxes[LNS.TempSettings.CloneTo]) do
-            --     if type(v) == 'table' then
-            --         tmpSet[k] = {}
-            --         for k2, v2 in pairs(v) do
-            --             tmpSet[k][k2] = v2
-            --         end
-            --     else
-            --         tmpSet[k] = v
-            --     end
-            -- end
             local message = {
                 action = 'updatesettings',
                 who = LNS.TempSettings.CloneTo,
@@ -5481,7 +5457,7 @@ function LNS.renderSettingsSection(who)
             if Mode == 'directed' then
                 LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
             end
-
+            LNS.TempSettings.CloneWho = nil
             LNS.TempSettings.CloneTo = nil
         end
     end
