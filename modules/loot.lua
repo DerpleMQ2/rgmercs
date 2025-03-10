@@ -181,18 +181,19 @@ end
 
 function Module:Init()
 	self:LoadSettings()
+	self:LootMessageHandler()
 	if not Core.OnEMU() then
 		Logger.log_debug("\ay[LOOT]: \agWe are not on EMU unloading module. Build: %s",
 			mq.TLO.MacroQuest.BuildName())
 	else
 		if self.settings.DoLoot then
-			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING' or false
+			local lnsRunning = mq.TLO.Lua.Script('lootnscoot').Status() == 'RUNNING'
 			if lnsRunning then
 				Core.DoCmd("/lua stop lootnscoot")
+				mq.delay(1000, function() return mq.TLO.Lua.Script('lootnscoot').Status() ~= 'RUNNING' end)
 			end
 			Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
-			Module:LootMessageHandler()
-			Module.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
+			self.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
 				{ who = Config.Globals.CurLoadedChar, directions = 'getcombatsetting', })
 		end
 		self.TempSettings.Looting = false
@@ -258,7 +259,7 @@ function Module.DoLooting()
 end
 
 function Module:LootMessageHandler()
-	Module.Actor = Actors.register('loot_module', function(message)
+	self.Actor = Actors.register('loot_module', function(message)
 		local mail = message()
 		local subject = mail.Subject or ''
 		local who = mail.Who or ''
