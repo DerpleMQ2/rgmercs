@@ -127,9 +127,9 @@ function Module:SaveSettings(doBroadcast)
 				Core.DoCmd("/lua run %s directed rgmercs", LootnScootPath)
 			end
 
-			if not Module.Actor then Module:LootMessageHandler() end
+			if not self.Actor then Module:LootMessageHandler() end
 
-			Module.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
+			self.Actor:send({ mailbox = 'lootnscoot', script = LootScript, },
 				{ who = Config.Globals.CurLoadedChar, directions = 'combatlooting', CombatLooting = self.settings.CombatLooting, })
 		else
 			Core.DoCmd("/lua stop %s", LootnScootPath)
