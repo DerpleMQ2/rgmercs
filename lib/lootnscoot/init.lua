@@ -3195,7 +3195,7 @@ function LNS.RegisterActors()
             Classes = itemClasses,
             Link = itemLink,
         }
-        if directions == 'doloot' and who == MyName and LNS.Settings.DoLoot then
+        if directions == 'doloot' and who == MyName and (LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse) then
             LNS.LootNow = true
             return
         end
@@ -3677,7 +3677,7 @@ function LNS.lootMobs(limit)
     end
 
     -- Add other corpses to the loot list if not limited by the player's own corpse
-    if myCorpseCount == 0 then
+    if myCorpseCount == 0 and LNS.Settings.DoLoot then
         for i = 1, (limit or deadCount) do
             local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', LNS.Settings.CorpseRadius))
             if corpse() and (not lootedCorpses[corpse.ID()] or not LNS.Settings.CheckCorpseOnce) then
@@ -6200,9 +6200,11 @@ LNS.init({ ..., })
 
 while not LNS.Terminate do
     local directorRunning = mq.TLO.Lua.Script(LNS.DirectorScript).Status() == 'RUNNING' or false
+
     if not directorRunning and Mode == 'directed' then
         LNS.Terminate = true
     end
+
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then LNS.Terminate = true end -- exit sctipt if at char select.
 
     if LNS.TempSettings.LastCombatSetting == nil then
@@ -6213,6 +6215,7 @@ while not LNS.Terminate do
         LNS.TempSettings.LastCombatSetting = LNS.Settings.CombatLooting
         LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, }, { Subject = 'combatsetting', Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
     end
+
     if debugPrint then
         Logger.loglevel = 'debug'
     elseif not LNS.Settings.ShowInfoMessages then
@@ -6221,19 +6224,23 @@ while not LNS.Terminate do
         Logger.loglevel = 'info'
     end
 
-    if LNS.Settings.DoLoot and Mode ~= 'directed' then LNS.lootMobs() end
+    if LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse and Mode ~= 'directed' then LNS.lootMobs() end
+
     if LNS.LootNow then
         LNS.LootNow = false
         LNS.lootMobs()
     end
+
     if doSell then
         LNS.processItems('Sell')
         doSell = false
     end
+
     if doBuy then
         LNS.processItems('Buy')
         doBuy = false
     end
+
     if doTribute then
         LNS.processItems('Tribute')
         doTribute = false
