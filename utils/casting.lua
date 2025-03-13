@@ -79,7 +79,7 @@ function Casting.LocalBuffCheck(spell, checkPet)
         return false
     end
 
-    if not (checkPet and me.Pet.Buff(spellName) or me.FindBuff("name " .. spellName)()) then
+    if not (checkPet and me.Pet.Buff(spellName) or me.FindBuff("name \"" .. spellName .. "\"")()) then
         Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, let's check for triggers.", spellName, spellID)
         local numEffects = mq.TLO.Spell(spellID).NumEffects()
         local triggerCount = 0
