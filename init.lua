@@ -603,7 +603,8 @@ local function RGInit(...)
     initPctComplete = 50
     initMsg = "Setting up Environment..."
     Core.DoCmd("/squelch /rez accept on")
-    mq.cmdf("/squelch /rez pct %d", Config.GetSetting['RezAcceptPct'])
+    --RezAcceptPct
+    mq.cmdf("/squelch /rez pct %d", Config:GetSetting('RezAcceptPct'))
 
     initPctComplete = 60
     initMsg = "Setting up MQ2DanNet..."
