@@ -8,6 +8,7 @@ local Targeting       = require("utils.targeting")
 local DanNet          = require('lib.dannet.helpers')
 local Logger          = require("utils.logger")
 local Combat          = require("utils.combat")
+local Tables          = require("utils.tables")
 
 local Casting         = { _version = '2.0', _name = "Casting", _author = 'Derple, Algar', }
 Casting.__index       = Casting
@@ -442,6 +443,37 @@ end
 --- Stub seemingly intended for alliance spell use
 --- @return boolean True if an alliance can be formed, false otherwise.
 function Casting.CanAlliance()
+    return true
+end
+
+-- Function to ensure that a corpse we've detected hasn't previously accepted a rez already (stops spam rez on emu)
+function Casting.OkayToRez(corpseId)
+    if Core.OnEMU() then
+        Targeting.SetTarget(corpseId, true)
+        Core.DoCmd("/consider")
+        local maxWait = 1000
+        while not Config.Globals.CorpseConned do
+            mq.doevents()
+            mq.delay(20)
+            maxWait = maxWait - 20
+            if maxWait <= 0 then
+                Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, but did not receive a con message. Aborting.", corpseId or 0)
+                return false
+            end
+        end
+        mq.doevents('AlreadyRezzed')
+        Config.Globals.CorpseConned = false
+        if Tables.TableContains(Config.Globals.RezzedCorpses, corpseId) then
+            Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, and it appears to have been rezzed already. Aborting.", corpseId or 0)
+            return false
+        end
+    end
+
+    if mq.TLO.Spawn(corpseId).Distance3D() > 25 then
+        Targeting.SetTarget(corpseId, true)
+        Core.DoCmd("/corpse")
+    end
+
     return true
 end
 
@@ -1567,19 +1599,6 @@ function Casting.AutoMed()
             Logger.log_debug("Forcing stand - Combat or aggro threshold reached.")
             me.Stand()
             return
-        end
-
-        if Modules:ExecModule("Class", "IsRezing") and mq.TLO.Me.PctMana() > 10 then
-            local group = mq.TLO.Group.Members()
-            for i = 1, group do
-                local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
-                if mq.TLO.SpawnCount(rezSearch)() > 0 then
-                    Config.Globals.InMedState = false
-                    Logger.log_debug("Forcing stand - we should have enough mana to rez and there is a corpse nearby.")
-                    me.Stand()
-                    return
-                end
-            end
         end
 
         if (Config:GetSetting('StandWhenDone') or Config:GetSetting('DoPull')) and forcestand then

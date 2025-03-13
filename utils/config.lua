@@ -39,6 +39,8 @@ Config.Globals.CastResult            = 0
 Config.Globals.BuildType             = mq.TLO.MacroQuest.BuildName()
 Config.Globals.Minimized             = false
 Config.Globals.LastUsedSpell         = "None"
+Config.Globals.CorpseConned          = false
+Config.Globals.RezzedCorpses         = {}
 
 -- Constants
 Config.Constants                     = {}

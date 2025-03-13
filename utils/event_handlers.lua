@@ -10,6 +10,7 @@ local Logger      = require("utils.logger")
 local Movement    = require("utils.movement")
 local ClassLoader = require('utils.classloader')
 
+
 -- [ CANT SEE HANDLERS ] --
 
 mq.event("CantSee", "You cannot see your target.", function()
@@ -459,3 +460,19 @@ mq.event('PersonaEquipLoad', "You successfully loaded your #*# equipment set.", 
     end
 end)
 -- [ END CLASS CHANGE EVENT HANDLERS ] --
+
+-- [ EMU REZ HANDLERS] --
+mq.event('CorpseConned', "This corpse will decay#*#.", function()
+    if Core.OnEMU and Modules:ExecModule("Class", "IsRezing") then
+        Logger.log_verbose("Corpse /con message received for rez checks.")
+        Config.Globals.CorpseConned = true
+    end
+end)
+
+mq.event('AlreadyRezzed', "This corpse has already accepted a resurrection.", function()
+    if Core.OnEMU and Modules:ExecModule("Class", "IsRezing") then
+        Logger.log_verbose("Already rezzed corpse detected, we will ignore this corpse for now.")
+        table.insert(Config.Globals.RezzedCorpses, mq.TLO.Target.ID()) --target.id returns 0 if no target
+    end
+end)
+-- [ END EMU REZ HANDLERS] --
