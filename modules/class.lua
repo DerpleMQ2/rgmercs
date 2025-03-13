@@ -216,7 +216,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    if Config:GetSetting('DoPetCommands') and (Casting.CanUseAA("Companion's Discipline") or (Core.OnLaz() and Casting.CanUseAA("Pet Discipline"))) then
+    if Config:GetSetting('DoPetCommands') and (Casting.CanUseAA("Companion's Discipline") or Casting.CanUseAA("Pet Discipline")) then
         Core.DoCmd("/pet ghold on")
     else
         Core.DoCmd("/pet hold on")
@@ -386,7 +386,7 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if ImGui.CollapsingHeader("Config Options") then
+        if ImGui.CollapsingHeader("Class Options") then
             self.settings, pressed, loadoutChange = Ui.RenderSettings(self.settings,
                 self.ClassConfig.DefaultConfig, self.DefaultCategories)
             if pressed then
@@ -832,8 +832,13 @@ end
 function Module:GiveTime(combat_state)
     if not self.ClassConfig then return end
 
-    -- dead... whoops
-    if mq.TLO.Me.Hovering() then return end
+    local me = mq.TLO.Me
+    if me.Hovering() or me.Stunned() or me.Charmed() or me.Feared() or me.Mezzed() then
+        Logger.log_super_verbose("Class GiveTime aborted, we aren't in control of ourselves. Hovering(%s) Stunned(%s) Charmed(%s) Feared(%s) Mezzed(%s)",
+            Strings.BoolToColorString(me.Hovering()), Strings.BoolToColorString(me.Stunned()), Strings.BoolToColorString(me.Charmed() ~= nil),
+            Strings.BoolToColorString(me.Feared() ~= nil), Strings.BoolToColorString(me.Mezzed() ~= nil))
+        return
+    end
 
     if Config.ShouldPriorityFollow() then
         Logger.log_verbose("\arSkipping Class GiveTime because we are moving and follow is the priority.")
@@ -898,7 +903,7 @@ function Module:GiveTime(combat_state)
                 Logger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(),
                     (xtSpawn.Heading.Degrees() or 0))
-                Core.DoCmd("/stick moveback %s", Config:GetSetting('MovebackDistance'))
+                Core.DoCmd("/stick moveback %d", Config:GetSetting('MovebackDistance'))
                 mq.delay(500)
             end
         end

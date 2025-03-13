@@ -17,20 +17,19 @@ local Icons     = require('mq.ICONS')
 
 require('utils.datatypes')
 
-local Module                       = { _version = '0.1a', _name = "Mez", _author = 'Derple', }
-Module.__index                     = Module
+local Module                   = { _version = '0.1a', _name = "Mez", _author = 'Derple', }
+Module.__index                 = Module
 
-Module.ModuleLoaded                = false
-Module.CombatState                 = "None"
+Module.ModuleLoaded            = false
+Module.CombatState             = "None"
 
-Module.TempSettings                = {}
-Module.TempSettings.BardAEMezTimer = 0
-Module.TempSettings.MezImmune      = {}
-Module.TempSettings.MezTracker     = {}
-Module.FAQ                         = {}
-Module.ClassFAQ                    = {}
+Module.TempSettings            = {}
+Module.TempSettings.MezImmune  = {}
+Module.TempSettings.MezTracker = {}
+Module.FAQ                     = {}
+Module.ClassFAQ                = {}
 
-Module.DefaultConfig               = {
+Module.DefaultConfig           = {
     -- [ MEZ ] --
     ['MezAECount']                             = {
         DisplayName = "Mez AE Count",
@@ -43,20 +42,38 @@ Module.DefaultConfig               = {
         Max = 20,
     },
     ['MezOn']                                  = {
-        DisplayName = "Mez On",
+        DisplayName = "Enable Mezzing",
         Category = "Mez",
         Default = true,
-        Tooltip = "Set to use mez spells.",
+        Tooltip = "Enables mezzing all forms of mezzing as a quick toggle, select particular actions to use below.",
         FAQ = "How do I turn on Mez?",
         Answer = "Toggle [MezOn] to the on position.",
     },
-    ['UseSingleTgtMez']                        = {
-        DisplayName = "Use Single Tgt Mez",
+    ['DoSTMez']                                = {
+        DisplayName = "ST Mez Song/Spells",
         Category = "Mez",
         Default = true,
-        Tooltip = "Set to enable use of single target mez spells/songs. Default: 1.",
+        Tooltip = "Set to enable use of ST mez spells/songs.",
+        RequiresLoadoutChange = true,
         FAQ = "How come my character is only using the AE Mez?",
-        Answer = "To use Single Target mez turn on [UseSingleTgtMez].",
+        Answer = "To use Single Target mez turn on [DoSTMez].",
+    },
+    ['DoAEMez']                                = {
+        DisplayName = "AE Mez Song/Spells",
+        Category = "Mez",
+        Default = true,
+        Tooltip = "Set to enable use of AE mez spells/songs.",
+        RequiresLoadoutChange = true,
+        FAQ = "How come my character is only using the ST Mez?",
+        Answer = "To use AE mez turn on AE Mez in the mez options..",
+    },
+    ['DoAAMez']                                = {
+        DisplayName = "Use Mez AA",
+        Category = "Mez",
+        Default = true,
+        Tooltip = "Use Beam of Slumber(ENC) or Dirge of the Sleepwalker(BRD) when able.",
+        FAQ = "Why am I not using XXX AA to mez?",
+        Answer = "Currently Beam of Slumber and Dirge of the Sleepwalker are supported. Feedback is always welcome!",
     },
     ['MezStartCount']                          = {
         DisplayName = "Mez Start Count",
@@ -139,14 +156,6 @@ Module.DefaultConfig               = {
         FAQ = "I keep trying to mez mobs that are about to die -- how do I fix this?",
         Answer = "Adjust your [MezStopHPs] to the HP% you want to stop trying to mez mobs.",
     },
-    ['UseAEAAMez']                             = {
-        DisplayName = "Use AE AAMez",
-        Category = "Mez",
-        Default = false,
-        Tooltip = "Toggle 0/1 to use Area Effect AA Mez (Default: 0).",
-        FAQ = "I just learned my AA AOE Mez, Can I use that when its avail?",
-        Answer = "Certainly you can use your AA AOE Mez just Toggle [UseAEAAMez] on to use Area Effect AA Mez.",
-    },
     ['SafeAEMez']                              = {
         DisplayName = "AE Mez Safety Check",
         Category = "Mez",
@@ -170,7 +179,7 @@ Module.DefaultConfig               = {
     },
 }
 
-Module.DefaultCategories           = Set.new({})
+Module.DefaultCategories       = Set.new({})
 for k, v in pairs(Module.DefaultConfig) do
     if v.Type ~= "Custom" then
         Module.DefaultCategories:add(v.Category)
@@ -404,8 +413,8 @@ function Module:MezNow(mezId, useAE, useAA)
         -- Only Enchanters have an AA AE Mez but we'll prefer the AE Spell if we can.
         -- TODO CHECK IF ITS READY
         if useAA and Core.MyClassIs("enc") and
-            not Casting.TargetedSpellReady(aeMezSpell.RankName.Name(), mezId, false) and
-            Casting.AAReady("Beam of Slumber") and self.settings.UseAEAAMez then
+            not Casting.SpellReady(aeMezSpell) and
+            Casting.AAReady("Beam of Slumber") and self.settings.DoAAMez then
             -- This is a beam AE so I need ot face the target and  cast.
             Core.DoCmd("/face fast")
             -- Delay to wait till face finishes
@@ -416,7 +425,7 @@ function Module:MezNow(mezId, useAE, useAA)
             Comms.HandleAnnounce(string.format("\aw I JUST CAST \ar AE AA MEZ \ag Beam of Slumber"), Config:GetSetting('MezAnnounceGroup'),
                 Config:GetSetting('MezAnnounce'))
             -- reset timers
-        elseif Casting.TargetedSpellReady(aeMezSpell.RankName.Name(), mezId, false) then
+        elseif Casting.SpellReady(aeMezSpell) then
             -- If we're here we're not doing AA-based AE Mezzing. We're either using our bard song or
             -- ENCH/NEC Spell
             Comms.HandleAnnounce(string.format("\aw I AM \ar AE SPELL MEZZING \ag %s", aeMezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
@@ -426,8 +435,6 @@ function Module:MezNow(mezId, useAE, useAA)
             -- Setting the recast time for the bard ae song after cast.
             -- TODO: Make spell now use songnow for brds
             if Core.MyClassIs("brd") then
-                -- TODO songnow aemez
-                self.TempSettings.BardAEMezTimer = "30s"
                 Casting.UseSong(aeMezSpell.RankName(), mezId, false, 3)
             else
                 Casting.UseSpell(aeMezSpell.RankName(), mezId, false)
@@ -439,9 +446,8 @@ function Module:MezNow(mezId, useAE, useAA)
         -- In case they're mez immune
         mq.doevents()
     else
-        if not mezSpell or not mezSpell() then return end
         Logger.log_debug("Performing Single Target MEZ --> %d", mezId)
-        if useAA and Core.MyClassIs("brd") and Casting.AARank("Dirge of the Sleepwalker") then
+        if useAA and Core.MyClassIs("brd") and Casting.AAReady("Dirge of the Sleepwalker") and self.settings.DoAAMez then
             -- Bard AA Mez is Dirge of the Sleepwalker
             -- Only bards have single target AA Mez
             -- Cast and Return
@@ -465,6 +471,8 @@ function Module:MezNow(mezId, useAE, useAA)
 
             return
         end
+
+        if not mezSpell or not mezSpell() then return end
 
         -- Added this If to avoid rewriting SpellNow to be bard friendly.
         -- we can just invoke The bard SongNow which already accounts for all the weird bard stuff
@@ -495,7 +503,7 @@ function Module:MezNow(mezId, useAE, useAA)
 end
 
 function Module:AEMezCheck()
-    if not Config:GetSetting('UseAEAAMez') then return end
+    if not Config:GetSetting('DoAEMez') then return end
 
     local mezNPCFilter = string.format("npc radius %d targetable los playerstate 4", self.settings.MezRadius)
     local mezNPCPetFilter = string.format("npcpet radius %d targetable los playerstate 4", self.settings.MezRadius)
@@ -691,7 +699,7 @@ function Module:ProcessMezList()
         return
     end
 
-    if not self.settings.UseSingleTgtMez then
+    if not self.settings.DoSTMez then
         Logger.log_debug("\ayProcessMezList(%d) :: Single Target Mezzing is off...")
         return
     end
@@ -701,7 +709,7 @@ function Module:ProcessMezList()
         local spawn = mq.TLO.Spawn(id)
         Logger.log_debug("\ayProcessMezList(%d) :: Checking...", id)
 
-        if not spawn or not spawn() or spawn.Dead() or Targeting.TargetIsType("corpse", spawn) then
+        if not spawn or not spawn() or spawn.Dead() or Targeting.TargetIsType("corpse", spawn) or (spawn.ID() or 0) == Config.Globals.AutoTargetID then
             table.insert(removeList, id)
             Logger.log_debug("\ayProcessMezList(%d) :: Can't find mob removing...", id)
         else
@@ -738,15 +746,13 @@ function Module:ProcessMezList()
 
                         Targeting.SetTarget(id)
 
-                        mq.delay(500, function() return mq.TLO.Target.BuffsPopulated() end)
-
                         local maxWait = 5000
-                        while not Casting.TargetedSpellReady(mezSpell.RankName.Name()) and maxWait > 0 do
+                        while not Casting.SpellReady(mezSpell) and maxWait > 0 do
                             mq.delay(100)
                             maxWait = maxWait - 100
                         end
 
-                        self:MezNow(id, false, false)
+                        self:MezNow(id, false, true)
 
                         if mq.TLO.Target.Mezzed.ID() then
                             -- update the timer.
@@ -769,7 +775,7 @@ function Module:DoMez()
     local mezSpell = self:GetMezSpell()
     local aeMezSpell = self:GetAEMezSpell()
     if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and
-        ((Core.MyClassIs("brd") and self.TempSettings.BardAEMezTimer == 0) or
+        ((Core.MyClassIs("brd") and (mq.TLO.Me.GemTimer(aeMezSpell.RankName()) or -1 == 0)) or
             (mq.TLO.Me.SpellReady(aeMezSpell.RankName.Name())() or Casting.AAReady("Beam of Slumber"))) then
         self:AEMezCheck()
     end

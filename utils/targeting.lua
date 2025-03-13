@@ -51,7 +51,7 @@ function Targeting.ClearTarget()
     Logger.log_debug("Clearing Target")
     if Config:GetSetting('DoAutoTarget') then
         Config.Globals.AutoTargetID = 0
-        Config.Globals.ForceTargetID = 0
+        if Config.Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Config.Globals.ForceTargetID) then Config.Globals.ForceTargetID = 0 end
         if mq.TLO.Stick.Status():lower() == "on" then Core.DoCmd("/stick off") end
         Core.DoCmd("/target clear")
     end
@@ -438,6 +438,71 @@ function Targeting.SetForceBurn(targetId)
     local burnNowSpawn = mq.TLO.Spawn(Targeting.ForceBurnTargetID)
     Logger.log_info("\aoForcing Burn Now: \at%s \aw(\am%d\aw)", burnNowSpawn and (burnNowSpawn() and burnNowSpawn.CleanName() or "None") or "None",
         Targeting.ForceBurnTargetID)
+end
+
+function Targeting.TargetIsMA(target)
+    if not (target and target()) then return false end
+    return target.ID() == Core.GetMainAssistId()
+end
+
+function Targeting.TargetIsACaster(target)
+    if not (target and target()) then return false end
+    return Config.Constants.RGCasters:contains(target.Class.ShortName())
+end
+
+function Targeting.TargetIsAMelee(target)
+    if not (target and target()) then return false end
+    return Config.Constants.RGMelee:contains(target.Class.ShortName())
+end
+
+function Targeting.TargetIsATank(target)
+    if not (target and target()) then return false end
+    return Config.Constants.RGTank:contains(target.Class.ShortName())
+end
+
+function Targeting.TargetIsMyself(target)
+    if not (target and target()) then return false end
+    return target.ID() == mq.TLO.Me.ID()
+end
+
+function Targeting.MobNotLowHP(target)
+    if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
+    if not (target and target()) then return false end
+
+    local threshold = Targeting.IsNamed(target) and Config:GetSetting('NamedLowHP') or Config:GetSetting('MobLowHP')
+    return Targeting.GetTargetPctHPs(target) < threshold
+end
+
+function Targeting.MobHasLowHP(target)
+    if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
+    if not (target and target()) then return false end
+
+    local threshold = Targeting.IsNamed(target) and Config:GetSetting('NamedLowHP') or Config:GetSetting('MobLowHP')
+    return threshold > Targeting.GetTargetPctHPs(target)
+end
+
+function Targeting.BigHealsNeeded(target)
+    return (target.PctHPs() or 999) < Config:GetSetting('BigHealPoint')
+end
+
+function Targeting.MainHealsNeeded(target)
+    return (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint')
+end
+
+function Targeting.LightHealsNeeded(target)
+    return (target.PctHPs() or 999) < Config:GetSetting('LightHealPoint')
+end
+
+function Targeting.GroupHealsNeeded()
+    return (mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() or 0) >= Config:GetSetting('GroupInjureCnt')
+end
+
+function Targeting.BigGroupHealsNeeded()
+    return (mq.TLO.Group.Injured(Config:GetSetting('BigHealPoint'))() or 0) >= Config:GetSetting('GroupInjureCnt')
+end
+
+function Targeting.CheckForAutoTargetID()
+    return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {}
 end
 
 return Targeting

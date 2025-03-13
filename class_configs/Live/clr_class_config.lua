@@ -56,9 +56,6 @@ local _ClassConfig = {
             "Harmony of the Soul",
             "Aegis of Superior Divinity",
         },
-        ['VP2Hammer'] = {
-            "Apothic Dragon Spine Hammer",
-        },
     },
     ['AbilitySets']       = {
         ['WardBuff'] = { -- Level 97+
@@ -687,12 +684,12 @@ local _ClassConfig = {
                 end
             end
 
-            if mq.TLO.Me.CombatState():lower() == "active" or mq.TLO.Me.CombatState():lower() == "resting" then
-                if mq.TLO.SpawnCount("pccorpse radius 80 zradius 30")() > 2 and Casting.SpellReady(mq.TLO.Spell("Larger Reviviscence")) then
+            if mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
+                if mq.TLO.SpawnCount("pccorpse radius 80 zradius 30")() > 2 and Casting.SpellReady(mq.TLO.Spell("Larger Reviviscence"), true) then
                     rezAction = Casting.UseSpell("Larger Reviviscence", corpseId, true, true)
                 elseif Casting.AAReady("Blessing of Resurrection") then
                     rezAction = Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
-                elseif not Casting.CanUseAA("Blessing of Resurrection") and Casting.SpellReady(rezSpell) then
+                elseif not Casting.CanUseAA("Blessing of Resurrection") and Casting.SpellReady(rezSpell, true) then
                     rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
                 end
             end
@@ -726,18 +723,31 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() > 97 end,
-            cond = function(self, target)
-                if not Targeting.GroupedWithTarget(target) then return false end
-                return (mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() or 0) >= Config:GetSetting('GroupInjureCnt')
-            end,
+            cond = function(self, target) return Targeting.GroupHealsNeeded() end,
         },
-        { -- Level 70+
-            name = 'BigHeal(70+)',
+        { -- Level 1-97
+            name = 'GroupHeal(1-97)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() > 69 end,
+            load_cond = function() return mq.TLO.Me.Level() < 98 end,
+            cond = function(self, target) return Targeting.GroupHealsNeeded() end,
+        },
+        { -- Level 77+
+            name = 'BigHeal(77+)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 76 end,
             cond = function(self, target)
-                return (target.PctHPs() or 999) < Config:GetSetting('BigHealPoint')
+                return Targeting.BigHealsNeeded(target)
+            end,
+        },
+        { -- Level 59-76
+            name = 'BigHeal(59-76)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 58 and mq.TLO.Me.Level() < 77 end,
+            cond = function(self, target)
+                return Targeting.BigHealsNeeded(target)
             end,
         },
         { -- Level 101+
@@ -746,112 +756,108 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() > 100 end,
             cond = function(self, target)
-                return (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint')
+                return Targeting.MainHealsNeeded(target)
             end,
         },
-        { -- Level 1-97
-            name = 'GroupHeal(1-97)',
+        { -- Level 80-100
+            name = 'MainHeal(80-100)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 98 end,
+            load_cond = function() return mq.TLO.Me.Level() > 79 and mq.TLO.Me.Level() < 101 end,
             cond = function(self, target)
-                if not Targeting.GroupedWithTarget(target) then return false end
-                return (mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() or 0) >= Config:GetSetting('GroupInjureCnt')
+                return Targeting.MainHealsNeeded(target)
             end,
         },
-        { -- Level 70-100
-            name = 'MainHeal(70-100)',
+        { -- Level 1-70
+            name = 'MainHeal(1-79)',
             state = 1,
             steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() > 69 and mq.TLO.Me.Level() < 101 end,
+            load_cond = function() return mq.TLO.Me.Level() < 80 end,
             cond = function(self, target)
-                return (target.PctHPs() or 999) <= Config:GetSetting('MainHealPoint')
-            end,
-        },
-        { -- Level 1-69, includes BigHeal
-            name = 'Heal(1-69)',
-            state = 1,
-            steps = 1,
-            load_cond = function() return mq.TLO.Me.Level() < 70 end,
-            cond = function(self, target)
-                return (target.PctHPs() or 999) <= Config:GetSetting('MainHealPoint')
+                return Targeting.MainHealsNeeded(target)
             end,
         },
     },
     ['HealRotations']     = {
-        ["GroupHeal(98+)"] = {
+        ['GroupHeal(98+)'] = {
             {
                 name = "DichoHeal",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and
-                        (mq.TLO.Group.Injured(Config:GetSetting('BigHealPoint'))() or 0) >= Config:GetSetting('GroupInjureCnt')
+                    return Targeting.BigGroupHealsNeeded()
                 end,
             },
             {
                 name = "Beacon of Life",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "GroupFastHeal",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GemReady(spell) and Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "Celestial Regeneration",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "GroupHealCure",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GemReady(spell) and Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "Exquisite Benediction",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "GroupElixir",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoHealOverTime') then return false end
-                    return Casting.GemReady(spell) and Casting.GroupBuffCheck(spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },
-        ["BigHeal(70+)"] = {
+        ['GroupHeal(1-97)'] = { --Level 1-97
+            {
+                name = "GroupHealNoCure",
+                type = "Spell",
+            },
+            {
+                name = "GroupElixir",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoHealOverTime') then return false end
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "Celestial Regeneration",
+                type = "AA",
+            },
+            {
+                name = "Exquisite Benediction",
+                type = "AA",
+            },
+        },
+        ['BigHeal(77+)'] = {
             {
                 name = "ClutchHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and Targeting.GetTargetPctHPs() < 35
+                    return Targeting.GetTargetPctHPs() < 35
                 end,
             },
             {
                 name = "Sanctuary",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return (target.ID() or 0) == mq.TLO.Me.ID() and Casting.AAReady(aaName)
+                    return Targeting.TargetIsMyself(target)
                 end,
             },
             {
                 name = "DichoHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and target.ID() == Core.GetMainAssistId
+                    return Targeting.TargetIsMA(target)
                 end,
             },
             {
@@ -859,245 +865,188 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Targeting.GroupedWithTarget(target) then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId
+                    return Targeting.TargetIsMA(target)
                 end,
             },
             {
                 name = "Burst of Life",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID(), true)
-                end,
             },
             {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName, target)
-                    return mq.TLO.FindItemCount(itemName)() ~= 0 and mq.TLO.FindItem(itemName).TimerReady() == 0 and target.ID() == Core.GetMainAssistId
+                    if not Targeting.GroupedWithTarget(target) then return false end
+                    return Targeting.TargetIsMA(target)
                 end,
             },
             {
                 name = "Blessing of Sanctuary",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == (mq.TLO.Target.AggroHolder.ID() and not Core.GetMainAssistId())
+                    return target.ID() == (mq.TLO.Target.AggroHolder.ID() and not Core.GetMainAssistId())
                 end,
             },
             {
                 name = "Veturika's Perseverence",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return (target.ID() or 0) == mq.TLO.Me.ID() and Casting.AAReady(aaName)
+                    return Targeting.TargetIsMyself(target)
                 end,
             },
             { --The stuff above is down, lets make mainhealpoint chonkier. Homework: Wondering if we should be using this more/elsewhere.
                 name = "Channeling of the Divine",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
-                name = "VP2Hammer",
+                name = "Apothic Dragon Spine Hammer",
                 type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
             },
             { --if we hit this we need spells back ASAP
                 name = "Forceful Rejuvenation",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
         },
-        ["MainHeal(101+)"] = {
+        ['BigHeal(59-76)'] = {
             {
-                name = "Focused Celestial Regeneration",
+                name = "Sanctuary",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId
+                    return Targeting.TargetIsMyself(target)
                 end,
             },
-            {
-                name = "HealNuke",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID(), true) and mq.TLO.Me.CombatState():lower() == "combat"
-                end,
-            },
-            {
-                name = "RemedyHeal",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID(), true)
-                end,
-            },
-            {
-                name = "RemedyHeal2",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID(), true)
-                end,
-            },
-            {
-                name = "VP2Hammer",
-                type = "Item",
-                cond = function(self, itemName)
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0
-                end,
-            },
-        },
-        ["GroupHeal(1-97)"] = { --Level 1-97
-            {
-                name = "GroupHealNoCure",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.SpellReady(spell)
-                end,
-            },
-            {
-                name = "GroupElixir",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHealOverTime') then return false end
-                    return Casting.GemReady(spell) and Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-            {
-                name = "Celestial Regeneration",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.AAReady(aaName)
-                end,
-            },
-            {
-                name = "Exquisite Benediction",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
-            },
-        },
-        ["MainHeal(70-100)"] = { --Level 70-100
-            {
-                name = "Focused Celestial Regeneration",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId
-                end,
-            },
-            {
-                name = "HealNuke",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true) and mq.TLO.Me.CombatState():lower() == "combat"
-                end,
-            },
-            {
-                name = "HealNuke2",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true) and mq.TLO.Me.CombatState():lower() == "combat"
-                end,
-            },
-            {
-                name = "RemedyHeal",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
-                end,
-            },
-            {
-                name = "Renewal",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
-                end,
-            },
-            {
-                name = "Renewal2",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
-                end,
-            },
-            {
-                name = "Renewal3",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
-                end,
-            },
-            {
-                name = "SingleElixir",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHealOverTime') then return false end
-                    return Casting.GemReady(spell) and Casting.GroupBuffCheck(spell, target)
-                end,
-            },
-            {
-                name = "HealingLight",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
-                end,
-            },
-        },
-        ["Heal(1-69)"] = { --Level 1-69, includes Main and Big Healing
             {
                 name = "Divine Arbitration",
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Targeting.GroupedWithTarget(target) then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID(), true) and target.ID() == Core.GetMainAssistId and
-                        (target.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
+                    return Targeting.TargetIsMA(target)
                 end,
             },
             {
                 name = "Epic",
                 type = "Item",
                 cond = function(self, itemName, target)
-                    if mq.TLO.FindItemCount(itemName)() == 0 or not Targeting.GroupedWithTarget(target) then return false end
-                    return mq.TLO.FindItem(itemName).TimerReady() == 0 and target.ID() == Core.GetMainAssistId and
-                        (target.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
+                    if not Targeting.GroupedWithTarget(target) then return false end
+                    return Targeting.TargetIsMA(target)
                 end,
+            },
+            {
+                name = "Renewal",
+                type = "Spell",
             },
             {
                 name = "RemedyHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true) and (target.PctHPs() or 999) <= Config:GetSetting('BigHealPoint')
+                    return not Core.GetResolvedActionMapItem("Renewal")
                 end,
+            },
+        },
+        ['MainHeal(101+)'] = {
+            {
+                name = "Focused Celestial Regeneration",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.TargetIsMA(target)
+                end,
+            },
+            {
+                name = "HealNuke",
+                type = "Spell",
+                cond = function(self)
+                    return mq.TLO.Me.CombatState():lower() == "combat"
+                end,
+            },
+            {
+                name = "RemedyHeal",
+                type = "Spell",
+            },
+            {
+                name = "RemedyHeal2",
+                type = "Spell",
+            },
+            {
+                name = "Apothic Dragon Spine Hammer",
+                type = "Item",
+            },
+        },
+        ['MainHeal(80-100)'] = { --Level 80-100
+            {
+                name = "Focused Celestial Regeneration",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.TargetIsMA(target)
+                end,
+            },
+            {
+                name = "HealNuke",
+                type = "Spell",
+                cond = function(self)
+                    return mq.TLO.Me.CombatState():lower() == "combat"
+                end,
+            },
+            {
+                name = "HealNuke2",
+                type = "Spell",
+                cond = function(self)
+                    return mq.TLO.Me.CombatState():lower() == "combat"
+                end,
+            },
+            {
+                name = "RemedyHeal",
+                type = "Spell",
+            },
+            {
+                name = "Renewal",
+                type = "Spell",
+            },
+            {
+                name = "Renewal2",
+                type = "Spell",
+            },
+            {
+                name = "Renewal3",
+                type = "Spell",
             },
             {
                 name = "SingleElixir",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoHealOverTime') then return false end
-                    return Casting.GemReady(spell) and Casting.GroupBuffCheck(spell, target)
+                    return Casting.GroupBuffCheck(spell, target)
+                end,
+            },
+            {
+                name = "HealingLight",
+                type = "Spell",
+            },
+        },
+        ['MainHeal(1-79)'] = { --Level 1-79
+            {
+                name = "SingleElixir",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoHealOverTime') then return false end
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
                 name = "CompleteHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting("DoCompleteHeal") or target.ID() ~= Core.GetMainAssistId() then return false end
-                    return (target.PctHPs() or 999) <= Config:GetSetting('CompleteHealPct') and Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
+                    if not Config:GetSetting("DoCompleteHeal") or not Targeting.TargetIsMA(target) then return false end
+                    return (target.PctHPs() or 999) <= Config:GetSetting('CompleteHealPct')
                 end,
             },
             {
                 name = "HealingLight",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Config:GetSetting("DoCompleteHeal") and target.ID() == Core.GetMainAssistId() then return false end
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true)
+                    return not (Config:GetSetting("DoCompleteHeal") and Targeting.TargetIsMA(target))
                 end,
             },
         },
-
     },
     ['RotationOrder']     = {
         -- Downtime doesn't have state because we run the whole rotation at once.
@@ -1105,7 +1054,7 @@ local _ClassConfig = {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.DoBuffCheck() and Casting.AmIBuffable()
+                return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.OkayToBuff() and Casting.AmIBuffable()
             end,
         },
         { --Spells that should be checked on group members
@@ -1113,16 +1062,16 @@ local _ClassConfig = {
             timer = 60,
             targetId = function(self) return Casting.GetBuffableGroupIDs() end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.DoBuffCheck()
+                return combat_state == "Downtime" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal()) and Casting.OkayToBuff()
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and Casting.BurnCheck() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
         {
@@ -1136,8 +1085,8 @@ local _ClassConfig = {
                     Combat.FindWorstHurtManaXT(Config:GetSetting('ManaRestorePct')), }
             end,
             cond = function(self, combat_state)
-                local downtime = combat_state == "Downtime" and Casting.DoBuffCheck()
-                local combat = combat_state == "Combat" and not Casting.IAmFeigning()
+                local downtime = combat_state == "Downtime" and Casting.OkayToBuff()
+                local combat = combat_state == "Combat"
                 return (downtime or combat) and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
@@ -1149,16 +1098,16 @@ local _ClassConfig = {
             load_cond = function(self) return self:GetResolvedActionMapItem('ReverseDS') or self:GetResolvedActionMapItem('WardBuff') end,
             targetId = function(self) return { Core.GetMainAssistId(), } or {} end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning() and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
         },
     },
@@ -1168,16 +1117,16 @@ local _ClassConfig = {
                 name = "Veturika's Perseverence",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return (target.ID() or 0) == mq.TLO.Me.ID() and Casting.AAReady(aaName) and Casting.AmIBuffable()
+                    return Targeting.TargetIsMyself(target) and Casting.AmIBuffable()
                 end,
             },
             {
                 name = "Quiet Prayer",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if target.ID() == mq.TLO.Me.ID() then return false end
+                    if Targeting.TargetIsMyself(target) then return false end
                     local rezSearch = string.format("pccorpse %s radius 100 zradius 50", target.DisplayName())
-                    return Casting.TargetedAAReady(aaName, target.ID()) and mq.TLO.SpawnCount(rezSearch)() == 0
+                    return mq.TLO.SpawnCount(rezSearch)() == 0
                 end,
             },
         },
@@ -1186,7 +1135,8 @@ local _ClassConfig = {
                 name = "ReverseDS",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.TargetedSpellReady(spell, target.ID(), true) and Casting.GroupBuffCheck(spell, target)
+                    if not Casting.CastReady(spell) then return false end --avoid constant group buff checks
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1194,7 +1144,8 @@ local _ClassConfig = {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell, target)
-                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and Casting.GroupBuffCheck(spell, target)
+                    if not Casting.CastReady(spell) then return false end --avoid constant group buff checks
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
         },
@@ -1202,80 +1153,55 @@ local _ClassConfig = {
             {
                 name = "Celestial Hammer",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Flurry of Life",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Healing Frenzy",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Spire of the Vicar",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Divine Avatar",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Config:GetSetting('DoMelee') and mq.TLO.Me.Combat()
+                cond = function(self)
+                    return Config:GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             { --homework: This is a defensive proc, likely need to add elsewhere
                 name = "Divine Retribution",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Config:GetSetting('DoMelee') and mq.TLO.Me.Combat()
+                cond = function(self)
+                    return Config:GetSetting('DoMelee') and mq.TLO.Me.Combat()
                 end,
             },
             {
                 name = "Battle Frenzy",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Improved Twincast",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
-                cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
-                    return Casting.AAReady(aaName)
+                cond = function(self)
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
             { --homework: Check if this is necessary (does not exceed 50% spell haste cap)
                 name = "Celestial Rapidity",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Exquisite Benediction",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
         },
         ['DPS'] = {
@@ -1285,41 +1211,36 @@ local _ClassConfig = {
                 retries = 0,
                 cond = function(self, spell)
                     if not Config:GetSetting('DoTwinHeal') then return false end
-                    return Casting.GemReady(spell) and Casting.SpellReady(spell) and
-                        not Casting.SongActiveByName("Healing Twincast")
+                    return not Casting.IHaveBuff("Healing Twincast")
                 end,
             },
             {
                 name = "StunTimer6",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoHealStun') or ((spell.Level() or 0) > 85 and Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint')) then return false end
-                    return Casting.GemReady(spell) and Casting.DetSpellCheck(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and
-                        Casting.TargetedSpellReady(spell, target.ID())
+                cond = function(self, spell)
+                    if not Config:GetSetting('DoHealStun') then return false end
+                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "NukeHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint') then return false end
-                    return Casting.GemReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Targeting.LightHealsNeeded(Core.GetMainAssistSpawn()) and Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "NukeHeal2",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint') then return false end
-                    return Casting.GemReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Targeting.LightHealsNeeded(Core.GetMainAssistSpawn()) and Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "NukeHeal3",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Core.GetMainAssistPctHPs() > Config:GetSetting('LightHealPoint') then return false end
-                    return Casting.GemReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Targeting.LightHealsNeeded(Core.GetMainAssistSpawn()) and Casting.HaveManaToNuke()
                 end,
             },
             {
@@ -1336,7 +1257,7 @@ local _ClassConfig = {
                 allowDead = true,
                 cond = function(self, spell)
                     if Casting.CanUseAA("Yaulp") then return false end
-                    return Casting.GemReady(spell) and Casting.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1344,40 +1265,39 @@ local _ClassConfig = {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell)
-                    if (mq.TLO.Me.Level() < 101 and not Casting.DetGOMCheck()) then return false end
-                    return Casting.GemReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
+                    if (mq.TLO.Me.Level() < 101 and not Casting.GOMCheck()) then return false end
+                    return (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
             {
                 name = "LowLevelStun",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, spell)
                     if not Config:GetSetting('DoLLStun') then return false end
-                    return Casting.GemReady(spell) and Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff() and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.DetSpellCheck(spell) and Casting.HaveManaToDebuff()
                 end,
             },
             {
                 name = "Turn Undead",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not Targeting.TargetBodyIs(target, "Undead") then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Casting.DetSpellCheck(mq.TLO.Me.AltAbility(aaName).Spell)
+                    return Targeting.TargetBodyIs(target, "Undead")
                 end,
             },
             {
                 name = "UndeadNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self, aaName, target)
                     if not Config:GetSetting('DoUndeadNuke') or not Targeting.TargetBodyIs(target, "Undead") then return false end
-                    return Casting.GemReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "MagicNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
+                cond = function(self)
                     if not Config:GetSetting('DoMagicNuke') then return false end
-                    return Casting.GemReady(spell) and (Casting.HaveManaToNuke() or Casting.BurnCheck()) and Casting.TargetedSpellReady(spell, target.ID())
+                    return Casting.HaveManaToNuke()
                 end,
             },
         },
@@ -1401,7 +1321,10 @@ local _ClassConfig = {
             {
                 name = "GroupHealProcBuff",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
+                active_cond = function(self, spell)
+                    return
+                        Casting.IHaveBuff(spell)
+                end,
                 cond = function(self, spell)
                     return Casting.SelfBuffCheck(spell)
                 end,
@@ -1437,8 +1360,8 @@ local _ClassConfig = {
                 name = "Divine Guardian",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if target.ID() ~= Core.GetMainAssistId() then return false end
-                    return Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
+                    if not Targeting.TargetIsMA(target) then return false end
+                    return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
             {
@@ -1446,8 +1369,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('AegoSymbol') > 2 then return false end
-                    ---@diagnostic disable-next-line: undefined-field
-                    return Casting.GroupBuffCheck(spell, target, mq.TLO.Me.Spell(spell).ID())
+                    return Casting.GroupBuffCheck(spell, target)
                 end,
             },
             {
@@ -1478,7 +1400,7 @@ local _ClassConfig = {
                 name = "GroupVieBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoVieBuff') or (target.ID() == Core.GetMainAssistId() and self:GetResolvedActionMapItem('ShiningBuff')) then return false end
+                    if not Config:GetSetting('DoVieBuff') or (Targeting.TargetIsMA(target) and self:GetResolvedActionMapItem('ShiningBuff')) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1486,7 +1408,7 @@ local _ClassConfig = {
                 name = "ShiningBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if target.ID() ~= Core.GetMainAssistId() then return false end
+                    if not Targeting.TargetIsMA(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1494,7 +1416,7 @@ local _ClassConfig = {
                 name = "SingleVieBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoVieBuff') or self:GetResolvedActionMapItem('GroupVieBuff') or target.ID() ~= Core.GetMainAssistId() then return false end
+                    if not Config:GetSetting('DoVieBuff') or self:GetResolvedActionMapItem('GroupVieBuff') or not Targeting.TargetIsMA(target) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -1502,8 +1424,8 @@ local _ClassConfig = {
                 name = "DivineBuff",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDivineBuff') or target.ID() ~= Core.GetMainAssistId() then return false end
-                    return Casting.GemReady(spell) and Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
+                    if not Config:GetSetting('DoDivineBuff') or not Targeting.TargetIsMA(target) then return false end
+                    return Casting.CastReady(spell) and Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
                 end,
             },
         },
@@ -1513,17 +1435,16 @@ local _ClassConfig = {
             gem = 1,
             spells = {
                 { name = "RemedyHeal",   cond = function(self) return mq.TLO.Me.Level() >= 96 end, }, -- Level 96+
-                { name = "Renewal", },                                                                -- Level 70-95
-                { name = "HealingLight", },                                                           -- Main Heal, Level 1-69
+                { name = "Renewal",      cond = function(self) return mq.TLO.Me.Level() >= 80 end, }, -- Level 80-95
+                { name = "HealingLight", },                                                           -- Main Heal, Level 1-79
             },
         },
         {
             gem = 2,
             spells = {
                 { name = "RemedyHeal2", },                                                           -- Level 101+
-                { name = "Renewal", },                                                               -- Level 96-100 (When we only have one Remedy)
-                { name = "Renewal2", },                                                              -- Level 75+
-                { name = "HealingLight", },                                                          -- Fallback, Level 70-74
+                { name = "Renewal", },                                                               -- Level 70-79,96-100 (When we only have one Remedy)
+                { name = "Renewal2", },                                                              -- Level 80+
                 { name = "RemedyHeal", },                                                            -- Emergency/fallback, 59-69, these aren't good until 96
                 { name = "LowLevelStun", cond = function(self) return mq.TLO.Me.Level() < 59 end, }, -- Level 2-58
             },
@@ -1533,7 +1454,7 @@ local _ClassConfig = {
             spells = {
                 { name = "HealNuke2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 1 end, }, -- Level 88+
                 { name = "NukeHeal", },                                                                                    -- Level 85+
-                { name = "Renewal3", },                                                                                    -- Level 80-85/87
+                { name = "Renewal2", },                                                                                    -- Level 80-85/87
                 { name = "CompleteHeal",  cond = function(self) return Config:GetSetting('DoCompleteHeal') end, },         -- Level 39
                 { name = "SingleElixir",  cond = function(self) return Config:GetSetting('DoHealOverTime') end, },         -- Level 19-79
                 --fallback
@@ -1553,10 +1474,11 @@ local _ClassConfig = {
             spells = {
                 { name = "NukeHeal2",     cond = function(self) return Config:GetSetting('InterContraChoice') == 3 end, }, -- Level 90+
                 { name = "HealNuke", },                                                                                    -- Level 83+
+                { name = "Renewal3", },
                 { name = "SingleElixir",  cond = function(self) return Config:GetSetting('DoHealOverTime') end, },
-                { name = "HealingLight", },                                                                                -- Fallback, Level 75-82
+                { name = "HealingLight", },                                                                    -- Fallback, Level 80-82
                 --fallback
-                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },             -- 84+
+                { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, }, -- 84+
                 { name = "CureAll",       cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 end, },
                 { name = "CurePoison",    cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },
                 { name = "CureDisease",   cond = function(self) return Config:GetSetting('KeepCureMemmed') == 2 and not Core.GetResolvedActionMapItem('CureAll') end, },

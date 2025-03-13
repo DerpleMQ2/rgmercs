@@ -197,7 +197,7 @@ end
 --- Checks if the character is currently mezzing.
 --- @return boolean True if the character is mezzing, false otherwise.
 function Core.IsMezzing()
-    return Modules:ExecModule("Class", "IsMezzing") and Config:GetSetting('MezOn')
+    return Modules:ExecModule("Class", "IsMezzing")
 end
 
 --- Checks if the character is currently charming.

@@ -242,7 +242,7 @@ return {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.DoBuffCheck() and Casting.AmIBuffable()
+                return combat_state == "Downtime" and Casting.OkayToBuff() and Casting.AmIBuffable()
             end,
         },
         {
@@ -250,37 +250,37 @@ return {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return Targeting.GetXTHaterCount() > 0 and not Casting.IAmFeigning() and
-                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(mq.TLO.Target) and mq.TLO.Me.PctAggro() > 99))
+                return Targeting.GetXTHaterCount() > 0 and
+                    (mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and mq.TLO.Me.PctAggro() > 99))
             end,
         },
         {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and not Casting.IAmFeigning()
+                return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
         {
             name = 'CombatBuff',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
         {
             name = 'DPS',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and not Casting.IAmFeigning()
+                return combat_state == "Combat"
             end,
         },
     },
@@ -290,118 +290,90 @@ return {
                 name = "Frenzied",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "Twisted",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "Executioner",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "EdgeDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
+                    return self.ClassConfig.HelperFunctions.BurnDiscCheck(self)
                 end,
             },
             {
                 name = "Rogue's Fury",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Pinpoint",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "MarkDisc",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Spire of the Rake",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
-            {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                cond = function(self)
-                    if not Config:GetSetting('DoChestClick') then return false end
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and item.TimerReady() == 0 and Casting.SpellStacksOnMe(item.Spell)
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
                 name = "PoisonBlade",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Dicho",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Shadow's Flanking",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Rake's Rampage",
                 type = "AA",
                 cond = function(self, aaName)
-                    local speedDisc = self:GetResolvedActionMapItem("Speed")
                     if not Config:GetSetting("DoAEDamage") then return false end
-                    return Casting.AAReady(aaName) and self.ClassConfig.HelperFunctions.AETargetCheck(self)
+                    return self.ClassConfig.HelperFunctions.AETargetCheck(self)
                 end,
             },
             {
                 name = "Focused Rake's Rampage",
                 type = "AA",
                 cond = function(self, aaName)
-                    if Config:GetSetting("DoAEDamage") then return false end
-                    return Casting.AAReady(aaName)
+                    return not Config:GetSetting("DoAEDamage")
                 end,
             },
             {
                 name = "Phantom",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell)
-                end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    if not Config:GetSetting('DoVetAA') then return false end
-                    return Casting.AAReady(aaName)
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
         },
@@ -411,36 +383,35 @@ return {
                 type = "Item",
                 cond = function(self, itemName)
                     if Config:GetSetting('UseEpic') == 1 then return false end
-                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck())) and mq.TLO.FindItem(itemName)() and
-                        mq.TLO.FindItem(itemName).TimerReady() == 0
+                    return (Config:GetSetting('UseEpic') == 3 or (Config:GetSetting('UseEpic') == 2 and Casting.BurnCheck()))
                 end,
             },
             {
                 name = "Knifeplay",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
                 name = "AspDisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
                 name = "ProcBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return Casting.NoDiscActive()
                 end,
             },
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
@@ -448,23 +419,21 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if not Config:GetSetting('DoAlliance') then return false end
-                    return Casting.TargetedDiscReady(discSpell) and not Casting.TargetHasBuffByName(discSpell.Trigger(1))
+                    return not Casting.TargetHasBuff(discSpell.Trigger(1))
                 end,
             },
             {
                 name = "PoisonName",
                 type = "ClickyItem",
-                cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(Config:GetSetting('PoisonName'))
-                    return poisonItem and poisonItem() and poisonItem.Timer.TotalSeconds() == 0 and
-                        not Casting.BuffActiveByID(poisonItem.Spell.ID())
+                cond = function(self)
+                    return Casting.SelfBuffItemCheck(Config:GetSetting('PoisonName'))
                 end,
             },
             {
                 name = "Assassin's Premonition",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Casting.BurnCheck()
+                    return Casting.BurnCheck()
                 end,
             },
         },
@@ -473,72 +442,49 @@ return {
                 name = "Backstab",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    if not Casting.CanUseAA("Chaotic Stab") and not mq.TLO.Stick.Behind() then return false end
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
+                    return Casting.CanUseAA("Chaotic Stab") or mq.TLO.Stick.Behind()
                 end,
             },
             {
                 name = "Carve",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "SecretBlade",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "FellStrike",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Jugular",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Twisted Shank",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
             {
                 name = "Puncture",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "DaggerThrow",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             { --Check ToT to ensure we are not boosting the hate generation of someone we shouldn't be
                 name = "HateDebuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell) and mq.TLO.Me.TargetOfTarget.ID() == (mq.TLO.Group.MainTank.ID() or Core.GetMainAssistId())
+                    return mq.TLO.Me.TargetOfTarget.ID() == (mq.TLO.Group.MainTank.ID() or Core.GetMainAssistId())
                 end,
             },
             {
                 name = "Intimidation",
                 type = "Ability",
                 cond = function(self, abilityName)
-                    if (mq.TLO.Me.AltAbility("Intimidation").Rank() or 0) < 2 then return false end
-                    return mq.TLO.Me.AbilityReady(abilityName)()
+                    return Casting.AARank("Intimidation") > 1
                 end,
             },
         },
@@ -547,7 +493,7 @@ return {
                 name = "Escape",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Targeting.IHaveAggro(100)
+                    return Targeting.IHaveAggro(100)
                 end,
             },
             {
@@ -555,30 +501,26 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('DoVetAA') then return false end
-                    return mq.TLO.Me.PctHPs() < 35 and Casting.AAReady(aaName)
+                    return mq.TLO.Me.PctHPs() < 35
                 end,
             },
             {
                 name = "Tumble",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Coating",
                 type = "Item",
-                cond = function(self, itemName)
+                cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
-                    local item = mq.TLO.FindItem(itemName)
-                    return item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell) and mq.TLO.Me.PctHPs() < Config:GetSetting('EmergencyStart')
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
                 name = "CADisc",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Targeting.IHaveAggro(100)
+                    return Targeting.IHaveAggro(100)
                 end,
             },
         },
@@ -587,7 +529,7 @@ return {
                 name = "ThiefBuff",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.SelfBuffCheck(discSpell) and Casting.DiscReady(discSpell)
+                    return Casting.SelfBuffCheck(discSpell)
                 end,
             },
             {
@@ -595,14 +537,14 @@ return {
                 type = "Disc",
                 cond = function(self, discSpell)
                     if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
@@ -621,12 +563,10 @@ return {
                 type = "ClickyItem",
                 active_cond = function(self, _)
                     local poisonItem = mq.TLO.FindItem(Config:GetSetting('PoisonName'))
-                    return poisonItem and poisonItem() and Casting.BuffActiveByID(poisonItem.Spell.ID() or 0)
+                    return poisonItem and poisonItem() and Casting.IHaveBuff(poisonItem.Spell.ID() or 0)
                 end,
-                cond = function(self, _)
-                    local poisonItem = mq.TLO.FindItem(Config:GetSetting('PoisonName'))
-                    return mq.TLO.Me.ItemReady(Config:GetSetting('PoisonName'))() and
-                        not Casting.BuffActiveByID(poisonItem.Spell.ID())
+                cond = function(self)
+                    return Casting.SelfBuffItemCheck(Config:GetSetting('PoisonName'))
                 end,
             },
             {

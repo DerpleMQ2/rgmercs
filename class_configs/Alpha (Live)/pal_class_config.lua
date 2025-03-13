@@ -13,7 +13,7 @@ local _ClassConfig = {
     ['ModeChecks']        = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
         IsHealing = function() return true end,
-        IsCuring = function() return Config:GetSetting('DoCures') end,
+        IsCuring = function() return Config:GetSetting('DoCures') and Casting.AAReady("Radiant Cure") end,
         IsRezing = function() return (Config:GetSetting('DoBattleRez') and not Core.IsTanking()) or Targeting.GetXTHaterCount() == 0 end,
         --Disabling tank battle rez is not optional to prevent settings in different areas and to avoid causing more potential deaths
     },
@@ -656,7 +656,7 @@ local _ClassConfig = {
             "Repudiate",
             "Gird",
         },
-        ["Armor"] = {
+        ["ArmorDisc"] = {
             --- Armor Timer 11
             "Armor of Avowal",
             "Armor of the Forthright",
@@ -665,6 +665,7 @@ local _ClassConfig = {
             "Armor of Ardency",
             "Armor of Reverence",
             "Armor of Zeal",
+            "Armor of Courage",
         },
         ["Undeadburn"] = {
             "Holyforge Discipline",
@@ -690,6 +691,9 @@ local _ClassConfig = {
             "Honorific Mantle",
             "Armor of Decorum",
             "Armor of Righteousness",
+            "Guard of Righteousness",
+            "Guard of Humility",
+            "Guard of Piety",
         },
         ["Guardian"] = {
             -- Holy Guardian Discipline
@@ -727,7 +731,7 @@ local _ClassConfig = {
 
             if (Config:GetSetting('DoBattleRez') or mq.TLO.Me.CombatState():lower() ~= "combat") and Casting.AAReady("Gift of Resurrection") then
                 rezAction = Casting.UseAA("Gift of Resurrection", corpseId, true, 1)
-            elseif not Casting.CanUseAA("Gift of Resurrection") and mq.TLO.Me.CombatState():lower() ~= "combat" and Casting.SpellReady(rezSpell) then
+            elseif not Casting.CanUseAA("Gift of Resurrection") and mq.TLO.Me.CombatState():lower() ~= "combat" and Casting.SpellReady(rezSpell, true) then
                 rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
             end
 
@@ -794,7 +798,7 @@ local _ClassConfig = {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
-            cond = function(self, target) return (target.PctHPs() or 999) < Config:GetSetting('MainHealPoint') end,
+            cond = function(self, target) return Targeting.MainHealsNeeded(target) end,
         },
     },
     ['HealRotations']     = {
@@ -802,26 +806,24 @@ local _ClassConfig = {
             {
                 name = "Gift of Life",
                 type = "AA",
-                cond = function(self, aaName, combat_state)
+                cond = function(self, aaName, target)
                     if not mq.TLO.Group() then return false end
-                    return combat_state == "Combat" and Casting.AAReady(aaName) and
-                        mq.TLO.Group.Injured(Config:GetSetting('BigHealPoint'))() > Config:GetSetting('GroupInjureCnt')
+                    return self.CombatState == "Combat" and Targeting.BigGroupHealsNeeded()
                 end,
             },
             {
                 name = "Hand of Piety",
                 type = "AA",
-                cond = function(self, aaName, combat_state)
+                cond = function(self, aaName, target)
                     if not mq.TLO.Group() then return false end
-                    return combat_state == "Combat" and Casting.AAReady(aaName) and
-                        mq.TLO.Group.Injured(Config:GetSetting('BigHealPoint'))() > Config:GetSetting('GroupInjureCnt')
+                    return self.CombatState == "Combat" and Targeting.BigGroupHealsNeeded()
                 end,
             },
             {
                 name = "Lay on Hands",
                 type = "AA",
-                cond = function(self, aaName, combat_state)
-                    return combat_state == "Combat" and Casting.AAReady(aaName) and Targeting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
+                cond = function(self, aaName, target)
+                    return self.CombatState == "Combat" and Targeting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
                 end,
             },
             {
@@ -829,26 +831,15 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not mq.TLO.Group() then return false end
-                    return Casting.SpellLoaded(spell) and Casting.SpellReady(spell) and
-                        mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
+                    return Casting.CastReady(spell) and Targeting.GroupHealsNeeded()
                 end,
             },
-            -- {
-            --     name = "WaveHeal2",
-            --     type = "Spell",
-            --     cond = function(self, spell)
-            --         if not mq.TLO.Group() then return false end
-            --         return Casting.SpellLoaded(spell) and Casting.SpellReady(spell) and
-            --             mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
-            --     end,
-            -- },
             {
                 name = "Aurora",
                 type = "Spell",
                 cond = function(self, spell)
                     if not mq.TLO.Group() then return false end
-                    return Casting.SpellLoaded(spell) and Casting.SpellReady(spell) and
-                        mq.TLO.Group.Injured(Config:GetSetting('GroupHealPoint'))() > Config:GetSetting('GroupInjureCnt')
+                    return Casting.CastReady(spell) and Targeting.GroupHealsNeeded()
                 end,
             },
         },
@@ -857,36 +848,24 @@ local _ClassConfig = {
                 name = "Lay on Hands",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 25
+                    return mq.TLO.Me.PctHPs() < 25
                 end,
             },
             {
                 name = "SelfHeal",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SpellReady(spell)
-                end,
             },
             {
                 name = "Marr's Gift",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Hand of Piety",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Gift of Life",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
         },
     },
@@ -895,7 +874,7 @@ local _ClassConfig = {
             name = 'Downtime',
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.DoBuffCheck() and Casting.AmIBuffable()
+                return combat_state == "Downtime" and Casting.OkayToBuff() and Casting.AmIBuffable()
             end,
         },
         {
@@ -905,7 +884,7 @@ local _ClassConfig = {
                 return Casting.GetBuffableGroupIDs()
             end,
             cond = function(self, combat_state)
-                return combat_state == "Downtime" and Casting.DoBuffCheck()
+                return combat_state == "Downtime" and Casting.OkayToBuff()
             end,
         },
         { --Actions that establish or maintain hatred
@@ -913,7 +892,7 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function(self) return Core.IsTanking() end,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Core.IsTanking() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
             end,
@@ -923,7 +902,7 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
             end,
@@ -933,7 +912,7 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -944,7 +923,7 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function() return Config:GetSetting('UseBandolier') end,
             doFullRotation = true,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -953,7 +932,7 @@ local _ClassConfig = {
             name = 'Defenses',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 --need to look at rotation and decide if it should fire during emergencies. leaning towards no
                 return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
@@ -963,7 +942,7 @@ local _ClassConfig = {
             name = 'Burn',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
             end,
@@ -972,7 +951,7 @@ local _ClassConfig = {
             name = 'CombatWeave',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
             end,
@@ -981,7 +960,7 @@ local _ClassConfig = {
             name = 'Combat',
             state = 1,
             steps = 1,
-            targetId = function(self) return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {} end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
             end,
@@ -993,21 +972,21 @@ local _ClassConfig = {
                 name = "EndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.Level() < 106 and mq.TLO.Me.PctEndurance() < 15
+                    if self:GetResolvedActionMapItem("CombatEndRegen") then return false end
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
-            --If these tables were combined, errors could occur... there is no other good way I can think of to ensure a timer 13 ability that can be used in combat is scribed.
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.Level() > 105 and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "Divine Protector's Unity",
                 type = "AA",
-                active_cond = function(self, aaName) return Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or 0) end,
+                active_cond = function(self, aaName) return Casting.IHaveBuff(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or 0) end,
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName)
                 end,
@@ -1015,7 +994,7 @@ local _ClassConfig = {
             {
                 name = "ArmorSelfBuff",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return self.ClassConfig.HelperFunctions.SingleBuffCheck() and Casting.SelfBuffCheck(spell)
                 end,
@@ -1023,7 +1002,7 @@ local _ClassConfig = {
             {
                 name = "FuryProc",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return self.ClassConfig.HelperFunctions.SingleBuffCheck() and Casting.SelfBuffCheck(spell)
                 end,
@@ -1031,15 +1010,16 @@ local _ClassConfig = {
             {
                 name = "UndeadProc",
                 type = "Spell",
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell) --use this always until we have a Fury proc, and optionally after that, up until the point that Fury is rolled into DPU
                     if (mq.TLO.Me.AltAbility("Divine Protector's Unity").Rank() or 0) > 1 or (Core.GetResolvedActionMapItem("FuryProc") and not Config:GetSetting('DoUndeadProc')) then return false end
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Remorse",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return self.ClassConfig.HelperFunctions.SingleBuffCheck() and Casting.SelfBuffCheck(spell)
                 end,
@@ -1047,7 +1027,7 @@ local _ClassConfig = {
             {
                 name = "Piety",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     return self.ClassConfig.HelperFunctions.SingleBuffCheck() and Casting.SelfBuffCheck(spell)
                 end,
@@ -1058,46 +1038,42 @@ local _ClassConfig = {
             {
                 name = "Preservation",
                 type = "Spell",
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank") and
-                        (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 30
+                    return Casting.SelfBuffCheck(spell) and Core.IsModeActive("Tank") and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 30
                 end,
             },
             {
                 name = "TempHP",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.RankName.ID()) end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     if not Config:GetSetting('DoTempHP') then return false end
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
+                    return spell.RankName.Stacks() and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 45
                 end,
             },
             {
                 name = "Incoming",
                 type = "Spell",
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return Casting.SpellReady(spell) and Casting.SpellStacksOnMe(spell.RankName) and Core.IsModeActive("Tank") and
-                        (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 15
+                    return spell.RankName.Stacks() and Core.IsModeActive("Tank") and (mq.TLO.Me.Buff(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
             {
-                name = "HealWard", --requires a target, using TargetedSpellReady to force a target if needed
+                name = "HealWard",
                 type = "Spell",
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.SpellStacksOnMe(spell.RankName) and Core.IsModeActive("Tank") and
-                        (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
+                    return spell.RankName.Stacks() and Core.IsModeActive("Tank") and (mq.TLO.Me.Song(spell).Duration.TotalSeconds() or 0) < 15
                 end,
             },
-            {
-                name_func = function() return mq.TLO.Me.Inventory("Charm").Name() or "None" end,
+            { --Charm Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Charm").Name() or "CharmClick(Missing)" end,
                 type = "Item",
-                active_cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Charm")
-                    return item() and Casting.TargetHasBuff(item.Spell, mq.TLO.Me)
-                end,
-                cond = function(self)
-                    local item = mq.TLO.Me.Inventory("Charm")
-                    return Config:GetSetting('DoCharmClick') and item() and Casting.SelfBuffCheck(item.Spell) and item.TimerReady() == 0
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoCharmClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
@@ -1105,8 +1081,8 @@ local _ClassConfig = {
                 type = "Item",
                 active_cond = function(self) return mq.TLO.FindItemCount("Ethereal Arrow")() > 100 end,
                 cond = function(self)
-                    return Config:GetSetting('SummonArrows') and mq.TLO.Me.Level() > 89 and mq.TLO.FindItemCount("Ethereal Arrow")() < 101 and
-                        mq.TLO.Me.ItemReady("Huntsman's Ethereal Quiver")()
+                    if not Config:GetSetting('SummonArrows') then return false end
+                    return mq.TLO.FindItemCount("Ethereal Arrow")() < 101
                 end,
             },
         },
@@ -1115,25 +1091,28 @@ local _ClassConfig = {
             {
                 name = "Brells",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
-                cond = function(self, spell) return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell) and Config:GetSetting('DoBrells') end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
+                cond = function(self, spell)
+                    if not Config:GetSetting('DoBrells') then return false end
+                    return Casting.SelfBuffCheck(spell)
+                end,
             },
             {
                 name = "Aego",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     if Config:GetSetting('AegoSymbol') ~= 1 then return false end
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
                 name = "Symbol",
                 type = "Spell",
-                active_cond = function(self, spell) return Casting.BuffActiveByID(spell.ID()) end,
+                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
                     if Config:GetSetting('AegoSymbol') ~= 2 then return false end
-                    return Casting.SpellReady(spell) and Casting.SelfBuffCheck(spell)
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1141,7 +1120,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoSalvation') then return false end
-                    return Casting.AAReady(aaName) and Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
+                    return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
         },
@@ -1154,7 +1133,7 @@ local _ClassConfig = {
                 name = "Armor of Experience",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.PctHPs() < 25 and Config:GetSetting('DoVetAA')
+                    return mq.TLO.Me.PctHPs() < 25 and Config:GetSetting('DoVetAA')
                 end,
             },
             --Note that on named we may already have a mantle/carapace running already, could make this remove other discs, but meh, Shield Flash still a thing.
@@ -1167,7 +1146,7 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and not mq.TLO.Me.ActiveDisc.ID() and Casting.DiscReady(discSpell) and
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and Casting.NoDiscActive() and
                         (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000
                 end,
             },
@@ -1180,7 +1159,7 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline"
+                    return mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline"
                 end,
             },
             --Penitent vs Armor is something I will need to do more homework on
@@ -1188,46 +1167,42 @@ local _ClassConfig = {
                 name = "Penitent",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID() and Core.IsTanking()
-                end,
-            },
-            {
-                name = "Armor of the Inquisitor",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not Casting.SongActiveByName('Group Armor of the Inquisitor')
+                    return Casting.NoDiscActive() and Core.IsTanking()
                 end,
             },
             {
                 name = "Group Armor of The Inquisitor",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and not Casting.SongActiveByName('Armor of the Inquisitor')
+                    return not Casting.IHaveBuff("Armor of the Inquisitor")
                 end,
             },
             {
-                name = mq.TLO.Me.Inventory("Chest").Name(),
+                name = "Armor of the Inquisitor",
+                type = "AA",
+                cond = function(self, aaName)
+                    return not Casting.IHaveBuff("Armor of the Inquisitor")
+                end,
+            },
+            { --Chest Click, name function stops errors in rotation window when slot is empty
+                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
                 type = "Item",
-                cond = function(self)
-                    if not Config:GetSetting('DoChestClick') then return false end
-                    local item = mq.TLO.Me.Inventory("Chest")
-                    return item() and item.TimerReady() == 0 and Casting.SpellStacksOnMe(item.Spell)
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
                 name = "Mantle",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and not mq.TLO.Me.ActiveDisc.ID()
+                    return Casting.NoDiscActive()
                 end,
             },
             --if we made it this far let's reset our dicho/dire and hope for the best!
             {
                 name = "Forceful Rejuvenation",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
         },
         ['HateTools'] = {
@@ -1236,15 +1211,15 @@ local _ClassConfig = {
                 name = "Ageless Enmity",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.GetTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
+                    return Targeting.GetAutoTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
                 end,
             },
             --used to jumpstart hatred on named from the outset and prevent early rips from burns
             {
                 name = "Affirmation",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell) and Targeting.IsNamed(mq.TLO.Target)
+                cond = function(self, discSpell, target)
+                    return Targeting.IsNamed(target)
                 end,
             },
             {
@@ -1252,7 +1227,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('AETauntAA') then return false end
-                    return Casting.TargetedAAReady(aaName, target.ID()) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
@@ -1260,7 +1235,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('AETauntAA') then return false end
-                    return Casting.AAReady(aaName) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
@@ -1268,30 +1243,29 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     if not Config:GetSetting('AETauntAA') then return false end
-                    return Casting.AAReady(aaName) and self.ClassConfig.HelperFunctions.AETauntCheck(true)
+                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {
                 name = "Projection of Piety",
                 type = "AA",
-                cond = function(self, aaName)
+                cond = function(self, aaName, target)
                     ---@diagnostic disable-next-line: undefined-field
-                    return Casting.AAReady(aaName) and Targeting.IsNamed(mq.TLO.Target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
+                    return Targeting.IsNamed(target) and (mq.TLO.Target.SecondaryPctAggro() or 0) > 80
                 end,
             },
             {
                 name = "Taunt",
                 type = "Ability",
-                cond = function(self, abilityName)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and Targeting.GetTargetID() > 0 and
-                        Targeting.GetTargetDistance() < 30
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
                 end,
             },
             {
                 name = "ForHonor",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
         },
@@ -1299,46 +1273,30 @@ local _ClassConfig = {
             {
                 name = "Valorous Rage",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "RighteousStrike",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell)
-                end,
             },
             {
                 name = "Intensity of the Resolute",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Casting.AAReady(aaName) and Config:GetSetting('DoVetAA')
+                    return Config:GetSetting('DoVetAA')
                 end,
             },
             {
                 name = "Spire of Chivalry",
                 type = "AA",
-                cond = function(self, aaName)
-                    return
-                        Casting.AAReady(aaName)
-                end,
             },
             {
                 name = "Thunder of Karana",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Casting.AAReady(aaName)
-                end,
             },
             --add this back in with tanking Check
             -- {
             -- name = "Inquisitor's Judgment",
             -- type = "AA",
-            -- cond = function(self, aaName)
-            -- return Casting.AAReady(aaName)
-            -- end,
             -- },
         },
         ['Defenses'] = {
@@ -1346,41 +1304,40 @@ local _ClassConfig = {
                 name = "MeleeMit",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not (discSpell.Level() < 108 and mq.TLO.Me.ActiveDisc.ID())
+                    if not Core.IsTanking() then return false end
+                    return not ((discSpell.Level() or 0) < 108 and not Casting.NoDiscActive)
                 end,
             },
             {
-                name = "Armor",
+                name = "ArmorDisc",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and
-                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true)) and
-                        mq.TLO.Me.Level() > 87 --shares timer with mantle before 88
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
                 name = "Mantle",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and
-                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
                 name = "Guardian",
                 type = "Disc",
-                cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and Core.IsTanking() and not mq.TLO.Me.ActiveDisc.ID() and
-                        (Targeting.IsNamed(mq.TLO.Target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
                 name = "Coating",
                 type = "Item",
-                cond = function(self, itemName)
+                cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
-                    local item = mq.TLO.FindItem(itemName)
-                    return item() and item.TimerReady() == 0 and Casting.SelfBuffCheck(item.Spell)
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
             {
@@ -1388,7 +1345,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     ---@diagnostic disable-next-line: undefined-field
-                    return mq.TLO.Me.TotalCounters() > 0 and Casting.AAReady(aaName)
+                    return mq.TLO.Me.TotalCounters() > 0
                 end,
             },
         },
@@ -1399,32 +1356,28 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoDicho') then return false end
                     local myHP = mq.TLO.Me.PctHPs()
-                    return Casting.TargetedSpellReady(spell, target.ID()) and
-                        (myHP <= Config:GetSetting('EmergencyStart') or ((Casting.DotHaveManaToNuke() or Casting.BurnCheck()) and myHP <= Config:GetSetting('StartDicho')))
+                    return (myHP <= Config:GetSetting('EmergencyStart') or (Casting.HaveManaToNuke() and myHP <= Config:GetSetting('StartDicho')))
                 end,
             },
             {
                 name = "BurstHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID(), true) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('StartBurstToT')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('StartBurstToT')
                 end,
             },
             {
                 name = "TotLightHeal",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID(), true) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
             {
                 name = "Lowaggronuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and
-                        (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
+                    return (mq.TLO.Me.TargetOfTarget.PctHPs() or 0) < Config:GetSetting('TotHealPoint')
                 end,
             },
         },
@@ -1433,37 +1386,33 @@ local _ClassConfig = {
                 name = "ReflexStrike",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.TargetedDiscReady(discSpell) and (mq.TLO.Group.Injured(80)() or 0) > 2
+                    return Targeting.GroupHealsNeeded()
                 end,
             },
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 cond = function(self, discSpell)
-                    return Casting.DiscReady(discSpell) and mq.TLO.Me.PctEndurance() < 15
+                    return mq.TLO.Me.PctEndurance() < 15
                 end,
             },
             {
                 name = "Vanquish the Fallen",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and Targeting.TargetBodyIs(target, "Undead")
+                    return Targeting.TargetBodyIs(target, "Undead")
                 end,
             },
             {
                 name = "Bash",
                 type = "Ability",
                 cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target) and
-                        (Core.ShieldEquipped() or Casting.CanUseAA("Improved Bash"))
+                    return Core.ShieldEquipped() or Casting.CanUseAA("Improved Bash")
                 end,
             },
             {
                 name = "Slam",
                 type = "Ability",
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.AbilityReady(abilityName)() and Casting.AbilityRangeCheck(target)
-                end,
             },
         },
         ['Combat'] = {
@@ -1471,15 +1420,14 @@ local _ClassConfig = {
                 name = "StunTimer4",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
+                    return Casting.DetSpellCheck(spell)
                 end,
             },
             {
                 name = "HealStun",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell) and Casting.SpellStacksOnMe(spell.RankName) and
-                        (mq.TLO.Me.Song(spell.Trigger(1).Name).Duration.TotalSeconds() or 0) < 12
+                    return Casting.DetSpellCheck(spell) and spell.RankName.Stacks() and (mq.TLO.Me.Song(spell.Trigger(1).Name).Duration.TotalSeconds() or 0) < 12
                 end,
             },
             {
@@ -1490,83 +1438,22 @@ local _ClassConfig = {
             {
                 name = "CrushTimer6",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
             {
                 name = "HealNuke",
                 type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.TargetedSpellReady(spell, target.ID())
-                end,
             },
             {
                 name = "Disruptive Persecution",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID()) and (Casting.DotHaveManaToNuke() or Casting.BurnCheck())
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "Force of Disruption",
                 type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.TargetedAAReady(aaName, target.ID())
-                end,
             },
-            --below stuff thrown in, not vetted
-            -- {
-            -- name = "Healtaunt",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID())
-            -- end,
-            -- },
-            -- {
-            --     name = "Force of Disruption",
-            --     type = "AA",
-            --     cond = function(self, aaName)
-            --         return (mq.TLO.Me.AltAbility(aaName).Rank() or 0) > 7 and not Casting.BuffActiveByName("Knight's Yaulp") and
-            --             Targeting.GetTargetDistance() < 30 and Casting.AAReady(aaName)
-            --     end,
-            -- },
-            -- {
-            -- name = "StunTimer5",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID()) and Casting.DetSpellCheck(spell)
-            -- end,
-            -- },
-            -- {
-            --     name = "LessonStun",
-            --     type = "Spell",
-            --     cond = function(self, spell)
-            --         return Casting.SpellReady(spell) and Casting.DetSpellCheck(spell)
-            --     end,
-            -- },
-            -- {
-            -- name = "DebuffNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID()) and
-            -- ((Targeting.TargetBodyIs(mq.TLO.Target, "Undead") or mq.TLO.Me.Level() >= 96) and not Casting.TargetHasBuff(spell) and Config:GetSetting('DoNuke'))
-            -- end,
-            -- },
-            -- {
-            -- name = "AntiUndeadNuke",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID()) and Targeting.TargetBodyIs(mq.TLO.Target, "Undead")
-            -- end,
-            -- },
-            -- {
-            -- name = "Reverseds",
-            -- type = "Spell",
-            -- cond = function(self, spell)
-            -- return Casting.TargetedSpellReady(spell, target.ID()) and Casting.TargetHasBuff(spell) and Config:GetSetting('DoReverseDS')
-            -- end,
-            -- },
         },
         ['Weapon Management'] = {
             {
@@ -1575,9 +1462,9 @@ local _ClassConfig = {
                 active_cond = function(self, target)
                     return mq.TLO.Me.Bandolier("Shield").Active()
                 end,
-                cond = function(self)
+                cond = function(self, target)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(mq.TLO.Target) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(target) and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -1587,10 +1474,10 @@ local _ClassConfig = {
                 active_cond = function(self, target)
                     return mq.TLO.Me.Bandolier("2Hand").Active()
                 end,
-                cond = function(self)
+                cond = function(self, target)
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
                     return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and
-                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Targeting.IsNamed(mq.TLO.Target) and Config:GetSetting('NamedShieldLock'))
+                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Targeting.IsNamed(target) and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("2Hand") end,
             },

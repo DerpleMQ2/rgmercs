@@ -633,7 +633,7 @@ function Module:DoClickies()
             if item then
                 if item.Timer.TotalSeconds() == 0 then
                     if (item.RequiredLevel() or 0) <= mq.TLO.Me.Level() then
-                        if not Casting.BuffActiveByID(item.Clicky.Spell.RankName.ID() or 0) and Casting.SpellStacksOnMe(item.Clicky.Spell.RankName) then
+                        if Casting.SelfBuffItemCheck(item) then
                             Logger.log_verbose("\aaCasting Item: \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
                             Casting.UseItem(item.Name(), mq.TLO.Me.ID())
                         else
@@ -721,7 +721,7 @@ function Module:GiveTime(combat_state)
         self:DoCombatCampCheck()
     end
 
-    if Casting.DoBuffCheck() and not Config:GetSetting('PriorityHealing') then
+    if Casting.OkayToBuff() and not Config:GetSetting('PriorityHealing') then
         if not mq.TLO.Me.Fellowship.CampfireZone() and mq.TLO.Zone.ID() == self.TempSettings.CampZoneId and self.settings.MaintainCampfire > 1 then
             --Logger.log_debug("Doing campfire maintainance")
             self:Campfire()

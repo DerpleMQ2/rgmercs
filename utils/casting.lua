@@ -9,7 +9,7 @@ local DanNet          = require('lib.dannet.helpers')
 local Logger          = require("utils.logger")
 local Combat          = require("utils.combat")
 
-local Casting         = { _version = '1.0', _name = "Casting", _author = 'Derple', }
+local Casting         = { _version = '2.0', _name = "Casting", _author = 'Derple, Algar', }
 Casting.__index       = Casting
 Casting.Memorizing    = false
 
@@ -17,365 +17,333 @@ Casting.Memorizing    = false
 Casting.LastBurnCheck = false
 Casting.UseGem        = mq.TLO.Me.NumGems()
 
---- Checks if the target has a specific buff.
---- @param spell MQSpell The name of the spell to check for.
---- @param buffTarget MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
---- @return boolean Returns true if the target has the buff, false otherwise.
-function Casting.TargetHasBuff(spell, buffTarget)
-    --- @type target|spawn|character|fun():string|nil
-    local target = mq.TLO.Target
+--- Simple (no trigger or stacking checks) check to see if the player has a buff. Can pass a spell(userdata), ID, or effect name(string).
+--- @param effect MQSpell|string|integer The effect to check for.
+--- @return boolean Returns true if the player has the buff, false otherwise.
+function Casting.IHaveBuff(effect)
+    if not effect then return false end
+    if type(effect) ~= "string" then effect = tostring(effect) end
+    local spell = mq.TLO.Spell(effect)() or effect
 
-    if buffTarget ~= nil and buffTarget.ID() > 0 then
-        target = mq.TLO.Me.ID() == buffTarget.ID() and mq.TLO.Me or buffTarget
+    Logger.log_verbose("IHaveBuff - Searching Buff and Song windows for %s.", effect)
+
+    if mq.TLO.Me.Buff(spell)() then
+        Logger.log_verbose("IHaveBuff - %s found in Buff window!", effect)
+        return true
     end
-
-    if not spell or not spell() then
-        Logger.log_verbose("TargetHasBuff(): spell is invalid!")
-        return false
+    if mq.TLO.Me.Song(spell)() then
+        Logger.log_verbose("IHaveBuff - %s found in Song window!", effect)
+        return true
     end
-    if not target or not target() then
-        Logger.log_verbose("TargetHasBuff(): target is invalid!")
-        return false
-    end
-
-    -- If target is me then don't eat the cost of checking against DanNet.
-    if mq.TLO.Me.ID() ~= target.ID() then
-        local peerCheck = Casting.PeerHasBuff(spell, target.CleanName())
-        if peerCheck ~= nil then return peerCheck end
-    end
-
-    if mq.TLO.Me.ID() ~= target.ID() then
-        Targeting.SetTarget(target.ID())
-    end
-
-    Logger.log_verbose("TargetHasBuff(): Target Buffs Populated: %s", Strings.BoolToColorString(target.BuffsPopulated()))
-
-    local numEffects = spell.NumEffects()
-
-    local ret = (target.FindBuff("id " .. tostring(spell.ID())).ID() or 0) > 0
-    Logger.log_verbose("TargetHasBuff() Searching for spell(%s) ID: %d on %s :: %s", spell.Name(), spell.ID(), target.DisplayName(), Strings.BoolToColorString(ret))
-    if ret then return true end
-
-    ret = (target.FindBuff("id " .. tostring(spell.RankName.ID())).ID() or 0) > 0
-    Logger.log_verbose("TargetHasBuff() Searching for rank spell(%s) ID: %d on %s :: %s", spell.RankName.Name(), spell.RankName.ID(), target.DisplayName(),
-        Strings.BoolToColorString(ret))
-    if ret then return true end
-
-    for i = 1, numEffects do
-        local triggerSpell = spell.Trigger(i)
-        if triggerSpell and triggerSpell() then
-            ret = (target.FindBuff("id " .. tostring(triggerSpell.ID())).ID() or 0) > 0 --
-            Logger.log_verbose("TargetHasBuff() Searching for trigger spell ID: %d on %s :: %s", triggerSpell.ID(), target.DisplayName(), Strings.BoolToColorString(ret))
-            if ret then return true end
-
-            ret = (target.FindBuff("id " .. tostring(triggerSpell.RankName.ID())).ID() or 0) > 0
-            Logger.log_verbose("TargetHasBuff() Searching for trigger rank spell ID: %d on %s :: %s", triggerSpell.ID(), target.DisplayName(),
-                Strings.BoolToColorString(ret))
-            if ret then return true end
-        end
-    end
-
-    Logger.log_verbose("TargetHasBuff() Failed to find spell: %s on %s", spell.Name(), target.DisplayName())
     return false
 end
 
---- @param buffName string The name of the buff to check for.
---- @param buffTarget MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
---- @return boolean True if the target has the buff, false otherwise.
-function Casting.TargetHasBuffByName(buffName, buffTarget)
-    if buffName == nil then return false end
-    return Casting.TargetHasBuff(mq.TLO.Spell(buffName), buffTarget)
+--- Simple (no trigger or stacking checks) check to see if the target has a buff. Can pass a spell(userdata), ID, or effect name(string).
+--- @param effect MQSpell|string|integer The effect to check for.
+--- @param target MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @param bAllowTargetChange boolean|nil Allows the function to set the target to check buffs if true.
+--- @return boolean Returns true if the target has the buff, false otherwise.
+function Casting.TargetHasBuff(effect, target, bAllowTargetChange)
+    if not (target and target()) then return false end
+    if not effect then return false end
+    if type(effect) ~= "string" then effect = tostring(effect) end
+    local spell = mq.TLO.Spell(effect)() or effect
+
+    if target.ID() ~= mq.TLO.Target.ID() then
+        if not bAllowTargetChange then
+            Logger.log_verbose("TargetHasBuff: Passed target(ID:%d) isn't our current target(ID:%d), cannot check spell stacking, aborting.", target.ID(), mq.TLO.Target.ID())
+            return false
+        else
+            Logger.log_verbose("TargetHasBuff: Passed target(ID:%d) isn't our current target(ID:%d), setting target to populate buffs.", target.ID(), mq.TLO.Target.ID())
+            Targeting.SetTarget(target.ID())
+        end
+    end
+
+    return mq.TLO.Target.Buff(spell)() ~= nil
 end
 
---- Checks if a spell stacks on the target.
+--- Complex buff check that will check for presence and stacking of the buff (and any triggers) on the PC or the PC's pet.
 --- @param spell MQSpell The name of the spell to check.
---- @return boolean True if the spell stacks on the target, false otherwise.
-function Casting.SpellStacksOnTarget(spell)
-    local target = mq.TLO.Target
+--- @param checkPet boolean|nil Use the pet as the checked entity if true, use the PC otherwise.
+--- @return boolean True if the PC checking should cast the buff, false otherwise.
+function Casting.LocalBuffCheck(spell, checkPet)
+    if not (spell and spell()) then return false end
+    if checkPet and mq.TLO.Me.Pet.ID() == 0 then return false end
 
-    if not spell or not spell() then return false end
-    if not target or not target() then return false end
+    local me = mq.TLO.Me
+    local spellName = spell.RankName.Name()
+    local spellID = spell.RankName.ID()
 
-    local numEffects = spell.NumEffects()
-
-    if not spell.StacksTarget() then return false end
-
-    for i = 1, numEffects do
-        local triggerSpell = spell.Trigger(i)
-        --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
-        if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
-            if not triggerSpell.StacksTarget() then return false end
-        end
+    if (checkPet and me.BlockedPetBuff(spellName)() or me.BlockedBuff(spellName)()) then
+        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) is on the blocked spell list, aborting check.", spellName, spellID)
+        return false
     end
 
-    return true
-end
-
---- Checks if a given spell stacks on the player.
---- @param spell MQSpell The name of the spell to check.
---- @return boolean True if the spell stacks on the player, false otherwise.
-function Casting.SpellStacksOnMe(spell)
-    if not spell or not spell() then return false end
-
-    local numEffects = spell.NumEffects()
-
-    if not spell.Stacks() then return false end
-
-    for i = 1, numEffects do
-        local triggerSpell = spell.Trigger(i)
-        --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
-        if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
-            if not triggerSpell.Stacks() then return false end
-        end
-    end
-
-    return true
-end
-
---- Searches for a specific buff on a peer using DanNet.
----
---- @param peerName string The name of the peer to search for the buff.
---- @param IDs table A table containing the IDs of the buffs to search for.
---- @return boolean Returns true if the buff is found, false otherwise.
-function Casting.DanNetFindBuff(peerName, IDs)
-    local text = ""
-    for _, id in ipairs(IDs) do
-        if text ~= "" then
-            text = text .. " or "
-        end
-        text = text .. "ID " .. tostring(id)
-    end
-
-    local buffSearch = string.format("Me.FindBuff[%s].ID", text)
-    Logger.log_verbose("DanNetFindBuff(%s, %s) : %s", text, peerName, buffSearch)
-    return (DanNet.query(peerName, buffSearch, 1000) or "null"):lower() ~= "null"
-end
-
---- Checks if a peer has a specific buff.
---- @param spell MQSpell The name of the spell (buff) to check for.
---- @param peerName string The name of the peer to check.
---- @return boolean|nil True if the peer has the buff, false otherwise.
-function Casting.PeerHasBuff(spell, peerName)
-    peerName = (peerName or ""):lower()
-    local peerFound = (mq.TLO.DanNet.Peers() or ""):lower():find(peerName:lower() .. "|") ~= nil
-
-    if not peerFound then
-        Logger.log_verbose("\ayPeerHasBuff() \ayPeer '%s' not found falling back.", peerName)
-        return nil
-    end
-
-    if not spell or not spell() then return false end
-
-    local numEffects = spell.NumEffects()
-    local effectsToCheck = { spell.ID(), spell.RankName.ID(), }
-
-    -- lots of items like the SK epic fire the same effect 11+ times and we keep checking so this is
-    -- meant to cache things we've already checked to reduce expensive calls to peer checks.
-    local checkedEffects = {}
-
-    for i = 1, numEffects do
-        local triggerSpell = spell.Trigger(i)
-        --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0
-        if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 and not checkedEffects[triggerSpell.ID()] then
-            table.insert(effectsToCheck, triggerSpell.ID())
-            if triggerSpell.ID() ~= triggerSpell.RankName.ID() then
-                table.insert(effectsToCheck, triggerSpell.RankName.ID())
+    if not (checkPet and me.Pet.Buff(spellName) or me.FindBuff("name " .. spellName)()) then
+        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, let's check for triggers.", spellName, spellID)
+        local numEffects = mq.TLO.Spell(spellID).NumEffects()
+        local triggerCount = 0
+        local triggerFound = 0
+        for i = 1, numEffects do
+            local triggerSpell = mq.TLO.Spell(spellID).Trigger(i)
+            --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
+            if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
+                local triggerName = triggerSpell.Name()
+                local triggerID = triggerSpell.ID()
+                if not (checkPet and me.Pet.Buff(triggerName) or me.FindBuff("name " .. triggerName)()) then
+                    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) not found, checking stacking.", triggerName, triggerID)
+                    if triggerSpell.Stacks() then
+                        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) seems to stack, let's do it!", triggerName, triggerID)
+                        return true
+                    else
+                        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) does not stack, moving on.", triggerName, triggerID)
+                    end
+                else
+                    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) found, moving on.", triggerName, triggerID)
+                    triggerFound = triggerFound + 1
+                end
+                triggerCount = triggerCount + 1
+            else
+                Logger.log_verbose("LocalBuffCheck: We've checked every trigger for %s(ID:%d).", spellName, spellID)
+                break
             end
+        end
+        if triggerCount > 0 and triggerFound >= triggerCount then
+            Logger.log_verbose("LocalBuffCheck: Total triggers for %s(ID:%d): %d. Triggers found: %d. Ending Check.", spellName, spellID, triggerCount, triggerFound)
+            return false
+        end
+    else
+        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) found, ending check.", spellName, spellID)
+        return false
+    end
+    local spellStacks = checkPet and mq.TLO.Spell(spellID).StacksPet() or mq.TLO.Spell(spellID).Stacks()
+    if spellStacks then
+        Logger.log_verbose("LocalBuffCheck: %s(ID:%d) seems to stack, let's do it!", spellName, spellID)
+        return true
+    end
+    Logger.log_verbose("LocalBuffCheck: %s(ID:%d) does not seem to stack, ending check.", spellName, spellID)
+    return false
+end
 
-            checkedEffects[triggerSpell.ID()] = true
+--- "xBuffxCheck"s are helper functions that wrap buff spells and checks in an easy-to-understand system for simpler class configs
+
+function Casting.SelfBuffCheck(spell)
+    if not (spell and spell()) then return false end
+    return Casting.LocalBuffCheck(spell, false)
+end
+
+function Casting.SelfBuffAACheck(aaName)
+    if not Casting.CanUseAA(aaName) then return false end
+    return Casting.LocalBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell)
+end
+
+function Casting.SelfBuffItemCheck(itemName)
+    local clickySpell = Casting.GetClickySpell(itemName)
+    if not (clickySpell and clickySpell()) then return false end
+    return Casting.LocalBuffCheck(clickySpell)
+end
+
+function Casting.PetBuffCheck(spell)
+    if not (spell and spell()) then return false end
+    return Casting.LocalBuffCheck(spell, true)
+end
+
+function Casting.PetBuffAACheck(aaName)
+    if not Casting.CanUseAA(aaName) then return false end
+    return Casting.LocalBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, true)
+end
+
+function Casting.PetBuffItemCheck(itemName)
+    local clickySpell = Casting.GetClickySpell(itemName)
+    if not (clickySpell and clickySpell()) then return false end
+    return Casting.LocalBuffCheck(clickySpell, true)
+end
+
+--- Helper that will perform complex checks for presence and stacking of buffs (and any triggers) using the best (determined) method available.
+--- @param spell MQSpell The name of the spell to check.
+--- @param target MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @return boolean True if the PC checking should cast the buff, false otherwise.
+function Casting.GroupBuffCheck(spell, target)
+    if not (spell and spell()) then return false end
+    if not (target and target()) then return false end
+
+    local ret = false
+
+    if target.ID() == mq.TLO.Me.ID() then
+        Logger.log_verbose("GroupBuffCheck: Target is myself, using LocalBuffCheck(self).")
+        ret = Casting.LocalBuffCheck(spell)
+    else
+        --Let's check spell range in case our group/OA starts moving while we are trying to buff (common in hunt/farm modes).
+        local spellRange = spell.MyRange() > 0 and spell.MyRange() or (spell.AERange() > 0 and spell.AERange() or 250)
+        if Targeting.GetTargetDistance(target) > spellRange then
+            Logger.log_verbose("GroupBuffCheck: Aborting check because %s(Range:%d) is out of range(%d) for %s.", target.CleanName(), Targeting.GetTargetDistance(target), spellRange,
+                spell.RankName.Name())
+            return false
+        end
+        if mq.TLO.DanNet(mq.TLO.Spawn(target.ID()).CleanName())() then
+            Logger.log_verbose("GroupBuffCheck: Target is a DanNet peer, using PeerBuffCheck.")
+            ret = Casting.PeerBuffCheck(spell, target)
+        else
+            Logger.log_verbose("GroupBuffCheck: Target is not myself or a DanNet peer, using TargetSpellCheck.")
+            local allowTargetChange = not mq.TLO.Me.CombatState():lower() == "combat"
+            ret = Casting.TargetBuffCheck(spell, target, allowTargetChange)
         end
     end
-
-    local ret = Casting.DanNetFindBuff(peerName, effectsToCheck)
-    Logger.log_verbose("\ayPeerHasBuff() \atSearching for trigger rank spell ID Count: %d on %s :: %s", #effectsToCheck, peerName, Strings.BoolToColorString(ret))
-    Logger.log_verbose("\ayPeerHasBuff() \awFinding spell: %s on %s :: %s", spell.Name(), peerName, Strings.BoolToColorString(ret))
     return ret
 end
 
---- Checks if we should be casting buffs.
---- This function checks if we should be casting buffs - Enabled by user and not moving or trying to move or follow..
----
---- @return boolean
-function Casting.DoBuffCheck()
-    if not Config:GetSetting('DoBuffs') then return false end
-
-    if mq.TLO.Me.Invis() or Config:GetSetting('BuffWaitMoveTimer') > Config:GetTimeSinceLastMove() then return false end
-
-    if Targeting.GetXTHaterCount() > 0 or Config.Globals.AutoTargetID > 0 then return false end
-
-    if (mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active()) and not Core.MyClassIs("brd") then return false end
-
-    if Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
-
-    return true
+function Casting.GroupBuffAACheck(aaName, target)
+    if not Casting.CanUseAA(aaName) then return false end
+    return Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
 end
 
---- Performs a check on the pet status.
---- This function checks various conditions related to the pet.
---- @return boolean Returns true if the pet check is successful, false otherwise.
-function Casting.DoPetCheck()
-    if not Config:GetSetting('DoPet') then return false end
-
-    if mq.TLO.Me.Invis() or Config:GetSetting('BuffWaitMoveTimer') > Config:GetTimeSinceLastMove() then return false end
-
-    if Targeting.GetXTHaterCount() > 0 or Config.Globals.AutoTargetID > 0 then return false end
-
-    if mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active() then return false end
-
-    if Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10 then return false end
-
-    return true
-end
-
---- Checks if a group buff can be cast on the target.
+--- Complex buff check that will check for presence and stacking of the buff (and any triggers) on a target.
 --- @param spell MQSpell The name of the spell to check.
---- @param target MQSpawn The name of the target to receive the buff.
---- @return boolean Returns true if the buff can be cast, false otherwise.
-function Casting.GroupBuffCheck(spell, target, spellID)
-    if not spell or not spell() then return false end
-    if not target or not target() then return false end
-    if not spellID then spellID = spell.RankName.ID() end
+--- @param target MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @param bAllowTargetChange boolean|nil Allows the function to set the target to check buffs if true.
+--- @return boolean True if the PC checking should cast the buff, false otherwise.
+function Casting.TargetBuffCheck(spell, target, bAllowTargetChange)
+    if not (spell and spell()) then return false end
+    if not target then target = mq.TLO.Target end
+    if not (target and target()) then return false end
 
-    local targetName = target.CleanName() or "None"
-
-    if mq.TLO.DanNet(targetName)() ~= nil then
-        local spellName = spell.RankName.Name()
-        local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", spellID), 1000)
-        Logger.log_verbose("\ayGroupBuffCheck() Querying via DanNet for %s(ID:%d) on %s", spellName, spellID, targetName)
-        if spellResult == spellName then
-            Logger.log_verbose("\atGroupBuffCheck() DanNet detects that %s(ID:%d) is already present on %s, ending.", spellName, spellID, targetName)
+    if target.ID() ~= mq.TLO.Target.ID() then
+        if not bAllowTargetChange then
+            Logger.log_verbose("TargetBuffCheck: Passed target(ID:%d) isn't our current target(ID:%d), cannot check spell stacking, aborting.", target.ID(), mq.TLO.Target.ID())
             return false
-        elseif spellResult == "NULL" then
-            Logger.log_verbose("\atGroupBuffCheck() DanNet detects %s(ID:%d) is missing on %s, let's check for triggers.", spellName, spellID, targetName)
-            local numEffects = mq.TLO.Spell(spellID).NumEffects()
-            local triggerCt = 0
-            for i = 1, numEffects do
-                local triggerSpell = mq.TLO.Spell(spellID).RankName.Trigger(i)
-                --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
-                if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
-                    local triggerRankResult = DanNet.query(targetName, string.format("Me.FindBuff[id %d]", triggerSpell.ID()), 1000)
-                    --Logger.log_verbose("GroupBuffCheck() DanNet result for trigger %d of %d (%s, %s): %s", i, numEffects, triggerSpell.Name(), triggerSpell.ID(), triggerRankResult)
-                    if triggerRankResult == "NULL" then
-                        Logger.log_verbose("\ayGroupBuffCheck() DanNet found a missing trigger for %s(ID:%d) on %s, let's check stacking.", triggerSpell.Name(),
-                            triggerSpell.ID(), targetName)
-                        local triggerStackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", triggerSpell.Name()), 1000)
-                        --Logger.log_verbose("GroupBuffCheck() DanNet result for stacking check of %s (ID:%d) on %s : %s", triggerSpell.Name(), triggerSpell.ID(), targetName, triggerStackResult)
-                        if triggerStackResult == "TRUE" then
-                            Logger.log_verbose("\ayGroupBuffCheck() %s (ID:%d) seems to stack on %s, let's do it!", triggerSpell.Name(), triggerSpell.ID(), targetName)
-                            return true
-                        end
-                        Logger.log_verbose("\ayGroupBuffCheck() %s(ID:%d) does not stack on %s, moving on.", triggerSpell.Name(), triggerSpell.ID(), targetName)
-                    end
-                    triggerCt = triggerCt + 1
-                else
-                    Logger.log_verbose("\ayGroupBuffCheck() DanNet found no valid triggers for %s(ID:%d), let's check stacking.", spellName, spellID)
-                end
-            end
-            if triggerCt >= numEffects then
-                Logger.log_verbose("\arGroupBuffCheck() DanNet found %d of %d existing triggers for %s(ID:%d) on %s, ending.", triggerCt, numEffects, spellName, spellID,
-                    targetName)
-                return false
-            end
-            local stackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", spellName), 1000)
-            --Logger.log_verbose("GroupBuffCheck() DanNet result for stacking check of %s (ID:%d) on %s : %s", spellName, spellID, targetName, stackResult)
-            if stackResult == "TRUE" then
-                Logger.log_verbose("\agGroupBuffCheck() %s (ID:%d) seems to stack on %s, let's do it!", spellName, spellID, targetName)
-                return true
-            end
-            Logger.log_verbose("GroupBuffCheck() %s(ID:%d) does not stack on %s, moving on.", spellName, spellID, targetName)
+        else
+            Logger.log_verbose("TargetBuffCheck: Passed target(ID:%d) isn't our current target(ID:%d), setting target to populate buffs.", target.ID(), mq.TLO.Target.ID())
+            Targeting.SetTarget(target.ID())
         end
-    else
-        Targeting.SetTarget(target.ID())
-        return not Casting.TargetHasBuff(spell) and Casting.SpellStacksOnTarget(spell)
     end
 
+    local targetName = target.CleanName()
+    local targetId = target.ID()
+    local spellName = spell.RankName.Name()
+    local spellID = spell.RankName.ID()
+
+    if not mq.TLO.Target.FindBuff("name " .. spellName)() then
+        Logger.log_verbose("TargetBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellID, targetName, targetId)
+        local numEffects = mq.TLO.Spell(spellName).NumEffects()
+        local triggerCount = 0
+        local triggerFound = 0
+        for i = 1, numEffects do
+            local triggerSpell = mq.TLO.Spell(spellName).Trigger(i)
+            --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
+            if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
+                local triggerName = triggerSpell.Name()
+                local triggerID = triggerSpell.ID()
+                if not mq.TLO.Target.FindBuff("name " .. triggerName)() then
+                    Logger.log_verbose("TargetBuffCheck: %s(ID:%d) not found on %s(ID:%d), checking stacking.", triggerName, triggerID, targetName, targetId)
+                    if triggerSpell.StacksTarget() then
+                        Logger.log_verbose("TargetBuffCheck: %s(ID:%d) seems to stack on %s(ID:%d), let's do it!", triggerName, triggerID, targetName, targetId)
+                        return true
+                    else
+                        Logger.log_verbose("TargetBuffCheck: %s(ID:%d) does not stack on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
+                    end
+                else
+                    Logger.log_verbose("TargetBuffCheck: %s(ID:%d) found on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
+                    triggerFound = triggerFound + 1
+                end
+                triggerCount = triggerCount + 1
+            else
+                Logger.log_verbose("TargetBuffCheck: We've checked every trigger for %s(ID:%d).", spellName, spellID)
+                break
+            end
+        end
+        if triggerCount > 0 and triggerFound >= triggerCount then
+            Logger.log_verbose("TargetBuffCheck: Total triggers for %s(ID:%d): %d. Triggers found: %d. Ending Check.", spellName, spellID, triggerCount, triggerFound)
+            return false
+        end
+    else
+        Logger.log_verbose("TargetBuffCheck: %s(ID:%d) found on %s(ID:%d), ending check.", spellName, spellID, targetName, targetId)
+        return false
+    end
+    if mq.TLO.Spell(spellID).StacksTarget() then
+        Logger.log_verbose("TargetBuffCheck: %s(ID:%d) seems to stack on %s(ID:%d), let's do it!", spellName, spellID, targetName, targetId)
+        return true
+    end
+    Logger.log_verbose("TargetBuffCheck: %s(ID:%d) does not seem to stack, ending check.", spellName, spellID)
     return false
 end
 
---- Checks if the given Damage Over Time (DoT) spell can fire.
----
+--- Complex buff check that will check for presence and stacking of the buff (and any triggers) on a DanNet peer.
 --- @param spell MQSpell The name of the spell to check.
---- @return boolean Returns true if the DoT spell can fire, false otherwise.
-function Casting.DotSpellCheck(spell)
-    if not spell or not spell() then return false end
-    local named = Targeting.IsNamed(mq.TLO.Target)
-    local targethp = Targeting.GetTargetPctHPs()
+--- @param target MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @return boolean True if the PC checking should cast the buff, false otherwise.
+function Casting.PeerBuffCheck(spell, target)
+    if not (spell and spell()) then return false end
+    if not (target and target()) then return false end
 
-    return not Casting.TargetHasBuff(spell) and Casting.SpellStacksOnTarget(spell) and
-        ((named and (Config:GetSetting('NamedStopDOT') < targethp)) or (Config:GetSetting('HPStopDOT') < targethp))
-end
+    local targetName = target.CleanName()
+    local targetId = target.ID()
+    local spellName = spell.RankName.Name()
+    local spellID = spell.RankName.ID()
 
---- DetSpellCheck checks if the detrimental spell can fire.
---- @param spell MQSpell The name of the spell to check.
---- @return boolean Returns true if the spell detrimental spell should fire, false otherwise.
-function Casting.DetSpellCheck(spell)
-    if not spell or not spell() then return false end
-    return not Casting.TargetHasBuff(spell) and Casting.SpellStacksOnTarget(spell)
-end
-
---- Checks if the specified AA (Alternate Advancement) ability is available for self-buffing.
---- @param aaName string The name of the AA ability to check.
---- @return boolean Returns true if the AA ability is available for self-buffing, false otherwise.
-function Casting.SelfBuffAACheck(aaName)
-    local abilityReady = mq.TLO.Me.AltAbilityReady(aaName)()
-    local buffNotActive = not Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.ID())
-    local triggerNotActive = not Casting.BuffActiveByID(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID())
-    local auraNotActive = not mq.TLO.Me.Aura(tostring(mq.TLO.Spell(aaName).RankName())).ID()
-    local stacks = Casting.SpellStacksOnMe(mq.TLO.Spell(mq.TLO.Me.AltAbility(aaName).Spell.RankName.Name()))
-    --local triggerStacks = (not mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID() == 0 or mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).Stacks())
-    -- trigger is already checked in SpellStacksOnMe, testing.
-
-    Logger.log_verbose("SelfBuffAACheck(%s) abilityReady(%s) buffNotActive(%s) triggerNotActive(%s) auraNotActive(%s) stacks(%s)", aaName, -- triggerStacks(%s)
-        Strings.BoolToColorString(abilityReady),
-        Strings.BoolToColorString(buffNotActive),
-        Strings.BoolToColorString(triggerNotActive),
-        Strings.BoolToColorString(auraNotActive),
-        Strings.BoolToColorString(stacks))
-    --Strings.BoolToColorString(triggerStacks))
-
-
-    return abilityReady and buffNotActive and triggerNotActive and auraNotActive and stacks -- and triggerStacks
-end
-
---- Checks if a song is active by its name.
----
---- @param songName string The name of the song to check.
---- @return boolean True if the song is active, false otherwise.
-function Casting.SongActiveByName(songName)
-    if not songName then return false end
-    if type(songName) ~= "string" then
-        Logger.log_error("\arCasting.SongActive was passed a non-string songname! %s", type(songName))
+    if not mq.TLO.DanNet(mq.TLO.Spawn(targetId).CleanName())() then
+        Logger.log_error("PeerBuffCheck: Tried to check a peer's buff, but that peer isn't found! If this behavior continues, please report this. Spell:%s(ID:%d), Target:%s(ID:%d)",
+            spellName, spellID, targetName, targetId)
         return false
     end
-    return ((mq.TLO.Me.Song(songName).ID() or 0) > 0)
-end
 
---- Checks if a specific buff (spell) is currently active by its spell object
---- @param spell MQSpell spell object to check
---- @return boolean True if active, false otherwise.
-function Casting.BuffActive(spell)
-    if not spell or not spell() then return false end
-    return Casting.TargetHasBuff(spell, mq.TLO.Me)
-end
-
---- Checks if a specific buff (spell) is currently active by its name
---- @param buffName string name of the buff spell
---- @return boolean True if active, false otherwise.
-function Casting.BuffActiveByName(buffName)
-    if not buffName or buffName:len() == 0 then return false end
-    if type(buffName) ~= "string" then
-        Logger.log_error("\arCasting.BuffActiveByName was passed a non-string buffname! %s", type(buffName))
+    if DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000):lower() == "true" then
+        Logger.log_error("PeerBuffCheck: Tried to check a peer's buff, but that peer seems to have it blocked. Spell:%s(ID:%d), Target:%s(ID:%d)", spellName, spellID, targetName,
+            targetId)
         return false
     end
-    return Casting.BuffActive(mq.TLO.Spell(buffName))
-end
 
---- Checks if a specific buff (spell) is currently active.
---- @param buffId number The id of the spell to check.
---- @return boolean True if the buff is active, false otherwise.
-function Casting.BuffActiveByID(buffId)
-    if not buffId then return false end
-    return Casting.BuffActive(mq.TLO.Spell(buffId))
+    local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[name %s]", spellName), 1000)
+    if spellResult:lower() == "null" then
+        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellID, targetName, targetId)
+        local numEffects = mq.TLO.Spell(spellName).NumEffects()
+        local triggerCount = 0
+        local triggerFound = 0
+        for i = 1, numEffects do
+            local triggerSpell = mq.TLO.Spell(spellName).Trigger(i)
+            --Some Laz spells report trigger 1 as "Unknown Spell" with an ID of 0, which always reports false on stack checks
+            if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
+                local triggerName = triggerSpell.Name()
+                local triggerID = triggerSpell.ID()
+                local triggerResult = DanNet.query(targetName, string.format("Me.FindBuff[name %s]", triggerName), 1000)
+                if triggerResult:lower() == "null" then
+                    Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), checking stacking.", triggerName, triggerID, targetName, targetId)
+                    local triggerStackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", triggerName), 1000)
+                    if triggerStackResult:lower() == "true" then
+                        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) seems to stack on %s(ID:%d), let's do it!", triggerName, triggerID, targetName, targetId)
+                        return true
+                    else
+                        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not stack on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
+                        triggerFound = triggerFound + 1
+                    end
+                elseif triggerResult:lower() == triggerName:lower() then
+                    Logger.log_verbose("PeerBuffCheck: %s(ID:%d) found on %s(ID:%d), moving on.", triggerName, triggerID, targetName, targetId)
+                    triggerFound = triggerFound + 1
+                end
+                triggerCount = triggerCount + 1
+            else
+                Logger.log_verbose("PeerBuffCheck: We've checked every trigger for %s(ID:%d).", spellName, spellID)
+                break
+            end
+        end
+        if triggerCount > 0 and triggerFound >= triggerCount then
+            Logger.log_verbose("PeerBuffCheck: Total triggers for %s(ID:%d): %d. Present or non-stacking triggers: %d. Ending Check.", spellName, spellID, triggerCount, triggerFound)
+            return false
+        end
+    elseif spellResult:lower() == spellName:lower() then
+        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) found on %s(ID:%d), ending check.", spellName, spellID, targetName, targetId)
+        return false
+    else
+        Logger.log_error("PeerBuffCheck: Tried to check buff presence for %s(ID:%d), but something seems to have gone wrong! Please report this.")
+        return false
+    end
+
+    local stackResult = DanNet.query(targetName, string.format("Spell[%d].Stacks", spellID), 1000)
+    if stackResult:lower() == "true" then
+        Logger.log_verbose("PeerBuffCheck: %s(ID:%d) seems to stack on %s(ID:%d), let's do it!", spellName, spellID, targetName, targetId)
+        return true
+    end
+    Logger.log_verbose("PeerBuffCheck: %s(ID:%d) does not seem to stack, ending check.", spellName, spellID)
+    return false
 end
 
 --- Checks if an aura is active by its name.
@@ -391,69 +359,6 @@ function Casting.AuraActiveByName(auraName)
     auraTwo = auraTwo or string.find(mq.TLO.Me.Aura(2)() or "", stripName) ~= nil
 
     return auraOne or auraTwo
-end
-
---- Checks if a given song is currently active.
----
---- @param song MQSpell|MQBuff The name of the song to check.
---- @return boolean Returns true if the song is active, false otherwise.
-function Casting.SongActive(song)
-    if not song or not song() then return false end
-
-    if mq.TLO.Me.Song(song.Name())() then return true end
-    if mq.TLO.Me.Song(song.RankName.Name())() then return true end
-
-    return false
-end
-
---- Checks the mana level of the character.
---- This function evaluates the current mana level and performs necessary actions based on the result.
---- @return boolean True if you have more mana than Mana To Nuke false otherwise
-function Casting.HaveManaToNuke()
-    return mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToNuke')
-end
-
---- Checks the mana status for the character.
---- This function evaluates the current mana level and determines if it meets the required threshold.
---- @return boolean True if the mana level is sufficient, false otherwise.
-function Casting.DotHaveManaToNuke()
-    return mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDot')
-end
-
---- Checks the mana status for the character.
---- This function evaluates the current mana level and determines if it meets the required threshold.
---- @return boolean True if the mana level is sufficient, false otherwise.
-function Casting.HaveManaToDebuff()
-    return mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff')
-end
-
---- DetGOMCheck performs a check if Gift of Mana is active
---- This function does not take any parameters.
----
---- @return boolean
-function Casting.DetGOMCheck()
-    local me = mq.TLO.Me
-    return me.Song("Gift of Mana").ID() ~= nil
-end
-
---- DetGambitCheck performs a check for a specific gambit condition.
---- @return boolean Returns true if the gambit condition is met, false otherwise.
-function Casting.DetGambitCheck()
-    local me = mq.TLO.Me
-    local gambitSpell = Modules:ExecModule("Class", "GetResolvedActionMapItem", "GambitSpell")
-
-    return (gambitSpell and gambitSpell() and ((me.Song(gambitSpell.RankName.Name()).ID() or 0) > 0)) and true or false
-end
-
---- Checks if the detrimental Alternate Advancement (AA) ability should be used.
---- @param aaId number The ID of the AA ability to check.
---- @return boolean True if the AA ability should be used, false otherwise.
-function Casting.DetAACheck(aaId)
-    if Targeting.GetTargetID() == 0 then return false end
-    local me = mq.TLO.Me
-
-    return (not Casting.TargetHasBuff(me.AltAbility(aaId).Spell) and
-        Casting.SpellStacksOnTarget(me.AltAbility(aaId).Spell))
 end
 
 --- Checks if the required reagents for a given spell are available.
@@ -485,179 +390,151 @@ function Casting.ReagentCheck(spell)
     return true
 end
 
---- Checks if a given Alternate Advancement (AA) ability can be used.
---- @param aaName string The name of the AA ability to check.
---- @return boolean Returns true if the AA ability can be used, false otherwise.
-function Casting.CanUseAA(aaName)
-    local haveAbility = mq.TLO.Me.AltAbility(aaName)()
-    local levelCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level()
-    local rankCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).Rank() > 0
-    Logger.log_super_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, Strings.BoolToColorString(haveAbility),
-        Strings.BoolToColorString(levelCheck), Strings.BoolToColorString(rankCheck))
-    return haveAbility and levelCheck and rankCheck
+--- Determines whether the the PC should be shrunk.
+--- @return boolean True if the PC should be shrunk, false otherwise.
+function Casting.ShouldShrink()
+    return Config:GetSetting('DoShrink') and mq.TLO.Me.Height() > 2.2 and
+        (Config:GetSetting('ShrinkItem'):len() > 0) and Casting.OkayToBuff()
 end
 
---- Determines if an alliance can be formed.
+--- Determines whether the pet should be shrunk.
+--- @return boolean True if the pet should be shrunk, false otherwise.
+function Casting.ShouldShrinkPet()
+    return Config:GetSetting('DoShrinkPet') and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() > 1.8 and
+        (Config:GetSetting('ShrinkPetItem'):len() > 0) and Casting.OkayToPetBuff()
+end
+
+--- Checks if the burn condition is met for RGMercs.
+--- This function evaluates certain criteria to determine if the burn phase should be initiated.
+--- @return boolean True if the burn condition is met, false otherwise.
+function Casting.BurnCheck()
+    local settings = Config:GetSettings()
+    local autoBurn = settings.BurnAuto and
+        ((Targeting.GetXTHaterCount() >= settings.BurnMobCount) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and settings.BurnNamed))
+    local alwaysBurn = (settings.BurnAlways and settings.BurnAuto)
+    local forcedBurn = Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()
+
+    Casting.LastBurnCheck = autoBurn or alwaysBurn or forcedBurn
+    return Casting.LastBurnCheck
+end
+
+--- GOMCheck performs a check if Gift of Mana is active.
+--- This function does not take any parameters.
+--- @return boolean
+function Casting.GOMCheck()
+    return Casting.IHaveBuff("Gift of Mana")
+end
+
+--- Checks if a gambit spell is active.
+--- @return boolean Returns true if the gambit condition is met, false otherwise.
+function Casting.GambitCheck() -- This should probably be moved to wizard as a helper --Algar
+    local gambitSpell = Modules:ExecModule("Class", "GetResolvedActionMapItem", "GambitSpell")
+    if not gambitSpell and gambitSpell() then return false end
+
+    return Casting.IHaveBuff(gambitSpell)
+end
+
+--- Stub seemingly intended for alliance spell use
 --- @return boolean True if an alliance can be formed, false otherwise.
 function Casting.CanAlliance()
     return true
 end
 
---- Checks if a specific Alternate Advancement (AA) ability is ready to use.
---- @param aaName string The name of the AA ability to check.
---- @return boolean Returns true if the AA ability is ready, false otherwise.
-function Casting.AAReady(aaName)
-    local canUse = Casting.CanUseAA(aaName)
-    local ready = mq.TLO.Me.AltAbilityReady(aaName)()
-    local spell = mq.TLO.Me.AltAbility(aaName).Spell
-    Logger.log_super_verbose("AAReady(%s): ready(%s) canUse(%s) haveMana(%s) haveEnd(%s)", aaName, Strings.BoolToColorString(ready), Strings.BoolToColorString(canUse),
-        Strings.BoolToColorString(mq.TLO.Me.CurrentMana() >= (spell.Mana() or 0)), Strings.BoolToColorString(mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0)))
-    return ready and canUse and (mq.TLO.Me.CurrentMana() >= (spell.Mana() or 0) or mq.TLO.Me.CurrentEndurance() >= (spell.EnduranceCost() or 0))
+--- Determine if the time is opportune to cast buffs.
+--- @return boolean
+function Casting.OkayToBuff()
+    if not Config:GetSetting('DoBuffs') then return false end
+    return Casting.CheckOkayToBuff()
 end
 
---- Checks if a given ability is ready to be used.
---- @param abilityName string The name of the ability to check.
---- @return boolean True if the ability is ready, false otherwise.
-function Casting.AbilityReady(abilityName)
-    return mq.TLO.Me.AbilityReady(abilityName)()
+--- Determine if the time is opportune to summon or buff pets.
+--- @return boolean Returns true if the pet check is successful, false otherwise.
+function Casting.OkayToPetBuff()
+    if not Config:GetSetting('DoPet') then return false end
+    return Casting.CheckOkayToBuff()
 end
 
---- Retrieves the rank of a specified Alternate Advancement (AA) ability.
---- @param aaName string The name of the AA ability.
---- @return number The rank of the specified AA ability.
-function Casting.AARank(aaName)
-    return Casting.CanUseAA(aaName) and mq.TLO.Me.AltAbility(aaName).Rank() or 0
+--- Perform ancillary checks to facilitate OkaytoBuff checks.
+function Casting.CheckOkayToBuff()
+    local visible = not mq.TLO.Me.Invis()
+    local safe = Targeting.GetXTHaterCount() == 0 and Config.Globals.AutoTargetID == 0
+    local stationary = not (Config:GetSetting('BuffWaitMoveTimer') > Config:GetTimeSinceLastMove() or mq.TLO.MoveTo.Moving() or mq.TLO.Me.Moving() or mq.TLO.AdvPath.Following() or mq.TLO.Navigation.Active())
+    local able = not (Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and mq.TLO.Me.PctMana() < 10)
+
+    return visible and safe and stationary and able
 end
 
---- Checks if the given name corresponds to a discipline.
----
---- @param name string The name to check.
---- @return boolean True if the name is a discipline, false otherwise.
-function Casting.IsActiveDisc(name)
-    local spell = mq.TLO.Spell(name)
-
-    return (spell() and spell.IsSkill() and spell.Duration.TotalSeconds() > 0 and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and
-        true or false
+--- Checks if the PC should use debuffs based off of con color or named settings.
+--- @return boolean True if the target matches the Con requirements for debuffing.
+function Casting.OkayToDebuff()
+    local conLevel = (Config.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
+    return conLevel >= Config:GetSetting('DebuffMinCon') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('DebuffNamedAlways'))
 end
 
---- Checks if a player character's spell is ready to be cast.
----
---- @param spell MQSpell The name of the spell to check.
---- @return boolean Returns true if the spell is ready, false otherwise.
-function Casting.SpellReady(spell)
-    if not spell or not spell() then return false end
-    local me = mq.TLO.Me
-
-    if me.Stunned() then return false end
-
-    return me.CurrentMana() > spell.Mana() and not me.Casting() and me.Book(spell.RankName.Name())() ~= nil and
-        not (me.Moving() and (spell.MyCastTime() or -1) > 0)
+--- Determines if the PC can/should use buffs if their corpse is nearby.
+--- @return boolean True if the entity can be buffed, false otherwise.
+function Casting.AmIBuffable()
+    local myCorpseCount = Config:GetSetting('BuffRezables') and 0 or mq.TLO.SpawnCount(string.format('pccorpse %s radius 100 zradius 50', mq.TLO.Me.CleanName()))()
+    if myCorpseCount > 0 then Logger.log_debug("Corpse detected (%s), aborting rotation.", mq.TLO.Me.CleanName()) end
+    return myCorpseCount == 0
 end
 
---- Checks if a given discipline spell is ready to be used by the player character.
---- @param discSpell MQSpell The name of the discipline spell to check.
---- @return boolean Returns true if the discipline spell is ready, false otherwise.
-function Casting.DiscReady(discSpell)
-    if not discSpell or not discSpell() then return false end
-    Logger.log_super_verbose("DiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
-        Strings.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
-    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0)
-end
+--- Retrieves the list of group IDs that should be buffed.
+--- @return table A table containing the IDs of the groups that can receive buffs.
+function Casting.GetBuffableGroupIDs()
+    local groupIds = {}
 
---- Checks if a given PC discipline spell is ready to be used on the NPC Target.
----
---- @param discSpell MQSpell The name of the discipline spell to check.
---- @return boolean True if the discipline spell is ready, false otherwise.
-function Casting.TargetedDiscReady(discSpell)
-    if not discSpell or not discSpell() then return false end
-    local target = mq.TLO.Target
-    if not target or not target() then return false end
-    Logger.log_super_verbose("TargetedDiscReady(%s) => CAR(%s)", discSpell.RankName.Name() or "None",
-        Strings.BoolToColorString(mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()))
-    return mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())() and
-        mq.TLO.Me.CurrentEndurance() > (discSpell.EnduranceCost() or 0) and not Targeting.TargetIsType("corpse", target) and
-        target.LineOfSight() and not target.Hovering()
-end
+    if Casting.AmIBuffable() then
+        table.insert(groupIds, mq.TLO.Me.ID())
 
---- Checks if an PC spell is ready to be cast on the target NPC.
----
---- @param spellName string The name of the spell to check.
---- @param targetId number? The ID of the target NPC.
---- @param healingSpell boolean? Indicates if the spell is a healing spell.
---- @return boolean Returns true if the spell is ready, false otherwise.
-function Casting.TargetedSpellReady(spellName, targetId, healingSpell)
-    local me = mq.TLO.Me
-    local spell = mq.TLO.Spell(spellName)
-
-    if (targetId == 0 or not targetId) then targetId = mq.TLO.Target.ID() end
-
-    if not spell or not spell() then return false end
-
-    if me.Stunned() then return false end
-
-    local target = mq.TLO.Spawn(targetId)
-
-    if not target or not target() then return false end
-
-    if me.SpellReady(spell.RankName.Name())() and me.CurrentMana() >= spell.Mana() then
-        if not (me.Moving() and (spell.MyCastTime() or -1) > 0) and not me.Casting() and not Targeting.TargetIsType("corpse", target) then
-            if target.LineOfSight() then
-                return true
-            elseif healingSpell then
-                return true
+        local count = mq.TLO.Group.Members()
+        for i = 1, count do
+            local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
+            if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
+                groupIds = {}
+                Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
+                break
+            else
+                table.insert(groupIds, mq.TLO.Group.Member(i).ID())
             end
         end
-    end
 
-    return false
-end
-
---- @param aaName string
---- @param targetId number?
---- @param healingSpell boolean?
---- @return boolean
-function Casting.TargetedAAReady(aaName, targetId, healingSpell)
-    Logger.log_verbose("TargetedAAReady(%s)", aaName)
-    local me = mq.TLO.Me
-    local ability = mq.TLO.Me.AltAbility(aaName)
-
-    if targetId == 0 or not targetId then targetId = mq.TLO.Target.ID() end
-
-    if not ability or not ability() then
-        Logger.log_verbose("TargetedAAReady(%s) - Don't have ability.", aaName)
-        return false
-    end
-
-    if me.Stunned() then
-        Logger.log_verbose("TargetedAAReady(%s) - Stunned", aaName)
-        return false
-    end
-
-    local target = mq.TLO.Spawn(string.format("id %d", targetId))
-
-    if not target or not target() or target.Dead() then
-        Logger.log_verbose("TargetedAAReady(%s) - Target Dead", aaName)
-        return false
-    end
-
-    if Casting.AAReady(aaName) and me.CurrentMana() >= ability.Spell.Mana() and me.CurrentEndurance() >= ability.Spell.EnduranceCost() then
-        if Core.MyClassIs("brd") or (not me.Moving() and not me.Casting()) then
-            Logger.log_verbose("TargetedAAReady(%s) - Check LOS", aaName)
-            if target.LineOfSight() then
-                Logger.log_verbose("TargetedAAReady(%s) - Success", aaName)
-                return true
-            elseif healingSpell == true then
-                Logger.log_verbose("TargetedAAReady(%s) - Healing Success", aaName)
-                return true
+        -- check OA list
+        for _, n in ipairs(Config:GetSetting('OutsideAssistList')) do
+            -- dont double up OAs who are in our group
+            if not mq.TLO.Group.Member(n)() then
+                local oaSpawn = mq.TLO.Spawn(("pc =%s"):format(n))
+                if oaSpawn and oaSpawn() and oaSpawn.Distance() <= 90 then
+                    table.insert(groupIds, oaSpawn.ID())
+                end
             end
         end
     else
-        Logger.log_verbose("TargetedAAReady(%s) CurrentMana(%d) >= SpellMana(%d) CurrentEnd(%d) >= SpellEnd(%d)", aaName, me.CurrentMana(), ability.Spell.Mana(),
-            me.CurrentEndurance(), ability.Spell.EnduranceCost())
+        Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Me.DisplayName())
     end
 
-    Logger.log_verbose("TargetedAAReady(%s) - Failed", aaName)
-    return false
+    return groupIds
+end
+
+--- Checks if the character is currently feigning death.
+--- @return boolean True if the character is feigning death, false otherwise.
+function Casting.IAmFeigning()
+    return mq.TLO.Me.State():lower() == "feign"
+end
+
+--- Checks if a spell is loaded on the spellbar.
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean Returns true if the spell is loaded, false otherwise.
+function Casting.SpellLoaded(spell)
+    if not spell or not spell() then return false end
+
+    return mq.TLO.Me.Gem(spell.RankName.Name())() ~= nil
+end
+
+--- Checks if the spell is ready to cast (not in refresh, no gem timer)
+function Casting.CastReady(spell)
+    if not spell or not spell() then return false end
+    return mq.TLO.Me.SpellReady(spell.RankName.Name())()
 end
 
 --- Memorizes a spell in the specified gem slot.
@@ -694,167 +571,578 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
     Casting.Memorizing = false
 end
 
---- Checks if a spell is ready to be cast.
----
---- @param spell string The name of the spell to check.
---- @return boolean Returns true if the spell is ready to be cast, false otherwise.
-function Casting.CastReady(spell)
-    return mq.TLO.Me.SpellReady(spell)()
+--- Checks if a given Alternate Advancement (AA) ability can be used.
+--- @param aaName string The name of the AA ability to check.
+--- @return boolean Returns true if the AA ability can be used, false otherwise.
+function Casting.CanUseAA(aaName)
+    local haveAbility = mq.TLO.Me.AltAbility(aaName)()
+    local levelCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).MinLevel() <= mq.TLO.Me.Level()
+    local rankCheck = haveAbility and mq.TLO.Me.AltAbility(aaName).Rank() > 0
+    Logger.log_super_verbose("CanUseAA(%s): haveAbility(%s) levelCheck(%s) rankCheck(%s)", aaName, Strings.BoolToColorString(haveAbility),
+        Strings.BoolToColorString(levelCheck), Strings.BoolToColorString(rankCheck))
+    return haveAbility and levelCheck and rankCheck
 end
 
---- Waits for the casting to finish on the specified target.
----
---- @param target MQSpawn The target to wait for the casting to finish.
---- @param bAllowDead boolean Whether to allow the target to be dead.
-function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not vested in the math below, I simply converted the existing entry from sec to ms
-    local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime() or 0) + ((mq.TLO.EverQuest.Ping() * 20) + 1000))
-    local maxWait = maxWaitOrig
+--- Retrieves the rank of a specified Alternate Advancement (AA) ability.
+--- @param aaName string The name of the AA ability.
+--- @return number The rank of the specified AA ability.
+function Casting.AARank(aaName)
+    return Casting.CanUseAA(aaName) and mq.TLO.Me.AltAbility(aaName).Rank() or 0
+end
 
-    while mq.TLO.Me.Casting() do
-        local currentCast = mq.TLO.Me.Casting()
-        Logger.log_super_verbose("WaitCastFinish(): Waiting to Finish Casting...")
-        mq.delay(20)
-        if target() and Targeting.GetTargetPctHPs(target) <= 0 and not bAllowDead then
-            mq.TLO.Me.StopCast()
-            Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%d) is dead with no HP(%d)", currentCast, target.ID(),
-                Targeting.GetTargetPctHPs(target))
-            return
-        elseif target() and Targeting.GetTargetID() > 0 and target.ID() ~= Targeting.GetTargetID() then
-            mq.TLO.Me.StopCast()
-            Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%s/%d) is no longer myTarget(%s/%d)", currentCast, target.CleanName() or "",
-                target.ID(), Targeting.GetTargetCleanName(), Targeting.GetTargetID())
-            return
-        elseif target() and Targeting.GetTargetDistance(target) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
-            mq.TLO.Me.StopCast()
-            Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%d, range %d) is out of spell range(%d)", currentCast, target.ID(),
-                Targeting.GetTargetDistance(),
-                spellRange)
-            return
-            --elseif target() and target.ID() ~= Targeting.GetTargetID() then
-            --Logger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) for %s is no longer your currentTarget(%d)", target.ID(), currentCast, Targeting.GetTargetID())
+--- Helper to retrive an AA spell to be used in other checks.
+function Casting.GetAASpell(aaName)
+    if not Casting.CanUseAA(aaName) then return "None" end
+    return mq.TLO.Me.AltAbility(aaName).Spell
+end
+
+--- Checks if the disc in question is an active disc (not a buff; displayed in the disc window)
+--- @param name string The name to check.
+--- @return boolean True if the name is a discipline, false otherwise.
+function Casting.IsActiveDisc(name)
+    local spell = mq.TLO.Spell(name)
+
+    return (spell() and spell.IsSkill() and spell.Duration.TotalSeconds() > 0 and not spell.StacksWithDiscs() and spell.TargetType():lower() == "self") and
+        true or false
+end
+
+-- helper to check if a disc is currently active in the disc window
+function Casting.NoDiscActive()
+    return not mq.TLO.Me.ActiveDisc.ID()
+end
+
+-- Check if an item has a clicky effect.
+function Casting.ItemHasClicky(itemName)
+    local item = mq.TLO.FindItem(string.format("=%s", itemName or "None"))
+    if not (item and item()) then return false end
+
+    return item.Clicky() ~= nil
+end
+
+-- Helper to retrieve a Clicky spell to be used in other checks.
+function Casting.GetClickySpell(itemName)
+    local item = mq.TLO.FindItem(string.format("=%s", itemName or "None"))
+    if not (item and item()) then return false end
+
+    return item.Clicky and item.Clicky.Spell or "None"
+end
+
+--- Retrieves the ID of the item summoned by a given spell.
+--- @param spell MQSpell The name or identifier of the spell.
+--- @return number The ID of the summoned item.
+function Casting.GetSummonedItemIDFromSpell(spell)
+    if not spell or not spell() then return 0 end
+
+    for i = 1, spell.NumEffects() do
+        -- 32 means SPA_CREATE_ITEM
+        if spell.Attrib(i)() == 32 then
+            return tonumber(spell.Base(i)()) or 0
+        end
+    end
+
+    return 0
+end
+
+--- This function evaluates the current mana level and allows actions based on the result.
+--- @param bRestrictBurns boolean|nil True if this function should ignore burn status, false otherwise.
+--- @return boolean True if you have more mana than Mana To Nuke or are burning, false otherwise
+function Casting.HaveManaToNuke(bRestrictBurns)
+    return mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToNuke') or (not bRestrictBurns and Casting.BurnCheck())
+end
+
+--- This function evaluates the current mana level and allows actions based on the result.
+--- @param bRestrictBurns boolean|nil True if this function should ignore burn status, false otherwise.
+--- @return boolean True if you have more mana than Mana To Dot or are burning, false otherwise
+function Casting.HaveManaToDot(bRestrictBurns)
+    return mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDot') or (not bRestrictBurns and Casting.BurnCheck())
+end
+
+--- This function evaluates the current mana level and allows actions based on the result.
+--- @param bRestrictBurns boolean|nil True if this function should ignore burn status, false otherwise.
+--- @return boolean True if you have more mana than Mana To Debuff or are burning, false otherwise
+function Casting.HaveManaToDebuff(bRestrictBurns)
+    return mq.TLO.Me.PctMana() >= Config:GetSetting('ManaToDebuff') or (not bRestrictBurns and Casting.BurnCheck())
+end
+
+---- "DetXChecks"s are helper functions that wrap debuff spells and checks in an easy-to-understand system for simpler class configs
+
+function Casting.DetSpellCheck(spell, target)
+    if not (spell and spell()) then return false end
+    if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
+
+    return Casting.TargetBuffCheck(spell, target)
+end
+
+function Casting.DetAACheck(aaName, target)
+    if not Casting.CanUseAA(aaName) then return false end
+    if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
+
+    return Casting.TargetBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
+end
+
+function Casting.DetItemCheck(itemName, target)
+    local clickySpell = Casting.GetClickySpell(itemName)
+    if not (clickySpell and clickySpell()) then return false end
+    if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
+
+    return Casting.TargetBuffCheck(clickySpell, target)
+end
+
+-- Checks HP thresholds and presence/stacking for Dots.
+function Casting.DotSpellCheck(spell, target)
+    if not (spell and spell()) then return false end
+    if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
+
+    if Targeting.MobHasLowHP(target) then return false end
+
+    return Casting.TargetBuffCheck(spell, target)
+end
+
+--- Checks if a player character's spell is ready to be cast.
+--- @param spell MQSpell The name of the spell to check.
+--- @return boolean Returns true if the spell is ready, false otherwise.
+function Casting.SpellReady(spell, skipGemTimer)
+    if not spell or not spell() then return false end
+
+    local ready = mq.TLO.Me.SpellReady(spell.RankName.Name())()
+    local bookCheck = mq.TLO.Me.Book(spell.RankName.Name())()
+    local silenced = mq.TLO.Me.Silenced() ~= nil
+
+    Logger.log_verbose("SpellReady for %s(%d): Silenced (%s), BookCheck(%s), ReadyCheck(%s), Memorization Allowed (%s).", spell.RankName(), spell.ID(),
+        Strings.BoolToColorString(silenced), Strings.BoolToColorString(bookCheck), Strings.BoolToColorString(ready), Strings.BoolToColorString(skipGemTimer))
+
+    if silenced or not bookCheck or (not ready and not skipGemTimer) then return false end
+
+    return Casting.CastCheck(spell)
+end
+
+--- Checks if a given discipline spell is ready to be used by the player character.
+--- @param songSpell MQSpell The name of the song spell to check.
+--- @return boolean Returns true if the song is ready, false otherwise.
+function Casting.SongReady(songSpell, skipGemTimer)
+    if not songSpell or not songSpell() then return false end
+
+    local ready = mq.TLO.Me.SpellReady(songSpell.RankName.Name())()
+    local bookCheck = mq.TLO.Me.Book(songSpell.RankName.Name())()
+    local silenced = mq.TLO.Me.Silenced() ~= nil
+
+    Logger.log_verbose("SongReady for %s(%d): Silenced (%s), BookCheck(%s), ReadyCheck(%s), Memorization Allowed (%s).", songSpell.RankName(), songSpell.ID(),
+        Strings.BoolToColorString(silenced), Strings.BoolToColorString(bookCheck), Strings.BoolToColorString(ready), Strings.BoolToColorString(skipGemTimer))
+
+    if silenced or not bookCheck or (not ready and not skipGemTimer) then return false end
+
+    return Casting.CastCheck(songSpell)
+end
+
+--- Checks if a given discipline spell is ready to be used by the player character.
+--- @param discSpell MQSpell The name of the discipline spell to check.
+--- @return boolean Returns true if the discipline is ready, false otherwise.
+function Casting.DiscReady(discSpell)
+    if not discSpell or not discSpell() then return false end
+
+    local ready = mq.TLO.Me.CombatAbilityReady(discSpell.RankName.Name())()
+
+    Logger.log_verbose("DiscReady for %s(%d): Ready(%s)", discSpell.RankName.Name(), discSpell.ID(), Strings.BoolToColorString(ready))
+
+    if not ready then return false end
+
+    return Casting.CastCheck(discSpell, true)
+end
+
+--- Checks if a specific Alternate Advancement (AA) ability is ready to use.
+--- @param aaName string The name of the AA ability to check.
+--- @return boolean Returns true if the AA ability is ready, false otherwise.
+function Casting.AAReady(aaName)
+    local me = mq.TLO.Me
+    if not me.AltAbility(aaName) then return false end
+
+    local ready = me.AltAbilityReady(aaName)()
+    local aaSpell = me.AltAbility(aaName).Spell
+
+    Logger.log_verbose("AAReady for AA %s (aaSpell: %s, %d): Ready(%s).", aaName, (aaSpell.Name() or "None"), (aaSpell.ID() or 0), Strings.BoolToColorString(ready))
+
+    if not ready then return false end
+
+    return Casting.CastCheck(aaSpell)
+end
+
+--- Checks if a given ability is ready to be used.
+--- @param abilityName string The name of the ability to check.
+--- @return boolean True if the ability is ready, false otherwise.
+function Casting.AbilityReady(abilityName, target)
+    if not target or not target() then return false end
+
+    local ready = mq.TLO.Me.AbilityReady(abilityName)()
+
+    Logger.log_verbose("AbilityReady for  %s: Ready(%s)", abilityName, Strings.BoolToColorString(ready))
+
+    if not ready then return false end
+
+    return Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target) or abilityName:lower() == "taunt"
+end
+
+--- Checks if a given item is ready to be used.
+function Casting.ItemReady(itemName)
+    if not Casting.ItemHasClicky(itemName) then return false end
+
+    local ready = mq.TLO.Me.ItemReady(itemName)()
+    local levelCheck = mq.TLO.Me.Level() >= mq.TLO.FindItem("=" .. itemName).Clicky.RequiredLevel()
+
+    Logger.log_verbose("ItemReady for  %s: Ready(%s) LevelCheck(%s)", itemName, Strings.BoolToColorString(ready), Strings.BoolToColorString(levelCheck))
+
+    if not ready then return false end
+
+    return levelCheck
+end
+
+-- Helper function for use in determining whether we are ready to perform other actions.
+function Casting.CastCheck(spell, bAllowMove)
+    if not spell or not spell() then return false end
+
+    local me = mq.TLO.Me
+    local castingCheck = not (me.Casting() or mq.TLO.Window("CastingWindow").Open())
+    local movingCheck = bAllowMove or Core.MyClassIs("brd") or not (me.Moving() and (spell.MyCastTime() or -1) > 0)
+    local manaCheck = (Config.Globals.InMedState and (me.CurrentMana() - (2 * me.ManaRegen())) or me.CurrentMana()) >= spell.Mana()
+    local endCheck = (Config.Globals.InMedState and (me.CurrentEndurance() - (2 * me.EnduranceRegen())) or me.CurrentEndurance()) >= spell.EnduranceCost()
+    ---@diagnostic disable-next-line: undefined-field -- Feared is a valid data member
+    local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed() or me.Mezzed())
+
+    Logger.log_verbose("CastCheck for %s (%d): CastingCheck(%s), MovingCheck(%s), ManaCheck(%s), EndCheck(%s), ControlCheck(%s)", spell.Name(), spell.ID(),
+        Strings.BoolToColorString(castingCheck), Strings.BoolToColorString(movingCheck), Strings.BoolToColorString(manaCheck), Strings.BoolToColorString(endCheck),
+        Strings.BoolToColorString(controlCheck))
+
+    return castingCheck and movingCheck and manaCheck and endCheck and controlCheck
+end
+
+--- Uses a specified spell on a target.
+---
+--- @param spellName string The name of the spell to be used.
+--- @param targetId number The ID of the target on which the spell will be cast.
+--- @param bAllowMem boolean Whether to allow the spell to be memorized if not already.
+--- @param bAllowDead boolean? Whether to allow casting the spell on a dead target.
+--- @param overrideWaitForGlobalCooldown boolean? Whether to override the wait for the global cooldown.
+--- @param retryCount number? The number of times to retry casting the spell if it fails.
+--- @return boolean Returns true if the spell was successfully cast, false otherwise.
+function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown, retryCount)
+    local me = mq.TLO.Me
+    -- Immediately send bards to the song handler.
+    if me.Class.ShortName():lower() == "brd" then
+        return Casting.UseSong(spellName, targetId, bAllowMem)
+    end
+
+    Logger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, Strings.BoolToColorString(bAllowMem))
+
+    if me.Moving() then
+        Logger.log_debug("\ayUseSpell(%s, %d, %s) -- Failed because I am moving", spellName, targetId,
+            Strings.BoolToColorString(bAllowMem))
+        return false
+    end
+
+    if mq.TLO.Cursor.ID() then
+        Core.DoCmd("/autoinv")
+    end
+
+    if spellName then
+        local spell = mq.TLO.Spell(spellName)
+
+        if not spell() then
+            Logger.log_error("\ayUseSpell(): \arCasting Failed: Somehow I tried to cast a spell That doesn't exist: %s",
+                spellName)
+            return false
+        end
+        -- Check we actually have the spell -- Me.Book always needs to use RankName
+        if not me.Book(spellName)() then
+            Logger.log_error("\ayUseSpell(): \arCasting Failed: Somehow I tried to cast a spell I didn't know: %s", spellName)
+            return false
         end
 
-        if (maxWaitOrig - maxWait) % 200 == 0 and Combat.DoCombatActions() and not mq.TLO.Me.Pet.Combat() then --alleviate pets standing around at early levels where mob HPs are low and cast times are long
-            if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
-                Combat.PetAttack(Config.Globals.AutoTargetID, true)
+        local targetSpawn = mq.TLO.Spawn(targetId)
+
+        if targetSpawn() and Targeting.TargetIsType("pc", targetSpawn) then
+            -- check to see if this is too powerful a spell
+            local targetLevel    = targetSpawn.Level()
+            local spellLevel     = spell.Level()
+            local levelCheckPass = true
+            if targetLevel <= 45 and spellLevel > 50 then levelCheckPass = false end
+            if targetLevel <= 60 and spellLevel > 65 then levelCheckPass = false end
+            if targetLevel <= 65 and spellLevel > 95 then levelCheckPass = false end
+
+            if not levelCheckPass then
+                Logger.log_error("\ayUseSpell(): \arCasting %s failed level check with target=%d and spell=%d", spellName,
+                    targetLevel, spellLevel)
+                return false
             end
         end
 
-        maxWait = maxWait - 20
-
-        if maxWait <= 0 then
-            local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d",
-                (mq.TLO.Me.Casting.ID() or -1), maxWaitOrig,
-                Strings.BoolToColorString(mq.TLO.Window("CastingWindow").Open()), Config.Globals.AutoTargetID)
-
-            Logger.log_debug(msg)
-            Comms.PrintGroupMessage(msg)
-
-            --Core.DoCmd("/alt act 511")
-            mq.TLO.Me.StopCast()
-            return
+        -- Check for Reagents
+        if not Casting.ReagentCheck(spell) then
+            Logger.log_debug("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have Reagents for.",
+                spellName)
+            return false
         end
 
-        mq.doevents()
-    end
-end
-
---- Waits until the specified spell is ready to be cast or the maximum wait time is reached.
---- @param spell string The name of the spell to wait for.
---- @param maxWait number The maximum amount of time (in seconds) to wait for the spell to be ready.
-function Casting.WaitCastReady(spell, maxWait)
-    while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
-        mq.delay(1)
-        mq.doevents()
-        if Targeting.GetXTHaterCount() > 0 then
-            Logger.log_debug("I was interruped by combat while waiting to cast %s.", spell)
-            return
-        end
-        if not mq.TLO.Me.Book(spell)() then
-            Logger.log_debug("I was trying to cast %s as my persona was changed, aborting.", spell)
-            return
+        -- Check for enough mana -- just in case something has changed by this point...
+        if me.CurrentMana() < spell.Mana() then
+            Logger.log_verbose("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have mana for it.",
+                spellName)
+            return false
         end
 
-        maxWait = maxWait - 1
-
-        if (maxWait % 100) == 0 then
-            Logger.log_verbose("Waiting for spell '%s' to be ready...", spell)
+        -- If we're combat casting we need to both have the same swimming status
+        if targetId == 0 or (targetSpawn() and targetSpawn.FeetWet() ~= me.FeetWet()) then
+            Logger.log_debug("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.",
+                spellName, targetId)
+            return false
         end
-    end
 
-    -- account for lag
-    local pingDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('CastReadyDelayFact')
-    mq.delay(pingDelay)
-end
+        if not bAllowDead and targetSpawn() and targetSpawn.Dead() then
+            Logger.log_verbose("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s but my target (%d) is dead.",
+                spellName, targetId)
+            return false
+        end
 
---- Checks if a spell is loaded.
----
---- @param spell MQSpell The name of the spell to check.
---- @return boolean Returns true if the spell is loaded, false otherwise.
-function Casting.SpellLoaded(spell)
-    if not spell or not spell() then return false end
+        if (Targeting.GetXTHaterCount() > 0 or not bAllowMem) and (not Casting.CastReady(spell) or not mq.TLO.Me.Gem(spellName)()) then
+            Logger.log_debug("\ayUseSpell(): \ayI tried to cast %s but it was not ready and we are in combat - moving on.",
+                spellName)
+            return false
+        end
 
-    return (mq.TLO.Me.Gem(spell.RankName.Name())() ~= nil)
-end
+        local spellRequiredMem = false
+        if not me.Gem(spellName)() then
+            Logger.log_debug("\ayUseSpell(): \ay%s is not memorized - meming!", spellName)
+            Casting.MemorizeSpell(Casting.UseGem, spellName, true, 25000)
+            spellRequiredMem = true
+        end
 
---- Waits for the global cooldown to complete.
----
---- This function pauses execution until the global cooldown period has elapsed.
----
---- @param logPrefix string|nil: An optional prefix to be used in log messages.
-function Casting.WaitGlobalCoolDown(logPrefix)
-    while mq.TLO.Me.SpellInCooldown() do
-        mq.delay(100)
-        mq.doevents()
-        Logger.log_verbose(logPrefix and logPrefix or "" .. "Waiting for Global Cooldown to be ready...")
-    end
-end
+        if not me.Gem(spellName)() then
+            Logger.log_debug("\ayUseSpell(): \arFailed to memorized %s - moving on...", spellName)
+            return false
+        end
 
---- Uses the Origin ability for the character.
---- This function triggers the Origin ability, which typically teleports the character to their bind point.
---- Ensure that the character has the Origin ability available before calling this function.
----
---- @return boolean True if successful
-function Casting.UseOrigin()
-    if mq.TLO.FindItem("=Drunkard's Stein").ID() or 0 > 0 and mq.TLO.Me.ItemReady("=Drunkard's Stein") then
-        Logger.log_debug("\ag--\atFound a Drunkard's Stein, using that to get to PoK\ag--")
-        Casting.UseItem("Drunkard's Stein", mq.TLO.Me.ID())
+        Casting.WaitCastReady(spellName, spellRequiredMem and (5 * 60 * 100) or 5000)
+
+        Casting.WaitGlobalCoolDown()
+
+        Casting.ActionPrep()
+
+        retryCount = retryCount or 3
+
+        if targetId > 0 then
+            Targeting.SetTarget(targetId, true)
+        end
+
+        --if not spell.StacksTarget() then
+        --    Logger.log_debug("\ayUseSpell(): \arStacking checked failed - Someone tell Derple or Algar to add a Stacking Check to the condition of '%s'!", spellName)
+        --    return false
+        --end
+
+        local cmd = string.format("/cast \"%s\"", spellName)
+        Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESULT_NONE)
+
+        local spellRange = spell.MyRange() > 0 and spell.MyRange() or (spell.AERange() > 0 and spell.AERange() or 250)
+
+        repeat
+            Logger.log_verbose("\ayUseSpell(): Attempting to cast: %s", spellName)
+            Core.DoCmd(cmd)
+            Logger.log_verbose("\ayUseSpell(): Waiting to start cast: %s", spellName)
+            mq.delay("1s", function() return mq.TLO.Me.Casting() end)
+            Logger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
+            Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
+            mq.doevents()
+            mq.delay(1)
+            Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
+            retryCount = retryCount - 1
+        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
+
+        -- don't return control until we are done.
+        if Config:GetSetting('WaitOnGlobalCooldown') and not overrideWaitForGlobalCooldown then
+            Logger.log_verbose("\ayUseSpell(): Waiting on Global Cooldown After Casting: %s", spellName)
+            Casting.WaitGlobalCoolDown()
+            Logger.log_verbose("\agUseSpell(): Done Waiting on Global Cooldown After Casting: %s", spellName)
+        end
+
+        Config.Globals.LastUsedSpell = spellName
         return true
     end
 
-    if Casting.AAReady("Throne of Heroes") then
-        Logger.log_debug("\ag--\atUsing Throne of Heroes to get to Guild Lobby\ag--")
-        Logger.log_debug("\ag--\atAs you not within a zone we know\ag--")
+    Logger.log_verbose("\arCasting Failed: Invalid Spell Name")
+    return false
+end
 
-        Casting.UseAA("Throne of Heroes", mq.TLO.Me.ID())
-        return true
-    end
+--- Uses a specified song on a target.
+---
+--- @param songName string The name of the song to be used.
+--- @param targetId number The ID of the target on which the song will be used.
+--- @param bAllowMem boolean A flag indicating whether memorization is allowed.
+--- @param retryCount number? The number of times to retry using the song if it fails.
+--- @return boolean True if we were able to sing the song, false otherwise
+function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
+    if not songName then return false end
+    local me = mq.TLO.Me
+    Logger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, Strings.BoolToColorString(bAllowMem))
 
-    if Casting.AAReady("Origin") then
-        Logger.log_debug("\ag--\atUsing Origin to get to Guild Lobby\ag--")
-        Logger.log_debug("\ag--\atAs you not within a zone we know\ag--")
+    if songName then
+        local spell = mq.TLO.Spell(songName)
 
-        Casting.UseAA("Origin", mq.TLO.Me.ID())
-        return true
+        if not spell() then
+            Logger.log_error("\arSinging Failed: Somehow I tried to cast a spell That doesn't exist: %s",
+                songName)
+            return false
+        end
+
+        -- Check we actually have the song -- Me.Book always needs to use RankName
+        if not me.Book(songName)() then
+            Logger.log_error("\arSinging Failed: Somehow I tried to cast a spell I didn't know: %s", songName)
+            return false
+        end
+
+        if me.CurrentMana() < spell.Mana() then
+            Logger.log_verbose("\arSinging Failed: I tried to cast a spell %s I don't have mana for it.",
+                songName)
+            return false
+        end
+
+        if mq.TLO.Cursor.ID() then
+            Core.DoCmd("/autoinv")
+        end
+
+        local targetSpawn = mq.TLO.Spawn(targetId)
+
+        if (Targeting.GetXTHaterCount() > 0 or not bAllowMem) and (not Casting.CastReady(spell) or not mq.TLO.Me.Gem(songName)()) then
+            Logger.log_debug("\ayI tried to singing %s but it was not ready and we are in combat - moving on.",
+                songName)
+            return false
+        end
+
+        local spellRequiredMem = false
+        if not me.Gem(songName)() then
+            Logger.log_debug("\ay%s is not memorized - meming!", songName)
+            Casting.MemorizeSpell(Casting.UseGem, songName, true, 5000)
+            spellRequiredMem = true
+        end
+
+        if not me.Gem(songName)() then
+            Logger.log_debug("\arFailed to memorized %s - moving on...", songName)
+            return false
+        end
+
+        if targetId > 0 and targetId ~= mq.TLO.Me.ID() then
+            Targeting.SetTarget(targetId, true)
+        end
+
+        Casting.WaitCastReady(songName, spellRequiredMem and (5 * 60 * 100) or 5000)
+        --mq.delay(500)
+
+        Casting.ActionPrep()
+
+        Logger.log_verbose("\ag %s \ar =>> \ay %s \ar <<=", songName, targetSpawn.CleanName() or "None")
+
+        -- Swap Instruments
+        local classConfig = Modules:ExecModule("Class", "GetClassConfig")
+        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.SwapInst then
+            classConfig.HelperFunctions.SwapInst(spell.Skill())
+        end
+
+        retryCount = retryCount or 0
+
+        local spellRange = spell.MyRange() > 0 and spell.MyRange() or (spell.AERange() > 0 and spell.AERange() or 250)
+
+        repeat
+            if Core.OnEMU() then
+                -- EMU doesn't seem to tell us we begin singing.
+                Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)
+            end
+            Core.DoCmd("/cast \"%s\"", songName)
+
+            mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
+
+            -- while the casting window is open, still do movement if not paused or if movement enabled during pause.
+            while mq.TLO.Window("CastingWindow").Open() do
+                if not Config.Globals.PauseMain or Config:GetSetting('RunMovePaused') then
+                    Modules:ExecModule("Movement", "GiveTime", "Combat")
+                end
+
+                if (not targetSpawn or not targetSpawn() or Targeting.TargetIsType("corpse", targetSpawn)) and spell.SpellType() == "Detrimental" then
+                    mq.TLO.Me.StopCast()
+                    Logger.log_debug("UseSong(): Canceled singing %s because target is dead or no longer exists.", songName)
+                    break
+                elseif targetSpawn() and Targeting.GetTargetID() > 0 and targetSpawn.ID() ~= Targeting.GetTargetID() and spell.SpellType() == "Detrimental" then
+                    mq.TLO.Me.StopCast()
+                    Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%s/%d) is no longer myTarget(%s/%d)", songName, targetSpawn.CleanName() or "",
+                        targetSpawn.ID(), Targeting.GetTargetCleanName(), Targeting.GetTargetID())
+                    break
+                elseif targetSpawn() and Targeting.GetTargetDistance(targetSpawn) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
+                    mq.TLO.Me.StopCast()
+                    Logger.log_debug("UseSong(): Canceled singing %s because spellTarget(%d, range %d) is out of spell range(%d)", songName, targetSpawn.ID(),
+                        Targeting.GetTargetDistance(), spellRange)
+                    break
+                end
+                mq.doevents()
+                mq.delay(20)
+            end
+
+            retryCount = retryCount - 1
+        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
+
+        -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
+        local clipDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('SongClipDelayFact')
+        mq.delay(clipDelay)
+
+        Core.DoCmd("/stopsong")
+
+        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.SwapInst then
+            classConfig.HelperFunctions.SwapInst("Weapon")
+        end
+
+        return Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS
     end
 
     return false
 end
 
---- Prepares the necessary actions for the Casting module.
---- This function is responsible for setting up any prerequisites or initial configurations
---- required before executing the main functionalities of the Casting module.
---- It ensures that all necessary conditions are met and resources are allocated properly.
-function Casting.ActionPrep()
-    if not mq.TLO.Me.Standing() then
-        mq.TLO.Me.Stand()
-        mq.delay(10, function() return mq.TLO.Me.Standing() end)
+--- Uses a discipline spell on a specified target.
+--- @param discSpell MQSpell The name of the discipline spell to use.
+--- @param targetId number The ID of the target on which to use the discipline spell.
+--- @return boolean True if we were able to fire the Disc false otherwise.
+function Casting.UseDisc(discSpell, targetId)
+    local me = mq.TLO.Me
 
-        Config.Globals.InMedState = false
-    end
+    if not discSpell or not discSpell() then return false end
 
-    if mq.TLO.Window("SpellBookWnd").Open() then
-        mq.TLO.Window("SpellBookWnd").DoClose()
+    if mq.TLO.Window("CastingWindow").Open() or me.Casting() then
+        Logger.log_debug("CANT USE Disc - Casting Window Open")
+        return false
+    else
+        if me.CurrentEndurance() < discSpell.EnduranceCost() then
+            return false
+        else
+            Logger.log_debug("Trying to use Disc: %s", discSpell.RankName.Name())
+
+            Casting.ActionPrep()
+
+            if Casting.IsActiveDisc(discSpell.RankName.Name()) then
+                if me.ActiveDisc.ID() then
+                    Logger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(),
+                        me.ActiveDisc.Name())
+                    Core.DoCmd("/stopdisc")
+                    mq.delay(20, function() return not me.ActiveDisc() end)
+                end
+            end
+
+            Core.DoCmd("/squelch /doability \"%s\"", discSpell.RankName.Name())
+
+            mq.delay(discSpell.MyCastTime() or 1000,
+                function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting()) end)
+
+            -- Is this even needed?
+            if Casting.IsActiveDisc(discSpell.RankName.Name()) then
+                mq.delay(20, function() return me.ActiveDisc() end)
+            end
+
+            Logger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName.Name())
+
+            return true
+        end
     end
 end
 
@@ -950,6 +1238,16 @@ function Casting.UseAA(aaName, targetId, bAllowDead, retryCount)
     return true
 end
 
+--- Uses the specified ability.
+--- @param abilityName string The name of the ability to use.
+function Casting.UseAbility(abilityName)
+    local me = mq.TLO.Me
+    Core.DoCmd("/doability %s", abilityName)
+    mq.delay(8, function() return not me.AbilityReady(abilityName) end)
+    Logger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", abilityName)
+    return true
+end
+
 --- Uses an item on a specified target.
 --- @param itemName string The name of the item to be used.
 --- @param targetId number The ID of the target on which the item will be used.
@@ -981,18 +1279,8 @@ function Casting.UseItem(itemName, targetId)
     end
 
     if targetId == mq.TLO.Me.ID() then
-        if Casting.BuffActiveByID(item.Clicky.SpellID()) then
+        if Casting.IHaveBuff(item.Clicky.Spell.ID()) then
             Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the clicky buff is already active!", itemName)
-            return false
-        end
-
-        if Casting.BuffActiveByID(item.Spell.ID()) then
-            Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the buff is already active!", itemName)
-            return false
-        end
-
-        if Casting.SongActive(item.Spell) then
-            Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the song buff is already active: %s!", itemName, item.Spell.Name())
             return false
         end
 
@@ -1053,371 +1341,130 @@ function Casting.UseItem(itemName, targetId)
     end
 
     if oldTargetId > 0 then
+        Logger.log_debug("UseItem():switching target back to old target after casting aa")
         Targeting.SetTarget(oldTargetId, true)
-    else
-        Targeting.ClearTarget()
     end
 
     return true
 end
 
---- Uses the specified ability.
----
---- @param abilityName string The name of the ability to use.
-function Casting.UseAbility(abilityName)
-    local me = mq.TLO.Me
-    Core.DoCmd("/doability %s", abilityName)
-    mq.delay(8, function() return not me.AbilityReady(abilityName) end)
-    Logger.log_debug("Using Ability \ao =>> \ag %s \ao <<=", abilityName)
-end
+--- Prepares the necessary actions for the Casting module.
+--- This function is responsible for setting up any prerequisites or initial configurations
+--- required before executing the main functionalities of the Casting module.
+--- It ensures that all necessary conditions are met and resources are allocated properly.
+function Casting.ActionPrep()
+    if not mq.TLO.Me.Standing() then
+        mq.TLO.Me.Stand()
+        mq.delay(10, function() return mq.TLO.Me.Standing() end)
 
---- Uses a discipline spell on a specified target.
----
---- @param discSpell MQSpell The name of the discipline spell to use.
---- @param targetId number The ID of the target on which to use the discipline spell.
---- @return boolean True if we were able to fire the Disc false otherwise.
-function Casting.UseDisc(discSpell, targetId)
-    local me = mq.TLO.Me
+        Config.Globals.InMedState = false
+    end
 
-    if not discSpell or not discSpell() then return false end
-
-    if mq.TLO.Window("CastingWindow").Open() or me.Casting() then
-        Logger.log_debug("CANT USE Disc - Casting Window Open")
-        return false
-    else
-        if me.CurrentEndurance() < discSpell.EnduranceCost() then
-            return false
-        else
-            Logger.log_debug("Trying to use Disc: %s", discSpell.RankName.Name())
-
-            Casting.ActionPrep()
-
-            if Casting.IsActiveDisc(discSpell.RankName.Name()) then
-                if me.ActiveDisc.ID() then
-                    Logger.log_debug("Cancelling Disc for %s -- Active Disc: [%s]", discSpell.RankName.Name(),
-                        me.ActiveDisc.Name())
-                    Core.DoCmd("/stopdisc")
-                    mq.delay(20, function() return not me.ActiveDisc() end)
-                end
-            end
-
-            Core.DoCmd("/squelch /doability \"%s\"", discSpell.RankName.Name())
-
-            mq.delay(discSpell.MyCastTime() or 1000,
-                function() return (not me.CombatAbilityReady(discSpell.RankName.Name())() and not me.Casting()) end)
-
-            -- Is this even needed?
-            if Casting.IsActiveDisc(discSpell.RankName.Name()) then
-                mq.delay(20, function() return me.ActiveDisc() end)
-            end
-
-            Logger.log_debug("\aw Cast >>> \ag %s", discSpell.RankName.Name())
-
-            return true
-        end
+    if mq.TLO.Window("SpellBookWnd").Open() then
+        mq.TLO.Window("SpellBookWnd").DoClose()
     end
 end
 
---- Uses a specified song on a target.
----
---- @param songName string The name of the song to be used.
---- @param targetId number The ID of the target on which the song will be used.
---- @param bAllowMem boolean A flag indicating whether memorization is allowed.
---- @param retryCount number? The number of times to retry using the song if it fails.
---- @return boolean True if we were able to sing the song, false otherwise
-function Casting.UseSong(songName, targetId, bAllowMem, retryCount)
-    if not songName then return false end
-    local me = mq.TLO.Me
-    Logger.log_debug("\ayUseSong(%s, %d, %s)", songName, targetId, Strings.BoolToColorString(bAllowMem))
+--- Waits for the casting to finish on the specified target.
+--- @param target MQSpawn The target to wait for the casting to finish.
+--- @param bAllowDead boolean Whether to allow the target to be dead.
+function Casting.WaitCastFinish(target, bAllowDead, spellRange) --I am not vested in the math below, I simply converted the existing entry from sec to ms
+    local maxWaitOrig = ((mq.TLO.Me.Casting.MyCastTime() or 0) + ((mq.TLO.EverQuest.Ping() * 20) + 1000))
+    local maxWait = maxWaitOrig
 
-    if songName then
-        local spell = mq.TLO.Spell(songName)
-
-        if not spell() then
-            Logger.log_error("\arSinging Failed: Somehow I tried to cast a spell That doesn't exist: %s",
-                songName)
-            return false
+    while mq.TLO.Me.Casting() do
+        local currentCast = mq.TLO.Me.Casting()
+        Logger.log_super_verbose("WaitCastFinish(): Waiting to Finish Casting...")
+        mq.delay(20)
+        if (not target or not target() or Targeting.TargetIsType("corpse", target)) and not bAllowDead then
+            mq.TLO.Me.StopCast()
+            Logger.log_debug("WaitCastFinish(): Canceled casting %s because target is dead or no longer exists.", currentCast)
+            return
+        elseif target() and Targeting.GetTargetID() > 0 and target.ID() ~= Targeting.GetTargetID() then
+            mq.TLO.Me.StopCast()
+            Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%s/%d) is no longer myTarget(%s/%d)", currentCast, target.CleanName() or "",
+                target.ID(), Targeting.GetTargetCleanName(), Targeting.GetTargetID())
+            return
+        elseif target() and Targeting.GetTargetDistance(target) > (spellRange * 1.1) then --allow for slight movement in and out of range, if the target runs off, this is still easily triggered
+            mq.TLO.Me.StopCast()
+            Logger.log_debug("WaitCastFinish(): Canceled casting %s because spellTarget(%d, range %d) is out of spell range(%d)", currentCast, target.ID(),
+                Targeting.GetTargetDistance(), spellRange)
+            return
+        elseif target() and target.ID() ~= Targeting.GetTargetID() then
+            Logger.log_debug("WaitCastFinish(): Warning your spellTarget(%d) for %s is no longer your currentTarget(%d)", target.ID(), currentCast, Targeting.GetTargetID())
         end
 
-        -- Check we actually have the song -- Me.Book always needs to use RankName
-        if not me.Book(songName)() then
-            Logger.log_error("\arSinging Failed: Somehow I tried to cast a spell I didn't know: %s", songName)
-            return false
-        end
-
-        if me.CurrentMana() < spell.Mana() then
-            Logger.log_verbose("\arSinging Failed: I tried to cast a spell %s I don't have mana for it.",
-                songName)
-            return false
-        end
-
-        if mq.TLO.Cursor.ID() then
-            Core.DoCmd("/autoinv")
-        end
-
-        local targetSpawn = mq.TLO.Spawn(targetId)
-
-        if (Targeting.GetXTHaterCount() > 0 or not bAllowMem) and (not Casting.CastReady(songName) or not mq.TLO.Me.Gem(songName)()) then
-            Logger.log_debug("\ayI tried to singing %s but it was not ready and we are in combat - moving on.",
-                songName)
-            return false
-        end
-
-        local spellRequiredMem = false
-        if not me.Gem(songName)() then
-            Logger.log_debug("\ay%s is not memorized - meming!", songName)
-            Casting.MemorizeSpell(Casting.UseGem, songName, true, 5000)
-            spellRequiredMem = true
-        end
-
-        if not me.Gem(songName)() then
-            Logger.log_debug("\arFailed to memorized %s - moving on...", songName)
-            return false
-        end
-
-        if targetId > 0 and targetId ~= mq.TLO.Me.ID() then
-            Targeting.SetTarget(targetId, true)
-        end
-
-        Casting.WaitCastReady(songName, spellRequiredMem and (5 * 60 * 100) or 5000)
-        --mq.delay(500)
-
-        Casting.ActionPrep()
-
-        Logger.log_verbose("\ag %s \ar =>> \ay %s \ar <<=", songName, targetSpawn.CleanName() or "None")
-
-        -- Swap Instruments
-        local classConfig = Modules:ExecModule("Class", "GetClassConfig")
-        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.SwapInst then
-            classConfig.HelperFunctions.SwapInst(spell.Skill())
-        end
-
-        retryCount = retryCount or 0
-
-        repeat
-            if Core.OnEMU() then
-                -- EMU doesn't seem to tell us we begin singing.
-                Casting.SetLastCastResult(Config.Constants.CastResults.CAST_SUCCESS)
+        if (maxWaitOrig - maxWait) % 200 == 0 and Combat.DoCombatActions() and not mq.TLO.Me.Pet.Combat() then --alleviate pets standing around at early levels where mob HPs are low and cast times are long
+            if ((Config:GetSetting('DoPet') or Config:GetSetting('CharmOn')) and mq.TLO.Pet.ID() ~= 0) and (Targeting.GetTargetPctHPs(Targeting.GetAutoTarget()) <= Config:GetSetting('PetEngagePct')) then
+                Combat.PetAttack(Config.Globals.AutoTargetID, true)
             end
-            Core.DoCmd("/cast \"%s\"", songName)
-
-            mq.delay("3s", function() return mq.TLO.Window("CastingWindow").Open() end)
-
-            -- while the casting window is open, still do movement if not paused or if movement enabled during pause.
-            while mq.TLO.Window("CastingWindow").Open() do
-                if not Config.Globals.PauseMain or Config:GetSetting('RunMovePaused') then
-                    Modules:ExecModule("Movement", "GiveTime", "Combat")
-                end
-
-                if targetId > 0 and targetId ~= mq.TLO.Me.ID() then
-                    if targetSpawn() and Targeting.GetTargetPctHPs(targetSpawn) <= 0 and spell.SpellType() == "Detrimental" then -- Almost all bard casts should be allowed to continue
-                        mq.TLO.Me.StopCast()
-                        Logger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is dead with no HP(%d)", targetSpawn.ID(),
-                            Targeting.GetTargetPctHPs(targetSpawn))
-                        break
-                    elseif targetSpawn() and Targeting.GetTargetID() > 0 and targetSpawn.ID() ~= Targeting.GetTargetID() and spell.SpellType() == "Detrimental" then -- Almost all bard casts should be allowed to continue
-                        mq.TLO.Me.StopCast()
-                        Logger.log_debug("UseSong::WaitSingFinish(): Canceled casting because spellTarget(%d) is no longer myTarget(%d)", targetSpawn.ID(),
-                            Targeting.GetTargetID())
-                        break
-                    elseif targetSpawn() and targetSpawn.ID() ~= Targeting.GetTargetID() then
-                        Logger.log_debug("UseSong::WaitSingFinish(): Warning your spellTarget(%d) is no longar your currentTarget(%d)", targetSpawn.ID(),
-                            Targeting.GetTargetID())
-                    end
-                end
-                mq.doevents()
-                mq.delay(20)
-            end
-
-            retryCount = retryCount - 1
-        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
-
-        -- bard songs take a bit to refresh after casting window closes, otherwise we'll clip our song
-        local clipDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('SongClipDelayFact')
-        mq.delay(clipDelay)
-
-        Core.DoCmd("/stopsong")
-
-        if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.SwapInst then
-            classConfig.HelperFunctions.SwapInst("Weapon")
         end
 
-        return Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS
+        maxWait = maxWait - 20
+
+        if maxWait <= 0 then
+            local msg = string.format("StuckGem Data::: %d - MaxWait - %d - Casting Window: %s - Assist Target ID: %d",
+                (mq.TLO.Me.Casting.ID() or -1), maxWaitOrig,
+                Strings.BoolToColorString(mq.TLO.Window("CastingWindow").Open()), Config.Globals.AutoTargetID)
+
+            Logger.log_debug(msg)
+            Comms.PrintGroupMessage(msg)
+
+            --Core.DoCmd("/alt act 511")
+            mq.TLO.Me.StopCast()
+            return
+        end
+
+        mq.doevents()
     end
-
-    return false
 end
 
---- Uses a specified spell on a target.
----
---- @param spellName string The name of the spell to be used.
---- @param targetId number The ID of the target on which the spell will be cast.
---- @param bAllowMem boolean Whether to allow the spell to be memorized if not already.
---- @param bAllowDead boolean? Whether to allow casting the spell on a dead target.
---- @param overrideWaitForGlobalCooldown boolean? Whether to override the wait for the global cooldown.
---- @param retryCount number? The number of times to retry casting the spell if it fails.
---- @return boolean Returns true if the spell was successfully cast, false otherwise.
-function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWaitForGlobalCooldown, retryCount)
-    local me = mq.TLO.Me
-    -- Immediately send bards to the song handler.
-    if me.Class.ShortName():lower() == "brd" then
-        return Casting.UseSong(spellName, targetId, bAllowMem)
+--- Waits until the specified spell is ready to be cast or the maximum wait time is reached.
+--- @param spell string The name of the spell to wait for.
+--- @param maxWait number The maximum amount of time (in seconds) to wait for the spell to be ready.
+function Casting.WaitCastReady(spell, maxWait)
+    while not mq.TLO.Me.SpellReady(spell)() and maxWait > 0 do
+        mq.delay(1)
+        mq.doevents()
+        if Targeting.GetXTHaterCount() > 0 then
+            Logger.log_debug("I was interruped by combat while waiting to cast %s.", spell)
+            return
+        end
+        if not mq.TLO.Me.Book(spell)() then
+            Logger.log_debug("I was trying to cast %s as my persona was changed, aborting.", spell)
+            return
+        end
+
+        maxWait = maxWait - 1
+
+        if (maxWait % 100) == 0 then
+            Logger.log_verbose("Waiting for spell '%s' to be ready...", spell)
+        end
     end
 
-    Logger.log_debug("\ayUseSpell(%s, %d, %s)", spellName, targetId, Strings.BoolToColorString(bAllowMem))
-
-    if me.Moving() then
-        Logger.log_debug("\ayUseSpell(%s, %d, %s) -- Failed because I am moving", spellName, targetId,
-            Strings.BoolToColorString(bAllowMem))
-        return false
-    end
-
-    if mq.TLO.Cursor.ID() then
-        Core.DoCmd("/autoinv")
-    end
-
-    if spellName then
-        local spell = mq.TLO.Spell(spellName)
-
-        if not spell() then
-            Logger.log_error("\ayUseSpell(): \arCasting Failed: Somehow I tried to cast a spell That doesn't exist: %s",
-                spellName)
-            return false
-        end
-        -- Check we actually have the spell -- Me.Book always needs to use RankName
-        if not me.Book(spellName)() then
-            Logger.log_error("\ayUseSpell(): \arCasting Failed: Somehow I tried to cast a spell I didn't know: %s", spellName)
-            return false
-        end
-
-        local targetSpawn = mq.TLO.Spawn(targetId)
-
-        if targetSpawn() and Targeting.TargetIsType("pc", targetSpawn) then
-            -- check to see if this is too powerful a spell
-            local targetLevel    = targetSpawn.Level()
-            local spellLevel     = spell.Level()
-            local levelCheckPass = true
-            if targetLevel <= 45 and spellLevel > 50 then levelCheckPass = false end
-            if targetLevel <= 60 and spellLevel > 65 then levelCheckPass = false end
-            if targetLevel <= 65 and spellLevel > 95 then levelCheckPass = false end
-
-            if not levelCheckPass then
-                Logger.log_error("\ayUseSpell(): \arCasting %s failed level check with target=%d and spell=%d", spellName,
-                    targetLevel, spellLevel)
-                return false
-            end
-        end
-
-        -- Check for Reagents
-        if not Casting.ReagentCheck(spell) then
-            Logger.log_debug("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have Reagents for.",
-                spellName)
-            return false
-        end
-
-        -- Check for enough mana -- just in case something has changed by this point...
-        if me.CurrentMana() < spell.Mana() then
-            Logger.log_verbose("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have mana for it.",
-                spellName)
-            return false
-        end
-
-        -- If we're combat casting we need to both have the same swimming status
-        if targetId == 0 or (targetSpawn() and targetSpawn.FeetWet() ~= me.FeetWet()) then
-            Logger.log_debug("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s I don't have a target (%d) for it.",
-                spellName, targetId)
-            return false
-        end
-
-        if not bAllowDead and targetSpawn() and targetSpawn.Dead() then
-            Logger.log_verbose("\ayUseSpell(): \arCasting Failed: I tried to cast a spell %s but my target (%d) is dead.",
-                spellName, targetId)
-            return false
-        end
-
-        if (Targeting.GetXTHaterCount() > 0 or not bAllowMem) and (not Casting.CastReady(spellName) or not mq.TLO.Me.Gem(spellName)()) then
-            Logger.log_debug("\ayUseSpell(): \ayI tried to cast %s but it was not ready and we are in combat - moving on.",
-                spellName)
-            return false
-        end
-
-        local spellRequiredMem = false
-        if not me.Gem(spellName)() then
-            Logger.log_debug("\ayUseSpell(): \ay%s is not memorized - meming!", spellName)
-            Casting.MemorizeSpell(Casting.UseGem, spellName, true, 25000)
-            spellRequiredMem = true
-        end
-
-        if not me.Gem(spellName)() then
-            Logger.log_debug("\ayUseSpell(): \arFailed to memorized %s - moving on...", spellName)
-            return false
-        end
-
-        Casting.WaitCastReady(spellName, spellRequiredMem and (5 * 60 * 100) or 5000)
-
-        Casting.WaitGlobalCoolDown()
-
-        Casting.ActionPrep()
-
-        retryCount = retryCount or 3
-
-        if targetId > 0 then
-            Targeting.SetTarget(targetId, true)
-        end
-
-        --if not Casting.SpellStacksOnTarget(spell) then
-        --    Logger.log_debug("\ayUseSpell(): \arStacking checked failed - Someone tell Derple or Algar to add a Stacking Check to the condition of '%s'!", spellName)
-        --    return false
-        --end
-
-        local cmd = string.format("/cast \"%s\"", spellName)
-        Casting.SetLastCastResult(Config.Constants.CastResults.CAST_RESULT_NONE)
-
-        local spellRange = spell.MyRange() > 0 and spell.MyRange() or (spell.AERange() > 0 and spell.AERange() or 250)
-
-        repeat
-            Logger.log_verbose("\ayUseSpell(): Attempting to cast: %s", spellName)
-            Core.DoCmd(cmd)
-            Logger.log_verbose("\ayUseSpell(): Waiting to start cast: %s", spellName)
-            mq.delay("1s", function() return mq.TLO.Me.Casting() end)
-            Logger.log_verbose("\ayUseSpell(): Started to cast: %s - waiting to finish", spellName)
-            Casting.WaitCastFinish(targetSpawn, bAllowDead or false, spellRange)
-            mq.doevents()
-            mq.delay(1)
-            Logger.log_verbose("\atUseSpell(): Finished waiting on cast: %s result = %s retries left = %d", spellName, Casting.GetLastCastResultName(), retryCount)
-            retryCount = retryCount - 1
-        until Config.Constants.CastCompleted:contains(Casting.GetLastCastResultName()) or retryCount < 0
-
-        -- don't return control until we are done.
-        if Config:GetSetting('WaitOnGlobalCooldown') and not overrideWaitForGlobalCooldown then
-            Logger.log_verbose("\ayUseSpell(): Waiting on Global Cooldown After Casting: %s", spellName)
-            Casting.WaitGlobalCoolDown()
-            Logger.log_verbose("\agUseSpell(): Done Waiting on Global Cooldown After Casting: %s", spellName)
-        end
-
-        Config.Globals.LastUsedSpell = spellName
-        return true
-    end
-
-    Logger.log_verbose("\arCasting Failed: Invalid Spell Name")
-    return false
+    -- account for lag
+    local pingDelay = mq.TLO.EverQuest.Ping() * Config:GetSetting('CastReadyDelayFact')
+    mq.delay(pingDelay)
 end
 
---- Checks if the character is currently feigning death.
---- @return boolean True if the character is feigning death, false otherwise.
-function Casting.IAmFeigning()
-    return mq.TLO.Me.State():lower() == "feign"
+--- Waits for the global cooldown to complete.
+--- This function pauses execution until the global cooldown period has elapsed.
+--- @param logPrefix string|nil: An optional prefix to be used in log messages.
+function Casting.WaitGlobalCoolDown(logPrefix)
+    while mq.TLO.Me.SpellInCooldown() do
+        mq.delay(100)
+        mq.doevents()
+        Logger.log_verbose(logPrefix and logPrefix or "" .. "Waiting for Global Cooldown to be ready...")
+    end
 end
 
 --- Retrieves the name of the last cast result.
----
 --- @return string The name of the last cast result.
 function Casting.GetLastCastResultName()
     return Config.Constants.CastResultsIdToName[Config.Globals.CastResult]
 end
 
 --- Retrieves the ID of the last cast result.
----
 --- @return number The ID of the last cast result.
 function Casting.GetLastCastResultId()
     return Config.Globals.CastResult
@@ -1430,128 +1477,7 @@ function Casting.SetLastCastResult(result)
     Config.Globals.CastResult = result
 end
 
---- Checks if a self-buff spell can be cast on a pet.
----
---- @param spell MQSpell The name of the spell to check.
---- @return boolean Returns true if the spell can be cast on a pet, false otherwise.
-function Casting.SelfBuffPetCheck(spell)
-    if not spell or not spell() then return false end
-
-    -- Skip if the spell is set as a blocked pet buff, otherwise the bot loops forever
-    if mq.TLO.Me.BlockedPetBuff(spell.ID())() then
-        return false
-    end
-    Logger.log_verbose("\atSelfBuffPetCheck(%s) RankPetBuff(%s) PetBuff(%s) Stacks(%s)",
-        spell.RankName.Name(),
-        Strings.BoolToColorString(not mq.TLO.Me.PetBuff(spell.RankName.Name())()),
-        Strings.BoolToColorString(not mq.TLO.Me.PetBuff(spell.Name())()),
-        Strings.BoolToColorString(spell.StacksPet()))
-
-    return (not mq.TLO.Me.PetBuff(spell.RankName.Name())()) and (not mq.TLO.Me.PetBuff(spell.Name())()) and spell.StacksPet() and mq.TLO.Me.Pet.ID() > 0
-end
-
---- Checks if the self-buff spell is active.
----
---- @param spell MQSpell|string The name of the spell to check.
---- @return boolean Returns true if the spell is active, false otherwise.
-function Casting.SelfBuffCheck(spell)
-    if type(spell) == "string" then
-        Logger.log_verbose("\agSelfBuffCheck(%s) string", spell)
-        return Casting.BuffActiveByName(spell)
-    end
-    if not spell or not spell() then
-        --Logger.log_verbose("\arSelfBuffCheck() Spell Invalid")
-        return false
-    end
-
-    local res = not Casting.BuffActiveByID(spell.RankName.ID()) and spell.Stacks()
-
-    Logger.log_verbose("\aySelfBuffCheck(\at%s\ay/\am%d\ay) Spell Obj => %s", spell.RankName(),
-        spell.RankName.ID(),
-        Strings.BoolToColorString(res))
-
-    return res
-end
-
---- Checks if the burn condition is met for RGMercs.
---- This function evaluates certain criteria to determine if the burn phase should be initiated.
---- @return boolean True if the burn condition is met, false otherwise.
-function Casting.BurnCheck()
-    local settings = Config:GetSettings()
-    local autoBurn = settings.BurnAuto and
-        ((Targeting.GetXTHaterCount() >= settings.BurnMobCount) or (Targeting.IsNamed(mq.TLO.Target) and settings.BurnNamed))
-    local alwaysBurn = (settings.BurnAlways and settings.BurnAuto)
-    local forcedBurn = Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()
-
-    Casting.LastBurnCheck = autoBurn or alwaysBurn or forcedBurn
-    return Casting.LastBurnCheck
-end
-
---- Determines if the current entity can receive buffs.
---- @return boolean True if the entity can be buffed, false otherwise.
-function Casting.AmIBuffable()
-    local myCorpseCount = Config:GetSetting('BuffRezables') and 0 or mq.TLO.SpawnCount(string.format('pccorpse %s radius 100 zradius 50', mq.TLO.Me.CleanName()))()
-    if myCorpseCount > 0 then Logger.log_debug("Corpse detected (%s), aborting rotation.", mq.TLO.Me.CleanName()) end
-    return myCorpseCount == 0
-end
-
---- Retrieves the list of group IDs that can be buffed.
----
---- @return table A table containing the IDs of the groups that can receive buffs.
-function Casting.GetBuffableGroupIDs()
-    local groupIds = {}
-
-    if Casting.AmIBuffable() then
-        table.insert(groupIds, mq.TLO.Me.ID())
-
-        local count = mq.TLO.Group.Members()
-        for i = 1, count do
-            local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Group.Member(i).DisplayName())
-            if mq.TLO.SpawnCount(rezSearch)() > 0 and not Config:GetSetting('BuffRezables') then
-                groupIds = {}
-                Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Group.Member(i).DisplayName())
-                break
-            else
-                table.insert(groupIds, mq.TLO.Group.Member(i).ID())
-            end
-        end
-
-        -- check OA list
-        for _, n in ipairs(Config:GetSetting('OutsideAssistList')) do
-            -- dont double up OAs who are in our group
-            if not mq.TLO.Group.Member(n)() then
-                local oaSpawn = mq.TLO.Spawn(("pc =%s"):format(n))
-                if oaSpawn and oaSpawn() and oaSpawn.Distance() <= 90 then
-                    table.insert(groupIds, oaSpawn.ID())
-                end
-            end
-        end
-    else
-        Logger.log_debug("Groupmember corpse detected (%s), aborting group buff rotation.", mq.TLO.Me.DisplayName())
-    end
-
-    return groupIds
-end
-
---- Retrieves the ID of the item summoned by a given spell.
----
---- @param spell MQSpell The name or identifier of the spell.
---- @return number The ID of the summoned item.
-function Casting.GetSummonedItemIDFromSpell(spell)
-    if not spell or not spell() then return 0 end
-
-    for i = 1, spell.NumEffects() do
-        -- 32 means SPA_CREATE_ITEM
-        if spell.Attrib(i)() == 32 then
-            return tonumber(spell.Base(i)()) or 0
-        end
-    end
-
-    return 0
-end
-
 --- Retrieves the last used spell.
----
 --- @return string The name of the last used spell.
 function Casting.GetLastUsedSpell()
     return Config.Globals.LastUsedSpell
@@ -1559,12 +1485,11 @@ end
 
 --- Automatically manages the medication process for the character.
 --- This function handles the logic for ensuring the character takes the necessary medication at the appropriate times.
----
 function Casting.AutoMed()
     local me = mq.TLO.Me
     if Config:GetSetting('DoMed') == 1 then return end
 
-    if me.Class.ShortName():lower() == "brd" and me.Level() > 5 then return end
+    if Core.MyClassIs("BRD") and me.Level() > 5 and not Config:GetSetting('BardRespectMedState', true) then return end
 
     if me.Mount.ID() and not mq.TLO.Zone.Indoor() then
         Logger.log_verbose("Sit check returning early due to mount.")
@@ -1664,6 +1589,7 @@ function Casting.AutoMed()
     end
 end
 
+--- Function to execute use of modrods.
 function Casting.ClickModRod()
     local me = mq.TLO.Me
     if not Config.Constants.RGCasters:contains(me.Class.ShortName()) or me.PctMana() > Config:GetSetting('ModRodManaPct') or me.PctHPs() < 60 or Casting.IAmFeigning() or mq.TLO.Me.Invis() then
@@ -1682,81 +1608,6 @@ function Casting.ClickModRod()
             return
         end
     end
-end
-
---- Checks if a song spell is memorized.
----
---- @param songSpell MQSpell The name of the song spell to check.
---- @return boolean True if the song spell is memorized, false otherwise.
-function Casting.SongMemed(songSpell)
-    if not songSpell or not songSpell() then return false end
-    local me = mq.TLO.Me
-
-    return me.Gem(songSpell.RankName.Name())() ~= nil
-end
-
---- Returns if a Buff Song is in need of recast
---- @param songSpell MQSpell The name of the song spell to be used for buffing.
---- @return boolean Returns true if the buff is needed, false otherwise.
-function Casting.BuffSong(songSpell)
-    if not songSpell or not songSpell() then return false end
-    local me = mq.TLO.Me
-
-    local res = Casting.SongMemed(songSpell) and
-        (me.Song(songSpell.Name()).Duration.TotalSeconds() or 0) <= (songSpell.MyCastTime.Seconds() + 6)
-    Logger.log_verbose("\ayBuffSong(%s) => memed(%s), duration(%0.2f) < casttime(%0.2f) --> result(%s)",
-        songSpell.Name(),
-        Strings.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
-        me.Song(songSpell.Name()).Duration.TotalSeconds() or 0, songSpell.MyCastTime.Seconds() + 6,
-        Strings.BoolToColorString(res))
-    return res
-end
-
---- Returns if a Debuff Song is in need of recast
---- @param songSpell MQSpell The name of the song spell to be used for debuffing.
---- @return boolean Returns true if the debuff was successfully applied, false otherwise.
-function Casting.DebuffSong(songSpell)
-    if not songSpell or not songSpell() then return false end
-    local me = mq.TLO.Me
-    local res = me.Gem(songSpell.Name()) and not Casting.TargetHasBuff(songSpell)
-    Logger.log_verbose("\ayBuffSong(%s) => memed(%s), targetHas(%s) --> result(%s)", songSpell.Name(),
-        Strings.BoolToColorString(me.Gem(songSpell.Name())() ~= nil),
-        Strings.BoolToColorString(Casting.TargetHasBuff(songSpell)), Strings.BoolToColorString(res))
-    return res
-end
-
---- Checks the debuff condition for the Target
---- This function evaluates the current debuff status and performs necessary actions.
----
---- @return boolean True if the target matches the Con requirements for debuffing.
-function Casting.DebuffConCheck()
-    local conLevel = (Config.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
-    return conLevel >= Config:GetSetting('DebuffMinCon') or (Targeting.IsNamed(mq.TLO.Target) and Config:GetSetting('DebuffNamedAlways'))
-end
-
---- Determines whether the utility should shrink.
---- @return boolean True if the utility should shrink, false otherwise.
-function Casting.ShouldShrink()
-    return (Config:GetSetting('DoShrink') and true or false) and mq.TLO.Me.Height() > 2.2 and
-        (Config:GetSetting('ShrinkItem'):len() > 0) and Casting.DoBuffCheck()
-end
-
---- Determines whether the pet should be shrunk.
---- @return boolean True if the pet should be shrunk, false otherwise.
-function Casting.ShouldShrinkPet()
-    return (Config:GetSetting('DoShrinkPet') and true or false) and mq.TLO.Me.Pet.ID() > 0 and mq.TLO.Me.Pet.Height() > 1.8 and
-        (Config:GetSetting('ShrinkPetItem'):len() > 0) and Casting.DoPetCheck()
-end
-
---- Checks if the target is in range for an ability.
---- @param target MQTarget? The target entity to measure the range to.
-function Casting.AbilityRangeCheck(target)
-    return Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target)
-end
-
-function Casting.GemReady(spell) -- split from CastReady so we don't have to pass RankName in class configs. If we change SpellReady, we break custom configs
-    if not spell or not spell() then return false end
-    return mq.TLO.Me.SpellReady(spell.RankName.Name())()
 end
 
 return Casting
