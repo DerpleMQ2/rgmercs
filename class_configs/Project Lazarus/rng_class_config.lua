@@ -1143,18 +1143,18 @@ local _ClassConfig = {
                 name = "Poison Arrows",
                 type = "AA",
                 tooltip = Tooltips.PoisonArrow,
-                active_cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
+                active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
                 cond = function(self, aaName, target)
-                    return Casting.DetAACheck(aaName) and Config:GetSetting('DoPoisonArrow')
+                    return Casting.SelfBuffAACheck(aaName) and Config:GetSetting('DoPoisonArrow')
                 end,
             },
             {
                 name = "Flaming Arrows",
                 type = "AA",
                 tooltip = Tooltips.FlamingArrow,
-                active_cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
+                active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
                 cond = function(self, aaName, target)
-                    return Casting.DetAACheck(aaName) and (mq.TLO.Me.Level() < 86 or not Config:GetSetting('DoPoisonArrow'))
+                    return Casting.SelfBuffAACheck(aaName) and (mq.TLO.Me.Level() < 86 or not Config:GetSetting('DoPoisonArrow'))
                 end,
             },
         },
