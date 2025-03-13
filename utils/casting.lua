@@ -292,7 +292,7 @@ function Casting.PeerBuffCheck(spell, target)
         return false
     end
 
-    local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[name \"%s\"]", spellName), 1000)
+    local spellResult = DanNet.query(targetName, string.format("Me.FindBuff[name '%s']", spellName), 1000)
     if spellResult:lower() == "null" then
         Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), let's check for triggers.", spellName, spellID, targetName, targetId)
         local numEffects = mq.TLO.Spell(spellName).NumEffects()
@@ -304,7 +304,7 @@ function Casting.PeerBuffCheck(spell, target)
             if triggerSpell and triggerSpell() and triggerSpell.ID() > 0 then
                 local triggerName = triggerSpell.Name()
                 local triggerID = triggerSpell.ID()
-                local triggerResult = DanNet.query(targetName, string.format("Me.FindBuff[name \"%s\"]", triggerName), 1000)
+                local triggerResult = DanNet.query(targetName, string.format("Me.FindBuff[name '%s']", triggerName), 1000)
                 if triggerResult:lower() == "null" then
                     Logger.log_verbose("PeerBuffCheck: %s(ID:%d) not found on %s(ID:%d), checking stacking.", triggerName, triggerID, targetName, targetId)
                     local triggerStackResult = DanNet.query(targetName, string.format("Spell[%s].Stacks", triggerName), 1000)
