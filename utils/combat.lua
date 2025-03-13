@@ -377,14 +377,12 @@ function Combat.FindBestAutoTarget(validateFn)
                 -- unless specifically told.
 
                 if Config.Globals.AutoTargetID == 0 then
-                    if target.ID() > 0 then
-                        if target.ID() == Config.Globals.LastPulledID then
-                            Logger.log_verbose("It seems that we pulled %s(ID: %d), setting it as the initial AutoTarget.", target.CleanName(), target.ID())
-                            Config.Globals.AutoTargetID = Config.Globals.LastPulledID
-                        elseif (target and target.Distance3D() or 0) > Targeting.GetTargetMaxRangeTo(target) and targetValid then
-                            Logger.log_verbose("It seems that we manually pulled %s(ID: %d), setting it as the initial AutoTarget.", target.CleanName(), target.ID())
-                            Config.Globals.AutoTargetID = target.ID()
-                        end
+                    if Targeting.IsSpawnXTHater(Config.Globals.LastPulledID) then
+                        Logger.log_verbose("It seems that we pulled %s(ID: %d), setting it as the initial AutoTarget.", target.CleanName(), target.ID())
+                        Config.Globals.AutoTargetID = Config.Globals.LastPulledID
+                    elseif target.ID() > 0 and (target and target.Distance3D() or 0) > Targeting.GetTargetMaxRangeTo(target) and targetValid then
+                        Logger.log_verbose("It seems that we manually pulled %s(ID: %d), setting it as the initial AutoTarget.", target.CleanName(), target.ID())
+                        Config.Globals.AutoTargetID = target.ID()
                     else
                         -- Set our autotarget to the target MATargetScan chooses.
                         Config.Globals.AutoTargetID = Combat.MATargetScan(Config:GetSetting('AssistRange'),
