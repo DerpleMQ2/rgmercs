@@ -490,10 +490,21 @@ Config.DefaultConfig = {
         DisplayName = "Med Aggro Check",
         Category = "Med/Mana",
         Index = 8,
-        Tooltip = "Force a stand when we have high (> 90%) aggro from an xtarget.",
+        Tooltip = "Force a stand when we have high (> MedAggroCheckPct %) aggro from an xtarget.",
         Default = false,
         FAQ = "Why am I trying to meditate when I am being hit or targeted in combat?",
         Answer = "You can enable the Med Aggro Check on the Med/Mana tab to stop meditation in these conditions.",
+    },
+    ['MedAggroCheckPct']     = {
+        DisplayName = "Med Aggro Check Pct",
+        Category = "Med/Mana",
+        Index = 8,
+        Tooltip = "Set the Percent Aggro threshold to stand up if aggro is above.",
+        Default = 75,
+        Min = 1,
+        Max = 99,
+        FAQ = "Why am I trying to meditate when I am being hit or targeted in combat?",
+        Answer = "You can Adjust the aggro threshold percentage to stop meditation in these conditions.",
     },
     ['StandWhenDone']        = {
         DisplayName = "Stand When Done Medding",
@@ -1250,6 +1261,19 @@ Config.DefaultConfig = {
         FAQ = "Why am I not releasing instantly after death?",
         Answer = "You can set the [InstantRelease] option to true to instantly release when you die.",
     },
+    ['RezAcceptPct']         = {
+        DisplayName = "Rez Accept Percent",
+        Category = "Heal/Rez",
+        Index = 15,
+        Tooltip = "Minimum Percent Rez to auto accept.",
+        Default = 90,
+        Min = 0,
+        Max = 100,
+        ConfigType = "Advanced",
+        FAQ = "Why am I not accepting rezzes?",
+        Answer = "You can set the [RezAcceptPct] option to the percent xp returned you want to auto accept.",
+    },
+
 
     -- [ BURNS ] --
     ['BurnAuto']             = {
@@ -1607,6 +1631,7 @@ function Config:SaveSettings()
     mq.pickle(self:GetConfigFileName(), self.settings)
     Logger.set_log_level(Config:GetSetting('LogLevel'))
     Logger.set_log_to_file(Config:GetSetting('LogToFile'))
+    mq.cmdf("/squelch /rez pct %d", self.settings['RezAcceptPct'])
 end
 
 function Config:LoadSettings()
@@ -1637,6 +1662,7 @@ function Config:LoadSettings()
     if needSave or settingsChanged then
         self:SaveSettings()
     end
+    mq.cmdf("/squelch /rez pct %d", self.settings['RezAcceptPct'])
 
     -- setup our script path for later usage since getting it kind of sucks, but only on the first run (personas)
     if Config.Globals.ScriptDir == "" then

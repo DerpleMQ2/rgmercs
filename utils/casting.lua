@@ -1554,7 +1554,8 @@ function Casting.AutoMed()
 
     -- This could likely be refactored
     if me.Sitting() and not Casting.Memorizing then
-        if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or ((Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(90)))) then
+        if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or
+                ((Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(Config:GetSetting('MedAggroCheckPct'))))) then
             Config.Globals.InMedState = false
             Logger.log_debug("Forcing stand - Combat or aggro threshold reached.")
             me.Stand()
