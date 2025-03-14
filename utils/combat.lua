@@ -378,7 +378,8 @@ function Combat.FindBestAutoTarget(validateFn)
 
                 if Config.Globals.AutoTargetID == 0 then
                     if Targeting.IsSpawnXTHater(Config.Globals.LastPulledID) then
-                        Logger.log_verbose("It seems that we pulled %s(ID: %d), setting it as the initial AutoTarget.", target.CleanName(), target.ID())
+                        Logger.log_verbose("It seems that we pulled %s(ID: %d), setting it as the initial AutoTarget.",
+                            mq.TLO.Spawn(Config.Globals.LastPulledID).CleanName() or "None", Config.Globals.LastPulledID)
                         Config.Globals.AutoTargetID = Config.Globals.LastPulledID
                     elseif target.ID() > 0 and (target and target.Distance3D() or 0) > Targeting.GetTargetMaxRangeTo(target) and targetValid then
                         Logger.log_verbose("It seems that we manually pulled %s(ID: %d), setting it as the initial AutoTarget.", target.CleanName(), target.ID())
@@ -387,8 +388,8 @@ function Combat.FindBestAutoTarget(validateFn)
                         -- Set our autotarget to the target MATargetScan chooses.
                         Config.Globals.AutoTargetID = Combat.MATargetScan(Config:GetSetting('AssistRange'),
                             Config:GetSetting('MAScanZRange'))
-                        Logger.log_verbose("MATargetScan returned %d -- Current Target: %s [%d]",
-                            Config.Globals.AutoTargetID, target.CleanName(), target.ID())
+                        Logger.log_verbose("MATargetScan returned %d -- Setting initial AutoTarget: %s",
+                            Config.Globals.AutoTargetID, mq.TLO.Spawn(Config.Globals.AutoTargetID).CleanName() or "None")
                     end
                 end
                 -- If StayOnTarget is off, we're going to scan if we don't have full aggro. As this is a dev applied setting that defaults to on, it should
@@ -398,7 +399,7 @@ function Combat.FindBestAutoTarget(validateFn)
                         Config:GetSetting('MAScanZRange'))
                     local autoTarget = mq.TLO.Spawn(Config.Globals.AutoTargetID)
                     Logger.log_verbose(
-                        "Re-Targeting: MATargetScan says we need to target %s [%d] -- Current Target: %s [%d]",
+                        "Re-Targeting: MATargetScan says we need to autotarget %s [%d] -- Current Target: %s [%d]",
                         autoTarget.CleanName() or "None", Config.Globals.AutoTargetID or 0,
                         target() and target.CleanName() or "None", target() and target.ID() or 0)
                 end
