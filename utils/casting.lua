@@ -432,8 +432,8 @@ end
 --- Checks if a gambit spell is active.
 --- @return boolean Returns true if the gambit condition is met, false otherwise.
 function Casting.GambitCheck() -- This should probably be moved to wizard as a helper --Algar
-    local gambitSpell = Modules:ExecModule("Class", "GetResolvedActionMapItem", "GambitSpell")
-    if not gambitSpell and gambitSpell() then return false end
+    local gambitSpell = Core.GetResolvedActionMapItem('GambitSpell')
+    if not (gambitSpell and gambitSpell()) then return false end
 
     return Casting.IHaveBuff(gambitSpell)
 end
