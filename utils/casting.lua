@@ -96,6 +96,7 @@ function Casting.LocalBuffCheck(spellId, checkPet)
                         return true
                     else
                         Logger.log_verbose("LocalBuffCheck: %s(ID:%d) does not stack, moving on.", triggerName, triggerID)
+                        triggerFound = triggerFound + 1
                     end
                 else
                     Logger.log_verbose("LocalBuffCheck: %s(ID:%d) found, moving on.", triggerName, triggerID)

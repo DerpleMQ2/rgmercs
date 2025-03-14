@@ -105,7 +105,7 @@ Module.Constants.PullAbilities         = {
         Type = "Special",
         DisplayName = "Auto Attack",
         AbilityRange = function()
-            if Targeting.GetTargetID() == 0 then return 2 end
+            if Targeting.GetTargetID() == 0 then return 6 end
 
             return Targeting.GetTargetMaxRangeTo() * .9
         end,
