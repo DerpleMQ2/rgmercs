@@ -1239,7 +1239,8 @@ local _ClassConfig = {
                 name = "StripBuffSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return target.Beneficial()
+                    if not Config:GetSetting('DoStripBuff') or mq.TLO.Target.ID() == 0 then return false end
+                    return mq.TLO.Target.Beneficial()
                 end,
             },
         },

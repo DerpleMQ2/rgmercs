@@ -1459,12 +1459,12 @@ local _ClassConfig = {
             {
                 name = "Equip Shield",
                 type = "CustomFunc",
-                active_cond = function(self, target)
+                active_cond = function()
                     return mq.TLO.Me.Bandolier("Shield").Active()
                 end,
                 cond = function(self, target)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
-                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(target) and Config:GetSetting('NamedShieldLock'))
+                    return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("Shield") end,
             },
@@ -1474,10 +1474,10 @@ local _ClassConfig = {
                 active_cond = function(self, target)
                     return mq.TLO.Me.Bandolier("2Hand").Active()
                 end,
-                cond = function(self, target)
+                cond = function()
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
                     return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and
-                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Targeting.IsNamed(target) and Config:GetSetting('NamedShieldLock'))
+                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("2Hand") end,
             },

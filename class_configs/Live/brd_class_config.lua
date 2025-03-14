@@ -837,7 +837,7 @@ local _ClassConfig = {
             return songSpell.StacksTarget() and Targeting.MobNotLowHP(Targeting.GetAutoTarget())
         end,
         GetDetSongDuration = function(songSpell) -- Checks target for duration remaining on dot songs
-            local duration = mq.TLO.Target.FindBuff("name " .. songSpell.Name()).Duration.TotalSeconds() or 0
+            local duration = mq.TLO.Target.FindBuff("name " .. "\"" .. songSpell.Name() .. "\"").Duration.TotalSeconds() or 0
             Logger.log_debug("getDetSongDuration() Current duration for %s : %d", songSpell, duration)
             return duration
         end,
