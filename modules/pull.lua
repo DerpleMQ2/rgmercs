@@ -476,6 +476,18 @@ Module.DefaultConfig                   = {
         FAQ = "How do I set the Z point to measure radius from with a rectangle pull area?",
         Answer = "Set Base Z Location to where you would like the point to be.",
     },
+    ['PullRectangleZRadius']                   = {
+        DisplayName = "Rectangle Z Radius",
+        Category = "Pull Rectangle Points",
+        Tooltip = "Z radius for rectangle pull area.",
+        Index = 5,
+        Default = 30,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the Z radius for a rectangle pull area?",
+        Answer = "Set Rectangle Z Radius to the desired radius.",
+    },
     ['PullDebuffed']                           = {
         DisplayName = "Pull While Debuffed",
         Category = "Puller",
