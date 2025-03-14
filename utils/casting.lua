@@ -433,7 +433,7 @@ end
 --- @return boolean Returns true if the gambit condition is met, false otherwise.
 function Casting.GambitCheck() -- This should probably be moved to wizard as a helper --Algar
     local gambitSpell = Core.GetResolvedActionMapItem('GambitSpell')
-    if not (gambitSpell and gambitSpell()) then return false end
+    if not gambitSpell or not gambitSpell() then return false end
 
     return Casting.IHaveBuff(gambitSpell)
 end
