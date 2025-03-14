@@ -53,6 +53,7 @@ local PullStates                          = {
 }
 
 local PullStateDisplayStrings             = {
+    ['MERCS_PAUSED']            = { Display = Icons.MD_REPORT_PROBLEM, Text = "RGMercs Main Paused", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
     ['PULL_IDLE']               = { Display = Icons.FA_CLOCK_O, Text = "Idle", Color = { r = 0.02, g = 0.8, b = 0.2, a = 1.0, }, },
     ['PULL_GROUPWATCH_WAIT']    = { Display = Icons.MD_GROUP, Text = "Waiting on GroupWatch", Color = { r = 0.8, g = 0.8, b = 0.02, a = 1.0, }, },
     ['PULL_NAV_INTERRUPT']      = { Display = Icons.MD_PAUSE_CIRCLE_OUTLINE, Text = "Navigation Interrupted", Color = { r = 0.8, g = 0.02, b = 0.02, a = 1.0, }, },
@@ -948,7 +949,7 @@ function Module:Render()
             ImGui.TableNextColumn()
             ImGui.Text("Pull State")
             ImGui.TableNextColumn()
-            local stateData = PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
+            local stateData = Config.Globals.PauseMain and PullStateDisplayStrings['MERCS_PAUSED'] or PullStateDisplayStrings[PullStatesIDToName[self.TempSettings.PullState]]
             local stateColor = stateData and ImGui.GetColorU32(stateData.Color.r or 1.0, stateData.Color.g or 1.0, stateData.Color.b or 1.0, stateData.Color.a or 1.0) or
                 ImGui.GetColorU32(1.0, 1.0, 1.0, 1.0)
             ImGui.PushStyleColor(ImGuiCol.Text, stateColor)
