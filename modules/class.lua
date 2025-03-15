@@ -571,7 +571,7 @@ function Module:GetRotations()
 end
 
 function Module:SelfCheckAndRez()
-    local rezSearch = string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Me.DisplayName())
+    local rezSearch = string.format("pccorpse %s' radius 100 zradius 50", mq.TLO.Me.DisplayName()) -- use ' to prevent partial name matches (foo's corpse vs foobar's corpse)
     local rezCount = mq.TLO.SpawnCount(rezSearch)()
 
     for i = 1, rezCount do

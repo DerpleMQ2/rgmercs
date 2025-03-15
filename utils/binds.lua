@@ -104,7 +104,7 @@ Binds.Handlers    = {
                 Logger.log_error("/rgl deloa - no name given and no valid target exists!")
                 return
             end
-            Logger.log_info("Adding %s to your Outside Assist list!", name)
+            Logger.log_info("Removing %s from your Outside Assist list!", name)
             Config:DeleteOAByName(name)
         end,
     },
