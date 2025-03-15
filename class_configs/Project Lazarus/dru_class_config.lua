@@ -1660,24 +1660,20 @@ local _ClassConfig = {
         DoRez = function(self, corpseId)
             local rezAction = false
             local rezSpell = Core.GetResolvedActionMapItem('RezSpell')
+            local okayToRez = Casting.OkayToRez(corpseId)
 
             if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
                 if mq.TLO.FindItem("Staff of Forbidden Rites")() and mq.TLO.Me.ItemReady("Staff of Forbidden Rites")() then
-                    rezAction = Casting.UseItem("Staff of Forbidden Rites", corpseId)
+                    rezAction = okayToRez and Casting.UseItem("Staff of Forbidden Rites", corpseId)
                 elseif Casting.AAReady("Call of the Wild") and corpseId ~= mq.TLO.Me.ID() then
-                    rezAction = Casting.UseAA("Call of the Wild", corpseId, true, 1)
+                    rezAction = okayToRez and Casting.UseAA("Call of the Wild", corpseId, true, 1)
                 end
             elseif mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
                 if Casting.AAReady("Rejuvenation of Spirit") then
-                    rezAction = Casting.UseAA("Rejuvenation of Spirit", corpseId, true, 1)
+                    rezAction = okayToRez and Casting.UseAA("Rejuvenation of Spirit", corpseId, true, 1)
                 elseif not Casting.CanUseAA("Rejuvenation of Spirit") and Casting.SpellReady(rezSpell, true) then
-                    rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
+                    rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)
                 end
-            end
-
-            if rezAction and mq.TLO.Spawn(corpseId).Distance3D() > 25 then
-                Targeting.SetTarget(corpseId)
-                Core.DoCmd("/corpse")
             end
 
             return rezAction

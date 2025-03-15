@@ -726,16 +726,12 @@ return {
         DoRez = function(self, corpseId)
             local rezAction = false
             local rezSpell = Core.GetResolvedActionMapItem('RezSpell')
+            local okayToRez = Casting.OkayToRez(corpseId)
 
             if (Config:GetSetting('DoBattleRez') or mq.TLO.Me.CombatState():lower() ~= "combat") and Casting.AAReady("Gift of Resurrection") then
-                rezAction = Casting.UseAA("Gift of Resurrection", corpseId, true, 1)
+                rezAction = okayToRez and Casting.UseAA("Gift of Resurrection", corpseId, true, 1)
             elseif not Casting.CanUseAA("Gift of Resurrection") and mq.TLO.Me.CombatState():lower() ~= "combat" and Casting.SpellReady(rezSpell, true) then
-                rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
-            end
-
-            if rezAction and mq.TLO.Spawn(corpseId).Distance3D() > 25 then
-                Targeting.SetTarget(corpseId)
-                Core.DoCmd("/corpse")
+                rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)
             end
 
             return rezAction
