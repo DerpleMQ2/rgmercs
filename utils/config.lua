@@ -1905,7 +1905,7 @@ end
 --- @param name string The name of the OA to delete
 function Config:DeleteOAByName(name)
     for idx, cur_name in ipairs(Config:GetSetting('OutsideAssistList') or {}) do
-        if cur_name == name then
+        if cur_name:lower() == name:lower() then
             self:DeleteOA(idx)
             return
         end

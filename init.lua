@@ -658,6 +658,7 @@ local function Main()
             Modules:ExecAll("OnZone")
             notifyZoning = false
             Config.Globals.ForceTargetID = 0
+            Config.Globals.AutoTargetID = 0
         end
         mq.delay(100)
         Config.Globals.CurZoneId = mq.TLO.Zone.ID()
@@ -709,6 +710,7 @@ local function Main()
             Targeting.ClearSafeTargetCache()
             Targeting.ForceBurnTargetID = 0
             Config.Globals.LastPulledID = 0
+            Config.Globals.AutoTargetID = 0
             Casting.LastBurnCheck = false
             Modules:ExecModule("Pull", "SetLastPullOrCombatEndedTimer")
         end
