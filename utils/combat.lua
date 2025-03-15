@@ -471,7 +471,7 @@ function Combat.FindBestAutoTargetCheck()
 
     -- our MA out of group has a valid target for us.
     if Config:GetSetting('AssistOutside') then
-        local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 0)
+        local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
 
         if queryResult then
             local assistTarget = mq.TLO.Spawn(queryResult)

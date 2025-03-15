@@ -743,72 +743,76 @@ return {
     },
     ['HealRotationOrder'] = {
         {
+            name = 'GroupHealPoint',
+            state = 1,
+            steps = 1,
+            cond = function(self, target) return Targeting.GroupHealsNeeded() end,
+        },
+        {
             name = 'MainHealPoint',
             state = 1,
             steps = 1,
             cond = function(self, target) return Targeting.MainHealsNeeded(target) end,
         },
-        {
-            name = 'LightHealPoint',
-            state = 1,
-            steps = 1,
-            cond = function(self, target) return Targeting.LightHealsNeeded(target) end,
-        },
     },
     ['HealRotations']     = {
-        ["LightHealPoint"] = {
-            {
-                name = "LightHeal",
-                type = "Spell",
-                cond = function(self, _) return true end,
-            },
-        },
-        ["MainHealPoint"] = {
-            {
-                name = "WaveHeal",
-                type = "Spell",
-                cond = function(self, _)
-                    if not mq.TLO.Group() then return false end
-                    return Targeting.GroupHealsNeeded()
-                end,
-            },
-            {
-                name = "WaveHeal2",
-                type = "Spell",
-                cond = function(self, _)
-                    if not mq.TLO.Group() then return false end
-                    return Targeting.GroupHealsNeeded()
-                end,
-            },
-            {
-                name = "Aurora",
-                type = "Spell",
-                cond = function(self, _)
-                    if not mq.TLO.Group() then return false end
-                    return Targeting.GroupHealsNeeded()
-                end,
-            },
+        ["GroupHealPoint"] = {
             {
                 name = "Gift of Life",
                 type = "AA",
-                cond = function(self, aaName)
-                    if not mq.TLO.Group() then return false end
-                    return Targeting.GroupHealsNeeded()
+                cond = function(self, aaName, target)
+                    return self.CombatState == "Combat" and Targeting.BigGroupHealsNeeded()
                 end,
             },
             {
                 name = "Hand of Piety",
                 type = "AA",
-                cond = function(self, aaName)
-                    if not mq.TLO.Group() then return false end
-                    return Targeting.GroupHealsNeeded()
+                cond = function(self, aaName, target)
+                    return self.CombatState == "Combat" and Targeting.BigGroupHealsNeeded()
                 end,
             },
             {
+                name = "WaveHeal",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.SpellLoaded(spell)
+                end,
+            },
+            {
+                name = "Aurora",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.SpellLoaded(spell)
+                end,
+            },
+            {
+                name = "WaveHeal2",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.SpellLoaded(spell)
+                end,
+            },
+        },
+        ["MainHealPoint"] = {
+            {
                 name = "Lay on Hands",
                 type = "AA",
-                cond = function(self, aaName)
-                    return Targeting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
+                cond = function(self, aaName, target)
+                    return self.CombatState == "Combat" and Targeting.GetTargetPctHPs() < Config:GetSetting('LayHandsPct')
+                end,
+            },
+            {
+                name = "Hand of Piety",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return self.CombatState == "Combat" and Targeting.BigHealsNeeded(target) and Targeting.TargetIsMyself(target)
+                end,
+            },
+            {
+                name = "LightHeal",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.SpellLoaded(spell)
                 end,
             },
         },
