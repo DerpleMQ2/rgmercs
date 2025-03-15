@@ -415,9 +415,9 @@ function Combat.FindBestAutoTarget(validateFn)
             local assistTarget = nil
 
             if peer:len() then
-                local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 0)
-                assistTarget = mq.TLO.Spawn(queryResult)
+                local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 1000)
                 if queryResult then
+                    assistTarget = mq.TLO.Spawn(queryResult)
                     Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s (%s)",
                         assistTarget.CleanName() or "None", queryResult)
                 end
@@ -473,14 +473,13 @@ function Combat.FindBestAutoTargetCheck()
     if Config:GetSetting('AssistOutside') then
         local queryResult = DanNet.query(Config.Globals.MainAssist, "Target.ID", 0)
 
-        local assistTarget = mq.TLO.Spawn(queryResult)
         if queryResult then
+            local assistTarget = mq.TLO.Spawn(queryResult)
             Logger.log_verbose("\ayFindTargetCheck Assist's Target via DanNet :: %s",
                 assistTarget.CleanName() or "None")
-        end
-
-        if assistTarget and assistTarget() then
-            OATarget = true
+            if assistTarget and assistTarget() then
+                OATarget = true
+            end
         end
     end
 
