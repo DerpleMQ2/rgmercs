@@ -943,12 +943,22 @@ _ClassConfig      = {
             timer = 120, --this will only be checked once every 2 minutes
             state = 1,
             steps = 2,
-            load_cond = function() return Config:GetSetting('SummonModRods') end,
+            load_cond = function() return Config:GetSetting('SummonModRods') and Core.GetResolvedActionMapItem("ManaRodSummon") end,
             targetId = function(self)
-                local groupIds = { mq.TLO.Me.ID(), }
+                local groupIds = {}
+                if not Core.OnEMU() or mq.TLO.Me.Inventory("MainHand")() then
+                    table.insert(groupIds, mq.TLO.Me.ID())
+                end
                 local count = mq.TLO.Group.Members()
                 for i = 1, count do
-                    table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                    local mainHand = DanNet.query(mq.TLO.Group.Member(i).DisplayName(), "Me.Inventory[MainHand]", 1000)
+                    if Core.OnEMU() and (mainHand and mainHand:lower() == "null") then
+                        groupIds = {}
+                        Logger.log_debug("%s has no weapon equipped, aborting ModRod summon to avoid corpse-looting conflicts.", mq.TLO.Group.Member(i).DisplayName())
+                        break
+                    else
+                        table.insert(groupIds, mq.TLO.Group.Member(i).ID())
+                    end
                 end
                 return groupIds
             end,
@@ -1271,6 +1281,7 @@ _ClassConfig      = {
                 name = "HandlePetToys",
                 type = "CustomFunc",
                 custom_func = function(self)
+                    if not Config:GetSetting("DoPetWeapons") and not Config:GetSetting("DoPetArmor") and not Config:GetSetting("DoPetHeirlooms") then return false end
                     return self.ClassConfig.HelperFunctions.handle_pet_toys and self.ClassConfig.HelperFunctions.handle_pet_toys(self) or false
                 end,
             },
