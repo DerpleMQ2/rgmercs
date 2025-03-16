@@ -2651,19 +2651,31 @@ function LNS.checkTS(rule, decision, isTradeSkill)
     return isTSRule, tsRule, tsDecision
 end
 
-function LNS.checkClasses(decision, classes, new)
+--- comment
+--- @param decision string
+--- @param allowedClasses string
+--- @param fromFunction string
+--- @param new boolean
+--- @return string
+function LNS.checkClasses(decision, allowedClasses, fromFunction, new)
     local ret = decision
-    if classes:lower() ~= "all" and decision:lower() == 'keep' and not new then
-        if fromFunction == "loot" and not string.find(classes(), LNS.MyClass) then
-            local dbgTbl = {
-                Lookup = '\ax\ag Check for Class Rules',
-                Decision = decision,
-                Classes = classes,
-            }
-            Logger.Debug(LNS.guiLoot.console, dbgTbl)
+    local tmpClasses = allowedClasses:lower()
+    if ret:lower() == 'keep' and not new then
+        if not string.find(tmpClasses, LNS.MyClass) then
             ret = "Ignore"
         end
+        if tmpClasses == 'all' then
+            ret = "Keep"
+        end
     end
+    local dbgTbl = {
+        Lookup = '\ax\ag Check for \ayClass Rules',
+        OldDecision = decision,
+        NewDecision = ret,
+        Classes = tmpClasses,
+        MyClass = LNS.MyClass,
+    }
+    Logger.Debug(LNS.guiLoot.console, dbgTbl)
     return ret
 end
 
@@ -2698,30 +2710,42 @@ end
 ---@param curRule string Current Rule
 ---@param onhand number Number of items on hand
 ---@param curClasses string Current Classes
----@return string curDecision The new decision
+---@return string tmpDecision The new decision
 ---@return number qKeep The number of items to keep
 function LNS.checkQuest(curRule, onhand, curClasses)
-    local curDecision = curRule
-    local qKeep = 0
-    if string.find(curRule, "Quest") then
+    local tmpDecision = "Ignore"
+    local qKeep = LNS.Settings.QuestKeep or 1
+    local dbgTbl = {}
+    if string.find(curRule:lower(), "quest") then
         if LNS.Settings.LootQuest then
             local _, position = string.find(curRule, "|")
-            if position then qKeep = tonumber(curRule:sub(position + 1)) or 0 else qKeep = LNS.Settings.QuestKeep end
-            if onhand < qKeep then
-                curDecision = "Keep"
-            else
-                curDecision = "Ignore"
+            if position then
+                qKeep = tonumber(curRule:sub(position + 1)) or qKeep
             end
-            local dbgTbl = {
+            if onhand < qKeep then
+                tmpDecision = LNS.checkClasses("Keep", curClasses, 'loot', false)
+            else
+                tmpDecision = "Ignore"
+            end
+            dbgTbl = {
                 Lookup = '\ax\ag Check for QUEST',
-                Decision = curDecision,
+                Decision = tmpDecision,
                 Rule = curRule,
             }
             Logger.Debug(LNS.guiLoot.console, dbgTbl)
+            tmpDecision = LNS.checkClasses('Keep', curClasses, 'loot', false)
+        else
+            tmpDecision = "Ignore"
         end
-        curDecision = LNS.checkClasses(curDecision, curClasses, false)
+        dbgTbl = {
+            Lookup = '\ax\ag Check for QUEST CLASSES',
+            Decision = tmpDecision,
+            Classes = curClasses,
+            Rule = curRule,
+        }
+        Logger.Debug(LNS.guiLoot.console, dbgTbl)
     end
-    return curDecision, qKeep
+    return tmpDecision, qKeep
 end
 
 --- Evaluate and return the rule for an item.
@@ -2789,7 +2813,7 @@ function LNS.getRule(item, fromFunction, index)
     end
 
     if ruletype == ('Global') then
-        lootDecision = LNS.checkClasses(lootRule, lootClasses, newRule)
+        lootDecision = LNS.checkClasses(lootRule, lootClasses, 'loot', newRule)
     end
 
     Logger.Info(LNS.guiLoot.console, 'RuleType: %s', ruletype)
@@ -2850,7 +2874,10 @@ function LNS.getRule(item, fromFunction, index)
         lootNewItemRule = lootDecision
     end
 
-    lootDecision, qKeep = LNS.checkQuest(lootRule, countHave, lootClasses)
+    if string.find(lootRule, "Quest") then
+        lootDecision, qKeep = LNS.checkQuest(lootRule, countHave, lootClasses)
+        goto quest_override
+    end
 
     -- Handle AlwaysAsk setting
     if alwaysAsk then
@@ -3032,6 +3059,9 @@ function LNS.getRule(item, fromFunction, index)
         lootDecision = 'Ignore'
     end
 
+    ::quest_override::
+
+
     if lootDecision == 'NULL' then
         Logger.Warn(LNS.guiLoot.console, "Invalid decision \at%s\ax for item: \ay%s", lootDecision, itemName)
         lootDecision = 'Ignore'
@@ -3053,7 +3083,6 @@ function LNS.getRule(item, fromFunction, index)
     if lootRule == 'Destroy' then
         lootDecision = 'Destroy'
     end
-
     if fromFunction == 'loot' then
         LNS.lootItem(index, lootDecision, 'leftmouseup', qKeep, not iCanUse)
     end
@@ -4008,6 +4037,7 @@ function LNS.processItems(action)
                 -- end
 
                 LNS.SellToVendor(itemID, bag, slot, item.Name())
+
                 -- totalPlat = totalPlat + sellPrice
                 mq.delay(1)
             elseif todo == 'Tribute' then
@@ -4055,11 +4085,14 @@ function LNS.processItems(action)
         end
         ::next_bag::
     end
-
+    if action == 'Sell' then
+        soldVal = (mq.TLO.Me.Cash() - myCoins) / 1000
+    end
     -- Handle restocking if AutoRestock is enabled
     if action == 'Sell' and LNS.Settings.AutoRestock then
-        soldVal = mq.TLO.Me.Cash() - myCoins
+        local tmp = mq.TLO.Me.Cash()
         LNS.RestockItems()
+        spentVal = (mq.TLO.Me.Cash() - tmp) / 1000
     end
 
     -- Handle buying items
@@ -4068,7 +4101,7 @@ function LNS.processItems(action)
             if not LNS.goToVendor() or not LNS.openVendor() then return end
         end
         LNS.RestockItems()
-        spentVal = mq.TLO.Me.Cash() - myCoins
+        spentVal = (mq.TLO.Me.Cash() - myCoins) / 1000
     end
 
     -- Restore AlwaysEval state if it was modified
@@ -4089,7 +4122,8 @@ function LNS.processItems(action)
         end
         -- totalPlat = math.floor(totalPlat)
         totalPlat = (mq.TLO.Me.Cash() - myCoins) / 1000
-        LNS.report('Plat Spent: \ay%0.2f\ax, Gained: \ag%0.2f\ax, Total Profit: %0.2f', spentVal, soldVal, totalPlat)
+        LNS.report('Plat Spent: \ar%0.3f\ax, Gained: \ag%0.3f\ax, \awTotal Profit\ax: \ag%0.3f', spentVal, soldVal, totalPlat)
+        Logger.Info(LNS.guiLoot.console, 'Plat Spent: \ar%0.3f\ax, Gained: \ag%0.3f\ax, \awTotal Profit\ax: \ag%0.3f', spentVal, soldVal, totalPlat)
     elseif action == 'Bank' then
         if mq.TLO.Window('BigBankWnd').Open() then
             mq.TLO.Window('BigBankWnd').DoClose()
@@ -6299,7 +6333,7 @@ while not LNS.Terminate do
 
     if LNS.TempSettings.SendSettings then
         LNS.TempSettings.SendSettings = false
-        Logger.Info(LNS.guiLoot.console, "Sending Settings")
+        Logger.Debug(LNS.guiLoot.console, "Sending Settings")
         LNS.sendMySettings()
     end
 
