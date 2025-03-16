@@ -335,6 +335,9 @@ local function RenderToggleHud()
             Core.DoCmd("/rgl %s", cmd)
         end
         ImGui.PopStyleColor()
+        if ImGui.IsKeyPressed(ImGuiKey.Escape) and Config:GetSetting("EscapeMinimizes") and not Config.Globals.Minimized then
+            Config.Globals.Minimized = true
+        end
     end
     ImGui.End()
 end
@@ -470,11 +473,7 @@ local function RenderMainWindow(imgui_style)
         end
 
         ImGui.PopID()
-        if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
-            if ImGui.IsKeyPressed(ImGuiKey.Escape) and Config:GetSetting("EscapeMinimizes") then
-                Config.Globals.Minimized = true
-            end
-        end
+
         ImGui.End()
     end
 end
