@@ -115,6 +115,7 @@ local settingsEnum                      = {
     showreport = 'ShowReport',
     ignorebagslot = 'IgnoreBagSlot',
     processingeval = 'ProcessingEval',
+    alwaysglobal = 'AlwaysGlobal',
 
 }
 local doSell, doBuy, doTribute, areFull = false, false, false, false
@@ -203,7 +204,8 @@ LNS.Settings    = {
     ShowInfoMessages = true,
     ShowConsole      = false,
     ShowReport       = false,
-    IgnoreBagSlot    = 0, -- Ignore this Bag Slot when buying, selling, tributing and destroying of items.
+    IgnoreBagSlot    = 0,     -- Ignore this Bag Slot when buying, selling, tributing and destroying of items.
+    AlwaysGlobal     = false, -- Always assign new rules to global as well as normal rules.
     -- ProcessingEval   = true, -- Re evaluate when processing items for sell\tribute? this will re check our settings and not sell or tribute items outside the new parameters
     BuyItemsTable    = {
         ['Iron Ration'] = 20,
@@ -348,27 +350,41 @@ function LNS.SortTableColums(input_table, sorted_keys, num_columns)
 
     -- If sorted_keys is provided, use it, otherwise extract the keys from the input_table
     local keys = sorted_keys or {}
-    if input_Table ~= nil then
-        if #keys == 0 then
-            for k, _ in pairs(input_table) do
-                table.insert(keys, k)
-            end
-            table.sort(keys, function(a, b)
-                return a < b
-            end)
+    if #keys == 0 then
+        for k, _ in pairs(input_table) do
+            table.insert(keys, k)
         end
+        table.sort(keys, function(a, b)
+            return a < b
+        end)
     end
 
     local total_items = #keys
-    local num_rows = math.ceil(total_items / num_columns)
-    local column_sorted = {}
+    local base_rows = math.floor(total_items / num_columns) -- number of rows per column
+    local extra_rows = total_items % num_columns            -- incase we have a remainder
 
-    -- Reorganize the keys to fill vertically by columns
-    for row = 1, num_rows do
+    local column_sorted = {}
+    local column_entries = {}
+
+    local start_index = 1
+    for col = 1, num_columns do
+        local rows_in_col = base_rows + (col <= extra_rows and 1 or 0)
+        column_entries[col] = {}
+
+        for row = 1, rows_in_col do
+            if start_index <= total_items then
+                table.insert(column_entries[col], keys[start_index])
+                start_index = start_index + 1
+            end
+        end
+    end
+
+    -- Rearrange into the final sorted order, maintaining column-first layout
+    local max_rows = base_rows + (extra_rows > 0 and 1 or 0)
+    for row = 1, max_rows do
         for col = 1, num_columns do
-            local index = (col - 1) * num_rows + row
-            if index <= total_items then
-                table.insert(column_sorted, keys[index])
+            if column_entries[col][row] then
+                table.insert(column_sorted, column_entries[col][row])
             end
         end
     end
@@ -743,7 +759,7 @@ function LNS.loadSettings(firstRun)
     LNS.Settings = tmpSettings
     LNS.Boxes[MyName] = {}
     LNS.Boxes[MyName] = LNS.Settings
-    table.insert(LNS.BoxKeys, MyName)
+    if firstRun then table.insert(LNS.BoxKeys, MyName) end
     LNS.guiLoot.openGUI = LNS.Settings.ShowConsole
 
     return needSave
@@ -1391,8 +1407,10 @@ function LNS.LoadRuleDB()
     local function processRules(stmt, ruleTable, classTable, linkTable)
         for row in stmt:nrows() do
             local id = row.item_id
-            local classes = row.item_rule_classes or 'All'
-            if classes == 'None' or classes:gsub(' ', '') then classes = 'All' end
+            local classes = row.item_rule_classes
+            if classes == nil then classes = 'None' end
+            local classTmp = string.gsub(classes, ' ', '')
+            if classes == 'None' or classTmp == '' then classes = 'All' end
             ruleTable[id] = row.item_rule
             classTable[id] = classes
             linkTable[id] = row.item_link or "NULL"
@@ -2101,18 +2119,20 @@ function LNS.lookupLootRule(itemID, tablename)
         local stepResult = stmt:step()
 
         local rule       = 'NULL'
-        local classes    = 'All'
+        local classes    = 'None'
         link             = 'NULL'
 
         -- Extract values if a row is returned
         if stepResult == SQLite3.ROW then
             local row = stmt:get_named_values()
             rule      = row.item_rule or 'NULL'
-            classes   = row.item_rule_classes or 'All'
+            classes   = row.item_rule_classes
             link      = row.item_link or 'NULL'
             found     = true
         end
-        if classes == 'None' or classes:gsub(" ", '') == '' then
+        if classes == nil then classes = 'None' end
+        local tmpClass = string.gsub(classes, " ", '')
+        if classes == 'None' or tmpClass == '' then
             classes = 'All'
         end
         -- Finalize the statement and close the database
@@ -2122,7 +2142,7 @@ function LNS.lookupLootRule(itemID, tablename)
     end
 
     local rule    = 'NULL'
-    local classes = 'All'
+    local classes = 'None'
     link          = 'NULL'
 
     if tablename == nil then
@@ -2141,7 +2161,7 @@ function LNS.lookupLootRule(itemID, tablename)
 
         if not found then
             rule = 'NULL'
-            classes = 'All'
+            classes = 'None'
             link = 'NULL'
         end
     else
@@ -2235,6 +2255,9 @@ function LNS.addNewItem(corpseItem, itemRule, itemLink, corpseID)
     Logger.Info(LNS.guiLoot.console, "\agAdding 1 \ayNEW\ax item: \at%s \ay(\axID: \at%s\at) \axwith rule: \ag%s", itemName, itemID, itemRule)
     -- LNS.actorAddRule(itemID, itemName, 'Normal', itemRule, LNS.TempItemClasses, itemLink)
     LNS.addRule(itemID, 'NormalItems', itemRule, LNS.TempItemClasses, itemLink)
+    if LNS.Settings.AlwaysGlobal then
+        LNS.addRule(itemID, 'GlobalItems', itemRule, LNS.TempItemClasses, itemLink)
+    end
     LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, newMessage)
     if Mode == 'directed' then
         LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, newMessage)
@@ -2629,6 +2652,7 @@ function LNS.checkTS(rule, decision, isTradeSkill)
 end
 
 function LNS.checkClasses(decision, classes, new)
+    local ret = decision
     if classes:lower() ~= "all" and decision:lower() == 'keep' and not new then
         if fromFunction == "loot" and not string.find(classes(), LNS.MyClass) then
             local dbgTbl = {
@@ -2637,10 +2661,10 @@ function LNS.checkClasses(decision, classes, new)
                 Classes = classes,
             }
             Logger.Debug(LNS.guiLoot.console, dbgTbl)
-            decision = "Ignore"
+            ret = "Ignore"
         end
     end
-    return decision
+    return ret
 end
 
 function LNS.checkWearable(isEqupiable, decision, ruletype, nodrop, newrule, isAug, item)
@@ -2779,7 +2803,6 @@ function LNS.getRule(item, fromFunction, index)
         lootRule = "Bank"
         LNS.modifyItemRule(itemID, lootRule, 'Normal_Rules', lootClasses, lootLink)
     end
-
     if lootRule == 'Ask' then alwaysAsk = true end
 
     -- Re-evaluate settings if AlwaysEval is enabled
@@ -2910,12 +2933,18 @@ function LNS.getRule(item, fromFunction, index)
         Logger.Debug(LNS.guiLoot.console, dbgTbl)
     end
 
-    if newRule and ruletype == 'Normal' then
+    if newRule and ruletype == 'Normal' and not isNoDrop then
         if sellPrice > 0 then
+            lootDecision = 'Sell'
             lootNewItemRule = 'Sell'
-        elseif tributeValue > 0 and not equipable then
+        elseif tributeValue > 0 then
+            lootDecision = 'Tribute'
             lootNewItemRule = 'Tribtue'
-        elseif tributeValue > 0 and equpiable then
+        elseif equpiable then
+            lootDecision = 'Keep'
+            lootNewItemRule = 'Keep'
+        else
+            lootDecision = 'Ask'
             lootNewItemRule = 'Ask'
         end
 
@@ -3121,17 +3150,6 @@ function LNS.actorAddRule(itemID, itemName, tableName, rule, classes, link)
 end
 
 function LNS.sendMySettings()
-    local tmpTable = {}
-    -- for k, v in pairs(LNS.Settings) do
-    --     if type(v) == 'table' then
-    --         tmpTable[k] = {}
-    --         for kk, vv in pairs(v) do
-    --             tmpTable[k][kk] = vv
-    --         end
-    --     else
-    --         tmpTable[k] = v
-    --     end
-    -- end
     local message = {
         who      = MyName,
         action   = 'sendsettings',
@@ -3195,7 +3213,7 @@ function LNS.RegisterActors()
             Classes = itemClasses,
             Link = itemLink,
         }
-        if directions == 'doloot' and who == MyName and LNS.Settings.DoLoot then
+        if directions == 'doloot' and who == MyName and (LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse) then
             LNS.LootNow = true
             return
         end
@@ -3222,6 +3240,7 @@ function LNS.RegisterActors()
             table.sort(LNS.BoxKeys)
             return
         end
+
         if action == 'sendsettings' and who ~= MyName then
             if LNS.Boxes[who] ~= nil and os.difftime(os.time(), LNS.TempSettings.LastSent) > 60 then
                 return
@@ -3230,34 +3249,21 @@ function LNS.RegisterActors()
 
             LNS.Boxes[who] = boxSettings
             LNS.TempSettings[who] = boxSettings
-            -- for k, v in pairs(boxSettings) do
-            --     if type(k) ~= 'table' then
-            --         LNS.Boxes[who][k] = v
-            --     else
-            --         LNS.Boxes[who][k] = {}
-            --         for i, j in pairs(v) do
-            --             LNS.Boxes[who][k][i] = j
-            --         end
-            --     end
-            -- end
-            -- LNS.TempSettings.SendSettings = true
         end
 
         if action == 'updatesettings' then
-            -- for k, v in pairs(boxSettings) do
-            --     if type(k) ~= 'table' then
-            --         LNS.Settings[k] = v
-            --     else
-            --         for i, j in pairs(v) do
-            --             LNS.Settings[k][i] = j
-            --         end
-            --     end
-            -- end
+            if LNS.Boxes[who] == nil then LNS.Boxes[who] = {} end
+            LNS.Boxes[who] = {}
             LNS.Boxes[who] = boxSettings
-            LNS.TempSettings[who] = boxSettings
+            LNS.TempSettings[who] = nil
             if who == MyName then
-                LNS.Settings = LNS.Boxes[who]
-                LNS.TempSettings[who] = boxSettings
+                for k, v in pairs(boxSettings) do
+                    if type(v) ~= 'table' then
+                        LNS.Settings[k] = v
+                    end
+                end
+                LNS.Boxes[MyName] = LNS.Settings
+                LNS.TempSettings[MyName] = nil
                 LNS.TempSettings.UpdateSettings = true
             end
         end
@@ -3677,7 +3683,7 @@ function LNS.lootMobs(limit)
     end
 
     -- Add other corpses to the loot list if not limited by the player's own corpse
-    if myCorpseCount == 0 then
+    if myCorpseCount == 0 and LNS.Settings.DoLoot then
         for i = 1, (limit or deadCount) do
             local corpse = mq.TLO.NearestSpawn(('%d,' .. spawnSearch):format(i, 'npccorpse', LNS.Settings.CorpseRadius))
             if corpse() and (not lootedCorpses[corpse.ID()] or not LNS.Settings.CheckCorpseOnce) then
@@ -4361,6 +4367,9 @@ function LNS.drawNewItemsTable()
 
 
                     LNS.addRule(itemID, "NormalItems", tmpRules[itemID], classes, item.Link)
+                    if LNS.AlwaysGlobal then
+                        LNS.addRule(itemID, "GlobalItems", tmpRules[itemID], classes, item.Link)
+                    end
                     LNS.enterNewItemRuleInfo({
                         ID = itemID,
                         ItemName = item.Name,
@@ -5382,42 +5391,22 @@ function LNS.renderSettingsSection(who)
     ImGui.SameLine()
 
     if ImGui.SmallButton("Send Settings##LootnScoot") then
-        if who == MyName then
-            -- for k, v in pairs(LNS.Boxes[MyName]) do
-            --     if type(v) == 'table' then
-            --         for k2, v2 in pairs(v) do
-            --             LNS.Settings[k][k2] = v2
-            --         end
-            --     else
-            --         LNS.Settings[k] = v
-            --     end
-            -- end
-            LNS.Settings = LNS.Boxes[MyName]
-            LNS.writeSettings()
-            LNS.sendMySettings()
-        else
-            local tmpSet = LNS.Boxes[who]
-            -- for k, v in pairs(LNS.Boxes[who]) do
-            --     if type(v) == 'table' then
-            --         tmpSet[k] = {}
-            --         for k2, v2 in pairs(v) do
-            --             tmpSet[k][k2] = v2
-            --         end
-            --     else
-            --         tmpSet[k] = v
-            --     end
-            -- end
-            local message = {
-                action = 'updatesettings',
-                who = who,
-                settings = tmpSet,
-            }
-            LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
-            if Mode == 'directed' then
-                LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
-            end
+        -- if who == MyName then
+        --     -- LNS.TempSettings.UpdateSettings = true
+        --     LNS.TempSettings.SendSettings = true
+        -- end
+
+        local message = {
+            action = 'updatesettings',
+            who = who,
+            settings = LNS.Boxes[who],
+        }
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, message)
+        if Mode == 'directed' then
+            LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
         end
     end
+
     ImGui.SeparatorText("Clone Settings")
     ImGui.SetNextItemWidth(120)
 
@@ -5457,7 +5446,7 @@ function LNS.renderSettingsSection(who)
             if Mode == 'directed' then
                 LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, message)
             end
-            LNS.TempSettings.CloneWho = nil
+            -- LNS.TempSettings.CloneWho = nil
             LNS.TempSettings.CloneTo = nil
         end
     end
@@ -6200,9 +6189,11 @@ LNS.init({ ..., })
 
 while not LNS.Terminate do
     local directorRunning = mq.TLO.Lua.Script(LNS.DirectorScript).Status() == 'RUNNING' or false
+
     if not directorRunning and Mode == 'directed' then
         LNS.Terminate = true
     end
+
     if mq.TLO.MacroQuest.GameState() ~= "INGAME" then LNS.Terminate = true end -- exit sctipt if at char select.
 
     if LNS.TempSettings.LastCombatSetting == nil then
@@ -6213,6 +6204,7 @@ while not LNS.Terminate do
         LNS.TempSettings.LastCombatSetting = LNS.Settings.CombatLooting
         LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, }, { Subject = 'combatsetting', Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
     end
+
     if debugPrint then
         Logger.loglevel = 'debug'
     elseif not LNS.Settings.ShowInfoMessages then
@@ -6221,19 +6213,23 @@ while not LNS.Terminate do
         Logger.loglevel = 'info'
     end
 
-    if LNS.Settings.DoLoot and Mode ~= 'directed' then LNS.lootMobs() end
+    if LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse and Mode ~= 'directed' then LNS.lootMobs() end
+
     if LNS.LootNow then
         LNS.LootNow = false
         LNS.lootMobs()
     end
+
     if doSell then
         LNS.processItems('Sell')
         doSell = false
     end
+
     if doBuy then
         LNS.processItems('Buy')
         doBuy = false
     end
+
     if doTribute then
         LNS.processItems('Tribute')
         doTribute = false
@@ -6266,14 +6262,14 @@ while not LNS.Terminate do
 
     mq.doevents()
 
-    if LNS.TempSettings.UpdateSettings == true then
+    if LNS.TempSettings.UpdateSettings then
         Logger.Info(LNS.guiLoot.console, "Updating Settings")
         mq.pickle(SettingsFile, LNS.Settings)
         LNS.loadSettings()
         LNS.TempSettings.UpdateSettings = false
     end
 
-    if LNS.TempSettings.SendSettings == true then
+    if LNS.TempSettings.SendSettings then
         LNS.TempSettings.SendSettings = false
         Logger.Info(LNS.guiLoot.console, "Sending Settings")
         LNS.sendMySettings()
