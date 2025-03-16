@@ -662,6 +662,10 @@ local _ClassConfig = {
             "Dire Convulsion",
             "Dire Seizure",
             "Dire Squelch",
+            "Dark Constriction",
+            "Asystole",
+            "Heart Flutter",
+            "Disease Cloud",
         },
         ['AllianceNuke'] = {
             "Bloodletting Coalition",
@@ -780,14 +784,15 @@ local _ClassConfig = {
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
             end,
         },
-        { --Actions that establish or maintain hatred
-            name = 'HateTools',
+        { --Dynamic weapon swapping if UseBandolier is toggled
+            name = 'Weapon Management',
             state = 1,
             steps = 1,
-            load_cond = function() return Core.IsTanking() end,
+            load_cond = function() return Config:GetSetting('UseBandolier') end,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                return combat_state == "Combat"
             end,
         },
         { --Defensive actions triggered by low HP
@@ -804,17 +809,6 @@ local _ClassConfig = {
             name = 'LifeTaps',
             state = 1,
             steps = 1,
-            doFullRotation = true,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
-            end,
-        },
-        { --Dynamic weapon swapping if UseBandolier is toggled
-            name = 'Weapon Management',
-            state = 1,
-            steps = 1,
-            load_cond = function() return Config:GetSetting('UseBandolier') end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -838,7 +832,7 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout') and
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart') and
                     Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
@@ -857,7 +851,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
             end,
         },
         { --DPS Spells, includes recourse/gift maintenance
@@ -866,7 +860,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
             end,
         },
     },
@@ -2578,7 +2572,7 @@ local _ClassConfig = {
             DisplayName = "Emergency Start",
             Category = "Defenses",
             Index = 2,
-            Tooltip = "Your HP % before we begin to use emergency abilities.",
+            Tooltip = "The HP % where DPS/Burn rotations are cut in favor of emergency abilities.",
             Default = 55,
             Min = 1,
             Max = 100,
@@ -2590,8 +2584,8 @@ local _ClassConfig = {
             DisplayName = "Emergency Only",
             Category = "Defenses",
             Index = 3,
-            Tooltip = "Your HP % before standard DPS rotations are cut in favor of emergency abilities.",
-            Default = 35,
+            Tooltip = "The HP % before all but essential rotations are cut in favor of emergency abilities.",
+            Default = 40,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
