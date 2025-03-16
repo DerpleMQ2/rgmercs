@@ -1147,7 +1147,7 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
                 cond = function(self, aaName)
-                    return Casting.SelfBuffAACheck(aaName)
+                    return Casting.SelfBuffAACheck(aaName) and not Casting.IHaveBuff("Group " .. aaName)
                 end,
             },
             {
