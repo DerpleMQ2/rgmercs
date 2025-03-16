@@ -293,8 +293,8 @@ function Module:GiveTime(combat_state)
 		return
 	end
 
-	local deadCount = mq.TLO.SpawnCount(string.format('npccorpse radius %s zradius 50', 100))()
-	local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius %d zradius 50", mq.TLO.Me.CleanName(), 100))()
+	local deadCount = mq.TLO.SpawnCount("npccorpse radius 100 zradius 50")()
+	local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius 100 zradius 50", mq.TLO.Me.CleanName()))()
 	if myCorpseCount > 0 then deadCount = deadCount + 1 end
 
 	if self.Actor == nil then self:LootMessageHandler() end
