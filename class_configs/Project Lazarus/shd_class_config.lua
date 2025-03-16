@@ -1283,7 +1283,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Spire of the Reavers",
+                name = "Fundament: Third Spire of the Reavers",
                 type = "AA",
                 tooltip = Tooltips.SpireoftheReavers,
             },
