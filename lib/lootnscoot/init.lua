@@ -1952,14 +1952,14 @@ DELETE FROM %s WHERE item_id = ?;
     for itemID, data in pairs(item_table) do
         local itemName = LNS.ItemNames[itemID] or nil
         local itemLink = data.Link
-        Logger.Debug(LNS.guiLoot.console, "Query: %s, itemID %s itemName %s, setting %s", qry, itemID, itemName, setting)
+        Logger.Debug(LNS.guiLoot.console, "Query: %s, itemID %s itemName %s, setting %s", qry, itemID, itemName, item_table[itemID].Rule)
 
         if itemName then
             if not delete_items then
-                stmt:bind_values(itemID, itemName, setting, classes, itemLink)
+                stmt:bind_values(itemID, itemName, item_table[itemID].Rule, classes, itemLink)
                 stmt:step()
                 stmt:reset()
-                LNS[localName .. 'Rules'][itemID] = setting
+                LNS[localName .. 'Rules'][itemID] = item_table[itemID].Rule
                 LNS[localName .. 'Classes'][itemID] = classes
                 LNS[localName .. 'Link'][itemID] = itemLink
             else
@@ -3168,13 +3168,16 @@ end
 
 function LNS.finishedLooting()
     if Mode == 'directed' then
+        -- Logger.Info(LNS.guiLoot.console, "\ayInforming \ax\aw[\at%s\ax\aw]\ax that I am \agDone Looting.", LNS.DirectorScript)
         LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
             { Subject = 'done_looting', Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
     end
+    LNS.LootNow = false
 end
 
 function LNS.informProcessing()
     if Mode == 'directed' then
+        Logger.Info(LNS.guiLoot.console, "\ayInforming \ax\aw[\at%s\ax\aw]\ax that I am \agProcessing.", LNS.DirectorScript)
         LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
             { Subject = "processing", Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
     end
@@ -3182,6 +3185,7 @@ end
 
 function LNS.doneProcessing()
     if Mode == 'directed' then
+        Logger.Info(LNS.guiLoot.console, "\ayInforming \ax\aw[\at%s\ax\aw]\ax that I am \agDone Processing.", LNS.DirectorScript)
         LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
             { Subject = "done_processing", Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
     end
@@ -3976,6 +3980,9 @@ function LNS.processItems(action)
     local flag        = false
     local totalPlat   = 0
     ProcessItemsState = action
+    local myCoins     = mq.TLO.Me.Cash()
+    local soldVal     = 0
+    local spentVal    = 0
     LNS.informProcessing()
     -- Helper function to process individual items based on action
     local function processItem(item, todo, bag, slot)
@@ -3988,20 +3995,20 @@ function LNS.processItems(action)
                 if not mq.TLO.Window('MerchantWnd').Open() then
                     if not LNS.goToVendor() or not LNS.openVendor() then return end
                 end
-                local sellPrice = item.Value() and item.Value() / 1000 or 0
-                local stackSize = item.StackSize() or 0
-                local haveAmt = mq.TLO.FindItemCount(item.Name())()
+                -- local sellPrice = item.Value() and item.Value() / 1000 or 0
+                -- local stackSize = item.StackSize() or 0
+                -- local haveAmt = mq.TLO.FindItemCount(item.Name())()
 
-                if stackSize > 1 and haveAmt > 1 then
-                    if haveAmt > stackSize then
-                        sellPrice = sellPrice * stackSize
-                    else
-                        sellPrice = sellPrice * haveAmt
-                    end
-                end
+                -- if stackSize > 1 and haveAmt > 1 then
+                --     if haveAmt > stackSize then
+                --         sellPrice = sellPrice * stackSize
+                --     else
+                --         sellPrice = sellPrice * haveAmt
+                --     end
+                -- end
 
                 LNS.SellToVendor(itemID, bag, slot, item.Name())
-                totalPlat = totalPlat + sellPrice
+                -- totalPlat = totalPlat + sellPrice
                 mq.delay(1)
             elseif todo == 'Tribute' then
                 if not mq.TLO.Window('TributeMasterWnd').Open() then
@@ -4043,12 +4050,15 @@ function LNS.processItems(action)
                     processItem(item, action, i, j)
                 end
             end
+        else
+            Logger.Warn(LNS.guiLoot.console, 'Item is \arNOT\ax in a Bag! \ayPlease place items inside of Bags!', i)
         end
         ::next_bag::
     end
 
     -- Handle restocking if AutoRestock is enabled
     if action == 'Sell' and LNS.Settings.AutoRestock then
+        soldVal = mq.TLO.Me.Cash() - myCoins
         LNS.RestockItems()
     end
 
@@ -4058,6 +4068,7 @@ function LNS.processItems(action)
             if not LNS.goToVendor() or not LNS.openVendor() then return end
         end
         LNS.RestockItems()
+        spentVal = mq.TLO.Me.Cash() - myCoins
     end
 
     -- Restore AlwaysEval state if it was modified
@@ -4076,8 +4087,9 @@ function LNS.processItems(action)
         if mq.TLO.Window('MerchantWnd').Open() then
             mq.TLO.Window('MerchantWnd').DoClose()
         end
-        totalPlat = math.floor(totalPlat)
-        LNS.report('Total plat value sold: \ag%s\ax', totalPlat)
+        -- totalPlat = math.floor(totalPlat)
+        totalPlat = (mq.TLO.Me.Cash() - myCoins) / 1000
+        LNS.report('Plat Spent: \ay%0.2f\ax, Gained: \ag%0.2f\ax, Total Profit: %0.2f', spentVal, soldVal, totalPlat)
     elseif action == 'Bank' then
         if mq.TLO.Window('BigBankWnd').Open() then
             mq.TLO.Window('BigBankWnd').DoClose()
@@ -4580,6 +4592,14 @@ function LNS.drawTable(label)
                 ImGui.EndCombo()
             end
             ImGui.SameLine()
+            if LNS.TempSettings.BulkRule == 'Quest' then
+                ImGui.SetNextItemWidth(100)
+                if LNS.TempSettings.BulkQuestAmount == nil then
+                    LNS.TempSettings.BulkQuestAmount = 0
+                end
+                LNS.TempSettings.BulkQuestAmount = ImGui.InputInt("Amount", LNS.TempSettings.BulkQuestAmount, 1, 1)
+                ImGui.SameLine()
+            end
             ImGui.SetNextItemWidth(100)
             if LNS.TempSettings.BulkClasses == nil then
                 LNS.TempSettings.BulkClasses = "All"
@@ -4621,8 +4641,16 @@ function LNS.drawTable(label)
                 LNS.TempSettings.BulkSet = {}
                 for itemID, isSelected in pairs(LNS.TempSettings.SelectedItems) do
                     if isSelected then
+                        local tmpRule = "Quest"
+                        if LNS.TempSettings.BulkRule == 'Quest' then
+                            if LNS.TempSettings.BulkQuestAmount > 0 then
+                                tmpRule = string.format("Quest|%s", LNS.TempSettings.BulkQuestAmount)
+                            end
+                        else
+                            tmpRule = LNS.TempSettings.BulkRule
+                        end
                         LNS.TempSettings.BulkSet[itemID] = {
-                            Rule = LNS.TempSettings.BulkRule,
+                            Rule = tmpRule,
                             Link = LNS[varSub .. 'Link'][itemID] or "NULL",
                         }
                     end
