@@ -86,9 +86,9 @@ Module.Constants.PullAreaType          = {
 }
 
 Module.Constants.PullAreaNames         = {
-    "Radius Around Camp",
-    "Radius Around Point",
-    "Rectangle Pull Area",
+    "Radius (From Camp/Hunter/Waypoint)",
+    "Radius (From Designated Point)",
+    "Rectangle",
 }
 
 Module.Constants.PullAbilities         = {
@@ -303,10 +303,10 @@ Module.DefaultConfig                   = {
         Tooltip = "Distance to pull in Hunt mode from your starting position",
         Default = 500,
         Min = 1,
+        Max = 10000,
         FAQ = "I run out of spawns to pull in Hunt Mode, how do I fix this?",
         Answer = "You can adjust the distance you pull from in Hunt Mode with [PullRadiusHunt].",
     },
-    Max                                        = 10000,
     ['PullZRadius']                            = {
         DisplayName = "Pull Z Radius",
         Category = "Pull Distance",
@@ -327,17 +327,113 @@ Module.DefaultConfig                   = {
         FAQ = "I want to adjust the distance I pull from at the waypoint stops in Farm Mode, how do I do that?",
         Answer = "You can adjust how far you pull from at the stops using the [PullRadiusFarm] setting.",
     },
-    ['PullCircleCenterY']                      = {
-        DisplayName = "Pull Center Y",
-        Category = "Pull Radius Point",
-        Tooltip = "Y point of circle center",
+    ['PullCircleCenterX']                      = {
+        DisplayName = "Designated Point X",
+        Category = "Pull Area",
+        Tooltip = "X point of circle center",
         Index = 1,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the center (X) of my pull circle.",
+        Answer = "Set Pull Center X to where you would like the Y point of your pull radius to be.",
+    },
+    ['PullCircleCenterY']                      = {
+        DisplayName = "Designated Point Y",
+        Category = "Pull Area",
+        Tooltip = "Y point of circle center",
+        Index = 2,
         Default = 0,
         Min = -10000,
         Max = 10000,
         ConfigType = "Advanced",
         FAQ = "How do I set the center (Y) of my pull circle.",
         Answer = "Set Pull Center Y to where you would like the Y point of your pull radius to be.",
+    },
+    ['PullCircleCenterZ']                      = {
+        DisplayName = "Designated Point Z",
+        Category = "Pull Area",
+        Tooltip = "Z point of circle center",
+        Index = 3,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the center (Z) of my pull circle.",
+        Answer = "Set Pull Center Z to where you would like the Y point of your pull radius to be.",
+    },
+    ['PullNWCornerX']                          = {
+        DisplayName = "Rect. NW Corner X",
+        Category = "Pull Area",
+        Tooltip = "X Location of North West Corner for rectangle pull area.",
+        Index = 4,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the North West corner X location for rectangle pulls areas?",
+        Answer = "Set North West Corner X to where you would like the x point of your corner to be.",
+    },
+    ['PullNWCornerY']                          = {
+        DisplayName = "Rect. NW Corner Y",
+        Category = "Pull Area",
+        Tooltip = "Y Location of North West Corner for rectangle pull area.",
+        Index = 5,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the North West corner Y location for rectangle pulls areas?",
+        Answer = "Set North West Corner Y to where you would like the x point of your corner to be.",
+    },
+    ['PullSECornerX']                          = {
+        DisplayName = "Rect. SE Corner X",
+        Category = "Pull Area",
+        Tooltip = "X Location of South East Corner for rectangle pull area.",
+        Index = 6,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the South east corner X location for rectangle pulls areas?",
+        Answer = "Set South East Corner X to where you would like the x point of your corner to be.",
+    },
+    ['PullSECornerY']                          = {
+        DisplayName = "Rect. SE Corner Y",
+        Category = "Pull Area",
+        Tooltip = "Y Location of South East Corner for rectangle pull area.",
+        Index = 7,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the South east corner Y location for rectangle pulls areas?",
+        Answer = "Set South East Corner Y to where you would like the x point of your corner to be.",
+    },
+    ['PullRectangleZPoint']                    = {
+        DisplayName = "Rect. Plane Z",
+        Category = "Pull Area",
+        Tooltip = "Z Location base height for rectangle pull area.",
+        Index = 8,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the Z point to measure radius from with a rectangle pull area?",
+        Answer = "Set Base Z Location to where you would like the point to be.",
+    },
+    ['PullRectangleZRadius']                   = {
+        DisplayName = "Rect. Pull Z Radius",
+        Category = "Pull Area",
+        Tooltip = "Z Location pull radius for rectangle pull area",
+        Index = 9,
+        Default = 30,
+        Min = 0,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set a Z radius when I am using rectangle pull area?",
+        Answer = "Set Rectangle Pulling Z Radius.",
     },
     ['PullHPPct']                              = {
         DisplayName = "Puller HP %",
@@ -366,9 +462,9 @@ Module.DefaultConfig                   = {
         Category = "Puller",
         Index = 3,
         Tooltip = "Make sure you have at least this much Endurance %",
+        Default = 30,
         Min = 0,
         Max = 100,
-        Default = 30,
         FAQ = "I keep trying to pull when I have half endurance. I don't want to run out, how do I fix this?",
         Answer = "You can adjust the Endurance % for pulls with [PullEndPct] and you will not pull until you are above that setting.",
     },
@@ -376,22 +472,10 @@ Module.DefaultConfig                   = {
         DisplayName = "Respect Med State",
         Category = "Puller",
         Index = 4,
-        Default = false,
         Tooltip = "Hold pulls if you are currently meditating.",
-        Answer = "If you turn on Respect Med State in the Group Watch options, your puller will remain medding until those thresholds are reached.",
+        Default = false,
         FAQ = "My puller only meds long enough to meet the pull minimums, what can be done?",
-    },
-    ['PullCircleCenterX']                      = {
-        DisplayName = "Pull Center X",
-        Category    = "Pull Radius Point",
-        Tooltip     = "X point of circle center",
-        Index       = 2,
-        Default     = 0,
-        Min         = -10000,
-        Max         = 10000,
-        ConfigType  = "Advanced",
-        FAQ         = "How do I set the center (X) of my pull circle.",
-        Answer      = "Set Pull Center X to where you would like the Y point of your pull radius to be.",
+        Answer = "If you turn on Respect Med State in the Group Watch options, your puller will remain medding until those thresholds are reached.",
     },
     ['PullBuffCount']                          = {
         DisplayName = "Min Buff Count",
@@ -403,90 +487,6 @@ Module.DefaultConfig                   = {
         Max = 40,
         FAQ = "How do I make it so my puller doesn't pull with no buffs?",
         Answer = "Set the min number of buffs before pulling with Min Buff Count and the pulling will pause to wait for that number of buffs.",
-    },
-    ['PullCircleCenterZ']                      = {
-        DisplayName = "Pull Center Z",
-        Tooltip = "Z point of circle center",
-        Min = -10000,
-        Index = 3,
-        Category = "Pull Radius Point",
-        Default = 0,
-        Max = 10000,
-        ConfigType = "Advanced",
-        FAQ = "How do I set the center (Z) of my pull circle.",
-        Answer = "Set Pull Center Z to where you would like the Y point of your pull radius to be.",
-    },
-    ['PullNWCornerX']                          = {
-        DisplayName = "North West Corner X",
-        Category = "Pull Rectangle Points",
-        Tooltip = "X Location of North West Corner for rectangle pull area.",
-        Index = 1,
-        Default = 0,
-        Min = -10000,
-        Max = 10000,
-        ConfigType = "Advanced",
-        FAQ = "How do I set the North West corner X location for rectangle pulls areas?",
-        Answer = "Set North West Corner X to where you would like the x point of your corner to be.",
-    },
-    ['PullNWCornerY']                          = {
-        DisplayName = "North West Corner Y",
-        Category    = "Pull Rectangle Points",
-        Index       = 2,
-        Tooltip     = "Y Location of North West Corner for rectangle pull area.",
-        Default     = 0,
-        Min         = -10000,
-        Max         = 10000,
-        ConfigType  = "Advanced",
-        FAQ         = "How do I set the North West corner Y location for rectangle pulls areas?",
-        Answer      = "Set North West Corner Y to where you would like the x point of your corner to be.",
-    },
-    ['PullSECornerX']                          = {
-        DisplayName = "South East Corner X",
-        Category = "Pull Rectangle Points",
-        Tooltip = "X Location of South East Corner for rectangle pull area.",
-        Index = 3,
-        Default = 0,
-        Min = -10000,
-        Max = 10000,
-        ConfigType = "Advanced",
-        FAQ = "How do I set the South east corner X location for rectangle pulls areas?",
-        Answer = "Set South East Corner X to where you would like the x point of your corner to be.",
-    },
-    ['PullSECornerY']                          = {
-        DisplayName = "South East Corner Y",
-        Category = "Pull Rectangle Points",
-        Tooltip = "Y Location of South East Corner for rectangle pull area.",
-        Default = 0,
-        Index = 4,
-        Min = -10000,
-        Max = 10000,
-        ConfigType = "Advanced",
-        FAQ = "How do I set the South east corner Y location for rectangle pulls areas?",
-        Answer = "Set South East Corner Y to where you would like the x point of your corner to be.",
-    },
-    ['PullRectangleZPoint']                    = {
-        DisplayName = "Base Z Location",
-        Category = "Pull Rectangle Points",
-        Tooltip = "Z Location base height for rectangle pull area.",
-        Index = 5,
-        Default = 0,
-        Min = -10000,
-        Max = 10000,
-        ConfigType = "Advanced",
-        FAQ = "How do I set the Z point to measure radius from with a rectangle pull area?",
-        Answer = "Set Base Z Location to where you would like the point to be.",
-    },
-    ['PullRectangleZRadius']                   = {
-        DisplayName = "Rectangle Z Radius",
-        Category = "Pull Rectangle Points",
-        Tooltip = "Z radius for rectangle pull area.",
-        Index = 5,
-        Default = 30,
-        Min = -10000,
-        Max = 10000,
-        ConfigType = "Advanced",
-        FAQ = "How do I set the Z radius for a rectangle pull area?",
-        Answer = "Set Rectangle Z Radius to the desired radius.",
     },
     ['PullDebuffed']                           = {
         DisplayName = "Pull While Debuffed",
@@ -1060,22 +1060,34 @@ function Module:Render()
         ImGui.PopStyleVar(1)
 
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
+        Ui.Tooltip("Select the Pull Mode you would like to use:\n" ..
+            "Normal = Set a camp, and pull a single mob to it (Will not split pull, sorry!).\n" ..
+            "Chain = Set a camp, and pull a number of mobs (equal to your Chain Count setting) to it.\n" ..
+            "Hunt = Roam an area with your group, pulling as you go.\n" ..
+            "Farm = Move from waypoint to waypoint, pulling within a set radius from each.\n")
         if pressed then
             self:SaveSettings(false)
         end
+        ImGui.NewLine()
+
+        --Pull Area Type dropdown
+        self.settings.PullAreaType, pressed = ImGui.Combo("Pull Area Type", self.settings.PullAreaType, self.Constants.PullAreaNames,
+            #self.Constants.PullAreaNames)
+        Ui.Tooltip("Select the Pull Area you would like to use:\n" ..
+            "From Camp/Hunter/Waypoint: The pull area will centered on the location you start pulling from.\n" ..
+            "From Designated Point: The pull area will be centered on the coordinates you provide in the Pull Area tab.\n" ..
+            "Rectangle Pull Area: The pull area will be within a box drawn from coordinates you provide in the Pull Area tab.")
+        if pressed then
+            self:SaveSettings(false)
+        end
+        ImGui.NewLine()
+
         if #self.TempSettings.ValidPullAbilities > 0 then
             self.settings.PullAbility, pressed = ImGui.Combo("Pull Ability", self.settings.PullAbility, function(id) return self:getPullAbilityDisplayName(id) end,
                 #self.TempSettings.ValidPullAbilities) --, self.TempSettings.ValidPullAbilities, #self.TempSettings.ValidPullAbilities)
             if pressed then
                 self:SaveSettings(false)
             end
-        end
-
-        --Pull Area Type dropdown
-        self.settings.PullAreaType, pressed = ImGui.Combo("Pull Area Type", self.settings.PullAreaType, self.Constants.PullAreaNames,
-            #self.Constants.PullAreaNames)
-        if pressed then
-            self:SaveSettings(false)
         end
 
         local nextPull = self.settings.PullDelay - (os.clock() - self.TempSettings.LastPullOrCombatEnded)
@@ -1146,7 +1158,6 @@ function Module:Render()
         ImGui.Text("Note: Allow List will supersede Deny List")
         self:RenderMobList("Allow List", "PullAllowList")
         self:RenderMobList("Deny List", "PullDenyList")
-        ImGui.NewLine()
         ImGui.Separator()
 
         if Config:GetSetting('DoPull') then
@@ -1588,9 +1599,8 @@ function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
                 if member.ID() == Core.GetMainAssistId() then
                     if campData.returnToCamp and Math.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
                         Comms.HandleAnnounce(string.format("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(),
-                                campData.campSettings.AutoCampY,
-                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, Config:GetSetting('AutoCampRadius')), Config:GetSetting('PullAnnounceGroup'),
-                            Config:GetSetting('PullAnnounce'))
+                                campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, Config:GetSetting('AutoCampRadius')),
+                            Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'))
                         return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                     end
                 else
@@ -2494,6 +2504,7 @@ function Module:GiveTime(combat_state)
             Logger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
 
             local successFn = function() return Targeting.GetXTHaterCount() > 0 end
+            local maxMove = self.settings.MaxMoveTime * 1000
 
             if self:IsPullMode("Chain") then
                 successFn = function() return Targeting.GetXTHaterCount() >= self.settings.ChainCount end
@@ -2558,7 +2569,7 @@ function Module:GiveTime(combat_state)
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     Core.DoCmd("/ranged %d", self.TempSettings.PullID)
@@ -2586,7 +2597,7 @@ function Module:GiveTime(combat_state)
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     mq.doevents()
@@ -2614,7 +2625,7 @@ function Module:GiveTime(combat_state)
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay(500, function() return mq.TLO.Navigation.Active() end)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     if pullAbility.Type:lower() == "ability" then

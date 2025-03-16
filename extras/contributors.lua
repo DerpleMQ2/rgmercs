@@ -10,4 +10,5 @@ return {
     "Grimmier",
     "cannonballdex",
     "RobbanEQ",
+    "Lisie",
 }
