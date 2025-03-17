@@ -130,7 +130,7 @@ end
 function Casting.SelfBuffCheck(spell)
     if not (spell and spell()) then return false end
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.ID() -- this allows us to still pass spells we don't know as variables to check
+    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.RankName.ID() -- this checks the book first but allows us to still pass spells we don't know as variables to check
     return Casting.LocalBuffCheck(spellId, false)
 end
 
@@ -148,7 +148,7 @@ end
 function Casting.PetBuffCheck(spell)
     if not (spell and spell()) then return false end
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell.ID() or spell.ID() -- this allows us to still pass spells we don't know as variables to check
+    local spellId = mq.TLO.Me.Spell.ID() or spell.RankName.ID() -- this checks the book first but allows us to still pass spells we don't know as variables to check
     return Casting.LocalBuffCheck(spellId, true)
 end
 
@@ -172,7 +172,7 @@ function Casting.GroupBuffCheck(spell, target)
     if not (target and target()) then return false end
 
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.ID() -- this allows us to still pass spells we don't know as variables to check
+    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.RankName.ID() -- this checks the book first but allows us to still pass spells we don't know as variables to check
 
     local ret = false
 
@@ -675,7 +675,7 @@ function Casting.DetSpellCheck(spell, target)
     if not (spell and spell()) then return false end
     if not target then target = Targeting.GetAutoTarget() or mq.TLO.Target end
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.ID()
+    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.RankName.ID()
     return Casting.TargetBuffCheck(spellId, target)
 end
 
@@ -701,7 +701,7 @@ function Casting.DotSpellCheck(spell, target)
 
     if Targeting.MobHasLowHP(target) then return false end
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.ID()
+    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.RankName.ID()
 
     return Casting.TargetBuffCheck(spellId, target)
 end
