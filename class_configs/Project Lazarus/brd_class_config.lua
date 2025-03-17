@@ -407,16 +407,17 @@ local _ClassConfig = {
             "Pulse of Sionachie",
             "Pulse of Salarra",
             "Pulse of Lunanyn",
-            "Pulse of Renewal",             -- 86 start hp/mana/endurance
-            "Cantata of Rodcet",            -- 81
-            "Cantata of Restoration",       -- 76
-            "Erollisi's Cantata",           -- 71
-            "Cantata of Life",              -- 67
-            "Wind of Marr",                 -- 62
-            "Cantata of Replenishment",     -- 55
-            "Cantata of Soothing",          -- 34 start hp/mana
-            "Cassindra's Chant of Clarity", --20, mana only
-            "Hymn of Restoration",          -- 7, hp only
+            "Pulse of Renewal",              -- 86 start hp/mana/endurance
+            "Cantata of Rodcet",             -- 81
+            "Cantata of Restoration",        -- 76
+            "Erollisi's Cantata",            -- 71
+            "Cantata of Life",               -- 67
+            "Wind of Marr",                  -- 62
+            "Cantata of Replenishment",      -- 55
+            "Cantata of Soothing",           -- 34 start hp/mana. Slightly less mana. They can custom if it they want the 2 mana/tick
+            "Cassindra's Chrous of Clarity", -- 32, mana only
+            "Cassindra's Chant of Clarity",  -- 20, mana only
+            "Hymn of Restoration",           -- 7, hp only
 
         },
         ['AreaRegenSong'] = {
