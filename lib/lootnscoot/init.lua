@@ -2757,6 +2757,7 @@ end
 function LNS.checkLore(itemName, itemLink, decision, countHave, isLore)
     local ret = decision
     local lootable = true
+    local freeSpace = mq.TLO.Me.FreeInventory()
     if isLore then
         if countHave > 0 or freeSpace <= LNS.Settings.SaveBagSlots then
             table.insert(loreItems, itemLink)
