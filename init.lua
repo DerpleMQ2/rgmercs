@@ -536,7 +536,9 @@ local function RGMercsGUI()
 
             renderModulesPopped()
 
-            RenderToggleHud()
+            if Config:GetSetting("AlwaysShowMiniButton") or Config.Globals.Minimized then
+                RenderToggleHud()
+            end
 
             RenderMainWindow(imGuiStyle)
 
