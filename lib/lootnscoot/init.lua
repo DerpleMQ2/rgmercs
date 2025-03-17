@@ -2716,36 +2716,63 @@ function LNS.checkQuest(curRule, onhand, curClasses)
     local tmpDecision = "Ignore"
     local qKeep = LNS.Settings.QuestKeep or 1
     local dbgTbl = {}
-    if string.find(curRule:lower(), "quest") then
-        if LNS.Settings.LootQuest then
-            local _, position = string.find(curRule, "|")
-            if position then
-                qKeep = tonumber(curRule:sub(position + 1)) or qKeep
-            end
-            if onhand < qKeep then
-                tmpDecision = LNS.checkClasses("Keep", curClasses, 'loot', false)
-            else
-                tmpDecision = "Ignore"
-            end
-            dbgTbl = {
-                Lookup = '\ax\ag Check for QUEST',
-                Decision = tmpDecision,
-                Rule = curRule,
-            }
-            Logger.Debug(LNS.guiLoot.console, dbgTbl)
-            tmpDecision = LNS.checkClasses('Keep', curClasses, 'loot', false)
+    if LNS.Settings.LootQuest then
+        local _, position = string.find(curRule, "|")
+        if position then
+            qKeep = tonumber(curRule:sub(position + 1)) or qKeep
+        end
+        if onhand < qKeep then
+            tmpDecision = LNS.checkClasses("Keep", curClasses, 'loot', false)
         else
             tmpDecision = "Ignore"
         end
         dbgTbl = {
-            Lookup = '\ax\ag Check for QUEST CLASSES',
+            Lookup = '\ax\ag Check for QUEST',
             Decision = tmpDecision,
-            Classes = curClasses,
             Rule = curRule,
         }
         Logger.Debug(LNS.guiLoot.console, dbgTbl)
+        tmpDecision = LNS.checkClasses('Keep', curClasses, 'loot', false)
+    else
+        tmpDecision = "Ignore"
     end
+    dbgTbl = {
+        Lookup = '\ax\ag Check for QUEST CLASSES',
+        Decision = tmpDecision,
+        Classes = curClasses,
+        Rule = curRule,
+    }
+    Logger.Debug(LNS.guiLoot.console, dbgTbl)
     return tmpDecision, qKeep
+end
+
+--- Check if the item is a Lore item and if we should keep it.
+---@param itemName string The name of the item
+---@param itemLink string The item link
+---@param decision string The current decision
+---@param countHave number The number of items on hand
+---@param isLore boolean True if the item is Lore
+---@return string ret The new decision
+---@return boolean lootable True if the item is lootable
+function LNS.checkLore(itemName, itemLink, decision, countHave, isLore)
+    local ret = decision
+    local lootable = true
+    if isLore then
+        if countHave > 0 or freeSpace <= LNS.Settings.SaveBagSlots then
+            table.insert(loreItems, itemLink)
+            ret = 'Ignore'
+            lootable = false
+        end
+        local dbgTbl = {
+            Lookup = '\ax\ag Check for LORE',
+            Have = haveLore,
+            Decision = ret,
+            Item = itemName,
+            Link = lootLink,
+        }
+        Logger.Debug(LNS.guiLoot.console, dbgTbl)
+    end
+    return ret, lootable
 end
 
 --- Evaluate and return the rule for an item.
@@ -2875,7 +2902,15 @@ function LNS.getRule(item, fromFunction, index)
     end
 
     if string.find(lootRule, "Quest") then
-        lootDecision, qKeep = LNS.checkQuest(lootRule, countHave, lootClasses)
+        local lootableItem = false
+        _, lootableItem = LNS.checkLore(itemName, lootLink, lootDecision, countHave, isLore)
+        if lootableItem then
+            lootDecision, qKeep = LNS.checkQuest(lootRule, countHave, lootClasses)
+            if countHave >= qKeep then
+                lootDecision = "Ignore"
+            end
+            qKeep = lootDecision == "Ignore" and 0 or qKeep
+        end
         goto quest_override
     end
 
@@ -2899,24 +2934,7 @@ function LNS.getRule(item, fromFunction, index)
         itemName,
         lootLink)
 
-    if isLore then
-        local haveItem     = mq.TLO.FindItem(('=%s'):format(item.Name()))()
-        local haveItemBank = mq.TLO.FindItemBank(('=%s'):format(item.Name()))()
-        local haveLore     = haveItem or haveItemBank
-        if haveItem or haveItemBank or freeSpace <= LNS.Settings.SaveBagSlots then
-            table.insert(loreItems, itemLink)
-            lootDecision = 'Ignore'
-        end
-        dbgTbl = {
-            Lookup = '\ax\ag Check for LORE',
-            Have = haveLore,
-            Decision = lootDecision,
-            Classes = lootClasses,
-            Item = itemName,
-            Link = lootLink,
-        }
-        Logger.Debug(LNS.guiLoot.console, dbgTbl)
-    end
+    lootDecision = LNS.checkLore(itemName, lootLink, lootDecision, countHave, isLore)
 
     if isNoDrop and (ruletype == 'Normal' or newRule) then
         iCanUse, lootDecision = LNS.checkWearable(equpiable, lootDecision, ruletype, isNoDrop, newRule, isAug, item)
@@ -3059,9 +3077,6 @@ function LNS.getRule(item, fromFunction, index)
         lootDecision = 'Ignore'
     end
 
-    ::quest_override::
-
-
     if lootDecision == 'NULL' then
         Logger.Warn(LNS.guiLoot.console, "Invalid decision \at%s\ax for item: \ay%s", lootDecision, itemName)
         lootDecision = 'Ignore'
@@ -3083,8 +3098,13 @@ function LNS.getRule(item, fromFunction, index)
     if lootRule == 'Destroy' then
         lootDecision = 'Destroy'
     end
+
+    ::quest_override::
+
     if fromFunction == 'loot' then
-        LNS.lootItem(index, lootDecision, 'leftmouseup', qKeep, not iCanUse)
+        if type(lootDecision) == 'string' then
+            LNS.lootItem(index, lootDecision, 'leftmouseup', qKeep, not iCanUse)
+        end
     end
 
     return lootDecision, qKeep, newRule, iCanUse
