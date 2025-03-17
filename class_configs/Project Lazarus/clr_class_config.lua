@@ -1367,9 +1367,9 @@ local _ClassConfig = {
             {
                 name = "Spirit Mastery",
                 type = "AA",
-                pre_activate = function(self, spell) --remove the old aura if we just purchased the AA, otherwise we will be spammed because of no focus.
+                pre_activate = function(self, aaName) --remove the old aura if we just purchased the AA, otherwise we will be spammed because of no focus.
                     ---@diagnostic disable-next-line: undefined-field
-                    if mq.TLO.Me.Aura(1)() then mq.TLO.Me.Aura(1).Remove() end
+                    if not Casting.AuraActiveByName("Aura of Pious Divinity") then mq.TLO.Me.Aura(1).Remove() end
                 end,
                 cond = function(self, aaName)
                     return not Casting.AuraActiveByName("Aura of Pious Divinity")
