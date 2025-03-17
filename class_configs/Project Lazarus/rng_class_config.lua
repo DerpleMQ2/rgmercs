@@ -1080,8 +1080,9 @@ local _ClassConfig = {
                 name = "MoveSpells",
                 type = "Spell",
                 tooltip = Tooltips.MoveSpells,
-                active_cond = function(self, spell) return Config:GetSetting('DoRunSpeed') and Casting.IHaveBuff(spell) end,
+                active_cond = function(self, spell) Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
+                    if not Config:GetSetting('DoRunSpeed') then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
