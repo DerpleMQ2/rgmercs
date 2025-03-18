@@ -278,6 +278,206 @@ local function DrawConsole(showPopout)
     end
 end
 
+local function RenderToggleHud()
+    local open, show = ImGui.Begin("RGMercsHUD", true, bit32.bor(ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.AlwaysAutoResize))
+    if not open then show = false end
+    if show then
+        local btnImg = Casting.LastBurnCheck and burnImg or derpImg
+        if Config.Globals.PauseMain then
+            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
+                Config.Globals.Minimized = not Config.Globals.Minimized
+            end
+            if ImGui.IsItemHovered() then
+                ImGui.SetTooltip("RGMercs is Paused.")
+            end
+        else
+            if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then
+                Config.Globals.Minimized = not Config.Globals.Minimized
+            end
+            if ImGui.IsItemHovered() then
+                ImGui.BeginTooltip()
+                if Casting.LastBurnCheck then
+                    ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
+                        string.format("RGMercs is BURNING!!"))
+                else
+                    ImGui.Text("RGMercs is Running")
+                end
+                ImGui.EndTooltip()
+            end
+        end
+        if ImGui.BeginPopupContextWindow() then
+            local pauseLabel = Config.Globals.PauseMain and "Resume" or "Pause"
+            if ImGui.MenuItem(pauseLabel) then
+                Config.Globals.PauseMain = not Config.Globals.PauseMain
+            end
+            ImGui.EndPopup()
+        end
+        ImGui.SameLine()
+
+
+        local red = ImVec4(1.0, 0.4, 0.4, 0.4)
+        local green = ImVec4(0.4, 1.0, 0.4, 0.4)
+        local lbl = Config.Globals.PauseMain and "Paused" or "Running"
+        local color = Config.Globals.PauseMain and red or green
+        ImGui.PushStyleColor(ImGuiCol.Button, color)
+        if ImGui.Button(lbl) then
+            Config.Globals.PauseMain = not Config.Globals.PauseMain
+        end
+        ImGui.PopStyleColor()
+
+        ImGui.SameLine()
+
+        color = Config:GetSetting('DoPull') and red or green
+        lbl = Config:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls"
+        ImGui.PushStyleColor(ImGuiCol.Button, color)
+        if ImGui.Button(lbl) then
+            local cmd = Config:GetSetting('DoPull') and "pullstop" or "pullstart"
+            Core.DoCmd("/rgl %s", cmd)
+        end
+        ImGui.PopStyleColor()
+        if ImGui.IsKeyPressed(ImGuiKey.Escape) and Config:GetSetting("EscapeMinimizes") and not Config.Globals.Minimized then
+            Config.Globals.Minimized = true
+        end
+    end
+    ImGui.End()
+end
+
+local function RenderMainWindow(imgui_style)
+    if not Config.Globals.Minimized then
+        local flags = ImGuiWindowFlags.None
+
+        if Config.settings.MainWindowLocked then
+            flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
+        end
+
+        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+
+        ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
+
+        if shouldDrawGUI then
+            local pressed
+            local imgDisplayed = Casting.LastBurnCheck and burnImg or derpImg
+            ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
+            ImGui.SameLine()
+            ImGui.Text(string.format("RGMercs %s [%s]\nClass Config: %s\nAuthor(s): %s",
+                Config._version,
+                GitCommit.commitId or "None",
+                Modules:ExecModule("Class", "GetVersionString"),
+                Modules:ExecModule("Class", "GetAuthorString"))
+            )
+
+            RenderWindowControls()
+
+            if not Config.Globals.PauseMain then
+                ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
+            else
+                ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
+            end
+
+            local pauseLabel = Config.Globals.PauseMain and "PAUSED" or "Running"
+            if Config.Globals.BackOffFlag then
+                pauseLabel = pauseLabel .. " [Backoff]"
+            end
+
+            if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imgui_style.ScrollbarSize) - imgui_style.WindowPadding.x), 40) then
+                Config.Globals.PauseMain = not Config.Globals.PauseMain
+            end
+            ImGui.PopStyleColor()
+
+            RenderTarget()
+
+            ImGui.NewLine()
+            ImGui.Separator()
+
+            if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
+                ImGui.SetItemDefaultFocus()
+                if ImGui.BeginTabItem("RGMercsMain") then
+                    ImGui.Text("Current State: " .. curState)
+                    ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
+
+                    -- .. tostring(Config.Globals.AutoTargetID))
+                    ImGui.Text("MA: %-25s", (Core.GetMainAssistSpawn().CleanName() or "None"))
+                    if mq.TLO.Target.ID() > 0 and Targeting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
+                        ImGui.SameLine()
+                        if ImGui.SmallButton(string.format("Set MA to %s", Targeting.GetTargetCleanName())) then
+                            Config.Globals.MainAssist = mq.TLO.Target.CleanName()
+                        end
+                    end
+                    ImGui.Text("Stuck To: " ..
+                        (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
+                    if ImGui.CollapsingHeader("Outside Assist List") then
+                        ImGui.Indent()
+                        Ui.RenderOAList()
+                        ImGui.Unindent()
+                    end
+
+                    if Core.IAmMA() and not Config:GetSetting('PopOutForceTarget') then
+                        if ImGui.CollapsingHeader("Force Target") then
+                            ImGui.Indent()
+                            Ui.RenderForceTargetList(true)
+                            ImGui.Unindent()
+                        end
+                    end
+
+                    ImGui.Separator()
+
+                    if ImGui.CollapsingHeader("Config Options") then
+                        ImGui.Indent()
+
+                        if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
+                            local settingsRef = Config:GetSettings()
+                            settingsRef, pressed, _ = Ui.RenderSettings(settingsRef, Config.DefaultConfig,
+                                Config.DefaultCategories, false, true)
+                            if pressed then
+                                Config:SaveSettings()
+                            end
+                        end
+                        if Config:GetSetting('ShowAllOptionsMain') then
+                            if Config.Globals.SubmodulesLoaded then
+                                local submoduleSettings = Modules:ExecAll("GetSettings")
+                                local submoduleDefaults = Modules:ExecAll("GetDefaultSettings")
+                                local submoduleCategories = Modules:ExecAll("GetSettingCategories")
+                                for n, s in pairs(submoduleSettings) do
+                                    if Modules:ExecModule(n, "ShouldRender") then
+                                        ImGui.PushID(n .. "_config_hdr")
+                                        if s and submoduleDefaults[n] and submoduleCategories[n] then
+                                            if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
+                                                s, pressed, _ = Ui.RenderSettings(s, submoduleDefaults[n],
+                                                    submoduleCategories[n], true)
+                                                if pressed then
+                                                    Modules:ExecModule(n, "SaveSettings", true)
+                                                end
+                                            end
+                                        end
+                                        ImGui.PopID()
+                                    end
+                                end
+                            end
+                        end
+                        ImGui.Unindent()
+                    end
+                    ImGui.EndTabItem()
+                end
+
+                renderModulesTabs()
+
+                ImGui.EndTabBar();
+            end
+
+            ImGui.Separator()
+            if not Config:GetSetting('PopOutConsole') then
+                if ImGui.CollapsingHeader("Console") then
+                    DrawConsole(true)
+                end
+            end
+        end
+
+        ImGui.PopID()
+
+        ImGui.End()
+    end
+end
+
 local function RGMercsGUI()
     local theme = GetTheme()
     local themeColorPop = 0
@@ -333,185 +533,23 @@ local function RGMercsGUI()
                     showConsole = false
                 end
             end
+
             renderModulesPopped()
-            if not Config.Globals.Minimized then
-                local flags = ImGuiWindowFlags.None
 
-                if Config.settings.MainWindowLocked then
-                    flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
-                end
-
-                openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercsui'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
-            else
-                local flags = bit32.bor(ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoTitleBar)
-                openGUI, shouldDrawGUI = ImGui.Begin(('RGMercsMin###rgmercsuiMin'), openGUI, flags)
-            end
-            ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
-
-            if shouldDrawGUI and not Config.Globals.Minimized then
-                local pressed
-                local imgDisplayed = Casting.LastBurnCheck and burnImg or derpImg
-                ImGui.Image(imgDisplayed:GetTextureID(), ImVec2(60, 60))
-                ImGui.SameLine()
-                ImGui.Text(string.format("RGMercs %s [%s]\nClass Config: %s\nAuthor(s): %s",
-                    Config._version,
-                    GitCommit.commitId or "None",
-                    Modules:ExecModule("Class", "GetVersionString"),
-                    Modules:ExecModule("Class", "GetAuthorString"))
-                )
-
-                RenderWindowControls()
-
-                if not Config.Globals.PauseMain then
-                    ImGui.PushStyleColor(ImGuiCol.Button, 0.3, 0.7, 0.3, 1)
-                else
-                    ImGui.PushStyleColor(ImGuiCol.Button, 0.7, 0.3, 0.3, 1)
-                end
-
-                local pauseLabel = Config.Globals.PauseMain and "PAUSED" or "Running"
-                if Config.Globals.BackOffFlag then
-                    pauseLabel = pauseLabel .. " [Backoff]"
-                end
-
-                if ImGui.Button(pauseLabel, (ImGui.GetWindowWidth() - ImGui.GetCursorPosX() - (ImGui.GetScrollMaxY() == 0 and 0 or imGuiStyle.ScrollbarSize) - imGuiStyle.WindowPadding.x), 40) then
-                    Config.Globals.PauseMain = not Config.Globals.PauseMain
-                end
-                ImGui.PopStyleColor()
-
-                RenderTarget()
-
-                ImGui.NewLine()
-                ImGui.Separator()
-
-                if ImGui.BeginTabBar("RGMercsTabs", ImGuiTabBarFlags.Reorderable) then
-                    ImGui.SetItemDefaultFocus()
-                    if ImGui.BeginTabItem("RGMercsMain") then
-                        ImGui.Text("Current State: " .. curState)
-                        ImGui.Text("Hater Count: " .. tostring(Targeting.GetXTHaterCount()))
-
-                        -- .. tostring(Config.Globals.AutoTargetID))
-                        ImGui.Text("MA: %-25s", (Core.GetMainAssistSpawn().CleanName() or "None"))
-                        if mq.TLO.Target.ID() > 0 and Targeting.TargetIsType("pc") and Config.Globals.MainAssist ~= mq.TLO.Target.ID() then
-                            ImGui.SameLine()
-                            if ImGui.SmallButton(string.format("Set MA to %s", Targeting.GetTargetCleanName())) then
-                                Config.Globals.MainAssist = mq.TLO.Target.CleanName()
-                            end
-                        end
-                        ImGui.Text("Stuck To: " ..
-                            (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
-                        if ImGui.CollapsingHeader("Outside Assist List") then
-                            ImGui.Indent()
-                            Ui.RenderOAList()
-                            ImGui.Unindent()
-                        end
-
-                        if Core.IAmMA() and not Config:GetSetting('PopOutForceTarget') then
-                            if ImGui.CollapsingHeader("Force Target") then
-                                ImGui.Indent()
-                                Ui.RenderForceTargetList(true)
-                                ImGui.Unindent()
-                            end
-                        end
-
-                        ImGui.Separator()
-
-                        if ImGui.CollapsingHeader("Config Options") then
-                            ImGui.Indent()
-
-                            if ImGui.CollapsingHeader(string.format("%s: Config Options", "Main"), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                local settingsRef = Config:GetSettings()
-                                settingsRef, pressed, _ = Ui.RenderSettings(settingsRef, Config.DefaultConfig,
-                                    Config.DefaultCategories, false, true)
-                                if pressed then
-                                    Config:SaveSettings()
-                                end
-                            end
-                            if Config:GetSetting('ShowAllOptionsMain') then
-                                if Config.Globals.SubmodulesLoaded then
-                                    local submoduleSettings = Modules:ExecAll("GetSettings")
-                                    local submoduleDefaults = Modules:ExecAll("GetDefaultSettings")
-                                    local submoduleCategories = Modules:ExecAll("GetSettingCategories")
-                                    for n, s in pairs(submoduleSettings) do
-                                        if Modules:ExecModule(n, "ShouldRender") then
-                                            ImGui.PushID(n .. "_config_hdr")
-                                            if s and submoduleDefaults[n] and submoduleCategories[n] then
-                                                if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then
-                                                    s, pressed, _ = Ui.RenderSettings(s, submoduleDefaults[n],
-                                                        submoduleCategories[n], true)
-                                                    if pressed then
-                                                        Modules:ExecModule(n, "SaveSettings", true)
-                                                    end
-                                                end
-                                            end
-                                            ImGui.PopID()
-                                        end
-                                    end
-                                end
-                            end
-                            ImGui.Unindent()
-                        end
-                        ImGui.EndTabItem()
-                    end
-
-                    renderModulesTabs()
-
-
-                    ImGui.EndTabBar();
-                end
-
-                ImGui.Separator()
-                if not Config:GetSetting('PopOutConsole') then
-                    if ImGui.CollapsingHeader("Console") then
-                        DrawConsole(true)
-                    end
-                end
-            elseif shouldDrawGUI and Config.Globals.Minimized then
-                local btnImg = Casting.LastBurnCheck and burnImg or derpImg
-                if Config.Globals.PauseMain then
-                    if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30), ImVec2(0.0, 0.0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 0, 0, 1)) then
-                        Config.Globals.Minimized = false
-                    end
-                    if ImGui.IsItemHovered() then
-                        ImGui.SetTooltip("RGMercs is Paused.")
-                    end
-                else
-                    if ImGui.ImageButton('RGMercsButton', btnImg:GetTextureID(), ImVec2(30, 30)) then
-                        Config.Globals.Minimized = false
-                    end
-                    if ImGui.IsItemHovered() then
-                        ImGui.BeginTooltip()
-                        if Casting.LastBurnCheck then
-                            ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
-                                string.format("RGMercs is BURNING!!"))
-                        else
-                            ImGui.Text("RGMercs is Running")
-                        end
-                        ImGui.EndTooltip()
-                    end
-                end
-                if ImGui.BeginPopupContextWindow() then
-                    local pauseLabel = Config.Globals.PauseMain and "Resume" or "Pause"
-                    if ImGui.MenuItem(pauseLabel) then
-                        Config.Globals.PauseMain = not Config.Globals.PauseMain
-                    end
-                    ImGui.EndPopup()
-                end
+            if Config:GetSetting("AlwaysShowMiniButton") or Config.Globals.Minimized then
+                RenderToggleHud()
             end
 
-            ImGui.PopID()
+            RenderMainWindow(imGuiStyle)
+
             ImGui.PopStyleVar(3)
-            if ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) then
-                if ImGui.IsKeyPressed(ImGuiKey.Escape) and Config:GetSetting("EscapeMinimizes") then
-                    Config.Globals.Minimized = true
-                end
-            end
+
             if themeColorPop > 0 then
                 ImGui.PopStyleColor(themeColorPop)
             end
             if themeStylePop > 0 then
                 ImGui.PopStyleVar(themeStylePop)
             end
-            ImGui.End()
         end
     end
 end

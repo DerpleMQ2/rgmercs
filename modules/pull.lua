@@ -623,6 +623,22 @@ Module.CommandHandlers = {
             return true
         end,
     },
+    pullstart = {
+        usage = "/rgl pullstart",
+        about = "Starts the puller",
+        handler = function(self, ...)
+            self:StartPuller()
+            return true
+        end,
+    },
+    pullstop = {
+        usage = "/rgl pullstop",
+        about = "Stops the puller",
+        handler = function(self, ...)
+            self:StopPuller()
+            return true
+        end,
+    },
     pulldeny = {
         usage = "/rgl pulldeny \"<name>\"",
         about = "Adds <name> to the Pull Deny List.",
@@ -883,14 +899,7 @@ function Module:Render()
 
             if ImGui.Button(Config:GetSetting('DoPull') and "Stop Pulls" or "Start Pulls", ImGui.GetWindowWidth() * .3, 25) then
                 self.settings.DoPull = not self.settings.DoPull
-                if Config:GetSetting('AutoSetRoles') and mq.TLO.Group.Leader() == mq.TLO.Me.DisplayName() then
-                    -- in hunt mode we follow around.
-
-                    if self.Constants.PullModes[self.settings.PullMode] ~= "Hunt" then
-                        Core.DoCmd("/grouproles %s %s 3", Config:GetSetting('DoPull') and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
-                    end
-                    Core.DoCmd("/grouproles set %s 2", Config.Globals.MainAssist)                                                    -- set MA
-                end
+                Module:SetRoles()
                 self:SaveSettings(false)
             end
             ImGui.PopStyleColor()
@@ -2277,6 +2286,31 @@ function Module:SetPullTarget()
     self.TempSettings.TargetSpawnID = mq.TLO.Target.ID()
     table.insert(self.TempSettings.PullTargets, mq.TLO.Target)
     self.TempSettings.PullTargetsMetaData[mq.TLO.Target.ID()] = { distance = mq.TLO.Navigation.PathLength("id " .. mq.TLO.Target.ID())(), }
+end
+
+function Module:StartPuller()
+    if self.settings.DoPull == true then return end
+    self.settings.DoPull = true
+    Module:SetRoles()
+    self:SaveSettings(false)
+end
+
+function Module:StopPuller()
+    if self.settings.DoPull == false then return end
+    self.settings.DoPull = false
+    Module:SetRoles()
+    self:SaveSettings(false)
+end
+
+function Module:SetRoles()
+    if Config:GetSetting('AutoSetRoles') and mq.TLO.Group.Leader() == mq.TLO.Me.DisplayName() then
+        -- in hunt mode we follow around.
+
+        if self.Constants.PullModes[self.settings.PullMode] ~= "Hunt" then
+            Core.DoCmd("/grouproles %s %s 3", Config:GetSetting('DoPull') and "set" or "unset", mq.TLO.Me.DisplayName()) -- set puller
+        end
+        Core.DoCmd("/grouproles set %s 2", Config.Globals.MainAssist)                                                    -- set MA
+    end
 end
 
 function Module:OnDeath()

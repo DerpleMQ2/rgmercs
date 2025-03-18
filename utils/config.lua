@@ -1391,6 +1391,15 @@ Config.DefaultConfig = {
         Answer = "You can set the [EscapeMinimizes] option to true to minimize the window if focused and Escape is pressed.\n" ..
             "You can also click the minimize button on the window to minimize it.",
     },
+    ['AlwaysShowMiniButton'] = {
+        DisplayName = "Always show Mini Button",
+        Category = "UI",
+        Tooltip = "Always show the Mini button.",
+        Default = false,
+        ConfigType = "Normal",
+        FAQ = "How do I keep the mini button on the screen as a toggle?",
+        Answer = "You can set the [AlwaysShowMiniButton] option to true and the button will stay on screen at all times.",
+    },
     ['PopOutForceTarget']    = {
         DisplayName = "Pop Out Force Target",
         Type = "Custom",
