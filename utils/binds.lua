@@ -159,6 +159,9 @@ Binds.Handlers    = {
             targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
             Logger.log_debug("\atCasting: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
 
+            -- wait for cast window to close
+            mq.delay("5s", function() return mq.TLO.Me.Casting.ID() == nil end)
+
             if not Casting.UseSpell(spell, targetId, true) then
                 Casting.UseAA(spell, targetId)
             end
