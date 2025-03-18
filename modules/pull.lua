@@ -80,6 +80,18 @@ Module.Constants.PullModes             = {
     "Farm",
 }
 
+Module.Constants.PullAreaType          = {
+    PullCircleCamp = 1,
+    PullCirclePoint = 2,
+    PullAreaRectangle = 3,
+}
+
+Module.Constants.PullAreaNames         = {
+    "Radius (From Camp/Hunter/Waypoint)",
+    "Radius (From Designated Point)",
+    "Rectangle",
+}
+
 Module.Constants.PullAbilities         = {
     {
         id = "PetPull",
@@ -218,6 +230,15 @@ Module.DefaultConfig                   = {
             "Hunt = Roam the Hunt Pull Radius moving to each mob to fight.\n" ..
             "Farm = Follow the Farm Path waypoints and kill at each stop.\n",
     },
+    ['PullAreaType']                           = {
+        DisplayName = "Pull Area Type",
+        Category = "Pulling",
+        Tooltip = "1 = Circle around camp, 2 = Circle around point, 3 = Rectangle Area",
+        Type = "Custom",
+        Default = 1,
+        min = 1,
+        max = 3,
+    },
     ['ChainCount']                             = {
         DisplayName = "Chain Count",
         Category = "Pulling",
@@ -306,6 +327,114 @@ Module.DefaultConfig                   = {
         Max = 10000,
         FAQ = "I want to adjust the distance I pull from at the waypoint stops in Farm Mode, how do I do that?",
         Answer = "You can adjust how far you pull from at the stops using the [PullRadiusFarm] setting.",
+    },
+    ['PullCircleCenterX']                      = {
+        DisplayName = "Designated Point X",
+        Category = "Pull Area",
+        Tooltip = "X point of circle center",
+        Index = 1,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the center (X) of my pull circle.",
+        Answer = "Set Pull Center X to where you would like the Y point of your pull radius to be.",
+    },
+    ['PullCircleCenterY']                      = {
+        DisplayName = "Designated Point Y",
+        Category = "Pull Area",
+        Tooltip = "Y point of circle center",
+        Index = 2,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the center (Y) of my pull circle.",
+        Answer = "Set Pull Center Y to where you would like the Y point of your pull radius to be.",
+    },
+    ['PullCircleCenterZ']                      = {
+        DisplayName = "Designated Point Z",
+        Category = "Pull Area",
+        Tooltip = "Z point of circle center",
+        Index = 3,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the center (Z) of my pull circle.",
+        Answer = "Set Pull Center Z to where you would like the Y point of your pull radius to be.",
+    },
+    ['PullNWCornerX']                          = {
+        DisplayName = "Rect. NW Corner X",
+        Category = "Pull Area",
+        Tooltip = "X Location of North West Corner for rectangle pull area.",
+        Index = 4,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the North West corner X location for rectangle pulls areas?",
+        Answer = "Set North West Corner X to where you would like the x point of your corner to be.",
+    },
+    ['PullNWCornerY']                          = {
+        DisplayName = "Rect. NW Corner Y",
+        Category = "Pull Area",
+        Tooltip = "Y Location of North West Corner for rectangle pull area.",
+        Index = 5,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the North West corner Y location for rectangle pulls areas?",
+        Answer = "Set North West Corner Y to where you would like the x point of your corner to be.",
+    },
+    ['PullSECornerX']                          = {
+        DisplayName = "Rect. SE Corner X",
+        Category = "Pull Area",
+        Tooltip = "X Location of South East Corner for rectangle pull area.",
+        Index = 6,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the South east corner X location for rectangle pulls areas?",
+        Answer = "Set South East Corner X to where you would like the x point of your corner to be.",
+    },
+    ['PullSECornerY']                          = {
+        DisplayName = "Rect. SE Corner Y",
+        Category = "Pull Area",
+        Tooltip = "Y Location of South East Corner for rectangle pull area.",
+        Index = 7,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the South east corner Y location for rectangle pulls areas?",
+        Answer = "Set South East Corner Y to where you would like the x point of your corner to be.",
+    },
+    ['PullRectangleZPoint']                    = {
+        DisplayName = "Rect. Plane Z",
+        Category = "Pull Area",
+        Tooltip = "Z Location base height for rectangle pull area.",
+        Index = 8,
+        Default = 0,
+        Min = -10000,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set the Z point to measure radius from with a rectangle pull area?",
+        Answer = "Set Base Z Location to where you would like the point to be.",
+    },
+    ['PullRectangleZRadius']                   = {
+        DisplayName = "Rect. Pull Z Radius",
+        Category = "Pull Area",
+        Tooltip = "Z Location pull radius for rectangle pull area",
+        Index = 9,
+        Default = 30,
+        Min = 0,
+        Max = 10000,
+        ConfigType = "Advanced",
+        FAQ = "How do I set a Z radius when I am using rectangle pull area?",
+        Answer = "Set Rectangle Pulling Z Radius.",
     },
     ['PullHPPct']                              = {
         DisplayName = "Puller HP %",
@@ -941,9 +1070,28 @@ function Module:Render()
         ImGui.PopStyleVar(1)
 
         self.settings.PullMode, pressed = ImGui.Combo("Pull Mode", self.settings.PullMode, self.Constants.PullModes, #self.Constants.PullModes)
+        Ui.Tooltip("Select the Pull Mode you would like to use:\n" ..
+            "Normal = Set a camp, and pull a single mob to it (Will not split pull, sorry!).\n" ..
+            "Chain = Set a camp, and pull a number of mobs (equal to your Chain Count setting) to it.\n" ..
+            "Hunt = Roam an area with your group, pulling as you go.\n" ..
+            "Farm = Move from waypoint to waypoint, pulling within a set radius from each.\n")
         if pressed then
             self:SaveSettings(false)
         end
+        ImGui.NewLine()
+
+        --Pull Area Type dropdown
+        self.settings.PullAreaType, pressed = ImGui.Combo("Pull Area Type", self.settings.PullAreaType, self.Constants.PullAreaNames,
+            #self.Constants.PullAreaNames)
+        Ui.Tooltip("Select the Pull Area you would like to use:\n" ..
+            "From Camp/Hunter/Waypoint: The pull area will centered on the location you start pulling from.\n" ..
+            "From Designated Point: The pull area will be centered on the coordinates you provide in the Pull Area tab.\n" ..
+            "Rectangle Pull Area: The pull area will be within a box drawn from coordinates you provide in the Pull Area tab.")
+        if pressed then
+            self:SaveSettings(false)
+        end
+        ImGui.NewLine()
+
         if #self.TempSettings.ValidPullAbilities > 0 then
             self.settings.PullAbility, pressed = ImGui.Combo("Pull Ability", self.settings.PullAbility, function(id) return self:getPullAbilityDisplayName(id) end,
                 #self.TempSettings.ValidPullAbilities) --, self.TempSettings.ValidPullAbilities, #self.TempSettings.ValidPullAbilities)
@@ -1020,7 +1168,6 @@ function Module:Render()
         ImGui.Text("Note: Allow List will supersede Deny List")
         self:RenderMobList("Allow List", "PullAllowList")
         self:RenderMobList("Deny List", "PullDenyList")
-        ImGui.NewLine()
         ImGui.Separator()
 
         if Config:GetSetting('DoPull') then
@@ -1462,9 +1609,8 @@ function Module:CheckGroupForPull(resourceResumePct, resourcePausePct, campData)
                 if member.ID() == Core.GetMainAssistId() then
                     if campData.returnToCamp and Math.GetDistanceSquared(member.X(), member.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > maxDist then
                         Comms.HandleAnnounce(string.format("%s (assist target) is beyond AutoCampRadius from %d, %d, %d : %d. Holding pulls.", member.CleanName(),
-                                campData.campSettings.AutoCampY,
-                                campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, Config:GetSetting('AutoCampRadius')), Config:GetSetting('PullAnnounceGroup'),
-                            Config:GetSetting('PullAnnounce'))
+                                campData.campSettings.AutoCampY, campData.campSettings.AutoCampX, campData.campSettings.AutoCampZ, Config:GetSetting('AutoCampRadius')),
+                            Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'))
                         return false, string.format("%s Beyond AutoCampRadius", member.CleanName())
                     end
                 else
@@ -1507,150 +1653,428 @@ end
 function Module:GetPullableSpawns()
     local pullRadius = Config:GetSetting('PullRadius')
     local maxPathRange = Config:GetSetting('MaxPathRange')
-
+    local pullTargets
     local metaDataCache = {}
-
-    if self:IsPullMode("Farm") then
-        pullRadius = Config:GetSetting('PullRadiusFarm')
-    elseif self:IsPullMode("Hunt") then
-        pullRadius = Config:GetSetting('PullRadiusHunt')
-    end
-
-    local pullRadiusSqr = pullRadius * pullRadius
-
-    local spawnFilter = function(spawn)
-        if not spawn() or spawn.ID() == 0 then return false end
-        if not spawn.Targetable() then return false end
-        if spawn.Type() ~= "NPC" and spawn.Type() ~= "NPCPET" then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
-                spawn.Type())
-            return false
-        end
-
-        if spawn.Master.Type() == 'PC' then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
-            return false
-        elseif self:IsPullMode("Chain") then
-            if Targeting.IsSpawnXTHater(spawn.ID()) then
-                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
-                return false
-            end
-        end
-
-        if self:HaveList("PullAllowList") then
-            if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
-                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
-                return false
-            end
-        elseif self:HaveList("PullDenyList") then
-            if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
-                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
-                return false
-            end
-        end
-
-        if spawn.FeetWet() and not Config:GetSetting('PullMobsInWater') then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water water", spawn.CleanName(), spawn.ID())
-            return false
-        end
-
-        -- Level Checks
-        if self.settings.UsePullLevels then
-            if spawn.Level() < self.settings.PullMinLevel then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
-                    spawn.Level())
-                return false
-            end
-            if spawn.Level() > self.settings.PullMaxLevel then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
-                    spawn.Level())
-                return false
-            end
-        else
-            -- check cons.
-            local conLevel = Config.Constants.ConColorsNameToId[spawn.ConColor()]
-            if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
-                    spawn.CleanName(), spawn.ID(),
-                    self.settings.PullMinCon,
-                    self.settings.PullMaxCon, conLevel, spawn.ConColor())
-                return false
-            end
-            -- check max level difference
-            local maxLvl = mq.TLO.Me.Level() + self.settings.MaxLevelDiff
-            if spawn.Level() > maxLvl then
-                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to max level difference. Max Level = %d, Mob = %d",
-                    spawn.CleanName(), spawn.ID(), maxLvl, spawn.Level())
-                return false
-            end
-        end
-
-        local checkX, checkY, checkZ = mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z()
-
+    if self.settings.PullAreaType == self.Constants.PullAreaType.PullCircleCamp then
         if self:IsPullMode("Farm") then
-            local wpId = self:GetCurrentWpId()
-            local wpData = self:GetWPById(wpId)
-            checkX, checkY, checkZ = wpData.x, wpData.y, wpData.z
+            pullRadius = Config:GetSetting('PullRadiusFarm')
         elseif self:IsPullMode("Hunt") then
-            checkX, checkY, checkZ = self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ
+            pullRadius = Config:GetSetting('PullRadiusHunt')
         end
 
-        -- do distance checks.
-        if math.abs(spawn.Z() - checkZ) > self.settings.PullZRadius then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
-                math.abs(spawn.Z() - checkZ),
-                self.settings.PullZRadius)
-            return false
+        local pullRadiusSqr = pullRadius * pullRadius
+
+        local spawnFilter = function(spawn)
+            if not spawn() or spawn.ID() == 0 then return false end
+            if not spawn.Targetable() then return false end
+            if spawn.Type() ~= "NPC" and spawn.Type() ~= "NPCPET" then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
+                    spawn.Type())
+                return false
+            end
+
+            if spawn.Master.Type() == 'PC' then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
+                return false
+            elseif self:IsPullMode("Chain") then
+                if Targeting.IsSpawnXTHater(spawn.ID()) then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            end
+
+            if self:HaveList("PullAllowList") then
+                if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            elseif self:HaveList("PullDenyList") then
+                if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            end
+
+            if spawn.FeetWet() and not Config:GetSetting('PullMobsInWater') then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water water", spawn.CleanName(), spawn.ID())
+                return false
+            end
+
+            -- Level Checks
+            if self.settings.UsePullLevels then
+                if spawn.Level() < self.settings.PullMinLevel then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
+                        spawn.Level())
+                    return false
+                end
+                if spawn.Level() > self.settings.PullMaxLevel then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
+                        spawn.Level())
+                    return false
+                end
+            else
+                -- check cons.
+                local conLevel = Config.Constants.ConColorsNameToId[spawn.ConColor()]
+                if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
+                        spawn.CleanName(), spawn.ID(),
+                        self.settings.PullMinCon,
+                        self.settings.PullMaxCon, conLevel, spawn.ConColor())
+                    return false
+                end
+                -- check max level difference
+                local maxLvl = mq.TLO.Me.Level() + self.settings.MaxLevelDiff
+                if spawn.Level() > maxLvl then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to max level difference. Max Level = %d, Mob = %d",
+                        spawn.CleanName(), spawn.ID(), maxLvl, spawn.Level())
+                    return false
+                end
+            end
+
+            local checkX, checkY, checkZ = mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z()
+
+            if self:IsPullMode("Farm") then
+                local wpId = self:GetCurrentWpId()
+                local wpData = self:GetWPById(wpId)
+                checkX, checkY, checkZ = wpData.x, wpData.y, wpData.z
+            elseif self:IsPullMode("Hunt") then
+                checkX, checkY, checkZ = self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ
+            end
+
+            -- do distance checks.
+            if math.abs(spawn.Z() - checkZ) > self.settings.PullZRadius then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
+                    math.abs(spawn.Z() - checkZ),
+                    self.settings.PullZRadius)
+                return false
+            end
+
+            local distSqr = Math.GetDistanceSquared(spawn.X(), spawn.Y(), checkX, checkY)
+
+            if distSqr > pullRadiusSqr then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoDistance too far - distSq(%d) > pullRadiusSq(%d)",
+                    spawn.CleanName(), spawn.ID(), distSqr,
+                    pullRadiusSqr)
+                return false
+            end
+
+            local navDist = 0
+            local canPath = true
+
+            if maxPathRange > 0 then
+                navDist = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
+                canPath = navDist > 0
+            else
+                canPath = mq.TLO.Navigation.PathExists("id " .. spawn.ID())()
+            end
+
+            if not canPath or navDist > maxPathRange then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
+                    spawn.ID(), navDist, Strings.BoolToColorString(canPath))
+                return false
+            end
+
+            if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
+                    spawn.CleanName(), spawn.ID())
+                return false
+            end
+
+            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
+
+            metaDataCache[spawn.ID()] = { distance = navDist, }
+
+            return true
         end
 
-        local distSqr = Math.GetDistanceSquared(spawn.X(), spawn.Y(), checkX, checkY)
+        pullTargets = mq.getFilteredSpawns(spawnFilter)
 
-        if distSqr > pullRadiusSqr then
-            Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoDistance too far - distSq(%d) > pullRadiusSq(%d)",
-                spawn.CleanName(), spawn.ID(), distSqr,
-                pullRadiusSqr)
-            return false
+        table.sort(pullTargets, function(a, b)
+            -- spawn could be invalid by now so double check
+            if a.ID() == 0 or a.Dead() then return false end
+            if b.ID() == 0 or b.Dead() then return true end
+
+            return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance
+        end)
+    elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullCirclePoint then
+        if self:IsPullMode("Farm") then
+            pullRadius = Config:GetSetting('PullRadiusFarm')
+        elseif self:IsPullMode("Hunt") then
+            pullRadius = Config:GetSetting('PullRadiusHunt')
+        end
+        local pullRadiusSqr = pullRadius * pullRadius
+
+        local spawnFilter = function(spawn)
+            if not spawn() or spawn.ID() == 0 then return false end
+            if not spawn.Targetable() then return false end
+            if spawn.Type() ~= "NPC" and spawn.Type() ~= "NPCPET" then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
+                    spawn.Type())
+                return false
+            end
+
+            if spawn.Master.Type() == 'PC' then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
+                return false
+            elseif self:IsPullMode("Chain") then
+                if Targeting.IsSpawnXTHater(spawn.ID()) then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            end
+
+            if self:HaveList("PullAllowList") then
+                if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            elseif self:HaveList("PullDenyList") then
+                if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            end
+
+            if spawn.FeetWet() and not Config:GetSetting('PullMobsInWater') then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water water", spawn.CleanName(), spawn.ID())
+                return false
+            end
+
+            -- Level Checks
+            if self.settings.UsePullLevels then
+                if spawn.Level() < self.settings.PullMinLevel then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
+                        spawn.Level())
+                    return false
+                end
+                if spawn.Level() > self.settings.PullMaxLevel then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
+                        spawn.Level())
+                    return false
+                end
+            else
+                -- check cons.
+                local conLevel = Config.Constants.ConColorsNameToId[spawn.ConColor()]
+                if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
+                        spawn.CleanName(), spawn.ID(),
+                        self.settings.PullMinCon,
+                        self.settings.PullMaxCon, conLevel, spawn.ConColor())
+                    return false
+                end
+                -- check max level difference
+                local maxLvl = mq.TLO.Me.Level() + self.settings.MaxLevelDiff
+                if spawn.Level() > maxLvl then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to max level difference. Max Level = %d, Mob = %d",
+                        spawn.CleanName(), spawn.ID(), maxLvl, spawn.Level())
+                    return false
+                end
+            end
+
+            local checkX, checkY, checkZ = self.settings.PullCircleCenterX, self.settings.PullCircleCenterY, self.settings.PullCircleCenterZ
+
+            if self:IsPullMode("Farm") then
+                local wpId = self:GetCurrentWpId()
+                local wpData = self:GetWPById(wpId)
+                checkX, checkY, checkZ = wpData.x, wpData.y, wpData.z
+            elseif self:IsPullMode("Hunt") then
+                checkX, checkY, checkZ = self.TempSettings.HuntX, self.TempSettings.HuntY, self.TempSettings.HuntZ
+            end
+
+            -- do distance checks.
+            if math.abs(spawn.Z() - checkZ) > self.settings.PullZRadius then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
+                    math.abs(spawn.Z() - checkZ),
+                    self.settings.PullZRadius)
+                return false
+            end
+
+            local distSqr = Math.GetDistanceSquared(spawn.X(), spawn.Y(), checkX, checkY)
+
+            if distSqr > pullRadiusSqr then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoDistance too far - distSq(%d) > pullRadiusSq(%d)",
+                    spawn.CleanName(), spawn.ID(), distSqr,
+                    pullRadiusSqr)
+                return false
+            end
+
+            local navDist = 0
+            local canPath = true
+
+            if maxPathRange > 0 then
+                navDist = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
+                canPath = navDist > 0
+            else
+                canPath = mq.TLO.Navigation.PathExists("id " .. spawn.ID())()
+            end
+
+            if not canPath or navDist > maxPathRange then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
+                    spawn.ID(), navDist, Strings.BoolToColorString(canPath))
+                return false
+            end
+
+            if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
+                    spawn.CleanName(), spawn.ID())
+                return false
+            end
+
+            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
+
+            metaDataCache[spawn.ID()] = { distance = navDist, }
+
+            return true
         end
 
-        local navDist = 0
-        local canPath = true
+        pullTargets = mq.getFilteredSpawns(spawnFilter)
 
-        if maxPathRange > 0 then
-            navDist = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
-            canPath = navDist > 0
-        else
-            canPath = mq.TLO.Navigation.PathExists("id " .. spawn.ID())()
+        table.sort(pullTargets, function(a, b)
+            -- spawn could be invalid by now so double check
+            if a.ID() == 0 or a.Dead() then return false end
+            if b.ID() == 0 or b.Dead() then return true end
+
+            return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance
+        end)
+    elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullAreaRectangle then
+        if self:IsPullMode("Farm") then
+            pullRadius = Config:GetSetting('PullRadiusFarm')
+        elseif self:IsPullMode("Hunt") then
+            pullRadius = Config:GetSetting('PullRadiusHunt')
         end
 
-        if not canPath or navDist > maxPathRange then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
-                spawn.ID(), navDist, Strings.BoolToColorString(canPath))
-            return false
+        local spawnFilter = function(spawn)
+            if not spawn() or spawn.ID() == 0 then return false end
+            if not spawn.Targetable() then return false end
+            if spawn.Type() ~= "NPC" and spawn.Type() ~= "NPCPET" then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois type %s not an NPC or NPCPET -- Skipping", spawn.CleanName(), spawn.ID(),
+                    spawn.Type())
+                return false
+            end
+
+            if spawn.Master.Type() == 'PC' then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aois Charmed Pet -- Skipping", spawn.CleanName(), spawn.ID())
+                return false
+            elseif self:IsPullMode("Chain") then
+                if Targeting.IsSpawnXTHater(spawn.ID()) then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoAlready on XTarget -- Skipping", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            end
+
+            if self:HaveList("PullAllowList") then
+                if self:IsMobInList("PullAllowList", spawn.CleanName(), true) == false then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Not Found in Allow List!", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            elseif self:HaveList("PullDenyList") then
+                if self:IsMobInList("PullDenyList", spawn.CleanName(), false) == true then
+                    Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar -> Found in Deny List!", spawn.CleanName(), spawn.ID())
+                    return false
+                end
+            end
+
+            if spawn.FeetWet() and not Config:GetSetting('PullMobsInWater') then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water water", spawn.CleanName(), spawn.ID())
+                return false
+            end
+
+            -- Level Checks
+            if self.settings.UsePullLevels then
+                if spawn.Level() < self.settings.PullMinLevel then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too low - %d", spawn.CleanName(), spawn.ID(),
+                        spawn.Level())
+                    return false
+                end
+                if spawn.Level() > self.settings.PullMaxLevel then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoLevel too high - %d", spawn.CleanName(), spawn.ID(),
+                        spawn.Level())
+                    return false
+                end
+            else
+                -- check cons.
+                local conLevel = Config.Constants.ConColorsNameToId[spawn.ConColor()]
+                if conLevel > self.settings.PullMaxCon or conLevel < self.settings.PullMinCon then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to con color. Min = %d, Max = %d, Mob = %d (%s)",
+                        spawn.CleanName(), spawn.ID(),
+                        self.settings.PullMinCon,
+                        self.settings.PullMaxCon, conLevel, spawn.ConColor())
+                    return false
+                end
+                -- check max level difference
+                local maxLvl = mq.TLO.Me.Level() + self.settings.MaxLevelDiff
+                if spawn.Level() > maxLvl then
+                    Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw)  - Ignoring mob due to max level difference. Max Level = %d, Mob = %d",
+                        spawn.CleanName(), spawn.ID(), maxLvl, spawn.Level())
+                    return false
+                end
+            end
+
+            -- Z Check
+            local checkZ = self.settings.PullRectangleZPoint
+            if math.abs(spawn.Z() - checkZ) > self.settings.PullZRadius then
+                Logger.log_verbose("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoZDistance too far - %d > %d", spawn.CleanName(), spawn.ID(),
+                    math.abs(spawn.Z() - checkZ),
+                    self.settings.PullRectangleZRadius)
+                return false
+            end
+
+            -- Area Check using NE and SW corners
+            local nwX, nwY = self.settings.PullNWCornerX, self.settings.PullNWCornerY
+            local seX, seY = self.settings.PullSECornerX, self.settings.PullSECornerY
+
+            -- Ensure min/max boundaries are correctly set
+            local minX, maxX = math.min(nwX, seX), math.max(nwX, seX)
+            local minY, maxY = math.min(nwY, seY), math.max(nwY, seY)
+
+            local spawnX, spawnY = spawn.X(), spawn.Y()
+
+            if spawnX < minX or spawnX > maxX or spawnY < minY or spawnY > maxY then
+                Logger.log_verbose(
+                    "\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoOutside pull area - (X: %.2f, Y: %.2f) not in bounds X[%.2f, %.2f], Y[%.2f, %.2f]",
+                    spawn.CleanName(), spawn.ID(), spawnX, spawnY, minX, maxX, minY, maxY)
+                return false
+            end
+
+            local navDist = 0
+            local canPath = true
+
+            if maxPathRange > 0 then
+                navDist = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
+                canPath = navDist > 0
+            else
+                canPath = mq.TLO.Navigation.PathExists("id " .. spawn.ID())()
+            end
+
+            if not canPath or navDist > maxPathRange then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \aoPath check failed - dist(%d) canPath(%s)", spawn.CleanName(),
+                    spawn.ID(), navDist, Strings.BoolToColorString(canPath))
+                return false
+            end
+
+            if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
+                Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
+                    spawn.CleanName(), spawn.ID())
+                return false
+            end
+
+            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
+
+            metaDataCache[spawn.ID()] = { distance = navDist, }
+
+            return true
         end
 
-        if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \ar mob is fighting a stranger and safe targeting is enabled!",
-                spawn.CleanName(), spawn.ID())
-            return false
-        end
+        pullTargets = mq.getFilteredSpawns(spawnFilter)
 
-        Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agPotential Pull Added to List", spawn.CleanName(), spawn.ID())
+        table.sort(pullTargets, function(a, b)
+            -- spawn could be invalid by now so double check
+            if a.ID() == 0 or a.Dead() then return false end
+            if b.ID() == 0 or b.Dead() then return true end
 
-        metaDataCache[spawn.ID()] = { distance = navDist, }
-
-        return true
+            return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance
+        end)
     end
-
-    local pullTargets = mq.getFilteredSpawns(spawnFilter)
-
-    table.sort(pullTargets, function(a, b)
-        -- spawn could be invalid by now so double check
-        if a.ID() == 0 or a.Dead() then return false end
-        if b.ID() == 0 or b.Dead() then return true end
-
-        return metaDataCache[a.ID()].distance < metaDataCache[b.ID()].distance
-    end)
-
     return pullTargets, metaDataCache
 end
 
@@ -1695,17 +2119,46 @@ function Module:CheckForAbort(pullID)
 
     -- ignore distance if this is a manually requested pull
     if pullID ~= self.TempSettings.TargetSpawnID then
-        if not self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadius then
-            Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
-            return true
+        if self.settings.PullAreaType == self.Constants.PullAreaType.PullCircleCamp then
+            if not self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadius then
+                Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
+                return true
+            end
+
+
+            if self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadiusFarm then
+                Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
+                return true
+            end
+        elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullCirclePoint then
+            local centerX = self.settings.PullCircleCenterX
+            local centerY = self.settings.PullCircleCenterY
+            local spawnX, spawnY = spawn.X(), spawn.Y()
+            local dx, dy = spawnX - centerX, spawnY - centerY
+            local distanceFromCenter = math.sqrt(dx * dx + dy * dy)
+
+            if distanceFromCenter > self.settings.PullRadius then
+                Logger.log_debug("\ar ALERT: Aborting: Spawn \am%s\aw (\at%d\aw) \aoOutside pull radius from center - Distance: %.2f, Max Allowed: %.2f",
+                    spawn.CleanName(), spawn.ID(), distanceFromCenter, self.settings.PullRadius)
+                return true
+            end
+        elseif self.settings.PullAreaType == self.Constants.PullAreaType.PullAreaRectangle then
+            -- Check if the spawn is within the rectangular pull area
+            local nwX, nwY = self.settings.PullNWCornerX, self.settings.PullNWCornerY
+            local seX, seY = self.settings.PullSECornerX, self.settings.PullSECornerY
+
+            -- Ensure min/max boundaries are correctly set
+            local minX, maxX = math.min(nwX, seX), math.max(nwX, seX)
+            local minY, maxY = math.min(nwY, seY), math.max(nwY, seY)
+
+            local spawnX, spawnY = spawn.X(), spawn.Y()
+
+            if spawnX < minX or spawnX > maxX or spawnY < minY or spawnY > maxY then
+                Logger.log_debug("\ar ALERT: Spawn \am%s\aw (\at%d\aw) \aoOutside defined pull area - (X: %.2f, Y: %.2f) not in bounds X[%.2f, %.2f], Y[%.2f, %.2f]",
+                    spawn.CleanName(), spawn.ID(), spawnX, spawnY, minX, maxX, minY, maxY)
+                return true
+            end
         end
-
-
-        if self:IsPullMode("Farm") and spawn.Distance() > self.settings.PullRadiusFarm then
-            Logger.log_debug("\ar ALERT: Aborting mob moved out of spawn distance \ax")
-            return true
-        end
-
         if Config:GetSetting('SafeTargeting') and Targeting.IsSpawnFightingStranger(spawn, 500) then
             Logger.log_debug("\ar ALERT: Aborting mob is fighting a stranger and safe targeting is enabled! \ax")
             return true
@@ -2061,6 +2514,7 @@ function Module:GiveTime(combat_state)
             Logger.log_info("\agPulling %s [%d]", target.CleanName(), target.ID())
 
             local successFn = function() return Targeting.GetXTHaterCount() > 0 end
+            local maxMove = self.settings.MaxMoveTime * 1000
 
             if self:IsPullMode("Chain") then
                 successFn = function() return Targeting.GetXTHaterCount() >= self.settings.ChainCount end
@@ -2125,7 +2579,7 @@ function Module:GiveTime(combat_state)
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     Core.DoCmd("/ranged %d", self.TempSettings.PullID)
@@ -2153,7 +2607,7 @@ function Module:GiveTime(combat_state)
 
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     mq.doevents()
@@ -2181,7 +2635,7 @@ function Module:GiveTime(combat_state)
                     if Targeting.GetTargetDistance() > self:GetPullAbilityRange() then
                         Core.DoCmd("/nav id %d distance=%d lineofsight=%s log=off", self.TempSettings.PullID, self:GetPullAbilityRange() / 2, requireLOS)
                         mq.delay(500, function() return mq.TLO.Navigation.Active() end)
-                        mq.delay("5s", function() return not mq.TLO.Navigation.Active() end)
+                        mq.delay(maxMove, function() return not mq.TLO.Navigation.Active() end)
                     end
 
                     if pullAbility.Type:lower() == "ability" then
