@@ -927,9 +927,16 @@ local _ClassConfig = {
             },
         },
         ['HateTools'] = {
-            --used when we've lost hatred after it is initially established
-            {
-                name = "Ageless Enmity",
+            { --more valuable on laz because we have less hate tools and no other hatelist + 1 abilities
+                name = "Taunt",
+                type = "Ability",
+                tooltip = Tooltips.Taunt,
+                cond = function(self, abilityName, target)
+                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
+                end,
+            },
+            { --pull does not work on Laz, it is just a hate tool
+                name = "Hate's Attraction",
                 type = "AA",
                 tooltip = Tooltips.AgelessEnmity,
                 cond = function(self, aaName, target)
@@ -954,13 +961,12 @@ local _ClassConfig = {
                     return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
-            {
-                name = "AETaunt",
-                type = "Spell",
-                tooltip = Tooltips.AETaunt,
-                cond = function(self)
-                    if Config:GetSetting('AETauntSpell') == 1 then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
+            { --8min reuse, save for named or if we still can't get a mob back on us
+                name = "Ageless Enmity",
+                type = "AA",
+                tooltip = Tooltips.AgelessEnmity,
+                cond = function(self, aaName, target)
+                    return Targeting.GetAutoTargetPctHPs() < 90 and (mq.TLO.Me.PctAggro() < 100 or Targeting.IsNamed(target))
                 end,
             },
             {
@@ -973,11 +979,12 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Taunt",
-                type = "Ability",
-                tooltip = Tooltips.Taunt,
-                cond = function(self, abilityName, target)
-                    return mq.TLO.Me.TargetOfTarget.ID() ~= mq.TLO.Me.ID() and target.ID() > 0 and Targeting.GetTargetDistance(target) < 30
+                name = "AETaunt",
+                type = "Spell",
+                tooltip = Tooltips.AETaunt,
+                cond = function(self)
+                    if Config:GetSetting('AETauntSpell') == 1 then return false end
+                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
                 end,
             },
             {

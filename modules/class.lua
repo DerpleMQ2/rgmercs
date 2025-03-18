@@ -4,6 +4,7 @@ local Combat      = require('utils.combat')
 local Config      = require('utils.config')
 local Core        = require("utils.core")
 local Modules     = require("utils.modules")
+local Movement    = require("utils.movement")
 local Targeting   = require("utils.targeting")
 local Rotation    = require("utils.rotation")
 local Casting     = require("utils.casting")
@@ -897,11 +898,15 @@ function Module:GiveTime(combat_state)
 
         for i = 1, xtCount do
             local xtSpawn = mq.TLO.Me.XTarget(i)
-            if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and ((xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater") or Targeting.ForceCombat) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
+            if xtSpawn and xtSpawn.ID() > 0 and not xtSpawn.Dead() and (math.ceil(xtSpawn.PctHPs() or 0)) > 0 and ((xtSpawn.Aggressive() or xtSpawn.TargetType():lower() == "auto hater") or Targeting.ForceCombat) and not Config.Constants.RGMezAnims:contains(xtSpawn.Animation()) and math.abs((mq.TLO.Me.Heading.Degrees() - (xtSpawn.Heading.Degrees() or 0))) < 100 then
                 Logger.log_debug("\arXT(%s) is behind us! \atTaking evasive maneuvers! \awMyHeader(\am%d\aw) ThierHeading(\am%d\aw)", xtSpawn.DisplayName() or "",
                     mq.TLO.Me.Heading.Degrees(), (xtSpawn.Heading.Degrees() or 0))
-                Core.DoCmd("/stick moveback %d", Config:GetSetting('MovebackDistance'))
-                -- mq.delay(500) I don't see the need for a delay here, tanks could still be using AA/discs/etc while moving. Rotation checks for movement are very tight now. Going to test. Algar 3/17/25
+                if os.clock() - Movement.LastDoStick < 0.5 then
+                    Logger.log_debug("\ayIgnoring moveback because we just stuck a second ago - let's give it some time.")
+                else
+                    Core.DoCmd("/stick moveback %d", Config:GetSetting('MovebackDistance'))
+                    Movement.LastDoStick = os.clock()
+                end
             end
         end
     end
