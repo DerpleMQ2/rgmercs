@@ -203,10 +203,10 @@ function Combat.MATargetScan(radius, zradius)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
+        if xtSpawn and xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
             if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(xtSpawn, radius) then
-                Logger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName(), xtSpawn.ID(),
-                    xtSpawn.Distance())
+                Logger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName() or "None", xtSpawn.ID() or 0,
+                    xtSpawn.Distance() or 0)
                 if (xtSpawn.Distance() or 999) <= radius then
                     -- Check for lack of aggro and make sure we get the ones we haven't aggro'd. We can't
                     -- get aggro data from the spawn data type.
@@ -377,7 +377,7 @@ function Combat.FindBestAutoTarget(validateFn)
                 -- unless specifically told.
 
                 if Config.Globals.AutoTargetID == 0 then
-                    if Targeting.IsSpawnXTHater(Config.Globals.LastPulledID) then
+                    if Config.Globals.LastPulledID > 0 and Targeting.IsSpawnXTHater(Config.Globals.LastPulledID) then
                         Logger.log_verbose("It seems that we pulled %s(ID: %d), setting it as the initial AutoTarget.",
                             mq.TLO.Spawn(Config.Globals.LastPulledID).CleanName() or "None", Config.Globals.LastPulledID)
                         Config.Globals.AutoTargetID = Config.Globals.LastPulledID
