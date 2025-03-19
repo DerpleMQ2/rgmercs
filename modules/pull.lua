@@ -1550,7 +1550,7 @@ function Module:GetPullableSpawns()
         end
 
         if spawn.FeetWet() and not Config:GetSetting('PullMobsInWater') then
-            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water water", spawn.CleanName(), spawn.ID())
+            Logger.log_debug("\atPULL::FindTarget \awFindTarget :: Spawn \am%s\aw (\at%d\aw) \agIgnoring mob in water", spawn.CleanName(), spawn.ID())
             return false
         end
 
