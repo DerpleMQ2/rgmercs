@@ -4,6 +4,7 @@ local Comms        = require("utils.comms")
 local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
+local DanNet       = require('lib.dannet.helpers')
 local Logger       = require("utils.logger")
 
 local _ClassConfig = {
@@ -872,9 +873,9 @@ local _ClassConfig = {
             end,
         },
     },
-    ['HelperFunctions'] = { --used to autoinventory our azure crystal after summon. Crystal is a group-wide spell on Laz.
-        StashCrystal = function()
-            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Me.AltAbility("Azure Mind Crystal").Spell.Base(1)() end)
+    ['HelperFunctions'] = { --used to autoinventory our crystals after summon. Crystal is a group-wide spell on Laz.
+        StashCrystal = function(aaName)
+            mq.delay("2s", function() return mq.TLO.Cursor() and mq.TLO.Cursor.ID() == mq.TLO.Me.AltAbility(aaName).Spell.Base(1)() end)
 
             if not mq.TLO.Cursor() then
                 Logger.log_debug("No valid item found on cursor, item handling aborted.")
@@ -884,7 +885,7 @@ local _ClassConfig = {
             Logger.log_info("Sending the %s to our bags.", mq.TLO.Cursor())
 
             Comms.PrintGroupMessage("%s summoned, issuing autoinventory command momentarily.", mq.TLO.Cursor())
-            mq.delay(250)
+            mq.delay(Config:GetSetting("AICrystalDelay"))
             Core.DoGroupCmd("/autoinventory")
         end,
     },
@@ -931,17 +932,6 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
                 cond = function(self, aaName) return Casting.SelfBuffAACheck(aaName) end,
-            },
-            {
-                name = "Azure Mind Crystal",
-                type = "AA",
-                active_cond = function(self, aaName) return mq.TLO.FindItem(aaName)() ~= nil end,
-                cond = function(self, aaName) return mq.TLO.Me.PctMana() > 90 and not mq.TLO.FindItem(aaName)() end,
-                post_activate = function(self, aaName, success)
-                    if success then
-                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.StashCrystal)
-                    end
-                end,
             },
             {
                 name = "Mana Draw",
@@ -1144,6 +1134,34 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if Config:GetSetting('RuneChoice') ~= 1 then return false end
                     return Casting.GroupBuffCheck(spell, target) and Casting.ReagentCheck(spell)
+                end,
+            },
+            {
+                name = "Azure Mind Crystal",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('SummonAzure') or not Targeting.GroupedWithTarget(target) then return false end
+                    local crystal = mq.TLO.Spell(aaName).RankName.Base(1)()
+                    return crystal and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", crystal), 1000) == "0" and (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+                post_activate = function(self, aaName, success)
+                    if success then
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.StashCrystal(aaName))
+                    end
+                end,
+            },
+            {
+                name = "Sanguine Mind Crystal",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('SummonSanguine') or not Targeting.GroupedWithTarget(target) then return false end
+                    local crystal = mq.TLO.Spell(aaName).RankName.Base(1)()
+                    return crystal and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", crystal), 1000) == "0" and (mq.TLO.Cursor.ID() or 0) == 0
+                end,
+                post_activate = function(self, aaName, success)
+                    if success then
+                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.StashCrystal(aaName))
+                    end
                 end,
             },
         },
@@ -1800,6 +1818,39 @@ local _ClassConfig = {
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
                 "ENC is set to use theirs during burns, so long as the item equipped has a clicky effect.",
+        },
+
+        -- Crystal Summoning
+        ['SummonAzure']        = {
+            DisplayName = "Azure Mind Crystal",
+            Category = "Crystals",
+            Index = 1,
+            Tooltip = "Summon Azure Mind Crystals (Mana Restore) for the group.",
+            RequiresLoadoutChange = true, -- this is a load condition
+            Default = true,
+            FAQ = "Why am I not summoning crystals for my group?",
+            Answer = "Ensure that you have purchased the AA and your settings are as desired on the Crystals tab.",
+        },
+        ['SummonSanguine']     = {
+            DisplayName = "Sanguine Mind Crystal",
+            Category = "Crystals",
+            Index = 2,
+            Tooltip = "Summon Sanguine Mind Crystals (Health Restore) for the group.",
+            RequiresLoadoutChange = true, -- this is a load condition
+            Default = true,
+            FAQ = "When will my party use the (Azure or Sanguine) crystals I have summoned for them?",
+            Answer = "Azure Crystals use ModRod mana percent settings; Sanguine Crystals will be used based off of Emergency HP settings (or 45% as a fallback.)",
+        },
+        ['AICrystalDelay']     = {
+            DisplayName = "Crystal Autoinv Delay",
+            Category = "Crystals",
+            Tooltip = "Delay in ms before /autoinventory after summoning, adjust if you notice items left on cursors regularly.",
+            Default = 150,
+            Min = 1,
+            Max = 500,
+            FAQ = "Why do I always have items stuck on the cursor?",
+            Answer = "You can adjust the delay before autoinventory by setting the [AICrystalDelay] setting.\n" ..
+                "Increase the delay if you notice items left on cursors regularly.",
         },
     },
 }
