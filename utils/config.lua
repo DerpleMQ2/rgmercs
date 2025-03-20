@@ -915,6 +915,14 @@ Config.DefaultConfig = {
         FAQ = "Why am I constantly rememorizing spells in the last slot?",
         Answer = "You can disable the Re-Mem After Buff option to stop this behavior.",
     },
+    ['IgnoreLevelCheck']     = {
+        DisplayName = "Ignore Spell Level Checks",
+        Category = "Spells/Abils",
+        Index = 7,
+        Tooltip = "If your server allows for higher level spells to land on lower level characters check this.",
+        Default = false,
+        ConfigType = "Advanced",
+    },
 
     -- [ Tank/MA ] --
     ['MovebackWhenTank']     = {

@@ -866,7 +866,7 @@ function Casting.UseSpell(spellName, targetId, bAllowMem, bAllowDead, overrideWa
 
         local targetSpawn = mq.TLO.Spawn(targetId)
 
-        if targetSpawn() and Targeting.TargetIsType("pc", targetSpawn) then
+        if (not Config:GetSetting('IgnoreLevelCheck')) and targetSpawn() and Targeting.TargetIsType("pc", targetSpawn) then
             -- check to see if this is too powerful a spell
             local targetLevel    = targetSpawn.Level()
             local spellLevel     = spell.Level()
