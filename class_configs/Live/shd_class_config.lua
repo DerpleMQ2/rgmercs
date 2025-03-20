@@ -784,6 +784,16 @@ local _ClassConfig = {
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
             end,
         },
+        { --Actions that establish or maintain hatred
+            name = 'HateTools',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Core.IsTanking() end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+            end,
+        },
         { --Dynamic weapon swapping if UseBandolier is toggled
             name = 'Weapon Management',
             state = 1,
