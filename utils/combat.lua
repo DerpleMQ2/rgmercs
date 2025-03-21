@@ -232,7 +232,7 @@ function Combat.MATargetScan(radius, zradius)
                         return xtSpawn.ID() or 0
                     end
 
-                    if (xtSpawn.PctHPs() or 100) < lowestHP then
+                    if (xtSpawn.PctHPs() or 101) < lowestHP then
                         Logger.log_verbose("\atFound Possible Target: %s :: %d --  Storing for Lowest HP Check", xtSpawn.CleanName(), xtSpawn.ID())
                         lowestHP = xtSpawn.PctHPs() or 0
                         killId = xtSpawn.ID() or 0
@@ -261,7 +261,7 @@ function Combat.MATargetScan(radius, zradius)
             for i = 1, aggroMobCount do
                 local spawn = mq.TLO.NearestSpawn(i, aggroSearch)
 
-                if spawn() and (spawn.CleanName() or "None"):find("Guard") == nil then
+                if spawn and spawn() and (spawn.CleanName() or "None"):find("Guard") == nil then
                     -- If the spawn is already in combat with someone else, we should skip them.
                     if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(spawn, radius) then
                         -- If a name has pulled in we target the name first and return. Named always
@@ -278,7 +278,7 @@ function Combat.MATargetScan(radius, zradius)
                         end
 
                         -- Lowest HP
-                        if spawn.PctHPs() < lowestHP then
+                        if (spawn.PctHPs() or 101) < lowestHP then
                             lowestHP = spawn.PctHPs()
                             killId = spawn.ID()
                         end
@@ -291,7 +291,7 @@ function Combat.MATargetScan(radius, zradius)
 
                 if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(spawn, radius) then
                     -- Lowest HP
-                    if spawn.PctHPs() < lowestHP then
+                    if (spawn.PctHPs() or 101) < lowestHP then
                         lowestHP = spawn.PctHPs()
                         killId = spawn.ID()
                     end
