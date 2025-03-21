@@ -953,7 +953,7 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Fundament: Second Spire of Nature", -- TODO add spire options
+                name = "Fundament: Third Spire of Nature", -- TODO add spire options
                 type = "AA",
             },
             {
