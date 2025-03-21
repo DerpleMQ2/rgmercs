@@ -318,7 +318,7 @@ end
 --- @param slot number The slot number where the XT should be added.
 --- @param name string The name of the XT to be added.
 function Targeting.AddXTByName(slot, name)
-    local spawnToAdd = mq.TLO.Spawn(name)
+    local spawnToAdd = mq.TLO.Spawn("=" .. name)
     if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
         Core.DoCmd("/xtarget set %d \"%s\"", slot, name)
     end
