@@ -54,6 +54,7 @@ function Targeting.ClearTarget()
         if Config.Globals.ForceTargetID > 0 and not Targeting.IsSpawnXTHater(Config.Globals.ForceTargetID) then Config.Globals.ForceTargetID = 0 end
         if mq.TLO.Stick.Status():lower() == "on" then Core.DoCmd("/stick off") end
         Core.DoCmd("/target clear")
+        if mq.TLO.Me.XTarget(1).TargetType() ~= "Auto Hater" then Core.DoCmd("/xtarget set 1 autohater") end
     end
 end
 
@@ -329,8 +330,12 @@ end
 --- @param id number The ID of the item to be added.
 function Targeting.AddXTByID(slot, id)
     local spawnToAdd = mq.TLO.Spawn(id)
-    if spawnToAdd and spawnToAdd() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
-        Core.DoCmd("/xtarget set %d \"%s\"", slot, spawnToAdd.CleanName())
+    if spawnToAdd and spawnToAdd() and spawnToAdd.Type() and mq.TLO.Me.XTarget(slot).ID() ~= spawnToAdd.ID() then
+        if spawnToAdd.Type() == "PC" then
+            Core.DoCmd("/xtarget set %d \"%s\"", slot, spawnToAdd.CleanName())
+        else
+            Core.DoCmd("/xtarget set %d \"%s\"", slot, spawnToAdd.Name())
+        end
     end
 end
 
