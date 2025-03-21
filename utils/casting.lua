@@ -18,7 +18,7 @@ Casting.LastBurnCheck = false
 Casting.UseGem        = mq.TLO.Me.NumGems()
 
 --- Simple (no trigger or stacking checks) check to see if the player has a buff. Can pass a spell(userdata), ID, or effect name(string).
---- @param effect MQSpell|string|integer The effect to check for.
+--- @param effect MQSpell|string|integer|nil The effect to check for.
 --- @return boolean Returns true if the player has the buff, false otherwise.
 function Casting.IHaveBuff(effect)
     if not effect then return false end
