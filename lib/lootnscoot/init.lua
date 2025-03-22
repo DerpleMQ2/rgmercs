@@ -2771,6 +2771,7 @@ function LNS.checkLore(itemName, itemLink, decision, countHave, isLore)
         return decision, true
     end
     if countHave > 0 then
+        Logger.Warn(LNS.guiLoot.console, "Item is \ayLORE\ax and I \arHAVE\ax it. Ignoring.")
         return 'Ignore', false
     end
     local ret = decision
