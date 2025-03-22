@@ -52,6 +52,7 @@ Module.TempSettings.ReloadingLoadouts        = true
 Module.TempSettings.NewCombatMode            = false
 Module.TempSettings.MissingSpells            = {}
 Module.TempSettings.MissingSpellsHighestOnly = true
+Module.TempSettings.CorpsesAlreadyRezzed     = {}
 
 Module.CommandHandlers                       = {
     setmode = {
@@ -582,7 +583,10 @@ function Module:SelfCheckAndRez()
         if rezSpawn() then
             Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
             if self.ClassConfig.HelperFunctions and self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                if Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                    Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
+                        rezSpawn.ID() or 0)
+                elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Core.SafeCallFunc("SelfCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                     self:ResetRotationTimer("GroupBuff")
@@ -602,7 +606,10 @@ function Module:IGCheckAndRez()
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
                 Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                if Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                    Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
+                        rezSpawn.ID() or 0)
+                elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Logger.log_debug("\atIGCheckAndRez(): Attempting to Res: %s", rezSpawn.CleanName())
                     Core.SafeCallFunc("IGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
@@ -621,7 +628,10 @@ function Module:OOGCheckAndRez()
 
         if rezSpawn() and (Targeting.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
+                if Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                    Logger.log_debug("\atOOGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
+                        rezSpawn.ID() or 0)
+                elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
                     Core.SafeCallFunc("OOGCheckAndRez", self.ClassConfig.HelperFunctions.DoRez, self, rezSpawn.ID())
                     self.TempSettings.RezTimers[rezSpawn.ID()] = os.clock()
                     self:ResetRotationTimer("GroupBuff")
@@ -841,10 +851,12 @@ function Module:GiveTime(combat_state)
     if not self.ClassConfig then return end
 
     local me = mq.TLO.Me
-    if me.Hovering() or me.Stunned() or me.Charmed() or me.Feared() or me.Mezzed() then
+    ---@diagnostic disable-next-line: undefined-field
+    if me.Hovering() or me.Stunned() or me.Charmed() or me.Mezzed() or me.Feared() then
         Logger.log_super_verbose("Class GiveTime aborted, we aren't in control of ourselves. Hovering(%s) Stunned(%s) Charmed(%s) Feared(%s) Mezzed(%s)",
             Strings.BoolToColorString(me.Hovering()), Strings.BoolToColorString(me.Stunned()), Strings.BoolToColorString(me.Charmed() ~= nil),
-            Strings.BoolToColorString(me.Feared() ~= nil), Strings.BoolToColorString(me.Mezzed() ~= nil))
+            ---@diagnostic disable-next-line: undefined-field
+            Strings.BoolToColorString(me.Mezzed() ~= nil), Strings.BoolToColorString(me.Feared() ~= nil))
         return
     end
 
@@ -883,6 +895,15 @@ function Module:GiveTime(combat_state)
 
             if Config:GetSetting('AssistOutside') then
                 self:OOGCheckAndRez()
+            end
+
+            --clear the table of corpses we've already rezzed if there are no PC corpses nearby
+            if Core.OnEMU() then
+                local rezCount = mq.TLO.SpawnCount("pccorpse radius 150 zradius 50")()
+                if rezCount == 0 then
+                    Config.Globals.RezzedCorpses = {}
+                    Config.Globals.CorpseConned  = false
+                end
             end
         end
     end

@@ -1190,19 +1190,9 @@ local _ClassConfig = {
         end,
 
         DoRez = function(self, corpseId)
-            if Config:GetSetting('DoBattleRez') or Casting.OkayToBuff() then
-                Targeting.SetTarget(corpseId)
-
-                local target = mq.TLO.Target
-
-                if not target or not target() then return false end
-
-                if mq.TLO.Target.Distance() > 25 then
-                    Core.DoCmd("/corpse")
-                end
-
-                if Casting.AAReady("Convergence") and mq.TLO.FindItemCount(mq.TLO.AltAbility("Convergence").Spell.ReagentID(1)())() > 0 then
-                    return Casting.UseAA("Convergence", corpseId, true, 1)
+            if Config:GetSetting('DoBattleRez') or mq.TLO.Me.CombatState():lower() ~= "combat" then
+                if Casting.AAReady("Convergence") and Casting.ReagentCheck(mq.TLO.Me.AltAbility("Convergence").Spell) then
+                    return Casting.OkayToRez(corpseId) and Casting.UseAA("Convergence", corpseId, true, 1)
                 end
             end
         end,
