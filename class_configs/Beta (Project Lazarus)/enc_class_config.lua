@@ -1143,7 +1143,7 @@ local _ClassConfig = {
                 name = "Fundament: Second Spire of Enchantment",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return mq.TLO.Group.LowMana(30)() > 1
+                    return (mq.TLO.Group.LowMana(30)() + (mq.TLO.Me.PctMana() < 30 and 1 or 0)) > 1
                 end,
             },
             {
