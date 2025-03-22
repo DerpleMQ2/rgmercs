@@ -16,6 +16,7 @@ Modules.ModuleOrder = {
     "Perf",
     "Contributors",
     "FAQ",
+    "Debug",
 }
 
 Modules.ModuleList  = {}
@@ -36,6 +37,7 @@ function Modules:load()
             "Loot",
             "Contributors",
             "FAQ",
+            "Debug",
         }
     end
     self.ModuleList = {
@@ -51,6 +53,7 @@ function Modules:load()
         Perf         = require("modules.performance").New(),
         Contributors = require("modules.contributors").New(),
         FAQ          = require("modules.faq").New(),
+        Debug        = require("modules.debug").New(),
     }
 end
 

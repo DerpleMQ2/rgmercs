@@ -3718,11 +3718,11 @@ function LNS.lootMobs(limit)
     -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Found %s corpses in range.', deadCount)
 
     -- Handle looting of the player's own corpse
-    local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse %s radius %d zradius 100", mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))()
+    local myCorpseCount = mq.TLO.SpawnCount(string.format("pccorpse =%s radius %d zradius 100", mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))()
 
     if LNS.Settings.LootMyCorpse and myCorpseCount > 0 then
         for i = 1, (limit or myCorpseCount) do
-            local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse %s radius %d zradius 100", i, mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))
+            local corpse = mq.TLO.NearestSpawn(string.format("%d, pccorpse =%s radius %d zradius 100", i, mq.TLO.Me.CleanName(), LNS.Settings.CorpseRadius))
             if corpse() then
                 -- Logger.Debug(loot.guiLoot.console, 'lootMobs(): Adding my corpse to loot list. Corpse ID: %d', corpse.ID())
                 table.insert(corpseList, corpse)
