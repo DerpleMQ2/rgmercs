@@ -2767,24 +2767,29 @@ end
 ---@return string ret The new decision
 ---@return boolean lootable True if the item is lootable
 function LNS.checkLore(itemName, itemLink, decision, countHave, isLore)
+    if not isLore then
+        return decision, true
+    end
+    if countHave > 0 then
+        return 'Ignore', false
+    end
     local ret = decision
     local lootable = true
     local freeSpace = mq.TLO.Me.FreeInventory()
-    if isLore then
-        if countHave > 0 or freeSpace <= LNS.Settings.SaveBagSlots then
-            table.insert(loreItems, itemLink)
-            ret = 'Ignore'
-            lootable = false
-        end
-        local dbgTbl = {
-            Lookup = '\ax\ag Check for LORE',
-            Have = haveLore,
-            Decision = ret,
-            Item = itemName,
-            Link = lootLink,
-        }
-        Logger.Debug(LNS.guiLoot.console, dbgTbl)
+    if freeSpace <= LNS.Settings.SaveBagSlots then
+        table.insert(loreItems, itemLink)
+        ret = 'Ignore'
+        lootable = false
     end
+    local dbgTbl = {
+        Lookup = '\ax\ag Check for LORE',
+        IsLore = isLore,
+        Have = (countHave > 0),
+        Decision = ret,
+        Item = itemName,
+        Link = lootLink,
+    }
+    Logger.Debug(LNS.guiLoot.console, dbgTbl)
     return ret, lootable
 end
 
@@ -3278,23 +3283,28 @@ function LNS.RegisterActors()
             ItemID = itemID,
             Rule = rule,
             Classes = itemClasses,
+            Directed = directions,
+            Who = who,
             Link = itemLink,
         }
-        if directions == 'doloot' and who == MyName and (LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse) then
-            LNS.LootNow = true
-            return
-        end
-        if directions == 'combatlooting' then
-            LNS.Settings.CombatLooting = combatLooting
-            LNS.TempSettings.CombatLooting = combatLooting
-            LNS.TempSettings.SentSettings = true
-            LNS.TempSettings.NeedSave = true
-            return
-        end
-        if directions == 'getcombatsetting' then
-            if Mode == 'directed' then
-                LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
-                    { Subject = 'mysetting', Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+        Logger.Debug(LNS.guiLoot.console, dbgTbl)
+        if Mode == 'directed' then
+            if directions == 'doloot' and who == MyName and (LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse) then
+                LNS.LootNow = true
+                return
+            end
+            if directions == 'combatlooting' then
+                LNS.Settings.CombatLooting = combatLooting
+                LNS.TempSettings.CombatLooting = combatLooting
+                LNS.TempSettings.SentSettings = true
+                LNS.TempSettings.NeedSave = true
+                return
+            end
+            if directions == 'getcombatsetting' then
+                if Mode == 'directed' then
+                    LNS.lootActor:send({ mailbox = 'loot_module', script = LNS.DirectorScript, },
+                        { Subject = 'mysetting', Who = MyName, CombatLooting = LNS.Settings.CombatLooting, })
+                end
             end
         end
         if itemName == 'NULL' then
@@ -3762,6 +3772,8 @@ function LNS.lootMobs(limit)
     else
         Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Skipping other corpses due to nearby player corpse.')
     end
+
+    if Mode == 'directed' and not LNS.LootNow then return end
 
     -- Process the collected corpse list
     local didLoot = false
@@ -6320,11 +6332,12 @@ while not LNS.Terminate do
         Logger.loglevel = 'info'
     end
 
-    if LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse and Mode ~= 'directed' then LNS.lootMobs() end
+    if (LNS.Settings.DoLoot or LNS.Settings.LootMyCorpse) and Mode ~= 'directed' then LNS.lootMobs() end
 
-    if LNS.LootNow then
-        LNS.LootNow = false
+    if LNS.LootNow and Mode == 'directed' then
+        -- LNS.LootNow = false
         LNS.lootMobs()
+        LNS.LootNow = false
     end
 
     if doSell then
