@@ -475,7 +475,7 @@ function Targeting.MobNotLowHP(target)
     if not (target and target()) then return false end
 
     local threshold = Targeting.IsNamed(target) and Config:GetSetting('NamedLowHP') or Config:GetSetting('MobLowHP')
-    return Targeting.GetTargetPctHPs(target) < threshold
+    return Targeting.GetTargetPctHPs(target) >= threshold
 end
 
 function Targeting.MobHasLowHP(target)

@@ -936,6 +936,7 @@ return {
             {
                 name = "AEBeam",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     if not (Config:GetSetting('DoAEBeam') and Config:GetSetting('DoAEDamage')) then return false end
                     return self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('BeamTargetCnt'), true)
@@ -951,6 +952,7 @@ return {
             {
                 name = "PBFlame",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     if not (Config:GetSetting('DoPBAE') and Config:GetSetting('DoAEDamage')) then return false end
                     return self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
@@ -1096,6 +1098,7 @@ return {
             {
                 name = "PBTimer4",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
@@ -1103,6 +1106,7 @@ return {
             {
                 name = "FireJyll",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
@@ -1110,6 +1114,7 @@ return {
             {
                 name = "IceJyll",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
@@ -1117,6 +1122,7 @@ return {
             {
                 name = "MagicJyll",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,

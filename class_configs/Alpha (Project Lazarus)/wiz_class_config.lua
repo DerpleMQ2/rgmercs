@@ -681,11 +681,12 @@ return {
             name = 'DPS(Level70)',
             state = 1,
             steps = 1,
-            load_cond = function() return Core.IsModeActive('DPS') and mq.TLO.Me.Level() < 101 and mq.TLO.Me.Level() > 69 end,
+            load_cond = function() return mq.TLO.Me.Level() < 101 and mq.TLO.Me.Level() > 69 end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat"
+                return combat_state == "Combat" and
+                    not (Core.IsModeActive('PBAE(LowLevel)') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
             end,
         },
         {
@@ -835,7 +836,7 @@ return {
                 end,
             },
             {
-                name = "Concussion",
+                name = "Concussive Intuition",
                 type = "AA",
                 cond = function(self)
                     return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
@@ -877,20 +878,6 @@ return {
         ['CombatBuff'] =
         {
             {
-                name = "TwincastSpell",
-                type = "Spell",
-                cond = function(self)
-                    return not Casting.IHaveBuff("Twincast")
-                end,
-            },
-            {
-                name = "GambitSpell",
-                type = "Spell",
-                cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('GambitManaPct')
-                end,
-            },
-            {
                 name = "Harvest of Druzzil",
                 type = "AA",
                 allowDead = true,
@@ -909,22 +896,7 @@ return {
         },
         ['Weaves'] = {
             {
-                name = "Lower Element",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Casting.DetAACheck(aaName)
-                end,
-            },
-            {
-                name = "Force of Ice",
-                type = "AA",
-            },
-            {
                 name = "Force of Will",
-                type = "AA",
-            },
-            {
-                name = "Force of Flame",
                 type = "AA",
             },
         },
@@ -940,7 +912,7 @@ return {
                 name = "WildNuke",
                 type = "Spell",
                 cond = function(self)
-                    return Casting.HaveManaToNuke() and not Casting.IHaveBuff("Weave of Power")
+                    return Casting.HaveManaToNuke() and Casting.IHaveBuff("Weave of Power")
                 end,
             },
             {
@@ -1030,6 +1002,7 @@ return {
             {
                 name = "PBTimer4",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
@@ -1037,6 +1010,7 @@ return {
             {
                 name = "FireJyll",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
@@ -1044,6 +1018,7 @@ return {
             {
                 name = "IceJyll",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
@@ -1051,6 +1026,7 @@ return {
             {
                 name = "MagicJyll",
                 type = "Spell",
+                allowDead = true,
                 cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
