@@ -288,6 +288,7 @@ Binds.Handlers    = {
             --local baseRadian = 360 / peerCount
 
             for i = 1, peerCount do
+                ---@diagnostic disable-next-line: redundant-parameter
                 local peer = mq.TLO.DanNet.Peers(i)()
                 if peer and peer:len() > 0 then
                     local radians = i * angle_step

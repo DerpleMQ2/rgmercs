@@ -190,7 +190,7 @@ function Module:ExecCoroutine()
     return coroutine.create(function()
         local success, msg = self:Exec(scriptText)
         if not success then
-            self.LogToConsole("\ar" .. msg)
+            self:LogToConsole("\ar" .. msg)
         end
     end)
 end

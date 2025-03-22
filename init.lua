@@ -717,7 +717,7 @@ local function Main()
             Modules:ExecModule("Movement", "GiveTime", curState)
         end
         Modules:ExecModule("Drag", "GiveTime", curState)
-        --Modules:ExecModule("Exp", "GiveTime", curState)
+        Modules:ExecModule("Debug", "GiveTime", curState)
         return
     end
 
