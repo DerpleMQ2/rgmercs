@@ -173,12 +173,12 @@ LNS.Settings    = {
     StackPlatValue   = 0,      -- Minimum sell value for full stack
     StackableOnly    = false,  -- Only loot stackable items
     AlwaysEval       = false,  -- Re-Evaluate all *Non Quest* items. useful to update loot.ini after changing min sell values.
-    BankTradeskills  = true,   -- Toggle flagging Tradeskill items as Bank or not.
+    BankTradeskills  = false,  -- Toggle flagging Tradeskill items as Bank or not.
     DoLoot           = true,   -- Enable auto looting in standalone mode
     LootForage       = true,   -- Enable Looting of Foraged Items
     LootNoDrop       = false,  -- Enable Looting of NoDrop items.
     LootNoDropNew    = false,  -- Enable looting of new NoDrop items.
-    LootQuest        = false,  -- Enable Looting of Items Marked 'Quest', requires LootNoDrop on to loot NoDrop quest items
+    LootQuest        = true,   -- Enable Looting of Items Marked 'Quest', requires LootNoDrop on to loot NoDrop quest items
     DoDestroy        = false,  -- Enable Destroy functionality. Otherwise 'Destroy' acts as 'Ignore'
     AlwaysDestroy    = false,  -- Always Destroy items to clean corpese Will Destroy Non-Quest items marked 'Ignore' items REQUIRES DoDestroy set to true
     QuestKeep        = 10,     -- Default number to keep if item not set using Quest|# format.
@@ -192,12 +192,12 @@ LNS.Settings    = {
     GMLSelect        = true,   -- not implimented yet
     LootLagDelay     = 0,      -- not implimented yet
     HideNames        = false,  -- Hides names and uses class shortname in looted window
-    RecordData       = false,  -- Enables recording data to report later.
+    RecordData       = true,   -- Enables recording data to report later.
     AutoTag          = false,  -- Automatically tag items to sell if they meet the MinSellPrice
-    AutoRestock      = false,  -- Automatically restock items from the BuyItems list when selling
+    AutoRestock      = true,   -- Automatically restock items from the BuyItems list when selling
     LootMyCorpse     = false,  -- Loot your own corpse if its nearby (Does not check for REZ)
     LootAugments     = false,  -- Loot Augments
-    CheckCorpseOnce  = false,  -- Check Corpse once and move on. Ignore the next time it is in range if enabled
+    CheckCorpseOnce  = true,   -- Check Corpse once and move on. Ignore the next time it is in range if enabled
     AutoShowNewItem  = false,  -- Automatically show new items in the looted window
     KeepSpells       = true,   -- Keep spells
     CanWear          = false,  -- Only loot items you can wear
@@ -1212,6 +1212,14 @@ function LNS.enterNewItemRuleInfo(data_table)
     if Mode == 'directed' then
         LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, modMessage)
     end
+
+    if LNS.Settings.AlwaysGlobal then
+        modMessage.section = "GlobalItems"
+        LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, modMessage)
+        if Mode == 'directed' then
+            LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, modMessage)
+        end
+    end
 end
 
 ------------------------------------
@@ -2199,7 +2207,7 @@ function LNS.addNewItem(corpseItem, itemRule, itemLink, corpseID)
         return
     end
     if LNS.NewItems[itemID] ~= nil then return end
-    local isNoDrop       = corpseItem.NoDrop()
+    local isNoDrop       = corpseItem.NoDrop() or corpseItem.NoTrade()
     LNS.TempItemClasses  = LNS.retrieveClassList(corpseItem)
     LNS.TempItemRaces    = LNS.retrieveRaceList(corpseItem)
     -- Add the new item to the loot.NewItems table
@@ -2223,7 +2231,8 @@ function LNS.addNewItem(corpseItem, itemRule, itemLink, corpseID)
     table.insert(LNS.TempSettings.NewItemIDs, itemID)
 
     -- Increment the count of new items
-    LNS.NewItemsCount = LNS.NewItemsCount + 1
+    -- LNS.NewItemsCount = LNS.NewItemsCount + 1
+    LNS.NewItemsCount = #LNS.TempSettings.NewItemIDs or 0
 
     if LNS.Settings.AutoShowNewItem then
         showNewItem = true
@@ -2255,9 +2264,9 @@ function LNS.addNewItem(corpseItem, itemRule, itemLink, corpseID)
     Logger.Info(LNS.guiLoot.console, "\agAdding 1 \ayNEW\ax item: \at%s \ay(\axID: \at%s\at) \axwith rule: \ag%s", itemName, itemID, itemRule)
     -- LNS.actorAddRule(itemID, itemName, 'Normal', itemRule, LNS.TempItemClasses, itemLink)
     LNS.addRule(itemID, 'NormalItems', itemRule, LNS.TempItemClasses, itemLink)
-    if LNS.Settings.AlwaysGlobal then
-        LNS.addRule(itemID, 'GlobalItems', itemRule, LNS.TempItemClasses, itemLink)
-    end
+    -- if LNS.Settings.AlwaysGlobal then
+    --     LNS.addRule(itemID, 'GlobalItems', itemRule, LNS.TempItemClasses, itemLink)
+    -- end
     LNS.lootActor:send({ mailbox = 'lootnscoot', script = 'lootnscoot', }, newMessage)
     if Mode == 'directed' then
         LNS.lootActor:send({ mailbox = 'lootnscoot', script = LNS.DirectorLNSPath, }, newMessage)
@@ -2423,7 +2432,9 @@ function LNS.addRule(itemID, section, rule, classes, link)
         tblName = LNS.PersonalTableName
     end
     LNS.modifyItemRule(itemID, rule, tblName, classes, link)
-
+    if LNS.Settings.AlwaysGlobal and section == 'NormalItems' then
+        LNS.modifyItemRule(itemID, rule, 'Global_Rules', classes, link)
+    end
 
     -- Refresh the loot settings to apply the changes
     return true
@@ -2591,7 +2602,7 @@ end
 ---@return string @the new decision
 function LNS.checkDecision(item, lootDecision)
     if item == nil then return lootDecision end
-    local newDecision  = lootDecision
+    local newDecision  = lootDecision or 'Keep'
 
     local sellPrice    = (item.Value() or 0) / 1000
     local stackable    = item.Stackable()
@@ -2633,7 +2644,8 @@ function LNS.checkTS(rule, decision, isTradeSkill)
         tsDecision = "Bank"
         isTSRule = true
     elseif isTradeSkill and not LNS.Settings.BankTradeskills and rule == 'Bank' then
-        tsRule = 'NULL'
+        tsRule = LNS.checkDecision(item, tsDecision)
+        tsDecision = tsRule
         dbgTbl.Decision = tsDecision
     end
 
@@ -2812,9 +2824,10 @@ function LNS.getRule(item, fromFunction, index)
     local dbgTbl                                    = {}
     local freeStack                                 = item.FreeStack()
     local isLore                                    = item.Lore()
-    local isNoDrop                                  = item.NoDrop()
+    local isNoDrop                                  = item.NoDrop() or item.NoTrade()
     local tsCheck                                   = false
     local retries                                   = 0
+    local lootLore                                  = true -- i don't have item and its lore so i can loot it
     -- Lookup existing rule in the databases
     local lootRule, lootClasses, lootLink, ruletype = LNS.lookupLootRule(itemID)
 
@@ -2849,29 +2862,29 @@ function LNS.getRule(item, fromFunction, index)
     ::retry_check::
 
     -- we changed settings and this item is marked bank. lets reset and reassess as a new rule only for Normal Rules.
-    if tradeskill and not LNS.Settings.BankTradeskills and lootRule == "Bank" and ruletype == 'Normal' then
-        lootRule = "NULL"
-    elseif tradeskill and LNS.Settings.BankTradeskills and ruletype == 'Normal' then
-        lootRule = "Bank"
-        LNS.modifyItemRule(itemID, lootRule, 'Normal_Rules', lootClasses, lootLink)
-    end
+    -- if tradeskill and not LNS.Settings.BankTradeskills and lootRule == "Bank" and ruletype == 'Normal' then
+    --     lootRule = "NULL"
+    -- elseif tradeskill and LNS.Settings.BankTradeskills and ruletype == 'Normal' then
+    --     lootRule = "Bank"
+    --     LNS.modifyItemRule(itemID, lootRule, 'Normal_Rules', lootClasses, lootLink)
+    -- end
     if lootRule == 'Ask' then alwaysAsk = true end
 
     -- Re-evaluate settings if AlwaysEval is enabled
     if LNS.Settings.AlwaysEval and ruletype == 'Normal' then
-        if lootRule ~= ("Quest" or "Keep" or "Destroy" or 'CanUse' or 'Ask') then
+        if lootRule ~= ("Quest" or "Keep" or "Destroy" or 'CanUse' or 'Ask' or 'Bank') then
             lootRule = 'NULL'
         end
     end
 
-    if tradeskill and ruletype == 'Normal' and not newRule then
-        local checkVal, checkRule, checkDecision = LNS.checkTS(lootRule, lootDecision, tradeskill)
-        if checkVal then
-            lootRule = checkRule
-            lootDecision = checkDecision
-            tsCheck = true
-        end
-    end
+    -- if tradeskill and ruletype == 'Normal' and not newRule then
+    --     local checkVal, checkRule, checkDecision = LNS.checkTS(lootRule, lootDecision, tradeskill)
+    --     if checkVal then
+    --         lootRule = checkRule
+    --         lootDecision = checkDecision
+    --         tsCheck = true
+    --     end
+    -- end
 
     -- Evaluate new rules if no valid rule exists
     if (lootRule == "NULL" or newRule) and ruletype == 'Normal' then
@@ -2884,20 +2897,20 @@ function LNS.getRule(item, fromFunction, index)
             lootRule = 'Tribute'
         end
 
-        local checkVal, checkRule, checkDecision = LNS.checkTS(lootRule, lootDecision, tradeskill)
-        if checkVal and ruletype == 'Normal' then
-            lootRule = checkRule
-            tsCheck = true
-        else
-            lootRule = lootDecision
-        end
+        -- local checkVal, checkRule, checkDecision = LNS.checkTS(lootRule, lootDecision, tradeskill)
+        -- if checkVal and ruletype == 'Normal' then
+        --     lootRule = checkRule
+        --     tsCheck = true
+        -- else
+        --     lootRule = lootDecision
+        -- end
         newRule = true
         -- end
     end
     ::skip_new_rule::
     lootNewItemRule = lootRule
 
-    if lootRule == ('Sell' or 'Tribute') and ruletype == 'Normal' and not newRule and not tsCheck then
+    if lootRule == ('Sell' or 'Tribute') and ruletype == 'Normal' and not newRule then
         lootDecision = LNS.checkDecision(item, lootRule)
         lootNewItemRule = lootDecision
     end
@@ -2935,7 +2948,7 @@ function LNS.getRule(item, fromFunction, index)
         itemName,
         lootLink)
 
-    lootDecision = LNS.checkLore(itemName, lootLink, lootDecision, countHave, isLore)
+    lootDecision, lootLore = LNS.checkLore(itemName, lootLink, lootDecision, countHave, isLore)
 
     if isNoDrop and (ruletype == 'Normal' or newRule) then
         iCanUse, lootDecision = LNS.checkWearable(equpiable, lootDecision, ruletype, isNoDrop, newRule, isAug, item)
@@ -2994,10 +3007,10 @@ function LNS.getRule(item, fromFunction, index)
             lootNewItemRule = 'Ask'
         end
 
-        if tradeskill and LNS.Settings.BankTradeskills then
-            lootDecision = 'Bank'
-            lootNewItemRule = 'Bank'
-        end
+        -- if tradeskill and LNS.Settings.BankTradeskills then
+        --     lootDecision = 'Bank'
+        --     lootNewItemRule = 'Bank'
+        -- end
         lootDecision = LNS.checkDecision(item, newRule)
         -- tsCheck, lootNewItemRule, lootDecision = LNS.checkTS(lootNewItemRule, lootDecision, tradeskill)
     end
@@ -3103,7 +3116,7 @@ function LNS.getRule(item, fromFunction, index)
     ::quest_override::
 
     if fromFunction == 'loot' then
-        if type(lootDecision) == 'string' then
+        if type(lootDecision) == 'string' and lootLore then
             LNS.lootItem(index, lootDecision, 'leftmouseup', qKeep, not iCanUse)
         end
     end
@@ -3393,7 +3406,7 @@ function LNS.RegisterActors()
                         end
                     end
                 end
-                LNS.NewItemsCount = LNS.NewItemsCount - 1
+                LNS.NewItemsCount = #LNS.TempSettings.NewItemIDs or 0
                 Logger.Info(LNS.guiLoot.console, "loot.RegisterActors: \atNew Item Rule \ax\agUpdated:\ax [\ay%s\ax] NewItemCount Remaining \ag%s\ax", lootMessage.entered,
                     LNS.NewItemsCount)
             end
@@ -3435,7 +3448,9 @@ function LNS.RegisterActors()
             end
             table.insert(LNS.TempSettings.NewItemIDs, itemID)
             Logger.Info(LNS.guiLoot.console, "loot.RegisterActors: \atAction:\ax [\ay%s\ax] \ag%s\ax rule for item \at%s\ax", action, rule, lootMessage.item)
-            LNS.NewItemsCount = LNS.NewItemsCount + 1
+            -- LNS.NewItemsCount = LNS.NewItemsCount + 1
+            LNS.NewItemsCount = #LNS.TempSettings.NewItemIDs or 0
+
             if LNS.Settings.AutoShowNewItem then
                 showNewItem = true
             end
@@ -3484,7 +3499,7 @@ function LNS.lootItem(index, doWhat, button, qKeep, cantWear)
     Logger.Debug(LNS.guiLoot.console, dbgTbl)
     if corpseItem and not shouldLootActions[doWhat] then
         if (doWhat == 'Ignore' and not (LNS.Settings.DoDestroy and LNS.Settings.AlwaysDestroy)) or
-            (doWhat == 'Destroy' and not LNS.Settings.DoDestroy) or (doWhat == 'Ask') or (cantWear and LNS.Settings.CanWear and corpseItem.NoDrop()) then
+            (doWhat == 'Destroy' and not LNS.Settings.DoDestroy) or (doWhat == 'Ask') or (cantWear and LNS.Settings.CanWear and (corpseItem.NoDrop() or corpseItem.NoTrade())) then
             if doWhat == ('Ask' or 'Ignore') then
                 eval = 'Left'
             end
@@ -3648,7 +3663,7 @@ function LNS.lootCorpse(corpseID)
             local corpseItem = mq.TLO.Corpse.Item(i)
             if corpseItem() then
                 local corpseItemID = corpseItem.ID()
-                local isNoDrop     = corpseItem.NoDrop()
+                local isNoDrop     = corpseItem.NoDrop() or corpseItem.NoTrade()
                 local newNoDrop    = false
                 if LNS.ItemNames[corpseItemID] == nil and isNoDrop then
                     newNoDrop = true
@@ -3770,6 +3785,9 @@ function LNS.lootMobs(limit)
             end
 
             Logger.Debug(LNS.guiLoot.console, 'lootMobs(): Navigating to corpse ID=%d.', corpseID)
+            while mq.TLO.Me.Casting() ~= nil do
+                mq.delay(10)
+            end
             LNS.navToID(corpseID)
 
             if mobsNearby > 0 and not LNS.Settings.CombatLooting then
@@ -4037,9 +4055,16 @@ function LNS.processItems(action)
     -- Helper function to process individual items based on action
     local function processItem(item, todo, bag, slot)
         if not item or not item.ID() then return end
-        local itemID = item.ID()
-        local rule   = LNS.GlobalItemsRules[itemID] and LNS.GlobalItemsRules[itemID] or LNS.NormalItemsRules[itemID]
-        rule         = LNS.PersonalItemsRules[itemID] and LNS.PersonalItemsRules[itemID] or rule
+        local itemID     = item.ID()
+        local tradeskill = item.Tradeskills()
+        local rule       = LNS.NormalItemsRules[itemID]
+        if LNS.GlobalItemsRules[itemID] then
+            rule = LNS.GlobalItemsRules[itemID]
+        elseif LNS.PersonalItemsRules[itemID] then
+            rule = LNS.PersonalItemsRules[itemID]
+        elseif tradeskill and todo == 'Bank' then
+            rule = (tradeskill and LNS.Settings.BankTradeskills) and 'Bank' or rule
+        end
         if rule == todo then
             if todo == 'Sell' then
                 if not mq.TLO.Window('MerchantWnd').Open() then
@@ -4144,7 +4169,7 @@ function LNS.processItems(action)
         -- totalPlat = math.floor(totalPlat)
         totalPlat = (mq.TLO.Me.Cash() - myCoins) / 1000
         LNS.report('Plat Spent: \ar%0.3f\ax, Gained: \ag%0.3f\ax, \awTotal Profit\ax: \ag%0.3f', spentVal, soldVal, totalPlat)
-        Logger.Info(LNS.guiLoot.console, 'Plat Spent: \ar%0.3f\ax, Gained: \ag%0.3f\ax, \awTotal Profit\ax: \ag%0.3f', spentVal, soldVal, totalPlat)
+        Logger.Info(LNS.guiLoot.console, 'Plat Spent: \ay%0.3f\ax, Gained: \ag%0.3f\ax, \awTotal Profit\ax: \ag%0.3f', spentVal, soldVal, totalPlat)
     elseif action == 'Bank' then
         if mq.TLO.Window('BigBankWnd').Open() then
             mq.TLO.Window('BigBankWnd').DoClose()
@@ -4300,11 +4325,9 @@ end
 function LNS.drawNewItemsTable()
     local itemsToRemove = {}
     if LNS.NewItems == nil then showNewItem = false end
-    if #LNS.NewItems < 0 then
+    if LNS.NewItemsCount <= 0 then
         showNewItem = false
-        LNS.NewItemsCount = 0
-    end
-    if LNS.NewItemsCount > 0 then
+    else
         if ImGui.BeginTable('##newItemTable', 3, bit32.bor(
                 ImGuiTableFlags.Borders, ImGuiTableFlags.ScrollX,
                 ImGuiTableFlags.Reorderable,
@@ -4329,6 +4352,9 @@ function LNS.drawNewItemsTable()
                 tmpRules[itemID] = tmpRules[itemID] or item.Rule or settingList[1]
                 if LNS.tempLootAll == nil then
                     LNS.tempLootAll = {}
+                end
+                if LNS.tempGlobalRule == nil then
+                    LNS.tempGlobalRule = {}
                 end
                 ImGui.TableNextRow()
                 -- Item Name and Link
@@ -4425,20 +4451,20 @@ function LNS.drawNewItemsTable()
                 ImGui.Unindent(2)
 
                 ImGui.Spacing()
-                ImGui.Spacing()
+                if LNS.tempGlobalRule[itemID] == nil then
+                    LNS.tempGlobalRule[itemID] = LNS.Settings.AlwaysGlobal
+                end
+                LNS.tempGlobalRule[itemID] = ImGui.Checkbox('Global Rule', LNS.tempGlobalRule[itemID])
 
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetColumnWidth(-1) / 6))
                 ImGui.PushStyleColor(ImGuiCol.Button, ImVec4(0.040, 0.294, 0.004, 1.000))
                 if ImGui.Button('Save Rule') then
                     local classes = LNS.tempLootAll[itemID] and "All" or tmpClasses[itemID]
-
-
-                    LNS.addRule(itemID, "NormalItems", tmpRules[itemID], classes, item.Link)
-                    if LNS.AlwaysGlobal then
-                        LNS.addRule(itemID, "GlobalItems", tmpRules[itemID], classes, item.Link)
-                    end
+                    local ruleTable = LNS.tempGlobalRule[itemID] and "GlobalItems" or "NormalItems"
+                    LNS.addRule(itemID, ruleTable, tmpRules[itemID], classes, item.Link)
                     LNS.enterNewItemRuleInfo({
                         ID = itemID,
+                        RuleType = ruleTable,
                         ItemName = item.Name,
                         Rule = tmpRules[itemID],
                         Classes = classes,
@@ -4454,7 +4480,6 @@ function LNS.drawNewItemsTable()
                 ImGui.PopID()
             end
 
-
             ImGui.EndTable()
         end
     end
@@ -4466,12 +4491,10 @@ function LNS.drawNewItemsTable()
         tmpRules[itemID]        = nil
         tmpLinks[itemID]        = nil
         LNS.tempLootAll[itemID] = nil
-        -- loot.NewItemsCount       = loot.NewItemsCount - 1
     end
 
     -- Update New Items Count
-    if LNS.NewItemsCount < 0 then LNS.NewItemsCount = 0 end
-    if LNS.NewItemsCount == 0 then showNewItem = false end
+    LNS.NewItemsCount = #LNS.TempSettings.NewItemIDs or 0
 end
 
 function LNS.SafeText(write_value)
@@ -6229,6 +6252,7 @@ function LNS.init(args)
         LNS.Terminate = false
     end
     needsSave = LNS.loadSettings(true)
+    mq.cmdf("/squelch /mapfilter CastRadius %d", LNS.Settings.CorpseRadius)
     LNS.SortSettings()
     LNS.SortTables()
     LNS.RegisterActors()
@@ -6414,13 +6438,15 @@ while not LNS.Terminate do
         LNS.TempSettings.LookUpItem = false
     end
 
-    LNS.NewItemsCount = LNS.NewItemsCount <= 0 and 0 or LNS.NewItemsCount
+    if LNS.NewItemsCount <= 0 then
+        LNS.NewItemsCount = 0
+    end
 
     if LNS.NewItemsCount == 0 then
         showNewItem = false
     end
 
-    if LNS.TempSettings.NeedsCleanup then
+    if LNS.TempSettings.NeedsCleanup and not mq.TLO.Me.Casting() then
         LNS.TempSettings.NeedsCleanup = false
         LNS.processItems('Destroy')
     end
