@@ -280,34 +280,25 @@ Binds.Handlers    = {
         handler = function(radius)
             if not radius then radius = 15 end
 
-            local groupCount = mq.TLO.Group.Members()
-            if groupCount < 1 then return end
-            local multiplier = 90
+            local peerCount = mq.TLO.DanNet.PeerCount()
+            if peerCount < 1 then return end
+            local angle_step = (2 * math.pi) / peerCount
 
-            if groupCount == 2 then
-                multiplier = 318
-            elseif groupCount == 3 then
-                multiplier = 270
-            elseif groupCount == 4 then
-                multiplier = 245
-            elseif groupCount == 5 then
-                multiplier = 196
-            end
+            --local myHeading = mq.TLO.Me.Heading.Degrees() - multiplier
+            --local baseRadian = 360 / peerCount
 
-            local myHeading = mq.TLO.Me.Heading.Degrees() - multiplier
-            local baseRadian = 360 / groupCount
+            for i = 1, peerCount do
+                local peer = mq.TLO.DanNet.Peers(i)()
+                if peer and peer:len() > 0 then
+                    local radians = i * angle_step
+                    local xMove = math.cos(radians) * (i + radius)
+                    local yMove = math.sin(radians) * (i + radius)
 
-            for i = 1, groupCount do
-                local member = mq.TLO.Group.Member(i)
-                if member and member() then
-                    local xMove = math.cos(baseRadian * (i + myHeading))
-                    local yMove = math.sin(baseRadian * (i + myHeading))
+                    local xOff = mq.TLO.Me.X() + math.floor(xMove)
+                    local yOff = mq.TLO.Me.Y() + math.floor(yMove)
 
-                    local xOff = mq.TLO.Me.X() + math.floor(radius * xMove)
-                    local yOff = mq.TLO.Me.Y() + math.floor(radius * yMove)
-
-                    Core.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", member.DisplayName(), yOff, xOff, mq.TLO.Me.Z())
-                    Core.DoCmd("/dex %s /timed 50 /face %s", member.DisplayName(), mq.TLO.Me.DisplayName())
+                    Core.DoCmd("/dex %s /nav locyxz %2.3f %2.3f %2.3f", peer, yOff, xOff, mq.TLO.Me.Z())
+                    Core.DoCmd("/dex %s /timed 50 /face %s", peer, mq.TLO.Me.DisplayName())
                 end
             end
         end,
