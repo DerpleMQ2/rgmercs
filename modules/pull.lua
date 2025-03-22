@@ -84,7 +84,7 @@ Module.Constants.PullAbilities         = {
     {
         id = "PetPull",
         Type = "Special",
-        AbilityRange = 100,
+        AbilityRange = 175,
         DisplayName = "Pet Pull",
         LOS = false,
         cond = function(self)
