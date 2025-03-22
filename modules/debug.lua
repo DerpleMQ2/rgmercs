@@ -20,8 +20,6 @@ Module.DefaultCategories         = {}
 -- Sample Basic Class Module
 local mq                         = require('mq')
 local Config                     = require('utils.config')
-local Core                       = require("utils.core")
-local Targeting                  = require("utils.targeting")
 local Ui                         = require("utils.ui")
 local Comms                      = require("utils.comms")
 local Logger                     = require("utils.logger")
@@ -152,12 +150,25 @@ function Module:Exec(scriptText)
         return false, err
     end
 
-    setfenv(func, _G)
+    local locals       = setmetatable({}, { __index = _G, })
+    locals.mq          = setmetatable({}, { __index = mq, })
+    locals.Config      = setmetatable({}, { __index = Config, })
+    locals.Core        = setmetatable({}, { __index = Core, })
+    locals.Targeting   = setmetatable({}, { __index = require('utils.targeting'), })
+    locals.Casting     = setmetatable({}, { __index = require('utils.casting'), })
+    locals.Combat      = setmetatable({}, { __index = require('utils.combat'), })
+    locals.Comms       = setmetatable({}, { __index = require('utils.comms'), })
+    locals.ItemManager = setmetatable({}, { __index = require('utils.item_manager'), })
+    locals.Logger      = setmetatable({}, { __index = require('utils.logger'), })
+    locals.Math        = setmetatable({}, { __index = require('utils.math'), })
+    locals.Movement    = setmetatable({}, { __index = require('utils.movement'), })
+    locals.Nameds      = setmetatable({}, { __index = require('utils.nameds'), })
+    locals.Rotation    = setmetatable({}, { __index = require('utils.rotation'), })
+    locals.Strings     = setmetatable({}, { __index = require('utils.strings'), })
+    locals.Tables      = setmetatable({}, { __index = require('utils.tables'), })
 
-    local locals = setmetatable({}, { __index = _G, })
-    locals.mq = setmetatable({}, { __index = mq, })
 
-    locals.print = function(...)
+    locals.print   = function(...)
         self:LogTimestamp()
         self.luaConsole:PushStyleColor(Zep.ConsoleCol.Text, CHANNEL_COLOR)
         for _, arg in ipairs({ ..., }) do
@@ -167,7 +178,7 @@ function Module:Exec(scriptText)
         self.luaConsole:PopStyleColor()
     end
 
-    locals.printf = function(text, ...)
+    locals.printf  = function(text, ...)
         self:LogTimestamp()
         self.luaConsole:AppendText(CHANNEL_COLOR, text, ...)
     end
@@ -176,7 +187,7 @@ function Module:Exec(scriptText)
         self.execCoroutine = nil
     end
 
-    locals.hi = 3
+    locals.hi      = 3
 
     setfenv(func, locals)
 
