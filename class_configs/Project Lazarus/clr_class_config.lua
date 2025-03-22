@@ -685,28 +685,24 @@ local _ClassConfig = {
         DoRez = function(self, corpseId)
             local rezAction = false
             local rezSpell = self.ResolvedActionMap['RezSpell']
+            local okayToRez = Casting.OkayToRez(corpseId)
 
             if mq.TLO.Me.CombatState():lower() == "combat" and Config:GetSetting('DoBattleRez') then
                 if Casting.AAReady("Blessing of Resurrection") then
-                    rezAction = Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
+                    rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif mq.TLO.FindItem("Water Sprinkler of Nem Ankh")() and mq.TLO.Me.ItemReady("Water Sprinkler of Nem Ankh")() then
-                    rezAction = Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
+                    rezAction = okayToRez and Casting.UseItem("Water Sprinkler of Nem Ankh", corpseId)
                 end
             end
 
             if mq.TLO.Me.CombatState():lower() == ("active" or "resting") then
                 if mq.TLO.SpawnCount("pccorpse radius 80 zradius 30")() > 2 and Casting.SpellReady(mq.TLO.Spell("Larger Reviviscence"), true) then
-                    rezAction = Casting.UseSpell("Larger Reviviscence", corpseId, true, true)
+                    rezAction = okayToRez and Casting.UseSpell("Larger Reviviscence", corpseId, true, true)
                 elseif Casting.AAReady("Blessing of Resurrection") then
-                    rezAction = Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
+                    rezAction = okayToRez and Casting.UseAA("Blessing of Resurrection", corpseId, true, 1)
                 elseif not Casting.CanUseAA("Blessing of Resurrection") and Casting.SpellReady(rezSpell, true) then
-                    rezAction = Casting.UseSpell(rezSpell, corpseId, true, true)
+                    rezAction = okayToRez and Casting.UseSpell(rezSpell, corpseId, true, true)
                 end
-            end
-
-            if rezAction and mq.TLO.Spawn(corpseId).Distance3D() > 25 then
-                Targeting.SetTarget(corpseId)
-                Core.DoCmd("/corpse")
             end
 
             return rezAction
