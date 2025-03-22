@@ -872,6 +872,7 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function() return Core.IsModeActive("Default") end,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
@@ -1218,15 +1219,11 @@ local _ClassConfig = {
         },
         ['DPS(Default)'] = {
             {
-                name = "Focus of Arcanum",
-                type = "AA",
-            },
-            {
                 name = "TwinCastMez",
                 type = "Spell",
                 cond = function(self, spell, target)
                     if Config:GetSetting('TwincastMez') ~= 3 or Modules:ExecModule("Mez", "IsMezImmune", target.ID()) then return false end
-                    return not Casting.IHaveBuff(spell) and not Casting.IHaveBuff("Twincast")()
+                    return not Casting.IHaveBuff(spell) and not Casting.IHaveBuff("Twincast")
                 end,
             },
             {
@@ -1234,7 +1231,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoMindDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Targeting.IsNamed(target) or not Casting.IHaveBuff(spell and spell.Trigger(1)))
+                    return Casting.DotSpellCheck(spell) and (Targeting.IsNamed(target) or not Casting.IHaveBuff(spell and spell.Trigger()))
                 end,
             },
             {
@@ -1263,10 +1260,6 @@ local _ClassConfig = {
             },
         },
         ['DPS(ModernEra)'] = {
-            {
-                name = "Focus of Arcanum",
-                type = "AA",
-            },
             {
                 name = "DichoSpell",
                 type = "Spell",
@@ -1333,6 +1326,10 @@ local _ClassConfig = {
             },
             {
                 name = "Calculated Insanity",
+                type = "AA",
+            },
+            {
+                name = "Focus of Arcanum",
                 type = "AA",
             },
             {

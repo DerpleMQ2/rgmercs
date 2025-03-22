@@ -846,6 +846,7 @@ local _ClassConfig = {
             name = 'DPS',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
@@ -1139,6 +1140,13 @@ local _ClassConfig = {
         },
         ['CombatSupport'] = {
             {
+                name = "Fundament: Second Spire of Enchantment",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return mq.TLO.Group.LowMana(30)() > 1
+                end,
+            },
+            {
                 name = "Glyph Spray",
                 type = "AA",
             },
@@ -1247,7 +1255,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoMindDot') then return false end
-                    return Casting.DotSpellCheck(spell) and (Targeting.IsNamed(target) or not Casting.IHaveBuff(spell and spell.Trigger(1)))
+                    return Casting.DotSpellCheck(spell) and (Targeting.IsNamed(target) or not Casting.IHaveBuff(spell and spell.Trigger()))
                 end,
             },
             {
@@ -1280,13 +1288,6 @@ local _ClassConfig = {
                 cond = function(self, spell, target)
                     if not Config:GetSetting('DoColored') then return false end
                     return Casting.HaveManaToNuke()
-                end,
-            },
-            {
-                name = "Fundament: Second Spire of Enchantment",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return mq.TLO.Group.LowMana(25)() > 2
                 end,
             },
         },
@@ -1347,10 +1348,10 @@ local _ClassConfig = {
                     return Targeting.IsNamed(target) and Casting.DetSpellCheck(spell)
                 end,
             },
-            {
-                name = "Phantasmal Opponent",
-                type = "AA",
-            },
+            -- { --Temporarily commented out due to high prevalance of xtarget bugs with this pet. will revisit.
+            --     name = "Phantasmal Opponent",
+            --     type = "AA",
+            -- },
             {
                 name = "Forceful Rejuvenation",
                 type = "AA",

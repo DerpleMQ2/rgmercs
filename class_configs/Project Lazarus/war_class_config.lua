@@ -297,7 +297,7 @@ local _ClassConfig = {
         end,
         DiscOverwriteCheck = function(self)
             local defenseBuff = Core.GetResolvedActionMapItem('DefenseACBuff')
-            if mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.ActiveDisc.Name() ~= defenseBuff.RankName() then return false end
+            if mq.TLO.Me.ActiveDisc.ID() and mq.TLO.Me.ActiveDisc.Name() ~= (defenseBuff and defenseBuff.RankName() or "None") then return false end
             return true
         end,
         BurnDiscCheck = function(self)
