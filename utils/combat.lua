@@ -203,7 +203,7 @@ function Combat.MATargetScan(radius, zradius)
     for i = 1, xtCount do
         local xtSpawn = mq.TLO.Me.XTarget(i)
 
-        if xtSpawn and xtSpawn() and (xtSpawn.ID() or 0) > 0 and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
+        if xtSpawn and xtSpawn() and (xtSpawn.ID() or 0) > 0 and not xtSpawn.Dead() and (xtSpawn.TargetType():lower() == "auto hater" or Targeting.ForceCombat) then
             if not Config:GetSetting('SafeTargeting') or not Targeting.IsSpawnFightingStranger(xtSpawn, radius) then
                 Logger.log_verbose("Found %s [%d] Distance: %d", xtSpawn.CleanName() or "None", xtSpawn.ID() or 0,
                     xtSpawn.Distance() or 0)
