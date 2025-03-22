@@ -438,7 +438,7 @@ local function RenderMainWindow(imgui_style)
                                 local submoduleDefaults = Modules:ExecAll("GetDefaultSettings")
                                 local submoduleCategories = Modules:ExecAll("GetSettingCategories")
                                 for n, s in pairs(submoduleSettings) do
-                                    if Modules:ExecModule(n, "ShouldRender") then
+                                    if n ~= "Debug" and Modules:ExecModule(n, "ShouldRender") then
                                         ImGui.PushID(n .. "_config_hdr")
                                         if s and submoduleDefaults[n] and submoduleCategories[n] then
                                             if ImGui.CollapsingHeader(string.format("%s: Config Options", n), bit32.bor(ImGuiTreeNodeFlags.DefaultOpen, ImGuiTreeNodeFlags.Leaf)) then

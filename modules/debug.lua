@@ -36,10 +36,14 @@ Module.ClassFAQ                  = {}
 Module.DefaultConfig             = {
     ['script'] = {
         Default = "",
+        DisplayName = "Script",
+        Category = "Custom",
         Type = "Custom",
     },
     ['ShowTimestamps'] = {
         Default = true,
+        DisplayName = "Show Time Stamps",
+        Category = "Custom",
         Type = "Custom",
     },
     [string.format("%s_Popped", Module._name)] = {
