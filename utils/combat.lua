@@ -350,8 +350,10 @@ function Combat.FindBestAutoTarget(validateFn)
         if Config.Globals.ForceTargetID ~= 0 then
             local forceSpawn = mq.TLO.Spawn(Config.Globals.ForceTargetID)
             if forceSpawn and forceSpawn() and not forceSpawn.Dead() then
-                Config.Globals.AutoTargetID = Config.Globals.ForceTargetID
-                Logger.log_info("FindTarget(): Forced Targeting: \ag%s\ax [ID: \ag%d\ax]", forceSpawn.CleanName() or "None", forceSpawn.ID())
+                if Config.Globals.AutoTargetID ~= Config.Globals.ForceTargetID then
+                    Config.Globals.AutoTargetID = Config.Globals.ForceTargetID
+                    Logger.log_info("FindTarget(): Forced Targeting: \ag%s\ax [ID: \ag%d\ax]", forceSpawn.CleanName() or "None", forceSpawn.ID())
+                end
             else
                 Config.Globals.ForceTargetID = 0
             end
