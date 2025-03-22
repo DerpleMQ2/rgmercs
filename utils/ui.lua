@@ -147,7 +147,7 @@ function Ui.RenderForceTargetList(showPopout)
         Config.Globals.ForceTargetID = 0
     end
 
-    if ImGui.BeginTable("XTargs", 5, ImGuiTableFlags.None + ImGuiTableFlags.Borders + ImGuiTableFlags.Resizable) then
+    if ImGui.BeginTable("XTargs", 5, bit32.bor(ImGuiTableFlags.Borders, ImGuiTableFlags.Resizable)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('FT', (ImGuiTableColumnFlags.WidthFixed), 16.0)
         ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthFixed), ImGui.GetWindowWidth() - 300)
@@ -723,9 +723,9 @@ function Ui.RenderSettings(settings, defaults, categories, hideControls, showMai
             if (defaults[k1].Index ~= nil or defaults[k2].Index ~= nil) and (defaults[k1].Index ~= defaults[k2].Index) then
                 return (defaults[k1].Index or 999) < (defaults[k2].Index or 999)
             elseif defaults[k1].Category == defaults[k2].Category then
-                return defaults[k1].DisplayName < defaults[k2].DisplayName
+                return (defaults[k1].DisplayName or "") < (defaults[k2].DisplayName or "")
             else
-                return defaults[k1].Category < defaults[k2].Category
+                return (defaults[k1].Category or "") < (defaults[k2].Category or "")
             end
         end)
 
