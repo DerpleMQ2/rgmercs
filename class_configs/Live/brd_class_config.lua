@@ -990,7 +990,7 @@ local _ClassConfig = {
                 name = "DispelSong",
                 type = "Song",
                 cond = function(self, songSpell)
-                    return Config:GetSetting('DoDispel') and mq.TLO.Target.Beneficial()
+                    return Config:GetSetting('DoDispel') and mq.TLO.Target.Beneficial() ~= nil
                 end,
             },
             {
