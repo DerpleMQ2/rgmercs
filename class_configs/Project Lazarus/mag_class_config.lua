@@ -9,7 +9,7 @@ local DanNet      = require('lib.dannet.helpers')
 local Logger      = require("utils.logger")
 
 _ClassConfig      = {
-    _version              = "1.1 - Project Lazarus",
+    _version              = "1.2 - Project Lazarus",
     _author               = "Derple, Morisato, Algar",
     ['ModeChecks']        = {
         IsTanking = function() return Core.IsModeActive("PetTank") end,
@@ -17,6 +17,7 @@ _ClassConfig      = {
     ['Modes']             = {
         'DPS',
         'PetTank',
+        'PBAE',
     },
     ['OnModeChange']      = function(self, mode)
         if mode == "PetTank" then
@@ -48,45 +49,27 @@ _ClassConfig      = {
         --- Nukes
         ['SwarmPet'] = {
             -- Swarm Pet* >= LVL 70
-            "Ravening Servant",
-            "Roiling Servant",
-            "Riotous Servant",
-            "Reckless Servant",
-            "Remorseless Servant",
-            "Relentless Servant",
-            "Ruthless Servant",
-            "Ruinous Servant",
-            "Rumbling Servant",
-            "Rancorous Servant",
-            "Rampaging Servant",
+            -- "Ravening Servant",
+            -- "Roiling Servant",
+            -- "Riotous Servant",
+            -- "Reckless Servant",
+            -- "Remorseless Servant",
+            -- "Relentless Servant",
+            -- "Ruthless Servant",
+            -- "Ruinous Servant",
+            -- "Rumbling Servant",
+            -- "Rancorous Servant",
+            -- "Rampaging Servant",
             "Raging Servant",
             "Rage of Zomm",
         },
         ['SpearNuke'] = {
             -- Spear Nuke* >= LVL 70
-            "Spear of Molten Dacite",
-            "Spear of Molten Luclinite",
-            "Spear of Molten Komatiite",
-            "Spear of Molten Arcronite",
-            "Spear of Molten Shieldstone",
-            "Spear of Blistersteel",
-            "Spear of Molten Steel",
-            "Spear of Magma",
             "Spear of Ro",
         },
         ['ChaoticNuke'] = {
             -- Chaotic Nuke with Beneficial Effect >= LVL69
-            "Chaotic Magma",
-            "Chaotic Calamity",
-            "Chaotic Pyroclasm",
-            "Chaotic Inferno",
-            "Chaotic Fire",
-            "Fickle Magma",
-            "Fickle Flames",
-            "Fickle Flare",
-            "Fickle Blaze",
-            "Fickle Pyroclasm",
-            "Fickle Inferno",
+            -- "Fickle Inferno",
             "Fickle Fire",
         },
         -- ['FireNuke'] = {
@@ -318,29 +301,9 @@ _ClassConfig      = {
             "Pyrilen Skin",
         },
         ['LongDurDmgShield'] = {
-            -- Preferring group buffs for ease. Included all Single target Now as well.
-            "Circle of Forgefire Coat",
-            "Forgefire Coat",
-            "Circle of Emberweave Coat",
-            "Emberweave Coat",
-            "Circle of Igneous Skin",
-            "Igneous Coat",
-            "Circle of the Inferno",
-            "Inferno Coat",
-            "Circle of Flameweaving",
-            "Flameweave Coat",
-            "Circle of Flameskin",
-            "Flameskin",
-            "Circle of Embers",
-            "Embercoat",
-            "Circle of Dreamfire",
-            "Dreamfire Coat",
-            "Circle of Brimstoneskin",
-            "Brimstoneskin",
-            "Circle of Lavaskin",
-            "Lavaskin",
-            "Circle of Magmaskin",
-            "Magmaskin",
+            -- Preferring group buffs for ease. Included all Single target Now as well
+            -- "Circle of Magmaskin",
+            -- "Magmaskin",
             "Circle of Fireskin",
             "Fireskin",
             "Maelstrom of Ro",
@@ -829,6 +792,12 @@ _ClassConfig      = {
         ['Bladegusts'] = {
             "Burning Bladegusts",
         },
+        ['PBAE2'] = {
+            "Scintillation",
+        },
+        ['PBAE1'] = {
+            "Wind of the Desert",
+        },
     },
     ['HealRotationOrder'] = {
 
@@ -875,15 +844,6 @@ _ClassConfig      = {
             end,
         },
         {
-            name = 'Burn',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck()
-            end,
-        },
-        {
             name = 'Malo',
             state = 1,
             steps = 1,
@@ -894,11 +854,51 @@ _ClassConfig      = {
             end,
         },
         {
+            name = 'Burn',
+            state = 1,
+            steps = 1,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Casting.BurnCheck()
+            end,
+        },
+        {
             name = 'Combat Pocket Pet',
             state = 1,
             steps = 1,
             load_cond = function() return Config:GetSetting('DoPocketPet') end,
             targetId = function(self) return { mq.TLO.Me.ID(), } end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
+            end,
+        },
+        {
+            name = 'DPS(PBAE)',
+            state = 1,
+            steps = 1,
+            load_cond = function(self) return Core.IsModeActive('PBAE') and self:GetResolvedActionMapItem('PBAE2') end,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
+            end,
+        },
+        {
+            name = 'DPS(70)',
+            state = 1,
+            steps = 1,
+            load_cond = function(self) return not Core.IsModeActive("PetTank") and self:GetResolvedActionMapItem('SpearNuke') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
+            end,
+        },
+        {
+            name = 'DPS(1-69)',
+            state = 1,
+            steps = 1,
+            load_cond = function(self) return not Core.IsModeActive("PetTank") and not self:GetResolvedActionMapItem('SpearNuke') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
@@ -920,26 +920,6 @@ _ClassConfig      = {
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and mq.TLO.Me.SpellInCooldown()
-            end,
-        },
-        {
-            name = 'DPS(LowLevel)',
-            state = 1,
-            steps = 1,
-            load_cond = function(self) return not self:GetResolvedActionMapItem('ChaoticNuke') end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
-            end,
-        },
-        {
-            name = 'DPS',
-            state = 1,
-            steps = 1,
-            load_cond = function(self) return self:GetResolvedActionMapItem('ChaoticNuke') end,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat"
             end,
         },
         {
@@ -1256,6 +1236,30 @@ _ClassConfig      = {
                 return false
             end
         end,
+        --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
+        AETargetCheck = function(minCount, printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < minCount or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
+
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+                    end
+                    return false
+                end
+            end
+
+            return true
+        end,
+        --function to make sure we don't use single target nukes when we could be AEing in PBAEMode
+        PBAEReady = function(self)
+            return (mq.TLO.Me.GemTimer(self.ResolvedActionMap['PBAE1'])() or -1) == 0 or (mq.TLO.Me.GemTimer(self.ResolvedActionMap['PBAE2'])() or -1) == 0
+        end,
     },
     ['Rotations']         = {
         ['PetSummon'] = {
@@ -1402,60 +1406,6 @@ _ClassConfig      = {
         },
         ['Burn'] = {
             {
-                name = "EarthPetItemUse",
-                type = "CustomFunc",
-                cond = function(self)
-                    if not self.ResolvedActionMap['EarthPetItemSummon'] then return false end
-                    local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
-                    return mq.TLO.FindItemCount(baseItem)() >= 1
-                end,
-                custom_func = function(self)
-                    if not self.ResolvedActionMap['EarthPetItemSummon'] then return false end
-                    local baseItem = self.ResolvedActionMap['EarthPetItemSummon'].RankName.Base(1)()
-                    if mq.TLO.FindItemCount(baseItem)() >= 1 then
-                        local invItem = mq.TLO.FindItem(baseItem)
-                        return Casting.UseItem(invItem.Name(), Config.Globals.AutoTargetID)
-                    end
-
-                    return false
-                end,
-            },
-            {
-                name = "FirePetItemUse",
-                type = "CustomFunc",
-                cond = function(self)
-                    if not self.ResolvedActionMap['FirePetItemSummon'] then return false end
-                    local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
-                    return mq.TLO.FindItemCount(baseItem)() >= 1
-                end,
-                custom_func = function(self)
-                    if not self.ResolvedActionMap['FirePetItemSummon'] then return false end
-                    local baseItem = self.ResolvedActionMap['FirePetItemSummon'].RankName.Base(1)()
-                    if mq.TLO.FindItemCount(baseItem)() >= 1 then
-                        local invItem = mq.TLO.FindItem(baseItem)
-                        return Casting.UseItem(invItem.Name(), Config.Globals.AutoTargetID)
-                    end
-
-                    return false
-                end,
-            },
-            { --Chest Click, name function stops errors in rotation window when slot is empty
-                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
-                end,
-            },
-            {
-                name = "AllianceBuff",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Targeting.IsNamed(target) and not Casting.TargetHasBuff(spell) and
-                        Config:GetSetting('DoAlliance') and Casting.CanAlliance()
-                end,
-            },
-            {
                 name = "Companion's Fury",
                 type = "AA",
             },
@@ -1563,40 +1513,52 @@ _ClassConfig      = {
                 end,
             },
         },
-        ['DPS'] = {
+        ['DPS(PBAE)'] = {
+            {
+                name = "PBAE1",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "PBAE2",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+        },
+        ['DPS(70)'] = {
             {
                 name = "SwarmPet",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
+                cond = function(self, spell, target)
+                    if Config:GetSetting('DoSwarmPet') == 1 then return false end
+                    return Casting.HaveManaToNuke() and not (Config:GetSetting('DoSwarmPet') == 2 and not Targeting.IsNamed(target))
                 end,
             },
             {
                 name = "Bladegusts",
                 type = "Spell",
                 cond = function(self, _)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
                 cond = function(self, _)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "SpearNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
-                end,
-            },
-            {
-                name = "VolleyNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
@@ -1607,16 +1569,11 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "TwinCast",
-                type = "Spell",
-                cond = function(self, spell) return Casting.SelfBuffCheck(spell) and not Casting.IHaveBuff("Twincast") end,
-            },
-            {
                 name = "Dagger of Evil Summons",
                 type = "Item",
             },
         },
-        ['DPS(LowLevel)'] = {
+        ['DPS(1-69)'] = {
             {
                 name = "BigFireDD",
                 type = "Spell",
@@ -1628,9 +1585,9 @@ _ClassConfig      = {
             {
                 name = "FireDD",
                 type = "Spell",
-                cond = function(self)
+                cond = function(self, spell, target)
                     if Config:GetSetting('ElementChoice') ~= 1 then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.HaveManaToNuke() and Targeting.MobHasLowHP(target)
                 end,
             },
             {
@@ -1661,7 +1618,7 @@ _ClassConfig      = {
                 name = "MaloDebuff",
                 type = "Spell",
                 cond = function(self, spell)
-                    if Casting.CanUseAA("Malaise") then return false end
+                    if Casting.CanUseAA("Malosinete") then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1704,28 +1661,6 @@ _ClassConfig      = {
         },
         ['Downtime'] = {
             {
-                name = "Elemental Conversion",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctMana() <= Config:GetSetting('GatherManaPct') and mq.TLO.Me.Pet.ID() > 0
-                end,
-            },
-            {
-                name = "Forceful Rejuvenation",
-                type = "AA",
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctMana() <= Config:GetSetting('GatherManaPct') and not mq.TLO.Me.SpellReady(self.ResolvedActionMap['GatherMana'] or "")() and
-                        mq.TLO.Me.Pet.ID() > 0
-                end,
-            },
-            {
-                name = "GatherMana",
-                type = "Spell",
-                cond = function(self, spell)
-                    return spell and spell() and mq.TLO.Me.PctMana() <= Config:GetSetting('GatherManaPct') and Casting.CastReady(spell)
-                end,
-            },
-            {
                 name = "ManaRegenBuff",
                 type = "Spell",
                 cond = function(self, spell)
@@ -1759,31 +1694,7 @@ _ClassConfig      = {
                 end,
             },
             {
-                name = "EarthPetItemSummon",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
-                end,
-                post_activate = function(self, spell, success)
-                    if success then
-                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
-                    end
-                end,
-            },
-            {
-                name = "FirePetItemSummon",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.FindItemCount(spell.RankName.Base(1)() or "")() == 0
-                end,
-                post_activate = function(self, spell, success)
-                    if success then
-                        Core.SafeCallFunc("Autoinventory", self.ClassConfig.HelperFunctions.HandleItemSummon, self, spell, "personal")
-                    end
-                end,
-            },
-            {
-                name = "Elemental Form",
+                name = "Elemental Form: Fire",
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.SelfBuffAACheck(aaName)
@@ -1903,96 +1814,99 @@ _ClassConfig      = {
             gem = 4,
             spells = {
                 { name = "Bladegusts", },
-                { name = "VolleyNuke", },
+                { name = "PBAE1",        cond = function(self) return Core.IsModeActive("PBAE") end, },
+                { name = "PBAE2",        cond = function(self) return Core.IsModeActive("PBAE") end, },
+                { name = "MaloDebuff",   cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
                 { name = "PetHealSpell", },
             },
         },
         {
             gem = 5,
             spells = {
-                { name = "TwinCast", },
-                { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malaise") end, },
+                { name = "PBAE1",         cond = function(self) return Core.IsModeActive("PBAE") end, },
+                { name = "PBAE2",         cond = function(self) return Core.IsModeActive("PBAE") end, },
+                { name = "MaloDebuff",    cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
                 { name = "PetHealSpell", },
-                { name = "LongDurDmgShield", },
+                { name = "FireOrbSummon", },
             },
         },
         {
             gem = 6,
             spells = {
-                { name = "GroupCotH", },
-                { name = "ManaRodSummon", },
+                { name = "PBAE2",         cond = function(self) return Core.IsModeActive("PBAE") end, },
+                { name = "MaloDebuff",    cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
                 { name = "PetHealSpell", },
-                { name = "LongDurDmgShield", },
+                { name = "FireOrbSummon", },
+                { name = "GroupCotH", },
             },
         },
         {
             gem = 7,
             spells = {
-                { name = "FireOrbSummon", },
+                { name = "MaloDebuff",       cond = function(self) return Config:GetSetting('DoMalo') and not Casting.CanUseAA("Malosinete") end, },
                 { name = "PetHealSpell", },
+                { name = "FireOrbSummon", },
+                { name = "GroupCotH", },
+                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
+                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "LongDurDmgShield", },
+                { name = "FireShroud", },
             },
         },
         {
             gem = 8,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "PetManaNuke", },
                 { name = "PetHealSpell", },
+                { name = "FireOrbSummon", },
                 { name = "GroupCotH", },
                 { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
+                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "LongDurDmgShield", },
+                { name = "FireShroud", },
             },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "GatherMana", },
-                { name = "PetHealSpell", },
+                { name = "FireOrbSummon", },
+                { name = "GroupCotH", },
+                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
+                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "LongDurDmgShield", },
+                { name = "FireShroud", },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "EarthPetItemSummon", },
-                { name = "PetHealSpell", },
+                { name = "GroupCotH", },
+                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
+                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "LongDurDmgShield", },
+                { name = "FireShroud", },
             },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "FirePetItemSummon", },
-                { name = "PetHealSpell", },
+                { name = "SingleCotH",       cond = function() return not Casting.CanUseAA('Call of the Hero') end, },
+                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "LongDurDmgShield", },
+                { name = "FireShroud", },
             },
         },
         {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SelfManaRodSummon", },
-                { name = "PetHealSpell", },
+                { name = "ManaRodSummon",    cond = function(self) return Config:GetSetting('SummonModRods') and not Casting.CanUseAA("Small Modulation Shard") end, },
                 { name = "LongDurDmgShield", },
-            },
-        },
-        {
-            gem = 13,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "PetHealSpell", },
-                { name = "LongDurDmgShield", },
-            },
-        },
-        {
-            gem = 14,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "PetHealSpell", },
+                { name = "FireShroud", },
+
             },
         },
     },
@@ -2005,10 +1919,11 @@ _ClassConfig      = {
             RequiresLoadoutChange = true,
             Default = 1,
             Min = 1,
-            Max = 2,
+            Max = 3,
             FAQ = "What is the difference between the modes?",
             Answer = "Fire Mode will use Fire Nukes and strive for DPS.\n" ..
-                "PetTank mode will Focus on keeping the Pet alive as the main tank.",
+                "PetTank mode will Focus on keeping the Pet alive as the main tank.\n" ..
+                "PBAE Mode will use PBAE spells when configured, alongside the DPS rotation.",
         },
         ['DoPocketPet']    = {
             DisplayName = "Do Pocket Pet",
@@ -2066,15 +1981,6 @@ _ClassConfig      = {
             Answer = "You can set the [PetHealPct] to a lower value to heal your pet sooner.\n" ..
                 "Also make sure that [DoPetHeals] is enabled.",
         },
-        ['SelfModRod']     = {
-            DisplayName = "Self Mod Rod Item",
-            Category = "Mana",
-            Tooltip = "Click the modrod clicky you want to use here",
-            Type = "ClickyItem",
-            Default = "",
-            FAQ = "Can I specify the mod rod item I want to use?",
-            Answer = "Yes, you can specify the mod rod item you want to use by setting the [SelfModRod] setting.",
-        },
         ['SummonModRods']  = {
             DisplayName = "Summon Mod Rods",
             Category = "Mana",
@@ -2083,16 +1989,6 @@ _ClassConfig      = {
             Default = true,
             FAQ = "Can I summon mod rods for my group?",
             Answer = "Yes, you can summon mod rods for your group by setting the [SummonModRods] setting.",
-        },
-        ['GatherManaPct']  = {
-            DisplayName = "Gather Mana %",
-            Category = "Mana",
-            Tooltip = "When to use Gather Mana",
-            Default = 70,
-            Min = 1,
-            Max = 99,
-            FAQ = "How do I adjust when to use Gather Mana?",
-            Answer = "You can adjust when to use Gather Mana by setting the [GatherManaPct] setting.",
         },
         ['DoForce']        = {
             DisplayName = "Do Force",
@@ -2116,13 +2012,18 @@ _ClassConfig      = {
             FAQ = "I'm fighting fire-resistant mobs, how can I use my magic nukes?",
             Answer = "If you are under level 70, you can swap to magic nukes on the DPS Low Level tab.",
         },
-        ['DoChestClick']   = {
-            DisplayName = "Do Chest Click",
-            Category = "Utilities",
-            Tooltip = "Click your chest item",
-            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "How do I use my chest clicky?",
-            Answer = "You can use the [DoChestClick] feature to click your chest item.",
+        ['DoSwarmPet']     = {
+            DisplayName = "Swarm Pet Spell:",
+            Category = "Spells and Abilities",
+            Tooltip = "Choose the conditions to cast your Swarm Pet Spell.",
+            Type = "Combo",
+            ComboOptions = { 'Never', 'Named Only', 'Always', },
+            Default = 2,
+            Min = 1,
+            Max = 3,
+            RequiresLoadoutChange = true,
+            FAQ = "Why am I not using my swarmp pet?",
+            Answer = "Do to mana constraints with fresh level 70's, the swarm pet will only be used on named by default. You can change this in the options.",
         },
         ['AISelfDelay']    = {
             DisplayName = "Autoinv Delay (Self)",
@@ -2212,6 +2113,54 @@ _ClassConfig      = {
             FAQ = "What is an Arcanum and why would I want to weave them?",
             Answer =
             "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
+        },
+
+        --Damage (AE)
+        ['DoAEDamage']     = {
+            DisplayName = "Do AE Damage",
+            Category = "Damage (PBAE)",
+            Index = 1,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
+                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['PBAETargetCnt']  = {
+            DisplayName = "PBAE Tgt Cnt",
+            Category = "Damage (PBAE)",
+            Index = 5,
+            Tooltip = "Minimum number of valid targets before using PBAE Spells.",
+            Default = 4,
+            Min = 1,
+            Max = 10,
+            FAQ = "Why am I not using my PBAE spells?",
+            Answer =
+            "You can adjust the PB Target Count to control when you will use actions PBAE Spells such as the of Flame line.",
+        },
+        ['MaxAETargetCnt'] = {
+            DisplayName = "Max AE Targets",
+            Category = "Damage (PBAE)",
+            Index = 6,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 6,
+            Min = 2,
+            Max = 30,
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
+            Answer =
+            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
+        },
+        ['SafeAEDamage']   = {
+            DisplayName = "AE Proximity Check",
+            Category = "Damage (PBAE)",
+            Index = 7,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
         },
     },
 }

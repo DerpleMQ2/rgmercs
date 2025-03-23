@@ -86,14 +86,6 @@ return {
             "Cloudburst Bolts",
             "Cloudburst Strike",
         },
-        ['FuseNuke'] = {
-            "Ethereal Twist",
-            "Ethereal Confluence",
-            "Ethereal Braid",
-            "Ethereal Fuse",
-            "Ethereal Weave",
-            "Ethereal Plait",
-        },
         ['FireEtherealNuke'] = {
             -- "Ethereal Immolation",
             -- "Ethereal Ignition",
@@ -446,29 +438,29 @@ return {
             "Lure of the Cold Moon",
             "Lure of Winter Memories",
         },
-        ['FireLureNuke'] = {
-            "Enticement of Flame",
-            "Lure of Flame",
-            "Lure of Ro",
-            "Firebane",
-            "Lavalure",
-            "Pyrolure",
-            "Flarelure",
-            "Flamelure",
-            "Blazelure",
-            "MagmaLure",
-            "PlasmaLure",
-            "Lure of Qunard",
-            "Lure of Sontalak",
-            "Lure of Fyrthek",
-            "Lure of the Arcanaforged",
-        },
-        ['MagicLureNuke'] = {
-            "Lure of Lightning",
-            "Lure of Thunder",
-            "Lightningbane",
-            "Permeating Ether",
-        },
+        -- ['FireLureNuke'] = {
+        --     "Enticement of Flame",
+        --     "Lure of Flame",
+        --     "Lure of Ro",
+        --     "Firebane",
+        --     "Lavalure",
+        --     "Pyrolure",
+        --     "Flarelure",
+        --     "Flamelure",
+        --     "Blazelure",
+        --     "MagmaLure",
+        --     "PlasmaLure",
+        --     "Lure of Qunard",
+        --     "Lure of Sontalak",
+        --     "Lure of Fyrthek",
+        --     "Lure of the Arcanaforged",
+        -- },
+        -- ['MagicLureNuke'] = {
+        --     "Lure of Lightning",
+        --     "Lure of Thunder",
+        --     "Lightningbane",
+        --     "Permeating Ether",
+        -- },
         ['StunMagicNuke'] = {
             "Leap of Stormjolts",
             "Leap of Stormbolts",
@@ -526,47 +518,47 @@ return {
             "Tears of Night Fire",
             "Tears of the Rescued",
         },
-        ['FireLureRain'] = {
-            "Volcanic Burst",
-            "Tears of Arlyxir",
-            "Meteor Storm",
-            "Volcanic Eruption",
-            "Pyroclastic Eruption",
-            "Magmatic Eruption",
-            "Magmatic Downpour",
-            "Magmatic Outburst",
-            "Magmatic Vent",
-            "Magmatic Burst",
-            "Magmatic Explosion",
-            "Volcanic Downpour",
-            "Volcanic Barrage",
-        },
-        ['SnapNuke'] = {  -- T2 Ice ~8.5s recast (shared with Cloudburst)
-            "Frostblast", -- Level 123
-            "Chillblast",
-            "Coldburst",
-            "Flashfrost",
-            "Flashrime",
-            "Flashfreeze",
-            "Frost Snap",
-            "Freezing Snap",
-            "Gelid Snap",
-            "Rime Snap",
-            "Cold Snap",      -- Level 73
-        },
-        ['AEBeam'] = {        -- T2 Frontal Fire AE
-            "Cremating Beam", -- Level 121
-            "Vaporizing Beam",
-            "Scorching Beam",
-            "Burning Beam",
-            "Combusting Beam",
-            "Incinerating Beam",
-            "Blazing Beam",
-            "Corona Beam",      -- Level 86
-            "Beam of Solteris", -- Level 72
-        },
-        ['PBFlame'] = {         -- T4 PB Fire AE
-            "Gyre of Flame",    -- Level 122
+        -- ['FireLureRain'] = {
+        --     "Volcanic Burst",
+        --     "Tears of Arlyxir",
+        --     "Meteor Storm",
+        --     "Volcanic Eruption",
+        --     "Pyroclastic Eruption",
+        --     "Magmatic Eruption",
+        --     "Magmatic Downpour",
+        --     "Magmatic Outburst",
+        --     "Magmatic Vent",
+        --     "Magmatic Burst",
+        --     "Magmatic Explosion",
+        --     "Volcanic Downpour",
+        --     "Volcanic Barrage",
+        -- },
+        -- ['SnapNuke'] = {  -- T2 Ice ~8.5s recast (shared with Cloudburst)
+        --     "Frostblast", -- Level 123
+        --     "Chillblast",
+        --     "Coldburst",
+        --     "Flashfrost",
+        --     "Flashrime",
+        --     "Flashfreeze",
+        --     "Frost Snap",
+        --     "Freezing Snap",
+        --     "Gelid Snap",
+        --     "Rime Snap",
+        --     "Cold Snap",      -- Level 73
+        -- },
+        -- ['AEBeam'] = {        -- T2 Frontal Fire AE
+        --     "Cremating Beam", -- Level 121
+        --     "Vaporizing Beam",
+        --     "Scorching Beam",
+        --     "Burning Beam",
+        --     "Combusting Beam",
+        --     "Incinerating Beam",
+        --     "Blazing Beam",
+        --     "Corona Beam",      -- Level 86
+        --     "Beam of Solteris", -- Level 72
+        -- },
+        ['PBFlame'] = {      -- T4 PB Fire AE
+            "Gyre of Flame", -- Level 122
             "Coil of Flame",
             "Loop of Flame",
             "Wheel of Flame",
@@ -590,7 +582,7 @@ return {
             "Jyll's Wave of Heat", -- Level 59
         },
         ['IceJyll'] = {
-            "Jyll's Zephyr of Iced", -- Level 56
+            "Jyll's Zephyr of Ice", -- Level 56
         },
         ['MagicJyll'] = {
             "Jyll's Static Pulse", -- Level 53
