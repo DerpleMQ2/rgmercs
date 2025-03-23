@@ -639,9 +639,7 @@ local function RGInit(...)
     end
 
     initPctComplete = 50
-    initMsg = "Setting up Environment..."
-    Core.DoCmd("/squelch /rez accept on")
-    Core.DoCmd("/squelch /rez pct 90")
+    initMsg = "We deleted the thing that used to be here..."
 
     initPctComplete = 60
     initMsg = "Setting up MQ2DanNet..."
