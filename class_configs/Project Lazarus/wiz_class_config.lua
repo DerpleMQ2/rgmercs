@@ -8,28 +8,27 @@ local Config    = require('utils.config')
 local Modules   = require("utils.modules")
 local Targeting = require("utils.targeting")
 local Casting   = require("utils.casting")
-local Comms     = require("utils.comms")
+local Core      = require("utils.core")
+local Logger    = require("utils.logger")
 
 return {
-    _version         = "1.0 - Project Lazarus",
-    _author          = "Derple",
-    ['Modes']        = {
-        'Combo',
-        'Fire',
-        'Ice',
-        'Magic',
+    _version            = "2.0 - Project Lazarus",
+    _author             = "Derple, Algar",
+    ['Modes']           = {
+        'DPS',
+        'PBAE',
     },
-    ['OnModeChange'] = function(self, mode)
-        -- if this is enabled the weaves will break.
+    ['OnModeChange']    = function(self, mode)
+        -- if this is enabled weaves will break.
         Config:GetSettings().WaitOnGlobalCooldown = false
     end,
-    ['ItemSets']     = {
+    ['ItemSets']        = {
         ['Epic'] = {
             "Staff of Phenomenal Power",
             "Staff of Prismatic Power",
         },
     },
-    ['AbilitySets']  = {
+    ['AbilitySets']     = {
         ['AllianceSpell'] = {
             "Frostbound Covariance",
             "Frostbound Conjunction",
@@ -43,15 +42,6 @@ return {
             "Composite Fire",
             "Dissident Fire",
             "Dichotomic Fire",
-        },
-        ['ComboClaw'] = {
-            -- only here so that the loader does not complain
-        },
-        ['ComboNuke'] = {
-            -- only here so that the loader does not complain
-        },
-        ['ComboEtherealNuke'] = {
-            -- only here so that the loader does not complain
         },
         ['IceClaw'] = {
             "Claw of the Void",
@@ -68,12 +58,12 @@ return {
             "Claw of Ankexfen",
         },
         ['FireClaw'] = {
+            "Claw of Ingot",
             "Claw of the Duskflame",
             "Claw of Sontalak",
             "Claw of Qunard",
             "Claw of the Flameweaver",
             "Claw of the Flamewing",
-            "Claw of Ingot",
         },
         ['MagicClaw'] = {
             "Claw of Itzal",
@@ -105,17 +95,17 @@ return {
             "Ethereal Plait",
         },
         ['FireEtherealNuke'] = {
-            "Ethereal Immolation",
-            "Ethereal Ignition",
-            "Ethereal Brand",
-            "Ethereal Skyfire",
-            "Ethereal Skyblaze",
-            "Ethereal Incandescence",
-            "Ethereal Blaze",
-            "Ethereal Inferno",
-            "Ethereal Combustion",
-            "Ethereal Incineration",
-            "Ethereal Conflagration",
+            -- "Ethereal Immolation",
+            -- "Ethereal Ignition",
+            -- "Ethereal Brand",
+            -- "Ethereal Skyfire",
+            -- "Ethereal Skyblaze",
+            -- "Ethereal Incandescence",
+            -- "Ethereal Blaze",
+            -- "Ethereal Inferno",
+            -- "Ethereal Combustion",
+            -- "Ethereal Incineration",
+            -- "Ethereal Conflagration",
             "Ether Flame",
         },
         ['IceEtherealNuke'] = {
@@ -140,15 +130,16 @@ return {
             "Ethereal Blitz",
         },
         ['ChaosNuke'] = {
-            "Chaos Flame",
-            "Chaos Inferno",
-            "Chaos Burn",
-            "Chaos Scintillation",
-            "Chaos Incandescence",
-            "Chaos Blaze",
-            "Chaos Char",
-            "Chaos Conflagration",
-            "Chaos Immolation",
+            -- "Chaos Flame",
+            -- "Chaos Inferno",
+            -- "Chaos Burn",
+            -- "Chaos Scintillation",
+            -- "Chaos Incandescence",
+            -- "Chaos Blaze",
+            -- "Chaos Char",
+            -- "Chaos Combustion",
+            -- "Chaos Conflagration",
+            -- "Chaos Immolation",
             "Chaos Flame",
         },
         ['VortexNuke'] = {
@@ -178,61 +169,89 @@ return {
             "Fire Vortex",
         },
         ['WildNuke'] = {
-            "Wildspell Strike",
-            "Wildflame Strike",
-            "Wildscorch Strike",
-            "Wildflash Strike",
-            "Wildflash Barrage",
-            "Wildether Barrage",
-            "Wildspark Barrage",
-            "Wildmana Barrage",
-            "Wildmagic Blast",
+            -- "Wildspell Strike",
+            -- "Wildflame Strike",
+            -- "Wildscorch Strike",
+            -- "Wildflash Strike",
+            -- "Wildflash Barrage",
+            -- "Wildether Barrage",
+            -- "Wildspark Barrage",
+            -- "Wildmana Barrage",
+            -- "Wildmagic Blast",
             "Wildmagic Burst",
-            "Wildmagic Strike",
+            -- "Wildmagic Strike",
         },
+        -- ['WildNuke2'] = {
+        --     "Wildspell Strike",
+        --     "Wildflame Strike",
+        --     "Wildscorch Strike",
+        --     "Wildflash Strike",
+        --     "Wildflash Barrage",
+        --     "Wildether Barrage",
+        --     "Wildspark Barrage",
+        --     "Wildmana Barrage",
+        --     "Wildmagic Blast",
+        --     "Wildmagic Burst",
+        --     "Wildmagic Strike",
+        -- },
         ['FireNuke'] = {
-            "Kindleheart's Fire",
-            "The Diabo's Fire",
-            "Dagarn's Fire",
-            "Dragoflux's Fire",
-            "Narendi's Fire",
-            "Gosik's Fire",
-            "Daevan's Fire",
-            "Lithara's Fire",
-            "Klixcxyk's Fire",
-            "Inizen's Fire",
-            "Sothgar's Flame",
-            "Corona Flare",
-            "White Fire",
-            "Garrison's Superior Sundering",
+            -- "Kindleheart's Fire",
+            -- "The Diabo's Fire",
+            -- "Dagarn's Fire",
+            -- "Dragoflux's Fire",
+            -- "Narendi's Fire",
+            -- "Gosik's Fire",
+            -- "Daevan's Fire",
+            -- "Lithara's Fire",
+            -- "Klixcxyk's Fire",
+            -- "Inizen's Fire",
+            -- "Sothgar's Flame",
+            "Spark of Fire",
+            "Draught of Ro",
+            "Draught of Fire",
             "Conflagration",
             "Inferno Shock",
             "Flame Shock",
             "Fire Bolt",
             "Shock of Fire",
         },
+        ['BigFireNuke'] = {       -- Level 51-70, Long Cast, Heavy Damage
+            "Ancient: Core Fire", --Ether Flame beats this soundly at the same level
+            "Corona Flare",       --Ether Flame beats this soundly at the same level
+            "Ancient: Strike of Chaos",
+            "White Fire",
+            "Strike of Solusek",
+            "Garrison's Superior Sundering",
+            "Sunstrike",
+        },
         ['IceNuke'] = {
-            "Glacial Ice Cascade",
-            "Tundra Ice Cascade",
-            "Restless Ice Cascade",
-            "Icefloe Cascade",
-            "Rimeblast Cascade",
-            "Hoarfrost Cascade",
-            "Rime Cascade",
-            "Glacial Cascade",
-            "Icesheet Cascade",
-            "Glacial Collapse",
-            "Icefall Avalanche",
-            "Gelidin Comet",
-            "Ice Meteor",
-            "Ice Spear of Solist",
-            "Frozen Harpoon",
+            -- "Glacial Ice Cascade",
+            -- "Tundra Ice Cascade",
+            -- "Restless Ice Cascade",
+            -- "Icefloe Cascade",
+            -- "Rimeblast Cascade",
+            -- "Hoarfrost Cascade",
+            -- "Rime Cascade",
+            -- "Glacial Cascade",
+            -- "Icesheet Cascade",
+            -- "Glacial Collapse",
+            -- "Icefall Avalanche",
+            -- "Ancient: Spear of Gelaqua" -- ON LAZ, BUT NOT SURE WHETHER TO INCLUDE THIS OR NOT
+            "Spark of Ice",
+            "Black Ice",
+            "Draught of E`ci",
+            "Draught of Ice",
             "Ice Comet",
             "Ice Shock",
             "Frost Shock",
             "Shock of Ice",
-            "Frost Bolt",
             "Blast of Cold",
+        },
+        ['BigIceNuke'] = { -- Level 60-70, Timed with great Ratio or High Cast Time/Damage
+            "Gelidin Comet",
+            "Ice Meteor",
+            "Ancient: Destruction of Ice", --13s T1
+            "Ice Spear of Solist",         --13s T2
         },
         ['MagicNuke'] = {
             "Lightning Cyclone",
@@ -248,28 +267,31 @@ return {
             "Ball Lightning",
             "Spark of Lightning",
             "Draught of Lightning",
-            "Elnerick's Electrical Rending",
-            "Draught of Jiva",
             "Voltaic Draught",
             "Rend",
             "Lightning Shock",
-            "Thunder Strike",
             "Garrison's Mighty Mana Shock",
-            "Lightning Bolt",
             "Shock of Lightning",
         },
+        ['BigMagicNuke'] = { -- Level 60-68, High Cast Time/Damage
+            "Thundaka",
+            "Shock of Magic",
+            "Agnarr's Thunder",
+            "Elnerick's Electrical Rending",
+        },
         ['StunSpell'] = {
-            "Teladaka",
-            "Teladaja",
-            "Telajaga",
-            "Telanata",
-            "Telanara",
-            "Telanaga",
-            "Telanama",
-            "Telakama",
-            "Telajara",
-            "Telajasz",
-            "Telakisz",
+            -- "Teladaka",
+            -- "Teladaja",
+            -- "Telajaga",
+            -- "Telanata",
+            -- "Telanara",
+            -- "Telanaga",
+            -- "Telanama",
+            -- "Telakama",
+            -- "Telajara",
+            -- "Telajasz",
+            -- "Telakisz",
+            "Telakemara",
             "Telekara",
             "Telaka",
             "Telekin",
@@ -300,23 +322,23 @@ return {
             "Lesser Shielding",
             "Minor Shielding",
         },
+        -- ['SelfSpellShield1'] = {
+        --     "Shield of Inescapability",
+        --     "Shield of Inevitability",
+        --     "Shield of Destiny",
+        --     "Shield of Order",
+        --     "Shield of Consequence",
+        --     "Shield of Fate",
+        -- },
         ['FamiliarBuff'] = {
             "Greater Familiar",
             "Familiar",
             "Lesser Familiar",
             "Minor Familiar",
         },
-        ['MeleeGuard'] = {
-            "Shield of Inescapability",
-            "Shield of Inevitability",
-            "Shield of Destiny",
-            "Shield of Order",
-            "Shield of Consequence",
-            "Shield of Fate",
-        },
         ['SelfRune1'] = {
-            "Mail of the Crystalwing",
-            "Scales of the Crystalwing",
+            "Aegis of Remembrance",
+            "Aegis of the Umbra",
             "Aegis of the Crystalwing",
             "Armor of Wirn",
             "Armor of the Codex",
@@ -337,14 +359,14 @@ return {
         ['TwincastSpell'] = {
             "Twincast",
         },
-        ['GambitSpell'] = {
-            "Anodyne Gambit",
-            "Idyllic Gambit",
-            "Musing Gambit",
-            "Quiescent Gambit",
-            "Bucolic Gambit",
-            "Contemplative Gambit",
-        },
+        -- ['GambitSpell'] = {
+        --     "Contemplative Gambit",
+        --     "Anodyne Gambit",
+        --     "Idyllic Gambit",
+        --     "Musing Gambit",
+        --     "Quiescent Gambit",
+        --     "Bucolic Gambit",
+        -- },
         ['PetSpell'] = {
             "Kindleheart's Pyroblade",
             "Diabo Xi Fer's Pyroblade",
@@ -397,7 +419,6 @@ return {
             "Neurofreeze",
             "Cortexfreeze",
             "Synapsefreeze",
-            --"Flashfreeze", This is not a jolt, it is an instant nuke that we don't use/have a table for.
             "Skullfreeze",
             "Thoughtfreeze",
             "Brainfreeze",
@@ -448,28 +469,7 @@ return {
             "Lightningbane",
             "Permeating Ether",
         },
-        -- Fast Nukes
-        ['FastIceNuke'] = {
-            "Draught of Ice",
-            "Frost Shock",
-            "Shock of Ice",
-            "Draught of E`ci",
-            "Black Ice",
-            "Spark of Ice",
-        },
-        ['FastFireNuke'] = {
-            "Shock of Fire",
-            "Flame Shock",
-            "Inferno Shock",
-            "Draught of Fire",
-            "Draught of Ro",
-            "Chaos Flame",
-            "Spark of Fire",
-        },
-        ['FastMagicNuke'] = {
-            "Voltaic Draught",
-            "Draught of Lightning",
-            "Spark of Lightning",
+        ['StunMagicNuke'] = {
             "Leap of Stormjolts",
             "Leap of Stormbolts",
             "Leap of Static Sparks",
@@ -479,10 +479,18 @@ return {
             "Leap of Static Bolts",
             "Leap of Sparks",
             "Leap of Levinsparks",
+            "Leap of Shocking Bolts",
+            "Spark of Thunder",
+            "Draught of Thunder",
+            "Draught of Jiva",
+            "Force Strike",
+            "Thunder Strike",
+            "Force Snap",
+            "Lightning Bolt",
         },
         -- Rain Spells Listed here are used Primarily for TLP Mode.
         -- Magic Rain - Only have 3 of them so Not Sustainable.
-        ['IceRainNuke'] = {
+        ['IceRain'] = {
             "Icestrike",
             "Frost Storm",
             "Tears of Prexus",
@@ -500,7 +508,7 @@ return {
             "Hypothermic Torrent",
             "Rimeclaw Torrent",
         },
-        ['FireRainNuke'] = {
+        ['FireRain'] = {
             "Firestorm",
             "Lava Storm",
             "Tears of Solusek",
@@ -518,7 +526,7 @@ return {
             "Tears of Night Fire",
             "Tears of the Rescued",
         },
-        ['FireRainLureNuke'] = {
+        ['FireLureRain'] = {
             "Volcanic Burst",
             "Tears of Arlyxir",
             "Meteor Storm",
@@ -533,106 +541,94 @@ return {
             "Volcanic Downpour",
             "Volcanic Barrage",
         },
-        -- Large 8 Second Cast Nukes
-        ['BigIceNuke'] = {
-            -- Big Ice Nukes  50-69
-            "Ice Comet",
-            "Ice Spear of Solist",
-            "Ancient: Destruction of Ice",
-            "Ice Meteor",
-            "Gelidin Comet",
+        ['SnapNuke'] = {  -- T2 Ice ~8.5s recast (shared with Cloudburst)
+            "Frostblast", -- Level 123
+            "Chillblast",
+            "Coldburst",
+            "Flashfrost",
+            "Flashrime",
+            "Flashfreeze",
+            "Frost Snap",
+            "Freezing Snap",
+            "Gelid Snap",
+            "Rime Snap",
+            "Cold Snap",      -- Level 73
         },
-        ['BigFireNuke'] = {
-            -- Big Fire Nukes
-            "Conflagration",
-            "Sunstrike",
-            "Garrison's Superior Sundering",
-            "Strike of Solusek",
-            "White Fire",
-            "Ether Flame",
-            "Corona Flare",
+        ['AEBeam'] = {        -- T2 Frontal Fire AE
+            "Cremating Beam", -- Level 121
+            "Vaporizing Beam",
+            "Scorching Beam",
+            "Burning Beam",
+            "Combusting Beam",
+            "Incinerating Beam",
+            "Blazing Beam",
+            "Corona Beam",      -- Level 86
+            "Beam of Solteris", -- Level 72
         },
-        ['BigMagicNuke'] = {
-            -- Big Magic Nukes
-            "Rend",
-            "Elnerick's Electrical Rending",
-            "Agnarr's Thunder",
-            "Shock of Magic",
-            "Thundaka",
+        ['PBFlame'] = {         -- T4 PB Fire AE
+            "Gyre of Flame",    -- Level 122
+            "Coil of Flame",
+            "Loop of Flame",
+            "Wheel of Flame",
+            "Corona of Flame",
+            "Circle of Flame",
+            "Ring of Flame",
+            "Ring of Fire",
+            "Talendor's Presence",
+            "Vsorgu's Presence",
+            "Magmaraug's Presence",
+            --"Circle of Fire", -- Level 67 Used in PBAE Mode, wouldn't be used in Modern PBAE
+        },
+        ['PBTimer4'] = {
+            "Circle of Thunder", -- Level 70, Magic
+            "Circle of Fire",    -- Level 67, Fire
+            "Winds of Gelid",    -- Level 60, Ice
+            "Supernova",         -- Level 45, Fire
+            "Thunderclap",       -- Level 30, Magic
+        },
+        ['FireJyll'] = {
+            "Jyll's Wave of Heat", -- Level 59
+        },
+        ['IceJyll'] = {
+            "Jyll's Zephyr of Iced", -- Level 56
+        },
+        ['MagicJyll'] = {
+            "Jyll's Static Pulse", -- Level 53
+        },
+        ['ManaWeave'] = {
             "Mana Weave",
         },
-    },
-    ['ChatBegList']  = {
-        ['WizBegs'] = {
-            ['bindme'] = {
-                ['spell'] = "Bind Affinity",
-                ['sender'] = true,
-            },
-            ['gatenorth'] = {
-                ['spell'] = "North Gate",
-                ['sender'] = true,
-            },
-            ['gatefay'] = {
-                ['spell'] = "Fay Gate",
-                ['sender'] = true,
-            },
-            ['portalnorth'] = {
-                ['spell'] = "North Portal",
-                ['sender'] = true,
-            },
-            ['portalfay'] = {
-                ['spell'] = "Fay Portal",
-                ['sender'] = true,
-            },
-            ['portallcea'] = {
-                ['spell'] = {
-                    "Lceanium Portal",
-                    ['sender'] = true,
-                },
-            },
+        ['SwarmPet'] = {
+            "Flaming Sword of Xuzl", --homework
         },
     },
-    --[[['CommandHandlers']   = {
-        wizevac = {
-            usage = "/rgl wizevac",
-            about = "Cause wizard to cast an evac AA or spell",
-            handler =
-                function(self)
-                    local evacSpells = {'Exodus', 'Evacuate', 'Lesser Evacuate'}
-                    local portName = ''
-                    local me = mq.TLO.Me
+    ['HelperFunctions'] = {
+        --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
+        AETargetCheck = function(minCount, printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < minCount or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
 
-
-                    for _, port in ipairs(evacSpells) do
-                        if me.Class.Name() == 'Wizard' and me.Level() >= 57 and port == 'Evacuate' then
-                            portName = port
-                            break
-                        elseif me.Class.Name() == 'Wizard' and me.Level() >= 18 and port == 'Lesser Evacuate' then
-                            portName = port
-                            break
-                        end
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
                     end
-
-                    -- Cast the spell. Will report if need to memorize or don't have the spell
-                    Core.DoCmd('/if (${Cast.Ready[exodus]}) /cast "exodus" alt')
-                    Core.DoCmd('/timed 1 /if (${Me.Book["%s"]}>0) /cast "%s"', portName, portName)
-                    Core.DoCmd('/timed 2 /if (!${Me.Book["%s"]}>0) /dgt all Spell not known!', portName)
-
-                    -- Have to memorize
-                    Core.DoCmd('/timed 5 /if (${Cast.Status.Equal[CM]}) /timed 5 /dgt all Memorizing "%s"! Ready in 1.5 seconds', portName)
-                    Core.DoCmd('/timed 50 /if (${Cast.Timing}>6000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
-                    Core.DoCmd('/timed 90 /if (${Cast.Timing}>4000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
-
-                    -- Already memorized
-                    Core.DoCmd('/timed 5 /if (${Cast.Timing}>8000) /dgt all Casting -> %s <- in ${Math.Calc[${Cast.Timing}/1000]} seconds!', portName)
-                    Core.DoCmd('/timed 40 /if (${Cast.Timing}>5000) /dgt all ${Math.Calc[${Cast.Timing}/1000]} seconds remaining!', portName)
-
-                    -- Out of mana
-                    Core.DoCmd('/timed 5 /if (${Cast.Status.Equal[CAST_OUTOFMANA]}) /dgt all Out of mana! Can\'t Evac!')
+                    return false
                 end
-        }
-    },]]
-    ['RotationOrder'] = {
+            end
+
+            return true
+        end,
+        RainCheck = function(target) -- I made a funny
+            if not (Config:GetSetting('DoRain') and Config:GetSetting('DoAEDamage')) then return false end
+            return Targeting.GetTargetDistance() >= Config:GetSetting('RainDistance') and Targeting.MobNotLowHP(target)
+        end,
+    },
+    ['RotationOrder']   = {
         -- Downtime doesn't have state because we run the whole rotation at once.
         {
             name = 'Downtime',
@@ -643,34 +639,101 @@ return {
             end,
         },
         {
+            name = 'Aggro Management',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and mq.TLO.Me.PctAggro() > (Config:GetSetting('JoltAggro') or 90)
+            end,
+        },
+        {
             name = 'Burn',
             state = 1,
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and
-                    Casting.BurnCheck()
+                return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
-        {
-            name = 'Combat Buffs',
+        { --Keep things from running
+            name = 'Snare',
             state = 1,
             steps = 1,
-            timer = 30, -- only run every 30 seconds at most.
-            targetId = function(self) return { mq.TLO.Me.ID(), } end,
-            cond = function(self, combat_state)
-                return combat_state ==
-                    "Combat"
-            end,
-        },
-        {
-            name = 'Aggro Management',
-            state = 1,
-            steps = 1,
+            load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state ==
-                    "Combat"
+                return combat_state == "Combat" and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+            end,
+        },
+        { --Keep things from doing
+            name = 'Stun',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoStun') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
+            end,
+        },
+        {
+            name = 'DPS(Level70)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 101 and mq.TLO.Me.Level() > 69 end,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
+            end,
+        },
+        {
+            name = 'DPS(FireLowLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 70 and Config:GetSetting('ElementChoice') == 1 end,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
+            end,
+        },
+        {
+            name = 'DPS(IceLowLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 70 and Config:GetSetting('ElementChoice') == 2 end,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
+            end,
+        },
+        {
+            name = 'DPS(MagicLowLevel)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() < 70 and Config:GetSetting('ElementChoice') == 3 end,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and
+                    not (Core.IsModeActive('PBAE') and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true))
+            end,
+        },
+        {
+            name = 'DPS(PBAE)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Core.IsModeActive('PBAE') end,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
             end,
         },
         {
@@ -679,75 +742,37 @@ return {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Config:GetSetting('WeaveAANukes') and mq.TLO.Me.SpellInCooldown()
+                return combat_state == "Combat"
             end,
         },
         {
-            name = 'Gift of Mana',
+            name = 'CombatBuff',
             state = 1,
             steps = 1,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and (not Config:GetSetting('DoGOMCheck') or Casting.GOMCheck())
-            end,
-        },
-        {
-            name = 'DPS',
-            state = 1,
-            steps = 1,
+            timer = 30, -- only run every 30 seconds at most.
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
         },
-        {
-            name = 'AoE Rain DPS',
-            state = 1,
-            steps = 1,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and Targeting.GetAutoTargetPctHPs() <= Config:GetSetting('RainMinTargetHP') and
-                    Targeting.GetXTHaterCount() >= Config:GetSetting('RainMinHaters')
-            end,
-        },
     },
-    ['Rotations']     = {
+    ['Rotations']       = {
         ['Burn'] = {
             {
-                name = "Arcane Whisper",
+                name = "Focus of Arcanum",
                 type = "AA",
-                cond = function(self)
-                    return Targeting.GetTargetPctHPs() > 10
-                end,
-            },
-            {
-                name = "Spire of Arcanum",
-                type = "AA",
-                cond = function(self)
-                    return true
-                end,
-            },
-            {
-                name = "Silent Casting",
-                type = "AA",
-                cond = function(self)
-                    return true
-                end,
-            },
-            {
-                name = "Arcane Destruction",
-                type = "AA",
-                cond = function(self)
-                    return not Casting.IHaveBuff("Frenzied Devastation")
-                end,
             },
             {
                 name = "Arcane Fury",
                 type = "AA",
-                cond = function(self)
-                    return (not Casting.IHaveBuff("Chromatic Haze")) and (not Casting.IHaveBuff("Gift of Chromatic Haze")) and
-                        ((Casting.IHaveBuff("Arcane Destruction")) or (Casting.IHaveBuff("Frenzied Devastation")))
-                end,
+            },
+            {
+                name = "Fury of the Gods",
+                type = "AA",
+            },
+            {
+                name = "Fundament: Second Spire of Arcanum",
+                type = "AA",
             },
             {
                 name = "Improved Twincast",
@@ -757,45 +782,61 @@ return {
                 end,
             },
             {
+                name = "Arcane Destruction",
+                type = "AA",
+                cond = function(self)
+                    return not Casting.IHaveBuff("Spire of Arcanum")
+                end,
+            },
+            {
+                name = "Frenzied Devastation",
+                type = "AA",
+                cond = function(self)
+                    return not Casting.IHaveBuff("Spire of Arcanum")
+                end,
+            },
+            {
+                name = "Silent Casting",
+                type = "AA",
+            },
+            {
                 name = "Mana Burn",
                 type = "AA",
                 cond = function(self)
-                    return not Casting.TargetHasBuff("Mana Burn") and Config:GetSetting('DoManaBurn')
+                    if not Config:GetSetting('DoManaBurn') then return false end
+                    return not Casting.TargetHasBuff("Mana Burn") and Casting.HaveManaToNuke()
                 end,
             },
             {
-                name = "Harvest of Druzzil",
+                name = "Call of Xuzl",
                 type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
-                end,
-            },
-            {
-                name = "HarvestSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.CastReady(spell)
-                end,
             },
         },
-        ['Agro Management'] =
+        ['Aggro Management'] =
         {
+            {
+                name = "Mind Crash",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
+                end,
+            },
+            {
+                name = "Arcane Whisper",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() > 90
+                end,
+            },
             {
                 name = "A Hole in Space",
                 type = "AA",
                 cond = function(self)
-                    return mq.TLO.Me.PctAggro() > 99 and Targeting.IHaveAggro(100)
+                    return Targeting.IHaveAggro(100)
                 end,
             },
             {
-                name = "Mind Crash",
-                type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctAggro() > 85
-                end,
-            },
-            {
-                name = "Concussion",
+                name = "Concussive Intuition",
                 type = "AA",
                 cond = function(self)
                     return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
@@ -808,238 +849,186 @@ return {
                     return mq.TLO.Me.PctAggro() > Config:GetSetting('JoltAggro')
                 end,
             },
-
         },
-        ['Combat Buffs'] =
-        {
+        ['Snare'] = {
             {
-                name = "Etherealist's Unity",
+                name = "Atol's Shackles",
                 type = "AA",
-                active_cond = function(self, aaName) return Casting.IHaveBuff(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
-                cond = function(self, aaName)
-                    local selfHPBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
-                    local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
-                name = "SelfRune1",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "MeleeGuard",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "GambitSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('ModRodManaPct')
-                end,
-            },
-            {
-                name = "Harvest of Druzzil",
-                type = "AA",
-                cond = function(self)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
-                end,
-            },
-            {
-                name = "HarvestSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.CastReady(spell)
-                end,
-            },
-        },
-        ['Weaves'] = {
-            {
-                name = "Force of Ice",
-                type = "AA",
-            },
-            {
-                name = "Force of Will",
-                type = "AA",
-            },
-            {
-                name = "Force of Flame",
-                type = "AA",
-            },
-        },
-        ['Gift of Mana'] = {
-            {
-                name = "FuseNuke",
-                type = "Spell",
-            },
-            {
-                name = "FireEtherealNuke",
-                type = "Spell",
-            },
-            {
-                name = "IceEtherealNuke",
-                type = "Spell",
-            },
-            {
-                name = "DichoSpell",
-                type = "Spell",
-            },
-        },
-        ['DPS'] = {
-            {
-                name = "PetSpell",
-                type = "Spell",
-                active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
-                cond = function(self, _) return Config:GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
-                post_activate = function(self, spell)
-                    local pet = mq.TLO.Me.Pet
-                    if pet.ID() > 0 then
-                        Comms.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
-                            pet.Class.Name(), pet.CleanName(), spell.RankName())
-                    end
-                end,
-            },
-            {
-                name = "CloudburstNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GambitCheck() or ((mq.TLO.Me.Song("Evoker's Synergy I").ID() or 0) > 0)
-                end,
-            },
-            {
-                name = "WildNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GambitCheck()
-                end,
-            },
-            {
-                name = "ChaosNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.GambitCheck()
-                end,
-            },
-            {
-                name = "TwincastSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return mq.TLO.Me.Buff("Twincast").ID() == 0
-                end,
-            },
-            {
-                name = "VortexNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return not Casting.TargetHasBuff(spell)
-                end,
-            },
-            {
-                name = "DichoSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    return not Casting.GambitCheck() and not Casting.IHaveBuff("Twincast")
-                end,
-            },
-            {
-                name = "FireClaw",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
-                end,
-            },
-            {
-                name = "FuseNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    local fireClaw = Modules:ExecModule("Class", "GetResolvedActionMapItem", "FireClaw")
-                    return not Casting.GambitCheck() and ((not fireClaw or not fireClaw()) or not mq.TLO.Me.SpellReady(fireClaw.RankName()))
-                end,
-            },
-            {
-                name = "FireNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and not Casting.GambitCheck()
-                end,
-            },
-            {
-                name = "IceNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and not Casting.GambitCheck()
-                end,
-            },
-            {
-                name = "MagicNuke",
-                type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and not Casting.GambitCheck()
+                cond = function(self, aaName, target)
+                    return Casting.DetAACheck(aaName) and Targeting.MobHasLowHP(target)
                 end,
             },
             {
                 name = "SnareSpell",
                 type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell) and Targeting.MobHasLowHP(target)
+                end,
+            },
+        },
+        ['Stun'] = {
+            {
+                name = "StunSpell",
+                type = "Spell",
                 cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and Targeting.GetTargetDistance() > 30 and self.settings.DoSnare
+                    return Casting.HaveManaToDebuff() and Casting.DetSpellCheck(spell)
+                end,
+            },
+        },
+        ['CombatBuff'] =
+        {
+            {
+                name = "Harvest of Druzzil",
+                type = "AA",
+                allowDead = true,
+                cond = function(self)
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
                 end,
             },
             {
-                name = "FastMagicNuke",
+                name = "HarvestSpell",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                allowDead = true,
+                cond = function(self)
+                    return mq.TLO.Me.PctMana() < Config:GetSetting('CombatHarvestManaPct')
+                end,
+            },
+        },
+        ['Weaves'] = {
+            {
+                name = "Force of Will",
+                type = "AA",
+            },
+        },
+        ['DPS(Level70)'] = {
+            {
+                name = "ManaWeave",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and not Casting.IHaveBuff("Weave of Power")
                 end,
             },
             {
-                name = "FuseNuke",
+                name = "WildNuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                cond = function(self)
+                    return Casting.HaveManaToNuke() and Casting.IHaveBuff("Weave of Power")
                 end,
             },
             {
                 name = "FireEtherealNuke",
                 type = "Spell",
-                cond = function(self, spell)
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                end,
+            },
+            {
+                name = "ChaosNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.MobHasLowHP(target)
+                end,
+            },
+            {
+                name = "Scepter of Incantations",
+                type = "Item",
+            },
+        },
+        ['DPS(FireLowLevel)'] = {
+            {
+                name = "FireRain",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
                     return Casting.HaveManaToNuke()
                 end,
             },
             {
-                name = "IceEtherealNuke",
+                name = "BigFireNuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke()
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
                 end,
             },
             {
-                name = "DichoSpell",
+                name = "FireNuke",
                 type = "Spell",
-                cond = function(self, spell)
+                cond = function(self)
                     return Casting.HaveManaToNuke()
                 end,
             },
         },
-        ['AoE Rain DPS'] = {
+        ['DPS(IceLowLevel)'] = {
             {
-                name = "FireRainNuke",
+                name = "IceRain",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and not Casting.GambitCheck() and
-                        Targeting.GetTargetDistance() >= Config:GetSetting('RainDist')
+                cond = function(self, spell, target)
+                    if not self.ClassConfig.HelperFunctions.RainCheck(target) then return false end
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
-                name = "IceRainNuke",
+                name = "BigIceNuke",
                 type = "Spell",
-                cond = function(self, spell)
-                    return Casting.HaveManaToNuke() and not Casting.GambitCheck() and
-                        Targeting.GetTargetDistance() >= Config:GetSetting('RainDist')
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                end,
+            },
+            {
+                name = "IceNuke",
+                type = "Spell",
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+        },
+        ['DPS(MagicLowLevel)'] = {
+            {
+                name = "BigMagicNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.MobNotLowHP(target)
+                end,
+            },
+            {
+                name = "MagicNuke",
+                type = "Spell",
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+        },
+        ['DPS(PBAE)'] = {
+            {
+                name = "PBTimer4",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "FireJyll",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "IceJyll",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "MagicJyll",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self)
+                    return Casting.HaveManaToNuke()
                 end,
             },
         },
@@ -1053,26 +1042,9 @@ return {
                 end,
             },
             {
-                name = "Etherealist's Unity",
-                type = "AA",
-                active_cond = function(self, aaName) return Casting.IHaveBuff(mq.TLO.Me.AltAbility(aaName).Spell.Trigger(1).ID()) end,
-                cond = function(self, aaName)
-                    local selfHPBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "SelfHPBuff")
-                    local selfHPBuffLevel = selfHPBuff and selfHPBuff() and selfHPBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility("Etherealist's Unity").Spell.Trigger(1).Level() or 0) > selfHPBuffLevel and Casting.SelfBuffAACheck(aaName)
-                end,
-            },
-            {
                 name = "SelfRune1",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell)
-                    return Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "MeleeGuard",
-                type = "Spell",
                 cond = function(self, spell)
                     return Casting.SelfBuffCheck(spell)
                 end,
@@ -1082,7 +1054,7 @@ return {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return spell.Stacks() and spell.Level() > (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) and not Casting.IHaveBuff(spell)
+                    return spell.Level() > (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) and Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1092,7 +1064,7 @@ return {
                 cond = function(self, aaName)
                     local familiarBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
                     local familiarBuffLevel = familiarBuff and familiarBuff() and familiarBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility(aaName).Spell.Level() or 0) > familiarBuffLevel and Casting.SelfBuffAACheck(aaName)
+                    return (mq.TLO.Me.AltAbility(aaName).Spell.Level() or 0) >= familiarBuffLevel and Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
@@ -1106,255 +1078,341 @@ return {
                 name = "HarvestSpell",
                 type = "Spell",
                 cond = function(self, spell)
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.CastReady(spell)
-                end,
-            },
-            { --Chest Click, name function stops errors in rotation window when slot is empty
-                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end,
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
-                    return mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct') and Casting.SelfBuffItemCheck(itemName)
+                    return Casting.CastReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
                 end,
             },
         },
     },
-    ['Spells']        = {
+    ['Spells']          = {
         {
             gem = 1,
             spells = {
-                { name_func = function(self) return string.format("%sClaw", self:GetClassModeName()) end, },
-                { name = "IceClaw", },
-                { name = "FireClaw", },
-                { name = "MagicClaw", },
-                { name = "StunSpell", },
+                { name = "ManaWeave", },
+                { name = "FireNuke",  cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
+                { name = "IceNuke",   cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
+                { name = "MagicNuke", cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
+
             },
         },
         {
             gem = 2,
             spells = {
-                { name_func = function(self) return string.format("%sEtherealNuke", self:GetClassModeName()) end, },
-                { name_func = function(self) return string.format("%sNuke", self:GetClassModeName()) end, },
                 { name = "FireEtherealNuke", },
-                { name = "FireNuke", },
+                { name = "BigFireNuke",      cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
+                { name = "BigIceNuke",       cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
+                { name = "BigMagicNuke",     cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
             },
         },
         {
             gem = 3,
             spells = {
-                { name = "DichoSpell", },
-                {
-                    name = "MagicNuke",
-                    cond = function(self)
-                        return Modules:ExecModule("Class", "GetClassModeName") ~= "Magic" -- Magic mode will put this elsewhere so load an ice nuke.
-                    end,
-                },
-                { name = "IceNuke", },
+                { name = "WildNuke", },
+                { name = "FireRain",     cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 1 end, },
+                { name = "IceRain",      cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 2 end, },
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
             },
         },
         {
             gem = 4,
             spells = {
-                { name = "FuseNuke", },
-                {
-                    name = "FireRainNuke",
-                    active_cond = function(self) return self.settings.DoRain end,
-                    cond = function(self)
-                        return Modules:ExecModule("Class", "GetClassModeName") == "Fire" or Modules:ExecModule("Class", "GetClassModeName") == "Combo"
-                    end,
-                },
-                {
-                    name = "IceRainNuke",
-                    active_cond = function(self) return self.settings.DoRain end,
-                    cond = function(self)
-                        return Modules:ExecModule("Class", "GetClassModeName") == "Ice" or Modules:ExecModule("Class", "GetClassModeName") == "Magic"
-                    end,
-                },
-                {
-                    name = "IceNuke",
-                    cond = function(self)
-                        return Modules:ExecModule("Class", "GetClassModeName") == "Fire" or Modules:ExecModule("Class", "GetClassModeName") == "Combo"
-                    end,
-                },
-                {
-                    name = "FireNuke",
-                    cond = function(self)
-                        return Modules:ExecModule("Class", "GetClassModeName") == "Ice" or Modules:ExecModule("Class", "GetClassModeName") == "Magic"
-                    end,
-                },
+                { name = "ChaosNuke", },
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
             },
         },
         {
             gem = 5,
             spells = {
-                { name = "TwincastSpell", },
-                { name = "SnareSpell",    cond = function(self) return self.settings.DoSnare end, },
-                { name = "StunSpell", },
-                { name = "RootSpell", }, },
+                { name = "PBTimer4",     cond = function() return Core.IsModeActive('PBAE') end, },
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
+            },
         },
-        { gem = 6, spells = { { name = "GambitSpell", }, { name = "HarvestSpell", }, }, },
+        {
+            gem = 6,
+            spells = {
+                { name = "FireJyll",     cond = function() return Core.IsModeActive('PBAE') end, },
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
+            },
+        },
         {
             gem = 7,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = { { name = "VortexNuke", }, { name = "FastMagicNuke", }, },
+            spells = {
+                { name = "IceJyll",      cond = function() return Core.IsModeActive('PBAE') end, },
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
+
+
+            },
         },
         {
             gem = 8,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = { { name = "JoltSpell", }, },
+            spells = {
+                { name = "MagicJyll",    cond = function() return Core.IsModeActive('PBAE') end, },
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
+            },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                {
-                    name = "PetSpell",
-                    cond = function(self) return mq.TLO.Me.Level() < 79 end,
-                },
-                {
-                    name = "IceEtherealNuke",
-                    cond = function(self)
-                        return Modules:ExecModule("Class", "GetClassModeName") ~= "Ice" -- Ice will load this elsewhere.
-                    end,
-                },
-                {
-                    name = "MagicEtherealNuke",
-                },
-            },
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", }, },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = { { name = "FireRainLureNuke", }, },
+            spells = {
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
+
+            },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = { { name = "ChaosNuke", }, },
+            spells = {
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
+            },
         },
         {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = { { name = "CloudburstNuke", }, { name = "FireNuke", }, },
-        },
-        {
-            gem = 13,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = { { name = "FireNuke", }, { name = "IceNuke", }, { name = "MagicNuke", }, { name = "RootSpell", }, },
+            spells = {
+                { name = "HarvestSpell", },
+                { name = "SnareSpell",   cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "StunSpell",    cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "JoltSpell", },
+                { name = "SelfRune1", },
+                { name = "EvacSpell", },
+                { name = "SelfHPBuff", },
+            },
         },
     },
-    ['DefaultConfig'] = {
-        ['Mode']            = {
+    ['DefaultConfig']   = {
+        ['Mode']                 = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this Toon",
             Type = "Custom",
             RequiresLoadoutChange = true,
-            Default = 3,
+            Default = 1,
             Min = 1,
-            Max = 4,
+            Max = 1,
             FAQ = "What do the different Modes Do?",
-            Answer = "Combo mode is a mix of all 3 types of Nukes,\n" ..
-                "Fire mode will focus only on Fire Nukes,\n" ..
-                "Ice mode will focus only on Ice Nukes,\n" ..
-                "Magic mode will focus only on Magic Nukes.",
+            Answer = "Wizard only has a single mode, but the spells used will adjust based on your level range.",
         },
-        ['DoChestClick']    = {
-            DisplayName = "Do Chest Click",
-            Category = "Utilities",
-            Tooltip = "Click your chest item",
-            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "How do I use my chest item Clicky?",
-            Answer = "Enable [DoChestClick] to use your chest item clicky.",
-        },
-        ['JoltAggro']       = {
-            DisplayName = "Jolt Aggro %",
-            Category = "Combat",
-            Tooltip = "Aggro at which to use Jolt",
-            Default = 65,
+
+        -- Damage (ST)
+        ['ElementChoice']        = {
+            DisplayName = "Element Choice:",
+            Category = "Damage",
+            Index = 1,
+            Tooltip = "Choose an element to focus on.",
+            Type = "Combo",
+            ComboOptions = { 'Fire', 'Ice', 'Magic', },
+            Default = 1,
             Min = 1,
-            Max = 100,
-            FAQ = "Can I customize when to use Jolt?",
-            Answer = "Yes, you can set the aggro % at which to use Jolt with the [JoltAggro] setting.",
+            Max = 3,
+            RequiresLoadoutChange = true,
+            FAQ = "WIP?",
+            Answer = "WIP.",
         },
-        ['WeaveAANukes']    = {
-            DisplayName = "Weave AA Nukes",
-            Category    = "Combat",
-            Tooltip     = "Weave in AA Nukes",
-            Default     = true,
-            FAQ         = "I want to be able to weave in AA nukes when they are available, is this possible?",
-            Answer      = "Yes, you can enable [WeaveAANukes] to weave in AA Nukes when they are available.",
-        },
-        ['DoManaBurn']      = {
+        ['DoManaBurn']           = {
             DisplayName = "Use Mana Burn AA",
-            Category = "Combat",
+            Category = "Damage",
+            Index = 2,
             Tooltip = "Enable usage of Mana Burn",
             Default = true,
             FAQ = "Can I use Mana Burn?",
             Answer = "Yes, you can enable [DoManaBurn] to use Mana Burn when it is available.",
         },
-        ['DoSnare']         = {
-            DisplayName = "Use Snare Spells",
-            Category = "Combat",
-            Tooltip = "Enable usage of Snares",
-            Default = true,
-            FAQ = "How do I use Snare Spells?",
-            Answer = "Enable [DoSnare] to use Snare Spells when they are available.",
+        ['DoRain']               = {
+            DisplayName = "Do Rain",
+            Category = "Damage",
+            Index = 3,
+            RequiresLoadoutChange = true,
+            ConfigType = "Advanced",
+            Tooltip = "**WILL BREAK MEZ** Use your selected element's Rain Spell as a single-target nuke. **WILL BREAK MEZ***",
+            Default = false,
+            FAQ = "Why is Rain being used a single target nuke?",
+            Answer = "In some situations, using a Rain can be an efficient single target nuke at low levels.\n" ..
+                "Note that PBAE spells tend to be superior for AE dps at those levels.",
         },
-        ['DoRain']          = {
-            DisplayName = "Use Rain Spells",
-            Category = "Combat",
-            Tooltip = "Enable usage of Rain Spells",
-            Default = true,
-            FAQ = "How do I use Rain Spells?",
-            Answer = "Enable [DoRain] to use Rain Spells when they are available.",
-        },
-        ['RainDist']        = {
-            DisplayName = "Min Dist for Rains",
-            Category = "Combat",
-            Tooltip = "If you are closer you will not use Rain spells",
+        ['RainDist']             = {
+            DisplayName = "Min Rain Distance",
+            Category = "Damage",
+            Index = 4,
+            ConfigType = "Advanced",
+            Tooltip = "The minimum distance a target must be to use a Rain (Rain AE Range: 25').",
             Default = 30,
             Min = 0,
             Max = 100,
-            FAQ = "How do I use Rain Spells?",
-            Answer = "Set the [RainDist] to the minimum distance you want to be from the target to use Rain Spells.\n" ..
-                "And make sure you have [DoRain] enabled.",
+            FAQ = "Why does minimum rain distance matter?",
+            Answer = "Rain spells, if cast close enough, can damage the caster. The AE range of a Rain is 25'.",
         },
-        ['RainMinHaters']   = {
-            DisplayName = "Min XTHaters for Rains",
-            Category = "Combat",
-            Tooltip = "If There are less than x Mobs on XT you will not use Rain spells",
-            Default = 3,
+
+        --Damage (AE)
+        ['DoAEDamage']           = {
+            DisplayName = "Do AE Damage",
+            Category = "Damage (PBAE)",
+            Index = 1,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
+                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['PBAETargetCnt']        = {
+            DisplayName = "PBAE Tgt Cnt",
+            Category = "Damage (PBAE)",
+            Index = 5,
+            Tooltip = "Minimum number of valid targets before using PB Spells like the of Flame line.",
+            Default = 4,
             Min = 1,
-            Max = 100,
-            FAQ = "How do I use Rain Spells?",
-            Answer = "Set the [RainMinHaters] to the minimum number of haters you want to be near the target to use Rain Spells.\n" ..
-                "And make sure you have [DoRain] enabled.",
+            Max = 10,
+            FAQ = "Why am I not using my PBAE spells?",
+            Answer =
+            "You can adjust the PB Target Count to control when you will use actions PBAE Spells such as the of Flame line.",
         },
-        ['RainMinTargetHP'] = {
-            DisplayName = "Min Target HP for Rains",
-            Category = "Combat",
-            Tooltip = "Wait until the group target is at [x] HP before firing Rains",
+        ['MaxAETargetCnt']       = {
+            DisplayName = "Max AE Targets",
+            Category = "Damage (PBAE)",
+            Index = 6,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 6,
+            Min = 2,
+            Max = 30,
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
+            Answer =
+            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
+        },
+        ['SafeAEDamage']         = {
+            DisplayName = "AE Proximity Check",
+            Category = "Damage (PBAE)",
+            Index = 7,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
+        },
+
+        -- Utility
+        ['JoltAggro']            = {
+            DisplayName = "Jolt Aggro %",
+            Category = "Utility",
+            Index = 1,
+            Tooltip = "Aggro at which to use Jolt",
             Default = 90,
             Min = 1,
             Max = 100,
-            FAQ = "How do I use Rain Spells?",
-            Answer = "Set the [RainMinTargetHP] to the minimum HP % you want the target to be at before using Rain Spells.\n" ..
-                "And make sure you have [DoRain] enabled.",
+            FAQ = "Can I customize when to use Jolt?",
+            Answer = "Yes, you can set the aggro % at which to use Jolt with the [JoltAggro] setting.",
         },
-        ['DoGOMCheck']      = {
-            DisplayName = "Do GOM Check",
-            Category = "Combat",
-            Tooltip = "Check if you have Gift of Mana before casting big nukes.",
+        ['DoSnare']              = {
+            DisplayName = "Use Snares",
+            Category = "Utility",
+            Index = 3,
+            Tooltip = "Use Snare Spells.",
             Default = false,
-            FAQ = "How do I use Gift of Mana?",
-            Answer = "Enable [DoGOMCheck] to check if you have Gift of Mana before casting big nukes.",
+            RequiresLoadoutChange = true,
+            FAQ = "Why is my Shadow Knight not snaring?",
+            Answer = "Make sure Use Snares is enabled in your class settings.",
         },
-        ['HarvestManaPct']  = {
+        ['SnareCount']           = {
+            DisplayName = "Snare Max Mob Count",
+            Category = "Utility",
+            Index = 4,
+            Tooltip = "Only use snare if there are [x] or fewer mobs on aggro. Helpful for AoE groups.",
+            Default = 3,
+            Min = 1,
+            Max = 99,
+            FAQ = "Why is my Shadow Knight Not snaring?",
+            Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
+                "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
+        },
+        ['DoStun']               = {
+            DisplayName = "Do Stun",
+            Category = "Utility",
+            Index = 5,
+            Tooltip = "Use your Stun Nukes (Stun with DD, not mana efficient).",
+            RequiresLoadoutChange = true,
+            Default = false,
+            FAQ = "WIP?",
+            Answer =
+            "WIP.",
+        },
+        ['HarvestManaPct']       = {
             DisplayName = "Harvest Mana %",
-            Category = "Utilities",
+            Category = "Utility",
+            Index = 7,
+            ConfigType = "Advanced",
             Tooltip = "What Mana % to hit before using a harvest spell or aa.",
             Default = 85,
+            Min = 1,
+            Max = 99,
+            FAQ = "How do I use Harvest Spells?",
+            Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
+        },
+        ['CombatHarvestManaPct'] = {
+            DisplayName = "Combat Harvest %",
+            Category = "Utility",
+            Index = 8,
+            ConfigType = "Advanced",
+            Tooltip = "What Mana % to hit before using a harvest spell or aa in Combat.",
+            Default = 60,
             Min = 1,
             Max = 99,
             FAQ = "How do I use Harvest Spells?",
