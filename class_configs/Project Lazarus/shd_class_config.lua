@@ -75,7 +75,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version            = "2.3 - Project Lazarus",
+    _version            = "2.4 - Project Lazarus",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -668,10 +668,26 @@ local _ClassConfig = {
             name = 'HateTools',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             load_cond = function() return Core.IsTanking() end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart') and
+                    ---@diagnostic disable-next-line: undefined-field
+                    ((mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or mq.TLO.Me.PctAggro() < 100)
+            end,
+        },
+        { --Actions that establish or maintain hatred
+            name = 'AEHateTools',
+            state = 1,
+            steps = 1,
+            load_cond = function()
+                return Core.IsTanking() and
+                    ((Config:GetSetting('AETauntSpell') > 1 and Core.GetResolvedActionMapItem('AETauntSpell')) or (Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))))
+            end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart') and self.ClassConfig.HelperFunctions.AETauntCheck(true)
             end,
         },
         { --Dynamic weapon swapping if UseBandolier is toggled
@@ -711,8 +727,8 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                --need to look at rotation and decide if it should fire during emergencies. leaning towards no
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                return combat_state == "Combat" and mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or Targeting.IsNamed(Targeting.GetAutoTarget()) or
+                    self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true)
             end,
         },
         { --Keep things from running
@@ -729,19 +745,10 @@ local _ClassConfig = {
         { --Offensive actions to temporarily boost damage dealt
             name = 'Burn',
             state = 1,
-            steps = 2,
-            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
-            cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
-            end,
-        },
-        { --Non-spell actions that can be used during/between casts
-            name = 'CombatWeave',
-            state = 1,
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
+                return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
             end,
         },
         { --DPS Spells, includes recourse/gift maintenance
@@ -892,7 +899,7 @@ local _ClassConfig = {
                     end
                 end,
                 cond = function(self, discSpell)
-                    return Casting.NoDiscActive() and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout')
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -900,30 +907,8 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.LeechCurse,
                 cond = function(self)
-                    return Casting.NoDiscActive() and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout')
-                end,
-            },
-            {
-                name = "Mantle",
-                type = "Disc",
-                tooltip = Tooltips.Mantle,
-                cond = function(self)
                     return Casting.NoDiscActive()
                 end,
-            },
-            {
-                name_func = function() return mq.TLO.Me.Inventory("Chest").Name() or "ChestClick(Missing)" end, --stops errors in rotation window when slot is empty
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
-                    return Casting.SelfBuffItemCheck(itemName)
-                end,
-            },
-            --if we made it this far let's reset our dicho/dire and hope for the best!
-            {
-                name = "Forceful Rejuvenation",
-                type = "AA",
-                tooltip = Tooltips.ForcefulRejuv,
             },
         },
         ['HateTools'] = {
@@ -943,24 +928,7 @@ local _ClassConfig = {
                     return Targeting.GetAutoTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
                 end,
             },
-            {
-                name = "Explosion of Hatred",
-                type = "AA",
-                tooltip = Tooltips.ExplosionOfHatred,
-                cond = function(self)
-                    if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
-                name = "Explosion of Spite",
-                type = "AA",
-                tooltip = Tooltips.ExplosionOfSpite,
-                cond = function(self)
-                    if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
+
             { --8min reuse, save for named or if we still can't get a mob back on us
                 name = "Ageless Enmity",
                 type = "AA",
@@ -979,33 +947,37 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "AETaunt",
-                type = "Spell",
-                tooltip = Tooltips.AETaunt,
-                cond = function(self)
-                    if Config:GetSetting('AETauntSpell') == 1 then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
                 name = "Terror",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 cond = function(self)
-                    if Config:GetSetting('DoTerror') == 1 then return false end
-                    ---@diagnostic disable-next-line: undefined-field
-                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                    return Config:GetSetting('DoTerror')
                 end,
             },
             {
                 name = "Terror2",
                 type = "Spell",
                 tooltip = Tooltips.Terror,
-                cond = function(self, spell)
-                    if Config:GetSetting('DoTerror') == 1 then return false end
-                    ---@diagnostic disable-next-line: undefined-field
-                    return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
+                cond = function(self)
+                    return Config:GetSetting('DoTerror')
                 end,
+            },
+        },
+        ['AEHateTools'] = {
+            {
+                name = "Explosion of Hatred",
+                type = "AA",
+                tooltip = Tooltips.ExplosionOfHatred,
+            },
+            {
+                name = "Explosion of Spite",
+                type = "AA",
+                tooltip = Tooltips.ExplosionOfSpite,
+            },
+            {
+                name = "AETaunt",
+                type = "Spell",
+                tooltip = Tooltips.AETaunt,
             },
         },
         ['Burn'] = {
@@ -1021,18 +993,25 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Fundament: Third Spire of the Reavers",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Core.IsTanking()
+                end,
+            },
+            {
+                name = "UnholyAura",
+                type = "Disc",
+                tooltip = Tooltips.UnholyAura,
+                cond = function(self)
+                    return not Core.IsTanking() and Casting.NoDiscActive()
+                end,
+            },
+            {
                 name = "Harm Touch",
                 type = "AA",
                 tooltip = Tooltips.HarmTouch,
             },
-            -- { --kept commented because it is in the laz list (but inactive)
-            --     name = "Thought Leech",
-            --     type = "AA",
-            --     tooltip = Tooltips.ThoughtLeech,
-            --     cond = function(self)
-            --         return Config:GetSetting('DoThoughtLeech') ~= 1
-            --     end,
-            -- },
             {
                 name = "Leech Touch",
                 type = "AA",
@@ -1047,20 +1026,21 @@ local _ClassConfig = {
                 tooltip = Tooltips.ChatteringBones,
             },
             {
-                name = "UnholyAura",
-                type = "Disc",
-                tooltip = Tooltips.UnholyAura,
-                cond = function(self)
-                    return not Core.IsTanking() and Casting.NoDiscActive()
-                end,
-            },
-            {
                 name = "Scourge Skin",
                 type = "AA",
                 --tooltip = Tooltips.ScourgeSkin,
                 cond = function(self, aaName)
                     if not Core.IsTanking() then return false end
                     return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Terror",
+                type = "Spell",
+                tooltip = Tooltips.Terror,
+                cond = function(self, spell, target)
+                    if not Core.IsTanking() or not Config:GetSetting('DoTerror') then return false end
+                    return Targeting.IsNamed(target) and (Casting.CanUseAA("Cascading Theft of Defense") and not Casting.IHaveBuff("Cascading Theft of Defense"))
                 end,
             },
         },
@@ -1085,11 +1065,29 @@ local _ClassConfig = {
         },
         ['Defenses'] = {
             {
+                name = "Mantle",
+                type = "Disc",
+                tooltip = Tooltips.Mantle,
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return Casting.NoDiscActive()
+                end,
+            },
+            {
                 name = "Epic",
                 type = "Item",
                 tooltip = Tooltips.Epic,
                 cond = function(self, itemName, target)
                     return self.ClassConfig.HelperFunctions.LeechCheck(self) or Targeting.IsNamed(target)
+                end,
+            },
+            {
+                name = "UnholyAura",
+                type = "Disc",
+                tooltip = Tooltips.UnholyAura,
+                cond = function(self, discSpell, target)
+                    if not Core.IsTanking() then return false end
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -1101,39 +1099,11 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Mantle",
-                type = "Disc",
-                tooltip = Tooltips.Mantle,
-                cond = function(self, discSpell, target)
-                    if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
-                end,
-            },
-            {
                 name = "Coating",
                 type = "Item",
                 cond = function(self, itemName, target)
                     if not Config:GetSetting('DoCoating') then return false end
                     return Casting.SelfBuffItemCheck(itemName) and self.ClassConfig.HelperFunctions.LeechCheck(self)
-                end,
-            },
-            {
-                name = "Fundament: Third Spire of the Reavers",
-                type = "AA",
-                tooltip = Tooltips.SpireoftheReavers,
-                cond = function(self, aaName, target)
-                    if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
-                end,
-
-            },
-            {
-                name = "UnholyAura",
-                type = "Disc",
-                tooltip = Tooltips.UnholyAura,
-                cond = function(self, discSpell, target)
-                    if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
                 end,
             },
             {
@@ -1163,7 +1133,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell)
                     local myHP = mq.TLO.Me.PctHPs()
-                    return myHP <= Config:GetSetting('EmergencyStart') or (Casting.HaveManaToNuke() and myHP <= Config:GetSetting('StartLifeTap'))
+                    return Casting.HaveManaToNuke() and myHP <= Config:GetSetting('StartLifeTap') or myHP <= Config:GetSetting('DefenseStart')
                 end,
             },
             {
@@ -1181,45 +1151,8 @@ local _ClassConfig = {
                 tooltip = Tooltips.LifeTap,
                 cond = function(self, spell)
                     local myHP = mq.TLO.Me.PctHPs()
-                    return (myHP <= Config:GetSetting('EmergencyStart') or (Casting.HaveManaToNuke() and myHP <= Config:GetSetting('StartLifeTap')))
+                    return Casting.HaveManaToNuke() and myHP <= Config:GetSetting('StartLifeTap') or myHP <= Config:GetSetting('DefenseStart')
                 end,
-            },
-        },
-        ['CombatWeave'] = {
-            {
-                name = "Vicious Bite of Chaos",
-                type = "AA",
-                tooltip = Tooltips.ViciousBiteOfChaos,
-            },
-            {
-                name = "Unbridled Strike of Fear",
-                type = "AA",
-            },
-            -- { --on laz list but inactive
-            --     name = "Gift of the Quick Spear",
-            --     type = "AA",
-            -- },
-            -- { --on laz list but inactive
-            --     name = "Thought Leech",
-            --     type = "AA",
-            --     tooltip = Tooltips.ThoughtLeech,
-            --     cond = function(self, aaName, target)
-            --         if Config:GetSetting('DoThoughtLeech') == 2 then return false end
-            --         return mq.TLO.Me.PctMana() < 10
-            --     end,
-            -- },
-            {
-                name = "Bash",
-                type = "Ability",
-                -- tooltip = Tooltips.Bash,
-                cond = function(self)
-                    return (Core.ShieldEquipped() or Casting.CanUseAA("2 Hand Bash"))
-                end,
-            },
-            {
-                name = "Slam",
-                type = "Ability",
-                tooltip = Tooltips.Slam,
             },
         },
         ['Combat'] = {
@@ -1271,9 +1204,15 @@ local _ClassConfig = {
                 name = "BiteTap",
                 type = "Spell",
                 tooltip = Tooltips.BiteTap,
-                cond = function(self) --no mana check here because this returns half the mana cost to the entire group. can adjust later as needed.
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('StartLifeTap')
-                end,
+            },
+            {
+                name = "Vicious Bite of Chaos",
+                type = "AA",
+                tooltip = Tooltips.ViciousBiteOfChaos,
+            },
+            {
+                name = "Unbridled Strike of Fear",
+                type = "AA",
             },
             {
                 name = "PowerTapAC",
@@ -1292,6 +1231,19 @@ local _ClassConfig = {
                     if not Config:GetSetting('DoAtkTap') or not spell or not spell() then return false end
                     return not Casting.IHaveBuff(spell.Trigger())
                 end,
+            },
+            {
+                name = "Bash",
+                type = "Ability",
+                tooltip = Tooltips.Bash,
+                cond = function(self)
+                    return (Core.ShieldEquipped() or Casting.CanUseAA("2 Hand Bash"))
+                end,
+            },
+            {
+                name = "Slam",
+                type = "Ability",
+                tooltip = Tooltips.Slam,
             },
         },
         ['Weapon Management'] = {
@@ -1340,13 +1292,7 @@ local _ClassConfig = {
             gem = 3,
             spells = {
                 { name = "SnareDot", cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Encroaching Darkness") end, },
-                {
-                    name = "Terror",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror",   cond = function(self) return Config:GetSetting('DoTerror') end, },
                 {
                     name = "AETaunt",
                     cond = function(self)
@@ -1360,13 +1306,7 @@ local _ClassConfig = {
         {
             gem = 4,
             spells = {
-                {
-                    name = "Terror",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror",      cond = function(self) return Config:GetSetting('DoTerror') end, },
                 {
                     name = "AETaunt",
                     cond = function(self)
@@ -1375,16 +1315,10 @@ local _ClassConfig = {
                     end,
                 },
                 { name = "BiteTap", },
-                { name = "BondTap",   cond = function(self) return Config:GetSetting('DoBondTap') end, },
-                { name = "PoisonDot", cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
-                { name = "DireDot",   cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "BondTap",     cond = function(self) return Config:GetSetting('DoBondTap') end, },
+                { name = "PoisonDot",   cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
@@ -1396,13 +1330,7 @@ local _ClassConfig = {
         {
             gem = 5,
             spells = {
-                {
-                    name = "Terror",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror",      cond = function(self) return Config:GetSetting('DoTerror') end, },
                 {
                     name = "AETaunt",
                     cond = function(self)
@@ -1411,40 +1339,22 @@ local _ClassConfig = {
                     end,
                 },
                 { name = "BiteTap", },
-                { name = "BondTap",   cond = function(self) return Config:GetSetting('DoBondTap') end, },
-                { name = "PoisonDot", cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
-                { name = "DireDot",   cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "BondTap",     cond = function(self) return Config:GetSetting('DoBondTap') end, },
+                { name = "PoisonDot",   cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
-                {
-                    name = "Terror2",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
-                { name = "HateBuff", cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
             },
         },
         {
             gem = 6,
             spells = {
-                {
-                    name = "Terror",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror",      cond = function(self) return Config:GetSetting('DoTerror') end, },
                 {
                     name = "AETaunt",
                     cond = function(self)
@@ -1453,40 +1363,22 @@ local _ClassConfig = {
                     end,
                 },
                 { name = "BiteTap", },
-                { name = "BondTap",   cond = function(self) return Config:GetSetting('DoBondTap') end, },
-                { name = "PoisonDot", cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
-                { name = "DireDot",   cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "BondTap",     cond = function(self) return Config:GetSetting('DoBondTap') end, },
+                { name = "PoisonDot",   cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
-                {
-                    name = "Terror2",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
-                { name = "HateBuff", cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
             },
         },
         {
             gem = 7,
             spells = {
-                {
-                    name = "Terror",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror",      cond = function(self) return Config:GetSetting('DoTerror') end, },
                 {
                     name = "AETaunt",
                     cond = function(self)
@@ -1495,27 +1387,15 @@ local _ClassConfig = {
                     end,
                 },
                 { name = "BiteTap", },
-                { name = "BondTap",   cond = function(self) return Config:GetSetting('DoBondTap') end, },
-                { name = "PoisonDot", cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
-                { name = "DireDot",   cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "BondTap",     cond = function(self) return Config:GetSetting('DoBondTap') end, },
+                { name = "PoisonDot",   cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
-                {
-                    name = "Terror2",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
         },
         {
@@ -1530,29 +1410,16 @@ local _ClassConfig = {
                     end,
                 },
                 { name = "BiteTap", },
-                { name = "BondTap",   cond = function(self) return Config:GetSetting('DoBondTap') end, },
-                { name = "PoisonDot", cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
-                { name = "DireDot",   cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "BondTap",     cond = function(self) return Config:GetSetting('DoBondTap') end, },
+                { name = "PoisonDot",   cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
                 { name = "LifeTap2", },
-                {
-                    name = "Terror2",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
-
+                { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
         },
         { -- Level 55
@@ -1560,111 +1427,63 @@ local _ClassConfig = {
             cond = function(self) return mq.TLO.Me.NumGems() >= 10 end,
             spells = {
                 { name = "BiteTap", },
-                { name = "BondTap",   cond = function(self) return Config:GetSetting('DoBondTap') end, },
-                { name = "PoisonDot", cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
-                { name = "DireDot",   cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "BondTap",     cond = function(self) return Config:GetSetting('DoBondTap') end, },
+                { name = "PoisonDot",   cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
                 { name = "LifeTap2", },
-                {
-                    name = "Terror2",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
         },
         { -- Level 75
             gem = 10,
             cond = function(self) return mq.TLO.Me.NumGems() >= 10 end,
             spells = {
-                { name = "BondTap",   cond = function(self) return Config:GetSetting('DoBondTap') end, },
-                { name = "PoisonDot", cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
-                { name = "DireDot",   cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "BondTap",     cond = function(self) return Config:GetSetting('DoBondTap') end, },
+                { name = "PoisonDot",   cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
                 { name = "LifeTap2", },
-                {
-                    name = "Terror2",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
         },
         { -- Level 80
             gem = 11,
             cond = function(self) return mq.TLO.Me.NumGems() >= 12 end,
             spells = {
-                { name = "TempHP",    cond = function(self) return Config:GetSetting('DoTempHP') end, }, --level 84, this spell starts in a long recast so I prefer to keep it on the bar.
-                { name = "PoisonDot", cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
-                { name = "DireDot",   cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "TempHP",      cond = function(self) return Config:GetSetting('DoTempHP') end, }, --level 84, this spell starts in a long recast so I prefer to keep it on the bar.
+                { name = "PoisonDot",   cond = function(self) return Config:GetSetting('DoPoisonDot') end, },
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
                 { name = "LifeTap2", },
-                {
-                    name = "Terror2",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
         },
         { -- Level 80
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "Skin",    cond = function(self) return Core.IsTanking() end, }, -- level 70, while not as bad as the TempHP line, also starts in a recast. Placed higher before level 106.
-                { name = "DireDot", cond = function(self) return Config:GetSetting('DoDireDot') end, },
-                {
-                    name = "PowerTapAC",
-                    cond = function(self)
-                        local level = mq.TLO.Me.Level()
-                        return Config:GetSetting('DoACTap') and (level <= 75 or level >= 100)
-                    end,
-                },
+                { name = "Skin",        cond = function(self) return Core.IsTanking() end, }, -- level 70, while not as bad as the TempHP line, also starts in a recast. Placed higher before level 106.
+                { name = "DireDot",     cond = function(self) return Config:GetSetting('DoDireDot') end, },
+                { name = "PowerTapAC",  cond = function(self) return Config:GetSetting('DoACTap') end, },
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "HealBurn",    cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
                 { name = "LifeTap2", },
-                {
-                    name = "Terror2",
-                    cond = function(self)
-                        local setting = Config:GetSetting('DoTerror')
-                        return setting == 3 or (setting == 2 and mq.TLO.Me.Level() < 72)
-                    end,
-                },
+                { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
         },
     },
@@ -1732,7 +1551,7 @@ local _ClassConfig = {
     },
     ['DefaultConfig']   = {
         --Mode
-        ['Mode']             = {
+        ['Mode']            = {
             DisplayName = "Mode",
             Category = "Mode",
             Tooltip = "Select the active Combat Mode for this PC.",
@@ -1746,7 +1565,7 @@ local _ClassConfig = {
         },
 
         --Buffs and Debuffs
-        ['DoSnare']          = {
+        ['DoSnare']         = {
             DisplayName = "Use Snares",
             Category = "Buffs/Debuffs",
             Index = 1,
@@ -1756,7 +1575,7 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not snaring?",
             Answer = "Make sure Use Snares is enabled in your class settings.",
         },
-        ['SnareCount']       = {
+        ['SnareCount']      = {
             DisplayName = "Snare Max Mob Count",
             Category = "Buffs/Debuffs",
             Index = 2,
@@ -1768,7 +1587,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [DoSnare] enabled in your class settings.\n" ..
                 "Double check the Snare Max Mob Count setting, it will prevent snare from being used if there are more than [x] mobs on aggro.",
         },
-        ['ProcChoice']       = {
+        ['ProcChoice']      = {
             DisplayName = "HP/Mana Proc:",
             Category = "Buffs/Debuffs",
             Index = 4,
@@ -1782,7 +1601,7 @@ local _ClassConfig = {
             Answer = "During certain level ranges, it may be helpful to use the Mana Proc (Mental) line over the HP proc (Terror) line.\n" ..
                 "This can be adjusted on the Buffs/Debuffs tab.",
         },
-        ['DoVetAA']          = {
+        ['DoVetAA']         = {
             DisplayName = "Use Vet AA",
             Category = "Buffs/Debuffs",
             Index = 5,
@@ -1793,7 +1612,7 @@ local _ClassConfig = {
         },
 
         --Taps
-        ['StartLifeTap']     = {
+        ['StartLifeTap']    = {
             DisplayName = "HP % for LifeTaps",
             Category = "Taps",
             Index = 1,
@@ -1805,7 +1624,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [DoLifeTap] enabled in your class settings.\n" ..
                 "Double check [StartLifeTap] seetting, this setting will prevent Life Taps from being used if your HP is above [x]%",
         },
-        ['DoACTap']          = {
+        ['DoACTap']         = {
             DisplayName = "Use AC Tap",
             Category = "Taps",
             Index = 2,
@@ -1816,7 +1635,7 @@ local _ClassConfig = {
             FAQ = "Why am I not using my AC Tap?",
             Answer = "AC Taps have a large period of receiving no updates (between 71 and 99). We will avoid using them after Level 75 until they are updated again.",
         },
-        ['DoAtkTap']         = {
+        ['DoAtkTap']        = {
             DisplayName = "Use Attack Tap",
             Category = "Taps",
             Index = 3,
@@ -1827,7 +1646,7 @@ local _ClassConfig = {
             FAQ = "Why am I not using my Attack Tap?",
             Answer = "Attack Taps don't receive an update after level 70; by default we will not use them after level 75.",
         },
-        ['DoLeechTouch']     = {
+        ['DoLeechTouch']    = {
             DisplayName = "Leech Touch Use:",
             Category = "Taps",
             Index = 4,
@@ -1857,7 +1676,7 @@ local _ClassConfig = {
         -- },
 
         --DoT Spells
-        ['DoBondTap']        = {
+        ['DoBondTap']       = {
             DisplayName = "Use Bond Dot",
             Category = "DoT Spells",
             Index = 1,
@@ -1867,7 +1686,7 @@ local _ClassConfig = {
             FAQ = "Why do I spend so much mana using these DoTs?",
             Answer = "Dots have additional settings in the RGMercs Main config, such as the min mana% to use them.",
         },
-        ['DoPoisonDot']      = {
+        ['DoPoisonDot']     = {
             DisplayName = "Use Poison Dot",
             Category = "DoT Spells",
             Index = 2,
@@ -1877,7 +1696,7 @@ local _ClassConfig = {
             FAQ = "Why do I use a DoT just before a mob dies?",
             Answer = "Dots have additional settings in the RGMercs Main config, such as the HP% to stop using them (for both trash and named).",
         },
-        ['DoDireDot']        = {
+        ['DoDireDot']       = {
             DisplayName = "Use Dire Dot",
             Category = "DoT Spells",
             Index = 3,
@@ -1890,7 +1709,7 @@ local _ClassConfig = {
 
         --AE Damage
         -- AE Damage
-        ['DoAEDamage']       = {
+        ['DoAEDamage']      = {
             DisplayName = "Do AE Damage",
             Category = "AE Damage",
             Index = 1,
@@ -1900,7 +1719,7 @@ local _ClassConfig = {
             FAQ = "Why am I using AE damage when there are mezzed mobs around?",
             Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
         },
-        ['DoAESpearNuke']    = {
+        ['DoAESpearNuke']   = {
             DisplayName = "Use AE Spear",
             Category = "AE Damage",
             Index = 2,
@@ -1912,7 +1731,7 @@ local _ClassConfig = {
             Answer =
             "Recently, the three best Spears on Laz were converted to AE spells. Enable Use AE Spear for these spells to be memorized.\nAE Damage must also be enabled for them to be used.",
         },
-        ['DoAELifeTap']      = {
+        ['DoAELifeTap']     = {
             DisplayName = "Use AE Hate/LifeTap",
             Category = "AE Damage",
             Index = 3,
@@ -1922,7 +1741,7 @@ local _ClassConfig = {
             FAQ = "Why is my Shadow Knight not using the AE Tap (Insidious) Line?",
             Answer = "The Insidious AE Hate Life Tap is not enabled by default, you may need to select it.",
         },
-        ['AETargetCnt']      = {
+        ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
             Category = "AE Damage",
             Index = 4,
@@ -1934,7 +1753,7 @@ local _ClassConfig = {
             Answer =
             "You can adjust the AE Target Count to control when you will use actions with AE damage attached.",
         },
-        ['MaxAETargetCnt']   = {
+        ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
             Category = "AE Damage",
             Index = 5,
@@ -1947,7 +1766,7 @@ local _ClassConfig = {
             Answer =
             "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
         },
-        ['SafeAEDamage']     = {
+        ['SafeAEDamage']    = {
             DisplayName = "AE Proximity Check",
             Category = "AE Damage",
             Index = 6,
@@ -1960,7 +1779,7 @@ local _ClassConfig = {
         },
 
         --Hate Tools
-        ['DoHateBuff']       = {
+        ['DoHateBuff']      = {
             DisplayName = "Use Hate Buff",
             Category = "Hate Tools",
             Index = 1,
@@ -1972,21 +1791,17 @@ local _ClassConfig = {
             Answer = "If you have the option selected in Buffs/Debuffs, you may not have enough spell gems to keep the spell on your bar with other options.\n" ..
                 "Do to the incredibly long recast time (around 9 minutes), we will not memorize these to use them on the fly.",
         },
-        ['DoTerror']         = {
-            DisplayName = "Terror Taunts:",
+        ['DoTerror']        = {
+            DisplayName = "Use Terror Taunts",
             Category = "Hate Tools",
-            Index = 2,
-            Tooltip = "Choose the level range (if any) to memorize Terror Spells.",
-            RequiresLoadoutChange = true,
-            Type = "Combo",
-            ComboOptions = { 'Never', 'Until "For Power" spells are available', 'Always', },
-            Default = 3,
-            Min = 1,
-            Max = 3,
+            Index = 3,
+            Tooltip = "Use Terror line taunts (the number memorized is based on your other selected options).",
+            Default = true,
+            ConfigType = "Advanced",
             FAQ = "Why is my Shadow Knight Not using Terror Taunts?",
-            Answer = "By default, terrors won't be used once the \"For Power\" line is available. This can be adjusted on the Hate Tool tab.",
+            Answer = "You can elect to use Terrors on the Hate Tool tab. Bear in mind we won't use them until Secondary Aggro is above 60%.",
         },
-        ['AETauntAA']        = {
+        ['AETauntAA']       = {
             DisplayName = "Use AE Taunt AA",
             Category = "Hate Tools",
             Index = 3,
@@ -1996,7 +1811,7 @@ local _ClassConfig = {
             FAQ = "Why do we treat the Explosions the same? One is targeted, one is PBAE",
             Answer = "There are currently no scripted conditions where Hatred would be used at long range, thus, for ease of use, we can treat them similarly.",
         },
-        ['AETauntSpell']     = {
+        ['AETauntSpell']    = {
             DisplayName = "AE Taunt Spell Choice:",
             Category = "Hate Tools",
             Index = 4,
@@ -2013,7 +1828,7 @@ local _ClassConfig = {
                 "You will also want to adjust your [AETauntAA] options (Never, Until Explosions (AA Taunts) are available, Always)\n" ..
                 "And set [AETauntCnt] settings to match your current needs.",
         },
-        ['AETauntCnt']       = {
+        ['AETauntCnt']      = {
             DisplayName = "AE Taunt Count",
             Category = "Hate Tools",
             Index = 6,
@@ -2025,7 +1840,7 @@ local _ClassConfig = {
             Answer =
             "AE taunts are configured to only be used if a target has less than 100% hate on you, at whatever count you configure, so abilities with similar conditions may be used instead.",
         },
-        ['SafeAETaunt']      = {
+        ['SafeAETaunt']     = {
             DisplayName = "AE Taunt Safety Check",
             Category = "Hate Tools",
             Index = 7,
@@ -2037,35 +1852,36 @@ local _ClassConfig = {
         },
 
         --Defenses
-        ['DiscCount']        = {
-            DisplayName = "Def. Disc. Count",
+        ['DiscCount']       = {
+            DisplayName = "Defense Count",
             Category = "Defenses",
             Index = 1,
-            Tooltip = "Number of mobs around you before you use preemptively use Defensive Discs.",
+            Tooltip =
+            "Number of mobs around you before you use preemptively use defensive actions like discs, epics, etc.\n.Note that fighting a named will also trigger these actions.",
             Default = 4,
             Min = 1,
             Max = 10,
             ConfigType = "Advanced",
             FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
-            Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
+            Answer = "WIP LAZ.",
         },
-        ['EmergencyStart']   = {
-            DisplayName = "Emergency Start",
+        ['DefenseStart']    = {
+            DisplayName = "Defense HP",
             Category = "Defenses",
             Index = 2,
-            Tooltip = "The HP % where DPS/Burn rotations are cut in favor of emergency abilities.",
-            Default = 55,
+            Tooltip = "The HP % where we will use defensive actions like discs, epics, etc.\nNote that fighting a named will also trigger these actions.",
+            Default = 60,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
             FAQ = "My SHD health spikes up and down a lot and abilities aren't being triggered, what gives?",
             Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
-        ['EmergencyLockout'] = {
-            DisplayName = "Emergency Only",
+        ['EmergencyStart']  = {
+            DisplayName = "Emergency Start",
             Category = "Defenses",
             Index = 3,
-            Tooltip = "The HP % before all but essential rotations are cut in favor of emergency abilities.",
+            Tooltip = "The HP % before all but essential rotations are cut in favor of emergency or defensive abilities.",
             Default = 40,
             Min = 1,
             Max = 100,
@@ -2076,16 +1892,7 @@ local _ClassConfig = {
         },
 
         --Equipment
-        ['DoChestClick']     = {
-            DisplayName = "Do Chest Click",
-            Category = "Equipment",
-            Index = 1,
-            Tooltip = "Click your equipped chest.",
-            Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
-            FAQ = "What the heck is a chest click?",
-            Answer = "Most classes have useful abilities on their equipped chest after level 75 or so. The SHD's is generally a healing tool (a lifetapping pet).",
-        },
-        ['DoCoating']        = {
+        ['DoCoating']       = {
             DisplayName = "Use Coating",
             Category = "Equipment",
             Index = 2,
@@ -2094,7 +1901,7 @@ local _ClassConfig = {
             FAQ = "What is a Coating?",
             Answer = "Blood Drinker's Coating is a clickable lifesteal effect added in CotF. Spirit Drinker's Coating is an upgrade added in NoS.",
         },
-        ['UseBandolier']     = {
+        ['UseBandolier']    = {
             DisplayName = "Dynamic Weapon Swap",
             Category = "Equipment",
             Index = 3,
@@ -2105,7 +1912,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
-        ['EquipShield']      = {
+        ['EquipShield']     = {
             DisplayName = "Equip Shield",
             Category = "Equipment",
             Index = 4,
@@ -2118,7 +1925,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
-        ['Equip2Hand']       = {
+        ['Equip2Hand']      = {
             DisplayName = "Equip 2Hand",
             Category = "Equipment",
             Index = 5,
@@ -2131,7 +1938,7 @@ local _ClassConfig = {
             Answer = "Make sure you have [UseBandolier] enabled in your class settings.\n" ..
                 "You must also have Bandolier entries named \"Shield\" and \"2Hand\" to use this function.",
         },
-        ['NamedShieldLock']  = {
+        ['NamedShieldLock'] = {
             DisplayName = "Shield on Named",
             Category = "Equipment",
             Index = 6,
