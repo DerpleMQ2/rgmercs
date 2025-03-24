@@ -1042,21 +1042,20 @@ return {
                 end,
             },
             {
+                name = "Improved Familiar",
+                type = "AA",
+                active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
                 name = "FamiliarBuff",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    return spell.Level() > (mq.TLO.Me.AltAbility("Improved Familiar").Spell.Level() or 0) and Casting.SelfBuffCheck(spell)
-                end,
-            },
-            {
-                name = "Improved Familiar",
-                type = "AA",
-                active_cond = function(self, aaName) return Casting.IHaveBuff(mq.TLO.Me.AltAbility(aaName).Spell.ID()) end,
-                cond = function(self, aaName)
-                    local familiarBuff = Modules:ExecModule("Class", "GetResolvedActionMapItem", "FamiliarBuff")
-                    local familiarBuffLevel = familiarBuff and familiarBuff() and familiarBuff.Level() or 0
-                    return (mq.TLO.Me.AltAbility(aaName).Spell.Level() or 0) >= familiarBuffLevel and Casting.SelfBuffAACheck(aaName)
+                    if Casting.CanUseAA("Improved Familiar") then return false end
+                    return Casting.SelfBuffCheck(spell)
                 end,
             },
             {
@@ -1239,7 +1238,7 @@ return {
             RequiresLoadoutChange = true,
             Default = 1,
             Min = 1,
-            Max = 1,
+            Max = 2,
             FAQ = "What do the different Modes Do?",
             Answer = "Wizard only has a single mode, but the spells used will adjust based on your level range.",
         },
