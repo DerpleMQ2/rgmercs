@@ -1536,7 +1536,7 @@ function Casting.AutoMed()
         return
     end
 
-    if Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(90) then
+    if Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(Config:GetSetting("MedAggroPct")) then
         Logger.log_verbose("Sit check returning early due to aggro.")
         return
     end
@@ -1594,7 +1594,7 @@ function Casting.AutoMed()
 
     -- This could likely be refactored
     if me.Sitting() and not Casting.Memorizing then
-        if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or ((Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(70)))) then
+        if Targeting.GetXTHaterCount() > 0 and (Config:GetSetting('DoMed') ~= 3 or Config:GetSetting('DoMelee') or ((Config:GetSetting('MedAggroCheck') and Targeting.IHaveAggro(Config:GetSetting('MedAggroPct'))))) then
             Config.Globals.InMedState = false
             Logger.log_debug("Forcing stand - Combat or aggro threshold reached.")
             me.Stand()
