@@ -827,7 +827,7 @@ _ClassConfig      = {
         },
         { --Pet Buffs if we have one, timer because we don't need to constantly check this. Timer lowered for mage due to high volume of actions
             name = 'PetBuff',
-            timer = 30,
+            timer = 10,
             targetId = function(self) return mq.TLO.Me.Pet.ID() > 0 and { mq.TLO.Me.Pet.ID(), } or {} end,
             cond = function(self, combat_state)
                 return combat_state == "Downtime" and mq.TLO.Me.Pet.ID() > 0 and Casting.OkayToPetBuff()
@@ -1137,12 +1137,12 @@ _ClassConfig      = {
             end
         end,
         pet_management = function(self)
-            if not Config:GetSettings().DoPet or (Casting.CanUseAA("Companion's Suspension") and not Casting.AAReady("Companion's Suspension")) then
+            if not Config:GetSettings().DoPet or (Casting.CanUseAA("Suspended Minion") and not Casting.AAReady("Suspended Minion")) then
                 return false
             end
 
             -- Low Level Check - In 2 cases You're too lowlevel to Know Suspend companion and have no pet or You've Turned off Usepocket pet.
-            if mq.TLO.Me.Pet.ID() == 0 and (not Casting.CanUseAA("Companion's Suspension") or not Config:GetSetting('DoPocketPet')) then
+            if mq.TLO.Me.Pet.ID() == 0 and (not Casting.CanUseAA("Suspended Minion") or not Config:GetSetting('DoPocketPet')) then
                 if not self.ClassConfig.HelperFunctions.summon_pet(self) then
                     Logger.log_debug("\arPetManagement - Case 0 -> Summon Failed")
                     return false
@@ -1152,7 +1152,7 @@ _ClassConfig      = {
             -- Pocket Pet Stuff Begins. -  Added Check for DoPocketPet to be Positive Rather than Assuming
             if Config:GetSetting('DoPocketPet') then
                 if self.TempSettings.PocketPet and mq.TLO.Me.Pet.ID() == 0 and Targeting.GetXTHaterCount() > 0 then
-                    Casting.UseAA("Companion's Suspension", 0)
+                    Casting.UseAA("Suspended Minion", mq.TLO.Me.ID(), true)
                     self.TempSettings.PocketPet = false
                     return true
                 end
@@ -1165,8 +1165,7 @@ _ClassConfig      = {
                         return false
                     end
 
-                    if Casting.AARank("Companion's Suspension") > 2 then
-                        -- Need to buff
+                    if Casting.AARank("Suspended Minion") > 1 then --Need to buff
                         local resolvedPetHasteSpell = self.ResolvedActionMap["PetHaste"]
                         Casting.UseSpell(resolvedPetHasteSpell.RankName(), mq.TLO.Me.Pet.ID(), true)
                         local resolvedPetBuffSpell = self.ResolvedActionMap["PetIceFlame"]
@@ -1174,7 +1173,7 @@ _ClassConfig      = {
                         if mq.TLO.Me.Pet.ID() then
                             self.ClassConfig.HelperFunctions.handle_pet_toys(self)
                         end
-                        Casting.UseAA("Companion's Suspension", 0)
+                        Casting.UseAA("Suspended Minion", mq.TLO.Me.ID(), true)
                         self.TempSettings.PocketPet = true
                     end
 
@@ -1184,7 +1183,7 @@ _ClassConfig      = {
             -- Case 2 - No pocket pet and pet up
             if not self.TempSettings.PocketPet and (mq.TLO.Me.Pet.ID() or 0) > 0 and Targeting.GetXTHaterCount() == 0 then
                 Logger.log_debug("\ayPetManagement - Case 2 no Pocket Pet But Pet is up - pocketing")
-                Casting.UseAA("Companion's Suspension", 0)
+                Casting.UseAA("Suspended Minion", mq.TLO.Me.ID(), true)
                 if (mq.TLO.Me.Pet.ID() or 0) == 0 then
                     if not self.ClassConfig.HelperFunctions.summon_pet(self) then
                         Logger.log_debug("\arPetManagement - Case 2 -> Summon Failed")
@@ -1397,7 +1396,7 @@ _ClassConfig      = {
                 custom_func = function(self)
                     Logger.log_info("\atPocketPet: \arNo pet while in combat! \agPulling out pocket pet")
                     Targeting.SetTarget(mq.TLO.Me.ID())
-                    Casting.UseAA("Companion's Suspension", mq.TLO.Me.ID())
+                    Casting.UseAA("Suspended Minion", mq.TLO.Me.ID(), true)
                     self.TempSettings.PocketPet = false
 
                     return true
