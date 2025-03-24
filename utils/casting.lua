@@ -1363,9 +1363,13 @@ function Casting.UseItem(itemName, targetId)
         local maxWait = 1000
         while maxWait > 0 and not me.Casting() do
             Logger.log_verbose("Waiting for item to start casting...")
-            mq.delay(100)
+            mq.delay(50)
             mq.doevents()
-            maxWait = maxWait - 100
+            if not me.ItemReady(itemName) then
+                Logger.log_debug("No start cast noted, but item now reports on cooldown, moving on.")
+                break
+            end -- in case very fast casts serverside don't make it to the client; laz has some 100ms clickies that don't ever show casting
+            maxWait = maxWait - 50
         end
         mq.delay(item.CastTime(), function() return not me.Casting() end)
 
@@ -1381,7 +1385,7 @@ function Casting.UseItem(itemName, targetId)
     end
 
     if oldTargetId > 0 then
-        Logger.log_debug("UseItem():switching target back to old target after casting aa")
+        Logger.log_debug("UseItem():switching target back to old target after item use.")
         Targeting.SetTarget(oldTargetId, true)
     end
 
