@@ -12,8 +12,8 @@ local Core      = require("utils.core")
 local Logger    = require("utils.logger")
 
 return {
-    _version            = "Alpha 1.4 - Live (1-70 or 110-125)",
-    _author             = "Algar",
+    _version            = "Beta 1.5 - Live",
+    _author             = "Derple, Algar",
     ['Modes']           = {
         'DPS',
         'PBAE(LowLevel)',
@@ -64,6 +64,9 @@ return {
             "Claw of Qunard",
             "Claw of the Flameweaver",
             "Claw of the Flamewing",
+            "Villification of Havoc", --54s recast but same timer and purpose.
+            "Denunciation of Havoc",
+            "Malediction of Havoc",
         },
         ['MagicClaw'] = {
             "Claw of Itzal",
@@ -206,8 +209,7 @@ return {
             "Klixcxyk's Fire",
             "Inizen's Fire",
             "Sothgar's Flame",
-            "Ether Flame",
-            "Chaos Flame",
+            --Not used above this
             "Spark of Fire",
             "Draught of Ro",
             "Draught of Fire",
@@ -661,11 +663,21 @@ return {
                 return combat_state == "Combat" and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
-        {
-            name = 'DPS(HighLevel)',
+        { --Keep things from doing
+            name = 'Stun',
             state = 1,
             steps = 1,
-            load_cond = function() return Core.IsModeActive('DPS') and mq.TLO.Me.Level() > 100 end,
+            load_cond = function() return Config:GetSetting('DoStun') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat"
+            end,
+        },
+        {
+            name = 'DPS(100+)',
+            state = 1,
+            steps = 1,
+            load_cond = function() return mq.TLO.Me.Level() > 99 end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -673,10 +685,10 @@ return {
             end,
         },
         {
-            name = 'DPS(MidLevel)',
+            name = 'DPS(71-99)',
             state = 1,
             steps = 1,
-            load_cond = function() return Core.IsModeActive('DPS') and mq.TLO.Me.Level() < 101 and mq.TLO.Me.Level() > 70 end,
+            load_cond = function() return mq.TLO.Me.Level() < 100 and mq.TLO.Me.Level() > 70 end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
@@ -684,7 +696,7 @@ return {
             end,
         },
         {
-            name = 'DPS(FireLowLevel)',
+            name = 'FireDPS(1-70)',
             state = 1,
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 1 end,
@@ -696,7 +708,7 @@ return {
             end,
         },
         {
-            name = 'DPS(IceLowLevel)',
+            name = 'IceDPS(1-70)',
             state = 1,
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 2 end,
@@ -708,7 +720,7 @@ return {
             end,
         },
         {
-            name = 'DPS(MagicLowLevel)',
+            name = 'MagicDPS(1-70)',
             state = 1,
             steps = 1,
             load_cond = function() return mq.TLO.Me.Level() < 71 and Config:GetSetting('ElementChoice') == 3 end,
@@ -860,6 +872,15 @@ return {
                 end,
             },
         },
+        ['Stun'] = {
+            {
+                name = "StunSpell",
+                type = "Spell",
+                cond = function(self, spell)
+                    return Casting.HaveManaToDebuff() and Casting.DetSpellCheck(spell)
+                end,
+            },
+        },
         ['CombatBuff'] =
         {
             {
@@ -914,7 +935,7 @@ return {
                 type = "AA",
             },
         },
-        ['DPS(HighLevel)'] = {
+        ['DPS(100+)'] = {
             {
                 name = "VortexNuke",
                 type = "Spell",
@@ -972,9 +993,19 @@ return {
             {
                 name = "IceEtherealNuke",
                 type = "Spell",
+                cond = function(self)
+                    return mq.TLO.Me.Level() > 110 or Casting.IHaveBuff("Improved Twincast")
+                end,
             },
         },
-        ['DPS(MidLevel)'] = {
+        ['DPS(71-99)'] = {
+            {
+                name = "FireClaw",
+                type = "Spell",
+                cond = function(self)
+                    return not Casting.IHaveBuff("Improved Twincast")
+                end,
+            },
             {
                 name = "SnapNuke",
                 type = "Spell",
@@ -1004,17 +1035,12 @@ return {
             {
                 name = "ChaosNuke",
                 type = "Spell",
-            },
-        },
-        ['DPS(FireLowLevel)'] = {
-            {
-                name = "StunSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    if not Config:GetSetting('DoStun') then return false end
-                    return Casting.HaveManaToDebuff() and Casting.DetSpellCheck(spell)
+                cond = function(self)
+                    return not Core.GetResolvedActionMapItem("WildNuke2")
                 end,
             },
+        },
+        ['FireDPS(1-70)'] = {
             {
                 name = "FireRain",
                 type = "Spell",
@@ -1038,15 +1064,7 @@ return {
                 end,
             },
         },
-        ['DPS(IceLowLevel)'] = {
-            {
-                name = "StunSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    if not Config:GetSetting('DoStun') then return false end
-                    return Casting.HaveManaToDebuff() and Casting.DetSpellCheck(spell)
-                end,
-            },
+        ['IceDPS(1-70)'] = {
             {
                 name = "IceRain",
                 type = "Spell",
@@ -1070,15 +1088,7 @@ return {
                 end,
             },
         },
-        ['DPS(MagicLowLevel)'] = {
-            {
-                name = "StunSpell",
-                type = "Spell",
-                cond = function(self, spell)
-                    if not Config:GetSetting('DoStun') then return false end
-                    return Casting.HaveManaToDebuff() and Casting.DetSpellCheck(spell)
-                end,
-            },
+        ['MagicDPS(1-70)'] = {
             {
                 name = "BigMagicNuke",
                 type = "Spell",
@@ -1209,6 +1219,7 @@ return {
             spells = {
                 { name = "VortexNuke", cond = function() return mq.TLO.Me.Level() > 102 end, },
                 { name = "SnapNuke", },
+                --1-70
                 { name = "FireNuke",   cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
                 { name = "IceNuke",    cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
                 { name = "MagicNuke",  cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
@@ -1218,29 +1229,30 @@ return {
         {
             gem = 2,
             spells = {
-                { name = "FuseNuke", },
-                { name = "ChaosNuke", },
-                { name = "BigFireNuke",  cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
-                { name = "BigIceNuke",   cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
-                { name = "BigMagicNuke", cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
+                { name = "FireEtherealNuke", },
+                --1-70
+                { name = "BigFireNuke",      cond = function() return Config:GetSetting('ElementChoice') == 1 end, },
+                { name = "BigIceNuke",       cond = function() return Config:GetSetting('ElementChoice') == 2 end, },
+                { name = "BigMagicNuke",     cond = function() return Config:GetSetting('ElementChoice') == 3 end, },
             },
         },
         {
             gem = 3,
             spells = {
-                { name = "FireClaw", },
-                { name = "WildNuke", },
-                { name = "PBTimer4",  cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
-                { name = "StunSpell", cond = function() return Config:GetSetting('DoStun') end, },
+                { name = "IceEtherealNuke", },
+                -- 1-70
+                { name = "PBTimer4",        cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
+                { name = "StunSpell",       cond = function() return Config:GetSetting('DoStun') end, },
             },
         },
         {
             gem = 4,
             spells = {
-                { name = "FireEtherealNuke", },
-                { name = "FireJyll",         cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
-                { name = "FireRain",         cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 1 end, },
-                { name = "IceRain",          cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 2 end, },
+                { name = "FuseNuke", },
+                -- 1
+                { name = "FireJyll",  cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
+                { name = "FireRain",  cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 1 end, },
+                { name = "IceRain",   cond = function() return Config:GetSetting('DoRain') and Config:GetSetting('ElementChoice') == 2 end, },
                 { name = "EvacSpell", },
 
             },
@@ -1248,24 +1260,28 @@ return {
         {
             gem = 5,
             spells = {
-                { name = "IceEtherealNuke", },
-                { name = "IceJyll",         cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
+                { name = "FireClaw", },
+                -- 1-70
+                { name = "IceJyll",   cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
                 { name = "JoltSpell", },
             },
         },
         {
             gem = 6,
             spells = {
-                { name = "CloudburstNuke", },
-                { name = "MagicJyll",      cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
-                { name = "SnareSpell",     cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
+                { name = "WildNuke", },
+                -- 1-70
+                { name = "MagicJyll",  cond = function() return Core.IsModeActive('PBAE(LowLevel)') and mq.TLO.Me.Level() < 71 end, },
+                { name = "SnareSpell", cond = function() return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Atol's Shackles") end, },
             },
         },
         {
             gem = 7,
             spells = {
-                { name = "WildNuke", },
+                { name = "CloudburstNuke", cond = function() return mq.TLO.Me.Level() > 99 end, },
                 { name = "WildNuke2", },
+                { name = "ChaosNuke", },
+                -- 1-70
                 { name = "HarvestSpell", },
 
             },
@@ -1331,7 +1347,7 @@ return {
             RequiresLoadoutChange = true,
             Default = 1,
             Min = 1,
-            Max = 1,
+            Max = 2,
             FAQ = "What do the different Modes Do?",
             Answer = "Wizard only has a single mode, but the spells used will adjust based on your level range.",
         },
