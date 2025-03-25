@@ -58,12 +58,13 @@ Binds.Handlers    = {
         end,
     },
     ['forcetarget'] = {
-        usage = "/rgl forcetarget",
-        about = "Will force the current target to be your autotarget no matter what until it is no longer valid.",
-        handler = function()
-            if mq.TLO.Target.ID() > 0 and (Targeting.TargetIsType("npc") or Targeting.TargetIsType("npcpet")) then
-                Config.Globals.ForceTargetID = mq.TLO.Target.ID()
-                Logger.log_info("\awForced Target: %s", mq.TLO.Target.CleanName() or "None")
+        usage = "/rgl forcetarget <id?>",
+        about = "Will force the current target or <id> to be your autotarget no matter what until it is no longer valid.",
+        handler = function(targetId)
+            local forcedTarget = targetId and mq.TLO.Spawn(targetId) or mq.TLO.Target
+            if forcedTarget and forcedTarget() and forcedTarget.ID() > 0 and (Targeting.TargetIsType("npc", forcedTarget) or Targeting.TargetIsType("npcpet", forcedTarget)) then
+                Config.Globals.ForceTargetID = forcedTarget.ID()
+                Logger.log_info("\awForced Target: %s", forcedTarget.CleanName() or "None")
             end
         end,
     },
