@@ -407,6 +407,18 @@ local function RenderMainWindow(imgui_style)
                         (mq.TLO.Stick.Active() and (mq.TLO.Stick.StickTargetName() or "None") or "None"))
                     if ImGui.CollapsingHeader("Outside Assist List") then
                         ImGui.Indent()
+                        if Config:GetSetting('AssistOutside') then
+                            ImGui.PushStyleColor(ImGuiCol.Button, 0.02, 0.5, 0.0, .75)
+                        else
+                            ImGui.PushStyleColor(ImGuiCol.Button, 0.5, 0.02, 0.02, .75)
+                        end
+                        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2(20, 3))
+
+                        if ImGui.SmallButton(Config:GetSetting('AssistOutside') and "Outside Assist: Enabled" or "Outside Assist: Disabled") then
+                            Config:SetSetting('AssistOutside', not Config:GetSetting('AssistOutside'))
+                        end
+                        ImGui.PopStyleVar()
+                        ImGui.PopStyleColor()
                         Ui.RenderOAList()
                         ImGui.Unindent()
                     end
