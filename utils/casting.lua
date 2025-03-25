@@ -1620,6 +1620,22 @@ function Casting.AutoMed()
     end
 end
 
+--- Retrieves the first available purchased AA in a list.
+--- @param aaList table The list of AA to check.
+--- @return string The name of the selected AA (or "None" if no ability was found).
+function Casting.GetBestAA(aaList)
+    if not aaList or type(aaList) ~= "table" then return "None" end
+
+    local ret = "None"
+    for _, abil in ipairs(aaList) do
+        if Casting.CanUseAA(abil) then
+            ret = abil
+            break
+        end
+    end
+    return ret
+end
+
 --- Function to execute use of modrods.
 function Casting.ClickModRod()
     local me = mq.TLO.Me
