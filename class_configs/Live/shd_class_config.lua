@@ -235,6 +235,7 @@ local _ClassConfig = {
             "Expatiate Death",
             "Amplify Death",
             "Rune of Decay",
+            "Augmentation of Death",
             "Augment Death",
             "Strengthen Death",
         },
@@ -1081,7 +1082,7 @@ local _ClassConfig = {
                 name = "PetHaste",
                 type = "Spell",
                 tooltip = Tooltips.PetHaste,
-                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName) ~= nil end,
+                active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
                 cond = function(self, spell)
                     return Casting.PetBuffCheck(spell)
                 end,
