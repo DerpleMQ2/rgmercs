@@ -1041,17 +1041,9 @@ return {
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
-            { --Familiar AA, will use them in order of preference (Kera > Ro's > Imp.)
+            { --Familiar AA, will use the first(best) one found
                 name_func = function(self)
-                    local ret = "None"
-                    local famAA = { "Kerafyrm's Prismatic Familiar", "Ro's Flaming Familiar", "Improved Familiar", }
-                    for _, abil in ipairs(famAA) do
-                        if Casting.CanUseAA(abil) then
-                            ret = abil
-                            break
-                        end
-                    end
-                    return ret
+                    return Casting.GetBestAA({ "Kerafyrm's Prismatic Familiar", "Ro's Flaming Familiar", "Improved Familiar", })
                 end,
                 type = "AA",
                 active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,

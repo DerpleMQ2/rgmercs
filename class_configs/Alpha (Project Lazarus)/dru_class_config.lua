@@ -483,17 +483,6 @@ local _ClassConfig = {
         ['TwincastSpell'] = {
             "Twincast",
         },
-        ['TwinHealNuke'] = {
-            -- Druid Twincast
-            "Sundew Blessing",
-            "Sunrise Blessing",
-            "Sunbreeze Blessing",
-            "Sunbeam Blessing",
-            "Sunfire Blessing",
-            "Sunflash Blessing",
-            "Sunrake Blessing",
-            "Sunwarmth Blessing",
-        },
         ['IceNuke'] = {
             --Ice Nuke
             "Ice",
@@ -856,16 +845,6 @@ local _ClassConfig = {
                     Casting.BurnCheck() and Core.OkayToNotHeal()
             end,
         },
-        -- {
-        --     name = 'TwinHeal',
-        --     state = 1,
-        --     steps = 1,
-        --     load_cond = function(self) return Config:GetSetting('DoTwinHeal') and self:GetResolvedActionMapItem('TwinHealNuke') end,
-        --     targetId = function(self) return { Core.GetMainAssistId(), } end,
-        --     cond = function(self, combat_state)
-        --         return combat_state == "Combat" and Core.OkayToNotHeal()
-        --     end,
-        -- },
         {
             name = 'HealDPS(1-70)',
             state = 1,
@@ -968,29 +947,15 @@ local _ClassConfig = {
                 end,
             },
         },
-        -- ['TwinHeal'] = {
-        --     {
-        --         name = "TwinHealNuke",
-        --         type = "Spell",
-        --         retries = 0,
-        --         cond = function(self) return not Casting.IHaveBuff("Healing Twincast") end,
-        --     },
-        -- },
         ['RoDebuff'] = {
-            {
-                name = "Blessing of Ro",
+            { -- Ro Debuff AA, will use the first(best) available
+                name_func = function(self)
+                    return Casting.GetBestAA({ "Blessing of Ro", "Hand of Ro", })
+                end,
                 type = "AA",
                 cond = function(self, aaName, target)
                     local aaSpell = Casting.GetAASpell(aaName)
                     return Casting.DetAACheck(aaName) and Casting.ReagentCheck(aaSpell and aaSpell.Trigger(1) or aaName)
-                end,
-            },
-            {
-                name = "Hand of Ro",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    if Casting.CanUseAA("Blessing of Ro") then return false end
-                    return Casting.DetAACheck(aaName)
                 end,
             },
             {
@@ -1258,7 +1223,6 @@ local _ClassConfig = {
             gem = 8,
             spells = {
 
-                { name = "TwinHealNuke",        cond = function(self) return Config:GetSetting("DoTwinHeal") end, },
                 { name = "GroupCure",           cond = function(self) return true end, },
                 { name = "TempHPBuff",          cond = function(self) return Config:GetSetting('DoTempHP') end, },
                 { name = "ReptileCombatInnate", cond = function(self) return true end, },
@@ -1419,15 +1383,6 @@ local _ClassConfig = {
             FAQ = "Why do I see orphaned settings?",
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
-        },
-        ['DoTwinHeal']   = {
-            DisplayName = "Cast Twin Heal Nuke",
-            Category = "Spells and Abilities",
-            Tooltip = "Use Twin Heal Nuke Spells",
-            RequiresLoadoutChange = true,
-            Default = true,
-            FAQ = "I have Twincastig AA, can I use it?",
-            Answer = "Yes, you can enable [DoTwinHeal] to use Twin Heal Nuke spells.",
         },
         ['DoHPBuff']     = {
             DisplayName = "Group HP Buff",

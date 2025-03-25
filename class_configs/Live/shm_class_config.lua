@@ -1455,21 +1455,14 @@ local _ClassConfig = {
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
-            {
-                name = "Group Shrink",
+            { --Shrink AA, will use first(best) available
+                name_func = function(self)
+                    return Casting.GetBestAA({ "Group Shrink", "Shrink", })
+                end,
                 type = "AA",
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoGroupShrink') then return false end
-                    return target.Height() > 2.2
-                end,
-            },
-            {
-                name = "Shrink",
-                type = "AA",
-                active_cond = function(self) return mq.TLO.Me.Height() < 2 end,
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting('DoGroupShrink') or Casting.CanUseAA("Group Shrink") then return false end
                     return target.Height() > 2.2
                 end,
             },

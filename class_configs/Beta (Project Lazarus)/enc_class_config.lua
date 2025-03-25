@@ -923,18 +923,12 @@ local _ClassConfig = {
                 active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
                 cond = function(self, aaName) return Casting.SelfBuffAACheck(aaName) end,
             },
-            {
-                name = "Mana Draw",
+            { -- Mana Restore AA, will use the first(best) available
+                name_func = function(self)
+                    return Casting.GetBestAA({ "Mana Draw", "Gather Mana", })
+                end,
                 type = "AA",
                 cond = function(self, aaName) return mq.TLO.Me.PctMana() < 30 end,
-            },
-            {
-                name = "Gather Mana",
-                type = "AA",
-                cond = function(self, aaName)
-                    if Casting.CanUseAA("Mana Draw") then return false end
-                    return mq.TLO.Me.PctMana() < 30
-                end,
             },
             {
                 name = "Auroria Mastery",
