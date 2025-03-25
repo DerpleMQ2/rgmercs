@@ -1041,8 +1041,18 @@ return {
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
-            {
-                name = "Improved Familiar",
+            { --Familiar AA, will use them in order of preference (Kera > Ro's > Imp.)
+                name_func = function(self)
+                    local ret = "None"
+                    local famAA = { "Kerafyrm's Prismatic Familiar", "Ro's Flaming Familiar", "Improved Familiar", }
+                    for _, abil in ipairs(famAA) do
+                        if Casting.CanUseAA(abil) then
+                            ret = abil
+                            break
+                        end
+                    end
+                    return ret
+                end,
                 type = "AA",
                 active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
                 cond = function(self, aaName)
