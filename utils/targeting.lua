@@ -510,4 +510,14 @@ function Targeting.CheckForAutoTargetID()
     return mq.TLO.Target.ID() == Config.Globals.AutoTargetID and { Config.Globals.AutoTargetID, } or {}
 end
 
+function Targeting.InSpellRange(spell, target)
+    if not spell or not spell() then return false end
+    if not target then target = mq.TLO.Target() end
+    local range = spell.MyRange() > 0 and spell.MyRange() or (spell.AERange() > 0 and spell.AERange() or 250)
+    local distance = Targeting.GetTargetDistance(target)
+    Logger.log_verbose("InSpellRange: Spell: %s (Range: %d), Target: %s (Range: %d).", spell, range, target, distance)
+
+    return distance <= range
+end
+
 return Targeting
