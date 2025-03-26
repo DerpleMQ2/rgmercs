@@ -1517,16 +1517,16 @@ _ClassConfig      = {
                 name = "PBAE1",
                 type = "Spell",
                 allowDead = true,
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
             {
                 name = "PBAE2",
                 type = "Spell",
                 allowDead = true,
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
         },

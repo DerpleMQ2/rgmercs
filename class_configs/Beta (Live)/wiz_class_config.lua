@@ -1109,32 +1109,32 @@ return {
                 name = "PBTimer4",
                 type = "Spell",
                 allowDead = true,
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
             {
                 name = "FireJyll",
                 type = "Spell",
                 allowDead = true,
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
             {
                 name = "IceJyll",
                 type = "Spell",
                 allowDead = true,
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
             {
                 name = "MagicJyll",
                 type = "Spell",
                 allowDead = true,
-                cond = function(self)
-                    return Casting.HaveManaToNuke()
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
         },
