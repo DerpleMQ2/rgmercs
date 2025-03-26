@@ -27,6 +27,11 @@ return {
             "Staff of Phenomenal Power",
             "Staff of Prismatic Power",
         },
+
+        ['OoW_Chest'] = {
+            "Academic's Robe of the Arcanists",
+            "Spelldeviser's Cloth Robe",
+        },
     },
     ['AbilitySets']     = {
         ['AllianceSpell'] = {
@@ -751,19 +756,26 @@ return {
     ['Rotations']       = {
         ['Burn'] = {
             {
+                name = "Epic",
+                type = "Item",
+                cond = function(self)
+                    return not Casting.IHaveBuff("Twincast")
+                end,
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
+            },
+            {
                 name = "Focus of Arcanum",
                 type = "AA",
             },
             {
-                name = "Arcane Fury",
-                type = "AA",
-            },
-            {
-                name = "Fury of the Gods",
-                type = "AA",
-            },
-            {
                 name = "Fundament: Second Spire of Arcanum",
+                type = "AA",
+            },
+            {
+                name = "Fury of Ro",
                 type = "AA",
             },
             {
@@ -773,18 +785,13 @@ return {
                     return not Casting.IHaveBuff("Twincast")
                 end,
             },
-            {
-                name = "Arcane Destruction",
-                type = "AA",
-                cond = function(self)
-                    return not Casting.IHaveBuff("Spire of Arcanum")
+            { --Crit Chance AA, will use the first(best) one found
+                name_func = function(self)
+                    return Casting.GetBestAA({ "Prolonged Destruction", "Frenzied Devastation", })
                 end,
-            },
-            {
-                name = "Frenzied Devastation",
                 type = "AA",
-                cond = function(self)
-                    return not Casting.IHaveBuff("Spire of Arcanum")
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
             {
