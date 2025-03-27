@@ -1262,27 +1262,27 @@ function Module:ShouldPull(campData)
     local me = mq.TLO.Me
 
     if me.PctHPs() < self.settings.PullHPPct then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctHPs < %d", self.settings.PullHPPct)
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax PctHPs < %d", self.settings.PullHPPct)
         return false, string.format("PctHPs < %d", self.settings.PullHPPct)
     end
 
     if me.PctEndurance() < self.settings.PullEndPct then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctEnd < %d", self.settings.PullEndPct)
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax PctEnd < %d", self.settings.PullEndPct)
         return false, string.format("PctEnd < %d", self.settings.PullEndPct)
     end
 
     if me.MaxMana() > 0 and me.PctMana() < self.settings.PullManaPct then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax PctMana < %d", self.settings.PullManaPct)
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax PctMana < %d", self.settings.PullManaPct)
         return false, string.format("PctMana < %d", self.settings.PullManaPct)
     end
 
     if Config:GetSetting('PullRespectMedState') and Config.Globals.InMedState then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax Meditating.")
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax Meditating.")
         return false, string.format("Meditating")
     end
 
     if Casting.IHaveBuff("Resurrection Sickness") then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax Rez Sickness for %d seconds.",
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax Rez Sickness for %d seconds.",
             mq.TLO.Me.Buff("Resurrection Sickness")() and mq.TLO.Me.Buff("Resurrection Sickness").Duration.TotalSeconds() or 0)
         return false, string.format("Resurrection Sickness")
     end
@@ -1290,74 +1290,75 @@ function Module:ShouldPull(campData)
     if Config:GetSetting('PullWaitCorpse') then
         if mq.TLO.SpawnCount("pccorpse group radius 100 zradius 50")() > 0 then
             self.TempSettings.LastFoundGroupCorpse = os.clock()
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax %d group corpses in-range.", mq.TLO.SpawnCount("pccorpse group radius 100 zradius 50")())
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax %d group corpses in-range.", mq.TLO.SpawnCount("pccorpse group radius 100 zradius 50")())
             return false, string.format("Group Corpse Detected")
         elseif os.clock() - self.TempSettings.LastFoundGroupCorpse < Config:GetSetting('WaitAfterRez') then
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax Giving time for rebuffs after a groupmember was rezzed.")
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax Giving time for rebuffs after a groupmember was rezzed.")
             return false, string.format("Groupmember Recently Rezzed")
         end
     end
 
     if (me.Rooted.ID() or 0 > 0) then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am rooted!")
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am rooted!")
         return false, string.format("Rooted")
     end
 
     if not Config:GetSetting('PullDebuffed') then
         if (me.Snared.ID() or 0 > 0) then
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am snared!")
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am snared!")
             return false, string.format("Snared")
         end
 
         if Casting.IHaveBuff("Restless Ice") then
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice!")
             return false, string.format("Restless Ice")
         end
 
         if Casting.IHaveBuff("Restless Ice Infection") then
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax I Have Restless Ice Infection!")
             return false, string.format("Ice Infection")
         end
 
         if (me.Poisoned.ID() or 0 > 0) and not (me.Tashed.ID()) or 0 > 0 then
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am poisoned!")
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am poisoned!")
             return false, string.format("Poisoned")
         end
 
         if (me.Diseased.ID() or 0 > 0) then
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am diseased!")
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am diseased!")
             return false, string.format("Diseased")
         end
 
         if (me.Cursed.ID() or 0 > 0) then
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am cursed!")
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am cursed!")
             return false, string.format("Cursed")
         end
 
         if (me.Corrupted.ID() or 0 > 0) then
-            Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax I am corrupted!")
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am corrupted!")
             return false, string.format("Corrupted")
         end
     end
 
     if self.settings.PullBuffCount > 0 then
         if self:CountBuffs() < self.settings.PullBuffCount then
-            Logger.log_info("\ay::PULL:: \arAborted!\ax Waiting for Buffs! BuffCount < %d", self.settings.PullBuffCount)
+            Logger.log_verbose("\ay::PULL:: \arAborted!\ax Waiting for Buffs! BuffCount < %d", self.settings.PullBuffCount)
             return false, string.format("BuffCount < %d", self.settings.PullBuffCount)
         end
     end
 
     if self:IsPullMode("Chain") and Targeting.GetXTHaterCount() >= self.settings.ChainCount then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) >= ChainCount(%d)", Targeting.GetXTHaterCount(), self.settings.ChainCount)
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) >= ChainCount(%d)", Targeting.GetXTHaterCount(), self.settings.ChainCount)
         return false, string.format("XTargetCount(%d) > ChainCount(%d)", Targeting.GetXTHaterCount(), self.settings.ChainCount)
     end
 
     if not self:IsPullMode("Chain") and Targeting.GetXTHaterCount() > 0 then
-        Logger.log_super_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > 0", Targeting.GetXTHaterCount())
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax XTargetCount(%d) > 0", Targeting.GetXTHaterCount())
         return false, string.format("XTargetCount(%d) > 0", Targeting.GetXTHaterCount())
     end
 
     if campData.returnToCamp and Math.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY) > math.max(Config:GetSetting('AutoCampRadius') ^ 2, 200 ^ 2) then
+        Logger.log_verbose("\ay::PULL:: \arAborted!\ax I am too far away from camp!")
         Comms.HandleAnnounce("I am too far away from camp - Holding pulls!", Config:GetSetting('PullAnnounceGroup'), Config:GetSetting('PullAnnounce'))
         return false,
             string.format("I am Too Far (%d) (%d,%d) (%d,%d)", Math.GetDistanceSquared(me.X(), me.Y(), campData.campSettings.AutoCampX, campData.campSettings.AutoCampY),

@@ -1659,7 +1659,7 @@ local _ClassConfig = {
             end
 
             if not Config:GetSetting('NavCircle') and (Targeting.GetTargetDistance() >= 75 or forceMove) then
-                Core.DoCmd("/squelch /nav id %d facing=backward distance=%d", Config.Globals.AutoTargetID, Config:GetSetting('NavCircleDist'))
+                Core.DoCmd("/squelch /nav id %d facing=backward distance=%d lineofsight=on", Config.Globals.AutoTargetID, Config:GetSetting('NavCircleDist'))
             end
         end,
 
