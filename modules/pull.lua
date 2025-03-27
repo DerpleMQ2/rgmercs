@@ -118,7 +118,13 @@ Module.Constants.PullAbilities         = {
         id = "Ranged",
         Type = "Special",
         DisplayName = "Ranged",
-        AbilityRange = function() return mq.TLO.Me.Inventory("ranged").Range() end,
+        AbilityRange = function()
+            local range = mq.TLO.Me.Inventory("ranged").Range() or 0
+            if mq.TLO.Me.Inventory("ranged").Type() == 'Archery' or mq.TLO.Me.Inventory("ranged").Type() == 'Bow' then
+                range = range + (mq.TLO.Me.Inventory("ammo").Range() or 0)
+            end
+            return range
+        end,
         cond = function(self)
             local rangedType = (mq.TLO.Me.Inventory("ranged").Type() or ""):lower()
             local rangedTypes = Set.new({ "archery", "bow", "throwingv1", "throwing", "throwingv2", "ammo", })
