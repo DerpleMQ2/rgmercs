@@ -842,8 +842,16 @@ function Casting.CastCheck(spell, bAllowMove)
     local me = mq.TLO.Me
     local castingCheck = not (me.Casting() or mq.TLO.Window("CastingWindow").Open())
     local movingCheck = bAllowMove or Core.MyClassIs("brd") or not (me.Moving() and (spell.MyCastTime() or -1) > 0)
-    local manaCheck = (Config.Globals.InMedState and (me.CurrentMana() - (2 * me.ManaRegen())) or me.CurrentMana()) >= spell.Mana()
-    local endCheck = (Config.Globals.InMedState and (me.CurrentEndurance() - (2 * me.EnduranceRegen())) or me.CurrentEndurance()) >= spell.EnduranceCost()
+
+    local currentMana = me.CurrentMana()
+    local currentEnd = me.CurrentEndurance()
+    if Config.Globals.InMedState then --ensure false mana/end ticks don't make us stand early if we are medding by removing 2 ticks of resting for cost checks.
+        currentMana = math.max(0, me.CurrentMana() - (2 * me.ManaRegen()))
+        currentEnd = math.max(0, me.CurrentEndurance() - (2 * me.EnduranceRegen()))
+    end
+    local manaCheck = spell.Mana() == 0 or currentMana >= spell.Mana()
+    local endCheck = spell.EnduranceCost() == 0 or currentEnd >= spell.EnduranceCost()
+
     ---@diagnostic disable-next-line: undefined-field -- Feared is a valid data member
     local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed() or me.Mezzed())
 
