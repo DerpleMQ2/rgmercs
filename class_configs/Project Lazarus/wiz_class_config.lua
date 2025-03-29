@@ -752,6 +752,16 @@ return {
                 return combat_state == "Combat"
             end,
         },
+        {
+            name = 'ArcanumWeave',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoArcanumWeave') and Casting.CanUseAA("Acute Focus of Arcanum") end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and not mq.TLO.Me.Buff("Focus of Arcanum")()
+            end,
+        },
     },
     ['Rotations']       = {
         ['Burn'] = {
@@ -1079,6 +1089,29 @@ return {
                 type = "Spell",
                 cond = function(self, spell)
                     return Casting.CastReady(spell) and mq.TLO.Me.PctMana() < Config:GetSetting('HarvestManaPct')
+                end,
+            },
+        },
+        ['ArcanumWeave'] = {
+            {
+                name = "Empowered Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Enlightened Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Acute Focus of Arcanum",
+                type = "AA",
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
                 end,
             },
         },
@@ -1417,6 +1450,17 @@ return {
             Max = 99,
             FAQ = "How do I use Harvest Spells?",
             Answer = "Set the [HarvestManaPct] to the minimum mana % you want to be at before using a harvest spell or aa.",
+        },
+        ['DoArcanumWeave']       = {
+            DisplayName = "Weave Arcanums",
+            Category = "Utility",
+            Index = 9,
+            Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
+            RequiresLoadoutChange = true, --this setting is used as a load condition
+            Default = true,
+            FAQ = "What is an Arcanum and why would I want to weave them?",
+            Answer =
+            "The Focus of Arcanum series of AA decreases your spell resist rates.\nIf you have purchased all four, you can likely easily weave them to keep 100% uptime on one.",
         },
     },
 }

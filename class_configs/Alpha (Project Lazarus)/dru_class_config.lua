@@ -153,31 +153,14 @@ local _ClassConfig = {
             "Light Healing",
             "Minor Healing",
         },
-        ['QuickGroupHeal'] = {
-            -- Quick Group heal >= LVL78
-            "Survival of the Favored",
-            "Survival of the Auspicious",
-            "Survival of the Serendipitous",
-            "Survival of the Fortuitous",
-            "Survival of the Prosperous",
-            "Survival of the Propitious",
-            "Survival of the Felicitous",
-            "Survival of the Fittest",
-            "Survival of the Unrelenting",
-        },
-        ['LongGroupHeal'] = {
-            -- Long Group heal >= LVL 70
-            "Lunalesce",
-            "Lunasalve",
-            "Lunasoothe",
-            "Lunassuage",
-            "Lunalleviation",
-            "Lunamelioration",
-            "Lunulation",
-            "Crescentbloom",
-            "Lunarlight",
-            "Moonshadow",
-            "Lunarush",
+        ['GroupHeal'] = { -- Laz specific, some taken from cleric, some custom
+            "Word of Reconstitution",
+            -- "Moonshadow", -- The above spell is superior and both level 70
+            "Word of Redemption",
+            "Word of Restoration",
+            "Word of Vigor",
+            "Word of Healing",
+            "Word of Health",
         },
         ['PromHeal'] = {
             -- Promised Heals Line Druid
@@ -711,6 +694,27 @@ local _ClassConfig = {
             'Revive',         --emu only
             'Reanimation',    --emu only
         },
+        ['CurePoison'] = {
+            "Eradicate Poison",
+            "Counteract Poison",
+            "Cure Poison",
+        },
+        ['CureDisease'] = {
+            "Eradicate Disease",
+            "Counteract Disease",
+            "Cure Disease",
+        },
+        ['CureCurse'] = {
+            "Eradicate Curse",
+            "Remove Greater Curse",
+            "Remove Curse",
+            "Remove Lesser Curse",
+            "Remove Minor Curse",
+        },
+        ['TwinHealNuke'] = {
+            -- Druid Twincast
+            "Sunburst Blessing", -- Laz custom
+        },
     },
     ['HealRotationOrder'] = {
         {
@@ -753,22 +757,7 @@ local _ClassConfig = {
         },
         ['GroupHealPoint'] = {
             {
-                name = "Blessing of Tunare",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Targeting.BigGroupHealsNeeded()
-                end,
-            },
-            {
-                name = "QuickGroupHeal",
-                type = "Spell",
-            },
-            {
-                name = "Wildtender's Survival",
-                type = "AA",
-            },
-            {
-                name = "LongGroupHeal",
+                name = "GroupHeal",
                 type = "Spell",
             },
         },
@@ -867,6 +856,13 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.DetSpellCheck(spell) and Casting.HaveManaToNuke()
+                end,
+            },
+            { --description is incorrect, mob must be targeted.
+                name = "TwinHealNuke",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke()
                 end,
             },
             {
@@ -1154,7 +1150,7 @@ local _ClassConfig = {
         {
             gem = 2,
             spells = {
-                { name = "LongGroupHeal", cond = function(self) return mq.TLO.Me.Level() >= 70 end, },
+                { name = "GroupHeal", },
 
 
             },
@@ -1163,7 +1159,6 @@ local _ClassConfig = {
             gem = 3,
             spells = {
                 -- [ HEAL MODE ] --
-                { name = "QuickGroupHeal", cond = function(self) return mq.TLO.Me.Level() >= 90 end, },
 
             },
         },
@@ -1240,8 +1235,7 @@ local _ClassConfig = {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "NaturesWrathDot", cond = function(self) return true end, },
-
+                { name = "TwinHealNuke", cond = function(self) return Config:GetSetting("DoTwinHeal") end, },
             },
         },
         {
@@ -1383,6 +1377,15 @@ local _ClassConfig = {
             FAQ = "Why do I see orphaned settings?",
             Answer = "To avoid deletion of settings when moving between configs, our beta or experimental configs keep placeholders for live settings\n" ..
                 "These tabs or settings will be removed if and when the config is made the default.",
+        },
+        ['DoTwinHeal']   = {
+            DisplayName = "Cast Twin Heal Nuke",
+            Category = "Spells and Abilities",
+            Tooltip = "Use Twin Heal Nuke Spells",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "I have Twincastig AA, can I use it?",
+            Answer = "Yes, you can enable [DoTwinHeal] to use Twin Heal Nuke spells.",
         },
         ['DoHPBuff']     = {
             DisplayName = "Group HP Buff",
