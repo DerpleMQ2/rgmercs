@@ -1230,9 +1230,15 @@ local _ClassConfig = {
                 cond = function(self)
                     return mq.TLO.Me.PctAggro() >= 90
                 end,
-
             },
-        },
+            {
+                name = "Soothing Words",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting("DoSoothing") then return false end
+                    return Targeting.IsNamed(target) and (mq.TLO.Me.TargetOfTarget.ID() or Core.GetMainAssistId()) ~= Core.GetMainAssistId()
+                end,
+            }, },
         ['StripBuff'] = {
             {
                 name = "StripBuffSpell",
@@ -1849,6 +1855,15 @@ local _ClassConfig = {
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
                 "ENC is set to use theirs during burns, so long as the item equipped has a clicky effect.",
+        },
+        ['DoSoothing']         = {
+            DisplayName = "Do Soothing Words",
+            Category = "Combat",
+            Index = 5,
+            Tooltip = "Use the Soothing Words AA (large aggro reduction) on a named whose target is not our MA.",
+            Default = false,
+            FAQ = "Why won't I use the Soothing Words AA?",
+            Answer = "Ensure the option is selected on the combat tab and that the current target is designated as a named (check named tab or add in spawnmaster).",
         },
 
         --DPS
