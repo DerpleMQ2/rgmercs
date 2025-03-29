@@ -137,9 +137,15 @@ local _ClassConfig = {
             -- "Fyrthek Mantle",
             -- "Geomimus Mantle",
         },
-        ['Deflection'] = { 'Deflection Discipline', },
+        ['Deflection'] = {
+            "Rampart Discipline",
+            "Deflection Discipline",
+        },
+
         ['LeechCurse'] = { 'Leechcurse Discipline', },
+
         ['UnholyAura'] = { 'Unholy Aura Discipline', },
+
         ['PetSpell'] = {
             "Leering Corpse",
             "Bone Walk",
@@ -570,6 +576,7 @@ local _ClassConfig = {
             "Ignominious Influence",
         },
         ['HateBuff'] = {         --9 minute reuse makes these somewhat ridiculous to gem on the fly.
+            "Voice of Innoruuk", -- Level 70, 15% hate, 150pt DS (slot 9), 15% decrease DS Mit (VoT AA is still better for tanking at 24%, but they stack. DS smexy)
             "Voice of Thule",    -- level 60, 12% hate
             "Voice of Terris",   -- level 55, 10% hate
             "Voice of Death",    -- level 50, 6% hate
@@ -835,13 +842,13 @@ local _ClassConfig = {
                     return Casting.SelfBuffAACheck(aaName)
                 end,
             },
-            {
+            { -- Leve 70 buff less hate mod than Voice of Thule but has a 150pt damage shield; we can use them together.
                 name = "HateBuff",
                 type = "Spell",
                 tooltip = Tooltips.HateBuff,
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell)
-                    if not Config:GetSetting('DoHateBuff') or Casting.CanUseAA('Voice of Thule') or not Casting.CastReady(spell) then return false end
+                    if not Config:GetSetting('DoHateBuff') or not Casting.CastReady(spell) then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -908,7 +915,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.LeechCurse,
                 cond = function(self)
-                    return Casting.NoDiscActive()
+                    return Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
                 end,
             },
         },
@@ -1005,7 +1012,7 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.UnholyAura,
                 cond = function(self)
-                    return not Core.IsTanking() and Casting.NoDiscActive()
+                    return not Core.IsTanking() and Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
                 end,
             },
             {
@@ -1071,7 +1078,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Mantle,
                 cond = function(self, discSpell, target)
                     if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive()
+                    return Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
                 end,
             },
             {
@@ -1268,8 +1275,8 @@ local _ClassConfig = {
                 end,
                 cond = function()
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
-                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and
-                        (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000 and not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
+                    return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc() ~= "Deflection Discipline" and not mq.TLO.Me.Song("Rampart")() and
+                        not (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
                 end,
                 custom_func = function(self) return ItemManager.BandolierSwap("2Hand") end,
             },
@@ -1324,7 +1331,7 @@ local _ClassConfig = {
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
 
             },
         },
@@ -1349,7 +1356,7 @@ local _ClassConfig = {
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
             },
         },
         {
@@ -1373,7 +1380,7 @@ local _ClassConfig = {
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
             },
         },
         {
@@ -1418,7 +1425,7 @@ local _ClassConfig = {
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
@@ -1435,7 +1442,7 @@ local _ClassConfig = {
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
@@ -1451,7 +1458,7 @@ local _ClassConfig = {
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
@@ -1467,7 +1474,7 @@ local _ClassConfig = {
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "Skin",        cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
@@ -1482,7 +1489,7 @@ local _ClassConfig = {
                 { name = "PowerTapAtk", cond = function(self) return Config:GetSetting('DoAtkTap') and mq.TLO.Me.Level() < 76 end, },
                 { name = "AELifeTap",   cond = function(self) return Config:GetSetting('DoAELifeTap') end, },
                 { name = "HealBurn",    cond = function(self) return Core.IsTanking() and mq.TLO.Me.NumGems() < 13 end, },
-                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') and not Casting.CanUseAA("Voice of Thule") end, },
+                { name = "HateBuff",    cond = function(self) return Config:GetSetting('DoHateBuff') end, },
                 { name = "LifeTap2", },
                 { name = "Terror2",     cond = function(self) return Config:GetSetting('DoTerror') end, },
             },
