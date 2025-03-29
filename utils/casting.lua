@@ -1621,7 +1621,8 @@ function Casting.AutoMed()
         end
     end
 
-    if not me.Sitting() and forcesit then
+    -- if we aren't sitting, see if we were already medding and we got interrupted, or if our checks above say we should start medding
+    if not me.Sitting() and (Config.Globals.InMedState or forcesit) then
         Config.Globals.InMedState = true
         Logger.log_debug("Forcing sit - all conditions met.")
         me.Sit()
