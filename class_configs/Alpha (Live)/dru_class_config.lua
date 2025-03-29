@@ -485,14 +485,7 @@ local _ClassConfig = {
         },
         ['TwinHealNuke'] = {
             -- Druid Twincast
-            "Sundew Blessing",
-            "Sunrise Blessing",
-            "Sunbreeze Blessing",
-            "Sunbeam Blessing",
-            "Sunfire Blessing",
-            "Sunflash Blessing",
-            "Sunrake Blessing",
-            "Sunwarmth Blessing",
+            "Sunburst Blessing", -- Laz custom
         },
         ['IceNuke'] = {
             --Ice Nuke
