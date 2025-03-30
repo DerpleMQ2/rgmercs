@@ -723,7 +723,7 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
-                    if (spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsMA(target) then return false end
+                    if not Config:GetSetting('DoGroupDmgShield') or ((spell.TargetType() or ""):lower() ~= "group v2" and not Targeting.TargetIsMA(target)) then return false end
                     return Casting.GroupBuffCheck(spell, target)
                 end,
             },
@@ -935,8 +935,9 @@ local _ClassConfig = {
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL
-                { name = "HPTypeOneGroup", },
-                { name = "GroupRegenBuff", },
+                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
+                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
+                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
             },
         },
         {
@@ -962,8 +963,9 @@ local _ClassConfig = {
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL
-                { name = "HPTypeOneGroup", },
-                { name = "GroupRegenBuff", },
+                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
+                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
+                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
             },
         },
         {
@@ -988,8 +990,9 @@ local _ClassConfig = {
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL
-                { name = "HPTypeOneGroup", },
-                { name = "GroupRegenBuff", },
+                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
+                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
+                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
             },
         },
 
@@ -1015,8 +1018,9 @@ local _ClassConfig = {
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL
-                { name = "HPTypeOneGroup", },
-                { name = "GroupRegenBuff", },
+                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
+                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
+                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
             },
         },
         {
@@ -1040,8 +1044,9 @@ local _ClassConfig = {
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL
-                { name = "HPTypeOneGroup", },
-                { name = "GroupRegenBuff", },
+                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
+                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
+                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
             },
         },
         {
@@ -1064,8 +1069,9 @@ local _ClassConfig = {
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL
-                { name = "HPTypeOneGroup", },
-                { name = "GroupRegenBuff", },
+                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
+                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
+                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
             },
         },
         {
@@ -1087,8 +1093,9 @@ local _ClassConfig = {
                 { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL
-                { name = "HPTypeOneGroup", },
-                { name = "GroupRegenBuff", },
+                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
+                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
+                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
             },
         },
     },
@@ -1178,10 +1185,19 @@ local _ClassConfig = {
             FAQ = "Why am I spamming my Group Regen buff?",
             Answer = "Certain Shaman and Druid group regen buffs report cross-stacking. You should deselect the option on one of the PCs if they are grouped together.",
         },
+        ['DoGroupDmgShield']  = {
+            DisplayName = "Group Dmg Shield",
+            Category = "Buffs",
+            Index = 4,
+            Tooltip = "Use your group damage shield buff.",
+            Default = true,
+            FAQ = "Why do my druid and mage constantly both try to use the damage shield?",
+            Answer = "You can disable the group damage shield (DS) buff option on the Buffs tab.",
+        },
         ['SpireChoice']       = {
             DisplayName = "Spire Choice:",
             Category = "Buffs",
-            Index = 4,
+            Index = 5,
             Tooltip = "Choose which Fundament you would like to use during burns:\n" ..
                 "First Spire: Spell Crit Buff to Self.\n" ..
                 "Second Spire: Healing Power Buff to Self.\n" ..
@@ -1197,7 +1213,7 @@ local _ClassConfig = {
         ['WolfSpiritChoice']  = {
             DisplayName = "Self Wolfbuff Choice:",
             Category = "Buffs",
-            Index = 4,
+            Index = 6,
             Tooltip = "Choose which wolf spirit buff you would like to maintain on yourself:\n" ..
                 "White: Increased healing and reduced mana cost for healing spells. Mana Regeneration and Cold Resist.\n" ..
                 "Black: Increased damage and reduced mana cost for damage spells. Mana Regeneration and Fire Resist.",
