@@ -142,6 +142,7 @@ local function RenderTarget()
     if not assistSpawn or assistSpawn.ID() == 0 then
         ImGui.Text("None")
         Ui.RenderProgressBar(0, -1, 25)
+        ImGui.Dummy(32, 16)
     else
         local pctHPs = assistSpawn.PctHPs() or 0
         if not pctHPs then pctHPs = 0 end
@@ -172,7 +173,6 @@ local function RenderTarget()
         end
         Ui.RenderProgressBar(ratioHPs, -1, 25)
         ImGui.PopStyleColor(2)
-
         ImGui.PushStyleColor(ImGuiCol.Button, 0.6, 0.2, 0.01, 0.8)
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0.3, 0.1, 0.01, 1.0)
         local burnLabel = (Targeting.ForceBurnTargetID > 0 and Targeting.ForceBurnTargetID == mq.TLO.Target.ID()) and " FORCE BURN ACTIVATED " or " FORCE BURN THIS TARGET! "
