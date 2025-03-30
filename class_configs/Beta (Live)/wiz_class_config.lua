@@ -1379,7 +1379,7 @@ return {
             Answer = "In some situations, using a Rain can be an efficient single target nuke at low levels.\n" ..
                 "Note that PBAE spells tend to be superior for AE dps at those levels.",
         },
-        ['RainDist']             = {
+        ['RainDistance']         = {
             DisplayName = "Min Rain Distance",
             Category = "DPS Low Level",
             Index = 3,

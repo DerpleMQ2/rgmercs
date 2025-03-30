@@ -137,6 +137,8 @@ Config.Constants.ConColors         = {
 Config.Constants.ConColorsNameToId = {}
 for i, v in ipairs(Config.Constants.ConColors) do Config.Constants.ConColorsNameToId[v:upper()] = i end
 
+Config.Constants.Spires = { "First", "Second", "Third", }
+
 -- Defaults
 Config.DefaultConfig = {
 

@@ -1309,7 +1309,7 @@ return {
             FAQ = "How do I use Rain Spells?",
             Answer = "Enable [DoRain] to use Rain Spells when they are available.",
         },
-        ['RainDist']        = {
+        ['RainDistance']    = {
             DisplayName = "Min Dist for Rains",
             Category = "Combat",
             Tooltip = "If you are closer you will not use Rain spells",

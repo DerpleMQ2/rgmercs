@@ -46,6 +46,8 @@ local _ClassConfig = {
                 end
             elseif type:lower() == "corruption" then
                 cureSpell = Core.GetResolvedActionMapItem('CureCorrupt')
+            else
+                return false
             end
 
             if not cureSpell or not cureSpell() then return false end
