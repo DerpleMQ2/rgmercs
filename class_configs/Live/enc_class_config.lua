@@ -7,7 +7,7 @@ local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 
 local _ClassConfig = {
-    _version            = "1.2 - Live",
+    _version            = "1.4 - Live",
     _author             = "Derple, Grimmier, Algar",
     ['ModeChecks']      = {
         CanMez     = function() return true end,
@@ -471,7 +471,7 @@ local _ClassConfig = {
             "Tashani",
             "Tashina",
         },
-        ['ManaDrainSpell'] = {
+        ['ManaDrainNuke'] = {
             "Tears of Kasha",
             "Tears of Xenacious",
             "Tears of Aaryonar",
@@ -495,7 +495,7 @@ local _ClassConfig = {
             "Dichotomic Reinforcement",
             "Reciprocal Reinforcement",
         },
-        ['DotSpell1'] = {
+        ['StrangleDot'] = {
             ---DoT 1 -- >=LVL1
             "Asphyxiating Grasp",
             "Throttling Grip",
@@ -517,7 +517,7 @@ local _ClassConfig = {
             "Suffocating Sphere",
             "Shallow Breath",
         },
-        ['ManaDot'] = {
+        ['MindDot'] = {
             -- DoT 2 --  >= LVL70
             "Mind Whirl",
             "Mind Vortex",
@@ -532,7 +532,7 @@ local _ClassConfig = {
             "Mind Phobiate",
             "Mind Shatter",
         },
-        ['DebuffDot'] = {
+        ['ConstrictionDot'] = {
             ---DoT 3 -- >= LVL89
             "Dismaying Constriction",
             "Perplexing Constriction",
@@ -543,7 +543,7 @@ local _ClassConfig = {
             "Confusing Constriction",
             "Baffling Constriction",
         },
-        ['NukeSpell'] = {
+        ['MagicNuke'] = {
             --- Nuke 1 -- >= LVL7
             "Mindrend",
             "Mindreap",
@@ -584,7 +584,7 @@ local _ClassConfig = {
             "Chromatic Flash",
             "Chromatic Jab",
         },
-        ['ManaNuke'] = {
+        ['ManaTapNuke'] = {
             --- Mana Drain Nuke - Fast -- >=LVL96
             "Psychological Appropriation",
             "Ideological Appropriation",
@@ -593,7 +593,7 @@ local _ClassConfig = {
             "Mental Appropriation",
             "Cognitive Appropriation",
         },
-        --Unused table, temporarily removed - was causing conflicts while resolving NukeSpell action maps (will revisit nukes later)
+        --Unused table, temporarily removed - was causing conflicts while resolving MagicNuke action maps (will revisit nukes later)
         -- ['ChromaNuke'] = {
         --- Chromatic Lowest Nuke - Normal -- >=LVL73
         -- "Polycascading Assault",
@@ -840,6 +840,16 @@ local _ClassConfig = {
             end,
         },
         {
+            name = 'StripBuff',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Config:GetSetting('DoStripBuff') end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Casting.OkayToDebuff() and Casting.HaveManaToDebuff()
+            end,
+        },
+        {
             name = 'Burn',
             state = 1,
             steps = 1,
@@ -862,6 +872,7 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function() return Core.IsModeActive("Default") end,
+            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
@@ -1110,21 +1121,40 @@ local _ClassConfig = {
                 end,
             },
         },
+        ['StripBuff'] = {
+            {
+                name = "StripBuffSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoStripBuff') or mq.TLO.Target.ID() == 0 then return false end
+                    return mq.TLO.Target.Beneficial()
+                end,
+            },
+        },
         ['CombatSupport'] = {
             {
                 name = "Glyph Spray",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() < 40)
+                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() <= Config:GetSetting('EmergencyStart'))
                 end,
             },
             {
                 name = "Reactive Rune",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() < 40)
+                    return ((Targeting.IsNamed(target) and target.Level() > mq.TLO.Me.Level()) or Core.GetMainAssistPctHPs() <= Config:GetSetting('EmergencyStart'))
                 end,
             },
+            {
+                name = "PBAEStunSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if (Config:GetSetting('DoAEStun') == 2 and Core.GetMainAssistPctHPs() > Config:GetSetting('EmergencyStart')) or Config:GetSetting('DoAEStun') == 1 then return false end
+                    return Casting.DetSpellCheck(spell) and Targeting.GetXTHaterCount() >= Config:GetSetting('AECount')
+                end,
+            },
+
             -- { --this can be readded once we creat a post_activate to cancel the debuff you receive after
             --     name = "Self Stasis",
             --     type = "AA",
@@ -1144,7 +1174,7 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName, target)
                     if target.ID() == Config.Globals.AutoTargetID then return false end
-                    return mq.TLO.Me.PctAggro() > 99 and mq.TLO.Me.PctHPs() <= 40
+                    return mq.TLO.Me.PctAggro() > 99 and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
 
             },
@@ -1152,7 +1182,7 @@ local _ClassConfig = {
                 name = "Beguiler's Banishment",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= 50 and mq.TLO.SpawnCount("npc radius 20")() > 2
+                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and mq.TLO.SpawnCount("npc radius 20")() > 2
                 end,
 
             },
@@ -1160,9 +1190,8 @@ local _ClassConfig = {
                 name = "Doppelganger",
                 type = "AA",
                 cond = function(self, aaName)
-                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= 60
+                    return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart')
                 end,
-
             },
             -- { --This can interrupt spellcasting which can just make something worse. Let us trust healers and tanks.
             --     name = "Dimensional Shield",
@@ -1183,24 +1212,12 @@ local _ClassConfig = {
                 name = "Silent Casting",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() >= 90
+                    return Targeting.IsNamed(target) and mq.TLO.Me.PctAggro() >= 60
                 end,
 
             },
         },
         ['DPS(Default)'] = {
-            {
-                name = "StripBuffSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoStripBuff') or mq.TLO.Target.ID() == 0 then return false end
-                    return mq.TLO.Target.Beneficial()
-                end,
-            },
-            {
-                name = "Focus of Arcanum",
-                type = "AA",
-            },
             {
                 name = "TwinCastMez",
                 type = "Spell",
@@ -1210,57 +1227,39 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "DotSpell1",
+                name = "MindDot",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDot') then return false end
+                    if not Config:GetSetting('DoMindDot') then return false end
+                    return Casting.DotSpellCheck(spell) and (Targeting.IsNamed(target) or not Casting.IHaveBuff(spell and spell.Trigger()))
+                end,
+            },
+            {
+                name = "StrangleDot",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoStrangleDot') then return false end
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
-                name = "ManaDot",
+                name = "MagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDot') and not Targeting.IsNamed(target) then return false end
-                    return Casting.DotSpellCheck(spell)
-                end,
-            },
-            {
-                name = "DichoSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDicho') then return false end
+                    if not Config:GetSetting('DoNuke') then return false end
                     return Casting.HaveManaToNuke()
                 end,
             },
             {
-                name = "NukeSpell",
+                name = "ManaDrainNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    return Casting.HaveManaToNuke()
-                end,
-            },
-            {
-                name = "ManaDrainSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoManaDrain') then return false end
                     return (target.CurrentMana() or 0) > 10 and Casting.HaveManaToNuke()
                 end,
             },
         },
         ['DPS(ModernEra)'] = {
-            {
-                name = "StripBuffSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    if not Config:GetSetting('DoStripBuff') or mq.TLO.Target.ID() == 0 then return false end
-                    return mq.TLO.Target.Beneficial()
-                end,
-            },
-            {
-                name = "Focus of Arcanum",
-                type = "AA",
-            },
             {
                 name = "DichoSpell",
                 type = "Spell",
@@ -1269,28 +1268,28 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "ManaDot",
+                name = "MindDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.DotSpellCheck(spell) and Casting.HaveManaToDot()
                 end,
             },
             {
-                name = "NukeSpell",
+                name = "MagicNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.HaveManaToNuke()
                 end,
             },
             { --Mana check used instead of dot mana check because this is spammed like a nuke
-                name = "DotSpell1",
+                name = "StrangleDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.HaveManaToNuke()
                 end,
             },
             { --this is not an error, we want the spell twice in a row as part of the rotation.
-                name = "DotSpell1",
+                name = "StrangleDot",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return Casting.HaveManaToNuke()
@@ -1305,7 +1304,7 @@ local _ClassConfig = {
                 end,
             },
             { --used when the chanter or group members are low mana
-                name = "ManaNuke",
+                name = "ManaTapNuke",
                 type = "Spell",
                 cond = function(self, spell, target)
                     return (mq.TLO.Group.LowMana(80)() or -1) > 1 or not Casting.HaveManaToNuke()
@@ -1327,6 +1326,10 @@ local _ClassConfig = {
             },
             {
                 name = "Calculated Insanity",
+                type = "AA",
+            },
+            {
+                name = "Focus of Arcanum",
                 type = "AA",
             },
             {
@@ -1358,17 +1361,18 @@ local _ClassConfig = {
         },
         ['Tash'] = {
             {
-                name = "TashSpell",
-                type = "Spell",
-                cond = function(self, spell, target)
-                    return Casting.DetSpellCheck(spell)
+                name = "Bite of Tashani",
+                type = "AA",
+                cond = function(self, aaName)
+                    if Targeting.GetXTHaterCount() < Config:GetSetting('AECount') then return false end
+                    return Casting.DetAACheck(aaName)
                 end,
             },
             {
-                name = "Bite of Tashani",
-                type = "AA",
-                cond = function(self, aaName, target)
-                    return Casting.DetAACheck(aaName) and Targeting.GetXTHaterCount() > 1
+                name = "TashSpell",
+                type = "Spell",
+                cond = function(self, spell, target)
+                    return Casting.DetSpellCheck(spell) and (not Casting.TargetHasBuff("Bite of Tashani") or Targeting.IsNamed(target))
                 end,
             },
         },
@@ -1377,7 +1381,7 @@ local _ClassConfig = {
                 name = "Enveloping Helix",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if Targeting.GetXTHaterCount() < Config:GetSetting('AESlowCount') then return false end
+                    if Targeting.GetXTHaterCount() < Config:GetSetting('AECount') then return false end
                     return Casting.DetAACheck(aaName)
                 end,
             },
@@ -1394,7 +1398,7 @@ local _ClassConfig = {
                 name = "CripSlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Casting.CanUseAA("Enveloping Helix") then return false end
+                    if not Config:GetSetting('DoSlow') or not Casting.CanUseAA("Slowing Helix") then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1402,7 +1406,7 @@ local _ClassConfig = {
                 name = "SlowSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoSlow') or Casting.CanUseAA("Enveloping Helix") then return false end
+                    if not Config:GetSetting('DoSlow') or Casting.CanUseAA("Slowing Helix") or Core.GetResolvedActionMapItem('CripSlowSpell') then return false end
                     return Casting.DetSpellCheck(spell) and (spell.RankName.SlowPct() or 0) > (Targeting.GetTargetSlowedPct())
                 end,
             },
@@ -1410,7 +1414,7 @@ local _ClassConfig = {
                 name = "CrippleSpell",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoCripple') or Casting.CanUseAA("Enveloping Helix") then return false end
+                    if not Config:GetSetting('DoCripple') or Casting.CanUseAA("Slowing Helix") or Core.GetResolvedActionMapItem('CripSlowSpell') then return false end
                     return Casting.DetSpellCheck(spell)
                 end,
             },
@@ -1420,102 +1424,309 @@ local _ClassConfig = {
         {
             gem = 1,
             spells = {
-                { name = "TwinCastMez", cond = function(self) return Config:GetSetting('TwincastMez') > 1 end, },
-                { name = "MezSpell", },
+                { name = "TwinCastMez",      cond = function(self) return Config:GetSetting('DoSTMez') and Config:GetSetting('TwincastMez') > 1 end, },
+                { name = "MezSpell",         cond = function(self) return Config:GetSetting('DoSTMez') and Config:GetSetting('TwincastMez') == 1 end, },
+                { name = "MezAESpell",       cond = function(self) return Config:GetSetting('DoAEMez') end, },
+                { name = "CharmSpell",       cond = function(self) return Config:GetSetting('CharmOn') end, },
+                { name = "TashSpell",        cond = function(self) return Config:GetSetting('DoTash') end, },
+                { name = "CripSlowSpell",    cond = function(self) return (Config:GetSetting('DoSlow') or Config:GetSetting('DoCripple')) and not Casting.CanUseAA("Slowing Helix") end, },
+                { name = "SlowSpell",        cond = function(self) return Config:GetSetting('DoSlow') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCripple') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 2,
             spells = {
-                { name = "MezAESpell", },
+                { name = "MezAESpell",       cond = function(self) return Config:GetSetting('DoAEMez') end, },
+                { name = "CharmSpell",       cond = function(self) return Config:GetSetting('CharmOn') end, },
+                { name = "TashSpell",        cond = function(self) return Config:GetSetting('DoTash') end, },
+                { name = "CripSlowSpell",    cond = function(self) return (Config:GetSetting('DoSlow') or Config:GetSetting('DoCripple')) and not Casting.CanUseAA("Slowing Helix") end, },
+                { name = "SlowSpell",        cond = function(self) return Config:GetSetting('DoSlow') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCripple') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 3,
             spells = {
-                { name = "CharmSpell",     cond = function(self) return Config:GetSetting('CharmOn') and Core.IsModeActive("ModernEra") end, },
-                { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') and Core.IsModeActive("ModernEra") end, },
-                { name = "TashSpell", },
-                { name = "SpellProcBuff",  cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "CharmSpell",       cond = function(self) return Config:GetSetting('CharmOn') end, },
+                { name = "TashSpell",        cond = function(self) return Config:GetSetting('DoTash') end, },
+                { name = "CripSlowSpell",    cond = function(self) return (Config:GetSetting('DoSlow') or Config:GetSetting('DoCripple')) and not Casting.CanUseAA("Slowing Helix") end, },
+                { name = "SlowSpell",        cond = function(self) return Config:GetSetting('DoSlow') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCripple') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 4,
             spells = {
-                { name = "DichoSpell",     cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "SlowSpell",      cond = function(self) return not Casting.CanUseAA("Slowing Helix") and mq.TLO.Me.Level() < 88 end, },
-                { name = "CripSlowSpell",  cond = function(self) return not Casting.CanUseAA("Slowing Helix") and mq.TLO.Me.Level() >= 88 end, },
-                { name = "ManaDrainSpell", cond = function(self) return true end, },
+                { name = "TashSpell",        cond = function(self) return Config:GetSetting('DoTash') end, },
+                { name = "CripSlowSpell",    cond = function(self) return (Config:GetSetting('DoSlow') or Config:GetSetting('DoCripple')) and not Casting.CanUseAA("Slowing Helix") end, },
+                { name = "SlowSpell",        cond = function(self) return Config:GetSetting('DoSlow') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCripple') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 5,
             spells = {
-                { name = "ManaDot",    cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "CharmSpell", cond = function(self) return Config:GetSetting('CharmOn') end, },
-                { name = "NdtBuff", },
+                { name = "CripSlowSpell",    cond = function(self) return (Config:GetSetting('DoSlow') or Config:GetSetting('DoCripple')) and not Casting.CanUseAA("Slowing Helix") end, },
+                { name = "SlowSpell",        cond = function(self) return Config:GetSetting('DoSlow') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCripple') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 6,
             spells = {
-                { name = "NukeSpell", },
+                { name = "SlowSpell",        cond = function(self) return Config:GetSetting('DoSlow') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCripple') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 7,
             spells = {
-                { name = "DotSpell1", },
+                { name = "CrippleSpell",     cond = function(self) return Config:GetSetting('DoCripple') and not Core.GetResolvedActionMapItem('CripSlowSpell') end, },
+                { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 8,
             spells = {
-                { name = "ManaNuke",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "CrippleSpell",   cond = function(self) return Config:GetSetting('DoCripple') and mq.TLO.Me.Level() < 88 end, },
-                { name = "StripBuffSpell", cond = function(self) return Config:GetSetting('DoStripBuff') end, },
-                { name = "SpellProcBuff",  cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "PBAEStunSpell",    cond = function(self) return Config:GetSetting('DoAEStun') > 1 end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 9,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "NdtBuff",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "ManaDot",       cond = function(self) return true end, },
-                { name = "SpellProcBuff", cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "NdtBuff",          cond = function(self) return Config:GetSetting('DoNDTBuff') end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 10,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SingleRune", cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
-                { name = "GroupRune",  cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "SpellProcBuff",    cond = function(self) return Config:GetSetting('DoProcBuff') end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 11,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "GroupSpellShield", cond = function(self) return true end, },
+                { name = "StripBuffSpell",   cond = function(self) return Config:GetSetting('DoStripBuff') end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 12,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
-                { name = "SpellProcBuff", cond = function(self) return Config:GetSetting('DoProcBuff') and Core.IsModeActive("ModernEra") end, },
-                { name = "DichoSpell",    cond = function(self) return true end, },
+                { name = "DichoSpell",       cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
         {
             gem = 13,
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
+                { name = "MagicNuke",        cond = function(self) return Config:GetSetting('DoNuke') or Core.IsModeActive("ModernEra") end, },
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
                 { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
-                { name = "GroupAuspiceBuff", cond = function(self) return Core.IsModeActive("ModernEra") end, },
-                { name = "ManaDrainSpell",   cond = function(self) return Core.IsModeActive("Default") end, },
+            },
+        },
+        {
+            gem = 14,
+            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
+            spells = {
+                { name = "StrangleDot",      cond = function(self) return Config:GetSetting('DoStrangleDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "MindDot",          cond = function(self) return Config:GetSetting('DoMindDot') or Core.IsModeActive("ModernEra") end, },
+                { name = "ManaTapNuke",      cond = function(self) return Core.IsModeActive("ModernEra") end, },
+                { name = "ManaDrainNuke",    cond = function(self) return Config:GetSetting('DoManaDrain') and Core.IsModeActive("Default") end, },
+                { name = "SingleRune",       cond = function(self) return Config:GetSetting('RuneChoice') == 1 end, },
+                { name = "GroupRune",        cond = function(self) return Config:GetSetting('RuneChoice') == 2 end, },
+                { name = "GroupAuspiceBuff", cond = function(self) return Config:GetSetting('DoGroupAuspice') end, },
+                { name = "GroupSpellShield", cond = function(self) return Config:GetSetting('DoGroupSpellShield') end, },
+                { name = "GroupDotShield",   cond = function(self) return Config:GetSetting('DoGroupDotShield') end, },
+                { name = "AllianceSpell",    cond = function(self) return Config:GetSetting('DoAlliance') end, },
             },
         },
     },
@@ -1546,7 +1757,7 @@ local _ClassConfig = {
         },
     },
     ['DefaultConfig']   = {
-        ['Mode']             = {
+        ['Mode']               = {
             DisplayName = "Mode",
             Category = "Combat",
             Tooltip = "Select the Combat Mode for this PC. Default: The original RGMercs Config. ModernEra: DPS rotation and spellset aimed at modern live play (~90+)",
@@ -1561,27 +1772,100 @@ local _ClassConfig = {
                 "The ModernEra Mode is designed to be used with the ModernEra DPS rotation and spellset.\n" ..
                 "It should function well starting around level 90, but may not fully come into its own for a few levels after.",
         },
-        ['DoLearners']       = {
+
+        --Buffs
+        ['DoLearners']         = {
             DisplayName = "Do Learners",
             Category = "Buffs",
+            Index = 1,
             Tooltip = "Set to use the Learner's Aura instead of the Mana Regen Aura.",
             Default = false,
             FAQ = "How do I use my Learner's Aura?",
             Answer = "To use your Learner's Aura, set [DoLearners] to true in your PC's configuration.\n" ..
                 "This will cause your PC to use the Learner's Aura instead of the Mana Regen Aura.",
         },
-        ['AESlowCount']      = {
-            DisplayName = "Slow Count",
-            Category = "Debuffs",
-            Tooltip = "Number of XT Haters before we start AE slowing",
-            Min = 1,
+        ['RuneChoice']         = {
+            DisplayName = "Rune Selection:",
+            Category = "Buffs",
+            Index = 2,
+            Tooltip = "Select which line of Rune spells you prefer to use.\nPlease note that after level 73, the group rune has a built-in hate reduction when struck.",
+            Type = "Combo",
+            ComboOptions = { 'Single Target', 'Group', 'Off', },
             Default = 2,
-            Max = 10,
-            FAQ = "Why am I not AE slowing?",
-            Answer = "The [AESlowCount] setting determines the number of XT Haters before we start AE slowing.\n" ..
-                "If you are not AE slowing, you may need to adjust the [AESlowCount] setting.",
+            Min = 1,
+            Max = 3,
+            RequiresLoadoutChange = true,
+            FAQ = "Why am I putting an aggro-reducing buff on the tank?",
+            Answer =
+            "You can configure your rune selections to use a single-target hate increasing rune on the tank, while using group (hate reducing) or single target runes on others.",
         },
-        ['DoTash']           = {
+        ['DoAggroRune']        = {
+            DisplayName = "Do Aggro Rune",
+            Category = "Buffs",
+            Index = 3,
+            Tooltip = "Enable casting the Tank Aggro Rune",
+            Default = true,
+            FAQ = "Why am I not using the Aggro Rune?",
+            Answer = "The [DoAggroRune] setting determines whether or not your PC will cast the Tank Aggro Rune.\n" ..
+                "If you are not using the Aggro Rune, you may need to Enable the [DoAggroRune] setting.",
+        },
+        ['DoGroupSpellShield'] = {
+            DisplayName = "Do Group Spellshield",
+            Category = "Buffs",
+            Index = 4,
+            Tooltip = "Enable casting the Group Spell Shield Line.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I not using Group Spell Shield?",
+            Answer = "The Do Group Spellshield setting determines whether or not your PC will cast the Group Spell Shield Line.\n" ..
+                "If you are not using Group DoT Shield, you may need to Enable the Do Group Spellshield setting.",
+        },
+        ['DoGroupDotShield']   = {
+            DisplayName = "Do Group DoT Shield",
+            Category = "Buffs",
+            Index = 5,
+            Tooltip = "Enable casting the Group DoT Shield Line.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I not using Group DoT Shield?",
+            Answer = "The [DoGroupDotShield] setting determines whether or not your PC will cast the Group DoT Shield Line.\n" ..
+                "If you are not using Group DoT Shield, you may need to Enable the [DoGroupDotShield] setting.",
+        },
+        ['DoGroupAuspice']     = {
+            DisplayName = "Do Group Auspice",
+            Category = "Buffs",
+            Index = 6,
+            Tooltip = "Enable casting the Group Auspice Buff Line.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I not using Group Auspice Buff?",
+            Answer = "The [DoGroupAuspice] setting determines whether or not your PC will cast the Group Auspice Buff.\n" ..
+                "If you are not using Group Auspice Buff, you may need to Enable the setting.",
+        },
+        ['DoProcBuff']         = {
+            DisplayName = "Do Spellproc Buff",
+            Category = "Buffs",
+            Index = 7,
+            Tooltip = "Enable casting the spell proc (Mana ... ) line.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I using a spell proc buff on ... class?",
+            Answer = "By default, the spell proc buff will be used on any casters (including tanks/hybrids). You can change this option on the Buffs tab.",
+        },
+        ['DoNDTBuff']          = {
+            DisplayName = "Cast NDT",
+            Category = "Buffs",
+            Index = 8,
+            Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I not using NDT?",
+            Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
+                "Please note that the single target versions are only set to be used on melee.",
+        },
+
+        --Debuffs
+        ['DoTash']             = {
             DisplayName = "Do Tash",
             Category = "Debuffs",
             Tooltip = "Cast Tash Spells",
@@ -1591,9 +1875,69 @@ local _ClassConfig = {
             Answer = "The [DoTash] setting determines whether or not your PC will cast Tash Spells.\n" ..
                 "If you are not Tashing, you may need to Enable the [DoTash] setting.",
         },
-        ['TwincastMez']      = {
+        ['DoSlow']             = {
+            DisplayName = "Cast Slow",
+            Category = "Debuffs",
+            Tooltip = "Enable casting Slow spells.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I not Slowing?",
+            Answer = "The [DoSlow] setting determines whether or not your PC will cast Slow spells.\n" ..
+                "If you are not Slowing, you may need to Enable the [DoSlow] setting.",
+        },
+        ['DoCripple']          = {
+            DisplayName = "Cast Cripple",
+            Category = "Debuffs",
+            Tooltip = "Enable casting Cripple spells.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I not Crippling?",
+            Answer = "The [DoCripple] setting determines whether or not your PC will cast Cripple spells.\n" ..
+                "If you are not Crippling, you may need to Enable the [DoCripple] setting.\n" ..
+                "Please note that eventually, Cripple and Slow lines are merged together in the Helix line.",
+        },
+        ['DoStripBuff']        = {
+            DisplayName = "Do Strip Buffs",
+            Category = "Debuffs",
+            Tooltip = "Enable removing beneficial enemy effects.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I not stripping buffs?",
+            Answer = "The [DoStripBuff] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
+                "If you are not stripping buffs, you may need to Enable the [DoStripBuff] setting.",
+        },
+
+        --Combat
+        ['AECount']            = {
+            DisplayName = "AE Count",
+            Category = "Combat",
+            Index = 1,
+            Tooltip = "Number of XT Haters before we will use AE Slow, Tash, or Stun.",
+            Min = 1,
+            Default = 3,
+            Max = 15,
+            FAQ = "Why am I not using AE Abilities?",
+            Answer = "Adjust your AE Count on the Combat Tab.",
+        },
+        ['DoAEStun']           = {
+            DisplayName = "PBAE Stun use:",
+            Category = "Combat",
+            Index = 2,
+            Tooltip = "When to use your PBAE Stun Line.",
+            RequiresLoadoutChange = true,
+            Type = "Combo",
+            ComboOptions = { 'Never', 'At low MA health', 'Whenever Possible', },
+            Default = 1,
+            Min = 1,
+            Max = 3,
+            ConfigType = "Advanced",
+            FAQ = "Why am I stunning everything?!??",
+            Answer = "You can choose the conditions under which you will use your PBAE Stun on the Combat tab.",
+        },
+        ['TwincastMez']        = {
             DisplayName = "TwinCast Mez Usage:",
             Category = "Combat",
+            Index = 3,
             Tooltip = "If selected, will replace the standard ST Mez with an option that gives a DD twincast effect.",
             ConfigType = "Advanced",
             RequiresLoadoutChange = true,
@@ -1608,115 +1952,69 @@ local _ClassConfig = {
                 "As ST Mez: We will use the Twincast Mez as our ST Mez in Gem 1.\n" ..
                 "As Mez and to Trigger Twincast: As above and we will also use this spell in combat to trigger the twincast effect.",
         },
-        ['DoDot']            = {
-            DisplayName = "Cast DOTs",
+        ['EmergencyStart']     = {
+            DisplayName = "Emergency Start",
             Category = "Combat",
-            Tooltip = "Enable casting Damage Over Time spells. (Dots always used for ModernEra Mode)",
-            Default = true,
-            FAQ = "I turned Cast DOTS off, why am I still using them?",
-            Answer = "The Modern Era mode does not respect this setting, as DoTs are integral to the DPS rotation.",
-        },
-        ['DoSlow']           = {
-            DisplayName = "Cast Slow",
-            Category = "Debuffs",
-            Tooltip = "Enable casting Slow spells.",
-            RequiresLoadoutChange = true,
-            Default = true,
-            FAQ = "Why am I not Slowing?",
-            Answer = "The [DoSlow] setting determines whether or not your PC will cast Slow spells.\n" ..
-                "If you are not Slowing, you may need to Enable the [DoSlow] setting.",
-        },
-        ['DoCripple']        = {
-            DisplayName = "Cast Cripple",
-            Category = "Debuffs",
-            Tooltip = "Enable casting Cripple spells.",
-            RequiresLoadoutChange = true,
-            Default = true,
-            FAQ = "Why am I not Crippling?",
-            Answer = "The [DoCripple] setting determines whether or not your PC will cast Cripple spells.\n" ..
-                "If you are not Crippling, you may need to Enable the [DoCripple] setting.\n" ..
-                "Please note that eventually, Cripple and Slow lines are merged together in the Helix line.",
-        },
-        ['DoDicho']          = {
-            DisplayName = "Cast Dicho",
-            Category = "Combat",
-            Tooltip = "Enable casting Dicho spells.(Dicho always used for ModernEra Mode)",
-            Default = true,
-            FAQ = "Why am I not using Dicho spells?",
-            Answer = "The Cast Dicho setting determines whether or not your PC will cast Dicho spells.\n" ..
-                "Modern Era mode will always use the Dicho spell as a core part of its function.",
-        },
-        ['DoNDTBuff']        = {
-            DisplayName = "Cast NDT",
-            Category = "Buffs",
-            Tooltip = "Enable casting use Melee Proc Buff (Night's Dark Terror Line).",
-            RequiresLoadoutChange = true,
-            Default = true,
-            FAQ = "Why am I not using NDT?",
-            Answer = "The [DoNDTBuff] setting determines whether or not your PC will cast the Night's Dark Terror Line.\n" ..
-                "Please note that the single target versions are only set to be used on melee.",
-        },
-        ['RuneChoice']       = {
-            DisplayName = "Rune Selection:",
-            Category = "Buffs",
-            Index = 1,
-            Tooltip = "Select which line of Rune spells you prefer to use.\nPlease note that after level 73, the group rune has a built-in hate reduction when struck.",
-            Type = "Combo",
-            ComboOptions = { 'Single Target', 'Group', 'Off', },
-            Default = 2,
-            Min = 1,
-            Max = 3,
-            RequiresLoadoutChange = true,
-            FAQ = "Why am I putting an aggro-reducing buff on the tank?",
-            Answer =
-            "You can configure your rune selections to use a single-target hate increasing rune on the tank, while using group (hate reducing) or single target runes on others.",
-        },
-        ['DoAggroRune']      = {
-            DisplayName = "Do Aggro Rune",
-            Category = "Buffs",
-            Index = 2,
-            Tooltip = "Enable casting the Tank Aggro Rune",
-            Default = true,
-            FAQ = "Why am I not using the Aggro Rune?",
-            Answer = "The [DoAggroRune] setting determines whether or not your PC will cast the Tank Aggro Rune.\n" ..
-                "If you are not using the Aggro Rune, you may need to Enable the [DoAggroRune] setting.",
-        },
-        ['DoGroupDotShield'] = {
-            DisplayName = "Do Group DoT Shield",
-            Category = "Buffs",
-            Index = 3,
-            Tooltip = "Enable casting the Group DoT Shield Line.",
-            Default = true,
-            FAQ = "Why am I not using Group DoT Shield?",
-            Answer = "The [DoGroupDotShield] setting determines whether or not your PC will cast the Group DoT Shield Line.\n" ..
-                "If you are not using Group DoT Shield, you may need to Enable the [DoGroupDotShield] setting.",
-        },
-        ['DoProcBuff']       = {
-            DisplayName = "Do Spellproc Buff",
-            Category = "Buffs",
             Index = 4,
-            Tooltip = "Enable casting the spell proc (Mana ... ) line.",
-            Default = true,
-            FAQ = "Why am I using a spell proc buff on ... class?",
-            Answer = "By default, the spell proc buff will be used on any casters (including tanks/hybrids). You can change this option on the Buffs tab.",
+            Tooltip = "The HP % emergency abilities will be used (Abilities used depend on whose health is low, the ENC or the MA).",
+            Default = 50,
+            Min = 1,
+            Max = 100,
+            ConfigType = "Advanced",
+            FAQ = "Why am I not using my emergency abilities?",
+            Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
-        ['DoStripBuff']      = {
-            DisplayName = "Do Strip Buffs",
-            Category = "Debuffs",
-            Tooltip = "Enable removing beneficial enemy effects.",
-            Default = true,
-            FAQ = "Why am I not stripping buffs?",
-            Answer = "The [DoStripBuff] setting determines whether or not your PC will remove beneficial enemy effects.\n" ..
-                "If you are not stripping buffs, you may need to Enable the [DoStripBuff] setting.",
-        },
-        ['DoChestClick']     = {
+        ['DoChestClick']       = {
             DisplayName = "Do Chest Click",
             Category = "Combat",
+            Index = 5,
             Tooltip = "Click your equipped chest item during burns.",
             Default = mq.TLO.MacroQuest.BuildName() ~= "Emu",
             FAQ = "Why am I not clicking my chest item?",
             Answer = "Most Chest slot items after level 75ish have a clickable effect.\n" ..
                 "ENC is set to use theirs during burns, so long as the item equipped has a clicky effect.",
+        },
+
+        --DPS Low Level
+        ['DoNuke']             = {
+            DisplayName = "Magic Nuke",
+            Category = "DPS Low Level",
+            Index = 1,
+            Tooltip = "Use your magic nuke in the Default early/midgame DPS rotation.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "How can I use my magic Nuke?",
+            Answer = "You can enable the magic nuke line in the Spells and Abilities tab.",
+        },
+        ['DoManaDrain']        = {
+            DisplayName = "Mana Drain Nuke",
+            Category = "DPS Low Level",
+            Index = 2,
+            Tooltip = "Use your mana drain nuke in the Default early/midgame DPS rotation.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "How can I use my mana drain nuke?",
+            Answer = "You can enable the mana drain nuke line in the Spells and Abilities tab.",
+        },
+        ['DoStrangleDot']      = {
+            DisplayName = "Strangle Dot",
+            Category = "DPS Low Level",
+            Index = 3,
+            Tooltip = "Use your magic damage (Strangle Line) Dot in the Default early/midgame DPS rotation.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "I turned Cast DOTS off, why am I still using them?",
+            Answer = "The Modern Era mode does not respect this setting, as DoTs are integral to the DPS rotation.",
+        },
+        ['DoMindDot']          = {
+            DisplayName = "Mind Dot",
+            Category = "DPS Low Level",
+            Index = 4,
+            Tooltip = "Use your mana drain/magic damage (Mind Line) Dot on Named in the Default early/midgame DPS rotation.",
+            RequiresLoadoutChange = true,
+            Default = true,
+            FAQ = "Why am I not using my Mind Dot when I have it selected?",
+            Answer = "This Dot is set to be used on named or when you don't already have the recourse active.",
         },
     },
 }
