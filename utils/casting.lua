@@ -292,7 +292,7 @@ function Casting.PeerBuffCheck(spellId, target)
         return false
     end
 
-    if DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000):lower() == "true" then
+    if DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000):lower() ~= "null" then
         Logger.log_error("PeerBuffCheck: Tried to check a peer's buff, but that peer seems to have it blocked. Spell:%s(ID:%d), Target:%s(ID:%d)", spellName, spellId, targetName,
             targetId)
         return false
