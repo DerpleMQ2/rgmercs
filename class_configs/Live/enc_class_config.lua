@@ -902,6 +902,19 @@ local _ClassConfig = {
             mq.delay(150)
             Core.DoCmd("/autoinventory")
         end,
+        AuraCheck = function() -- remove undesired auras to stop spam conditions... this will only be triggered if we have already identified we are missing a desired aura
+            if Casting.CanUseAA("Auroria Mastery") then
+                -- If we can use two auras we will keep twincast and get rid of the other (including old versions of the spellproc aura line)
+                -- Make sure we don't get rid of the first aura if the second aura is already free for whatever reason (fallback)
+                ---@diagnostic disable-next-line: undefined-field
+                if (mq.TLO.Me.Aura(1).Name() or "Twincast Aura") ~= "Twincast Aura" and mq.TLO.Me.Aura(2)() then mq.TLO.Me.Aura(1).Remove() end
+                ---@diagnostic disable-next-line: undefined-field
+                if (mq.TLO.Me.Aura(2).Name() or "Twincast Aura") ~= "Twincast Aura" then mq.TLO.Me.Aura(2).Remove() end
+            else --if we can only use one aura, we will get rid of the current one since we are missing the one we want.
+                ---@diagnostic disable-next-line: undefined-field
+                mq.TLO.Me.Aura(1).Remove()
+            end
+        end,
     },
     ['Rotations']       = {
         ['Downtime'] = {
@@ -976,6 +989,7 @@ local _ClassConfig = {
                 name = "LearnersAura",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
+                pre_activate = function(self) self.ClassConfig.HelperFunctions.AuraCheck() end,
                 cond = function(self, spell)
                     return Config:GetSetting('DoLearners') and not Casting.AuraActiveByName(spell.Name())
                 end,
@@ -984,6 +998,7 @@ local _ClassConfig = {
                 name = "TwincastAura",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.AuraActiveByName(spell.Name()) end,
+                pre_activate = function(self) self.ClassConfig.HelperFunctions.AuraCheck() end,
                 cond = function(self, spell)
                     if Config:GetSetting('DoLearners') and not Casting.CanUseAA('Auroria Mastery') then return false end
                     return not Casting.AuraActiveByName(spell.Name())
@@ -996,16 +1011,9 @@ local _ClassConfig = {
                     local aura = string.sub(spell.Name() or "", 1, 8)
                     return Casting.AuraActiveByName(aura)
                 end,
-                pre_activate = function(self, spell)           --remove the old aura if we leveled up, otherwise we will be spammed because of no focus.
-                    local aura = string.sub(spell.Name() or "", 1, 8)
-                    if not Casting.AuraActiveByName(aura) then ----This is complex because the aura could be in slot 1 or 2 depending on level and aa status
-                        local rmv = Casting.CanUseAA('Auroria Mastery') and 2 or 1
-                        ---@diagnostic disable-next-line: undefined-field
-                        mq.TLO.Me.Aura(rmv).Remove() --I have to remove by slot because I can't map the "old" aura to remove it by name
-                    end
-                end,
+                pre_activate = function(self) self.ClassConfig.HelperFunctions.AuraCheck() end,
                 cond = function(self, spell)
-                    if (self:GetResolvedActionMapItem('TwincastAura') or Config:GetSetting('DoLearners')) and not Casting.CanUseAA('Auroria Mastery') then return false end
+                    if (Config:GetSetting('DoLearners') and self:GetResolvedActionMapItem('LearnersAura')) or (self:GetResolvedActionMapItem('TwincastAura') and not Casting.CanUseAA('Auroria Mastery')) then return false end
                     local aura = string.sub(spell.Name() or "", 1, 8)
                     return not Casting.AuraActiveByName(aura)
                 end,
