@@ -402,7 +402,7 @@ function Module:MezNow(mezId, useAE, useAA)
     Core.DoCmd("/attack off")
     local currentTargetID = mq.TLO.Target.ID()
 
-    Targeting.SetTarget(mezId)
+    Targeting.SetTarget(mezId, true)
 
     local mezSpell = self:GetMezSpell()
     local aeMezSpell = self:GetAEMezSpell()
@@ -477,29 +477,32 @@ function Module:MezNow(mezId, useAE, useAA)
         -- Added this If to avoid rewriting SpellNow to be bard friendly.
         -- we can just invoke The bard SongNow which already accounts for all the weird bard stuff
         -- TODO: Make spell now use songnow for brds
-        if Core.MyClassIs("brd") then
-            -- TODO SongNow MezSpell
-            Casting.UseSong(mezSpell.RankName(), mezId, false, 3)
-        else
-            -- This may not work for Bards but will work for NEC/ENCs
-            Casting.UseSpell(mezSpell.RankName(), mezId, false)
-        end
+        if Casting.SpellReady(mezSpell) then
+            if Core.MyClassIs("brd") then
+                -- TODO SongNow MezSpell
+                Casting.UseSong(mezSpell.RankName(), mezId, false, 3)
+            else
+                -- This may not work for Bards but will work for NEC/ENCs
+                Casting.UseSpell(mezSpell.RankName(), mezId, false)
+            end
 
-        mq.doevents()
+            -- In case they're mez immune
+            mq.doevents()
 
-        if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
-            Comms.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s \aw <- Using: \at%s",
-                    mq.TLO.Spawn(mezId).CleanName(), mezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
-                Config:GetSetting('MezAnnounce'))
-        else
-            Comms.HandleAnnounce(string.format("\ar MEZ Failed \ag -> \ay %s \ag <-", mq.TLO.Spawn(mezId).CleanName()), Config:GetSetting('MezAnnounceGroup'),
-                Config:GetSetting('MezAnnounce'))
+            if Casting.GetLastCastResultId() == Config.Constants.CastResults.CAST_SUCCESS then
+                Comms.HandleAnnounce(string.format("\ar JUST MEZZED \aw -> \ay %s \aw <- Using: \at%s",
+                        mq.TLO.Spawn(mezId).CleanName(), mezSpell.RankName()), Config:GetSetting('MezAnnounceGroup'),
+                    Config:GetSetting('MezAnnounce'))
+            else
+                Comms.HandleAnnounce(string.format("\ar MEZ Failed \ag -> \ay %s \ag <-", mq.TLO.Spawn(mezId).CleanName()), Config:GetSetting('MezAnnounceGroup'),
+                    Config:GetSetting('MezAnnounce'))
+            end
         end
 
         mq.doevents()
     end
 
-    Targeting.SetTarget(currentTargetID)
+    Targeting.SetTarget(currentTargetID, true)
 end
 
 function Module:AEMezCheck()
@@ -563,7 +566,6 @@ function Module:AEMezCheck()
 
     if Combat.FindBestAutoTargetCheck() then
         Combat.FindBestAutoTarget()
-        Targeting.SetTarget(Config.Globals.AutoTargetID)
         self:MezNow(Config.Globals.AutoTargetID, true, true)
     end
 
@@ -699,8 +701,8 @@ function Module:ProcessMezList()
         return
     end
 
-    if not self.settings.DoSTMez then
-        Logger.log_debug("\ayProcessMezList(%d) :: Single Target Mezzing is off...")
+    if not self.settings.DoSTMez and Targeting.GetXTHaterCount() < self.settings.MezAECount then
+        Logger.log_debug("\ayProcessMezList(%d) :: Single Target Mezzing is off and under the needed AE count threshold, returning.")
         return
     end
 
@@ -734,25 +736,42 @@ function Module:ProcessMezList()
                         table.insert(removeList, id)
                     else
                         Logger.log_debug("\ayProcessMezList(%d) :: Mob needs mezed.", id)
-                        if mq.TLO.Me.Combat() or mq.TLO.Me.Casting() then
+                        if mq.TLO.Me.Combat() then
                             Logger.log_debug(
                                 " \awNOTICE:\ax Stopping Melee/Singing -- must retarget to start mez.")
                             Core.DoCmd("/attack off")
                             mq.delay("3s", function() return not mq.TLO.Me.Combat() end)
+                        end
+                        if mq.TLO.Me.Casting() then
                             Core.DoCmd("/stopcast")
                             Core.DoCmd("/stopsong")
                             mq.delay("3s", function() return not mq.TLO.Window("CastingWindow").Open() end)
                         end
 
-                        Targeting.SetTarget(id)
+                        -- Algar note 4/5/2025: This entire thing could likely be refactored. It works much better than before, where we would have ae mez checked once and then we would use 6 single target mezzes instead.
+                        -- The choice of using the autotarget for an AEMez really sucks on targets that die quickly; but I suppose the mez isn't as important if they do.
+                        -- There are also instances where we recast the AEMez because the autotarget hasn't updated in time, meaning, only the autotarget isn't mezzed, but better too often than not enough for the sake of the user.
+                        -- Overall, AE and ST Mez seem to play much better together with the addition of the check below.
+                        -- Additionally, the AE Mez checks will now still use the mez list instead of being fire and forget.
 
-                        local maxWait = 5000
-                        while not Casting.SpellReady(mezSpell) and maxWait > 0 do
-                            mq.delay(100)
-                            maxWait = maxWait - 100
+                        --mez the thing, if it isn't (an AE mez or someone else's mez may have hit it before we got to it). If it is, we will update timer below.
+                        Targeting.SetTarget(id)
+                        ---@diagnostic disable-next-line: undefined-field -- [Doesn't like the .ID on group assist target, but it is valid]
+                        if self.settings.DoAEMez and not mq.TLO.Target.Mezzed() and mq.TLO.Me.GroupAssistTarget.ID() ~= id then
+                            --lets make sure we didn't have more mobs dogpile on, making an AE mez more appropriate
+                            local aeMezSpell = self:GetAEMezSpell()
+                            if Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1 == 0) or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
+                                Logger.log_debug("High number of targets, let's check if AE Mez is needed again before we start singles.")
+                                self:AEMezCheck()
+                            end
                         end
 
-                        self:MezNow(id, false, true)
+                        --lets check to see if it is mezzed now/again and use a single target mez if necessary:
+                        Targeting.SetTarget(id)
+                        if self.settings.DoSTMez and not mq.TLO.Target.Mezzed() then
+                            Logger.log_debug("Single target mez is (still) needed.")
+                            self:MezNow(id, false, true)
+                        end
 
                         if mq.TLO.Target.Mezzed.ID() then
                             -- update the timer.
@@ -774,9 +793,7 @@ end
 function Module:DoMez()
     local mezSpell = self:GetMezSpell()
     local aeMezSpell = self:GetAEMezSpell()
-    if aeMezSpell and aeMezSpell() and Targeting.GetXTHaterCount() >= self.settings.MezAECount and
-        ((Core.MyClassIs("brd") and (mq.TLO.Me.GemTimer(aeMezSpell.RankName()) or -1 == 0)) or
-            (mq.TLO.Me.SpellReady(aeMezSpell.RankName.Name())() or Casting.AAReady("Beam of Slumber"))) then
+    if Targeting.GetXTHaterCount() >= self.settings.MezAECount and ((mq.TLO.Me.GemTimer(aeMezSpell.RankName())() or -1 == 0) or (self.settings.DoAAMez and mq.TLO.Me.AltAbilityReady("Beam of Slumber"))) then
         self:AEMezCheck()
     end
 
@@ -787,7 +804,7 @@ function Module:DoMez()
     end
 
     local tableSize = Tables.GetTableSize(self.TempSettings.MezTracker)
-    if mezSpell and mezSpell() and (Core.MyClassIs("brd") or mq.TLO.Me.SpellReady(mezSpell.RankName.Name())()) and tableSize >= 1 then
+    if mezSpell and mezSpell() and tableSize >= 1 then
         self:ProcessMezList()
     else
         Logger.log_verbose("DoMez() : Skipping Mez list processing: Spell(%s) Ready(%s) TableSize(%d)", mezSpell and mezSpell() or "None",
