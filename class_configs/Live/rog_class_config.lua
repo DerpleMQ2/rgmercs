@@ -587,7 +587,7 @@ return {
                 end,
                 custom_func = function(_)
                     if Config:GetSetting('ChaseOn') then
-                        if mq.TLO.Me.Sneaking() then
+                        if not mq.TLO.Me.Sneaking() then
                             Core.DoCmd("/doability sneak")
                         end
                     else
