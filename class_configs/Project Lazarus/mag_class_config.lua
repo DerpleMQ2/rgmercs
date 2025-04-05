@@ -880,6 +880,7 @@ _ClassConfig      = {
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
+                if not Config:GetSetting('DoAEDamage') then return false end
                 return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('PBAETargetCnt'), true)
             end,
         },
