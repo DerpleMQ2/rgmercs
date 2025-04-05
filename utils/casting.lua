@@ -457,8 +457,10 @@ function Casting.OkayToRez(corpseId)
             mq.delay(20)
             maxWait = maxWait - 20
             if maxWait <= 0 then
-                Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, but did not receive a con message. Aborting.", corpseId or 0)
-                return false
+                Logger.log_info(
+                    "\atEmuOkayToRez(): \arWarning! \atChecked corpse ID %d, but did not receive a con message. Allowing the check to proceed, but a spam condition is possible.",
+                    corpseId or 0)
+                --return false -- issues with combat rezzes, testing. 4/5/25 Algar
             end
         end
         mq.doevents('AlreadyRezzed')
