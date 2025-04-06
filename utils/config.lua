@@ -139,6 +139,8 @@ for i, v in ipairs(Config.Constants.ConColors) do Config.Constants.ConColorsName
 
 Config.Constants.Spires = { "First", "Second", "Third", }
 
+Config.Constants.LastGemRemem = { "Do Nothing", "Mem Previous Spell", "Mem Loadout Spell", }
+
 -- Defaults
 Config.DefaultConfig = {
 
@@ -922,15 +924,22 @@ Config.DefaultConfig = {
         FAQ = "Why am I not standing up from Feign Death when it fails?",
         Answer = "You can set the [StandFailedFD] option to true to automatically stand up if you fail to Feign Death.",
     },
-    ['RememLastSlot']        = {
-        DisplayName = "Mem After Buff:",
+    ['LastGemRemem']         = {
+        DisplayName = "Remem After Buff:",
         Category = "Spells/Abils",
         Index = 6,
-        Tooltip = "Re-memorize the spell on the last gem after we use that gem to buff.",
-        Default = true,
+        Tooltip = "Choose what do with the last gem slot after we use it to buff:\n" ..
+            "Do Nothing: Use the slot as needed for buffs, but don't rememorize anything.\n" ..
+            "Remem Previous Spell: Rememorize the spell that was in the slot before buffing, if there was one.\n" ..
+            "Remem Loadout Spell: Rememorize the spell from the current loadout, if there is one.",
+        Default = 3,
+        Min = 1,
+        Max = #Config.Constants.LastGemRemem,
+        Type = "Combo",
+        ComboOptions = Config.Constants.LastGemRemem,
         ConfigType = "Advanced",
-        FAQ = "Why am I constantly rememorizing spells in the last slot?",
-        Answer = "You can disable the Re-Mem After Buff option to stop this behavior.",
+        FAQ = "Why am I constantly rememorizing buffs in the last slot?",
+        Answer = "You can control how and what we will remem in the last gem after buffing on the Spells/Abils options tab.",
     },
     ['IgnoreLevelCheck']     = {
         DisplayName = "Ignore Spell Level Checks",
