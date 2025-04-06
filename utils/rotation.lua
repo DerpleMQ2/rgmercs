@@ -5,6 +5,7 @@ local Logger     = require("utils.logger")
 local Casting    = require("utils.casting")
 local Strings    = require("utils.strings")
 local Targeting  = require("utils.targeting")
+local Modules    = require("utils.modules")
 
 local Rotation   = { _version = '1.0', _name = "Rotation", _author = 'Derple', }
 Rotation.__index = Rotation
@@ -261,6 +262,7 @@ end
 --- @return number, boolean
 function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation, fnRotationCond)
     local oldSpellInSlot = mq.TLO.Me.Gem(Casting.UseGem)
+    local loadoutSpell   = (Modules.ModuleList.Class.SpellLoadOut[Casting.UseGem] and Modules.ModuleList.Class.SpellLoadOut[Casting.UseGem].spell)
     local stepsThisTime  = 0
     local lastStepIdx    = 0
     local anySuccess     = false
@@ -328,9 +330,14 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
         end
     end
 
-    if Config:GetSetting('RememLastSlot') and Targeting.GetXTHaterCount() == 0 and oldSpellInSlot() and mq.TLO.Me.Gem(Casting.UseGem)() ~= oldSpellInSlot.Name() then
-        Logger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, Casting.UseGem)
-        Casting.MemorizeSpell(Casting.UseGem, oldSpellInSlot.Name(), false, 15000)
+    if Targeting.GetXTHaterCount() == 0 then -- no magic numbers, just 4 u bb
+        if Config.Constants.LastGemRemem[Config:GetSetting('LastGemRemem')] == "Mem Previous Spell" and oldSpellInSlot() and mq.TLO.Me.Gem(Casting.UseGem)() ~= oldSpellInSlot.Name() then
+            Logger.log_debug("\ayRestoring %s in slot %d", oldSpellInSlot, Casting.UseGem)
+            Casting.MemorizeSpell(Casting.UseGem, oldSpellInSlot.Name(), false, 15000)
+        elseif Config.Constants.LastGemRemem[Config:GetSetting('LastGemRemem')] == "Mem Loadout Spell" and loadoutSpell and mq.TLO.Me.Gem(Casting.UseGem)() ~= loadoutSpell.RankName() then
+            Logger.log_debug("\ayRestoring %s in slot %d", loadoutSpell.RankName(), Casting.UseGem)
+            Casting.MemorizeSpell(Casting.UseGem, loadoutSpell.RankName(), false, 15000)
+        end
     end
 
     -- Move to the next step
