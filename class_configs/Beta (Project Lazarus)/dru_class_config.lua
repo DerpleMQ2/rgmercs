@@ -1148,8 +1148,8 @@ local _ClassConfig = {
             return true
         end,
         RainCheck = function(target) -- I made a funny
-            if not (Config:GetSetting('DoRain') and Config:GetSetting('DoAEDamage')) then return false end
-            return Targeting.GetTargetDistance() >= Config:GetSetting('RainDistance') and Targeting.MobNotLowHP(target)
+            if not Config:GetSetting('DoRain') or not Config:GetSetting('DoAEDamage') then return false end
+            return Targeting.GetTargetDistance() >= Config:GetSetting('RainDistance')
         end,
     },
     --TODO: These are nearly all in need of Display and Tooltip updates.
