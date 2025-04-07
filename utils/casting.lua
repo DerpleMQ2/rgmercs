@@ -1366,26 +1366,30 @@ function Casting.UseItem(itemName, targetId)
 
     mq.delay(2)
 
-    if not item.CastTime() or item.CastTime() == 0 then
-        -- slight delay for instant casts
-        mq.delay(4)
+    -- Not satisifed with below, I intend to refactor to use waitcastfinish(); I'll adjust waiting to start at that time.
+    if not item.CastTime() or item.CastTime() < 101 then
+        -- slight delay for instant casts, bypass checking for cast window on faster casts, as the client may never see the cast at all.
+        local delay = item.CastTime() or 20
+        mq.delay(delay)
     else
         local maxWait = 1000
         while maxWait > 0 and not me.Casting() do
             Logger.log_verbose("Waiting for item to start casting...")
             mq.delay(50)
             mq.doevents()
+            -- in case very fast casts serverside don't make it to the client
+            -- this was originall added for 100ms clickies on laz that don't ever show casting (which has now been addressed above), but left as a fallback
             if not me.ItemReady(itemName) then
                 Logger.log_debug("No start cast noted, but item now reports on cooldown, moving on.")
                 break
-            end -- in case very fast casts serverside don't make it to the client; laz has some 100ms clickies that don't ever show casting
+            end
             maxWait = maxWait - 50
         end
         mq.delay(item.CastTime(), function() return not me.Casting() end)
 
         -- pick up any additonal server lag.
         while me.Casting() do
-            mq.delay(5)
+            mq.delay(10)
             mq.doevents()
         end
     end
