@@ -1177,9 +1177,9 @@ local _ClassConfig = {
                 name = "AESpearNuke",
                 type = "Spell",
                 tooltip = Tooltips.SpearNuke,
-                cond = function(self)
+                cond = function(self, spell, target)
                     if not (Config:GetSetting('DoAESpearNuke') and Config:GetSetting('DoAEDamage')) then return false end
-                    return Casting.HaveManaToNuke()
+                    return Casting.HaveManaToNuke() and Targeting.InSpellRange(spell, target)
                 end,
             },
             {
