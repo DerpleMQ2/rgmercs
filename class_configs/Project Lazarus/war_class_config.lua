@@ -678,7 +678,7 @@ local _ClassConfig = {
                 type = "Disc",
                 cond = function(self, discSpell)
                     local standDisc = self:GetResolvedActionMapItem('StandDisc')
-                    return mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName()
+                    return (not standDisc or mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName())
                 end,
             },
             { --shares effect with StandDisc and Warlord's Bravery, offset from AbsorbDisc for automation flow/coverage
