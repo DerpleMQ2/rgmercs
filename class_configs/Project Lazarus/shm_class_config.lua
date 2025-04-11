@@ -1648,7 +1648,6 @@ local _ClassConfig = {
                 { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
                 { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
@@ -1665,7 +1664,6 @@ local _ClassConfig = {
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
                 { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
@@ -1683,7 +1681,6 @@ local _ClassConfig = {
                 { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
                 { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
@@ -1701,7 +1698,6 @@ local _ClassConfig = {
                 { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
                 { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
@@ -1719,7 +1715,6 @@ local _ClassConfig = {
                 { name = "TwinHealNuke",      cond = function(self) return Core.IsModeActive("Heal") and Config:GetSetting('DoTwinHeal') end, },          -- 85-125
                 { name = "FastPoisonNuke",    cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 73-125
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, },                                          -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },                                              -- 52-125 Heal
                 { name = "CurseDot1",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 34-??? Heal, 34-125 Hybrid
                 { name = "SaryrnDot",         cond = function(self) return not (Core.IsModeActive("Heal") and not Config:GetSetting('DoHealDPS')) end, }, -- 8-?? Heal, 8-125 Hybrid
                 { name = "AfflictionDot",     cond = function(self) return Core.IsModeActive("Hybrid") end, },                                            -- 92-125 Hybrid (Boss Only)
@@ -1734,7 +1729,6 @@ local _ClassConfig = {
             cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
             spells = {
                 { name = "TempHPBuff",        cond = function(self) return Config:GetSetting('DoTempHP') end, }, -- 81-125
-                { name = "CureSpell",         cond = function(self) return Core.IsModeActive("Heal") end, },     -- 52-125 Heal
                 { name = "GroupHealProcBuff", cond = function(self) return Core.IsModeActive("Heal") end, },     -- 101-125
                 { name = "PoisonNuke",        cond = function(self) return Core.IsModeActive("Hybrid") end, },   -- Hey, why not?
                 { name = "SlowProcBuff", },                                                                      --fallback
