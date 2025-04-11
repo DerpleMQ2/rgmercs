@@ -687,7 +687,7 @@ local _ClassConfig = {
                 cond = function(self, itemName)
                     local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
                     local standDisc = Core.GetResolvedActionMapItem('StandDisc')
-                    return mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and not mq.TLO.Me.Song(absorbDisc)()
+                    return (not standDisc or mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName()) and not mq.TLO.Me.Song(absorbDisc)()
                 end,
             },
             { --See above entries for notes
@@ -696,7 +696,7 @@ local _ClassConfig = {
                 cond = function(self, aaName)
                     local absorbDisc = Core.GetResolvedActionMapItem('AbsorbDisc')
                     local standDisc = Core.GetResolvedActionMapItem('StandDisc')
-                    return mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName() and mq.TLO.Me.Song(absorbDisc)() and not Casting.IHaveBuff("Guardian's Boon") and
+                    return (not standDisc or mq.TLO.Me.ActiveDisc.Name() ~= standDisc.RankName()) and mq.TLO.Me.Song(absorbDisc)() and not Casting.IHaveBuff("Guardian's Boon") and
                         not Casting.IHaveBuff("Guardian's Bravery")
                 end,
             },

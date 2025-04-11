@@ -1580,7 +1580,7 @@ return {
             Answer = "Enable [DoTankPet] to use abilities designed for your pet to tank.\n" ..
                 "Disable [DoTankPet] to use abilities designed for your pet to DPS.",
         },
-        ['DoPetHeals']     = {
+        ['DoPetHealSpell'] = {
             DisplayName = "Do Pet Heals",
             Category = "Pet Mgmt.",
             Index = 2,
