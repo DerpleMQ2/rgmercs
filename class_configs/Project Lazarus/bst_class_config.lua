@@ -642,7 +642,7 @@ return {
             name = 'PetHealSpell',
             state = 1,
             steps = 1,
-            load_cond = function() return Config:GetSetting('DoPetHeals') end,
+            load_cond = function() return Config:GetSetting('DoPetHealSpell') end,
             cond = function(self, target) return target.ID() == mq.TLO.Me.Pet.ID() and Targeting.MainHealsNeeded(mq.TLO.Me.Pet) end,
         },
         {
@@ -1403,7 +1403,7 @@ return {
             gem = 1,
             spells = {
                 { name = "HealSpell",    cond = function(self) return Config:GetSetting('DoHeals') end, },
-                { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHeals') end, },
+                { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "Icelance1", },
 
             },
@@ -1411,7 +1411,7 @@ return {
         {
             gem = 2,
             spells = {
-                { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHeals') end, },
+                { name = "PetHealSpell", cond = function(self) return Config:GetSetting('DoPetHealSpell') end, },
                 { name = "Icelance1", },
                 { name = "AERoar",       cond = function(self) return Config:GetSetting('DoAERoar') end, },
                 { name = "Icelance2", },
@@ -1612,7 +1612,7 @@ return {
             Answer = "Enable [DoTankPet] to use abilities designed for your pet to tank.\n" ..
                 "Disable [DoTankPet] to use abilities designed for your pet to DPS.",
         },
-        ['DoPetHeals']     = {
+        ['DoPetHealSpell'] = {
             DisplayName = "Do Pet Heals",
             Category = "Pet Mgmt.",
             Index = 2,
@@ -1620,7 +1620,7 @@ return {
             Default = true,
             RequiresLoadoutChange = true,
             FAQ = "My Pet Keeps Dying, What Can I Do?",
-            Answer = "Make sure you have [DoPetHeals] enabled.\n" ..
+            Answer = "Make sure you have [DoPetHealSpell] enabled.\n" ..
                 "If your pet is still dying, consider using [PetHealPct] to adjust the pet heal threshold.",
         },
         ['DoPetSlow']      = {
@@ -1697,7 +1697,7 @@ return {
             RequiresLoadoutChange = true,
             FAQ = "I want to help with healing, what can I do?",
             Answer = "Make sure you have [DoHeals] enabled.\n" ..
-                "If you want to help with pet healing, enable [DoPetHeals].",
+                "If you want to help with pet healing, enable [DoPetHealSpell].",
         },
         ['DoSlow']         = {
             DisplayName = "Do Slow",
