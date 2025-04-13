@@ -1116,7 +1116,7 @@ Config.DefaultConfig = {
         Index = 4,
         Tooltip =
         "Automatically use counter actions (such as the Aureate's Bane AA to counter Curse of Subjugation in TOB zones.",
-        Default = false,
+        Default = (mq.TLO.MacroQuest.BuildName() or ""):lower() ~= "emu",
         FAQ = "How do I get rid of the TOB Debuff, Curse of Subjugation?",
         Answer =
         "If you select to Use Aureate's Bane on the Buff Tab of the main config options, you will attempt to clear Curse of Subjugation automatically.",
