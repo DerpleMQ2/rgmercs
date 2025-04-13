@@ -1657,11 +1657,11 @@ local _ClassConfig = {
         PreEngage = function(target)
             local openerAbility = Core.GetResolvedActionMapItem('ArrowOpener')
 
-            if not openerAbility then return end
+            if not Config:GetSetting("DoOpener") or not openerAbility then return end
 
             Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility.RankName.Name() or "None")
 
-            if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= Config:GetSetting("ManaToNuke") and Casting.TargetedSpellReady(openerAbility, target.ID(), false) then
+            if openerAbility and openerAbility() and mq.TLO.Me.PctMana() >= Config:GetSetting("ManaToNuke") and Casting.SpellReady(openerAbility) then
                 Core.DoCmd("/squelch /face")
                 Casting.UseSpell(openerAbility.RankName.Name(), target.ID(), false)
                 Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility.RankName.Name() or "None")
