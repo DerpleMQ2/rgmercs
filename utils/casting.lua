@@ -293,7 +293,7 @@ function Casting.PeerBuffCheck(spellId, target)
     end
 
     if DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000):lower() ~= "null" then
-        Logger.log_error("PeerBuffCheck: Tried to check a peer's buff, but that peer seems to have it blocked. Spell:%s(ID:%d), Target:%s(ID:%d)", spellName, spellId, targetName,
+        Logger.log_verbose("PeerBuffCheck: Tried to check a peer's buff, but that peer seems to have it blocked. Spell:%s(ID:%d), Target:%s(ID:%d)", spellName, spellId, targetName,
             targetId)
         return false
     end
@@ -587,7 +587,7 @@ function Casting.MemorizeSpell(gem, spell, waitSpellReady, maxWait)
 
     Casting.Memorizing = true
 
-    while (mq.TLO.Me.Gem(gem)() ~= spell or (waitSpellReady and not mq.TLO.Me.SpellReady(gem)())) and maxWait > 0 do
+    while (mq.TLO.Me.Gem(gem)() ~= mq.TLO.Spell(spell).Name() or (waitSpellReady and not mq.TLO.Me.SpellReady(gem)())) and maxWait > 0 do
         local me = mq.TLO.Me
         Logger.log_debug("\ayWaiting for '%s' to load in slot %d'...", spell, gem)
         if me.CombatState():lower() == "combat" or me.Casting() or me.Moving() or mq.TLO.Stick.Active() or mq.TLO.Navigation.Active() or mq.TLO.MoveTo.Moving() or mq.TLO.AdvPath.Following() then
