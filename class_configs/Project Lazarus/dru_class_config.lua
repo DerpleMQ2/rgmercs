@@ -252,17 +252,17 @@ local _ClassConfig = {
             'Reanimation',    --emu only
         },
         ['CurePoison'] = {
-            "Eradicate Poison",
+            --"Eradicate Poison",
             "Counteract Poison",
             "Cure Poison",
         },
         ['CureDisease'] = {
-            "Eradicate Disease",
+            --"Eradicate Disease",
             "Counteract Disease",
             "Cure Disease",
         },
         ['CureCurse'] = {
-            "Eradicate Curse",
+            --"Eradicate Curse",
             "Remove Greater Curse",
             "Remove Curse",
             "Remove Lesser Curse",

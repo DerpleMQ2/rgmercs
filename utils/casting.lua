@@ -446,29 +446,39 @@ function Casting.CanAlliance()
     return true
 end
 
--- Function to ensure that a corpse we've detected hasn't previously accepted a rez already (stops spam rez on emu)
+-- Function to ensure that a corpse we've detected hasn't previously accepted a rez already (stops spam rez on emu).
 function Casting.OkayToRez(corpseId)
     if Core.OnEMU() then
         Targeting.SetTarget(corpseId, true)
         Core.DoCmd("/consider")
+
         local maxWait = 1000
-        while not Config.Globals.CorpseConned do
-            mq.doevents()
-            mq.delay(20)
-            maxWait = maxWait - 20
+        while maxWait > 0 do
+            mq.doevents('CorpseConned')
+            mq.delay(50)
+            if not mq.TLO.Spawn(corpseId)() then
+                Logger.log_debug("\atEmuOkayToRez(): Corpse ID %d no longer exists, did someone else rez it? Aborting.", corpseId or 0)
+                return false
+            end
+            if Config.Globals.CorpseConned then
+                mq.doevents('AlreadyRezzed')
+                if Tables.TableContains(Config.Globals.RezzedCorpses, corpseId) then
+                    Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, and it appears to have been rezzed already. Aborting.", corpseId or 0)
+                    return false
+                else
+                    Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, and it appears to be in need of a rez. Proceeding.", corpseId or 0)
+                    break
+                end
+            end
+
+            maxWait = maxWait - 50
             if maxWait <= 0 then
                 Logger.log_info(
-                    "\atEmuOkayToRez(): \arWarning! \atChecked corpse ID %d, but did not receive a con message. Allowing the check to proceed, but a spam condition is possible.",
+                    "\atEmuOkayToRez(): \arWarning! \atChecked corpse ID %d, but did not receive a con message. Allowing the check to proceed, but this may rez a corpse that has previously received one.",
                     corpseId or 0)
-                --return false -- issues with combat rezzes, testing. 4/5/25 Algar
             end
         end
-        mq.doevents('AlreadyRezzed')
         Config.Globals.CorpseConned = false
-        if Tables.TableContains(Config.Globals.RezzedCorpses, corpseId) then
-            Logger.log_debug("\atEmuOkayToRez(): Checked corpse ID %d, and it appears to have been rezzed already. Aborting.", corpseId or 0)
-            return false
-        end
     end
 
     if mq.TLO.Spawn(corpseId).Distance3D() > 25 then
