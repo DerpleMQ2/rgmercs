@@ -137,7 +137,7 @@ Config.Constants.ConColors         = {
 Config.Constants.ConColorsNameToId = {}
 for i, v in ipairs(Config.Constants.ConColors) do Config.Constants.ConColorsNameToId[v:upper()] = i end
 
-Config.Constants.Spires = { "First", "Second", "Third", }
+Config.Constants.SpireChoices = { "First", "Second", "Third", "Disabled", }
 
 Config.Constants.LastGemRemem = { "Do Nothing", "Mem Previous Spell", "Mem Loadout Spell", }
 
