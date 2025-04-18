@@ -24,7 +24,7 @@ local _ClassConfig = {
                 return Casting.UseAA("Purified Spirits", targetId)
             end
 
-            local cureSpell = "None"
+            local cureSpell
 
             if type:lower() == "disease" then
                 cureSpell = Core.GetResolvedActionMapItem('CureDisease')
@@ -34,8 +34,6 @@ local _ClassConfig = {
                 cureSpell = Core.GetResolvedActionMapItem('CureCurse')
             elseif type:lower() == "corruption" then
                 cureSpell = Core.GetResolvedActionMapItem('CureCorrupt')
-            else
-                return false
             end
 
             if not cureSpell or not cureSpell() then return false end
@@ -597,8 +595,8 @@ local _ClassConfig = {
             },
             { -- Spire, the SpireChoice setting will determine which ability is displayed/used.
                 name_func = function(self)
-                    local spireChoice = Config.Constants.Spires[Config:GetSetting('SpireChoice')]
-                    return string.format("Fundament: %s Spire of Nature", spireChoice)
+                    local spireAbil = string.format("Fundament: %s Spire of Nature", Config.Constants.SpireChoices[Config:GetSetting('SpireChoice') or 4])
+                    return Casting.CanUseAA(spireAbil) and spireAbil or "Spire Not Purchased/Selected"
                 end,
                 type = "AA",
             },
@@ -661,11 +659,12 @@ local _ClassConfig = {
                 name = "Communion of the Cheetah",
                 type = "AA",
                 cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoMoveBuffs') then return false end
                     return Casting.GroupBuffAACheck(aaName)
                 end,
             },
             {
-                name = "Flight of Eagles", --this needs a helper function
+                name = "Flight of Eagles",
                 type = "AA",
                 active_cond = function(self, aaName)
                     return Casting.IHaveBuff(Casting.GetAASpell())
@@ -676,7 +675,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "MoveSpells", --needs the same helper function
+                name = "MoveSpells",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell, target)
@@ -741,6 +740,7 @@ local _ClassConfig = {
                 name = "Communion of the Cheetah",
                 type = "AA",
                 cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoMoveBuffs') then return false end
                     return Casting.SelfBuffAACheck(aaName)
                 end,
             },
@@ -1203,10 +1203,10 @@ local _ClassConfig = {
                 "Second Spire: Healing Power Buff to Self.\n" ..
                 "Third Spire: Large Group HP Buff.",
             Type = "Combo",
-            ComboOptions = Config.Constants.Spires,
+            ComboOptions = Config.Constants.SpireChoices,
             Default = 3,
             Min = 1,
-            Max = #Config.Constants.Spires,
+            Max = #Config.Constants.SpireChoices,
             FAQ = "Why am I using the wrong spire?",
             Answer = "You can choose which spire you prefer in the Class Options.",
         },
@@ -1223,7 +1223,7 @@ local _ClassConfig = {
             Min = 1,
             Max = 2,
             FAQ = "Why am I using the wrong wolf form?",
-            Answer = "You can choose which spire you prefer in the Class Options.",
+            Answer = "You can choose which wolf form you prefer in the Class Options.",
         },
         -- ['DoBurstDS']         = {
         --     DisplayName = "Do Burst DS",
