@@ -1406,7 +1406,7 @@ _ClassConfig      = {
         },
         ['Burn'] = {
             {
-                name = "Companion's Fury",
+                name = "Frenzied Burnout",
                 type = "AA",
             },
             {
