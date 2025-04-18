@@ -1076,7 +1076,7 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Companion's Fury",
+                name = "Frenzy of the Dead",
                 type = "AA",
             },
             {
