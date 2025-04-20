@@ -1769,7 +1769,7 @@ _ClassConfig      = {
                 name = "Summon Modulation Shard",
                 type = "AA",
                 cond = function(self, aaName, target)
-                    if not Config:GetSetting('SummonModRods') or not Casting.CanUseAA(aaName) then return false end
+                    if not Config:GetSetting('SummonModRods') or not Casting.CanUseAA(aaName) or not Targeting.TargetIsACaster(target) then return false end
                     local modRodItem = mq.TLO.Spell(aaName).RankName.Base(1)()
                     return modRodItem and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
                         (mq.TLO.Cursor.ID() or 0) == 0
@@ -1784,7 +1784,7 @@ _ClassConfig      = {
                 name = "ManaRodSummon",
                 type = "Spell",
                 cond = function(self, spell, target)
-                    if Casting.CanUseAA("Summon Modulation Shard") or not Config:GetSetting('SummonModRods') then return false end
+                    if Casting.CanUseAA("Summon Modulation Shard") or not Config:GetSetting('SummonModRods') or not Targeting.TargetIsACaster(target) then return false end
                     local modRodItem = spell.RankName.Base(1)()
                     return modRodItem and DanNet.query(target.CleanName(), string.format("FindItemCount[%d]", modRodItem), 1000) == "0" and
                         (mq.TLO.Cursor.ID() or 0) == 0
