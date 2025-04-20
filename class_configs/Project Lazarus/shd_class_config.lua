@@ -1001,6 +1001,9 @@ local _ClassConfig = {
             {
                 name = "Visage of Death",
                 type = "AA",
+                cond = function(self, aaName)
+                    return Config:GetSetting('DoVisage')
+                end,
             },
             {
                 name = "Intensity of the Resolute",
@@ -1618,10 +1621,20 @@ local _ClassConfig = {
             Answer = "During certain level ranges, it may be helpful to use the Mana Proc (Mental) line over the HP proc (Terror) line.\n" ..
                 "This can be adjusted on the Buffs/Debuffs tab.",
         },
+        ['DoVisage']        = {
+            DisplayName = "Use Visage of Death",
+            Category = "Buffs/Debuffs",
+            Index = 5,
+            Tooltip = "Use the Visage of Death AA.",
+            Default = true,
+            FAQ = "Why is my health draining so quickly out of combat?",
+            Answer =
+            "You may have Visage of Death enabled, which has a sizable self-damage component. While we will attempt to autocancel this in downtime, you can disable VoD use in the Class options.",
+        },
         ['DoVetAA']         = {
             DisplayName = "Use Vet AA",
             Category = "Buffs/Debuffs",
-            Index = 5,
+            Index = 6,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
             FAQ = "What Vet AA's does SHD use?",
