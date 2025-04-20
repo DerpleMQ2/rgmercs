@@ -852,6 +852,15 @@ local _ClassConfig = {
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
+            {
+                name = "Emergency Visage Cancel",
+                type = "CustomFunc",
+                custom_func = function(self)
+                    if mq.TLO.Me.PctHPs() < 25 and mq.TLO.Me.Buff("Visage of Death")() then
+                        Core.DoCmd("/removebuff \"Visage of Death\"")
+                    end
+                end,
+            },
         },
         ['PetSummon'] = {
             {
