@@ -4,7 +4,7 @@ local GitCommit  = require('extras.version')
 local Icons      = require('mq.ICONS')
 
 -- Preload these incase any modules need them.
-local PackageMan = require('mq/PackageMan')
+local PackageMan = require('mq.PackageMan')
 PackageMan.Require('lsqlite3')
 PackageMan.Require('luafilesystem', 'lfs')
 

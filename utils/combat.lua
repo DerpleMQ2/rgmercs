@@ -440,7 +440,11 @@ function Combat.FindBestAutoTarget(validateFn)
                 Logger.log_verbose(" FindTarget Setting Target To %s [%d]", assistTarget.CleanName(),
                     assistTarget.ID())
                 Config.Globals.AutoTargetID = assistTarget.ID()
-                Targeting.AddXTByName(1, assistTarget.Name())
+
+                -- if not already an XTHater then add it.
+                if not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
+                    Targeting.AddXTByName(1, assistTarget.Name())
+                end
             end
         else
             Combat.SetAutoTargetToGroupOrRaidTarget()
@@ -451,7 +455,7 @@ function Combat.FindBestAutoTarget(validateFn)
         mq.TLO.Target.ID())
 
     if Config.Globals.AutoTargetID > 0 and mq.TLO.Target.ID() ~= Config.Globals.AutoTargetID then
-        if Config:GetSetting('AssistOutside') and mq.TLO.Me.XTarget(1).ID() ~= Config.Globals.AutoTargetID then
+        if Config:GetSetting('AssistOutside') and not Targeting.IsSpawnXTHater(Config.Globals.AutoTargetID) then
             Targeting.AddXTByID(1, Config.Globals.AutoTargetID)
         end
 

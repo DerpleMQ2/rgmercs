@@ -262,7 +262,8 @@ end
 --- @return table: A table containing the IDs of the top haters.
 function Targeting.GetXTHaterIDs(printDebug)
     local xtCount = mq.TLO.Me.XTarget() or 0
-    local haters = {}
+    local uniqHaters = Set.new({})
+
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
@@ -270,12 +271,11 @@ function Targeting.GetXTHaterIDs(printDebug)
             if printDebug then
                 Logger.log_verbose("GetXTHaters(): XT(%d) Counting %s(%d) as a hater.", i, xtarg.CleanName() or "None", xtarg.ID())
             end
-
-            table.insert(haters, xtarg.ID())
+            uniqHaters:add(xtarg.ID())
         end
     end
 
-    return haters
+    return uniqHaters:toList()
 end
 
 --- Gets the count of XTHaters.
@@ -303,13 +303,23 @@ end
 
 --- Checks if the given spawn is an XTHater.
 --- @param spawnId number The ID of the spawn to check.
+--- @param autoHater boolean? required to be an autohater
 --- @return boolean True if the spawn is an XTHater, false otherwise.
-function Targeting.IsSpawnXTHater(spawnId)
+function Targeting.IsSpawnXTHater(spawnId, autoHater)
     local xtCount = mq.TLO.Me.XTarget() or 0
 
     for i = 1, xtCount do
         local xtarg = mq.TLO.Me.XTarget(i)
-        if xtarg and xtarg.ID() == spawnId then return true end
+        if xtarg and xtarg.ID() == spawnId then
+            if autoHater == true then
+                if xtarg.TargetType():lower() == "auto hater" then
+                    return true
+                end
+                -- if we got here then we continue iterating.
+            else -- false or nil
+                return true
+            end
+        end
     end
 
     return false
