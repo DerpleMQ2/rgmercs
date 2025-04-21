@@ -246,7 +246,7 @@ local _ClassConfig = {
 
             if (mobs or xtCount) < Config:GetSetting('AETauntCnt') then return false end
 
-            local tauntme = {}
+            local tauntme = Set.new({})
             for i = 1, xtCount do
                 local xtarg = mq.TLO.Me.XTarget(i)
                 if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and xtarg.PctAggro() < 100 and (xtarg.Distance() or 999) <= 50 then
@@ -254,10 +254,10 @@ local _ClassConfig = {
                         Logger.log_verbose("AETauntCheck(): XT(%d) Counting %s(%d) as a hater eligible to AE Taunt.", i, xtarg.CleanName() or "None",
                             xtarg.ID())
                     end
-                    table.insert(tauntme, xtarg.ID())
+                    tauntme:add(xtarg.ID())
                 end
             end
-            return #tauntme > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme < mobs)
+            return #tauntme:toList() > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme:toList() < mobs)
         end,
         --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
         AETargetCheck = function(printDebug)
@@ -283,17 +283,17 @@ local _ClassConfig = {
         DefensiveDiscCheck = function(printDebug)
             local xtCount = mq.TLO.Me.XTarget() or 0
             if xtCount < Config:GetSetting('DiscCount') then return false end
-            local haters = {}
+            local haters = Set.New({})
             for i = 1, xtCount do
                 local xtarg = mq.TLO.Me.XTarget(i)
                 if xtarg and xtarg.ID() > 0 and ((xtarg.Aggressive() or xtarg.TargetType():lower() == "auto hater")) and (xtarg.Distance() or 999) <= 30 then
                     if printDebug then
                         Logger.log_verbose("DefensiveDiscCheck(): XT(%d) Counting %s(%d) as a hater in range.", i, xtarg.CleanName() or "None", xtarg.ID())
                     end
-                    table.insert(haters, xtarg.ID())
+                    haters:add(xtarg.ID())
                 end
             end
-            return #haters >= Config:GetSetting('DiscCount')
+            return #haters:toList() >= Config:GetSetting('DiscCount')
         end,
         DiscOverwriteCheck = function(self)
             local defenseBuff = Core.GetResolvedActionMapItem('DefenseACBuff')

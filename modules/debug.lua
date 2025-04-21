@@ -181,6 +181,7 @@ function Module:Exec(scriptText)
     locals.Rotation    = setmetatable({}, { __index = require('utils.rotation'), })
     locals.Strings     = setmetatable({}, { __index = require('utils.strings'), })
     locals.Tables      = setmetatable({}, { __index = require('utils.tables'), })
+    locals.Set         = setmetatable({}, { __index = require('mq.set'), })
 
 
     locals.print   = function(...)
