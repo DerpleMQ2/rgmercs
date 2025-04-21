@@ -167,13 +167,14 @@ end
 --- Helper that will perform complex checks for presence and stacking of buffs (and any triggers) using the best (determined) method available.
 --- @param spell MQSpell The name of the spell to check.
 --- @param target MQTarget|MQSpawn|MQCharacter? The target to check for the buff.
+--- @param spellId integer|nil A directly passed ID to check, used to deconflict for AA or special situations.
 --- @return boolean True if the PC checking should cast the buff, false otherwise.
-function Casting.GroupBuffCheck(spell, target)
+function Casting.GroupBuffCheck(spell, target, spellId)
     if not (spell and spell()) then return false end
     if not (target and target()) then return false end
 
     ---@diagnostic disable-next-line: undefined-field
-    local spellId = mq.TLO.Me.Spell(spell).ID() or spell.RankName.ID() -- this checks the book first but allows us to still pass spells we don't know as variables to check
+    if not spellId then spellId = mq.TLO.Me.Spell(spell).ID() or spell.RankName.ID() end -- this checks the book first but allows us to still pass spells we don't know as variables to check
 
     local ret = false
 
@@ -202,7 +203,9 @@ end
 
 function Casting.GroupBuffAACheck(aaName, target)
     if not Casting.CanUseAA(aaName) then return false end
-    return Casting.GroupBuffCheck(mq.TLO.Me.AltAbility(aaName).Spell, target)
+    local aaSpell = mq.TLO.Me.AltAbility(aaName).Spell
+    if not aaSpell or not aaSpell() then return false end
+    return Casting.GroupBuffCheck(aaSpell, target, aaSpell.ID())
 end
 
 --- Complex buff check that will check for presence and stacking of the buff (and any triggers) on a target.

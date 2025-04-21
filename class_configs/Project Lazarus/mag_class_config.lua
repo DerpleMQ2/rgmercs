@@ -1290,6 +1290,17 @@ _ClassConfig      = {
         },
         ['PetHealPoint'] = {
             {
+                name = "Companion's Blessing",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return mq.TLO.Me.Pet.PctHPs() <= Config:GetSetting('BigHealPoint')
+                end,
+            },
+            {
+                name = "Mend Companion",
+                type = "AA",
+            },
+            {
                 name = "PetHealSpell",
                 type = "Spell",
             },
