@@ -5,6 +5,7 @@ local Targeting    = require("utils.Targeting")
 local Casting      = require("utils.casting")
 local ItemManager  = require("utils.item_manager")
 local Logger       = require("utils.logger")
+local Set          = require('mq.set')
 
 local _ClassConfig = {
     _version            = "2.2 - Project Lazarus",
