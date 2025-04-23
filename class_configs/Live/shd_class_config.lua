@@ -75,7 +75,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version            = "2.2 - Live",
+    _version            = "3.0 - Live",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -715,6 +715,7 @@ local _ClassConfig = {
                     end
                     tauntme:add(xtarg.ID())
                 end
+                if not Config:GetSetting('SafeAETaunt') and #tauntme:toList() > 0 then return true end --no need to find more than one if we don't care about safe taunt
             end
             return #tauntme:toList() > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme:toList() < mobs)
         end,
@@ -731,8 +732,9 @@ local _ClassConfig = {
                     end
                     haters:add(xtarg.ID())
                 end
+                if #haters:toList() >= Config:GetSetting('DiscCount') then return true end -- no need to keep counting once this threshold has been reached
             end
-            return #haters:toList() >= Config:GetSetting('DiscCount')
+            return false
         end,
         --function to space out Epic and Omens Chest with Mortal Coil old-school swarm style. Epic has an override condition to fire anyway on named.
         LeechCheck = function(self)
@@ -790,10 +792,28 @@ local _ClassConfig = {
             name = 'HateTools',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             load_cond = function() return Core.IsTanking() end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                ---@diagnostic disable-next-line: undefined-field -- doesn't like secondarypct
+                return combat_state == "Combat" and (mq.TLO.Me.PctAggro() < 100 or (mq.TLO.Target.SecondaryPctAggro() or 0) > 60 or Targeting.IsNamed(Targeting.GetAutoTarget()))
+            end,
+        },
+        { --Actions that establish or maintain hatred
+            name = 'AEHateTools',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            load_cond = function()
+                return Core.IsTanking() and
+                    ((Config:GetSetting('AETauntSpell') > 1 and Core.GetResolvedActionMapItem('AETauntSpell')) or (Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))))
+            end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.AETauntCheck(true)
             end,
         },
         { --Dynamic weapon swapping if UseBandolier is toggled
@@ -801,14 +821,13 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function() return Config:GetSetting('UseBandolier') end,
-            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
             end,
         },
         { --Defensive actions triggered by low HP
-            name = 'EmergencyDefenses',
+            name = 'Emergency',
             state = 1,
             steps = 1,
             doFullRotation = true,
@@ -828,13 +847,24 @@ local _ClassConfig = {
             end,
         },
         { --Defensive actions used proactively to prevent emergencies
-            name = 'Defenses',
+            name = 'DefensiveDiscs',
+            state = 1,
+            steps = 1,
+            load_cond = function() return Core.IsTanking() end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Casting.NoDiscActive() and mq.TLO.Me.PctHPs() <= Config:GetSetting('DefenseStart') or
+                    Targeting.IsNamed(Targeting.GetAutoTarget()) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true)
+            end,
+        },
+        { -- Leech Effect (Epic, OoW BP, Coating) maintenance
+            name = 'LeechEffects',
             state = 1,
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                --need to look at rotation and decide if it should fire during emergencies. leaning towards no
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyLockout')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') then return false end
+                return combat_state == "Combat" and self.ClassConfig.HelperFunctions.LeechCheck(self)
             end,
         },
         { --Keep things from running
@@ -844,17 +874,18 @@ local _ClassConfig = {
             load_cond = function() return Config:GetSetting('DoSnare') end,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart') and
-                    Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat" and Targeting.GetXTHaterCount() <= Config:GetSetting('SnareCount')
             end,
         },
         { --Offensive actions to temporarily boost damage dealt
             name = 'Burn',
             state = 1,
-            steps = 2,
+            steps = 4,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat" and Casting.BurnCheck()
             end,
         },
         { --Non-spell actions that can be used during/between casts
@@ -863,7 +894,8 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat"
             end,
         },
         { --DPS Spells, includes recourse/gift maintenance
@@ -872,7 +904,8 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
+                if mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                return combat_state == "Combat"
             end,
         },
     },
@@ -1089,32 +1122,31 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['EmergencyDefenses'] = {
+        ['Emergency'] = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
             --Abilities should be placed in order of lowest to highest triggered HP thresholds
-            --Side Note: I reserve Bargain for manual use while driving, the omission is intentional.
-            --Some conditionals are commented out while I tweak percentages (or determine if they are necessary)
-            {
-                name = "Armor of Experience",
-                type = "AA",
-                tooltip = Tooltips.ArmorofExperience,
-                cond = function(self, aaName)
-                    return mq.TLO.Me.PctHPs() < 25 and Config:GetSetting('DoVetAA')
-                end,
-            },
+            --Side Note: I reserve Bargain for manual use while driving, the omission is intentional. I haven't quite thought about how I would automate it.
             --Note that on named we may already have a mantle/carapace running already, could make this remove other discs, but meh, Shield Flash still a thing.
             {
                 name = "Deflection",
                 type = "Disc",
                 tooltip = Tooltips.Deflection,
                 pre_activate = function(self)
-                    if Config:GetSetting('UseBandolier') then
+                    if not Core.ShieldEquipped() and Config:GetSetting('UseBandolier') then
                         Core.SafeCallFunc("Equip Shield", ItemManager.BandolierSwap, "Shield")
                     end
                 end,
                 cond = function(self, discSpell)
-                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout') and Casting.NoDiscActive() and
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') and Casting.NoDiscActive() and
                         (mq.TLO.Me.AltAbilityTimer("Shield Flash")() or 0) < 234000
+                end,
+            },
+            {
+                name = "LeechCurse",
+                type = "Disc",
+                tooltip = Tooltips.LeechCurse,
+                cond = function(self)
+                    return Casting.NoDiscActive() and mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical')
                 end,
             },
             {
@@ -1122,7 +1154,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.ShieldFlash,
                 pre_activate = function(self)
-                    if Config:GetSetting('UseBandolier') then
+                    if not Core.ShieldEquipped() and Config:GetSetting('UseBandolier') then
                         Core.SafeCallFunc("Equip Shield", ItemManager.BandolierSwap, "Shield")
                     end
                 end,
@@ -1131,28 +1163,11 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "LeechCurse",
-                type = "Disc",
-                tooltip = Tooltips.LeechCurse,
-                cond = function(self)
-                    return Casting.NoDiscActive() and mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyLockout')
-                end,
-            },
-            --Influence is in an odd place with Carapace. Usage is very subjective and may be more nuanced than automation can support. Placed here as an alternative to Carapace in low health situations to get you topped back off again for tanks. Should be used in burn for non-tanks (adding non-tank stuff is TODO)
-            {
-                name = "InfluenceDisc",
-                type = "Disc",
-                tooltip = Tooltips.InfluenceDisc,
-                cond = function(self, discSpell)
-                    return Casting.NoDiscActive() and Core.IsTanking()
-                end,
-            },
-            {
-                name = "Carapace",
-                type = "Disc",
-                tooltip = Tooltips.Carapace,
-                cond = function(self, discSpell)
-                    return Casting.NoDiscActive()
+                name = "Armor of Experience",
+                type = "AA",
+                tooltip = Tooltips.ArmorofExperience,
+                cond = function(self, aaName)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') and Config:GetSetting('DoVetAA')
                 end,
             },
             { --Chest Click, name function stops errors in rotation window when slot is empty
@@ -1161,14 +1176,6 @@ local _ClassConfig = {
                 cond = function(self, itemName, target)
                     if not Config:GetSetting('DoChestClick') or not Casting.ItemHasClicky(itemName) then return false end
                     return Casting.SelfBuffItemCheck(itemName)
-                end,
-            },
-            {
-                name = "Mantle",
-                type = "Disc",
-                tooltip = Tooltips.Mantle,
-                cond = function(self, discSpell)
-                    return Casting.NoDiscActive()
                 end,
             },
             --if we made it this far let's reset our dicho/dire and hope for the best!
@@ -1208,41 +1215,6 @@ local _ClassConfig = {
                 end,
             },
             {
-                name = "Explosion of Hatred",
-                type = "AA",
-                tooltip = Tooltips.ExplosionOfHatred,
-                cond = function(self, aaName, target)
-                    if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
-                name = "Explosion of Spite",
-                type = "AA",
-                tooltip = Tooltips.ExplosionOfSpite,
-                cond = function(self, aaName)
-                    if not Config:GetSetting('AETauntAA') then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
-                name = "AETaunt",
-                type = "Spell",
-                tooltip = Tooltips.AETaunt,
-                cond = function(self, spell)
-                    if Config:GetSetting('AETauntSpell') == 1 then return false end
-                    return self.ClassConfig.HelperFunctions.AETauntCheck(true)
-                end,
-            },
-            {
-                name = "AELifeTap",
-                type = "Spell",
-                cond = function(self, spell)
-                    if not (Config:GetSetting('DoAELifeTap') and Config:GetSetting('DoAEDamage')) then return false end
-                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
-                end,
-            },
-            {
                 name = "Projection of Doom",
                 type = "AA",
                 tooltip = Tooltips.ProjectionofDoom,
@@ -1264,7 +1236,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoTerror') == 1 then return false end
+                    if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
                     ---@diagnostic disable-next-line: undefined-field
                     return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
@@ -1274,18 +1246,37 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.Terror,
                 cond = function(self, spell, target)
-                    if Config:GetSetting('DoTerror') == 1 then return false end
+                    if Config:GetSetting('DoTerror') == 1 or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
                     ---@diagnostic disable-next-line: undefined-field
                     return (mq.TLO.Target.SecondaryPctAggro() or 0) > 60
                 end,
             },
+        },
+        ['AEHateTools'] = {
             {
-                name = "ForPower",
+                name = "Explosion of Hatred",
+                type = "AA",
+                tooltip = Tooltips.ExplosionOfHatred,
+            },
+            {
+                name = "Explosion of Spite",
+                type = "AA",
+                tooltip = Tooltips.ExplosionOfSpite,
+            },
+            {
+                name = "AETaunt",
                 type = "Spell",
-                tooltip = Tooltips.ForPower,
+                tooltip = Tooltips.AETaunt,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoForPower') then return false end
-                    return Casting.DetSpellCheck(spell)
+                    return mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
+                end,
+            },
+            {
+                name = "AELifeTap",
+                type = "Spell",
+                cond = function(self, spell)
+                    if not (Config:GetSetting('DoAELifeTap') and Config:GetSetting('DoAEDamage')) or mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') then return false end
+                    return self.ClassConfig.HelperFunctions.AETargetCheck(true)
                 end,
             },
         },
@@ -1324,6 +1315,14 @@ local _ClassConfig = {
                 tooltip = Tooltips.ThoughtLeech,
                 cond = function(self, aaName, target)
                     return Config:GetSetting('DoLeechTouch') ~= 1
+                end,
+            },
+            {
+                name = "Epic",
+                type = "Item",
+                tooltip = Tooltips.Epic,
+                cond = function(self, itemName, target)
+                    return Targeting.IsNamed(target)
                 end,
             },
             {
@@ -1385,39 +1384,14 @@ local _ClassConfig = {
                 end,
             },
         },
-        ['Defenses'] = {
-            {
-                name = "MeleeMit",
-                type = "Disc",
-                tooltip = Tooltips.MeleeMit,
-                cond = function(self, discSpell)
-                    if not Core.IsTanking() then return false end
-                    return not ((discSpell.Level() or 0) < 108 and mq.TLO.Me.ActiveDisc.ID())
-                end,
-            },
-            {
-                name = "Epic",
-                type = "Item",
-                tooltip = Tooltips.Epic,
-                cond = function(self, itemName, target)
-                    return Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.LeechCheck(self)
-                end,
-            },
-            {
-                name = "OoW_Chest",
-                type = "Item",
-                tooltip = Tooltips.OoW_BP,
-                cond = function(self, itemName)
-                    return self.ClassConfig.HelperFunctions.LeechCheck(self)
-                end,
-            },
+        ['DefensiveDiscs'] = {
             {
                 name = "Carapace",
                 type = "Disc",
                 tooltip = Tooltips.Carapace,
                 cond = function(self, discSpell, target)
                     if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -1426,7 +1400,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Mantle,
                 cond = function(self, discSpell, target)
                     if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -1435,15 +1409,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.Guardian,
                 cond = function(self, discSpell, target)
                     if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
-                end,
-            },
-            {
-                name = "Coating",
-                type = "Item",
-                cond = function(self, itemName, target)
-                    if not Config:GetSetting('DoCoating') then return false end
-                    return Casting.SelfBuffItemCheck(itemName) and self.ClassConfig.HelperFunctions.LeechCheck(self)
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -1451,17 +1417,27 @@ local _ClassConfig = {
                 type = "Disc",
                 tooltip = Tooltips.UnholyAura,
                 cond = function(self, discSpell, target)
-                    if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive() and (Targeting.IsNamed(target) or self.ClassConfig.HelperFunctions.DefensiveDiscCheck(true))
+                    return Casting.NoDiscActive()
                 end,
             },
+        },
+        ['LeechEffects'] = {
             {
-                name = "Purity of Death",
-                type = "AA",
-                tooltip = Tooltips.PurityofDeath,
-                cond = function(self, aaName)
-                    ---@diagnostic disable-next-line: undefined-field
-                    return mq.TLO.Me.TotalCounters() > 0
+                name = "Epic",
+                type = "Item",
+                tooltip = Tooltips.Epic,
+            },
+            {
+                name = "OoW_Chest",
+                type = "Item",
+                tooltip = Tooltips.OoW_BP,
+            },
+            {
+                name = "Coating",
+                type = "Item",
+                cond = function(self, itemName, target)
+                    if not Config:GetSetting('DoCoating') then return false end
+                    return Casting.SelfBuffItemCheck(itemName)
                 end,
             },
         },
@@ -1473,7 +1449,7 @@ local _ClassConfig = {
                 tooltip = Tooltips.LeechTouch,
                 cond = function(self, aaName, target)
                     if Config:GetSetting('DoLeechTouch') == 2 then return false end
-                    return mq.TLO.Me.PctHPs() < 25
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical')
                 end,
             },
             --the trick with the next two is to find a sweet spot between using discs and long term CD abilities (we want these to trigger so those don't need to) and using them needlessly (which isn't much of a damage increase). Trying to get it dialed in for a good default value.
@@ -1535,20 +1511,29 @@ local _ClassConfig = {
             },
         },
         ['CombatWeave'] = {
-            { --Used if the group could benefit from the heal
-                name = "ReflexStrike",
-                type = "Disc",
-                tooltip = Tooltips.ReflexStrike,
-                cond = function(self, discSpell)
-                    return Targeting.GroupHealsNeeded()
-                end,
-            },
             {
                 name = "CombatEndRegen",
                 type = "Disc",
                 tooltip = Tooltips.CombatEndRegen,
                 cond = function(self, discSpell)
                     return mq.TLO.Me.PctEndurance() < 15
+                end,
+            },
+            {
+                name = "MeleeMit",
+                type = "Disc",
+                tooltip = Tooltips.MeleeMit,
+                cond = function(self, discSpell)
+                    if not Core.IsTanking() then return false end
+                    return not ((discSpell.Level() or 0) < 108 and mq.TLO.Me.ActiveDisc.ID())
+                end,
+            },
+            { --Used if the group could benefit from the heal
+                name = "ReflexStrike",
+                type = "Disc",
+                tooltip = Tooltips.ReflexStrike,
+                cond = function(self, discSpell)
+                    return Targeting.GroupHealsNeeded()
                 end,
             },
             {
@@ -1575,6 +1560,15 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Purity of Death",
+                type = "AA",
+                tooltip = Tooltips.PurityofDeath,
+                cond = function(self, aaName)
+                    ---@diagnostic disable-next-line: undefined-field
+                    return mq.TLO.Me.TotalCounters() > 0
+                end,
+            },
+            {
                 name = "Bash",
                 type = "Ability",
                 -- tooltip = Tooltips.Bash,
@@ -1589,6 +1583,15 @@ local _ClassConfig = {
             },
         },
         ['Combat'] = {
+            {
+                name = "ForPower",
+                type = "Spell",
+                tooltip = Tooltips.ForPower,
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoForPower') then return false end
+                    return Casting.DetSpellCheck(spell)
+                end,
+            },
             {
                 name = "BondTap",
                 type = "Spell",
@@ -1673,9 +1676,6 @@ local _ClassConfig = {
             {
                 name = "Equip Shield",
                 type = "CustomFunc",
-                active_cond = function()
-                    return mq.TLO.Me.Bandolier("Shield").Active()
-                end,
                 cond = function(self, target)
                     if mq.TLO.Me.Bandolier("Shield").Active() then return false end
                     return (mq.TLO.Me.PctHPs() <= Config:GetSetting('EquipShield')) or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('NamedShieldLock'))
@@ -1685,9 +1685,6 @@ local _ClassConfig = {
             {
                 name = "Equip 2Hand",
                 type = "CustomFunc",
-                active_cond = function(self, target)
-                    return mq.TLO.Me.Bandolier("2Hand").Active()
-                end,
                 cond = function()
                     if mq.TLO.Me.Bandolier("2Hand").Active() then return false end
                     return mq.TLO.Me.PctHPs() >= Config:GetSetting('Equip2Hand') and mq.TLO.Me.ActiveDisc.Name() ~= "Deflection Discipline" and
@@ -2580,30 +2577,43 @@ local _ClassConfig = {
             FAQ = "What are the Defensive Discs and what order are they triggered in when the Disc Count is met?",
             Answer = "Carapace, Mantle, Guardian, Unholy Aura, in that order. Note some may also be used preemptively on named, or in emergencies.",
         },
-        ['EmergencyStart']    = {
-            DisplayName = "Emergency Start",
+        ['DefenseStart']      = {
+            DisplayName = "Defense Start",
             Category = "Defenses",
             Index = 2,
-            Tooltip = "The HP % where DPS/Burn rotations are cut in favor of emergency abilities.",
-            Default = 55,
+            Tooltip = "The HP % where we will use defensive discs and the like.\nNote that fighting a named will also trigger these actions.",
+            Default = 70,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
             FAQ = "My SHD health spikes up and down a lot and abilities aren't being triggered, what gives?",
             Answer = "You may need to tailor the emergency thresholds to your current survivability and target choice.",
         },
-        ['EmergencyLockout']  = {
-            DisplayName = "Emergency Only",
+        ['EmergencyStart']    = {
+            DisplayName = "Emergency Start",
             Category = "Defenses",
             Index = 3,
-            Tooltip = "The HP % before all but essential rotations are cut in favor of emergency abilities.",
-            Default = 40,
+            Tooltip = "The HP % before heavy defensive abilities like Shield Flash are triggered.\n Some non-essential rotations are skipped to help us focus on survival (See FAQ).",
+            Default = 50,
             Min = 1,
             Max = 100,
             ConfigType = "Advanced",
-            FAQ = "What rotations are cut during Emergency Lockout?",
-            Answer = "Hate Tools - death will cause a bigger issue with aggro. Defenses - we stop using preemptives and go for the oh*#$#.\n" ..
-                "Debuffs, Weaves and other (non-LifeTap) DPS will also be cut.",
+            FAQ = "What rotations are cut during emergencies?",
+            Answer = "Snare, Burn, Combat Weave and Combat rotations are disabled when your health is at emergency levels.\nAdditionally, we will only use non-spell hate tools.",
+        },
+        ['HPCritical']        = {
+            DisplayName = "HP Critical",
+            Category = "Defenses",
+            Index = 4,
+            Tooltip =
+            "The HP % that we will use disciplines like Deflection, Leechcurse, and Leech Touch.\nMost other rotations are cut to give our full focus to survival (See FAQ).",
+            Default = 30,
+            Min = 1,
+            Max = 100,
+            ConfigType = "Advanced",
+            FAQ = "What rotations are cut when HP % is critical?",
+            Answer =
+            "Hate Tools (including AE) and Leech Effect rotations are cut when HP% is critical.\nAdditionally, reaching the emergency threshold would've also cut the Snare, Burn, Combat Weave and Combat Rotations.",
         },
 
         --Equipment
