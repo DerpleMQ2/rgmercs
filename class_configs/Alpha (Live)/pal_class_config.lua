@@ -761,6 +761,7 @@ local _ClassConfig = {
                     end
                     tauntme:add(xtarg.ID())
                 end
+                if not Config:GetSetting('SafeAETaunt') and #tauntme:toList() > 0 then return true end --no need to find more than one if we don't care about safe taunt
             end
             return #tauntme:toList() > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme:toList() < mobs)
         end,
@@ -777,8 +778,9 @@ local _ClassConfig = {
                     end
                     haters:add(xtarg.ID())
                 end
+                if #haters:toList() >= Config:GetSetting('DiscCount') then return true end -- no need to keep counting once this threshold has been reached
             end
-            return #haters:toList() >= Config:GetSetting('DiscCount')
+            return false
         end,
     },
     ['HealRotationOrder'] = {

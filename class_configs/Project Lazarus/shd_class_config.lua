@@ -603,6 +603,7 @@ local _ClassConfig = {
                     end
                     tauntme:add(xtarg.ID())
                 end
+                if not Config:GetSetting('SafeAETaunt') and #tauntme:toList() > 0 then return true end --no need to find more than one if we don't care about safe taunt
             end
             return #tauntme:toList() > 0 and not (Config:GetSetting('SafeAETaunt') and #tauntme:toList() < mobs)
         end,
@@ -619,8 +620,9 @@ local _ClassConfig = {
                     end
                     haters:add(xtarg.ID())
                 end
+                if #haters:toList() >= Config:GetSetting('DiscCount') then return true end -- no need to keep counting once this threshold has been reached
             end
-            return #haters:toList() >= Config:GetSetting('DiscCount')
+            return false
         end,
         --function to space out Epic and Omens Chest with Mortal Coil old-school swarm style. Epic has an override condition to fire anyway on named.
         LeechCheck = function(self)
@@ -690,6 +692,7 @@ local _ClassConfig = {
             name = 'AEHateTools',
             state = 1,
             steps = 1,
+            doFullRotation = true,
             load_cond = function()
                 return Core.IsTanking() and
                     ((Config:GetSetting('AETauntSpell') > 1 and Core.GetResolvedActionMapItem('AETauntSpell')) or (Config:GetSetting('AETauntAA') and (Casting.CanUseAA("Explosion of Spite") or Casting.CanUseAA("Explosion of Hatred"))))
@@ -704,7 +707,6 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function() return Config:GetSetting('UseBandolier') end,
-            doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat"
@@ -754,7 +756,7 @@ local _ClassConfig = {
         { --Offensive actions to temporarily boost damage dealt
             name = 'Burn',
             state = 1,
-            steps = 1,
+            steps = 2,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and Casting.BurnCheck() and mq.TLO.Me.PctHPs() > Config:GetSetting('EmergencyStart')
