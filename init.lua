@@ -36,20 +36,21 @@ Modules:load()
 require('utils.datatypes')
 
 -- ImGui Variables
-local openGUI         = true
-local shouldDrawGUI   = true
-local notifyZoning    = true
-local curState        = "Downtime"
-local logFilter       = ""
-local logFilterLocked = true
-local initPctComplete = 0
-local initMsg         = "Initializing RGMercs..."
+local openGUI             = true
+local shouldDrawGUI       = true
+local notifyZoning        = true
+local curState            = "Downtime"
+local logFilter           = ""
+local logFilterLocked     = true
+local initPctComplete     = 0
+local selectedSimplePanel = "General"
+local initMsg             = "Initializing RGMercs..."
 
 -- Icon Rendering
-local derpImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
+local derpImg             = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_60.png")
 --local burnImg2        = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/derpdog_burn.png") -- DerpDog Burning Ring of Fire
-local burnImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/algar2_60.png") -- Algar
-local grimImg         = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/grim_60.png")   -- Grim
+local burnImg             = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/algar2_60.png") -- Algar
+local grimImg             = mq.CreateTexture(mq.TLO.Lua.Dir() .. "/rgmercs/extras/grim_60.png")   -- Grim
 local imgDisplayed
 
 -- Function to randomly pick the image only once
@@ -490,6 +491,68 @@ local function RenderMainWindow(imgui_style)
     end
 end
 
+local function RenderSimplePanelOption(optionLabel, optionName)
+    if ImGui.Selectable(optionLabel, selectedSimplePanel == optionName) then
+        selectedSimplePanel = optionName
+    end
+end
+
+local function RenderSimpleWindow(imgui_style)
+    if not Config.Globals.Minimized then
+        local flags = ImGuiWindowFlags.None
+
+        if Config.settings.MainWindowLocked then
+            flags = bit32.bor(flags, ImGuiWindowFlags.NoMove, ImGuiWindowFlags.NoResize)
+        end
+
+        openGUI, shouldDrawGUI = ImGui.Begin(('RGMercs%s###rgmercssimpleui'):format(Config.Globals.PauseMain and " [Paused]" or ""), openGUI, flags)
+
+        ImGui.PushID("##RGMercsUI_" .. Config.Globals.CurLoadedChar)
+
+        if shouldDrawGUI then
+            local _, y = ImGui.GetContentRegionAvail()
+            if ImGui.BeginChild("left##RGmercsSimplePanel", ImGui.GetWindowContentRegionWidth() * .3, y - 1, ImGuiChildFlags.Border) then
+                local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersV, ImGuiTableFlags.ScrollY)
+                if ImGui.BeginTable('configmenu##RGmercsSimplePanel', 1, flags, 0, 0, 0.0) then
+                    ImGui.TableNextColumn()
+                    RenderSimplePanelOption(Icons.FA_COGS .. " General", "General")
+                    ImGui.TableNextColumn()
+                    RenderSimplePanelOption(Icons.FA_HEART .. " Healing", "Healing")
+                    ImGui.TableNextColumn()
+                    RenderSimplePanelOption(Icons.MD_RESTAURANT_MENU .. "Combat", "Combat")
+                    ImGui.TableNextColumn()
+                    RenderSimplePanelOption(Icons.FA_REBEL .. " Spells", "Spells")
+                    ImGui.TableNextColumn()
+                    ImGui.EndTable()
+                end
+            end
+            ImGui.EndChild()
+            ImGui.SameLine()
+            local x, _ = ImGui.GetContentRegionAvail()
+            if ImGui.BeginChild("right##RGmercsSimplePanel", x, y - 1, ImGuiChildFlags.Border) then
+                local flags = bit32.bor(ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersInner)
+                if ImGui.BeginTable('rightpanelTable##RGmercsSimplePanel', 1, flags, 0, 0, 0.0) then
+                    ImGui.TableNextColumn()
+
+                    local tmp, changed = Ui.RenderOptionToggle("ToggleFullUI", "Toggle Full UI", Config:GetSetting('FullUI'))
+                    if changed then
+                        Config:SetSetting('FullUI', tmp)
+                    end
+
+                    ImGui.TableNextColumn()
+                    ImGui.Text("Simple Panel: " .. selectedSimplePanel)
+                    ImGui.EndTable()
+                end
+            end
+            ImGui.EndChild()
+        end
+
+        ImGui.PopID()
+
+        ImGui.End()
+    end
+end
+
 local function RGMercsGUI()
     local theme = GetTheme()
     local themeColorPop = 0
@@ -552,7 +615,11 @@ local function RGMercsGUI()
                 RenderToggleHud()
             end
 
-            RenderMainWindow(imGuiStyle)
+            if Config:GetSetting('FullUI') then
+                RenderMainWindow(imGuiStyle)
+            else
+                RenderSimpleWindow(imGuiStyle)
+            end
 
             ImGui.PopStyleVar(3)
 

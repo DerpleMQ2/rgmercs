@@ -1465,6 +1465,14 @@ Config.DefaultConfig = {
         FAQ = "How do I lock the Main UI Window in place?",
         Answer = "You can click the Lock Icon on the main UI panel or toggle the [MainWindowLocked] option to true.",
     },
+    ['FullUI']               = {
+        DisplayName = "Use Full UI",
+        Category = "UI",
+        Tooltip = "Toggle between Full UI and a Simple UI [Experimental]",
+        Default = true,
+        FAQ = "The UI is overwhelming how can I make it simpler?",
+        Answer = "You can click off the Use Full UI option under UI settings for a simpler version of the UI.",
+    },
 
     -- [ Debug ] --
     ['LogLevel']             = {
