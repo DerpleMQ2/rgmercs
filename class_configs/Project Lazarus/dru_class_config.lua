@@ -27,9 +27,9 @@ local _ClassConfig = {
             local cureSpell
 
             if type:lower() == "disease" then
-                cureSpell = Core.GetResolvedActionMapItem('CureDisease')
+                cureSpell = Core.GetResolvedActionMapItem('PureBlood') or Core.GetResolvedActionMapItem('CureDisease')
             elseif type:lower() == "poison" then
-                cureSpell = Core.GetResolvedActionMapItem('CurePoison')
+                cureSpell = Core.GetResolvedActionMapItem('PureBlood') or Core.GetResolvedActionMapItem('CurePoison')
             elseif type:lower() == "curse" then
                 cureSpell = Core.GetResolvedActionMapItem('CureCurse')
             elseif type:lower() == "corruption" then
@@ -99,6 +99,7 @@ local _ClassConfig = {
             "Skin of the Reptile",
         },
         ['SwarmDot'] = { -- Magic Dot, 54s
+            "Wasp Swarm",
             "Swarming Death",
             "Winged Death",
             "Drifting Death",
@@ -226,8 +227,6 @@ local _ClassConfig = {
             "Shield of Thistles",
         },
         ['MoveSpells'] = {
-            "Flight of Falcons",
-            "Spirit of Falcons",
             "Flight of Eagles",
             "Spirit of Eagle",
             "Pack Spirit",
@@ -268,6 +267,9 @@ local _ClassConfig = {
         },
         ['CureCorruption'] = {
             "Cure Corruption",
+        },
+        ['PureBlood'] = {
+            "Pure Blood",
         },
         ['TwinHealNuke'] = {
             "Sunburst Blessing", -- Laz custom, description wrong, target mob
@@ -590,7 +592,7 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Spirit of Nature",
+                name = "Spirits of Nature",
                 type = "AA",
             },
             { -- Spire, the SpireChoice setting will determine which ability is displayed/used.
@@ -604,7 +606,7 @@ local _ClassConfig = {
         ['Debuff'] = {
             { -- Fire Debuff AA, will use the first(best) available
                 name_func = function(self)
-                    return Casting.GetBestAA({ "Blessing of Ro", "Hand of Ro", })
+                    return Casting.GetFirstAA({ "Blessing of Ro", "Hand of Ro", })
                 end,
                 type = "AA",
                 cond = function(self, aaName, target)
@@ -817,282 +819,57 @@ local _ClassConfig = {
             },
         },
     },
-    ['Spells']            = {
+    ['SpellList']         = { -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
         {
-            gem = 1,
+            name = "Heal Mode",
+            cond = function(self) return Core.IsModeActive("Heal") end,
             spells = {
                 { name = "HealSpell", },
-            },
-        },
-        {
-            gem = 2,
-            spells = {
                 { name = "GroupHeal", },
-            },
-        },
-        {
-            gem = 3,
-            spells = {
-                { name = "Elixir",       cond = function(self) return Config:GetSetting('DoElixir') end, },
-                { name = "SnareSpell",   cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Entrap") end, },
-                { name = "CurePoison",   cond = function(self) return Config:GetSetting('KeepPoisonMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureDisease",  cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureCurse",    cond = function(self) return Config:GetSetting('KeepCurseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "ATKDebuff",    cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
-                { name = "FireDebuff",   cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
-                { name = "ColdDebuff",   cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
-                { name = "EvacSpell",    cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",     cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke", cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",    cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",      cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",     cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",      cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot", cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",     cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot", cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",   cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",  cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",    cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-            },
-        },
-        {
-            gem = 4,
-            spells = {
-                { name = "SnareSpell",   cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Entrap") end, },
-                { name = "CurePoison",   cond = function(self) return Config:GetSetting('KeepPoisonMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureDisease",  cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureCurse",    cond = function(self) return Config:GetSetting('KeepCurseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "ATKDebuff",    cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
-                { name = "FireDebuff",   cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
-                { name = "ColdDebuff",   cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
-                { name = "EvacSpell",    cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",     cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke", cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",    cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",      cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",     cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",      cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot", cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",     cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot", cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",   cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",  cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",    cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-            },
-        },
-        {
-            gem = 5,
-            spells = {
-                { name = "CurePoison",   cond = function(self) return Config:GetSetting('KeepPoisonMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureDisease",  cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureCurse",    cond = function(self) return Config:GetSetting('KeepCurseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "ATKDebuff",    cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
-                { name = "FireDebuff",   cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
-                { name = "ColdDebuff",   cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
-                { name = "EvacSpell",    cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",     cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke", cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",    cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",      cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",     cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",      cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot", cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",     cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot", cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",   cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",  cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",    cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-            },
-        },
-        {
-            gem = 6,
-            spells = {
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "ATKDebuff",      cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
-                { name = "FireDebuff",     cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
-                { name = "ColdDebuff",     cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
+                { name = "Elixir",      cond = function(self) return Config:GetSetting('DoElixir') end, },
+                { name = "SnareSpell",  cond = function(self) return Config:GetSetting('DoSnare') and not Casting.CanUseAA("Entrap") end, },
+                { name = "ReptileBuff", },
+                { name = "ATKDebuff",   cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
+                { name = "FireDebuff",  cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
+                { name = "ColdDebuff",  cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
+                {
+                    name = "PureBlood",
+                    cond = function(self)
+                        return (Config:GetSetting('KeepDiseaseMemmed') or Config:GetSetting('KeepPoisonMemmed')) and
+                            not Casting.CanUseAA("Radiant Cure")
+                    end,
+                },
+                {
+                    name = "CurePoison",
+                    cond = function(self)
+                        return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepPoisonMemmed') and
+                            not Casting.CanUseAA("Radiant Cure")
+                    end,
+                },
+                {
+                    name = "CureDisease",
+                    cond = function(self)
+                        return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepDiseaseMemmed') and
+                            not Casting.CanUseAA("Radiant Cure")
+                    end,
+                },
+                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
                 { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
                 { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",        cond = function() return Config:GetSetting('DoRain') end, },
                 { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
                 { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
+                { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
+                { name = "IceRain",        cond = function(self) return Config:GetSetting('DoRain') end, },
                 { name = "FlameLickDot",   cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
                 { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
                 { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
                 -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
+                { name = "PureBlood",      cond = function(self) return Config:GetSetting('KeepPoisonMemmed') or Config:GetSetting('KeepDiseaseMemmed') end, },
+                { name = "CurePoison",     cond = function(self) return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepPoisonMemmed') end, },
+                { name = "CureDisease",    cond = function(self) return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                --fallback QoL
-                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
-                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
-                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
-            },
-        },
-        {
-            gem = 7,
-            spells = {
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') and not Casting.CanUseAA("Radiant Cure") end, },
-                { name = "ATKDebuff",      cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
-                { name = "FireDebuff",     cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
-                { name = "ColdDebuff",     cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
-                { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",        cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot",   cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                --fallback QoL
-                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
-                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
-                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
-            },
-        },
-        {
-            gem = 8,
-            spells = {
-                { name = "ATKDebuff",      cond = function(self) return Config:GetSetting('DoATKDebuff') end, },
-                { name = "FireDebuff",     cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
-                { name = "ColdDebuff",     cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
-                { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",        cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot",   cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                --fallback QoL
-                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
-                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
-                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
-            },
-        },
-
-        {
-            gem = 9,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "FireDebuff",     cond = function(self) return Config:GetSetting('DoFireDebuff') and not Casting.CanUseAA("Hand of Ro") end, },
-                { name = "ColdDebuff",     cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
-                { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",        cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot",   cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                --fallback QoL
-                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
-                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
-                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
-            },
-        },
-        {
-            gem = 10,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "ColdDebuff",     cond = function(self) return Config:GetSetting('DoColdDebuff') end, },
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
-                { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",        cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot",   cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                --fallback QoL
-                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
-                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
-                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
-            },
-        },
-        {
-            gem = 11,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "ReptileBuff", }, --feels lonely because it isn't optional. I don't know of any reason to make it so, feedback requested.
-                { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",        cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot",   cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                --fallback QoL
-                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
-                { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
-                { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
-            },
-        },
-        {
-            gem = 12,
-            cond = function(self, gem) return mq.TLO.Me.NumGems() >= gem end,
-            spells = {
-                { name = "EvacSpell",      cond = function(self) return Config:GetSetting('KeepEvacMemmed') and not Casting.CanUseAA("Exodus") end, },
-                { name = "StunNuke",       cond = function(self) return Config:GetSetting('DoStunNuke') end, },
-                { name = "TwinHealNuke",   cond = function(self) return Config:GetSetting('DoTwinHealNuke') end, },
-                { name = "PBAEMagic",      cond = function(self) return Config:GetSetting('DoPBAE') end, },
-                { name = "IceRain",        cond = function() return Config:GetSetting('DoRain') end, },
-                { name = "FireNuke",       cond = function(self) return Config:GetSetting('DoFireNuke') end, },
-                { name = "IceNuke",        cond = function(self) return Config:GetSetting('DoIceNuke') end, },
-                { name = "FlameLickDot",   cond = function(self) return Config:GetSetting('DoFlameLickDot') end, },
-                { name = "SwarmDot",       cond = function(self) return Config:GetSetting('DoSwarmDot') end, },
-                { name = "VengeanceDot",   cond = function(self) return Config:GetSetting('DoVengeanceDot') end, },
-                -- { name = "BurstDS",      cond = function(self) return Config:GetSetting('DoBurstDS') end, },
-                { name = "CurePoison",     cond = function(self) return Config:GetSetting('KeepPoisonMemmed') end, },
-                { name = "CureDisease",    cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
-                { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
-                --fallback QoL
+                --fallback QoL to take up extra slots
                 { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
                 { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
                 { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },

@@ -433,7 +433,7 @@ return {
             },
             { --Crit Chance AA, will use the first(best) one found
                 name_func = function(self)
-                    return Casting.GetBestAA({ "Prolonged Destruction", "Frenzied Devastation", })
+                    return Casting.GetFirstAA({ "Prolonged Destruction", "Frenzied Devastation", })
                 end,
                 type = "AA",
                 cond = function(self, aaName)
@@ -698,7 +698,7 @@ return {
             },
             { --Familiar AA, will use the first(best) one found
                 name_func = function(self)
-                    return Casting.GetBestAA({ "Kerafyrm's Prismatic Familiar", "Ro's Flaming Familiar", "Improved Familiar", })
+                    return Casting.GetFirstAA({ "Kerafyrm's Prismatic Familiar", "Ro's Flaming Familiar", "Improved Familiar", })
                 end,
                 type = "AA",
                 active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,

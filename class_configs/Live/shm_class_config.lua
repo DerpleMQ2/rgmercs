@@ -1455,7 +1455,7 @@ local _ClassConfig = {
             },
             { --Shrink AA, will use first(best) available
                 name_func = function(self)
-                    return Casting.GetBestAA({ "Group Shrink", "Shrink", })
+                    return Casting.GetFirstAA({ "Group Shrink", "Shrink", })
                 end,
                 type = "AA",
                 active_cond = function(self) return mq.TLO.Me.Height() < 2 end,

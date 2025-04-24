@@ -74,7 +74,7 @@ function Casting.LocalBuffCheck(spellId, checkPet)
     local me = mq.TLO.Me
     local spellName = mq.TLO.Spell(spellId).Name()
 
-    if (checkPet and me.BlockedPetBuff(spellName)() or me.BlockedBuff(spellName)()) then
+    if (checkPet and me.BlockedPetBuff(spellName)() == spellName or me.BlockedBuff(spellName)() == spellName) then
         Logger.log_verbose("LocalBuffCheck: %s(ID:%d) is on the blocked spell list, aborting check.", spellName, spellId)
         return false
     end
@@ -295,7 +295,7 @@ function Casting.PeerBuffCheck(spellId, target)
         return false
     end
 
-    if DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000):lower() ~= "null" then
+    if DanNet.query(targetName, string.format("Me.BlockedBuff[%s]", spellName), 1000):lower() == spellName:lower() then
         Logger.log_verbose("PeerBuffCheck: Tried to check a peer's buff, but that peer seems to have it blocked. Spell:%s(ID:%d), Target:%s(ID:%d)", spellName, spellId, targetName,
             targetId)
         return false
@@ -1648,15 +1648,36 @@ function Casting.AutoMed()
     end
 end
 
+--renamed function due to misleading name, deprecated.
+function Casting.GetBestAA(aaList)
+    return Casting.GetFirstAA(aaList)
+end
+
 --- Retrieves the first available purchased AA in a list.
 --- @param aaList table The list of AA to check.
 --- @return string The name of the selected AA (or "None" if no ability was found).
-function Casting.GetBestAA(aaList)
+function Casting.GetFirstAA(aaList)
     if not aaList or type(aaList) ~= "table" then return "None" end
 
     local ret = "None"
     for _, abil in ipairs(aaList) do
         if Casting.CanUseAA(abil) then
+            ret = abil
+            break
+        end
+    end
+    return ret
+end
+
+--- Retrieves the first available resolved map item in a list.
+--- @param mapList table The list of mapped actions to check.
+--- @return string The name of the selected map (or "None" if no ability was found).
+function Casting.GetFirstMapItem(mapList)
+    if not mapList or type(mapList) ~= "table" then return "None" end
+
+    local ret = "None"
+    for _, abil in ipairs(mapList) do
+        if Core.GetResolvedActionMapItem(abil) then
             ret = abil
             break
         end

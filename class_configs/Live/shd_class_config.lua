@@ -1126,8 +1126,7 @@ local _ClassConfig = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
             --Abilities should be placed in order of lowest to highest triggered HP thresholds
             --Side Note: I reserve Bargain for manual use while driving, the omission is intentional. I haven't quite thought about how I would automate it.
-            --Note that on named we may already have a mantle/carapace running already, could make this remove other discs, but meh, Shield Flash still a thing.
-            {
+            { --Note that on named we may already have a mantle/carapace running already, could make this remove other discs, but meh, Shield Flash still a thing.
                 name = "Deflection",
                 type = "Disc",
                 tooltip = Tooltips.Deflection,
