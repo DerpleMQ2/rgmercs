@@ -208,9 +208,7 @@ end
 --- Determines if the player is facing the target.
 --- @return boolean True if the player is facing the target, false otherwise.
 function Targeting.FacingTarget()
-    if mq.TLO.Target.ID() == 0 then return true end
-
-    return math.abs(mq.TLO.Target.HeadingTo.DegreesCCW() - mq.TLO.Me.Heading.DegreesCCW()) <= 20
+    return math.abs((mq.TLO.Target.HeadingTo.DegreesCCW() or mq.TLO.Me.Heading.DegreesCCW()) - mq.TLO.Me.Heading.DegreesCCW()) <= 20
 end
 
 --- Retrieves the highest aggro percentage among all players.
