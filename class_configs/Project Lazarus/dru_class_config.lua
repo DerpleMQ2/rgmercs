@@ -323,6 +323,13 @@ local _ClassConfig = {
     ['HealRotations']     = {
         ['BigHealPoint'] = {
             {
+                name = "Protection of Direwood",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return Targeting.TargetIsMyself(target)
+                end,
+            },
+            {
                 name = "Convergence of Spirits",
                 type = "AA",
             },
@@ -870,9 +877,9 @@ local _ClassConfig = {
                 { name = "CureDisease",    cond = function(self) return not Core.GetResolvedActionMapItem('PureBlood') and Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",      cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 --fallback QoL to take up extra slots
-                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
                 { name = "GroupRegenBuff", cond = function(self) return Config:GetSetting('DoGroupRegen') end, },
                 { name = "GroupDmgShield", cond = function(self) return Config:GetSetting('DoGroupDmgShield') end, },
+                { name = "HPTypeOneGroup", cond = function(self) return Config:GetSetting('DoHPBuff') end, },
             },
         },
     },
