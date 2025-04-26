@@ -76,7 +76,7 @@ local Tooltips     = {
 }
 
 local _ClassConfig = {
-    _version            = "2.4 - Project Lazarus",
+    _version            = "2.5 - Project Lazarus",
     _author             = "Algar, Derple",
     ['ModeChecks']      = {
         IsTanking = function() return Core.IsModeActive("Tank") end,
@@ -123,20 +123,9 @@ local _ClassConfig = {
     ['AbilitySets']     = {
         --Laz spells to look into: Fickle Shadows
         ['Mantle'] = {
-            "Ichor Guard", -- Level 56, Timer 5
-            "Soul Guard",
             "Soul Shield",
-            -- "Soul Carapace",
-            -- "Umbral Carapace",
-            -- "Malarian Mantle",
-            -- "Gorgon Mantle",
-            -- "Recondite Mantle",
-            -- "Bonebrood Mantle",
-            -- "Doomscale Mantle",
-            -- "Krellnakor Mantle",
-            -- "Restless Mantle",
-            -- "Fyrthek Mantle",
-            -- "Geomimus Mantle",
+            "Soul Guard",
+            "Ichor Guard", -- Level 56, Timer 5
         },
         ['Deflection'] = {
             "Rampart Discipline",
@@ -148,182 +137,55 @@ local _ClassConfig = {
         ['UnholyAura'] = { 'Unholy Aura Discipline', },
 
         ['PetSpell'] = {
+            "Son of Decay",
+            "Invoke Death",
+            "Cackling Bones",
             "Leering Corpse",
+            "Malignant Dead",
+            "Summon Dead",
+            "Animate Dead",
+            "Restless Bones",
             "Bone Walk",
             "Convoke Shadow",
-            "Restless Bones",
-            "Animate Dead",
-            "Summon Dead",
-            "Malignant Dead",
-            "Cackling Bones",
-            "Invoke Death",
-            "Son of Decay",
-            "Maladroit Minion",
-            "Minion of Sebilis",
-            "Minion of Fear",
-            "Minion of Sholoth",
-            "Minion of Grelleth",
-            "Minion of Vizat",
-            "Minion of T`Vem",
-            "Minion of Drendar",
-            "Minion of Itzal",
-            "Minion of Fandrel",
+            "Leering Corpse,",
         },
         ['PetHaste'] = {
-            "Gift of Fandrel",
-            "Gift of Itzal",
-            "Gift of Drendar",
-            "Gift of T`Vem",
-            "Gift of Lutzen",
-            "Gift of Urash",
-            "Gift of Dyalgem",
-            "Expatiate Death",
-            "Amplify Death",
             "Rune of Decay",
             "Augmentation of Death",
             "Augment Death",
             "Strengthen Death",
         },
-        ['Shroud'] = { --Some Shrouds listed under the Horror Line as HP/Mana Proc Choice was shroud vs. mental in buff slot 1 at lower levels.
-            "Shroud of the Nightborn",
-            "Shroud of the Gloomborn",
-            "Shroud of the Blightborn",
-            "Shroud of the Plagueborne",
-            "Shroud of the Shadeborne",
-            "Shroud of the Darksworn",
-            "Shroud of the Doomscale",
-            "Shroud of the Krellnakor",
-            "Shroud of the Restless",
-            "Shroud of Zelinstein",
-            "Shroud of Rimeclaw",
+        ['Horror'] = {           -- HP Tap Proc
+            "Shroud of Discord", -- Level 67 -- Buff Slot 1 <
+            "Shroud of Chaos",   -- Level 63
+            "Shroud of Death",   -- Level 55
         },
-        ['Horror'] = {             -- HP Tap Proc
-            "Shroud of Death",     -- Level 55
-            "Shroud of Chaos",     -- Level 63
-            "Black Shroud",        -- Level 65
-            "Shroud of Discord",   -- Level 67 -- Buff Slot 1 <
-            "Marrowthirst Horror", -- Level 71 -- Buff Slot 2 >
-            "Soulthirst Horror",   -- Level 76
-            "Mindshear Horror",    -- Level 81
-            "Amygdalan Horror",    -- Level 86
-            "Sholothian Horror",   -- Level 91
-            "Grelleth's Horror",   -- Level 96
-            "Vizat's Horror",      -- Level 101
-            "Tylix's Horror",      -- Level 106
-            "Cadcane's Horror",    -- Level 111
-            "Brightfeld's Horror", -- Level 116
-            "Mortimus' Horror",    -- Level 121
-        },
-        ['Mental'] = {             -- Mana Tap Proc
-            "Mental Retchedness",  -- Level 121
-            "Mental Anguish",      -- Level 116
-            "Mental Torment",      -- Level 111
-            "Mental Fright",       -- Level 106
-            "Mental Dread",        -- Level 101
-            "Mental Terror",       -- Level 96 --Buff Slot 2 <
-            "Mental Horror",       -- Level 65 --Buff Slot 1 >
-            "Mental Corruption",   -- Level 52
+        ['Mental'] = {           -- Mana Tap Proc
+            "Mental Horror",     -- Level 65 --Buff Slot 1 >
+            "Mental Corruption", -- Level 52
         },
         ['Skin'] = {
             "Decrepit Skin", -- Level 70
-            "Umbral Skin",
-            "Malarian Skin",
-            "Gorgon Skin",
-            "Sholothian Skin",
-            "Grelleth's Skin",
-            "Vizat's Skin",
-            "Tylix's Skin",
-            "Cadcane's Skin",
-            "Xenacious' Skin",
-            "Krizad's Skin",
         },
         ['SelfDS'] = {
             "Banshee Aura",
-            "Banshee Skin",
-            "Ghoul Skin",
-            "Zombie Skin",
-            "Helot Skin",
-            "Specter Skin",
-            "Tekuel Skin",
-            "Goblin Skin",
-        },
-        ['Demeanor'] = {
-            "Remorseless Demeanor",
-            "Impenitent Demeanor",
-        },
-        ['HealBurn'] = {
-            "Harmonious Disruption", -- Level 103
-            "Concordant Disruption",
-            "Confluent Disruption",
-            "Penumbral Disruption",
         },
         ['CloakHP'] = {
             "Cloak of the Akheva",
             "Cloak of Luclin",
             "Cloak of Discord",
-            "Cloak of Corruption",
-            "Drape of Corruption",
-            "Drape of Korafax",
-            "Drape of Fear",
-            "Drape of the Sepulcher",
-            "Drape of the Fallen",
-            "Drape of the Wrathforged",
-            "Drape of the Magmaforged",
-            "Drape of the Iceforged",
-            "Drape of the Akheva",
-            "Drape of the Ankexfen",
-        },
-        ['Covenant'] = {
-            "Grim Covenant",
-            "Venril's Covenant",
-            "Gixblat's Covenant",
-            "Worag's Covenant",
-            "Falhotep's Covenant",
-            "Livio's Covenant",
-            "Helot Covenant",
-            "Syl`Tor Covenant",
-            "Aten Ha Ra's Covenant",
-            "Kar's Covenant",
         },
         ['CallAtk'] = {
             "Call of Darkness",
-            "Call of Dusk",
-            "Call of Shadow",
-            "Call of Gloomhaze",
-            "Call of Nightfall",
-            "Call of Twilight",
-            "Penumbral Call",
-            "Call of Blight",
         },
         ['AETaunt'] = {
             "Dread Gaze", -- Level 69
-            "Vilify",
-            "Revile",
-            "Burst of Spite",
-            "Loathing",
-            "Abhorrence",
-            "Disgust",
-            "Revulsion",
-            "Contempt",
-            "Antipathy",
-            "Animus",
         },
         ['PoisonDot'] = {
             "Blood of Pain", -- Level 41
             "Blood of Hate",
             "Blood of Discord",
             "Blood of Inruku",
-            "Blood of the Blacktalon",
-            "Blood of the Blackwater",
-            "Blood of Laarthik",
-            "Blood of Malthiasiss",
-            "Blood of Korum",
-            "Blood of Ralstok",
-            "Blood of Bonemaw",
-            "Blood of Drakus",
-            "Blood of Ikatiar",
-            "Blood of Tearc",
-            "Blood of Shoru",
         },
         ['SpearNuke'] = {
             "Spike of Disease", -- Level 1
@@ -337,45 +199,11 @@ local _ClassConfig = {
             "Spear of Muram",
         },
         ['BondTap'] = {
-            "Bond of Tatalros",
-            "Bond of Bynn",
-            "Bond of Vulak",
-            "Bond of Xalgoz",
-            "Bond of Bonemaw",
-            "Bond of Ralstok",
-            "Bond of Korum",
-            "Bond of Malthiasiss",
-            "Bond of Laarthik",
-            "Bond of the Blackwater",
-            "Bond of the Blacktalon",
             "Bond of Inruku",
             "Bond of Death",
             "Vampiric Curse", -- Level 57
         },
-        ['DireTap'] = {
-            "Dire Implication", -- Level 85
-            "Dire Accusation",
-            "Dire Allegation",
-            "Dire Insinuation",
-            "Dire Declaration",
-            "Dire Testimony",
-            "Dire Indictment",
-            "Dire Censure",
-            "Dire Rebuke",
-        },
         ['LifeTap'] = {
-            "Touch of Flariton",
-            "Touch of Txiki",
-            "Touch of Drendar",
-            "Touch of T`Vem",
-            "Touch of Lutzen",
-            "Touch of Falsin",
-            "Touch of Urash",
-            "Touch of Falsin",
-            "Touch of Dyalgem",
-            "Touch of Tharoff",
-            "Touch of Kildrukaun",
-            "Touch of Severan",
             "Touch of the Devourer",
             "Touch of Inruku",
             "Touch of Innoruuk",
@@ -390,22 +218,10 @@ local _ClassConfig = {
             "Lifetap",   -- Level 8
         },
         ['LifeTap2'] = {
-            "Touch of Flariton",
-            "Touch of Txiki",
-            "Touch of Drendar",
-            "Touch of T`Vem",
-            "Touch of Lutzen",
-            "Touch of Falsin",
-            "Touch of Urash",
-            "Touch of Falsin",
-            "Touch of Dyalgem",
-            "Touch of Tharoff",
-            "Touch of Kildrukaun",
-            "Touch of Severan",
             "Touch of the Devourer",
             "Touch of Inruku",
             "Touch of Innoruuk",
-            "Touch of Volatis",
+            --"Touch of Volatis", -- Drain Soul buffed on Lazarus and is superior to this.
             "Drain Soul",
             "Drain Spirit",
             "Spirit Tap",
@@ -422,30 +238,6 @@ local _ClassConfig = {
             "Zevfeer's Bite", -- Level 62
             "Inruku's Bite",
             "Ancient: Bite of Muram",
-            "Blacktalon Bite",
-            "Blackwater Bite",
-            "Laarthik's Bite",
-            "Malthiasiss's Bite",
-            "Korum's Bite",
-            "Ralstok's Bite",
-            "Bonemaw's Bite",
-            "Xalgoz's Bite",
-            "Vulak's Bite",
-            "Cruor's Bite",
-            "Charka's Bite",
-        },
-        ['ForPower'] = {
-            "Challenge for Power", -- Level 72
-            "Trial for Power",
-            "Charge for Power",
-            "Confrontation for Power",
-            "Provocation for Power",
-            "Demand for Power",
-            "Impose for Power",
-            "Refute for Power",   -- TBL - 107
-            "Protest for Power",  -- TOV - 112
-            "Parlay for Power",   -- TOL - 117
-            "Petition for Power", -- LS - 122
         },
         ['Terror'] = {
             "Terror of Darkness", -- Level 33
@@ -454,17 +246,6 @@ local _ClassConfig = {
             "Terror of Terris",
             "Terror of Thule",
             "Terror of Discord",
-            "Terror of Vergalid",
-            "Terror of the Soulbleeder",
-            "Terror of Jelvalak",
-            "Terror of Rerekalen",
-            "Terror of Desalin",
-            "Terror of Poira",
-            "Terror of Narus",
-            "Terror of Kra`Du",
-            "Terror of Mirenilla",
-            "Terror of Ander",
-            "Terror of Tarantis",
         },
         ['Terror2'] = {
             "Terror of Darkness",
@@ -473,42 +254,8 @@ local _ClassConfig = {
             "Terror of Terris",
             "Terror of Thule",
             "Terror of Discord",
-            "Terror of Vergalid",
-            "Terror of the Soulbleeder",
-            "Terror of Jelvalak",
-            "Terror of Rerekalen",
-            "Terror of Desalin",
-            "Terror of Poira",
-            "Terror of Narus",
-            "Terror of Kra`Du",
-            "Terror of Mirenilla",
-            "Terror of Ander",
-            "Terror of Tarantis",
-        },
-        ['TempHP'] = {
-            "Unwavering Stance",
-            "Adamant Stance",
-            "Stormwall Stance",
-            "Defiant Stance",
-            "Staunch Stance",
-            "Steadfast Stance",
-            "Stoic Stance",
-            "Stubborn Stance",
-            "Steely Stance", -- Level 84
-        },
-        ['Dicho'] = {
-            "Dichotomic Fang", -- Level 101
-            "Dissident Fang",
-            "Composite Fang",
-            "Ecliptic Fang",
         },
         ['PowerTapAC'] = {
-            "Torrent of Desolation",
-            "Torrent of Melancholy",
-            "Torrent of Anguish",
-            "Torrent of Suffering",
-            "Torrent of Misery",
-            "Torrent of Agony", -- Level 100
             "Theft of Agony",
             "Theft of Pain",
             "Aura of Pain",
@@ -524,57 +271,17 @@ local _ClassConfig = {
             "Scream of Hate",
         },
         ['SnareDot'] = {
-            "Clinging Darkness", -- Level 11
-            "Engulfing Darkness",
-            "Dooming Darkness",
-            "Cascading Darkness",
             "Festering Darkness",
-            "Despairing Darkness",
-            "Suppurating Darkness",
-            "Smoldering Darkness",
-            "Spreading Darkness",
-            "Putrefying Darkness",
-            "Pestilent Darkness",
-            "Virulent Darkness",
-            "Vitriolic Darkness",
-        },
-        ['SpiteStrike'] = {
-            "Spite of Ronak",
-            "Spite of Kra`Du",
-            "Spite of Mirenilla",
-        },
-        ['ReflexStrike'] = {
-            "Reflexive Resentment",
-            "Reflexive Rancor",
-            "Reflexive Revulsion",
+            "Cascading Darkness",
+            "Dooming Darkness",
+            "Engulfing Darkness",
+            "Clinging Darkness", -- Level 11
         },
         ['DireDot'] = {
-            "Dire Constriction", -- Level 85
-            "Dire Restriction",
-            "Dire Stenosis",
-            "Dire Stricture",
-            "Dire Strangulation",
-            "Dire Coarctation",
-            "Dire Convulsion",
-            "Dire Seizure",
-            "Dire Squelch",
             "Dark Constriction",
             "Asystole",
             "Heart Flutter",
             "Disease Cloud",
-        },
-        ['AllianceNuke'] = {
-            "Bloodletting Coalition",
-            "Bloodletting Alliance",
-            "Bloodletting Covenant",
-            "Bloodletting Conjunction",
-        },
-        ['InfluenceDisc'] = {
-            "Insolent Influence",
-            "Impudent Influence",
-            "Impenitent Influence",
-            "Impertinent Influence",
-            "Ignominious Influence",
         },
         ['HateBuff'] = {         --9 minute reuse makes these somewhat ridiculous to gem on the fly.
             "Voice of Innoruuk", -- Level 70, 15% hate, 150pt DS (slot 9), 15% decrease DS Mit (VoT AA is still better for tanking at 24%, but they stack. DS smexy)
