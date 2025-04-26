@@ -703,12 +703,19 @@ local _ClassConfig = {
                     return Casting.DetSpellCheck(spell) and Targeting.GetXTHaterCount() >= Config:GetSetting("AECount")
                 end,
             },
-            -- { --this can be readded once we creat a post_activate to cancel the debuff you receive after
-            --     name = "Self Stasis",
-            --     type = "AA",
-            --     cond = function(self, aaName)
-            --         return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30            --     end,
-            -- },
+            { --this can be readded once we creat a post_activate to cancel the debuff you receive after
+                name = "Self Stasis",
+                type = "AA",
+                cond = function(self, aaName)
+                    return mq.TLO.Me.TargetOfTarget.ID() == mq.TLO.Me.ID() and mq.TLO.Target.ID() == Config.Globals.AutoTargetID and mq.TLO.Me.PctHPs() <= 30
+                end,
+                post_activate = function(self, aaName, success)
+                    if success and mq.TLO.Me.Buff("Self Stasis")() then
+                        Comms.PrintGroupMessage("We're out of combat, removing the Self Statis buff so we can act again.")
+                        Core.DoCmd('/removebuff =Self Stasis')
+                    end
+                end,
+            },
             -- { --This can interrupt spellcasting which can just make something worse. Let us trust healers and tanks.
             --     name = "Dimensional Instability",
             --     type = "AA",
