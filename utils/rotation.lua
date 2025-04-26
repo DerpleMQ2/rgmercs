@@ -353,17 +353,11 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
     return lastStepIdx, anySuccess
 end
 
---- Sets the loadout for a caller, including spell gems, item sets, and ability sets.
---- @param caller any The entity that is calling the function.
---- @param spellGemList table A list of spell gems to be set.
+--- Maps available actions, including item and ability sets.
 --- @param itemSets table A list of item sets to be equipped.
 --- @param abilitySets table A list of ability sets to be configured.
-function Rotation.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
-    local spellLoadOut = {}
+function Rotation.ResolveActions(itemSets, abilitySets)
     local resolvedActionMap = {}
-    local spellsToLoad = {}
-
-    Casting.UseGem = mq.TLO.Me.NumGems()
 
     -- Map AbilitySet Items and Load Them
     for unresolvedName, itemTable in pairs(itemSets) do
@@ -383,6 +377,78 @@ function Rotation.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
         resolvedActionMap[unresolvedName] = Rotation.GetBestSpell(spellTable, resolvedActionMap)
     end
 
+    return resolvedActionMap
+end
+
+--- Sets the spell gem loadout for a caller.
+--- @param caller any The entity that is calling the function.
+--- @param spellList table An array of spell lists to be checked and have gems loaded from.
+function Rotation.SetSpellLoadOutByPriority(caller, spellList)
+    local spellLoadOut = {}
+    local spellsToLoad = {}
+    local listName = "Error: No Valid List Found!"
+
+    Casting.UseGem = mq.TLO.Me.NumGems()
+
+    for _, l in ipairs(spellList or {}) do
+        if l ~= nil and (not l.cond or Core.SafeCallFunc(string.format("List Condition Check %s", l.name), l.cond, caller)) then
+            Logger.log_debug("\ayList \am%s\ay will be loaded.", l.name)
+            listName = l.name
+            for i = 1, mq.TLO.Me.NumGems() do
+                for _, s in ipairs(l.spells) do
+                    if s.name_func then
+                        s.name = Core.SafeCallFunc("Spell Name Func", s.name_func, caller) or
+                            "Error in name_func!"
+                    end
+                    local spellName = s.name
+                    Logger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, i)
+                    local bestSpell = Core.GetResolvedActionMapItem(spellName)
+                    if bestSpell then
+                        local bookSpell = mq.TLO.Me.Book(bestSpell.RankName())()
+                        local pass = Core.SafeCallFunc(
+                            string.format("Spell Condition Check: %s", bestSpell() or "None"), s.cond, caller, bestSpell)
+                        local loadedSpell = spellsToLoad[bestSpell.RankName()] or false
+
+                        if pass and bestSpell and bookSpell and not loadedSpell then
+                            Logger.log_debug("    ==> \ayGem \am%d\ay will load \at%s\ax ==> \ag%s", i, s
+                                .name, bestSpell.RankName())
+                            spellLoadOut[i] = { selectedSpellData = s, spell = bestSpell, }
+                            spellsToLoad[bestSpell.RankName()] = true
+                            i = i + 1
+                            break
+                        else
+                            Logger.log_debug(
+                                "    ==> \ayGem \am%d will \arNOT\ay load \at%s (pass=%s, bestSpell=%s, bookSpell=%d, loadedSpell=%s)",
+                                i, s.name,
+                                Strings.BoolToColorString(pass), bestSpell and bestSpell.RankName() or "", bookSpell or -1,
+                                Strings.BoolToColorString(loadedSpell))
+                        end
+                    else
+                        Logger.log_debug(
+                            "    ==> \ayGem \am%d\ay will \arNOT\ay load \at%s\ax ==> \arNo Resolved Spell!", i,
+                            s.name)
+                    end
+                end
+            end
+            break --we only want the first valid spellset
+        else
+            Logger.log_debug("\ayList \am%s\ay will \arNOT\ay be loaded ==> \arCondition Check Failed!", l.name)
+        end
+    end
+
+    return spellLoadOut, listName
+end
+
+--- Sets the spell gem loadout for a caller.
+--- @param caller any The entity that is calling the function.
+--- @param spellGemList table A list of spell gems to be set.
+function Rotation.SetSpellLoadOutByGem(caller, spellGemList)
+    local spellLoadOut = {}
+    local spellsToLoad = {}
+
+    Casting.UseGem = mq.TLO.Me.NumGems()
+
+    --Algar notes 4/20/25: Bard spell system is deprecated and will be replaced by the gemless spell lists. This code will eventually be removed.
     -- Allow a callback fn for generating spell loadouts rather than a static list
     -- Can be used by bards to prioritize loadouts based on user choices
     if spellGemList and spellGemList.getSpellCallback and type(spellGemList.getSpellCallback) == "function" then
@@ -408,13 +474,7 @@ function Rotation.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
                     end
                     local spellName = s.name
                     Logger.log_debug("\aw  ==> Testing \at%s\aw for Gem \am%d", spellName, gem)
-                    if abilitySets[spellName] == nil then
-                        -- this means we put a varname into our spell table that we didn't define in the ability list.
-                        Logger.log_error(
-                            "\ar ***!!!*** \awLoadout Var [\at%s\aw] has no entry in the AbilitySet list! \arThis is a bug in the class config please report this!",
-                            spellName)
-                    end
-                    local bestSpell = resolvedActionMap[spellName]
+                    local bestSpell = Core.GetResolvedActionMapItem(spellName)
                     if bestSpell then
                         local bookSpell = mq.TLO.Me.Book(bestSpell.RankName())()
                         local pass = Core.SafeCallFunc(
@@ -449,7 +509,7 @@ function Rotation.SetLoadOut(caller, spellGemList, itemSets, abilitySets)
         end
     end
 
-    return resolvedActionMap, spellLoadOut
+    return spellLoadOut
 end
 
 --- Loads a spell loadout for the Character.

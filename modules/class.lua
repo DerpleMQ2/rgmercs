@@ -26,6 +26,7 @@ Module.__index                               = Module
 
 Module.ModuleLoaded                          = false
 Module.SpellLoadOut                          = {}
+Module.LoadOutName                           = "Loading..."
 Module.ResolvedActionMap                     = {}
 Module.TempSettings                          = {}
 Module.CombatState                           = "None"
@@ -48,7 +49,7 @@ Module.TempSettings.RotationTimers           = {}
 Module.TempSettings.RezTimers                = {}
 Module.TempSettings.CureCheckTimer           = 0
 Module.TempSettings.ShowFailedSpells         = false
-Module.TempSettings.ReloadingLoadouts        = true
+Module.TempSettings.ResolvingActions         = true
 Module.TempSettings.NewCombatMode            = false
 Module.TempSettings.MissingSpells            = {}
 Module.TempSettings.MissingSpellsHighestOnly = true
@@ -244,7 +245,7 @@ function Module:SetDynamicNames()
 end
 
 function Module:GetResolvedActionMapItem(item)
-    if self.TempSettings.ReloadingLoadouts then return nil end
+    if self.TempSettings.ResolvingActions then return nil end
     return self.ResolvedActionMap[item]
 end
 
@@ -258,14 +259,20 @@ function Module:SetCombatMode(mode)
         return false
     end
     Logger.log_debug("\aySettings Combat Mode to: \am%s", mode)
-    self.TempSettings.ReloadingLoadouts = true
+    self.TempSettings.ResolvingActions = true
 
     if self.ClassConfig then
-        self.ResolvedActionMap, self.SpellLoadOut = Rotation.SetLoadOut(self,
-            self.ClassConfig.Spells, self.ClassConfig.ItemSets, self.ClassConfig.AbilitySets)
+        self.ResolvedActionMap = Rotation.ResolveActions(self.ClassConfig.ItemSets, self.ClassConfig.AbilitySets)
+        self.TempSettings.ResolvingActions = false
+
+        if self.ClassConfig.SpellList then
+            self.SpellLoadOut, self.LoadOutName = Rotation.SetSpellLoadOutByPriority(self, self.ClassConfig.SpellList)
+        else
+            self.SpellLoadOut = Rotation.SetSpellLoadOutByGem(self, self.ClassConfig.Spells)
+            self.LoadOutName = "Default"
+        end
     end
 
-    self.TempSettings.ReloadingLoadouts = false
     Rotation.LoadSpellLoadOut(self.SpellLoadOut)
 
     if self.ClassConfig.OnModeChange then
@@ -315,7 +322,7 @@ function Module:Render()
 
         ImGui.Separator()
 
-        if ImGui.CollapsingHeader("Spell Loadout") then
+        if ImGui.CollapsingHeader(string.format("Spell Loadout (%s)", self.LoadOutName)) then
             ImGui.Indent()
             if ImGui.SmallButton("Reload Spells") then
                 self:RescanLoadout()
@@ -346,7 +353,7 @@ function Module:Render()
             ImGui.Unindent()
             ImGui.Separator()
         end
-        if not self.TempSettings.ReloadingLoadouts then
+        if not self.TempSettings.ResolvingActions then
             if ImGui.CollapsingHeader("Rotations") then
                 ImGui.Indent()
                 ImGui.Text("Combat State: %s", self.CombatState)
@@ -367,7 +374,7 @@ function Module:Render()
             end
         end
 
-        if not self.TempSettings.ReloadingLoadouts and #self.TempSettings.HealRotationStates > 0 then
+        if not self.TempSettings.ResolvingActions and #self.TempSettings.HealRotationStates > 0 then
             if ImGui.CollapsingHeader("Healing Rotations") then
                 ImGui.Indent()
                 Ui.RenderRotationTableKey()

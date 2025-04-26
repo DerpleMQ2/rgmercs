@@ -1723,7 +1723,7 @@ _ClassConfig      = {
         ['Summon ModRods'] = {
             { -- Mod Rod AA, will use the first(best) one found.
                 name_func = function(self)
-                    return Casting.GetBestAA({ "Large Modulation Shard", "Medium Modulation Shard", "Small Modulation Shard", })
+                    return Casting.GetFirstAA({ "Large Modulation Shard", "Medium Modulation Shard", "Small Modulation Shard", })
                 end,
                 type = "AA",
                 cond = function(self, aaName, target)
