@@ -5,6 +5,7 @@ local Core         = require("utils.core")
 local Targeting    = require("utils.targeting")
 local Casting      = require("utils.casting")
 local DanNet       = require('lib.dannet.helpers')
+local Logger       = require("utils.logger")
 
 local _ClassConfig = {
     _version              = "2.2 - Project Lazarus",
@@ -262,6 +263,14 @@ local _ClassConfig = {
         ['CompleteHeal'] = {
             "Complete Heal",
         },
+        ['PBAENuke'] = { --This isn't worthwhile before these spells come around.
+            "Calamity",
+            "Catastrophe",
+        },
+        ['PBAEStun'] = { --This isn't worthwhile before these spells come around. The stun won't land in many cases (level) but the damage is okay.
+            "Silent Dictation",
+            "The Silent Command",
+        },
     }, -- end AbilitySets
     ['HelperFunctions']   = {
         DoRez = function(self, corpseId)
@@ -303,6 +312,26 @@ local _ClassConfig = {
             if ret and type(ret) == 'number' then return ret end
 
             return mq.TLO.Spawn(string.format("PC =%s", Config.Globals.MainAssist)).PctMana() or 0
+        end,
+        --function to make sure we don't have non-hostiles in range before we use AE damage or non-taunt AE hate abilities
+        AETargetCheck = function(minCount, printDebug)
+            local haters = mq.TLO.SpawnCount("NPC xtarhater radius 80 zradius 50")()
+            local haterPets = mq.TLO.SpawnCount("NPCpet xtarhater radius 80 zradius 50")()
+            local totalHaters = haters + haterPets
+            if totalHaters < minCount or totalHaters > Config:GetSetting('MaxAETargetCnt') then return false end
+
+            if Config:GetSetting('SafeAEDamage') then
+                local npcs = mq.TLO.SpawnCount("NPC radius 80 zradius 50")()
+                local npcPets = mq.TLO.SpawnCount("NPCpet radius 80 zradius 50")()
+                if totalHaters < (npcs + npcPets) then
+                    if printDebug then
+                        Logger.log_verbose("AETargetCheck(): %d mobs in range but only %d xtarget haters, blocking AE damage actions.", npcs + npcPets, haters + haterPets)
+                    end
+                    return false
+                end
+            end
+
+            return true
         end,
     },
     -- These are handled differently from normal rotations in that we try to make some intelligent desicions about which spells to use instead
@@ -487,7 +516,22 @@ local _ClassConfig = {
             cond = function(self, combat_state)
                 local downtime = combat_state == "Downtime" and Casting.OkayToBuff()
                 local combat = combat_state == "Combat"
-                return (downtime or combat) and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return (downtime or combat) and Core.OkayToNotHeal()
+            end,
+        },
+        {
+            name = 'DPS(AE)',
+            state = 1,
+            steps = 1,
+            load_cond = function(self)
+                return (Config:GetSetting('DoPBAENuke') and self:GetResolvedActionMapItem('PBAENuke')) or
+                    (Config:GetSetting('PBAEStun') and self:GetResolvedActionMapItem('PBAEStun'))
+            end,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and Core.OkayToNotHeal() and Config:GetSetting('DoAEDamage') and
+                    self.ClassConfig.HelperFunctions.AETargetCheck(Config:GetSetting('AETargetCnt'), true)
             end,
         },
         {
@@ -496,7 +540,7 @@ local _ClassConfig = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
+                return combat_state == "Combat" and Core.OkayToNotHeal()
             end,
         },
     },
@@ -589,6 +633,7 @@ local _ClassConfig = {
                 type = "AA",
                 allowDead = true,
                 cond = function(self, aaName)
+                    if not Config:GetSetting('DoYaulp') then return false end
                     return Casting.SelfBuffAACheck(aaName)
                 end,
             },
@@ -597,7 +642,7 @@ local _ClassConfig = {
                 type = "Spell",
                 allowDead = true,
                 cond = function(self, spell)
-                    if Casting.CanUseAA("Yaulp") then return false end
+                    if not Config:GetSetting('DoYaulp') or Casting.CanUseAA("Yaulp") then return false end
                     return Casting.SelfBuffCheck(spell)
                 end,
             },
@@ -606,7 +651,7 @@ local _ClassConfig = {
                 type = "Spell",
                 cond = function(self, spell)
                     if not Config:GetSetting('DoTwinHeal') then return false end
-                    return not Casting.IHaveBuff("Healing Twincast")
+                    return not Casting.IHaveBuff("Twincast")
                 end,
             },
             {
@@ -646,6 +691,24 @@ local _ClassConfig = {
                 cond = function(self)
                     if not Config:GetSetting('DoMagicNuke') then return false end
                     return Casting.HaveManaToNuke()
+                end,
+            },
+        },
+        ['DPS(AE)'] = {
+            {
+                name = "PBAEStun",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke(true) and Targeting.InSpellRange(spell, target)
+                end,
+            },
+            {
+                name = "PBAENuke",
+                type = "Spell",
+                allowDead = true,
+                cond = function(self, spell, target)
+                    return Casting.HaveManaToNuke(true) and Targeting.InSpellRange(spell, target)
                 end,
             },
         },
@@ -753,10 +816,16 @@ local _ClassConfig = {
             },
         },
     },
-    ['SpellList']         = { -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
+    -- New style spell list, gemless, priority-based. Will use the first set whose conditions are met.
+    -- The list name ("Default" in the list below) is abitrary, it is simply what shows up in the UI when this spell list is loaded.
+    -- Virtually any helper function or TLO can be used as a condition. Example: Mode or level-based lists.
+    -- The first list without conditions or whose conditions returns true will be loaded, all subsequent lists will be ignored.
+    -- Spells will be loaded in order (if the conditions are met), until all gem slots are full.
+    -- Loadout checks (such as scribing a spell or using the "Rescan Loadout" or "Reload Spells" buttons) will re-check these lists and may load a different set if things have changed.
+    ['SpellList']         = {
         {
-            name = "Heal Mode",
-            cond = function(self) return Core.IsModeActive("Heal") end,
+            name = "Default",
+            -- cond = function(self) return true end, --Kept here for illustration, this line could be removed in this instance since we aren't using conditions.
             spells = {
                 { name = "HealingLight",  cond = function(self) return not Config:GetSetting('DoCompleteHeal') or not Core.GetResolvedActionMapItem("CompleteHeal") end, },
                 { name = "CompleteHeal",  cond = function(self) return Config:GetSetting('DoCompleteHeal') end, },
@@ -769,12 +838,14 @@ local _ClassConfig = {
                 { name = "CureDisease",   cond = function(self) return Config:GetSetting('KeepDiseaseMemmed') end, },
                 { name = "CureCurse",     cond = function(self) return Config:GetSetting('KeepCurseMemmed') end, },
                 { name = "DivineBuff",    cond = function(self) return Config:GetSetting('DoDivineBuff') end, },
-                { name = "YaulpSpell",    cond = function(self) return not Casting.CanUseAA("Yaulp") end, },
+                { name = "YaulpSpell",    cond = function(self) return Config:GetSetting('DoYaulp') and not Casting.CanUseAA("Yaulp") end, },
                 { name = "SingleVieBuff", cond = function(self) return Config:GetSetting('DoVieBuff') end, },
                 { name = "TwinHealNuke",  cond = function(self) return Config:GetSetting('DoTwinHeal') end, },
                 { name = "StunTimer6",    cond = function(self) return Config:GetSetting('DoHealStun') end, },
                 { name = "LowLevelStun",  cond = function(self) return mq.TLO.Me.Level() < 59 end, },
                 { name = "MagicNuke",     cond = function(self) return Config:GetSetting('DoMagicNuke') end, },
+                { name = "PBAEStun",      cond = function(self) return Config:GetSetting('DoPBAEStun') end, },
+                { name = "PBAENuke",      cond = function(self) return Config:GetSetting('DoPBAENuke') end, },
                 { name = "UndeadNuke",    cond = function(self) return Config:GetSetting('DoUndeadNuke') end, },
                 { name = "RezSpell",      cond = function(self) return not Casting.CanUseAA('Blessing of Resurrection') end, },
             },
@@ -1013,6 +1084,76 @@ local _ClassConfig = {
             "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
 
+        --Damage(AE)
+        ['DoAEDamage']        = {
+            DisplayName = "Do AE Damage",
+            Category = "Damage(AE)",
+            Index = 1,
+            Tooltip = "**WILL BREAK MEZ** Use AE damage Spells and AA. **WILL BREAK MEZ**\n" ..
+                "This is a top-level setting that governs all AE damage, and can be used as a quick-toggle to enable/disable abilities without reloading spells.",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['DoPBAENuke']        = {
+            DisplayName = "Use PBAE Nuke",
+            Category = "Damage(AE)",
+            Index = 2,
+            RequiresLoadoutChange = true,
+            Tooltip =
+            "**WILL BREAK MEZ** Use your Magic PB AE Spells . **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['DoPBAEStun']        = {
+            DisplayName = "Use PBAE Stun",
+            Category = "Damage(AE)",
+            Index = 4,
+            RequiresLoadoutChange = true,
+            Tooltip =
+            "**WILL BREAK MEZ** Use your Magic PB AE Stun Spells . **WILL BREAK MEZ**",
+            Default = false,
+            FAQ = "Why am I using AE damage when there are mezzed mobs around?",
+            Answer = "It is not currently possible to properly determine Mez status without direct Targeting. If you are mezzing, consider turning this option off.",
+        },
+        ['AETargetCnt']       = {
+            DisplayName = "AE Tgt Cnt",
+            Category = "Damage(AE)",
+            Index = 5,
+            Tooltip = "Minimum number of valid targets before using PB Spells like the of Flame line.",
+            Default = 4,
+            Min = 1,
+            Max = 10,
+            FAQ = "Why am I not using my PBAE spells?",
+            Answer =
+            "You can adjust the AE Target Count to control when you will use the abilities.",
+        },
+        ['MaxAETargetCnt']    = {
+            DisplayName = "Max AE Targets",
+            Category = "Damage(AE)",
+            Index = 6,
+            Tooltip =
+            "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
+            Default = 6,
+            Min = 2,
+            Max = 30,
+            FAQ = "How do I take advantage of the Max AE Targets setting?",
+            Answer =
+            "By limiting your max AE targets, you can set an AE Mez count that is slightly higher, to allow for the possiblity of mezzing if you are being overwhelmed.",
+        },
+        ['SafeAEDamage']      = {
+            DisplayName = "AE Proximity Check",
+            Category = "Damage(AE)",
+            Index = 7,
+            Tooltip = "Check to ensure there aren't neutral mobs in range we could aggro if AE damage is used. May result in non-use due to false positives.",
+            Default = false,
+            FAQ = "Can you better explain the AE Proximity Check?",
+            Answer = "If the option is enabled, the script will use various checks to determine if a non-hostile or not-aggroed NPC is present and avoid use of the AE action.\n" ..
+                "Unfortunately, the script currently does not discern whether an NPC is (un)attackable, so at times this may lead to the action not being used when it is safe to do so.\n" ..
+                "PLEASE NOTE THAT THIS OPTION HAS NOTHING TO DO WITH MEZ!",
+        },
+
         --Utility
         ['DoManaRestore']     = {
             DisplayName = "Use Mana Restore AAs",
@@ -1039,10 +1180,19 @@ local _ClassConfig = {
             FAQ = "Why am I not using Veturika's or Quiet Miracle?",
             Answer = "Ensure that your Mana Restore Pct is configured to the value you would like to start using these abilities.",
         },
+        ['DoYaulp']           = {
+            DisplayName = "Use Yaulp",
+            Category = "Utility",
+            Index = 3,
+            Tooltip = "Use your Yaulp (AA or spell line) to help maintain your mana and buff your melee ability.",
+            Default = true,
+            FAQ = "Why am I using Yaulp? Clerics are not supposed to melee!",
+            Answer = "The Yaulp spells we use also contain a mana regen component. You can disable this behavior on the Utility tab in the Class Options.",
+        },
         ['DoVetAA']           = {
             DisplayName = "Use Vet AA",
             Category = "Utility",
-            Index = 3,
+            Index = 4,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
             FAQ = "What Vet AA's does CLR use?",
