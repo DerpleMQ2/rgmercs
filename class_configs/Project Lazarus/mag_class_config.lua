@@ -1421,6 +1421,14 @@ _ClassConfig      = {
         },
         ['Burn'] = {
             {
+                name = "Epic",
+                type = "Item",
+                cond = function(self, itemName)
+                    if mq.TLO.Me.Pet.ID() == 0 then return false end
+                    return Casting.PetBuffItemCheck(itemName)
+                end,
+            },
+            {
                 name = "Frenzied Burnout",
                 type = "AA",
             },
