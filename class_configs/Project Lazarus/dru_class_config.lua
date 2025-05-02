@@ -609,6 +609,10 @@ local _ClassConfig = {
                 end,
                 type = "AA",
             },
+            {
+                name = "Shattered Gnoll Slayer",
+                type = "Item",
+            },
         },
         ['Debuff'] = {
             { -- Fire Debuff AA, will use the first(best) available
@@ -800,6 +804,13 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return mq.TLO.Me.PetBuff(spell.RankName())() ~= nil end,
                 cond = function(self, spell) return Casting.PetBuffCheck(spell) end,
+            },
+            {
+                name = "Crystalized Soul Gem", -- This isn't a typo
+                type = "Item",
+                cond = function(self, itemName)
+                    return Casting.PetBuffItemCheck(itemName)
+                end,
             },
         },
         ['ArcanumWeave'] = {
