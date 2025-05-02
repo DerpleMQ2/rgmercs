@@ -604,6 +604,14 @@ local _ClassConfig = {
                     return Casting.PetBuffAACheck(aaName)
                 end,
             },
+            {
+                name = "Crystalized Soul Gem", -- This isn't a typo
+                type = "Item",
+                cond = function(self, itemName)
+                    return Casting.PetBuffItemCheck(itemName)
+                end,
+            },
+
         },
         ['EmergencyDefenses'] = {
             --Note that in Tank Mode, defensive discs are preemptively cycled on named in the (non-emergency) Defenses rotation
@@ -662,7 +670,7 @@ local _ClassConfig = {
                 type = "AA",
                 tooltip = Tooltips.AgelessEnmity,
                 cond = function(self, aaName, target)
-                    return Targeting.GetAutoTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100
+                    return (Targeting.GetAutoTargetPctHPs() < 90 and mq.TLO.Me.PctAggro() < 100) or Targeting.IsNamed(target)
                 end,
             },
 

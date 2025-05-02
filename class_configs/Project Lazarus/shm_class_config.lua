@@ -637,6 +637,10 @@ local _ClassConfig = {
                     return Config:GetSetting('DoVetAA')
                 end,
             },
+            {
+                name = "Shattered Gnoll Slayer",
+                type = "Item",
+            },
         },
         ['Malo'] = {
             {
@@ -853,6 +857,13 @@ local _ClassConfig = {
                 type = "AA",
                 cond = function(self, aaName)
                     return Casting.PetBuffAACheck(aaName)
+                end,
+            },
+            {
+                name = "Crystalized Soul Gem", -- This isn't a typo
+                type = "Item",
+                cond = function(self, itemName)
+                    return Casting.PetBuffItemCheck(itemName)
                 end,
             },
         },

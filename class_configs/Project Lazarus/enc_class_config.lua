@@ -559,6 +559,13 @@ local _ClassConfig = {
                     return Casting.PetBuffAACheck(aaName)
                 end,
             },
+            {
+                name = "Crystalized Soul Gem", -- This isn't a typo
+                type = "Item",
+                cond = function(self, itemName)
+                    return Casting.PetBuffItemCheck(itemName)
+                end,
+            },
         },
         ['GroupBuff'] = {
             {
