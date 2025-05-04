@@ -423,6 +423,16 @@ local _ClassConfig = {
                 end,
             },
             {
+                name = "Weighted Hammer of Conviction",
+                type = "Item",
+            },
+            { --This entry is for RemedyHeal until we learn a Renewal
+                name_func = function(self)
+                    return Casting.GetFirstMapItem({ "Renewal", "RemedyHeal", })
+                end,
+                type = "Spell",
+            },
+            {
                 name = "Focused Celestial Regeneration",
                 type = "AA",
                 cond = function(self, aaName, target)
@@ -435,12 +445,6 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     return target.ID() == (mq.TLO.Target.AggroHolder.ID() and not Targeting.TargetIsMA(target))
                 end,
-            },
-            { --This entry is for RemedyHeal until we learn a Renewal
-                name_func = function(self)
-                    return Casting.GetFirstMapItem({ "Renewal", "RemedyHeal", })
-                end,
-                type = "Spell",
             },
             { --The stuff above is down, lets make mainhealpoint faster.
                 name = "Celestial Rapidity",
