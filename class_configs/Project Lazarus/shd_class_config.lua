@@ -333,7 +333,7 @@ local _ClassConfig = {
         end,
         --function to space out Epic and Omens Chest with Mortal Coil old-school swarm style. Epic has an override condition to fire anyway on named.
         LeechCheck = function(self)
-            local LeechEffects = { "Leechcurse Discipline", "Mortal Coil", "Lich Sting Recourse", "Leeching Embrace", "Reaper Strike Recourse", "Leeching Touch", }
+            local LeechEffects = { "Leechcurse Discipline", "Mortal Coil", "Lich Sting Recourse", "Reaper Strike Recourse", "Vampiric Aura", }
             for _, buffName in ipairs(LeechEffects) do
                 if Casting.IHaveBuff(buffName) then return false end
             end
@@ -625,6 +625,11 @@ local _ClassConfig = {
                     return mq.TLO.Me.PctHPs() <= Config:GetSetting('HPCritical') and Config:GetSetting('DoVetAA')
                 end,
             },
+            {
+                name = "OoW_Chest",
+                type = "Item",
+                tooltip = Tooltips.OoW_BP,
+            },
             { --Note that on named we may already have a defensive disc running already, could make this remove other discs, but we have other options.
                 name = "Deflection",
                 type = "Disc",
@@ -644,6 +649,14 @@ local _ClassConfig = {
                 tooltip = Tooltips.LeechCurse,
                 cond = function(self)
                     return Casting.NoDiscActive() and not mq.TLO.Me.Song("Rampart")()
+                end,
+            },
+            {
+                name = "UnholyAura",
+                type = "Disc",
+                tooltip = Tooltips.UnholyAura,
+                cond = function(self, discSpell, target)
+                    return Casting.NoDiscActive()
                 end,
             },
             {
@@ -754,7 +767,7 @@ local _ClassConfig = {
                     return Core.IsTanking()
                 end,
             },
-            {
+            { -- for DPS mode
                 name = "UnholyAura",
                 type = "Disc",
                 tooltip = Tooltips.UnholyAura,
@@ -834,23 +847,6 @@ local _ClassConfig = {
                 tooltip = Tooltips.Epic,
                 cond = function(self, itemName, target)
                     return self.ClassConfig.HelperFunctions.LeechCheck(self) or Targeting.IsNamed(target)
-                end,
-            },
-            {
-                name = "UnholyAura",
-                type = "Disc",
-                tooltip = Tooltips.UnholyAura,
-                cond = function(self, discSpell, target)
-                    if not Core.IsTanking() then return false end
-                    return Casting.NoDiscActive()
-                end,
-            },
-            {
-                name = "OoW_Chest",
-                type = "Item",
-                tooltip = Tooltips.OoW_BP,
-                cond = function(self, itemName)
-                    return self.ClassConfig.HelperFunctions.LeechCheck(self)
                 end,
             },
             {

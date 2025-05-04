@@ -911,6 +911,10 @@ local _ClassConfig = {
             --     type = "AA",
             -- },
             {
+                name = "Tarnished Skeleton Key",
+                type = "Item",
+            },
+            {
                 name = "Forceful Rejuvenation",
                 type = "AA",
             },
