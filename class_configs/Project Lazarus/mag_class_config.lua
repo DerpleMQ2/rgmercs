@@ -920,7 +920,7 @@ _ClassConfig      = {
             steps = 1,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
-                return combat_state == "Combat" and mq.TLO.Me.SpellInCooldown()
+                return combat_state == "Combat"
             end,
         },
         {
@@ -1492,28 +1492,28 @@ _ClassConfig      = {
                 name = "SurgeDS1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "SurgeDS2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "ShortDurDmgShield",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "FireShroud",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
         },
@@ -1992,14 +1992,6 @@ _ClassConfig      = {
             Default = true,
             FAQ = "Can I summon mod rods for my group?",
             Answer = "Yes, you can summon mod rods for your group by setting the [SummonModRods] setting.",
-        },
-        ['DoForce']        = {
-            DisplayName = "Do Force",
-            Category = "Spells and Abilities",
-            Tooltip = "Use Force of Elements AA",
-            Default = true,
-            FAQ = "I want to use Force of Elements AA in my rotation, how do I do that?",
-            Answer = "You can use the [DoForce] feature to use the Force of Elements AA in your rotation.",
         },
         ['ElementChoice']  = {
             DisplayName = "Element Choice:",

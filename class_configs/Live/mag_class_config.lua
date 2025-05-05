@@ -1487,28 +1487,28 @@ _ClassConfig      = {
                 name = "SurgeDS1",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "SurgeDS2",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "ShortDurDmgShield",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
             {
                 name = "FireShroud",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("PetTank") and Casting.PetBuffCheck(spell)
+                    return Casting.PetBuffCheck(spell)
                 end,
             },
         },
@@ -1516,6 +1516,9 @@ _ClassConfig      = {
             {
                 name = "Force of Elements",
                 type = "AA",
+                cond = function(self, aaName)
+                    return Config:GetSetting('DoForce')
+                end,
             },
             {
                 name = "FireOrbItem",
@@ -1536,28 +1539,28 @@ _ClassConfig      = {
                 name = "SwarmPet",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
+                    return Core.IsModeActive("DPS") or Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "ChaoticNuke",
                 type = "Spell",
                 cond = function(self, _)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
+                    return Core.IsModeActive("DPS") or Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "SpearNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
+                    return Core.IsModeActive("DPS") or Casting.HaveManaToNuke()
                 end,
             },
             {
                 name = "VolleyNuke",
                 type = "Spell",
                 cond = function(self, spell)
-                    return Core.IsModeActive("DPS") and Casting.HaveManaToNuke()
+                    return Core.IsModeActive("DPS") or Casting.HaveManaToNuke()
                 end,
             },
             {
