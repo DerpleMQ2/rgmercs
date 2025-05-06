@@ -807,7 +807,7 @@ end
 function Module:DoCombatClickies() --TODO: Find out why normal clickies are in movement module. Split clickies into bene/detr/self-heals or something.
     -- I plan on breaking clickies out further to allow things like horn, other healing clickies to be used, that the user will select... this is "interim" implementation.
     if Core.OnLaz() and mq.TLO.Me.PctHPs() <= (Config:GetSetting('EmergencyStart', true) and Config:GetSetting('EmergencyStart') or 45) then
-        local healingItems = { "Sanguine Mind Crystal", "Orb of Shadows", "Draught of Opulent Healing", }
+        local healingItems = { "Sanguine Mind Crystal", "Orb of Shadows", } -- "Draught of Opulent Healing", keeping this one manual for now
         for _, itemName in ipairs(healingItems) do
             local item = mq.TLO.FindItem(itemName)
             if item() and item.TimerReady() == 0 then

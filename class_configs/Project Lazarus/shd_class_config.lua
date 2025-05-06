@@ -911,8 +911,8 @@ local _ClassConfig = {
                 name = "BondTap",
                 type = "Spell",
                 tooltip = Tooltips.BondTap,
-                cond = function(self, spell)
-                    if not Config:GetSetting('DoBondTap') then return false end
+                cond = function(self, spell, target)
+                    if not Config:GetSetting('DoBondTap') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -938,7 +938,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.PoisonDot,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoPoisonDot') then return false end
+                    if not Config:GetSetting('DoPoisonDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -947,7 +947,7 @@ local _ClassConfig = {
                 type = "Spell",
                 tooltip = Tooltips.DireDot,
                 cond = function(self, spell, target)
-                    if not Config:GetSetting('DoDireDot') then return false end
+                    if not Config:GetSetting('DoDireDot') or (Config:GetSetting('DotNamedOnly') and not Targeting.IsNamed(target)) then return false end
                     return Casting.HaveManaToDot() and Casting.DotSpellCheck(spell)
                 end,
             },
@@ -1269,6 +1269,16 @@ local _ClassConfig = {
             Default = false,
             FAQ = "Why is my Shadow Knight not using Dire Dot?",
             Answer = "Dire Dot is not enabled by default, you may need to select it.",
+        },
+        ['DotNamedOnly']    = {
+            DisplayName = "Only Dot Named",
+            Category = "DoT Spells",
+            Index = 4,
+            Tooltip = "Any selected dot above will only be used on a named mob.",
+            Default = true,
+            FAQ = "Why am I not using my dots?",
+            Answer = "Make sure the dot is enabled in your class settings and make sure that the mob is named if that option is selected.\n" ..
+                "You can read more about named mobs on the RGMercs named tab (and learn how to add one on your own!)",
         },
 
         --AE Damage
