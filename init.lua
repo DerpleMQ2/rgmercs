@@ -127,9 +127,11 @@ local function RenderLoader()
 end
 
 local function RenderTarget()
-    if (mq.TLO.Raid() and not mq.TLO.Raid.MainAssist(1)()) or (mq.TLO.Group() and not mq.TLO.Group.MainAssist()) then
-        ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
-            string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
+    if (mq.TLO.Raid.Members() > 0 and mq.TLO.Raid.MainAssist(1)() == nil) or (mq.TLO.Raid.Members() == 0 and mq.TLO.Group() and not mq.TLO.Group.MainAssist()) then
+        if ((Core.OnEMU() and (mq.TLO.Raid.Members() >= 18 or mq.TLO.Raid.Members() == 0)) or not Core.OnEMU()) then
+            ImGui.TextColored(IM_COL32(200, math.floor(os.clock() % 2) == 1 and 52 or 200, 52, 255),
+                string.format("Warning: NO GROUP MA - PLEASE SET ONE!"))
+        end
     end
 
     local assistSpawn = Targeting.GetAutoTarget()
