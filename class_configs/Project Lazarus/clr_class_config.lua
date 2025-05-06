@@ -168,10 +168,6 @@ local _ClassConfig = {
             "Reconstitution",
             "Reanimation",
         },
-        ['AERezSpell'] = {
-            "Greater Reviviscence",
-            "Larger Reviviscence",
-        },
         ['SingleElixir'] = {
             "Pious Elixir",
             "Holy Elixir",
