@@ -966,7 +966,7 @@ local _ClassConfig = {
             state = 1,
             steps = 1,
             load_cond = function(self) return Config:GetSetting('DoTwinHeal') and self:GetResolvedActionMapItem('TwinHealNuke') end,
-            targetId = function(self) return { Core.GetMainAssistId(), } end,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
             cond = function(self, combat_state)
                 return combat_state == "Combat" and (not Core.IsModeActive('Heal') or Core.OkayToNotHeal())
             end,
@@ -977,10 +977,14 @@ local _ClassConfig = {
         ['TwinHeal'] = {
             {
                 name = "TwinHealNuke",
-                type = "Spell",
-                retries = 0,
-                cond = function(self, spell)
-                    return not Casting.IHaveBuff("Healing Twincast")
+                type = "CustomFunc",
+                cond = function(self, spell, target)
+                    if Casting.IHaveBuff("Healing Twincast") then return false end
+                    return Casting.SpellReady(spell, false)
+                end,
+                custom_func = function(self)
+                    local twinHeal = Core.GetResolvedActionMapItem("TwinHealNuke")
+                    Casting.UseSpell(twinHeal.RankName(), Core.GetMainAssistId(), false, false, false, 0)
                 end,
             },
         },
