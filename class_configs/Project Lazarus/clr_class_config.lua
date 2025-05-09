@@ -525,7 +525,7 @@ local _ClassConfig = {
             steps = 1,
             load_cond = function(self)
                 return (Config:GetSetting('DoPBAENuke') and self:GetResolvedActionMapItem('PBAENuke')) or
-                    (Config:GetSetting('PBAEStun') and self:GetResolvedActionMapItem('PBAEStun'))
+                    (Config:GetSetting('DoPBAEStun') and self:GetResolvedActionMapItem('PBAEStun'))
             end,
             doFullRotation = true,
             targetId = function(self) return Targeting.CheckForAutoTargetID() end,
