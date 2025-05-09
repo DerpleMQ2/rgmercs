@@ -782,6 +782,9 @@ local _ClassConfig = {
             "Silence of Quietus",        -- Level 116
             "Silence of the Forgotten",  -- Level 121
         },
+        ['ThousandBlades'] = {
+            "Thousand Blades",
+        },
     },
     ['HelperFunctions'] = {
         SwapInst = function(type)
@@ -935,7 +938,7 @@ local _ClassConfig = {
                 type = "AA",
             },
             {
-                name = "Thousand Blades",
+                name = "ThousandBlades",
                 type = "Disc",
             },
             {
