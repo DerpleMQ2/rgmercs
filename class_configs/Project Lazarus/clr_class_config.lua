@@ -60,7 +60,6 @@ local _ClassConfig = {
             "Light Healing",
             "Healing",
             "Greater Healing",
-            "Celestial Health",
             "Superior Healing",
             "Healing Light",
             "Divine Light",
