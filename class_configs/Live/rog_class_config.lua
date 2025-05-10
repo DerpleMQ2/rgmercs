@@ -246,6 +246,16 @@ return {
             end,
         },
         {
+            name = 'Aggro Management',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and mq.TLO.Me.PctAggro() > (Config:GetSetting('EvadeAggro') or 90)
+            end,
+        },
+        {
             name = 'Emergency',
             state = 1,
             steps = 1,
@@ -374,6 +384,15 @@ return {
                 type = "AA",
                 cond = function(self, aaName)
                     return Config:GetSetting('DoVetAA')
+                end,
+            },
+        },
+        ["Aggro Management"] = {
+            {
+                name = "Hide",
+                type = "Ability",
+                cond = function(self)
+                    return mq.TLO.Me.PctAggro() > Config:GetSetting('EvadeAggro')
                 end,
             },
         },
@@ -777,6 +796,17 @@ return {
             Default = true,
             FAQ = "What Vet AA's does MNK use?",
             Answer = "If Use Vet AA is enabled, Intensity of the Resolute will be used on burns and Armor of Experience will be used in emergencies.",
+        },
+        ['EvadeAggro']      = {
+            DisplayName = "Evade %",
+            Category = "Abilities",
+            Index = 9,
+            Tooltip = "Aggro at which to Evade",
+            Default = 90,
+            Min = 1,
+            Max = 100,
+            FAQ = "Can I customize when to use Evade?",
+            Answer = "Yes, you can set the aggro % at which to use Evade with the [EvadeAggro] setting.",
         },
         --Equipment
         ['UseEpic']         = {
