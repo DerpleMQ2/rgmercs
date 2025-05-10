@@ -114,7 +114,7 @@ function Targeting.GetTargetDistanceZ(target)
 end
 
 --- Gets the maximum range to the specified target.
---- @param target MQTarget? The target entity to measure the range to.
+--- @param target MQSpawn|nil The target entity to measure the range to.
 --- @return number The maximum range to the target.
 function Targeting.GetTargetMaxRangeTo(target)
     return (target and target.MaxRangeTo() or (mq.TLO.Target.MaxRangeTo() or 15))
