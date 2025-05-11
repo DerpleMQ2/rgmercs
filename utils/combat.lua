@@ -74,24 +74,26 @@ function Combat.EngageTarget(autoTargetId)
     Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Checking for valid Target.", Targeting.GetTargetCleanName())
 
     if target() and (target.ID() or 0) == autoTargetId and Targeting.GetTargetDistance() <= Config:GetSetting('AssistRange') then
-        if Config:GetSetting('DoMelee') then
-            if mq.TLO.Me.Sitting() then
-                mq.TLO.Me.Stand()
+        if (Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or Core.IAmMA()) and not Targeting.GetTargetDead(target) then
+            if not mq.TLO.Me.Combat() then
+                local classConfig = Modules:ExecModule("Class", "GetClassConfig")
+                if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.PreEngage then
+                    classConfig.HelperFunctions.PreEngage(target)
+                end
             end
 
-            if (Targeting.GetTargetPctHPs() <= Config:GetSetting('AutoAssistAt') or Core.IAmMA()) and not Targeting.GetTargetDead(target) then
-                if Targeting.GetTargetDistance(target) > Targeting.GetTargetMaxRangeTo(target) then
-                    Logger.log_debug("EngageTarget(): Target is too far! %d>%d attempting to nav to it.", target.Distance3D(),
-                        target.MaxRangeTo())
+            if Config:GetSetting('DoMelee') then
+                if mq.TLO.Me.Sitting() then
+                    mq.TLO.Me.Stand()
+                end
 
-                    local classConfig = Modules:ExecModule("Class", "GetClassConfig")
-                    if classConfig and classConfig.HelperFunctions and classConfig.HelperFunctions.PreEngage then
-                        classConfig.HelperFunctions.PreEngage(target)
-                    end
+                if Targeting.GetTargetDistance(target) > Targeting.GetTargetMaxRangeTo(target) then
+                    Logger.log_verbose("EngageTarget(): Target is too far! %d>%d attempting to nav to it.", target.Distance3D(),
+                        target.MaxRangeTo())
 
                     Movement.NavInCombat(autoTargetId, Targeting.GetTargetMaxRangeTo(target), false)
                 else
-                    Logger.log_debug("EngageTarget(): Target is in range moving to combat")
+                    Logger.log_verbose("EngageTarget(): Target is in range moving to combat")
                     if mq.TLO.Navigation.Active() then
                         Core.DoCmd("/nav stop log=off")
                     end
@@ -107,24 +109,37 @@ function Combat.EngageTarget(autoTargetId)
                             Config:GetSetting('AnnounceTarget'))
                     end
                     Logger.log_debug("EngageTarget(): Attacking target!")
+                    if Core.MyClassIs("ROG") and mq.TLO.Me.AbilityReady("Backstab")() then
+                        local maxWait = 2000
+                        while maxWait > 0 do
+                            if Targeting.GetTargetDistance(target) <= Targeting.GetTargetMaxRangeTo(target) then
+                                break
+                            end
+                            mq.delay(100)
+                            Logger.log_verbose("EngageTarget(): Rogue closing distance before opening with backstab.")
+                            maxWait = maxWait - 100
+                        end
+                        if maxWait <= 0 then Logger.log_verbose("EngageTarget(): Rogue did not close distance within two seconds, moving on.") end
+                        Core.DoCmd("/doability Backstab")
+                    end
                     Core.DoCmd("/attack on")
                 else
                     Logger.log_verbose("EngageTarget(): Target already engaged not re-engaging.")
                 end
             else
-                Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.",
-                    Targeting.GetTargetCleanName())
+                Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Targeting.GetTargetCleanName())
             end
-        else
-            Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) DoMelee is false.", Targeting.GetTargetCleanName())
+
+            if not Config:GetSetting('DoMelee') and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
+                Core.DoCmd("/stick pin 40")
+            end
+
+            -- TODO: why are we doing this after turning stick on just now?
+            --if mq.TLO.Stick.Status():lower() == "on" then Core.DoCmd("/stick off") end
         end
     else
-        if not Config:GetSetting('DoMelee') and Config.Constants.RGCasters:contains(mq.TLO.Me.Class.ShortName()) and target.Named() and target.Body.Name() == "Dragon" then
-            Core.DoCmd("/stick pin 40")
-        end
-
-        -- TODO: why are we doing this after turning stick on just now?
-        --if mq.TLO.Stick.Status():lower() == "on" then Core.DoCmd("/stick off") end
+        Logger.log_verbose("\awNOTICE:\ax EngageTarget(%s) Target is above Assist HP or Dead.",
+            Targeting.GetTargetCleanName())
     end
 end
 

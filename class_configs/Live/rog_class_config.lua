@@ -8,7 +8,7 @@ local Logger    = require("utils.logger")
 
 return {
     _version            = "2.0 - Live",
-    _author             = "Derple, Algar",
+    _author             = "Derple, Algar, mackal",
     ['Modes']           = {
         'DPS',
     },
@@ -246,6 +246,16 @@ return {
             end,
         },
         {
+            name = 'Aggro Management',
+            state = 1,
+            steps = 1,
+            doFullRotation = true,
+            targetId = function(self) return Targeting.CheckForAutoTargetID() end,
+            cond = function(self, combat_state)
+                return combat_state == "Combat" and mq.TLO.Me.PctAggro() > (Config:GetSetting('HideAggro') or 90)
+            end,
+        },
+        {
             name = 'Emergency',
             state = 1,
             steps = 1,
@@ -377,6 +387,33 @@ return {
                 end,
             },
         },
+        ["Aggro Management"] = {
+            {
+                name = "Escape",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    return mq.TLO.Me.PctHPs() <= Config:GetSetting('EmergencyStart') and Targeting.IHaveAggro(100)
+                end,
+            },
+            {
+                name = "Hide",
+                type = "Ability",
+                pre_activate = function(self, abilityName)
+                    if Core.OnEMU() then
+                        Core.DoCmd("/attack off")
+                        mq.delay(100, function() return not mq.TLO.Me.Combat() end)
+                    end
+                end,
+                cond = function(self)
+                    return mq.TLO.Me.PctAggro() > Config:GetSetting('HideAggro')
+                end,
+                post_activate = function(self, abilityName, success)
+                    if not mq.TLO.Me.Combat() then
+                        Core.DoCmd("/attack on")
+                    end
+                end,
+            },
+        },
         ['CombatBuff'] = {
             {
                 name = "Epic",
@@ -490,13 +527,6 @@ return {
         },
         ['Emergency'] = {
             {
-                name = "Escape",
-                type = "AA",
-                cond = function(self, aaName)
-                    return Targeting.IHaveAggro(100)
-                end,
-            },
-            {
                 name = "Armor of Experience",
                 type = "AA",
                 cond = function(self, aaName)
@@ -603,15 +633,17 @@ return {
         PreEngage = function(target)
             local openerAbility = Core.GetResolvedActionMapItem('SneakAttack')
 
+            if not Config:GetSetting("DoOpener") or not openerAbility then return end
+
             Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
-            if openerAbility and mq.TLO.Me.CombatAbilityReady(openerAbility)() and mq.TLO.Me.AbilityReady("Hide")() and Config:GetSetting("DoOpener") and mq.TLO.Me.Invis() then
+            if mq.TLO.Me.CombatAbilityReady(openerAbility)() and not mq.TLO.Me.AbilityReady("Hide")() and mq.TLO.Me.AbilityTimer("Hide")() < 6000 and mq.TLO.Me.Invis() then
                 Casting.UseDisc(openerAbility, target)
                 Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
-                Logger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Hide Ready = %s, Invis = %s", openerAbility or "None",
+                Logger.log_debug("\arPreEngage(): NOT using Opener ability = %s, DoOpener = %s, Hide Ready = %s, Hide Timer = %d, Invis = %s", openerAbility or "None",
                     Strings.BoolToColorString(Config:GetSetting("DoOpener")), Strings.BoolToColorString(mq.TLO.Me.AbilityReady("Hide")()),
-                    Strings.BoolToColorString(mq.TLO.Me.Invis()))
+                    mq.TLO.Me.AbilityTimer("Hide")(), Strings.BoolToColorString(mq.TLO.Me.Invis()))
             end
         end,
         BurnDiscCheck = function(self)
@@ -643,7 +675,7 @@ return {
 
             return true
         end,
-        UnwantedAggroCheck = function(self) --Self-Explanatory. Add isTanking to this if you ever make a mode for bardtanks!
+        UnwantedAggroCheck = function(self) --Self-Explanatory. Add isTanking to this if you ever make a mode for roguetanks!
             if Targeting.GetXTHaterCount() == 0 or Core.IAmMA() or mq.TLO.Group.Puller.ID() == mq.TLO.Me.ID() then return false end
             return Targeting.IHaveAggro(100)
         end,
@@ -769,10 +801,21 @@ return {
             FAQ = "How do I use my Emergency Mitigation Abilities?",
             Answer = "Make sure you have [EmergencyStart] set to the HP % before we begin to use emergency mitigation abilities.",
         },
+        ['HideAggro']       = {
+            DisplayName = "Hide Aggro%",
+            Category = "Abilities",
+            Index = 8,
+            Tooltip = "Your Aggro % before we will attempt to Hide from our current target.",
+            Default = 90,
+            Min = 1,
+            Max = 100,
+            FAQ = "Can I customize when to use Hide?",
+            Answer = "Yes, you can set the aggro % at which to use Hide with the [HideAggro] setting.",
+        },
         ['DoVetAA']         = {
             DisplayName = "Use Vet AA",
             Category = "Abilities",
-            Index = 8,
+            Index = 9,
             Tooltip = "Use Veteran AA's in emergencies or during Burn. (See FAQ)",
             Default = true,
             FAQ = "What Vet AA's does MNK use?",

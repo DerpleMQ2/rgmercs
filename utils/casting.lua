@@ -823,8 +823,10 @@ end
 
 --- Checks if a given ability is ready to be used.
 --- @param abilityName string The name of the ability to check.
+--- @param target MQSpawn|nil The intended target of the ability.
 --- @return boolean True if the ability is ready, false otherwise.
 function Casting.AbilityReady(abilityName, target)
+    if not target then target = mq.TLO.Target end
     if not target or not target() then return false end
 
     local ready = mq.TLO.Me.AbilityReady(abilityName)()
