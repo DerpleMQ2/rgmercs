@@ -897,7 +897,7 @@ function Module:GiveTime(combat_state)
         end
     end
 
-    if self:IsRezing() then
+    if self:IsRezing() and Config:GetSetting('DoRez') then
         -- Check Rezes
         if not (combat_state == "Downtime" and mq.TLO.Me.Invis() and not Config:GetSetting('BreakInvis')) then
             self:IGCheckAndRez()
