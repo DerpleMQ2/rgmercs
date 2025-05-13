@@ -1253,7 +1253,7 @@ local _ClassConfig = {
                 cond = function(self, aaName, target)
                     local bookSpell = self:GetResolvedActionMapItem('MoveSpells')
                     local aaSpell = Casting.GetAASpell(aaName)
-                    if not Config:GetSetting('DoRunSpeed') or (bookSpell and bookSpell.Level() or 999) > (aaSpell.Level() or 0) then return false end
+                    if not Config:GetSetting('DoRunSpeed') or (bookSpell and bookSpell.Level() or 999) > (aaSpell ~= "None" and aaSpell.Level() or 0) then return false end
 
                     return Casting.GroupBuffAACheck(aaName, target)
                 end,
