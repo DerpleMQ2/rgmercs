@@ -97,7 +97,7 @@ local _ClassConfig = {
             "Untamed Growth",
             "Wild Growth",
         },
-        ["LowLvlStaminaBuff"] = {
+        ["LowLvlStaBuff"] = {
             -- Low Level Stamina Buff --- I guess this may be okay for tanks (but largely a raid thing). Need to scrub which levels. Not currently used.
             "Spirit of Bear",
             "Spirit of Ox",
