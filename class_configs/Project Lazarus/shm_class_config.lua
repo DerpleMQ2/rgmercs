@@ -801,11 +801,10 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
                 cond = function(self, _) return Config:GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
-                post_activate = function(self, spell)
-                    local pet = mq.TLO.Me.Pet
-                    if pet.ID() > 0 then
-                        Comms.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
-                            pet.Class.Name(), pet.CleanName(), spell.RankName())
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
                     end
                 end,
             },

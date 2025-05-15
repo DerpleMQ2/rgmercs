@@ -219,11 +219,7 @@ function Module:Init()
 
     self.ModuleLoaded = true
 
-    if Config:GetSetting('DoPetCommands') and (Casting.CanUseAA("Companion's Discipline") or Casting.CanUseAA("Pet Discipline")) then
-        Core.DoCmd("/pet ghold on")
-    else
-        Core.DoCmd("/pet hold on")
-    end
+    self:SetPetHold()
 
     return {
         self = self,
@@ -1022,6 +1018,12 @@ end
 
 function Module:OnZone()
     -- Zone Handler
+    mq.delay("30s", function() return not mq.TLO.Me.Zoning() end) --don't try to do anything while we are still zoning
+    if not mq.TLO.Me.Zoning() then
+        local addDelay = 8 * (mq.TLO.EverQuest.Ping() or 150)     -- add'l delay to ensure we are fully loaded
+        mq.delay(addDelay)
+        self:SetPetHold()
+    end
 end
 
 function Module:DoGetState()
@@ -1122,6 +1124,19 @@ function Module:ResetRotationTimer(rotation)
     if self.TempSettings.RotationTimers[rotation] then
         Logger.log_verbose("\ayResetting Class:TempSettings.RotationTimers[\ag%s\ay].", rotation)
         self.TempSettings.RotationTimers[rotation] = 0
+    end
+end
+
+function Module:SetPetHold()
+    if Config:GetSetting('DoPetCommands') and mq.TLO.Me.Pet.ID() > 0 then
+        if Casting.CanUseAA("Companion's Discipline") or Casting.CanUseAA("Pet Discipline") then
+            ---@diagnostic disable-next-line: undefined-field --GHold not listed in defs
+            if not mq.TLO.Me.Pet.GHold() then
+                Core.DoCmd("/pet ghold on")
+            end
+        elseif not mq.TLO.Me.Pet.Hold() then
+            Core.DoCmd("/pet hold on")
+        end
     end
 end
 
