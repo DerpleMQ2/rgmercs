@@ -19,26 +19,35 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if Casting.AAReady("Radiant Cure") then
-                return Casting.UseAA("Radiant Cure", targetId)
-            elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
-                return Casting.UseAA("Purified Spirits", targetId)
+            if Config:GetSetting('DoCureAA') then
+                if Casting.AAReady("Radiant Cure") then
+                    return Casting.UseAA("Radiant Cure", targetId)
+                elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                    return Casting.UseAA("Purified Spirits", targetId)
+                end
             end
 
-            local cureSpell
+            if Config:GetSetting('DoCureSpells') then
+                local cureSpell
+                --If we have Word of Reconstitution, we can use this as our poison/disease/curse cure. Before that, they don't cure or have low counter count
+                local groupHeal = (Config:GetSetting('GroupHealAsCure') and (Core.GetResolvedActionMapItem('GroupHeal').Level() or 0) >= 70) and "GroupHeal"
+                if type:lower() == "disease" then
+                    --simply choose the first available option (also based on the groupHeal criteria above)
+                    local diseaseCure = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CureDisease", })
+                    cureSpell = Core.GetResolvedActionMapItem(diseaseCure)
+                elseif type:lower() == "poison" then
+                    local poisonCure = Casting.GetFirstMapItem({ groupHeal, "GroupCure", "CurePoison", })
+                    cureSpell = Core.GetResolvedActionMapItem(poisonCure)
+                elseif type:lower() == "curse" then
+                    --if we selected to keep it memmed, prioritize it over the group heal, since RGC clears a LOT more counters
+                    cureSpell = Core.GetResolvedActionMapItem((not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse'))
+                end
 
-            if type:lower() == "disease" then
-                cureSpell = Core.GetResolvedActionMapItem('GroupCure') or Core.GetResolvedActionMapItem('CureDisease')
-            elseif type:lower() == "poison" then
-                cureSpell = Core.GetResolvedActionMapItem('GroupCure') or Core.GetResolvedActionMapItem('CurePoison')
-            elseif type:lower() == "curse" then
-                cureSpell = Core.GetResolvedActionMapItem('CureCurse')
-            elseif type:lower() == "corruption" then
-                cureSpell = Core.GetResolvedActionMapItem('CureCorrupt')
+                if not cureSpell or not cureSpell() then return false end
+                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
             end
 
-            if not cureSpell or not cureSpell() then return false end
-            return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            return false
         end,
     },
     ['ItemSets']          = {
@@ -325,9 +334,6 @@ local _ClassConfig = {
             "Remove Curse",
             "Remove Lesser Curse",
             "Remove Minor Curse",
-        },
-        ['CureCorruption'] = {
-            "Cure Corruption",
         },
         ['GroupCure'] = {
             "Blood of Nadox",
@@ -795,11 +801,10 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, _) return mq.TLO.Me.Pet.ID() ~= 0 end,
                 cond = function(self, _) return Config:GetSetting('DoPet') and mq.TLO.Me.Pet.ID() == 0 end,
-                post_activate = function(self, spell)
-                    local pet = mq.TLO.Me.Pet
-                    if pet.ID() > 0 then
-                        Comms.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(),
-                            pet.Class.Name(), pet.CleanName(), spell.RankName())
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
                     end
                 end,
             },
@@ -1294,6 +1299,19 @@ local _ClassConfig = {
             FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
             Answer =
             "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
+        },
+        ['GroupHealAsCure']   = {
+            DisplayName = "Use Group Heal to Cure",
+            Category = "Healing",
+            Index = 6,
+            Tooltip = "If Word of Reconstitution is available, use this to cure instead of individual cure spells. \n" ..
+                "Please note that we will prioritize Remove Greater Curse if you have selected to keep it memmed as above (due to the counter disparity).",
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I using my Group Heal when I should be curing?",
+            Answer =
+                "Word of Reconsitatutioon claers poison/disease/curse counters and is used optionally as a cure. You can disable this behavior in your class options on the Utility tab.\n" ..
+                "Some earlier group heal spells also clear counters, but the config must be customized to use them.",
         },
 
         -- Canni

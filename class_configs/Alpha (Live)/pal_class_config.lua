@@ -24,9 +24,13 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if Casting.AAReady("Radiant Cure") then
-                return Casting.UseAA("Radiant Cure", targetId)
+            if Config:GetSetting('DoCureAA') then
+                if Casting.AAReady("Radiant Cure") then
+                    return Casting.UseAA("Radiant Cure", targetId)
+                end
             end
+
+            return false
             --local cureSpell = Core.GetResolvedActionMapItem('Puritycure')
 
             -- if type:lower() == "poison" then

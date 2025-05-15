@@ -19,38 +19,44 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if Casting.AAReady("Group Purify Soul") then
-                return Casting.UseAA("Group Purify Soul", targetId)
-            elseif Casting.AAReady("Radiant Cure") then
-                return Casting.UseAA("Radiant Cure", targetId)
-            elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
-                return Casting.UseAA("Purified Spirits", targetId)
-            elseif Casting.AAReady("Purify Soul") then
-                return Casting.UseAA("Purify Soul", targetId)
+            if Config:GetSetting('DoCureAA') then
+                if Casting.AAReady("Group Purify Soul") then
+                    return Casting.UseAA("Group Purify Soul", targetId)
+                elseif Casting.AAReady("Radiant Cure") then
+                    return Casting.UseAA("Radiant Cure", targetId)
+                elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                    return Casting.UseAA("Purified Spirits", targetId)
+                elseif Casting.AAReady("Purify Soul") then
+                    return Casting.UseAA("Purify Soul", targetId)
+                end
             end
 
-            local cureSpell = Config:GetSetting('KeepCureMemmed') == 3 and Core.GetResolvedActionMapItem('GroupHealCure') or Core.GetResolvedActionMapItem('CureAll')
+            if Config:GetSetting('DoCureSpells') then
+                local cureSpell = Config:GetSetting('KeepCureMemmed') == 3 and Core.GetResolvedActionMapItem('GroupHealCure') or Core.GetResolvedActionMapItem('CureAll')
 
-            if type:lower() == "disease" then
-                if not cureSpell then
-                    cureSpell = Core.GetResolvedActionMapItem('CureDisease')
+                if type:lower() == "disease" then
+                    if not cureSpell then
+                        cureSpell = Core.GetResolvedActionMapItem('CureDisease')
+                    end
+                elseif type:lower() == "poison" then
+                    if not cureSpell then
+                        cureSpell = Core.GetResolvedActionMapItem('CurePoison')
+                    end
+                elseif type:lower() == "curse" then
+                    if not cureSpell or cureSpell.Level() == (51 or 57 or 84) then --First two group cures and first cureall don't cure curse
+                        cureSpell = Core.GetResolvedActionMapItem('CureCurse')
+                    end
+                elseif type:lower() == "corruption" then
+                    cureSpell = Core.GetResolvedActionMapItem('CureCorrupt')
+                else
+                    return false
                 end
-            elseif type:lower() == "poison" then
-                if not cureSpell then
-                    cureSpell = Core.GetResolvedActionMapItem('CurePoison')
-                end
-            elseif type:lower() == "curse" then
-                if not cureSpell or cureSpell.Level() == (51 or 57 or 84) then --First two group cures and first cureall don't cure curse
-                    cureSpell = Core.GetResolvedActionMapItem('CureCurse')
-                end
-            elseif type:lower() == "corruption" then
-                cureSpell = Core.GetResolvedActionMapItem('CureCorrupt')
-            else
-                return false
+
+                if not cureSpell or not cureSpell() then return false end
+                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
             end
 
-            if not cureSpell or not cureSpell() then return false end
-            return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            return false
         end,
     },
     ['ItemSets']          = {

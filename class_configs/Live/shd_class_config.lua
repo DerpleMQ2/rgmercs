@@ -1109,6 +1109,12 @@ local _ClassConfig = {
                     if mq.TLO.Me.Pet.ID() ~= 0 or not Config:GetSetting('DoPet') then return false end
                     return Casting.ReagentCheck(spell)
                 end,
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
             },
         },
         ['PetBuff'] = {

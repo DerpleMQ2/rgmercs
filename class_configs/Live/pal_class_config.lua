@@ -20,19 +20,22 @@ return {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if Casting.AAReady("Radiant Cure") then
-                return Casting.UseAA("Radiant Cure", targetId)
+            if Config:GetSetting('DoCureAA') then
+                if Casting.AAReady("Radiant Cure") then
+                    return Casting.UseAA("Radiant Cure", targetId)
+                end
             end
-            -- TODO: Consider the impact of memorizing cures outside of combat or increasing number of options in settings
-            -- local cureSpell = Core.GetResolvedActionMapItem('Puritycure')
+
+            return false
+            --local cureSpell = Core.GetResolvedActionMapItem('Puritycure')
 
             -- if type:lower() == "poison" then
             -- cureSpell = Core.GetResolvedActionMapItem('Puritycure')
             -- elseif type:lower() == "curse" then
             -- cureSpell = Core.GetResolvedActionMapItem('Puritycure')
-            --TODO: Add Corruption AbilitySets
+            --TODO: Add corruption AbilitySet
             -- elseif type:lower() == "corruption" then
-            -- cureSpell = Core.GetResolvedActionMapItem('')
+            -- cureSpell = Core.GetResolvedActionMapItem('Puritycure')
             -- end
 
             -- if not cureSpell or not cureSpell() then return false end

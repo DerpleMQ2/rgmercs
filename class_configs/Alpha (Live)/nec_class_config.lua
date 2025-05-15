@@ -1107,6 +1107,8 @@ local _ClassConfig = {
                     local pet = mq.TLO.Me.Pet
                     if success and pet.ID() > 0 then
                         Comms.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
                     end
                 end,
             },
@@ -1121,6 +1123,8 @@ local _ClassConfig = {
                     local pet = mq.TLO.Me.Pet
                     if success and pet.ID() > 0 then
                         Comms.PrintGroupMessage("Summoned a new %d %s pet named %s using '%s'!", pet.Level(), pet.Class.Name(), pet.CleanName(), spell.RankName())
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
                     end
                 end,
             },

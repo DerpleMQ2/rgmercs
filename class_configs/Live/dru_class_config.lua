@@ -20,12 +20,18 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if Casting.AAReady("Radiant Cure") then
-                return Casting.UseAA("Radiant Cure", targetId)
+            if Config:GetSetting('DoCureAA') then
+                if Casting.AAReady("Radiant Cure") then
+                    return Casting.UseAA("Radiant Cure", targetId)
+                end
             end
-            local cureSpell = Core.GetResolvedActionMapItem('SingleTgtCure')
-            if not cureSpell or not cureSpell() then return false end
-            return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            if Config:GetSetting('DoCureSpells') then
+                local cureSpell = Core.GetResolvedActionMapItem('SingleTgtCure')
+                if not cureSpell or not cureSpell() then return false end
+                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            end
+
+            return false
         end,
     },
     ['ItemSets']          = {
@@ -1384,6 +1390,12 @@ local _ClassConfig = {
                 name = "PetSpell",
                 type = "Spell",
                 active_cond = function() return mq.TLO.Me.Pet.ID() ~= 0 end,
+                post_activate = function(self, spell, success)
+                    if success and mq.TLO.Me.Pet.ID() > 0 then
+                        mq.delay(50) -- slight delay to prevent chat bug with command issue
+                        self:SetPetHold()
+                    end
+                end,
             },
         },
     },
