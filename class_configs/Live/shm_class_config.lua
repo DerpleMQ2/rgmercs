@@ -20,23 +20,28 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if Casting.AAReady("Radiant Cure") then
-                return Casting.UseAA("Radiant Cure", targetId)
+            if Config:GetSetting('DoCureAA') then
+                if Casting.AAReady("Radiant Cure") then
+                    return Casting.UseAA("Radiant Cure", targetId)
+                end
+            end
+            if Config:GetSetting('DoCureSpells') then
+                local cureSpell
+                --Ensure it is a type the spell can cure (we now check for more than just p/d/c), fallback to earlier spells if needed
+                if type:lower() == "poison" then
+                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPCurePoison')
+                elseif type:lower() == "disease" then
+                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPCureDisease')
+                elseif type:lower() == "curse" then
+                    cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPRemoveCurse')
+                end
+                --todo: Add corruption cure
+
+                if not cureSpell or not cureSpell() then return false end
+                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
             end
 
-            local cureSpell
-            --Ensure it is a type the spell can cure (we now check for more than just p/d/c), fallback to earlier spells if needed
-            if type:lower() == "poison" then
-                cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPCurePoison')
-            elseif type:lower() == "disease" then
-                cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPCureDisease')
-            elseif type:lower() == "curse" then
-                cureSpell = Core.GetResolvedActionMapItem('CureSpell') or Core.GetResolvedActionMapItem('TLPRemoveCurse')
-            end
-            --todo: Add corruption cure
-
-            if not cureSpell or not cureSpell() then return false end
-            return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            return false
         end,
     },
     ['ItemSets']          = {

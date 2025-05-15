@@ -20,29 +20,37 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if Casting.AAReady("Group Purify Soul") then
-                return Casting.UseAA("Group Purify Soul", targetId)
-            elseif Casting.AAReady("Radiant Cure") then
-                return Casting.UseAA("Radiant Cure", targetId)
-            elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
-                return Casting.UseAA("Purified Spirits", targetId)
-            elseif Casting.AAReady("Purify Soul") then
-                return Casting.UseAA("Purify Soul", targetId)
+            if Config:GetSetting('DoCureAA') then
+                if Casting.AAReady("Group Purify Soul") then
+                    return Casting.UseAA("Group Purify Soul", targetId)
+                elseif Casting.AAReady("Radiant Cure") then
+                    return Casting.UseAA("Radiant Cure", targetId)
+                elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                    return Casting.UseAA("Purified Spirits", targetId)
+                elseif Casting.AAReady("Purify Soul") then
+                    return Casting.UseAA("Purify Soul", targetId)
+                end
             end
 
-            local cureSpell
-            -- at one time we had the grouphealcure here. On laz, the total counters it clears seems quite low.
-            -- With the amount of AA cleric has to cure, we likely won't need to mem these at 70, but there will be the option to do so.
-            if type:lower() == "disease" then
-                cureSpell = Core.GetResolvedActionMapItem('CureDisease')
-            elseif type:lower() == "poison" then
-                cureSpell = Core.GetResolvedActionMapItem('CurePoison')
-            elseif type:lower() == "curse" then
-                cureSpell = Core.GetResolvedActionMapItem('CureCurse')
+            if Config:GetSetting('DoCureSpells') then
+                local cureSpell
+                --If our group heal removes counters, we can use it if selected.
+                --However, if we selecte to keep a cure memmed, prioritize it over the group heal, since it clears a LOT more counters (and that may be preferred).
+                local groupHeal = (Config:GetSetting('GroupHealAsCure') and (Core.GetResolvedActionMapItem('GroupHeal').Level() or 0) >= 64) and "GroupHeal"
+
+                if type:lower() == "disease" then
+                    cureSpell = Core.GetResolvedActionMapItem((not Config:GetSetting('KeepDiseaseMemmed') and (groupHeal or 'CureDisease') or 'CureDisease'))
+                elseif type:lower() == "poison" then
+                    cureSpell = Core.GetResolvedActionMapItem((not Config:GetSetting('KeepPoisonMemmed') and (groupHeal or 'CurePoison') or 'CurePoison'))
+                elseif type:lower() == "curse" then
+                    cureSpell = Core.GetResolvedActionMapItem((not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse'))
+                end
+
+                if not cureSpell or not cureSpell() then return false end
+                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
             end
 
-            if not cureSpell or not cureSpell() then return false end
-            return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            return false
         end,
     },
     ['ItemSets']          = {
@@ -1081,6 +1089,19 @@ local _ClassConfig = {
             FAQ = "Why do I have to stop to memorize a cure every time someone gets an effect?",
             Answer =
             "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
+        },
+        ['GroupHealAsCure']   = {
+            DisplayName = "Use Group Heal to Cure",
+            Category = "Heals and Cures",
+            Index = 9,
+            Tooltip = "If Word of Replenishment or Vivification are available, use these to cure instead of individual cure spells. \n" ..
+                "Please note that we will prioritize single target cures if you have selected to keep them memmed above (due to the counter disparity).",
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I using my Group Heal when I should be curing?",
+            Answer =
+                "Word of Reconsitatutioon claers poison/disease/curse counters and is used optionally as a cure. You can disable this behavior in your class options on the Utility tab.\n" ..
+                "Some earlier group heal spells also clear counters, but the config must be customized to use them.",
         },
 
         --Damage(AE)

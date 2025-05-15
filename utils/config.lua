@@ -1263,8 +1263,7 @@ Config.DefaultConfig = {
         DisplayName = "Do Cure Spells",
         Category = "Heal/Rez",
         Index = 11,
-        Tooltip = "Use Cure spells to clear detrimental effects from your group or yourself.\n" ..
-            "Quick Note, May 2025: this is a new setting and as such has not been implemented in all configs. Some configs may use cures even with this deslected.",
+        Tooltip = "Use Cure spells to clear detrimental effects from your group or yourself.",
         Default = true,
         ConfigType = "Advanced",
         FAQ = "I want to control cures manually or with an outside script or LEM. Can I do that??",
@@ -1274,8 +1273,7 @@ Config.DefaultConfig = {
         DisplayName = "Do Cure AA",
         Category = "Heal/Rez",
         Index = 12,
-        Tooltip = "Use Cure AA to clear detrimental effects from your group or yourself.\n" ..
-            "Quick Note, May 2025: this is a new setting and as such has not been implemented in all configs. Some configs may use cures even with this deslected.",
+        Tooltip = "Use Cure AA to clear detrimental effects from your group or yourself.",
         Default = true,
         ConfigType = "Advanced",
         FAQ = "Why am I wasting Radiant Cure?",

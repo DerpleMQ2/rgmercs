@@ -18,26 +18,36 @@ local _ClassConfig = {
     },
     ['Cures']             = {
         CureNow = function(self, type, targetId)
-            if Casting.AAReady("Radiant Cure") then
-                return Casting.UseAA("Radiant Cure", targetId)
-            elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
-                return Casting.UseAA("Purified Spirits", targetId)
+            if Config:GetSetting('DoCureAA') then
+                if Casting.AAReady("Radiant Cure") then
+                    return Casting.UseAA("Radiant Cure", targetId)
+                elseif targetId == mq.TLO.Me.ID() and Casting.AAReady("Purified Spirits") then
+                    return Casting.UseAA("Purified Spirits", targetId)
+                end
             end
 
-            local cureSpell
+            if Config:GetSetting('DoCureSpells') then
+                local cureSpell
+                --If we have Word of Reconstitution, we can use this as our poison/disease/curse cure. Before that, they don't cure or have low counter count
+                local groupHeal = (Config:GetSetting('GroupHealAsCure') and (Core.GetResolvedActionMapItem('GroupHeal').Level() or 0) >= 70) and "GroupHeal"
 
-            if type:lower() == "disease" then
-                cureSpell = Core.GetResolvedActionMapItem('PureBlood') or Core.GetResolvedActionMapItem('CureDisease')
-            elseif type:lower() == "poison" then
-                cureSpell = Core.GetResolvedActionMapItem('PureBlood') or Core.GetResolvedActionMapItem('CurePoison')
-            elseif type:lower() == "curse" then
-                cureSpell = Core.GetResolvedActionMapItem('CureCurse')
-            elseif type:lower() == "corruption" then
-                cureSpell = Core.GetResolvedActionMapItem('CureCorrupt')
+                if type:lower() == "disease" then
+                    --simply choose the first available option (also based on the groupHeal criteria above)
+                    local diseaseCure = Casting.GetFirstMapItem({ groupHeal, "PureBlood", "CureDisease", })
+                    cureSpell = Core.GetResolvedActionMapItem(diseaseCure)
+                elseif type:lower() == "poison" then
+                    local poisonCure = Casting.GetFirstMapItem({ groupHeal, "PureBlood", "CurePoison", })
+                    cureSpell = Core.GetResolvedActionMapItem(poisonCure)
+                elseif type:lower() == "curse" then
+                    --if we selected to keep it memmed, prioritize it over the group heal, since RGC clears a LOT more counters
+                    cureSpell = Core.GetResolvedActionMapItem((not Config:GetSetting('KeepCurseMemmed') and (groupHeal or 'CureCurse') or 'CureCurse'))
+                end
+
+                if not cureSpell or not cureSpell() then return false end
+                return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
             end
 
-            if not cureSpell or not cureSpell() then return false end
-            return Casting.UseSpell(cureSpell.RankName.Name(), targetId, true)
+            return false
         end,
     },
     ['ItemSets']          = {
@@ -264,9 +274,6 @@ local _ClassConfig = {
             "Remove Curse",
             "Remove Lesser Curse",
             "Remove Minor Curse",
-        },
-        ['CureCorruption'] = {
-            "Cure Corruption",
         },
         ['PureBlood'] = {
             "Pure Blood",
@@ -680,7 +687,7 @@ local _ClassConfig = {
                 name = "Flight of Eagles",
                 type = "AA",
                 active_cond = function(self, aaName)
-                    return Casting.IHaveBuff(Casting.GetAASpell())
+                    return Casting.IHaveBuff(Casting.GetAASpell(aaName))
                 end,
                 cond = function(self, aaName, target)
                     if not Config:GetSetting('DoMoveBuffs') then return false end
@@ -1297,10 +1304,23 @@ local _ClassConfig = {
             Answer =
             "You can choose to keep a cure memorized in the class options. If you have selected it, and it isn't being memmed, you may have chosen too many other optional spells to use/memorize.",
         },
+        ['GroupHealAsCure']   = {
+            DisplayName = "Use Group Heal to Cure",
+            Category = "Utility",
+            Index = 4,
+            Tooltip = "If Word of Reconstitution is available, use this to cure instead of individual cure spells. \n" ..
+                "Please note that we will prioritize Remove Greater Curse if you have selected to keep it memmed as above (due to the counter disparity).",
+            Default = true,
+            ConfigType = "Advanced",
+            FAQ = "Why am I using my Group Heal when I should be curing?",
+            Answer =
+                "Word of Reconsitatutioon claers poison/disease/curse counters and is used optionally as a cure. You can disable this behavior in your class options on the Utility tab.\n" ..
+                "Some earlier group heal spells also clear counters, but the config must be customized to use them.",
+        },
         ['DoArcanumWeave']    = {
             DisplayName = "Weave Arcanums",
             Category = "Utility",
-            Index = 5,
+            Index = 6,
             Tooltip = "Weave Empowered/Enlighted/Acute Focus of Arcanum into your standard combat routine (Focus of Arcanum is saved for burns).",
             RequiresLoadoutChange = true, --this setting is used as a load condition
             Default = true,
@@ -1311,7 +1331,7 @@ local _ClassConfig = {
         ['KeepEvacMemmed']    = {
             DisplayName = "Memorize Evac",
             Category = "Utility",
-            Index = 6,
+            Index = 7,
             Tooltip = "Keep (Lesser) Succor memorized.",
             Default = false,
             RequiresLoadoutChange = true,
