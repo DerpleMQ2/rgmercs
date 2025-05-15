@@ -519,8 +519,11 @@ end
 --- Checks if the PC should use debuffs based off of con color or named settings.
 --- @return boolean True if the target matches the Con requirements for debuffing.
 function Casting.OkayToDebuff()
+    local named = Targeting.IsNamed(Targeting.GetAutoTarget())
+    local debuffChoice = Config.Constants.DebuffChoice[Config:GetSetting(named and 'NamedDebuff' or 'MobDebuff')]
     local conLevel = (Config.Constants.ConColorsNameToId[mq.TLO.Target.ConColor() or "Grey"] or 0)
-    return conLevel >= Config:GetSetting('DebuffMinCon') or (Targeting.IsNamed(Targeting.GetAutoTarget()) and Config:GetSetting('DebuffNamedAlways'))
+
+    return debuffChoice == "Always" or (debuffChoice == "Based on Con Color" and conLevel >= Config:GetSetting('DebuffMinCon'))
 end
 
 --- Determines if the PC can/should use buffs if their corpse is nearby.
@@ -644,7 +647,6 @@ end
 
 --- Helper to retrive an AA spell to be used in other checks.
 function Casting.GetAASpell(aaName)
-    if not Casting.CanUseAA(aaName) then return "None" end
     return mq.TLO.Me.AltAbility(aaName).Spell
 end
 
