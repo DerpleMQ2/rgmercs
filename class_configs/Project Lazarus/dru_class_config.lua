@@ -751,7 +751,8 @@ local _ClassConfig = {
                 type = "AA",
                 active_cond = function(self, aaName) return true end,
                 cond = function(self, aaName, target)
-                    return Targeting.TargetIsMA(target) and Casting.GroupBuffAACheck(aaName, target)
+                    if Targeting.TargetIsMA(target) then return false end
+                    return Casting.GroupBuffAACheck(aaName, target)
                 end,
             },
         },
