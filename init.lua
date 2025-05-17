@@ -41,7 +41,7 @@ local initPctComplete = 0
 local initMsg         = "Initializing RGMercs..."
 
 -- UI --
-local SimpleUI        = require("ui.simple")
+local OptionsUI       = require("ui.options")
 local StandardUI      = require("ui.standard")
 local ConsoleUI       = require("ui.console")
 local LoaderUI        = require("ui.loader")
@@ -136,11 +136,7 @@ local function RGMercsGUI()
                 HudUI:RenderToggleHud()
             end
 
-            if Config:GetSetting('FullUI') then
-                openGUI = StandardUI:RenderMainWindow(imGuiStyle, curState, openGUI)
-            else
-                openGUI = SimpleUI:RenderMainWindow(imGuiStyle, curState, openGUI)
-            end
+            openGUI = StandardUI:RenderMainWindow(imGuiStyle, curState, openGUI)
 
             ImGui.PopStyleVar(3)
 
