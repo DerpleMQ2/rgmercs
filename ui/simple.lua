@@ -33,15 +33,18 @@ function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
             local _, y = ImGui.GetContentRegionAvail()
             if ImGui.BeginChild("left##RGmercsSimplePanel", ImGui.GetWindowContentRegionWidth() * .3, y - 1, ImGuiChildFlags.Border) then
                 local flags = bit32.bor(ImGuiTableFlags.RowBg, ImGuiTableFlags.BordersOuter, ImGuiTableFlags.BordersV, ImGuiTableFlags.ScrollY)
+                -- figure out icons once headings are finalized
                 if ImGui.BeginTable('configmenu##RGmercsSimplePanel', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
-                    self:RenderSimplePanelOption(Icons.FA_COGS .. " General", "General")
-                    ImGui.TableNextColumn()
-                    self:RenderSimplePanelOption(Icons.FA_HEART .. " Healing", "Healing")
+                    self:RenderSimplePanelOption(Icons.FA_COGS .. "General", "General")
                     ImGui.TableNextColumn()
                     self:RenderSimplePanelOption(Icons.MD_RESTAURANT_MENU .. "Combat", "Combat")
                     ImGui.TableNextColumn()
-                    self:RenderSimplePanelOption(Icons.FA_REBEL .. " Spells", "Spells")
+                    self:RenderSimplePanelOption(Icons.FA_REBEL .. "Spells/Abilities", "Spells/Abilities")
+                    ImGui.TableNextColumn()
+                    self:RenderSimplePanelOption(Icons.FA_REBEL .. "Items/Equipment", "Items/Equipment")
+                    ImGui.TableNextColumn()
+                    self:RenderSimplePanelOption(Icons.FA_REBEL .. "Modules", "Modules")
                     ImGui.TableNextColumn()
                     ImGui.EndTable()
                 end
@@ -71,8 +74,18 @@ function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
 
         ImGui.End()
     end
+end
 
-    return openGUI, shouldDrawGUI
+function SimpleUI:RenderCategoryPanel() --panel
+    -- make a table of existing categories for that panel
+    -- render collapsing header with existing category names for the heading we are on, using something similar to render settings
+    -- render subcategory names with dividers under each collapsing header
+    -- render settings tables for each subcategory
+    -- keep the last two grouped together when iterating so we end up with ----SubcatName---- with options underneath for each subcat
+end
+
+function SimpleUI:GetCategories() -- panel
+    --pull in all modules config settings
 end
 
 return SimpleUI

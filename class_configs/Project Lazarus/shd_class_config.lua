@@ -1323,6 +1323,9 @@ local _ClassConfig = {
         },
         ['AETargetCnt']     = {
             DisplayName = "AE Target Count",
+            -- Panel = "Spells/Abilities",
+            -- Category = "Damage"
+            -- Subcategory = "AE"
             Category = "AE Damage",
             Index = 4,
             Tooltip = "Minimum number of valid targets before using AE Spells, Disciplines or AA.",
