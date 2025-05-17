@@ -445,6 +445,22 @@ return {
                 type = "AA",
             },
             {
+                name = "Volatile Mana Blaze",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoManaBurn') or mq.TLO.Me.PctAggro() > 70 then return false end
+                    return not Casting.TargetHasBuff(aaName) and Casting.HaveManaToNuke()
+                end,
+            },
+            {
+                name = "Mana Blaze",
+                type = "AA",
+                cond = function(self, aaName, target)
+                    if not Config:GetSetting('DoManaBurn') or mq.TLO.Me.PctAggro() > 70 then return false end
+                    return not Casting.TargetHasBuff(aaName) and Casting.HaveManaToNuke()
+                end,
+            },
+            {
                 name = "Mana Blast",
                 type = "AA",
                 cond = function(self, aaName, target)
