@@ -85,7 +85,11 @@ function SimpleUI:RenderCategoryPanel() --panel
 end
 
 function SimpleUI:GetCategories() -- panel
-    --pull in all modules config settings
+    -- this might end up in the UI utils
+    -- i am unsure if we should:
+    -- iterate through all modules and dump all settings into a new table. iterate through new table to return all categories for this panel
+    -- or
+    -- iterate through all modules, iterate through each settings table to return all categories for this panel
 end
 
 return SimpleUI
