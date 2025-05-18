@@ -8,10 +8,45 @@ local GitCommit              = require('extras.version')
 local SimpleUI               = { _version = '1.0', _name = "SimpleUI", _author = 'Derple', }
 SimpleUI.__index             = SimpleUI
 SimpleUI.selectedSimplePanel = "General"
+SimpleUI.Categories          = {
+    { Name = "General", Icon = Icons.FA_COGS,            Render = function() return SimpleUI:RenderGeneralTab() end, },
+    { Name = "Healing", Icon = Icons.FA_HEART,           Render = function() return SimpleUI:RenderHealingTab() end, },
+    { Name = "Combat",  Icon = Icons.MD_RESTAURANT_MENU, Render = function() return SimpleUI:RenderCombatTab() end, },
+    { Name = "Spells",  Icon = Icons.FA_REBEL,           Render = function() return SimpleUI:RenderSpellsTab() end, },
+}
 
 function SimpleUI:RenderSimplePanelOption(optionLabel, optionName)
     if ImGui.Selectable(optionLabel, self.selectedSimplePanel == optionName) then
         self.selectedSimplePanel = optionName
+    end
+end
+
+function SimpleUI:RenderGeneralTab()
+    -- Render the General tab content here
+    ImGui.Text("General Settings")
+end
+
+function SimpleUI:RenderHealingTab()
+    -- Render the Healing tab content here
+    ImGui.Text("Healing Settings")
+end
+
+function SimpleUI:RenderCombatTab()
+    -- Render the Combat tab content here
+    ImGui.Text("Combat Settings")
+end
+
+function SimpleUI:RenderSpellsTab()
+    -- Render the Spells tab content here
+    ImGui.Text("Spells Settings")
+end
+
+function SimpleUI:RenderCurrentTab()
+    for _, category in ipairs(self.Categories) do
+        if self.selectedSimplePanel == category.Name then
+            category.Render()
+            break
+        end
     end
 end
 
@@ -36,16 +71,10 @@ function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
                 -- figure out icons once headings are finalized
                 if ImGui.BeginTable('configmenu##RGmercsSimplePanel', 1, flags, 0, 0, 0.0) then
                     ImGui.TableNextColumn()
-                    self:RenderSimplePanelOption(Icons.FA_COGS .. "General", "General")
-                    ImGui.TableNextColumn()
-                    self:RenderSimplePanelOption(Icons.MD_RESTAURANT_MENU .. "Combat", "Combat")
-                    ImGui.TableNextColumn()
-                    self:RenderSimplePanelOption(Icons.FA_REBEL .. "Spells/Abilities", "Spells/Abilities")
-                    ImGui.TableNextColumn()
-                    self:RenderSimplePanelOption(Icons.FA_REBEL .. "Items/Equipment", "Items/Equipment")
-                    ImGui.TableNextColumn()
-                    self:RenderSimplePanelOption(Icons.FA_REBEL .. "Modules", "Modules")
-                    ImGui.TableNextColumn()
+                    for _, category in ipairs(self.Categories) do
+                        self:RenderSimplePanelOption(string.format("%s %s", category.Icon, category.Name), category.Name)
+                        ImGui.TableNextColumn()
+                    end
                     ImGui.EndTable()
                 end
             end
@@ -63,7 +92,7 @@ function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
                     end
 
                     ImGui.TableNextColumn()
-                    ImGui.Text("Simple Panel: " .. self.selectedSimplePanel) -- Instead of this code this should now call to function which render each panel self:RenderGeneralPanel(), etc...
+                    self:RenderCurrentTab()
                     ImGui.EndTable()
                 end
             end
@@ -74,6 +103,8 @@ function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
 
         ImGui.End()
     end
+
+    return openGUI
 end
 
 function SimpleUI:RenderCategoryPanel() --panel
