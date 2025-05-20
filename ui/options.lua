@@ -4,6 +4,7 @@ local Config    = require('utils.config')
 local Ui        = require('utils.ui')
 local Icons     = require('mq.ICONS')
 local GitCommit = require('extras.version')
+local Modules   = require('utils.modules')
 
 
 -- Using the following terms:
@@ -19,15 +20,13 @@ OptionsUI.Groups        = {
         Name = "Movement",
         Desciption = "Following, Medding, Pulling",
         Icon = Icons.FA_HEART,
-        Headers = { "Chase", "Camp", "Meditation", "Mounts", "Pulling", },
-        Render = function() return OptionsUI:RenderHealingTab() end,
+        Headers = { "Chase", "Camp", "Meditation", "Mounts", "Drag", "Pulling", },
     },
     {
         Name = "Combat",
         Desciption = "Assisting, Positioning",
         Icon = Icons.FA_HEART,
         Headers = { "Engage", "Positioning", "Tanking", },
-        Render = function() return OptionsUI:RenderHealingTab() end,
     },
     { -- i have nfc what i'm doing, but it seems like we need to specify the order for consistency.
         -- -- hardcoded seems easier than multiple indexes on each setting
@@ -44,28 +43,18 @@ OptionsUI.Groups        = {
             ['Mez'] = { "General", "Range", "Target", },
             ['Charm'] = { "General", "Range", "Target", },
         }, -- this is still a WIP
-        Render = function() return OptionsUI:RenderHealingTab() end,
     },
     {
         Name = "Items",
         Desciption = "Clickies, Bandolier Swaps",
         Icon = Icons.MD_RESTAURANT_MENU,
         Headers = { "Bandolier", "Clickies(Mercs-Defined)", "Clickies(User-Entered)", "Instruments", },
-        Render = function() return OptionsUI:RenderCombatTab() end,
     },
     {
         Name = "Miscellaneous",
-        Desciption = "UI, Communication",
+        Desciption = "Loot, UI, Communication",
         Icon = Icons.FA_COGS,
-        Headers = { "Action Announcing", "UI", "Other", },
-        Render = function() return OptionsUI:RenderGeneralTab() end,
-    },
-    {
-        Name = "Loot(Emu)",
-        Desciption = "Integrated LootNScoot",
-        Icon = Icons.FA_REBEL,
-        --Headers = { "LootNScoot", },
-        Render = function() return OptionsUI:RenderLootPanel() end, -- Render this without a header or subcats, I think.
+        Headers = { "Loot(Emu)", "Action Announcing", "UI", "Other", },
     },
 }
 
@@ -109,30 +98,49 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     end
 end
 
-function OptionsUI:RenderGeneralTab()
-    -- Render the General tab content here
-    ImGui.Text("General Settings")
+function OptionsUI:RenderOptionsPanel(groupName)
+
 end
 
-function OptionsUI:RenderHealingTab()
-    -- Render the Healing tab content here
-    ImGui.Text("Healing Settings")
-end
+function OptionsUI:GetCombinedSettingNames()
+    --Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
+    local modules = { "Movement", "Pull", "Drag", "Mez", "Charm", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
-function OptionsUI:RenderCombatTab()
-    -- Render the Combat tab content here
-    ImGui.Text("Combat Settings")
-end
+    local combinedSettingNames = {}
 
-function OptionsUI:RenderSpellsTab()
-    -- Render the Spells tab content here
-    ImGui.Text("Spells Settings")
+    for _, module in ipairs(modules) do
+        local defaults = Modules:ExecModule(module, "GetDefaultSettings")
+        local settingNames = {}
+
+        --get defaults for this module
+        for k, _ in pairs(defaults) do
+            table.insert(settingNames, k)
+        end
+
+        -- sort by indexes, if there are any, before they are added to the list (so there is no conflict between indexing from different modules in the same category).
+        table.sort(settingNames,
+            function(k1, k2)
+                if (defaults[k1].Index ~= nil or defaults[k2].Index ~= nil) and (defaults[k1].Index ~= defaults[k2].Index) then
+                    return (defaults[k1].Index or 999) < (defaults[k2].Index or 999)
+                elseif defaults[k1].Category == defaults[k2].Category then
+                    return (defaults[k1].DisplayName or "") < (defaults[k2].DisplayName or "")
+                else
+                    return (defaults[k1].Category or "") < (defaults[k2].Category or "")
+                end
+            end)
+        -- insert them into the master list
+        for k, _ in pairs(settingNames) do
+            table.insert(combinedSettingNames, k)
+        end
+    end
+
+    return combinedSettingNames
 end
 
 function OptionsUI:RenderCurrentTab()
     for _, group in ipairs(self.Groups) do
         if self.selectedGroup == group.Name then
-            group.Render()
+            self:RenderOptionsPanel(group.Name)
             break
         end
     end
