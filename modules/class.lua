@@ -350,14 +350,22 @@ function Module:RenderRotationWithToggle(r, rotationTable)
     local enabledRotationEntriesChanged = false
     local rotationName = r.name
     local rotationDisabled = self.settings.EnabledRotations[r.name] == false
-    local rotationIcon = rotationDisabled and Icons.MD_ERROR or r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE
+    local rotationIcon = rotationDisabled and Icons.MD_ERROR or (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE)
     local headerText = string.format("[%s] %s", rotationIcon, rotationName)
-    local changed = false
-    local toggleOffset = 60
+    local toggleOffset = 60 -- how far left to move from the far right of the window to render the toggle button
+
+    -- Get start rendering position before we draw anything
     local cursorScreenPos = ImGui.GetCursorPosVec()
+
+    -- Move to the far right minus our offset to render an invis button that will handle mouse inputs
+    -- This has to come here because if it comes after the Header, the header will eat our mouse events.
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - toggleOffset, cursorScreenPos.y)
-    self.settings.EnabledRotations[r.name], changed = Ui.RenderOptionToggle("##Enable" .. rotationName, "", self.settings.EnabledRotations[r.name] ~= false)
-    if changed then self:SaveSettings(false) end
+    if ImGui.InvisibleButton("##Enable" .. rotationName, ImVec2(20, 20)) then
+        self.settings.EnabledRotations[r.name] = not self.settings.EnabledRotations[r.name]
+        self:SaveSettings(false)
+    end
+
+    -- Reset the cursor position to where we started
     ImGui.SetCursorPos(cursorScreenPos)
     if ImGui.CollapsingHeader(headerText) then
         if self.settings.EnabledRotations[r.name] ~= false then
@@ -368,9 +376,16 @@ function Module:RenderRotationWithToggle(r, rotationTable)
             ImGui.Unindent()
         end
     end
+
+    -- Store the position we are at after rendering the Header / Table
     local cursorScreenPosAfterRender = ImGui.GetCursorPosVec()
+
+    -- Move back to where the invisible Button is and render the toggle button just for looks
+    -- This has to come here because if we put it where the invisible button is then it renders under the header
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - toggleOffset, cursorScreenPos.y)
-    Ui.RenderOptionToggle("##EnableDrawn" .. rotationName, "", self.settings.EnabledRotations[r.name] ~= false)
+    Ui.RenderOptionToggle("##EnableDrawn" .. rotationName, "", not rotationDisabled)
+
+    -- Now set the rendering cursor back to where we were after the Header / Tables were rendered
     ImGui.SetCursorPos(cursorScreenPosAfterRender)
 
     if enabledRotationEntriesChanged then self:SaveSettings(false) end
