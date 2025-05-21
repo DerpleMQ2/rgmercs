@@ -5870,6 +5870,7 @@ function LNS.drawRecord(tableToDraw)
         ImGui.SameLine()
         if ImGui.SmallButton(Icons.FA_CALENDAR .. "Load Date") then
             LNS.TempSettings.LookUpDateData = true
+            ---@diagnostic disable-next-line: cast-local-type
             lookupDate = LNS.TempSettings.DateLookup
         end
         if ImGui.IsItemHovered() then
