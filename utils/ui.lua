@@ -339,15 +339,17 @@ end
 --- @param resolvedActionMap table: A map of resolved actions.
 --- @param rotationState number|nil: The current state of the rotation.
 --- @param showFailed boolean: Flag to indicate whether to show failed actions.
+--- @param enabledRotationEntries table: The table containing configuration about this rotation enablement
 ---
---- @return boolean returns showFailed input
-function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotationState, showFailed)
-    if ImGui.BeginTable("Rotation_" .. name, rotationState > 0 and 5 or 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
+--- @return boolean, table, boolean returns showFailed input and current enablement config table and bool if the enablement changed
+function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotationState, showFailed, enabledRotationEntries)
+    local enabledRotationEntriesChanged = false
+
+    if ImGui.BeginTable("Rotation_" .. name, 6, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
         ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
         ImGui.TableSetupColumn('ID', ImGuiTableColumnFlags.WidthFixed, 20.0)
-        if rotationState > 0 then
-            ImGui.TableSetupColumn('Cur', ImGuiTableColumnFlags.WidthFixed, 20.0)
-        end
+        ImGui.TableSetupColumn(rotationState > 0 and 'Cur' or '-', ImGuiTableColumnFlags.WidthFixed, 20.0)
+        ImGui.TableSetupColumn('Enable', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Condition Met', ImGuiTableColumnFlags.WidthFixed, 20.0)
         ImGui.TableSetupColumn('Action', ImGuiTableColumnFlags.WidthFixed, 250.0)
         ImGui.TableSetupColumn('Resolved Action', ImGuiTableColumnFlags.WidthStretch, 250.0)
@@ -363,11 +365,16 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                 ImGui.PushStyleColor(ImGuiCol.Text, 0.03, 1.0, 0.3, 1.0)
                 if idx == rotationState then
                     ImGui.Text(Icons.FA_DOT_CIRCLE_O)
-                else
-                    ImGui.Text("")
                 end
                 ImGui.PopStyleColor()
+            else
+                ImGui.TableNextColumn()
             end
+            ImGui.TableNextColumn()
+            local changed = false
+            enabledRotationEntries[entry.name], changed = Ui.RenderOptionToggle(string.format("tggl_%d", idx), "",
+                enabledRotationEntries[entry.name] == nil and true or enabledRotationEntries[entry.name])
+            if changed then enabledRotationEntriesChanged = true end
             ImGui.TableNextColumn()
             if entry.cond then
                 local pass, active = false, false
@@ -394,18 +401,19 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
             if entry.tooltip then
                 Ui.Tooltip(entry.tooltip)
             end
+
             ImGui.TableNextColumn()
             local mappedAction = resolvedActionMap[entry.name]
             if mappedAction then
                 if type(mappedAction) == "string" then
-                    ImGui.Text(entry.name)
+                    if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
                     ImGui.TableNextColumn()
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.2, 0.6, 1.0, 1.0)
                     ImGui.Text(mappedAction)
                     ImGui.PopStyleColor()
                 else
                     if entry.type:lower() == "spell" then
-                        ImGui.Text(entry.name)
+                        if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
                         ImGui.TableNextColumn()
                         ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.2, 1.0, 1.0)
                         local _, clicked = ImGui.Selectable(mappedAction.RankName())
@@ -414,7 +422,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                         end
                         ImGui.PopStyleColor()
                     else
-                        ImGui.Text(entry.name)
+                        if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
                         ImGui.TableNextColumn()
                         ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.2, 1.0, 1.0)
                         ImGui.Text(mappedAction.Name() or "None")
@@ -422,7 +430,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
                     end
                 end
             else
-                ImGui.Text(entry.name)
+                if enabledRotationEntries[entry.name] == false then Ui.StrikeThroughText(entry.name) else ImGui.Text(entry.name) end
                 ImGui.TableNextColumn()
                 if entry.type:lower() == "customfunc" then
                     ImGui.PushStyleColor(ImGuiCol.Text, 0.9, 0.9, .05, 1.0)
@@ -455,7 +463,7 @@ function Ui.RenderRotationTable(name, rotationTable, resolvedActionMap, rotation
         ImGui.EndTable()
     end
 
-    return showFailed
+    return showFailed, enabledRotationEntries, enabledRotationEntriesChanged
 end
 
 --- Renders a toggle option in the UI.
@@ -711,7 +719,7 @@ function Ui.RenderSettings(settings, defaults, categories, hideControls, showMai
     if Ui.ConfigFilter:len() > 0 then
         for _, k in ipairs(settingNames) do
             local lowerFilter = Ui.ConfigFilter:lower()
-            if k:lower():find(lowerFilter) ~= nil or defaults[k].DisplayName:lower():find(lowerFilter) ~= nil or defaults[k].Category:lower():find(lowerFilter) ~= nil then
+            if k:lower():find(lowerFilter) ~= nil or (defaults[k].DisplayName or ""):lower():find(lowerFilter) ~= nil or (defaults[k].Category or ""):lower():find(lowerFilter) ~= nil then
                 table.insert(filteredSettings, k)
             end
         end
@@ -863,6 +871,18 @@ function Ui.Tooltip(desc)
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
     end
+end
+
+--- Renders text as strikethrough
+--- @param text string The text to be displayed with strikethrough.
+function Ui.StrikeThroughText(text)
+    local textSizeVec = ImGui.CalcTextSizeVec(text)
+    local cursorScreenPos = ImGui.GetCursorScreenPosVec()
+    ImGui.PushStyleColor(ImGuiCol.Text, 0.6, 0.6, 0.6, 0.9)
+    cursorScreenPos.y = cursorScreenPos.y + (ImGui.GetTextLineHeightWithSpacing() / 1.75)
+    ImGui.GetWindowDrawList():AddLine(cursorScreenPos, ImVec2(cursorScreenPos.x + textSizeVec.x, cursorScreenPos.y), IM_COL32(255, 255, 255, 255), 1.0)
+    ImGui.Text(text)
+    ImGui.PopStyleColor()
 end
 
 return Ui

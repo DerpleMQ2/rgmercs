@@ -99,6 +99,46 @@ Module.CommandHandlers                       = {
             return true
         end,
     },
+    enablerotationentry = {
+        usage = "/rgl enablerotationentry \"<Name>\"",
+        about = "Enables <Name> Rotation Entry",
+        handler = function(self, name)
+            self.settings.EnabledRotationEntries[name] = true
+            self:SaveSettings(false)
+
+            return true
+        end,
+    },
+    disablerotationentry = {
+        usage = "/rgl disablerotationentry \"<Name>\"",
+        about = "Disables <Name> Rotation Entry",
+        handler = function(self, name)
+            self.settings.EnabledRotationEntries[name] = false
+            self:SaveSettings(false)
+
+            return true
+        end,
+    },
+    enablerotation = {
+        usage = "/rgl enablerotation \"<Name>\"",
+        about = "Enables <Name> Rotation",
+        handler = function(self, name)
+            self.settings.EnabledRotations[name] = true
+            self:SaveSettings(false)
+
+            return true
+        end,
+    },
+    disablerotation = {
+        usage = "/rgl disablerotation \"<Name>\"",
+        about = "Disables <Name> Rotation",
+        handler = function(self, name)
+            self.settings.EnabledRotations[name] = false
+            self:SaveSettings(false)
+
+            return true
+        end,
+    },
     rebuff = {
         usage = "/rgl rebuff",
         about = "Resets the delay timer on buff rotations. Does not force the cast of any buff.",
@@ -177,6 +217,23 @@ function Module:LoadSettings()
     end
 
     local settingsChanged = false
+
+    -- Add this to all class configs
+    self.ClassConfig.DefaultConfig['EnabledRotationEntries'] = {
+        DisplayName = "EnabledRotationEntries",
+        Category = "None",
+        Tooltip = "",
+        Type = "Custom",
+        Default = {},
+    }
+
+    self.ClassConfig.DefaultConfig['EnabledRotations'] = {
+        DisplayName = "EnabledRotations",
+        Category = "None",
+        Tooltip = "",
+        Type = "Custom",
+        Default = {},
+    }
 
     -- Setup Defaults
     self.settings, settingsChanged = Config.ResolveDefaults(self.ClassConfig.DefaultConfig, self.settings)
@@ -289,6 +346,36 @@ function Module:ShouldRender()
     return true
 end
 
+function Module:RenderRotationWithToggle(r, rotationTable)
+    local enabledRotationEntriesChanged = false
+    local rotationName = r.name
+    local rotationDisabled = self.settings.EnabledRotations[r.name] == false
+    local rotationIcon = rotationDisabled and Icons.MD_ERROR or r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE
+    local headerText = string.format("[%s] %s", rotationIcon, rotationName)
+    local changed = false
+    local toggleOffset = 60
+    local cursorScreenPos = ImGui.GetCursorPosVec()
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - toggleOffset, cursorScreenPos.y)
+    self.settings.EnabledRotations[r.name], changed = Ui.RenderOptionToggle("##Enable" .. rotationName, "", self.settings.EnabledRotations[r.name] ~= false)
+    if changed then self:SaveSettings(false) end
+    ImGui.SetCursorPos(cursorScreenPos)
+    if ImGui.CollapsingHeader(headerText) then
+        if self.settings.EnabledRotations[r.name] ~= false then
+            ImGui.Indent()
+            self.TempSettings.ShowFailedSpells, self.settings.EnabledRotationEntries, enabledRotationEntriesChanged = Ui.RenderRotationTable(r.name,
+                rotationTable[r.name],
+                self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells, self.settings.EnabledRotationEntries or {})
+            ImGui.Unindent()
+        end
+    end
+    local cursorScreenPosAfterRender = ImGui.GetCursorPosVec()
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - toggleOffset, cursorScreenPos.y)
+    Ui.RenderOptionToggle("##EnableDrawn" .. rotationName, "", self.settings.EnabledRotations[r.name] ~= false)
+    ImGui.SetCursorPos(cursorScreenPosAfterRender)
+
+    if enabledRotationEntriesChanged then self:SaveSettings(false) end
+end
+
 function Module:Render()
     ImGui.Text("Combat State: %s", self.CombatState)
     ImGui.Text("Current Rotation: %s [%d]", self.CurrentRotation.name, self.CurrentRotation.state)
@@ -349,6 +436,7 @@ function Module:Render()
             ImGui.Unindent()
             ImGui.Separator()
         end
+
         if not self.TempSettings.ResolvingActions then
             if ImGui.CollapsingHeader("Rotations") then
                 ImGui.Indent()
@@ -357,14 +445,7 @@ function Module:Render()
                 Ui.RenderRotationTableKey()
 
                 for _, r in ipairs(self.TempSettings.RotationStates) do
-                    local rotationName = r.name
-                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
-                        ImGui.Indent()
-                        self.TempSettings.ShowFailedSpells = Ui.RenderRotationTable(r.name,
-                            self.ClassConfig.Rotations[r.name],
-                            self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
-                        ImGui.Unindent()
-                    end
+                    self:RenderRotationWithToggle(r, self.ClassConfig.Rotations)
                 end
                 ImGui.Unindent()
             end
@@ -376,14 +457,7 @@ function Module:Render()
                 Ui.RenderRotationTableKey()
 
                 for _, r in pairs(self.TempSettings.HealRotationStates) do
-                    local rotationName = r.name
-                    if ImGui.CollapsingHeader("[" .. (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE) .. "] " .. rotationName) then
-                        ImGui.Indent()
-                        self.TempSettings.ShowFailedSpells = Ui.RenderRotationTable(r.name,
-                            self.ClassConfig.HealRotations[r.name],
-                            self.ResolvedActionMap, r.state or 0, self.TempSettings.ShowFailedSpells)
-                        ImGui.Unindent()
-                    end
+                    self:RenderRotationWithToggle(r, self.ClassConfig.HealRotations)
                 end
                 ImGui.Unindent()
             end
@@ -670,44 +744,47 @@ function Module:HealById(id)
         self.TempSettings.CurrentRotationStateType = 2
         self.TempSettings.CurrentRotationStateId = idx
 
-        Logger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id,
-            rotation.name)
-        if Core.SafeCallFunc(string.format("Heal Rotation Condition Check for %s", rotation.name), rotation.cond, self, healTarget) then
-            rotation.lastCondCheck = true
-            Logger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw appropriate to use.", id,
-                rotation.name)
-            -- since these are ordered by prioirty we can assume we are the best option.
-            selectedRotation = rotation
-
-            self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0, }
-
-            -- If we need to heal others we should wait on the cooldown.
-            Casting.WaitGlobalCoolDown("Healing: ")
-
-            local newState, wasRun = Rotation.Run(self, self:GetHealRotationTable(selectedRotation.name), id,
-                self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0,
-                self.CombatState == "Downtime", selectedRotation.doFullRotation or false, nil)
-
-            if selectedRotation.state then selectedRotation.state = newState end
-
-            if wasRun and Casting.GetLastCastResultName() == "CAST_SUCCESS" then
-                Logger.log_verbose(
-                    "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \agSuccessful\aw!", id,
-                    rotation.name)
-                Comms.HandleAnnounce(string.format('Healed %s :: %s', healTarget.CleanName() or "Target", Casting.GetLastUsedSpell()),
-                    Config:GetSetting('HealAnnounceGroup'),
-                    Config:GetSetting('HealAnnounce'))
-                break
-            else
-                Logger.log_verbose(
-                    "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \arNOT \awSuccessful! Conditions: wasRun(%s) castResult(%s) \ayGoing to keep trying!",
-                    id,
-                    rotation.name, Strings.BoolToColorString(wasRun), Casting.GetLastCastResultName())
-            end
+        if self.settings.EnabledRotations and self.settings.EnabledRotations[rotation.name] == false then
+            Logger.log_verbose("\aw:::Heal Rotation::: \arSkipping Rotation: %s because it is disabled in the settings.", rotation.name)
         else
-            Logger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \aris NOT\aw appropriate to use.", id,
+            Logger.log_verbose("\awHealById(%d):: Checking if Heal Rotation: \at%s\aw is appropriate to use.", id,
                 rotation.name)
-            rotation.lastCondCheck = false
+            if Core.SafeCallFunc(string.format("Heal Rotation Condition Check for %s", rotation.name), rotation.cond, self, healTarget) then
+                rotation.lastCondCheck = true
+                Logger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw appropriate to use.", id,
+                    rotation.name)
+                -- since these are ordered by prioirty we can assume we are the best option.
+                selectedRotation = rotation
+
+                self.CurrentRotation = { name = selectedRotation.name, state = selectedRotation.state or 0, }
+
+                -- If we need to heal others we should wait on the cooldown.
+                Casting.WaitGlobalCoolDown("Healing: ")
+
+                local newState, wasRun = Rotation.Run(self, self:GetHealRotationTable(selectedRotation.name), id,
+                    self.ResolvedActionMap, selectedRotation.steps or 0, selectedRotation.state or 0,
+                    self.CombatState == "Downtime", selectedRotation.doFullRotation or false, nil, self.settings.EnabledRotationEntries or {})
+                if selectedRotation.state then selectedRotation.state = newState end
+
+                if wasRun and Casting.GetLastCastResultName() == "CAST_SUCCESS" then
+                    Logger.log_verbose(
+                        "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \agSuccessful\aw!", id,
+                        rotation.name)
+                    Comms.HandleAnnounce(string.format('Healed %s :: %s', healTarget.CleanName() or "Target", Casting.GetLastUsedSpell()),
+                        Config:GetSetting('HealAnnounceGroup'),
+                        Config:GetSetting('HealAnnounce'))
+                    break
+                else
+                    Logger.log_verbose(
+                        "\awHealById(%d):: Heal Rotation: \at%s\aw \agis\aw was \arNOT \awSuccessful! Conditions: wasRun(%s) castResult(%s) \ayGoing to keep trying!",
+                        id,
+                        rotation.name, Strings.BoolToColorString(wasRun), Casting.GetLastCastResultName())
+                end
+            else
+                Logger.log_verbose("\awHealById(%d):: Heal Rotation: \at%s\aw \aris NOT\aw appropriate to use.", id,
+                    rotation.name)
+                rotation.lastCondCheck = false
+            end
         end
     end
 
@@ -955,38 +1032,44 @@ function Module:GiveTime(combat_state)
         self.TempSettings.CurrentRotationStateId = idx
         local timeCheckPassed = true
 
-        self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
-        if r.timer then -- see if we've waited the rotation timer out.
-            timeCheckPassed = ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
-        else            -- default to only processing Downtime rotations once per second if no timer is specified.
-            timeCheckPassed = self.CombatState ~= "Downtime" and true or ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= 1)
-        end
-        if timeCheckPassed then
-            local targetTable = Core.SafeCallFunc("Rotation Target Table", r.targetId)
-            if targetTable ~= false then
-                for _, targetId in ipairs(targetTable) do
-                    -- only do combat with a target.
-                    if targetId and targetId > 0 then
-                        if Core.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
-                            r.lastCondCheck = true
-                            Logger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
-                            self.CurrentRotation = { name = r.name, state = r.state or 0, }
-                            local newState = Rotation.Run(self, self:GetRotationTable(r.name), targetId,
-                                self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime", r.doFullRotation or false, r.cond)
+        if self.settings.EnabledRotations and self.settings.EnabledRotations[r.name] == false then
+            Logger.log_verbose("\aw:::RUN ROTATION::: \arSkipping Rotation: %s because it is disabled in the settings.", r.name)
+        else
+            self.TempSettings.RotationTimers[r.name] = self.TempSettings.RotationTimers[r.name] or 0
+            if r.timer then -- see if we've waited the rotation timer out.
+                timeCheckPassed = ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= r.timer)
+            else            -- default to only processing Downtime rotations once per second if no timer is specified.
+                timeCheckPassed = self.CombatState ~= "Downtime" and true or ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= 1)
+            end
 
-                            if r.state then r.state = newState end
-                            self.TempSettings.RotationTimers[r.name] = os.clock()
-                        else
-                            r.lastCondCheck = false
+            if timeCheckPassed then
+                local targetTable = Core.SafeCallFunc("Rotation Target Table", r.targetId)
+                if targetTable ~= false then
+                    for _, targetId in ipairs(targetTable) do
+                        -- only do combat with a target.
+                        if targetId and targetId > 0 then
+                            if Core.SafeCallFunc(string.format("Rotation Condition Check for %s", r.name), r.cond, self, combat_state) then
+                                r.lastCondCheck = true
+                                Logger.log_verbose("\aw:::RUN ROTATION::: \at%d\aw => \am%s", targetId, r.name)
+                                self.CurrentRotation = { name = r.name, state = r.state or 0, }
+                                local newState = Rotation.Run(self, self:GetRotationTable(r.name), targetId,
+                                    self.ResolvedActionMap, r.steps or 0, r.state or 0, self.CombatState == "Downtime", r.doFullRotation or false, r.cond,
+                                    self.settings.EnabledRotationEntries or {})
+
+                                if r.state then r.state = newState end
+                                self.TempSettings.RotationTimers[r.name] = os.clock()
+                            else
+                                r.lastCondCheck = false
+                            end
                         end
                     end
                 end
+            else
+                Logger.log_verbose(
+                    "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
+                    Strings.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
+                    Strings.FormatTime((r.timer or 1) - (os.clock() - self.TempSettings.RotationTimers[r.name])))
             end
-        else
-            Logger.log_verbose(
-                "\ay:::TEST ROTATION::: => \at%s :: Skipped due to timer! Last Run: %s Next Run %s", r.name,
-                Strings.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
-                Strings.FormatTime((r.timer or 1) - (os.clock() - self.TempSettings.RotationTimers[r.name])))
         end
     end
 
