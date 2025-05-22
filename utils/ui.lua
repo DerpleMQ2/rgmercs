@@ -562,7 +562,7 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
         local displayCharCount = 11
         local nameLen = setting:len()
         local maxStart = (nameLen - displayCharCount) + 1
-        local startDisp = (os.clock() % maxStart) + 1
+        local startDisp = maxStart > 0 and (os.clock() % maxStart) + 1 or 0
 
         ImGui.PushID(id .. "__btn")
         if ImGui.SmallButton(nameLen > 0 and setting:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
