@@ -7,6 +7,7 @@ Modules.__index     = Modules
 Modules.ModuleOrder = {
     "Class",
     "Movement",
+    "Clickies",
     "Pull",
     "Drag",
     "Charm",
@@ -27,6 +28,7 @@ function Modules:load()
         self.ModuleOrder = {
             "Class",
             "Movement",
+            "Clickies",
             "Pull",
             "Drag",
             "Charm",
@@ -43,6 +45,7 @@ function Modules:load()
     self.ModuleList = {
         Movement     = require("modules.movement").New(),
         Travel       = require("modules.travel").New(),
+        Clickies     = require("modules.clickies").New(),
         Class        = require("modules.class").New(),
         Pull         = require("modules.pull").New(),
         Drag         = require("modules.drag").New(),

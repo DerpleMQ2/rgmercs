@@ -546,6 +546,66 @@ function Ui.RenderOptionNumber(id, text, cur, min, max, step)
     return input, changed
 end
 
+function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
+    local args = { ..., }
+    local new_loadout, any_pressed, pressed = false, false, false
+    if type == "Combo" then
+        -- build a combo box.
+        ImGui.PushID("##combo_setting_" .. id)
+        setting, pressed = ImGui.Combo("", setting, args)
+        ImGui.PopID()
+        new_loadout = ((pressed or false) and (requiresLoadoutChange))
+        any_pressed = any_pressed or (pressed or false)
+    elseif type == "ClickyItem" then
+        -- make a drag and drop target
+        ImGui.PushFont(ImGui.ConsoleFont)
+        local displayCharCount = 11
+        local nameLen = setting:len()
+        local maxStart = (nameLen - displayCharCount) + 1
+        local startDisp = (os.clock() % maxStart) + 1
+
+        ImGui.PushID(id .. "__btn")
+        if ImGui.SmallButton(nameLen > 0 and setting:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
+            if mq.TLO.Cursor() then
+                setting = mq.TLO.Cursor.Name()
+                pressed = true
+            end
+        end
+        ImGui.PopID()
+
+        ImGui.PopFont()
+        if nameLen > 0 then
+            Ui.Tooltip(setting)
+        end
+
+        ImGui.SameLine()
+        ImGui.PushID(id .. "__clear_btn")
+        if ImGui.SmallButton(Icons.MD_CLEAR) then
+            setting = ""
+            pressed = true
+        end
+        ImGui.PopID()
+        Ui.Tooltip(string.format("Drop a new item here to replace\n%s", setting))
+        new_loadout = new_loadout or
+            ((pressed or false) and (requiresLoadoutChange))
+        any_pressed = any_pressed or (pressed or false)
+    elseif type == 'boolean' then
+        setting, pressed = Ui.RenderOptionToggle(id, "", setting)
+        new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
+        any_pressed = any_pressed or pressed
+    elseif type == 'number' then
+        setting, pressed = Ui.RenderOptionNumber(id, "", setting, args[1], args[2], args[3])
+        new_loadout = new_loadout or (pressed and (requiresLoadoutChange))
+        any_pressed = any_pressed or pressed
+    elseif type == 'string' then -- display only
+        setting, pressed = ImGui.InputText("##" .. id, setting)
+        any_pressed = any_pressed or pressed
+        Ui.Tooltip(setting)
+    end
+
+    return setting, new_loadout, any_pressed
+end
+
 --- Renders a settings table.
 ---
 --- @param settings table The settings table to render.
@@ -558,8 +618,8 @@ end
 function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
     local any_pressed           = false
     local new_loadout           = false
-    --- @type boolean|nil
     local pressed               = false
+    local loadout_change        = false
     local renderWidth           = 300
     local windowWidth           = ImGui.GetWindowWidth()
     local numCols               = math.max(1, math.floor(windowWidth / renderWidth))
@@ -595,69 +655,63 @@ function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
                     local itemIndex = row + ((col - 1) * itemsPerRow)
                     if itemIndex <= #settingToDrawIndicies then
                         local k = settingNames[settingToDrawIndicies[itemIndex]]
-                        ImGui.Text(defaults[k].DisplayName or "None")
-                        --ImGui.Text(string.format("%s %d %d + %d", defaults[k].DisplayName or "None", itemIndex, row, ImGui.TableGetColumnIndex() + 1))
-                        Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
-                            type(defaults[k].Tooltip) == 'function' and defaults[k].Tooltip() or defaults[k].Tooltip,
-                            k,
-                            tostring(defaults[k].Default)))
-                        ImGui.TableNextColumn()
-
-                        if defaults[k].Type == "Combo" then
-                            -- build a combo box.
-                            ImGui.PushID("##combo_setting_" .. k)
-                            settings[k], pressed = ImGui.Combo("", settings[k], defaults[k].ComboOptions)
-                            ImGui.PopID()
-                            new_loadout = new_loadout or
-                                ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
-                            any_pressed = any_pressed or (pressed or false)
-                        elseif defaults[k].Type == "ClickyItem" then
-                            -- make a drag and drop target
-                            ImGui.PushFont(ImGui.ConsoleFont)
-                            local displayCharCount = 11
-                            local nameLen = settings[k]:len()
-                            local maxStart = (nameLen - displayCharCount) + 1
-                            local startDisp = (os.clock() % maxStart) + 1
-
-                            ImGui.PushID(k .. "__btn")
-                            if ImGui.SmallButton(nameLen > 0 and settings[k]:sub(startDisp, (startDisp + displayCharCount - 1)) or "[Drop Here]") then
-                                if mq.TLO.Cursor() then
-                                    settings[k] = mq.TLO.Cursor.Name()
-                                    pressed = true
+                        if defaults[k].Type ~= "Custom" then
+                            if (defaults[k].Type or ""):find("Array") then
+                                local arrayType = defaults[k].Type:sub(7)
+                                ImGui.Text("New " .. k)
+                                Ui.Tooltip("Create another " .. arrayType)
+                                ImGui.TableNextColumn()
+                                if ImGui.SmallButton("Add " .. arrayType .. "##" .. k) then
+                                    table.insert(settings[k], arrayType == 'Number' and 0 or "")
+                                    any_pressed = true
                                 end
-                            end
-                            ImGui.PopID()
+                                ImGui.TableNextColumn()
+                                for idx, _ in ipairs(settings[k] or {}) do
+                                    ImGui.Text(string.format(defaults[k].DisplayName or "None %d", idx))
+                                    Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
+                                        type(defaults[k].Tooltip) == 'function' and defaults[k].Tooltip() or defaults[k].Tooltip,
+                                        k,
+                                        tostring(defaults[k].Default)))
+                                    ImGui.TableNextColumn()
 
-                            ImGui.PopFont()
-                            if nameLen > 0 then
-                                Ui.Tooltip(settings[k])
-                            end
+                                    settings[k][idx], loadout_change, pressed = Ui.RenderOption(
+                                        arrayType,
+                                        settings[k][idx],
+                                        k .. "_" .. idx,
+                                        defaults[k].RequiresLoadoutChange or false,
+                                        defaults[k].ComboOptions or defaults[k].Min, defaults[k].Max, defaults[k].Step or 1)
 
-                            ImGui.SameLine()
-                            ImGui.PushID(k .. "__clear_btn")
-                            if ImGui.SmallButton(Icons.MD_CLEAR) then
-                                settings[k] = ""
-                                pressed = true
-                            end
-                            ImGui.PopID()
-                            Ui.Tooltip(string.format("Drop a new item here to replace\n%s", settings[k]))
-                            new_loadout = new_loadout or
-                                ((pressed or false) and (defaults[k].RequiresLoadoutChange or false))
-                            any_pressed = any_pressed or (pressed or false)
-                        elseif defaults[k].Type ~= "Custom" then
-                            if type(settings[k]) == 'boolean' then
-                                settings[k], pressed = Ui.RenderOptionToggle(k, "", settings[k])
-                                new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
+                                    new_loadout = new_loadout or loadout_change
+                                    any_pressed = any_pressed or pressed
+                                    if idx < #settings[k] then ImGui.TableNextColumn() end
+                                end
+                                local removeQueue = {}
+                                for idx, item in ipairs(settings[k] or {}) do
+                                    if (not item or item == '') and idx < #settings[k] then
+                                        table.insert(removeQueue, idx)
+                                    end
+                                end
+
+                                for _, idx in ipairs(removeQueue) do
+                                    table.remove(settings[k], idx)
+                                    any_pressed = true
+                                end
+                            else
+                                ImGui.Text(defaults[k].DisplayName or "None")
+                                Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
+                                    type(defaults[k].Tooltip) == 'function' and defaults[k].Tooltip() or defaults[k].Tooltip,
+                                    k,
+                                    tostring(defaults[k].Default)))
+                                ImGui.TableNextColumn()
+
+                                settings[k], loadout_change, pressed = Ui.RenderOption(
+                                    type(defaults[k].Type) == 'string' and defaults[k].Type or type(settings[k]),
+                                    settings[k],
+                                    k,
+                                    defaults[k].RequiresLoadoutChange or false,
+                                    defaults[k].ComboOptions or defaults[k].Min, defaults[k].Max, defaults[k].Step or 1)
+                                new_loadout = new_loadout or loadout_change
                                 any_pressed = any_pressed or pressed
-                            elseif type(settings[k]) == 'number' then
-                                settings[k], pressed = Ui.RenderOptionNumber(k, "", settings[k], defaults[k].Min,
-                                    defaults[k].Max, defaults[k].Step or 1)
-                                new_loadout = new_loadout or (pressed and (defaults[k].RequiresLoadoutChange or false))
-                                any_pressed = any_pressed or pressed
-                            elseif type(settings[k]) == 'string' then -- display only
-                                settings[k], pressed = ImGui.InputText("##" .. k, settings[k])
-                                any_pressed = any_pressed or pressed
-                                Ui.Tooltip(settings[k])
                             end
                         end
                     end

@@ -1,4 +1,4 @@
--- Sample Basic Class Module
+-- Drag Module
 local mq                 = require('mq')
 local Config             = require('utils.config')
 local Core               = require("utils.core")
