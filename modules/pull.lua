@@ -1405,7 +1405,6 @@ function Module:RefreshGroupNames()
 
     for i, id in ipairs(groupWatch) do
         local member = mq.TLO.Group.Member(i)
-        print(self.DefaultConfig[id])
         self.DefaultConfig[id].DisplayName = member() and string.format("Watch %s", member.CleanName()) or "No GroupMember"
     end
 end
