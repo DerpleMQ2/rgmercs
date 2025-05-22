@@ -54,6 +54,7 @@ Module.TempSettings.NewCombatMode            = false
 Module.TempSettings.MissingSpells            = {}
 Module.TempSettings.MissingSpellsHighestOnly = true
 Module.TempSettings.CorpsesAlreadyRezzed     = {}
+Module.TempSettings.QueuedAbilities          = {}
 
 Module.CommandHandlers                       = {
     setmode = {
@@ -148,6 +149,114 @@ Module.CommandHandlers                       = {
             self:ResetRotationTimer("PetBuff")
 
             Logger.log_info("\awResetting buff rotation timers.")
+
+            return true
+        end,
+    },
+    cast = {
+        usage = "/rgl cast \"<spell>\" <targetId?>",
+        about = "Uses a spell or AA (memorizes if necessary). If no targetId is entered, your target is used.",
+        handler = function(self, spell, targetId)
+            targetId = targetId and tonumber(targetId)
+            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
+            Logger.log_debug("\atQueueing Cast: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
+
+            table.insert(self.TempSettings.QueuedAbilities, {
+                name = spell,
+                targetId = targetId,
+                target = mq.TLO.Spawn(targetId),
+                type = "spell",
+                queuedTime = os.clock(),
+            })
+
+            return true
+        end,
+    },
+    castaa = {
+        usage = "/rgl castaa \"<AAName>\" <targetId?>",
+        about = "Uses an AA. If no targetId is entered, your target is used.",
+        handler = function(self, aaname, targetId)
+            targetId = targetId and tonumber(targetId)
+            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
+            Logger.log_debug("\atUsing AA: \aw\"\am%s\aw\" on targetId(\am%d\aw)", aaname, tonumber(targetId) or mq.TLO.Target.ID())
+
+            table.insert(self.TempSettings.QueuedAbilities, {
+                name = aaname,
+                targetId = targetId,
+                target = mq.TLO.Spawn(targetId),
+                type = "aa",
+                queuedTime = os.clock(),
+            })
+
+            return true
+        end,
+    },
+    usemap = {
+        usage = "/rgl usemap \"<maptype>\" \"<mapname>\" <targetId?>",
+        about = "RGMercs will use the mapped spell, song, AA, disc, or item (using smart targeting, or, if provided, on the specified <targetID>).",
+        handler = function(self, mapType, mapName, targetId)
+            local action = Modules:ExecModule("Class", "GetResolvedActionMapItem", mapName)
+            if not action or not action() then
+                Logger.log_debug("\arUseMap: \"\ay%s\ar\" does not appear to be a valid mapped action! \awPlease note this value is case-sensitive.", mapName)
+                return false
+            end
+            targetId = targetId and tonumber(targetId)
+            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
+
+            local actionHandlers = {
+                spell = function(self)
+                    table.insert(self.TempSettings.QueuedAbilities, {
+                        name = action.RankName(),
+                        targetId = targetId,
+                        target = mq.TLO.Spawn(targetId),
+                        type = "spell",
+                        queuedTime = os.clock(),
+                    })
+                end,
+                song = function(self)
+                    table.insert(self.TempSettings.QueuedAbilities, {
+                        name = action.RankName(),
+                        targetId = targetId,
+                        target = mq.TLO.Spawn(targetId),
+                        type = "song",
+                        queuedTime = os.clock(),
+                    })
+                end,
+                aa = function(self)
+                    table.insert(self.TempSettings.QueuedAbilities, {
+                        name = action,
+                        targetId = targetId,
+                        target = mq.TLO.Spawn(targetId),
+                        type = "aa",
+                        queuedTime = os.clock(),
+                    })
+                end, --AFAIK we don't have any AA mapped, but, future proof.
+                item = function(self)
+                    table.insert(self.TempSettings.QueuedAbilities, {
+                        name = action,
+                        targetId = targetId,
+                        target = mq.TLO.Spawn(targetId),
+                        type = "item",
+                        queuedTime = os.clock(),
+                    })
+                end,
+                disc = function(self)
+                    table.insert(self.TempSettings.QueuedAbilities, {
+                        name = action,
+                        targetId = targetId,
+                        target = mq.TLO.Spawn(targetId),
+                        type = "disc",
+                        queuedTime = os.clock(),
+                    })
+                end,
+            }
+
+            local handlerFunc = actionHandlers[mapType:lower()]
+            if handlerFunc then
+                handlerFunc(self)
+            else
+                Logger.log_debug("\arUseMap: \"\ay%s\ar\" is an invalid maptype. \awValid maptypes are : \agspell \aw| \agsong \aw| \agAA \aw| \agdisc \aw| \agitem", mapType)
+            end
 
             return true
         end,
@@ -346,13 +455,49 @@ function Module:ShouldRender()
     return true
 end
 
+function Module:RenderQueuedAbilities()
+    if ImGui.CollapsingHeader("Queued Abilities") then
+        ImGui.Indent()
+        if ImGui.SmallButton("Clear Queue") then
+            self.TempSettings.QueuedAbilities = {}
+        end
+        if #self.TempSettings.QueuedAbilities > 0 then
+            if ImGui.BeginTable("QueuedAbilities", 4, bit32.bor(ImGuiTableFlags.Resizable, ImGuiTableFlags.Borders)) then
+                ImGui.PushStyleColor(ImGuiCol.Text, 1.0, 0.0, 1.0, 1)
+                ImGui.TableSetupColumn('Time in Queue', (ImGuiTableColumnFlags.WidthFixed), 40.0)
+                ImGui.TableSetupColumn('Type', (ImGuiTableColumnFlags.WidthFixed), 20.0)
+                ImGui.TableSetupColumn('Target', (ImGuiTableColumnFlags.WidthFixed), 100.0)
+                ImGui.TableSetupColumn('Name', (ImGuiTableColumnFlags.WidthStretch), 150.0)
+                ImGui.PopStyleColor()
+                ImGui.TableHeadersRow()
+
+                for _, queueData in pairs(self.TempSettings.QueuedAbilities) do
+                    ImGui.TableNextColumn()
+                    ImGui.Text(Strings.FormatTime((os.clock() - queueData.queuedTime)))
+                    ImGui.TableNextColumn()
+                    ImGui.Text(queueData.type)
+                    ImGui.TableNextColumn()
+                    ImGui.Text(queueData.target and queueData.target.CleanName() or "None")
+                    ImGui.TableNextColumn()
+                    ImGui.Text(queueData.name)
+                end
+
+                ImGui.EndTable()
+            end
+        end
+        ImGui.Unindent()
+        ImGui.Separator()
+    end
+end
+
 function Module:RenderRotationWithToggle(r, rotationTable)
     local enabledRotationEntriesChanged = false
     local rotationName = r.name
     local rotationDisabled = self.settings.EnabledRotations[r.name] == false
     local rotationIcon = rotationDisabled and Icons.MD_ERROR or (r.lastCondCheck and Icons.MD_CHECK or Icons.MD_CLOSE)
     local headerText = string.format("[%s] %s", rotationIcon, rotationName)
-    local toggleOffset = 60 -- how far left to move from the far right of the window to render the toggle button
+    local toggleOffset = 60  -- how far left to move from the far right of the window to render the toggle button
+    local timingOffset = 160 -- how far left to move from the far right of the window to render the toggle button
 
     -- Get start rendering position before we draw anything
     local cursorScreenPos = ImGui.GetCursorPosVec()
@@ -384,6 +529,10 @@ function Module:RenderRotationWithToggle(r, rotationTable)
     -- This has to come here because if we put it where the invisible button is then it renders under the header
     ImGui.SetCursorPos(ImGui.GetWindowWidth() - toggleOffset, cursorScreenPos.y)
     Ui.RenderOptionToggle("##EnableDrawn" .. rotationName, "", not rotationDisabled)
+
+    -- Draw Timing Data
+    ImGui.SetCursorPos(ImGui.GetWindowWidth() - timingOffset, cursorScreenPos.y)
+    ImGui.Text(r.lastTimeSpent and ("<" .. Strings.FormatTimeMS(r.lastTimeSpent * 1000) .. ">") or "")
 
     -- Now set the rendering cursor back to where we were after the Header / Tables were rendered
     ImGui.SetCursorPos(cursorScreenPosAfterRender)
@@ -451,6 +600,8 @@ function Module:Render()
             ImGui.Unindent()
             ImGui.Separator()
         end
+
+        self:RenderQueuedAbilities()
 
         if not self.TempSettings.ResolvingActions then
             if ImGui.CollapsingHeader("Rotations") then
@@ -946,6 +1097,49 @@ function Module:DoCombatClickies() --TODO: Find out why normal clickies are in m
     self.TempSettings.CombatClickiesTimer = os.clock()
 end
 
+function Module:ProcessQueuedEvents()
+    if #self.TempSettings.QueuedAbilities == 0 then return false end
+
+    -- wait for cast window to close
+    mq.delay("5s", function() return mq.TLO.Me.Casting.ID() == nil end)
+    local success = false
+    local queueData = self.TempSettings.QueuedAbilities[1]
+
+    Logger.log_debug("\ao[QueuedAbilities] Processing queued %s: %s on %s", queueData.type, queueData.name, queueData.targetId)
+
+    if queueData.type:lower() == "spell" then
+        success = Casting.UseSpell(queueData.name, queueData.targetId, true)
+        if not success then
+            success = Casting.UseAA(queueData.name, queueData.targetId)
+        end
+    elseif queueData.type:lower() == "song" then
+        success = Casting.UseSong(queueData.name, queueData.targetId, true)
+    elseif queueData.type:lower() == "aa" then
+        success = Casting.UseAA(queueData.name, queueData.targetId)
+    elseif queueData.type:lower() == "item" then
+        success = Casting.UseItem(queueData.name, queueData.targetId)
+    elseif queueData.type:lower() == "disc" then
+        success = Casting.UseDisc(queueData.name, queueData.targetId)
+    end
+
+    if not success then
+        Logger.log_error("\arFailed to cast queued %s: %s on %s", queueData.type, queueData.name, queueData.targetId)
+        self.TempSettings.QueuedAbilities[1].retries = (self.TempSettings.QueuedAbilities[1].retries or 0) + 1
+
+        if self.TempSettings.QueuedAbilities[1].retries > 3 then
+            Logger.log_error("\arFailed to cast queued %s: %s on %s after 3 attempts - giving up", queueData.type, queueData.name, queueData.targetId)
+            table.remove(self.TempSettings.QueuedAbilities, 1)
+        else
+            Logger.log_info("\ayRetrying queued %s: %s on %s (%d)", queueData.type, queueData.name, queueData.targetId, self.TempSettings.QueuedAbilities[1].retries)
+        end
+    else
+        Logger.log_info("\agSuccessfully cast queued %s: %s on %s", queueData.type, queueData.name, queueData.targetId)
+        table.remove(self.TempSettings.QueuedAbilities, 1)
+    end
+
+    return #self.TempSettings.QueuedAbilities > 0
+end
+
 function Module:GiveTime(combat_state)
     if not self.ClassConfig then return end
 
@@ -974,6 +1168,11 @@ function Module:GiveTime(combat_state)
 
     if self.CombatState ~= combat_state and combat_state == "Downtime" then
         self:ResetRotation()
+    end
+
+    if self:ProcessQueuedEvents() then
+        -- more to do next frame.
+        return
     end
 
     self.CombatState = combat_state
@@ -1057,6 +1256,7 @@ function Module:GiveTime(combat_state)
                 timeCheckPassed = self.CombatState ~= "Downtime" and true or ((os.clock() - self.TempSettings.RotationTimers[r.name]) >= 1)
             end
 
+            local start = string.format("%.03f", mq.gettime() / 1000)
             if timeCheckPassed then
                 local targetTable = Core.SafeCallFunc("Rotation Target Table", r.targetId)
                 if targetTable ~= false then
@@ -1085,6 +1285,9 @@ function Module:GiveTime(combat_state)
                     Strings.FormatTime(os.clock() - self.TempSettings.RotationTimers[r.name]),
                     Strings.FormatTime((r.timer or 1) - (os.clock() - self.TempSettings.RotationTimers[r.name])))
             end
+            local stop = string.format("%.03f", mq.gettime() / 1000)
+
+            r.lastTimeSpent = stop - start
         end
     end
 
