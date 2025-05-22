@@ -35,6 +35,7 @@ Module.TempSettings.HuntX                 = 0
 Module.TempSettings.HuntY                 = 0
 Module.TempSettings.HuntZ                 = 0
 Module.TempSettings.MyPaths               = {}
+Module.TempSettings.LastGroupUpdateTime   = os.clock()
 Module.TempSettings.SelectedPath          = "None"
 Module.FAQ                                = {}
 Module.ClassFAQ                           = {}
@@ -458,7 +459,7 @@ Module.DefaultConfig                   = {
         Answer = "You can Enable Group Watch on the Group Watch tab to watch the selected groupmembers for low MP and/or Endurance.",
     },
     ['GroupWatchF2']                           = {
-        DisplayName = mq.TLO.Group.Member(1) and string.format("Watch %s", mq.TLO.Group.Member(1).CleanName()) or "No GroupMember",
+        DisplayName = mq.TLO.Group.Member(1)() and string.format("Watch %s", mq.TLO.Group.Member(1).CleanName()) or "No GroupMember",
         Category = "Group Watch",
         Index = 2,
         Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
@@ -467,7 +468,7 @@ Module.DefaultConfig                   = {
         Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchF3']                           = {
-        DisplayName = mq.TLO.Group.Member(2) and string.format("Watch %s", mq.TLO.Group.Member(2).CleanName()) or "No GroupMember",
+        DisplayName = mq.TLO.Group.Member(2)() and string.format("Watch %s", mq.TLO.Group.Member(2).CleanName()) or "No GroupMember",
         Category = "Group Watch",
         Index = 3,
         Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
@@ -476,7 +477,7 @@ Module.DefaultConfig                   = {
         Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchF4']                           = {
-        DisplayName = mq.TLO.Group.Member(3) and string.format("Watch %s", mq.TLO.Group.Member(3).CleanName()) or "No GroupMember",
+        DisplayName = mq.TLO.Group.Member(3)() and string.format("Watch %s", mq.TLO.Group.Member(3).CleanName()) or "No GroupMember",
         Category = "Group Watch",
         Index = 4,
         Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
@@ -485,7 +486,7 @@ Module.DefaultConfig                   = {
         Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchF5']                           = {
-        DisplayName = mq.TLO.Group.Member(4) and string.format("Watch %s", mq.TLO.Group.Member(4).CleanName()) or "No GroupMember",
+        DisplayName = mq.TLO.Group.Member(4)() and string.format("Watch %s", mq.TLO.Group.Member(4).CleanName()) or "No GroupMember",
         Category = "Group Watch",
         Index = 5,
         Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
@@ -494,7 +495,7 @@ Module.DefaultConfig                   = {
         Answer = "Enable Group Watch and select the offending member to hold pulls if their mana is under the thresholds outlined on the Group Watch tab.",
     },
     ['GroupWatchF6']                           = {
-        DisplayName = mq.TLO.Group.Member(5) and string.format("Watch %s", mq.TLO.Group.Member(5).CleanName()) or "No GroupMember",
+        DisplayName = mq.TLO.Group.Member(5)() and string.format("Watch %s", mq.TLO.Group.Member(5).CleanName()) or "No GroupMember",
         Category = "Group Watch",
         Index = 6,
         Tooltip = "Watch the mana and/or endurance of the selected group member (if present).",
@@ -1388,6 +1389,27 @@ function Module:FarmFullInvActions()
     Core.DoCmd("/beep")
 end
 
+function Module:RefreshGroupNames()
+    -- Update the display names for the group watch members
+
+    if os.clock() - self.TempSettings.LastGroupUpdateTime < 10 then return end
+    self.TempSettings.LastGroupUpdateTime = os.clock()
+
+    local groupWatch = {
+        'GroupWatchF2',
+        'GroupWatchF3',
+        'GroupWatchF4',
+        'GroupWatchF5',
+        'GroupWatchF6',
+    }
+
+    for i, id in ipairs(groupWatch) do
+        local member = mq.TLO.Group.Member(i)
+        print(self.DefaultConfig[id])
+        self.DefaultConfig[id].DisplayName = member() and string.format("Watch %s", member.CleanName()) or "No GroupMember"
+    end
+end
+
 ---comment
 ---@param resourceResumePct number -- Resume pulls at this pct
 ---@param resourcePausePct number -- Hold pulls at this pct
@@ -1794,6 +1816,8 @@ function Module:GetPullStateTargetInfo()
 end
 
 function Module:GiveTime(combat_state)
+    self:RefreshGroupNames()
+
     if combat_state ~= "Downtime" then
         Logger.log_verbose("PULL:GiveTime() we are in %s, not ready for pulling.", combat_state)
         return
