@@ -14,6 +14,9 @@ local Files                               = require("utils.files")
 local Logger                              = require("utils.logger")
 local Set                                 = require("mq.Set")
 local Icons                               = require('mq.ICONS')
+local ZonePullConfig                      = mq.configDir ..
+    '/rgmercs/PCConfigs/' ..
+    "ZonePullLists" .. "_" .. Config.Globals.CurServer .. '.lua'
 
 local Module                              = { _version = '0.1a', _name = "Pull", _author = 'Derple', }
 Module.__index                            = Module
@@ -39,7 +42,10 @@ Module.TempSettings.LastGroupUpdateTime   = os.clock()
 Module.TempSettings.SelectedPath          = "None"
 Module.FAQ                                = {}
 Module.ClassFAQ                           = {}
-
+Module.ZonePullList                       = {
+    ['PullDenyList'] = {},
+    ['PullAllowList'] = {},
+}
 local PullStates                          = {
     ['PULL_IDLE']               = 1,
     ['PULL_GROUPWATCH_WAIT']    = 2,
@@ -698,9 +704,26 @@ local function getConfigFileName()
     return newFile
 end
 
+function Module:loadZonePullList()
+    local needSave = false
+    if Files.file_exists(ZonePullConfig) then
+        local zoneConfig, err = loadfile(ZonePullConfig)
+        if not err and zoneConfig then
+            self.ZonePullList = zoneConfig()
+        end
+    else
+        self.ZonePullList = {
+            ['PullDenyList'] = {},
+            ['PullAllowList'] = {},
+        }
+        needSave = true
+    end
+    return needSave
+end
+
 function Module:SaveSettings(doBroadcast)
     mq.pickle(getConfigFileName(), self.settings)
-
+    mq.pickle(ZonePullConfig, self.ZonePullList)
     if doBroadcast == true then
         Comms.BroadcastUpdate(self._name, "LoadSettings")
     end
@@ -730,6 +753,8 @@ function Module:LoadSettings()
 
     -- Setup Defaults
     self.settings, settingsChanged = Config.ResolveDefaults(self.DefaultConfig, self.settings)
+
+    settingsChanged = self:loadZonePullList() or settingsChanged
 
     if settingsChanged then
         self:SaveSettings(false)
@@ -819,7 +844,7 @@ function Module:RenderMobList(displayName, settingName)
             ImGui.TableSetupColumn('Controls', (ImGuiTableColumnFlags.WidthFixed), 80.0)
             ImGui.TableHeadersRow()
 
-            for idx, mobName in pairs(self.settings[settingName][mq.TLO.Zone.ShortName()] or {}) do
+            for idx, mobName in pairs(self.ZonePullList[settingName][mq.TLO.Zone.ShortName()] or {}) do
                 ImGui.TableNextColumn()
                 ImGui.Text(tostring(idx))
                 ImGui.TableNextColumn()
@@ -1025,6 +1050,9 @@ function Module:Render()
         ImGui.NewLine()
         ImGui.Separator()
         ImGui.Text("Note: Allow List will supersede Deny List")
+        if ImGui.SmallButton("Reload Lists") then
+            self:loadZonePullList()
+        end
         self:RenderMobList("Allow List", "PullAllowList")
         self:RenderMobList("Deny List", "PullDenyList")
         ImGui.NewLine()
@@ -1166,8 +1194,8 @@ end
 ---@param list string
 ---@param mobName string
 function Module:AddMobToList(list, mobName)
-    self.settings[list][mq.TLO.Zone.ShortName()] = self.settings[list][mq.TLO.Zone.ShortName()] or {}
-    table.insert(self.settings[list][mq.TLO.Zone.ShortName()], mobName)
+    self.ZonePullList[list][mq.TLO.Zone.ShortName()] = self.ZonePullList[list][mq.TLO.Zone.ShortName()] or {}
+    table.insert(self.ZonePullList[list][mq.TLO.Zone.ShortName()], mobName)
     self:SaveSettings(false)
 
     -- if we are pulling start over.
@@ -1179,8 +1207,8 @@ end
 ---@param list string
 ---@param idx number
 function Module:DeleteMobFromList(list, idx)
-    self.settings[list][mq.TLO.Zone.ShortName()] = self.settings[list][mq.TLO.Zone.ShortName()] or {}
-    self.settings[list][mq.TLO.Zone.ShortName()][idx] = nil
+    self.ZonePullList[list][mq.TLO.Zone.ShortName()] = self.ZonePullList[list][mq.TLO.Zone.ShortName()] or {}
+    self.ZonePullList[list][mq.TLO.Zone.ShortName()][idx] = nil
     self:SaveSettings(false)
 
     -- if we are pulling start over.
@@ -2279,7 +2307,7 @@ function Module:GiveTime(combat_state)
             mq.delay(10)
         end
 
-        Core.DoCmd("/face id %d", self.TempSettings.PullID)
+        Core.DoCmd("/face id %d fast", self.TempSettings.PullID)
 
         self:SetPullState(PullStates.PULL_WAITING_ON_MOB, self:GetPullStateTargetInfo())
 
