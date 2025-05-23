@@ -285,8 +285,18 @@ function Module:Pop()
     self:SaveSettings(false)
 end
 
+function Module:ValidateClickies(type)
+    local numClickes = #self.settings[type]
+    if numClickes == 0 or self.settings[type][numClickes] ~= "" then
+        table.insert(self.settings[type], '')
+        self:SaveSettings(false)
+    end
+end
+
 function Module:GiveTime(combat_state)
     -- Main Module logic goes here.
+    self:ValidateClickies('CombatClickies')
+    self:ValidateClickies('DowntimeClickies')
 
     -- don't use clickies when we are trying to med, feigning, or invisible.
     if combat_state == 'Downtime' and Config:GetSetting('UseClickies') and not (mq.TLO.Me.Sitting() or Casting.IAmFeigning() or mq.TLO.Me.Invis()) then

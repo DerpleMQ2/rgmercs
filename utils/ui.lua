@@ -658,14 +658,7 @@ function Ui.RenderSettingsTable(settings, settingNames, defaults, category)
                         if defaults[k].Type ~= "Custom" then
                             if (defaults[k].Type or ""):find("Array") then
                                 local arrayType = defaults[k].Type:sub(7)
-                                ImGui.Text("New " .. k)
-                                Ui.Tooltip("Create another " .. arrayType)
-                                ImGui.TableNextColumn()
-                                if ImGui.SmallButton("Add " .. arrayType .. "##" .. k) then
-                                    table.insert(settings[k], arrayType == 'Number' and 0 or "")
-                                    any_pressed = true
-                                end
-                                ImGui.TableNextColumn()
+
                                 for idx, _ in ipairs(settings[k] or {}) do
                                     ImGui.Text(string.format(defaults[k].DisplayName or "None %d", idx))
                                     Ui.Tooltip(string.format("%s\n\n[Variable: %s]\n[Default: %s]",
