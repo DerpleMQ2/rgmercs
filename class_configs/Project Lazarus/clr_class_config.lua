@@ -118,7 +118,7 @@ local _ClassConfig = {
             "Courage",
         },
         ['ACBuff'] = {
-            "Ward of Valliance",
+            "Ward of Valiance",
             "Ward of Gallantry",
             "Bulwark of Faith",
             "Shield of Words",
