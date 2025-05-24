@@ -552,7 +552,9 @@ function Ui.RenderOption(type, setting, id, requiresLoadoutChange, ...)
     if type == "Combo" then
         -- build a combo box.
         ImGui.PushID("##combo_setting_" .. id)
-        setting, pressed = ImGui.Combo("", setting, args)
+        ---@type string[]
+        local comboOptions = args[1]
+        setting, pressed = ImGui.Combo("", setting, comboOptions)
         ImGui.PopID()
         new_loadout = ((pressed or false) and (requiresLoadoutChange))
         any_pressed = any_pressed or (pressed or false)
