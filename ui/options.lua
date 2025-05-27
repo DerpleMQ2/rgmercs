@@ -12,29 +12,39 @@ local Modules   = require('utils.modules')
 -- Header: Which collapsing header on the right panel the option should be listed under
 -- Category: Will use dividers under each header to further organize options.
 
-local OptionsUI         = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
-OptionsUI.__index       = OptionsUI
-OptionsUI.selectedGroup = "General"
-OptionsUI.Groups        = {
+local OptionsUI                 = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
+OptionsUI.__index               = OptionsUI
+OptionsUI.selectedGroup         = "General"
+OptionsUI.Groups                = {
     {
         Name = "Movement",
         Desciption = "Following, Medding, Pulling",
-        Icon = Icons.FA_HEART,
-        Headers = { "Chase", "Camp", "Meditation", "Mounts", "Drag", "Pulling", },
+        Icon = Icons.FA_,
+        Headers = {
+            ['Following'] = { "Chase", "Camp", },
+            ['Meditation'] = { "Behavior", "Thresholds", },
+            ['Drag'] = {},
+            ['Pulling'] = { "Behavior", "Puller", "Group", "Distance", "Targets", },
+        },
     },
     {
         Name = "Combat",
         Desciption = "Assisting, Positioning",
         Icon = Icons.FA_HEART,
-        Headers = { "Engage", "Positioning", "Tanking", },
+        Headers = {
+            ['Targeting'] = {},   -- Auto engage, med break, stay on target, etc
+            ['Assisting'] = {},   -- this will include pet and merc percentages/commands
+            ['Positioning'] = {}, -- stick, face, etc
+            ['Burning'] = {},
+            ['Tanking'] = {},
+        },
     },
-    { -- i have nfc what i'm doing, but it seems like we need to specify the order for consistency.
-        -- -- hardcoded seems easier than multiple indexes on each setting
+    {
         Name = "Abilities",
         Desciption = "Spells, Songs, Discs, AA",
         Icon = Icons.FA_HEART,
         Headers = {
-            ['Buffs'] = { "Self", "Group", },
+            ['Buffs'] = { "Self", "Pet", "Group", },
             ['Debuffs'] = { "Resist", "Slow", "Dispel", "Snare", }, -- Resist i.e, Malo, Tash, druid
             ['Healing'] = { "General", "Thresholds", "Curing", "Rezzing", },
             ['Damage'] = { "Direct", "AE", "Over Time", "Taps", },
@@ -42,21 +52,32 @@ OptionsUI.Groups        = {
             ['Utility'] = { "Hate Reduction", "Emergency", "Unique", }, -- Unique Example: Canni, Paragon, etc.
             ['Mez'] = { "General", "Range", "Target", },
             ['Charm'] = { "General", "Range", "Target", },
-        }, -- this is still a WIP
+        },
     },
     {
         Name = "Items",
         Desciption = "Clickies, Bandolier Swaps",
         Icon = Icons.MD_RESTAURANT_MENU,
-        Headers = { "Bandolier", "Clickies(Mercs-Defined)", "Clickies(User-Entered)", "Instruments", },
+        Headers = {
+            ['Clickies(Pre-Defined)'] = { "Downtime", "Combat", "Recovery", }, -- should we combine pre/user-defined?
+            ['Clickies(User-Defined)'] = { "Downtime", "Combat", "Recovery", },
+            ['Bandolier'] = {},
+            ['Instruments'] = {},
+        },
     },
     {
         Name = "Miscellaneous",
         Desciption = "Loot, UI, Communication",
         Icon = Icons.FA_COGS,
-        Headers = { "Loot(Emu)", "Action Announcing", "UI", "Other", },
+        Headers = {
+            ['Loot(Emu)'] = {},
+            ['Announcing'] = {}, -- group announce stuff
+            ['Interface'] = {},  -- ui stuff
+            ['Other'] = {},      -- ??? profit
+        },
     },
 }
+OptionsUI.CombinedSettingsNames = {}
 
 -- Premise:
 
@@ -72,24 +93,13 @@ OptionsUI.Groups        = {
 
 -- Note... plan on moving functions to proper libraries as necessary later
 
-function OptionsUI:RenderGroupHeaders()
-    -- check config util for any header listed in a setting, insert into table
-    -- check all other module settings for headers, insert into table
-    -- iterate through headers in group array above
-    -- if header exists in our "current header" table, draw a collapsing header
-    -- if not, draw the alternate (non-collapsing) gray header (as soon as I figure out how the heck to do that)
-end
-
 function OptionsUI:RenderCategories()
     -- We have our header rendered, we clicked on it to expand it, this is the next step in iterating through the groups
-    -- check config util for any settings with categories matching the header variable passed to this function
-    -- sort the options by indexes if they exist
-    -- check all other modules for the above
-    -- -- load each module to an intermediary table to sort options by index before we insert them into the table we just made above
-    -- procedurally draw divider and table for each category in order set by the array above (no indexing for categories, only entries)
-    -- each category will list its name and use a divider for the rest of the line.
-    -- -- if this isn't possible, we just list the name and use a new line
-    -- -- this idea may be adjusted once we see it
+    -- check group table above to see if the header keys have entries in the category table
+    -- if there is a category in the table, check if a setting of that category exists in the combinedsettingstable
+    -- if there is, draw the name with a divider
+    -- render an option table with all options from that (category if present, header without category if not)
+    -- entries should already be indexed in the combined settings table
 end
 
 function OptionsUI:RenderGroupPanel(groupLabel, groupName)
@@ -99,14 +109,15 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
 end
 
 function OptionsUI:RenderOptionsPanel(groupName)
-
+    -- check headers in groups table against combined settings table
+    -- if there is a setting with that header, draw a collapsing header
+    -- if not, draw the alternate (non-collapsing) gray header (as soon as I figure out how the heck to do that)
+    -- render categories
 end
 
 function OptionsUI:GetCombinedSettingNames()
     --Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
-    local modules = { "Movement", "Pull", "Drag", "Mez", "Charm", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
-
-    local combinedSettingNames = {}
+    local modules = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
     for _, module in ipairs(modules) do
         local defaults = Modules:ExecModule(module, "GetDefaultSettings")
@@ -130,11 +141,9 @@ function OptionsUI:GetCombinedSettingNames()
             end)
         -- insert them into the master list
         for k, _ in pairs(settingNames) do
-            table.insert(combinedSettingNames, k)
+            table.insert(self.CombinedSettingsNames, k)
         end
     end
-
-    return combinedSettingNames
 end
 
 function OptionsUI:RenderCurrentTab()
