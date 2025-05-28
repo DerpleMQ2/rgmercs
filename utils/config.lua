@@ -147,7 +147,9 @@ Config.DefaultConfig = {
     -- [ MED/MANA ] --
     ['DoMed']                = {
         DisplayName = "Do Meditate",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 1,
         Tooltip = "Choose if/when to meditate.",
         Type = "Combo",
@@ -164,7 +166,9 @@ Config.DefaultConfig = {
     },
     ['HPMedPct']             = {
         DisplayName = "Med HP %",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 2,
         Tooltip = "What HP % to hit before medding.",
         Default = 60,
@@ -176,7 +180,9 @@ Config.DefaultConfig = {
     },
     ['ManaMedPct']           = {
         DisplayName = "Med Mana %",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 4,
         Tooltip = "What Mana % to hit before medding.",
         Default = 60,
@@ -189,7 +195,9 @@ Config.DefaultConfig = {
     },
     ['EndMedPct']            = {
         DisplayName = "Med Endurance %",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 6,
         Tooltip = "What Endurance % to hit before medding.",
         Default = 60,
@@ -202,7 +210,9 @@ Config.DefaultConfig = {
     },
     ['ManaMedPctStop']       = {
         DisplayName = "Med Mana % Stop",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 5,
         Tooltip = "What Mana % to hit before stopping medding.",
         Default = 90,
@@ -215,7 +225,9 @@ Config.DefaultConfig = {
     },
     ['EndMedPctStop']        = {
         DisplayName = "Med Endurance % Stop",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 7,
         Tooltip = "What Endurance % to hit before stopping medding.",
         Default = 90,
@@ -227,7 +239,9 @@ Config.DefaultConfig = {
     },
     ['HPMedPctStop']         = {
         DisplayName = "Med HP % Stop",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 3,
         Tooltip = "What HP % to hit before stopping medding.",
         Default = 90,
@@ -239,7 +253,10 @@ Config.DefaultConfig = {
     },
     ['MedAggroCheck']        = {
         DisplayName = "Med Aggro Check",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
+        ory = "Med/Mana",
         Index = 8,
         Tooltip = "Force a stand we have aggro higher than the below setting from an xtarget.",
         Default = true,
@@ -249,7 +266,9 @@ Config.DefaultConfig = {
     },
     ['MedAggroPct']          = {
         DisplayName = "Med Aggro Pct",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 9,
         Tooltip = "Aggro percent value for the Med Aggro Check.",
         Default = 65,
@@ -261,7 +280,9 @@ Config.DefaultConfig = {
     },
     ['StandWhenDone']        = {
         DisplayName = "Stand When Done Medding",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 10,
         Tooltip = "Force a stand when medding thresholds are reached.",
         Default = false,
@@ -270,7 +291,9 @@ Config.DefaultConfig = {
     },
     ['AfterCombatMedDelay']  = {
         DisplayName = "After Combat Med Delay",
-        Category = "Med/Mana",
+        Panel = "General",
+        Category = "Meditation",
+        Subcategory = "General",
         Index = 11,
         Tooltip = "How long to delay after combat in seconds before sitting.",
         Default = 6,
@@ -282,9 +305,11 @@ Config.DefaultConfig = {
     },
     ['DoModRod']             = {
         DisplayName = "Do Mod Rod",
-        Category = "Med/Mana",
+        Panel = "Items/Equipment",
+        Category = "Clickies(Mercs-Defined)",
+        Subcategory = "Recovery (HP/MP)",
         Index = 12,
-        Tooltip = "Auto use Mod Rods if we have them",
+        Tooltip = "Auto use Mod Rods if we have them (Lazarus: This includes Azure Mind Crystals from Enchanters.)",
         Default = true,
         ConfigType = "Advanced",
         FAQ = "How do I automate using Mod Rods?",
@@ -292,7 +317,9 @@ Config.DefaultConfig = {
     },
     ['ModRodManaPct']        = {
         DisplayName = "Mod Rod Mana %",
-        Category = "Med/Mana",
+        Panel = "Items/Equipment",
+        Category = "Clickies(Mercs-Defined)",
+        Subcategory = "Recovery (HP/MP)",
         Index = 13,
         Tooltip = "What Mana % to hit before using a rod.",
         Default = 60,
@@ -306,7 +333,9 @@ Config.DefaultConfig = {
     -- [ PET / MERC] --
     ['DoPet']                = {
         DisplayName = "Summon Pet",
-        Category = "Pet/Merc",
+        Panel = "General",
+        Category = "Pet/Merc Handling",
+        Subcategory = "Pet",
         Index = 1,
         Tooltip = "Enable the summoning and buffing of pets.",
         Default = true,
@@ -316,7 +345,9 @@ Config.DefaultConfig = {
     },
     ['DoPetCommands']        = {
         DisplayName = "Pet Control",
-        Category = "Pet/Merc",
+        Panel = "General",
+        Category = "Pet/Merc Handling",
+        Subcategory = "Pet",
         Index = 2,
         Tooltip = "Allow RGMercs to issue pet commands.",
         Default = true,
@@ -327,7 +358,9 @@ Config.DefaultConfig = {
     },
     ['PetEngagePct']         = {
         DisplayName = "Pet Engage HPs",
-        Category = "Pet/Merc",
+        Panel = "General",
+        Category = "Pet/Merc Handling",
+        Subcategory = "Pet",
         Index = 3,
         Tooltip = "Send in pet when target hits [x] HP %.",
         Default = 96,
@@ -339,7 +372,9 @@ Config.DefaultConfig = {
     },
     ['DoShrinkPet']          = {
         DisplayName = "Do Pet Shrink",
-        Category = "Pet/Merc",
+        Panel = "General",
+        Category = "Pet/Merc Handling",
+        Subcategory = "Pet",
         Index = 4,
         Tooltip = "Enable auto shrinking your pet",
         Default = false,
@@ -349,7 +384,9 @@ Config.DefaultConfig = {
     },
     ['ShrinkPetItem']        = {
         DisplayName = "Shrink Pet Item",
-        Category = "Pet/Merc",
+        Panel = "General",
+        Category = "Pet/Merc Handling",
+        Subcategory = "Pet",
         Index = 5,
         Tooltip = "Item to use to shrink your pet",
         Type = "ClickyItem",
@@ -360,7 +397,9 @@ Config.DefaultConfig = {
     },
     ['DoMercenary']          = {
         DisplayName = "Merc Control",
-        Category = "Pet/Merc",
+        Panel = "General",
+        Category = "Pet/Merc Handling",
+        Subcategory = "Merc",
         Index = 6,
         Tooltip = "Allow RGMercs to issue mercenary commands.",
         Default = (Config.Globals.BuildType ~= 'Emu'),
@@ -372,7 +411,9 @@ Config.DefaultConfig = {
     -- [ ENGAGE ] --
     ['SafeTargeting']        = {
         DisplayName = "Use Safe Targeting",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Targeting",
         Index = 8,
         Tooltip = "Do not target mobs that are fighting others.",
         Default = true,
@@ -383,7 +424,9 @@ Config.DefaultConfig = {
     },
     ['AssistOutside']        = {
         DisplayName = "Assist Outside of Group",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Assist",
         Index = 13,
         Tooltip = "Allow assisting characters outside of your group.",
         Default = false,
@@ -394,7 +437,9 @@ Config.DefaultConfig = {
     },
     ['AssistRange']          = {
         DisplayName = "Assist Range",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Assist",
         Index = 3,
         Tooltip = "Distance to the target before you engage.",
         Default = Config.Constants.RGCasters:contains(Config.Globals.CurLoadedClass) and 90 or 45,
@@ -406,7 +451,9 @@ Config.DefaultConfig = {
     },
     ['AutoAssistAt']         = {
         DisplayName = "Auto Assist At",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Assist",
         Index = 2,
         Tooltip = "Melee attack when target hits [x] HP %.",
         Default = 98,
@@ -418,7 +465,9 @@ Config.DefaultConfig = {
     },
     ['StickHow']             = {
         DisplayName = "Stick How",
-        Category = "Engage",
+        Panel = "Combat",
+        Category = "Movement",
+        Subcategory = "Stick",
         Index = 6,
         Tooltip = "Custom /stick command",
         Default = "",
@@ -429,7 +478,9 @@ Config.DefaultConfig = {
     },
     ['AllowMezBreak']        = {
         DisplayName = "Allow Mez Break",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Behavior",
         Index = 10,
         Tooltip = "Allow Mez Breaking.",
         Default = (Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
@@ -439,7 +490,9 @@ Config.DefaultConfig = {
     },
     ['DoAutoTarget']         = {
         DisplayName = "Auto Target",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Targeting",
         Index = 7,
         Tooltip = "Automatically change targets.",
         Default = true,
@@ -449,7 +502,9 @@ Config.DefaultConfig = {
     },
     ['StayOnTarget']         = {
         DisplayName = "Stay On Target",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Targeting",
         Index = 9,
         Tooltip = "Stick to your target. Default: true; Tank Mode Defaults: false. false allows intelligent target swapping based on aggro/named/ etc.",
         Default = (not Config.Constants.RGTank:contains(mq.TLO.Me.Class.ShortName())),
@@ -459,7 +514,9 @@ Config.DefaultConfig = {
     },
     ['DoAutoEngage']         = {
         DisplayName = "Auto Engage",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Behavior",
         Index = 1,
         Tooltip = "Automatically engage targets.",
         Default = true,
@@ -469,7 +526,9 @@ Config.DefaultConfig = {
     },
     ['DoMelee']              = {
         DisplayName = "Enable Melee Combat",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Behavior",
         Index = 4,
         Tooltip = "Melee targets.",
         Default = Config.Constants.RGMelee:contains(Config.Globals.CurLoadedClass),
@@ -479,7 +538,9 @@ Config.DefaultConfig = {
     },
     ['AutoStandFD']          = {
         DisplayName = "Stand from FD in Combat",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Behavior",
         Index = 12,
         Tooltip = "Auto stands you up from FD if combat starts.",
         Default = true,
@@ -489,7 +550,9 @@ Config.DefaultConfig = {
     },
     ['FaceTarget']           = {
         DisplayName = "Face Target in Combat",
-        Category = "Engage",
+        Panel = "Combat",
+        Category = "Movement",
+        Subcategory = "Stick",
         Index = 5,
         Tooltip = "Periodically /face your target while in combat.",
         Default = true,
@@ -499,7 +562,9 @@ Config.DefaultConfig = {
     },
     ['FollowMarkTarget']     = {
         DisplayName = "Follow Mark Target",
+        Panel = "Combat",
         Category = "Engage",
+        Subcategory = "Targeting",
         Index = 15,
         Tooltip = "Auto target MA target Marks.",
         Default = false,
@@ -509,8 +574,6 @@ Config.DefaultConfig = {
     },
     ['OutsideAssistList']    = {
         DisplayName = "List of Outsiders to Assist",
-        Category = "Engage",
-        Index = 14,
         Tooltip = "List of Outsiders to Assist",
         Type = "Custom",
         Default = {},
@@ -518,10 +581,9 @@ Config.DefaultConfig = {
         FAQ = "How do I Setup who to assist from outside of my group?",
         Answer = "You can add characters to the [OutsideAssistList] to allow you to assist them.",
     },
+    --not sure if this is the best place for this
     ['ClassConfigDir']       = {
         DisplayName = "Class Config Dir",
-        Category = "Main",
-        Index = 14,
         Tooltip = "Which version of class configs to Load",
         Type = "Custom",
         Default = mq.TLO.EverQuest.Server() == "Project Lazarus" and "Project Lazarus" or "Live",
@@ -533,7 +595,9 @@ Config.DefaultConfig = {
     -- [SPELLS/ABILS] --
     ['ManaToNuke']           = {
         DisplayName = "Mana to Nuke",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "HP/MP Thresholds",
         Index = 1,
         Tooltip = "Minimum % Mana in order to continue to cast nukes.",
         Default = 30,
@@ -545,7 +609,9 @@ Config.DefaultConfig = {
     },
     ['ManaToDot']            = {
         DisplayName = "Mana to Dot",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "HP/MP Thresholds",
         Index = 2,
         Tooltip = "Minimum % Mana in order to continue to cast dots.",
         Default = 30,
@@ -557,7 +623,9 @@ Config.DefaultConfig = {
     },
     ['ManaToDebuff']         = {
         DisplayName = "Mana to Debuff",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "HP/MP Thresholds",
         Index = 3,
         Tooltip = "Minimum % Mana in order to continue to cast debuffs.",
         Default = 10,
@@ -569,7 +637,9 @@ Config.DefaultConfig = {
     },
     ['MobLowHP']             = {
         DisplayName = "Mob Low HP:",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "HP/MP Thresholds",
         Index = 4,
         Tooltip = "A mob is considered to be low HP (for the sake of Dots and other abilities) under x HP%.",
         Default = 50,
@@ -581,7 +651,9 @@ Config.DefaultConfig = {
     },
     ['NamedLowHP']           = {
         DisplayName = "Named Low HP:",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "HP/MP Thresholds",
         Index = 5,
         Tooltip = "A named mob is considered to be low HP (for the sake of Dots and other abilities) under x HP%.",
         Default = 25,
@@ -593,7 +665,9 @@ Config.DefaultConfig = {
     },
     ['MobDebuff']            = {
         DisplayName = "Mob Debuffing:",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "Debuffs",
+        Subcategory = "General",
         Index = 6,
         Tooltip = "The circumstances in which we will debuff a (non-named) mob.",
         Default = 2,
@@ -607,7 +681,9 @@ Config.DefaultConfig = {
     },
     ['NamedDebuff']          = {
         DisplayName = "Named Debuffing:",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "Debuffs",
+        Subcategory = "General",
         Index = 7,
         Tooltip = "The circumstances in which we will debuff a (named) mob.",
         Default = 2,
@@ -622,7 +698,9 @@ Config.DefaultConfig = {
     },
     ['DebuffMinCon']         = {
         DisplayName = "Debuff Min Con",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "Debuffs",
+        Subcategory = "General",
         Index = 8,
         Tooltip = "Min Con to use debuffs on",
         Default = 4,
@@ -636,7 +714,9 @@ Config.DefaultConfig = {
     },
     ['DoAlliance']           = {
         DisplayName = "Do Alliance",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "Misc",
         Index = 9,
         Tooltip = "Automatically cast Alliance spells.",
         Default = false,
@@ -646,7 +726,9 @@ Config.DefaultConfig = {
     },
     ['StandFailedFD']        = {
         DisplayName = "Stand on Failed FD",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "Misc",
         Index = 10,
         Tooltip = "Auto stands you up if you fall to the ground.",
         Default = true,
@@ -656,7 +738,9 @@ Config.DefaultConfig = {
     },
     ['LastGemRemem']         = {
         DisplayName = "Remem After Buff:",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "Misc",
         Index = 11,
         Tooltip = "Choose what do with the last gem slot after we use it to buff:\n" ..
             "Do Nothing: Use the slot as needed for buffs, but don't rememorize anything.\n" ..
@@ -673,7 +757,9 @@ Config.DefaultConfig = {
     },
     ['IgnoreLevelCheck']     = {
         DisplayName = "Ignore Spell Level Checks",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "Misc",
         Index = 12,
         Tooltip = "If your server allows for higher level spells to land on lower level characters check this.",
         Default = false,
@@ -681,7 +767,9 @@ Config.DefaultConfig = {
     },
     ['WaitOnGlobalCooldown'] = {
         DisplayName = "Wait on Global Cooldown",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "Misc",
         Index = 13,
         Tooltip = "Wait on Global Cooldown before trying to cast more spells (Should NOT be used by classes that have Weave rotations!)",
         Default = false,
@@ -691,7 +779,9 @@ Config.DefaultConfig = {
     },
     ['CastReadyDelayFact']   = {
         DisplayName = "Cast Ready Delay Factor",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "Misc",
         Index = 14,
         Tooltip = "Wait Ping * [n] ms before saying we are ready to cast.",
         Default = 0,
@@ -703,7 +793,9 @@ Config.DefaultConfig = {
     },
     ['SongClipDelayFact']    = {
         DisplayName = "Song Clip Delay Factor",
-        Category = "Spells/Abils",
+        Panel = "Spells/Abilities",
+        Category = "General",
+        Subcategory = "Misc",
         Index = 15,
         Tooltip = "Wait Ping * [n] ms to allow songs to take effect before singing the next.",
         Default = 2,
@@ -717,7 +809,9 @@ Config.DefaultConfig = {
     -- [ Tank/MA ] --
     ['MovebackWhenTank']     = {
         DisplayName = "Moveback as Tank",
+        Panel = "Combat",
         Category = "Tank/MA",
+        Subcategory = "General",
         Index = 1,
         Tooltip = "Adds 'moveback' to stick command when tanking. Helpful to keep mobs from getting behind you.",
         Default = false,
@@ -727,7 +821,9 @@ Config.DefaultConfig = {
     },
     ['MovebackWhenBehind']   = {
         DisplayName = "Moveback if Mob Behind",
+        Panel = "Combat",
         Category = "Tank/MA",
+        Subcategory = "General",
         Index = 2,
         Tooltip = "Causes you to move back if we detect an XTarget is behind you when tanking.",
         Default = true,
@@ -737,7 +833,9 @@ Config.DefaultConfig = {
     },
     ['MovebackDistance']     = {
         DisplayName = "Units to Moveback",
+        Panel = "Combat",
         Category = "Tank/MA",
+        Subcategory = "General",
         Index = 3,
         Tooltip = "Default: 20. May require adjustment based on runspeed.",
         Default = 20,
@@ -749,9 +847,11 @@ Config.DefaultConfig = {
     },
     ['ForceKillPet']         = {
         DisplayName = "Force Kill Pet",
+        Panel = "Combat",
         Category = "Tank/MA",
+        Subcategory = "General",
         Index = 4,
-        Tooltip = "Force kill pcpet if on xtarget.",
+        Tooltip = "Force kill pcpet if on xtarget. Extreme solution for group pets bugging xtargets when /pet back off does not resolve the issue.",
         Default = false,
         ConfigType = "Advanced",
         FAQ = "Someones pet is causing issues, how do I fix this?",
@@ -759,7 +859,9 @@ Config.DefaultConfig = {
     },
     ['OnlyScanXT']           = {
         DisplayName = "Only Scan XTargets",
+        Panel = "Combat",
         Category = "Tank/MA",
+        Subcategory = "General",
         Index = 5,
         Tooltip = "When MA looks for a target use only XTargets instead of doing an area scan, area scan can cause aggro to unintentional mobs use wih caution.",
         Default = true,
@@ -769,7 +871,9 @@ Config.DefaultConfig = {
     },
     ['MAScanZRange']         = {
         DisplayName = "Main Assist Scan ZRange",
+        Panel = "Combat",
         Category = "Tank/MA",
+        Subcategory = "General",
         Index = 6,
         Tooltip = "Distance in Z direction to look for targets.",
         Default = 45,
@@ -783,7 +887,9 @@ Config.DefaultConfig = {
     -- [ BUFFS ] --
     ['DoBuffs']              = {
         DisplayName = "Do Buffs",
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 1,
         Tooltip = "Do Non-Class Specific Buffs.",
         Default = true,
@@ -793,7 +899,9 @@ Config.DefaultConfig = {
     },
     ['BuffWaitMoveTimer']    = {
         DisplayName = "Buff Wait Timer",
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 2,
         Tooltip = "Seconds to wait after stoping movement before doing buffs.",
         Default = 5,
@@ -805,7 +913,9 @@ Config.DefaultConfig = {
     },
     ['DoSelfWard']           = {
         DisplayName = "Enable Wards",
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 9,
         Tooltip = "Enable Self Ward Spells",
         Default = false,
@@ -815,7 +925,9 @@ Config.DefaultConfig = {
     },
     ['MountItem']            = {
         DisplayName = "Mount Item",
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 6,
         Tooltip = "Item to use to cast mount",
         Type = "ClickyItem",
@@ -827,7 +939,9 @@ Config.DefaultConfig = {
     },
     ['DoMount']              = {
         DisplayName = "Summon Mount:",
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 5,
         Tooltip = "Choose how/when to use mounts.",
         Type = "Combo",
@@ -842,7 +956,9 @@ Config.DefaultConfig = {
     },
     ['ShrinkItem']           = {
         DisplayName = "Shrink Item",
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 8,
         Tooltip = "Item to use to Shrink yourself",
         Type = "ClickyItem",
@@ -853,7 +969,9 @@ Config.DefaultConfig = {
     },
     ['DoShrink']             = {
         DisplayName = "Do Shrink",
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 7,
         Tooltip = "Enable auto shrinking",
         Default = false,
@@ -864,7 +982,9 @@ Config.DefaultConfig = {
     },
     ['BuffRezables']         = {
         DisplayName = "Buff Rezables",
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 3,
         Tooltip =
         "If a PC has a corpse near us, buff them even though they are likely to get rezed. (Note: If disabled, they may still be receiving group buffs aimed at those without corpses.)",
@@ -876,7 +996,9 @@ Config.DefaultConfig = {
     },
     ['UseCounterActions']    = {
         DisplayName = "Use Aureate's Bane", --this can be freely changed later if another system is added. Avoiding confusion for now.
+        Panel = "Spells/Abilities",
         Category = "Buffs",
+        Subcategory = "General",
         Index = 4,
         Tooltip =
         "Automatically use counter actions (such as the Aureate's Bane AA to counter Curse of Subjugation in TOB zones.",
@@ -889,9 +1011,11 @@ Config.DefaultConfig = {
     -- [ HEAL/REZ] --
     ['PriorityHealing']      = {
         DisplayName = "Priority Healing",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "General",
         Index = 10,
-        Tooltip = "Standby for healing over engaging in combat actions.",
+        Tooltip = "Prioritize Healing. Do not engage mobs.",
         Default = false,
         ConfigType = "Advanced",
         FAQ = "Why are my healers attacking the mob and not healing?",
@@ -899,7 +1023,9 @@ Config.DefaultConfig = {
     },
     ['BreakInvis']           = {
         DisplayName = "Break Invis",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "General",
         Index = 9,
         Tooltip = "Break invis to heal, cure and rez when out of combat (Does not affect combat actions).",
         Default = false,
@@ -909,7 +1035,9 @@ Config.DefaultConfig = {
     },
     ['MainHealPoint']        = {
         DisplayName = "Main Heal Point",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "HP Thresholds",
         Index = 3,
         Tooltip = "Minimum PctHPs to use the Main Heal Rotation.",
         Default = 80,
@@ -921,7 +1049,9 @@ Config.DefaultConfig = {
     },
     ['BigHealPoint']         = {
         DisplayName = "Big Heal Point",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "HP Thresholds",
         Index = 4,
         Tooltip = "Minimum PctHPs to use the Big Heal Rotation.",
         Default = 50,
@@ -933,7 +1063,9 @@ Config.DefaultConfig = {
     },
     ['GroupHealPoint']       = {
         DisplayName = "Group Heal Point",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "HP Thresholds",
         Index = 5,
         Tooltip = "Minimum PctHPs to use the Group Heal Rotation.",
         Default = 75,
@@ -946,7 +1078,9 @@ Config.DefaultConfig = {
     },
     ['PetHealPoint']         = {
         DisplayName = "Pet Heal Point",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "HP Thresholds",
         Index = 8,
         Tooltip = "Minimum PctHPs to use the Pet Heal Rotation.",
         Default = 50,
@@ -959,7 +1093,9 @@ Config.DefaultConfig = {
     },
     ['GroupInjureCnt']       = {
         DisplayName = "Group Injured Count",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "HP Thresholds",
         Index = 6,
         Tooltip = "Number of group members that must be under the above threshold.",
         Default = 3,
@@ -971,7 +1107,9 @@ Config.DefaultConfig = {
     },
     ['DoPetHeals']           = {
         DisplayName = "Do Pet Heals",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "General",
         Index = 7,
         Tooltip = "Heal pets in your group",
         Default = false,
@@ -981,7 +1119,9 @@ Config.DefaultConfig = {
     },
     ['MaxHealPoint']         = {
         DisplayName = "Healing Threshold",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "HP Thresholds",
         Index = 1,
         Tooltip = "Minimum PctHPs to check if a target needs healing.",
         Default = 90,
@@ -993,7 +1133,9 @@ Config.DefaultConfig = {
     },
     ['LightHealPoint']       = {
         DisplayName = "Light Heal Point",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Healing",
+        Subcategory = "HP Thresholds",
         Index = 2,
         Tooltip = "Minimum PctHPs to use the Light Heal Rotation.",
         Default = mq.TLO.Me.Class.ShortName() == "CLR" and 95 or 90,
@@ -1005,7 +1147,9 @@ Config.DefaultConfig = {
     },
     ['DoCureSpells']         = {
         DisplayName = "Do Cure Spells",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Curing",
+        Subcategory = "General",
         Index = 11,
         Tooltip = "Use Cure spells to clear detrimental effects from your group or yourself.",
         Default = true,
@@ -1015,7 +1159,9 @@ Config.DefaultConfig = {
     },
     ['DoCureAA']             = {
         DisplayName = "Do Cure AA",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Curing",
+        Subcategory = "General",
         Index = 12,
         Tooltip = "Use Cure AA to clear detrimental effects from your group or yourself.",
         Default = true,
@@ -1025,7 +1171,9 @@ Config.DefaultConfig = {
     },
     ['CureInterval']         = {
         DisplayName = "Cure Check Interval",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Curing",
+        Subcategory = "General",
         Index = 13,
         Tooltip = "Perform check to see if cures are needed every X seconds. ***WARNING: RESOURCE INTENSIVE*** Default: 5",
         Default = 5,
@@ -1038,7 +1186,9 @@ Config.DefaultConfig = {
     },
     ['DoRez']                = {
         DisplayName = "Do Rez",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Rezzing",
+        Subcategory = "General",
         Index = 14,
         Tooltip = "Use Rezes. If disabled, no rez spells will be used at any time.",
         Default = true,
@@ -1048,7 +1198,9 @@ Config.DefaultConfig = {
     },
     ['DoBattleRez']          = {
         DisplayName = "Do Battle Rez",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Rezzing",
+        Subcategory = "General",
         Index = 15,
         Tooltip = "Use Rez while in combat",
         Default = mq.TLO.Me.Class.ShortName():lower() == "clr",
@@ -1058,7 +1210,9 @@ Config.DefaultConfig = {
     },
     ['RetryRezDelay']        = {
         DisplayName = "Retry Rez Delay",
-        Category = "Heal/Rez",
+        Panel = "Spells/Abilities",
+        Category = "Rezzing",
+        Subcategory = "General",
         Index = 16,
         Tooltip = "Attempt to rez a corpse every X seconds.",
         Default = 6,
@@ -1070,7 +1224,9 @@ Config.DefaultConfig = {
     },
     ['InstantRelease']       = {
         DisplayName = "Instant Release",
-        Category = "Heal/Rez",
+        Panel = "General",
+        Category = "Misc",
+        Subcategory = "General",
         Index = 17,
         Tooltip = "Instantly release when you die.",
         Default = false,
@@ -1082,7 +1238,9 @@ Config.DefaultConfig = {
     -- [ BURNS ] --
     ['BurnAuto']             = {
         DisplayName = "Use Auto Burn",
+        Panel = "Combat",
         Category = "Burns",
+        Subcategory = "General",
         Index = 1,
         Tooltip = "Use Burn rotations when the conditions below are met.",
         Default = true,
@@ -1092,7 +1250,9 @@ Config.DefaultConfig = {
     },
     ['BurnAlways']           = {
         DisplayName = "Auto Burn: Always",
+        Panel = "Combat",
         Category = "Burns",
+        Subcategory = "General",
         Index = 2,
         Tooltip = "Automatically use Burn rotations on any/every target.",
         Default = false,
@@ -1102,7 +1262,10 @@ Config.DefaultConfig = {
     },
     ['BurnMobCount']         = {
         DisplayName = "Auto Burn: Mob Threshold",
+        CategPanel = "Combat",
         Category = "Burns",
+        Subcategory = "General",
+        ory = "Burns",
         Index = 4,
         Tooltip = "Automatically use Burn rotations when we are fighting x number of haters.",
         Default = 3,
@@ -1114,7 +1277,9 @@ Config.DefaultConfig = {
     },
     ['BurnNamed']            = {
         DisplayName = "Auto Burn: Named",
+        Panel = "Combat",
         Category = "Burns",
+        Subcategory = "General",
         Index = 5,
         Tooltip = "Automatically use Burn rotations when we are fighting a named mob(must be present in RGMerc Named List or SpawnMaster ini).",
         Default = true,
@@ -1126,7 +1291,9 @@ Config.DefaultConfig = {
     --[ EVENTS ] --
     ['HandleCantSeeTarget']  = {
         DisplayName = "Handle Cannot See Target",
-        Category = "Events",
+        Panel = "Combat",
+        Category = "Movement",
+        Subcategory = "Events",
         Tooltip = "If you get a cannot see your target message this will try to correct for it.",
         Default = true,
         ConfigType = "Advanced",
@@ -1135,7 +1302,9 @@ Config.DefaultConfig = {
     },
     ['HandleTooClose']       = {
         DisplayName = "Handle Too Close",
-        Category = "Events",
+        Panel = "Combat",
+        Category = "Movement",
+        Subcategory = "Events",
         Tooltip = "If you get a target too close message this will try to correct for it.",
         Default = true,
         ConfigType = "Advanced",
@@ -1144,7 +1313,9 @@ Config.DefaultConfig = {
     },
     ['HandleTooFar']         = {
         DisplayName = "Handle Too Far",
-        Category = "Events",
+        Panel = "Combat",
+        Category = "Movement",
+        Subcategory = "Events",
         Tooltip = "If you get a target too far message this will try to correct for it.",
         Default = true,
         ConfigType = "Advanced",
@@ -1155,7 +1326,9 @@ Config.DefaultConfig = {
     -- [ UI ] --
     ['DisplayManualTarget']  = {
         DisplayName = "Display Manual Target",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "If you have no auto target, enabling this will show information about your current manual target in the UI.",
         Default = false,
         FAQ = "When my auto target is empty how can I see information about my current manually set target?",
@@ -1163,7 +1336,9 @@ Config.DefaultConfig = {
     },
     ['BgOpacity']            = {
         DisplayName = "Background Opacity",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Opacity for the RGMercs UI",
         Default = 100,
         Min = 20,
@@ -1173,7 +1348,9 @@ Config.DefaultConfig = {
     },
     ['ShowAllOptionsMain']   = {
         DisplayName = "Show All Options on Main",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Show all options on the main panel",
         Default = true,
         FAQ = "There are a lot of options on the main panel, how do I hide some of them?",
@@ -1181,7 +1358,9 @@ Config.DefaultConfig = {
     },
     ['FrameEdgeRounding']    = {
         DisplayName = "Frame Edge Rounding",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Frame Edge Rounding for the RGMercs UI",
         Default = 6,
         Min = 0,
@@ -1191,7 +1370,9 @@ Config.DefaultConfig = {
     },
     ['ScrollBarRounding']    = {
         DisplayName = "Scroll Bar Rounding",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Frame Edge Rounding for the RGMercs UI",
         Default = 10,
         Min = 0,
@@ -1201,7 +1382,9 @@ Config.DefaultConfig = {
     },
     ['ShowAdvancedOpts']     = {
         DisplayName = "Show Advanced Options",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Show Advanced Options",
         Type = "Custom",
         Default = false,
@@ -1211,7 +1394,9 @@ Config.DefaultConfig = {
     },
     ['EscapeMinimizes']      = {
         DisplayName = "Minimize on Escape",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Minimizes the window if focused and Escape is pressed",
         Default = false,
         ConfigType = "Normal",
@@ -1221,7 +1406,9 @@ Config.DefaultConfig = {
     },
     ['AlwaysShowMiniButton'] = {
         DisplayName = "Always show Mini Button",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Always show the Mini button.",
         Default = false,
         ConfigType = "Normal",
@@ -1231,7 +1418,6 @@ Config.DefaultConfig = {
     ['PopOutForceTarget']    = {
         DisplayName = "Pop Out Force Target",
         Type = "Custom",
-        Category = "Custom",
         Tooltip = "Pop out the Force Target into it's own Window",
         Default = false,
         ConfigType = "Advanced",
@@ -1242,7 +1428,6 @@ Config.DefaultConfig = {
     ['PopOutConsole']        = {
         DisplayName = "Pop Out Console",
         Type = "Custom",
-        Category = "Custom",
         Tooltip = "Pop out the Console into it's own Window",
         Default = false,
         ConfigType = "Advanced",
@@ -1252,7 +1437,9 @@ Config.DefaultConfig = {
     },
     ['MainWindowLocked']     = {
         DisplayName = "Main Window Locked",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Lock UI",
         Default = false,
         Type = "Custom",
@@ -1261,7 +1448,9 @@ Config.DefaultConfig = {
     },
     ['FullUI']               = {
         DisplayName = "Use Full UI",
-        Category = "UI",
+        Panel = "General",
+        Category = "User Interface",
+        Subcategory = "General",
         Tooltip = "Toggle between Full UI and a Simple UI [Experimental]",
         Default = true,
         FAQ = "The UI is overwhelming how can I make it simpler?",
@@ -1271,8 +1460,7 @@ Config.DefaultConfig = {
     -- [ Debug ] --
     ['LogLevel']             = {
         DisplayName = "Log Level",
-        Category = "Debug",
-        Tooltip = "1 = Errors, 2 = Warnings, 3 = Info, 4 = Debug, 5 = Verbose",
+        Panel = "General",
         Type = "Custom",
         Default = 3,
         Min = 1,
@@ -1284,7 +1472,6 @@ Config.DefaultConfig = {
     },
     ['LogToFile']            = {
         DisplayName = "Log To File",
-        Category = "Debug",
         Tooltip = "Write all logs to the mqlog file.",
         Type = "Custom",
         Default = false,
@@ -1296,7 +1483,9 @@ Config.DefaultConfig = {
     -- [ ANNOUNCEMENTS ] --
     ['AnnounceTarget']       = {
         DisplayName = "Announce Target",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Tooltip = "Announces Target over DanNet in kissassist format, incase you are running a mixed set on your group.Config",
         Default = false,
         ConfigType = "Advanced",
@@ -1305,7 +1494,9 @@ Config.DefaultConfig = {
     },
     ['AnnounceTargetGroup']  = {
         DisplayName = "Announce Target to Group",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Tooltip = "Announces Target over /gsay",
         Default = false,
         ConfigType = "Advanced",
@@ -1314,7 +1505,9 @@ Config.DefaultConfig = {
     },
     ['MezAnnounce']          = {
         DisplayName = "Mez Announce",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce mez casts.",
         ConfigType = "Advanced",
@@ -1323,7 +1516,9 @@ Config.DefaultConfig = {
     },
     ['MezAnnounceGroup']     = {
         DisplayName = "Mez Announce to Group",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce mez casts In group.",
         ConfigType = "Advanced",
@@ -1332,7 +1527,9 @@ Config.DefaultConfig = {
     },
     ['CharmAnnounce']        = {
         DisplayName = "Charm Announce",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce Charm casts.",
         ConfigType = "Advanced",
@@ -1341,7 +1538,9 @@ Config.DefaultConfig = {
     },
     ['CharmAnnounceGroup']   = {
         DisplayName = "Charm Announce to Group",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce Charm casts In group.",
         ConfigType = "Advanced",
@@ -1350,7 +1549,9 @@ Config.DefaultConfig = {
     },
     ['HealAnnounce']         = {
         DisplayName = "Heal Announce",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce Heal casts.",
         ConfigType = "Advanced",
@@ -1359,7 +1560,9 @@ Config.DefaultConfig = {
     },
     ['HealAnnounceGroup']    = {
         DisplayName = "Heal Announce to Group",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce Heal casts In group.",
         ConfigType = "Advanced",
@@ -1368,7 +1571,9 @@ Config.DefaultConfig = {
     },
     ['CureAnnounce']         = {
         DisplayName = "Cure Announce",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce Cure casts.",
         ConfigType = "Advanced",
@@ -1377,7 +1582,9 @@ Config.DefaultConfig = {
     },
     ['CureAnnounceGroup']    = {
         DisplayName = "Cure Announce to Group",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce Cure casts In group.",
         ConfigType = "Advanced",
@@ -1386,7 +1593,9 @@ Config.DefaultConfig = {
     },
     ['ReagentAnnounce']      = {
         DisplayName = "Reagent Announce",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce a failed Reagent check in dannet.",
         ConfigType = "Advanced",
@@ -1396,7 +1605,9 @@ Config.DefaultConfig = {
     },
     ['ReagentAnnounceGroup'] = {
         DisplayName = "Reagent Announce to Group",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce a failed Reagent check in group. (Warning: Not recommended due to message spam!)",
         ConfigType = "Advanced",
@@ -1405,7 +1616,9 @@ Config.DefaultConfig = {
     },
     ['PullAnnounce']         = {
         DisplayName = "Pull Announce",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce pull-related messages in dannet.",
         ConfigType = "Advanced",
@@ -1414,7 +1627,9 @@ Config.DefaultConfig = {
     },
     ['PullAnnounceGroup']    = {
         DisplayName = "Pull Announce to Group",
+        Panel = "General",
         Category = "Announcements",
+        Subcategory = "General",
         Default = false,
         Tooltip = "Set to announce pull-related messages in group. (Warning: Not recommended due to message spam!)",
         ConfigType = "Advanced",

@@ -73,6 +73,7 @@ function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
     end
 
     return openGUI, shouldDrawGUI
+
 end
 
 return SimpleUI
