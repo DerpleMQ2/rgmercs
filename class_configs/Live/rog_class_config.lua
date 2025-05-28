@@ -637,7 +637,7 @@ return {
 
             Logger.log_debug("\ayPreEngage(): Testing Opener ability = %s", openerAbility or "None")
 
-            if mq.TLO.Me.CombatAbilityReady(openerAbility)() and not mq.TLO.Me.AbilityReady("Hide")() and mq.TLO.Me.AbilityTimer("Hide")() < 6000 and mq.TLO.Me.Invis() then
+            if mq.TLO.Me.CombatAbilityReady(openerAbility)() and not mq.TLO.Me.AbilityReady("Hide")() and mq.TLO.Me.AbilityTimer("Hide")() <= math.max(0, mq.TLO.Me.AbilityTimerTotal("Hide")() - 4000) and mq.TLO.Me.Invis() then
                 Casting.UseDisc(openerAbility, target)
                 Logger.log_debug("\agPreEngage(): Using Opener ability = %s", openerAbility or "None")
             else
