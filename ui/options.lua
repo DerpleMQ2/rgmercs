@@ -5,6 +5,7 @@ local Ui        = require('utils.ui')
 local Icons     = require('mq.ICONS')
 local GitCommit = require('extras.version')
 local Modules   = require('utils.modules')
+local Set       = require("mq.Set")
 
 
 -- Using the following terms:
@@ -12,10 +13,10 @@ local Modules   = require('utils.modules')
 -- Header: Which collapsing header on the right panel the option should be listed under
 -- Category: Will use dividers under each header to further organize options.
 
-local OptionsUI                 = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
-OptionsUI.__index               = OptionsUI
-OptionsUI.selectedGroup         = "General"
-OptionsUI.Groups                = {
+local OptionsUI             = { _version = '1.0', _name = "OptionsUI", _author = 'Derple', 'Algar', }
+OptionsUI.__index           = OptionsUI
+OptionsUI.selectedGroup     = "General"
+OptionsUI.Groups            = {
     {
         Name = "Movement",
         Desciption = "Following, Medding, Pulling",
@@ -77,7 +78,9 @@ OptionsUI.Groups                = {
         },
     },
 }
-OptionsUI.CombinedSettingsNames = {}
+OptionsUI.Settings          = {}
+OptionsUI.SettingNames      = {}
+OptionsUI.SettingCategories = Set.new({})
 
 -- Premise:
 
@@ -100,16 +103,33 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     end
 end
 
--- really kinda stuck here at the moment.
--- i was thinking i would draw the headers first, but that doesn't make much sense if we need to iterate through settings to find out which to draw
--- the above is true regardless of if we only draw headers that exist in the table, or we draw a "dummy" header if it isn't in the table.
-function OptionsUI:RenderOptionsPanel()
-    -- find the current group in the array
-    for _, group in ipairs(self.Groups) do
-        if group.Name == self.selectedGroup then
-            -- iterate through header values and render them
+
+function OptionsUI:RenderOptionsPanel(groupName)
+    for _, c in ipairs(self.SettingCategories) do
+        local shouldShow = false
+        for _, k in ipairs(self.SettingNames) 
+        -- stolen from elsewhere, examine/adapt once tables are properly set up
+            -- if defaults[k].Category == c then
+            --     if Config:GetSetting('ShowAdvancedOpts') or (defaults[k].ConfigType == nil or defaults[k].ConfigType:lower() == "normal") then
+            --         shouldShow = true
+            --         break
+            --     end
+            -- end
         end
+
+        -- if shouldShow then
+        --     if ImGui.BeginTabItem(c) then
+        --         local cat_pressed = false
+
+        --         settings, cat_pressed, new_loadout = Ui.RenderSettingsTable(settings, settingNames, defaults, c)
+        --         any_pressed = any_pressed or cat_pressed
+        --         ImGui.EndTabItem()
+        --     end
+        -- end
     end
+
+
+
     -- original plan:
     -- check headers in groups table against combined settings table
     -- if there is a setting with that header, draw a collapsing header
@@ -127,33 +147,43 @@ function OptionsUI:RenderCategories()
     -- entries should already be indexed in the combined settings table
 end
 
-function OptionsUI:GetCombinedSettingNames()
+function OptionsUI:GetCombinedSettings()
     --Custom module list to control the desired order of the settings within a category (basically this just ensures class-specific settings are last for consistency)
     local modules = { "Movement", "Pull", "Drag", "Mez", "Charm", "Clickies", "Class", "Travel", "Named", "Perf", "Contributors", "Debug", "FAQ", }
 
     for _, module in ipairs(modules) do
-        local defaults = Modules:ExecModule(module, "GetDefaultSettings")
-        local settingNames = {}
+        -- get a combined settings list from all modules
+        local moduleSettings = Modules:ExecModule(module, "GetSettings")
 
-        --get defaults for this module
-        for k, _ in pairs(defaults) do
-            table.insert(settingNames, k)
+
+
+        -- get default settings and category list from all modules
+        local moduleDefaults = Modules:ExecModule(module, "GetDefaultSettings")
+        local defaults = {}
+
+        -- is this moving everything?
+        for k, _ in pairs(moduleDefaults) do
+            table.insert(defaults, k)
         end
 
         -- sort by indexes, if there are any, before they are added to the list (so there is no conflict between indexing from different modules in the same category).
-        table.sort(settingNames,
+        table.sort(defaults,
             function(k1, k2)
-                if (defaults[k1].Index ~= nil or defaults[k2].Index ~= nil) and (defaults[k1].Index ~= defaults[k2].Index) then
-                    return (defaults[k1].Index or 999) < (defaults[k2].Index or 999)
-                elseif defaults[k1].Category == defaults[k2].Category then
-                    return (defaults[k1].DisplayName or "") < (defaults[k2].DisplayName or "")
+                if (moduleDefaults[k1].Index ~= nil or moduleDefaults[k2].Index ~= nil) and (moduleDefaults[k1].Index ~= moduleDefaults[k2].Index) then
+                    return (moduleDefaults[k1].Index or 999) < (moduleDefaults[k2].Index or 999)
+                elseif moduleDefaults[k1].Category == moduleDefaults[k2].Category then
+                    return (moduleDefaults[k1].DisplayName or "") < (moduleDefaults[k2].DisplayName or "")
                 else
-                    return (defaults[k1].Category or "") < (defaults[k2].Category or "")
+                    return (moduleDefaults[k1].Category or "") < (moduleDefaults[k2].Category or "")
                 end
             end)
-        -- insert them into the master list
-        for k, _ in pairs(settingNames) do
-            table.insert(self.CombinedSettingsNames, k)
+        -- break out names and categories for rendering later
+        for k, v in pairs(defaults) do
+            table.insert(self.SettingNames, k)
+
+            if v.Type ~= "Custom" then
+                self.SettingCategories:add(v.Category)
+            end
         end
     end
 end
