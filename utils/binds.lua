@@ -152,61 +152,6 @@ Binds.Handlers    = {
             Core.DoCmd("/squelch /dggaexecute /docommand /timed 5 /say %s", text)
         end,
     },
-    ['cast'] = {
-        usage = "/rgl cast \"<spell>\" <targetId?>",
-        about = "Uses a spell or AA (memorizes if necessary). If no targetId is entered, your target is used.",
-        handler = function(spell, targetId)
-            targetId = targetId and tonumber(targetId)
-            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
-            Logger.log_debug("\atCasting: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
-
-            -- wait for cast window to close
-            mq.delay("5s", function() return mq.TLO.Me.Casting.ID() == nil end)
-
-            if not Casting.UseSpell(spell, targetId, true) then
-                Casting.UseAA(spell, targetId)
-            end
-        end,
-    },
-    ['castaa'] = {
-        usage = "/rgl castaa \"<AAName>\" <targetId?>",
-        about = "Uses an AA. If no targetId is entered, your target is used.",
-        handler = function(spell, targetId)
-            targetId = targetId and tonumber(targetId)
-            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
-            Logger.log_debug("\atUsing AA: \aw\"\am%s\aw\" on targetId(\am%d\aw)", spell, tonumber(targetId) or mq.TLO.Target.ID())
-
-            Casting.UseAA(spell, targetId)
-        end,
-    },
-    ['usemap'] = {
-        usage = "/rgl usemap \"<maptype>\" \"<mapname>\" <targetId?>",
-        about = "RGMercs will use the mapped spell, song, AA, disc, or item (using smart targeting, or, if provided, on the specified <targetID>).",
-        handler = function(mapType, mapName, targetId)
-            local action = Modules:ExecModule("Class", "GetResolvedActionMapItem", mapName)
-            if not action or not action() then
-                Logger.log_debug("\arUseMap: \"\ay%s\ar\" does not appear to be a valid mapped action! \awPlease note this value is case-sensitive.", mapName)
-                return false
-            end
-            targetId = targetId and tonumber(targetId)
-            targetId = targetId or (mq.TLO.Target.ID() > 0 and mq.TLO.Target.ID() or mq.TLO.Me.ID())
-
-            local actionHandlers = {
-                spell = function() return Casting.UseSpell(action.RankName, targetId, true) end,
-                song = function() return Casting.UseSong(action.RankName, targetId, true) end,
-                aa = function() return Casting.UseAA(action, targetId) end, --AFAIK we don't have any AA mapped, but, future proof.
-                item = function() return Casting.UseItem(action, targetId) end,
-                disc = function() return Casting.UseDisc(action, targetId) end,
-            }
-
-            local handlerFunc = actionHandlers[mapType:lower()]
-            if handlerFunc then
-                handlerFunc()
-            else
-                Logger.log_debug("\arUseMap: \"\ay%s\ar\" is an invalid maptype. \awValid maptypes are : \agspell \aw| \agsong \aw| \agAA \aw| \agdisc \aw| \agitem", mapType)
-            end
-        end,
-    },
     ['setlogfilter'] = {
         usage = "/rgl setlogfilter <filter|filter|filter|...>",
         about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging).",

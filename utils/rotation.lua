@@ -259,8 +259,9 @@ end
 --- @param bAllowMem boolean Flag to allow memory usage.
 --- @param bDoFullRotation boolean? Flag to perform a full rotation.
 --- @param fnRotationCond function? A function to determine rotation conditions.
+--- @param enabledRotationEntries table A list of enabled rotation entries.
 --- @return number, boolean
-function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation, fnRotationCond)
+function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps, start_step, bAllowMem, bDoFullRotation, fnRotationCond, enabledRotationEntries)
     local oldSpellInSlot = mq.TLO.Me.Gem(Casting.UseGem)
     local loadoutSpell   = (Modules.ModuleList.Class.SpellLoadOut[Casting.UseGem] and Modules.ModuleList.Class.SpellLoadOut[Casting.UseGem].spell)
     local stepsThisTime  = 0
@@ -272,58 +273,60 @@ function Rotation.Run(caller, rotationTable, targetId, resolvedActionMap, steps,
     -- Used for bards to dynamically weave properly
     if bDoFullRotation then start_step = 1 end
     for idx, entry in ipairs(rotationTable) do
-        if idx >= start_step then
-            caller:SetCurrentRotationState(idx)
+        if enabledRotationEntries[entry.name] ~= false then
+            if idx >= start_step then
+                caller:SetCurrentRotationState(idx)
 
-            if Config.Globals.PauseMain then
-                break
-            end
-
-            if fnRotationCond then
-                local curState = Targeting.GetXTHaterCount() > 0 and "Combat" or "Downtime"
-
-                if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, curState) then
-                    Logger.log_verbose("\arStopping Rotation Due to condition check failure!")
+                if Config.Globals.PauseMain then
                     break
                 end
-            end
 
-            if Config.ShouldPriorityFollow() then
-                break
-            end
+                if fnRotationCond then
+                    local curState = Targeting.GetXTHaterCount() > 0 and "Combat" or "Downtime"
 
-            Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
-            lastStepIdx = idx
-            if entry.cond then
-                local pass = Rotation.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
-                Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: TestConditionsForEntry() => %s", start_step, steps,
-                    idx, Strings.BoolToColorString(pass))
-                if pass == true then
+                    if not Core.SafeCallFunc("\tRotation Condition Loop Re-Check", fnRotationCond, caller, curState) then
+                        Logger.log_verbose("\arStopping Rotation Due to condition check failure!")
+                        break
+                    end
+                end
+
+                if Config.ShouldPriorityFollow() then
+                    break
+                end
+
+                Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
+                lastStepIdx = idx
+                if entry.cond then
+                    local pass = Rotation.TestConditionForEntry(caller, resolvedActionMap, entry, targetId)
+                    Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: TestConditionsForEntry() => %s", start_step, steps,
+                        idx, Strings.BoolToColorString(pass))
+                    if pass == true then
+                        local res = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
+                        Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: ExecEntry() => %s", start_step, steps,
+                            idx, Strings.BoolToColorString(res))
+                        if res == true then
+                            anySuccess = true
+                            stepsThisTime = stepsThisTime + 1
+
+                            if steps > 0 and stepsThisTime >= steps then
+                                break
+                            end
+
+                            if Config.Globals.PauseMain then
+                                break
+                            end
+                        end
+                    else
+                        Logger.log_verbose("\aoFailed Condition RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
+                    end
+                else
                     local res = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
-                    Logger.log_verbose("\aoDoing RunRotation(start(%d), step(%d), cur(%d)) :: ExecEntry() => %s", start_step, steps,
-                        idx, Strings.BoolToColorString(res))
                     if res == true then
-                        anySuccess = true
                         stepsThisTime = stepsThisTime + 1
 
                         if steps > 0 and stepsThisTime >= steps then
                             break
                         end
-
-                        if Config.Globals.PauseMain then
-                            break
-                        end
-                    end
-                else
-                    Logger.log_verbose("\aoFailed Condition RunRotation(start(%d), step(%d), cur(%d))", start_step, steps, idx)
-                end
-            else
-                local res = Rotation.ExecEntry(caller, entry, targetId, resolvedActionMap, bAllowMem)
-                if res == true then
-                    stepsThisTime = stepsThisTime + 1
-
-                    if steps > 0 and stepsThisTime >= steps then
-                        break
                     end
                 end
             end

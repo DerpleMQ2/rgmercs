@@ -618,38 +618,6 @@ function Module:Pop()
     self:SaveSettings(false)
 end
 
-function Module:DoClickies()
-    if not Config:GetSetting('UseClickies') then return end
-
-    -- don't use clickies when we are trying to med, feigning, or invisible.
-    if mq.TLO.Me.Sitting() or Casting.IAmFeigning() or mq.TLO.Me.Invis() then return end
-
-    for i = 1, 12 do
-        local setting = Config:GetSetting(string.format("ClickyItem%d", i))
-        if setting and setting:len() > 0 then
-            local item = mq.TLO.FindItem(setting)
-            Logger.log_verbose("Looking for clicky item: %s found: %s", setting, Strings.BoolToColorString(item() ~= nil))
-
-            if item then
-                if item.Timer.TotalSeconds() == 0 then
-                    if (item.RequiredLevel() or 0) <= mq.TLO.Me.Level() then
-                        if Casting.SelfBuffItemCheck(item) then
-                            Logger.log_verbose("\aaCasting Item: \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                            Casting.UseItem(item.Name(), mq.TLO.Me.ID())
-                        else
-                            Logger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay Already Active!", item.Name(), item.Clicky.Spell.RankName.Name())
-                        end
-                    else
-                        Logger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay I am too low level to use this clicky!", item.Name(), item.Clicky.Spell.RankName.Name())
-                    end
-                else
-                    Logger.log_verbose("\ayItem: \at%s\ay Clicky: \at%s\ay Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
-                end
-            end
-        end
-    end
-end
-
 function Module:OnDeath()
     if not Config:GetSetting('BreakOnDeath') then return end
     if self.settings.ChaseTarget then
@@ -709,8 +677,6 @@ function Module:GiveTime(combat_state)
             Logger.log_debug("\ayDismounting...")
             self:RunCmd("/dismount")
         end
-
-        self:DoClickies()
     end
 
     if Combat.ShouldDoCamp() then

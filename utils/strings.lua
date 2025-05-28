@@ -56,6 +56,17 @@ function Strings.FormatTime(time, formatString)
     return string.format(formatString and formatString or "%d:%02d:%02d:%02d", days, hours, minutes, seconds)
 end
 
+--- Formats a given time according to the specified format string.
+---
+--- @param time number The time value to format.
+--- @param formatString string? The format string to use for formatting the time.
+--- @return string The formatted time as a string.
+function Strings.FormatTimeMS(time, formatString)
+    -- Convert milliseconds to seconds6
+    local milliseconds = time % 1000
+    return string.format(formatString and formatString or "%-3dms", milliseconds)
+end
+
 --- Converts a boolean value to its string representation.
 --- @param b boolean: The boolean value to convert.
 --- @return string: "true" if the boolean is true, "false" otherwise.

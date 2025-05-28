@@ -72,7 +72,8 @@ function SimpleUI:RenderMainWindow(imgui_style, curState, openGUI)
         ImGui.End()
     end
 
-    return openGUI
+    return openGUI, shouldDrawGUI
+
 end
 
 return SimpleUI
