@@ -93,14 +93,6 @@ OptionsUI.CombinedSettingsNames = {}
 
 -- Note... plan on moving functions to proper libraries as necessary later
 
-function OptionsUI:RenderCategories()
-    -- We have our header rendered, we clicked on it to expand it, this is the next step in iterating through the groups
-    -- check group table above to see if the header keys have entries in the category table
-    -- if there is a category in the table, check if a setting of that category exists in the combinedsettingstable
-    -- if there is, draw the name with a divider
-    -- render an option table with all options from that (category if present, header without category if not)
-    -- entries should already be indexed in the combined settings table
-end
 
 function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     if ImGui.Selectable(groupLabel, self.selectedGroup == groupName) then
@@ -108,11 +100,31 @@ function OptionsUI:RenderGroupPanel(groupLabel, groupName)
     end
 end
 
-function OptionsUI:RenderOptionsPanel(groupName)
+-- really kinda stuck here at the moment.
+-- i was thinking i would draw the headers first, but that doesn't make much sense if we need to iterate through settings to find out which to draw
+-- the above is true regardless of if we only draw headers that exist in the table, or we draw a "dummy" header if it isn't in the table.
+function OptionsUI:RenderOptionsPanel()
+    -- find the current group in the array
+    for _, group in ipairs(self.Groups) do
+        if group.Name == self.selectedGroup then
+            -- iterate through header values and render them
+        end
+    end
+    -- original plan:
     -- check headers in groups table against combined settings table
     -- if there is a setting with that header, draw a collapsing header
     -- if not, draw the alternate (non-collapsing) gray header (as soon as I figure out how the heck to do that)
+    -- -- I think it would be nice, but it is much easier to only draw the headers that have entries
     -- render categories
+end
+
+function OptionsUI:RenderCategories()
+    -- We have our header rendered, we clicked on it to expand it, this is the next step in iterating through the groups
+    -- check group table above to see if the header keys have entries in the category table
+    -- if there is a category in the table, check if a setting of that category exists in the combinedsettingstable
+    -- if there is, draw the name with a divider
+    -- render an option table with all options from that (category if present, header without category if not)
+    -- entries should already be indexed in the combined settings table
 end
 
 function OptionsUI:GetCombinedSettingNames()
