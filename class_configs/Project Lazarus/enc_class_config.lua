@@ -430,22 +430,21 @@ local _ClassConfig = {
     ['Rotations']       = {
         ['Downtime'] = {
             {
-                name = "Orator's Unity",
+                name = "Eldritch Rune",
                 type = "AA",
                 active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
-                cond = function(self, aaName) return Casting.SelfBuffAACheck(aaName) end,
-            },
-            {
-                name = "SelfGuardShield",
-                type = "Spell",
-                active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
+                cond = function(self, aaName)
+                    return Casting.SelfBuffAACheck(aaName)
+                end,
             },
             {
                 name = "SelfRune1",
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
-                cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
+                cond = function(self, spell)
+                    if Casting.CanUseAA("Eldritch Rune") then return false end
+                    return Casting.SelfBuffCheck(spell)
+                end,
             },
             {
                 name = "SelfHPBuff",
@@ -458,12 +457,6 @@ local _ClassConfig = {
                 type = "Spell",
                 active_cond = function(self, spell) return Casting.IHaveBuff(spell) end,
                 cond = function(self, spell) return Casting.SelfBuffCheck(spell) end,
-            },
-            {
-                name = "Veil of Mindshadow",
-                type = "AA",
-                active_cond = function(self, aaName) return Casting.IHaveBuff(aaName) end,
-                cond = function(self, aaName) return Casting.SelfBuffAACheck(aaName) end,
             },
             { -- Mana Restore AA, will use the first(best) available
                 name_func = function(self)
@@ -767,7 +760,7 @@ local _ClassConfig = {
 
             -- },
             {
-                name = "Eldritch Rune",
+                name = "Veil of Mindshadow",
                 type = "AA",
                 cond = function(self, aaName)
                     return Targeting.IHaveAggro(100) and mq.TLO.Me.PctHPs() <= 80 and Casting.SelfBuffAACheck(aaName)
