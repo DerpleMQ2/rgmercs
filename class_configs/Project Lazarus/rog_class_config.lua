@@ -767,7 +767,7 @@ return {
         },
         ['MaxAETargetCnt']  = {
             DisplayName = "Max AE Targets",
-            Category = "Damage Spells",
+            Category = "Abilities",
             Index = 5,
             Tooltip =
             "Maximum number of valid targets before using AE Spells, Disciplines or AA.\nUseful for setting up AE Mez at a higher threshold on another character in case you are overwhelmed.",
