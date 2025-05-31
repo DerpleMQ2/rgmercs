@@ -451,7 +451,7 @@ end
 
 -- Function to ensure that a corpse we've detected hasn't previously accepted a rez already (stops spam rez on emu).
 function Casting.OkayToRez(corpseId)
-    if Core.OnEMU() then
+    if Config:GetSetting('ConCorpseForRez') then
         Targeting.SetTarget(corpseId, true)
         Core.DoCmd("/consider")
 

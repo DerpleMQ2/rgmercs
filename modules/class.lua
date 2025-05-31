@@ -816,6 +816,12 @@ function Module:GetRotations()
 end
 
 function Module:SelfCheckAndRez()
+    -- we are always in zone with ourself, I would hope
+    if not Config:GetSetting('RezInZonePC') then
+        Logger.log_verbose("\atSelfCheckAndRez(): We are configured to only rez out-of-zone PCs, no need to check for our own corpse.")
+        return
+    end
+
     local rezSearch = string.format("pccorpse %s' radius 100 zradius 50", mq.TLO.Me.DisplayName()) -- use ' to prevent partial name matches (foo's corpse vs foobar's corpse)
     local rezCount = mq.TLO.SpawnCount(rezSearch)()
 
@@ -826,7 +832,7 @@ function Module:SelfCheckAndRez()
         if rezSpawn() then
             Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
             if self.ClassConfig.HelperFunctions and self.ClassConfig.HelperFunctions.DoRez then
-                if Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                if Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atSelfCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
@@ -849,7 +855,10 @@ function Module:IGCheckAndRez()
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
                 Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
-                if Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                if not Config:GetSetting('RezInZonePC') and not mq.TLO.Group.Member(rezSpawn.CleanName()).OtherZone() then
+                    Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but the player appears to be in-zone.", rezSpawn.CleanName() or "Unknown",
+                        rezSpawn.ID() or 0)
+                elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
@@ -868,10 +877,15 @@ function Module:OOGCheckAndRez()
 
     for i = 1, rezCount do
         local rezSpawn = mq.TLO.NearestSpawn(i, self.Constants.RezSearchOutOfGroup)
+        local corpseName = rezSpawn.CleanName() or "None"
+        local ownerName = corpseName:gsub("'s corpse$", "")
 
         if rezSpawn() and (Targeting.IsSafeName("pc", rezSpawn.DisplayName())) then
             if self.ClassConfig.HelperFunctions.DoRez then
-                if Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
+                if not Config:GetSetting('RezInZonePC') and mq.TLO.Spawn(string.format("PC =%s", ownerName))() then
+                    Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but the player appears to be in-zone.", ownerName or "Unknown",
+                        rezSpawn.ID() or 0)
+                elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atOOGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif (os.clock() - (self.TempSettings.RezTimers[rezSpawn.ID()] or 0)) >= Config:GetSetting('RetryRezDelay') then
