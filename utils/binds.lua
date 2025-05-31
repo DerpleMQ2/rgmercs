@@ -152,6 +152,20 @@ Binds.Handlers    = {
             Core.DoCmd("/squelch /dggaexecute /docommand /timed 5 /say %s", text)
         end,
     },
+    ['rsay'] = {
+        usage = "/rgl rsay <text>",
+        about = "All raidmembers running RGMercs will target your target and say the <text> after a very short delay.",
+        handler = function(...)
+            local allText = { ..., }
+            local text
+            for _, t in ipairs(allText) do
+                text = (text and text .. " " or "") .. t
+            end
+            Core.DoCmd("/squelch /dgraexecute /mqtarget id %d", Targeting.GetTargetID())
+            mq.delay(5)
+            Core.DoCmd("/squelch /dgraexecute /docommand /timed 5 /say %s", text)
+        end,
+    },
     ['setlogfilter'] = {
         usage = "/rgl setlogfilter <filter|filter|filter|...>",
         about = "Set a Lua regex filter to match log lines against before printing (does not effect file logging).",
