@@ -851,12 +851,14 @@ function Module:IGCheckAndRez()
     for i = 1, rezCount do
         Logger.log_debug("\atIGCheckAndRez(): Looking for corpse #%d", i)
         local rezSpawn = mq.TLO.NearestSpawn(i, self.Constants.RezSearchGroup)
+        local corpseName = rezSpawn.CleanName() or "None"
+        local ownerName = corpseName:gsub("'s corpse$", "")
 
         if rezSpawn() then
             if self.ClassConfig.HelperFunctions.DoRez then
                 Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s :: %s", rezSpawn.CleanName() or "Unknown", rezSpawn.Name() or "Unknown")
-                if not Config:GetSetting('RezInZonePC') and not mq.TLO.Group.Member(rezSpawn.CleanName()).OtherZone() then
-                    Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but the player appears to be in-zone.", rezSpawn.CleanName() or "Unknown",
+                if not Config:GetSetting('RezInZonePC') and mq.TLO.Group.Member(ownerName).OtherZone() then
+                    Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but the player appears to be in-zone.", ownerName or "Unknown",
                         rezSpawn.ID() or 0)
                 elseif Config:GetSetting('ConCorpseForRez') and Tables.TableContains(Config.Globals.RezzedCorpses, rezSpawn.ID()) then
                     Logger.log_debug("\atIGCheckAndRez(): Found corpse of %s(ID:%d), but it appears to have been rezzed already.", rezSpawn.CleanName() or "Unknown",
