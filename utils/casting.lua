@@ -843,15 +843,19 @@ end
 --- Checks if a given item is ready to be used.
 function Casting.ItemReady(itemName)
     if not Casting.ItemHasClicky(itemName) then return false end
+    if not mq.TLO.Me.ItemReady(itemName)() then return false end
 
-    local ready = mq.TLO.Me.ItemReady(itemName)()
-    local levelCheck = mq.TLO.Me.Level() >= mq.TLO.FindItem("=" .. itemName).Clicky.RequiredLevel()
+    local me = mq.TLO.Me
+    local clicky = mq.TLO.FindItem("=" .. itemName).Clicky
+    local levelCheck = me.Level() >= (clicky.RequiredLevel() or 0)
+    local movingCheck = Core.MyClassIs("brd") or not (me.Moving() and (clicky.CastTime() or -1) > 0)
+    ---@diagnostic disable-next-line: undefined-field -- Feared is a valid data member
+    local controlCheck = not (me.Stunned() or me.Feared() or me.Charmed() or me.Mezzed())
 
-    Logger.log_verbose("ItemReady for  %s: Ready(%s) LevelCheck(%s)", itemName, Strings.BoolToColorString(ready), Strings.BoolToColorString(levelCheck))
+    Logger.log_verbose("ItemReady for %s: LevelCheck(%s) MovingCheck(%s) ControlCheck(%s)", itemName, Strings.BoolToColorString(levelCheck),
+        Strings.BoolToColorString(movingCheck), Strings.BoolToColorString(controlCheck))
 
-    if not ready then return false end
-
-    return levelCheck
+    return levelCheck and movingCheck and controlCheck
 end
 
 -- Helper function for use in determining whether we are ready to perform other actions.
@@ -1346,8 +1350,8 @@ function Casting.UseItem(itemName, targetId)
     end
 
     if targetId == mq.TLO.Me.ID() then
-        if Casting.IHaveBuff(item.Clicky.Spell.ID()) then
-            Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the clicky buff is already active!", itemName)
+        if Casting.IHaveBuff(item.Clicky.SpellID()) then
+            Logger.log_debug("\awUseItem(\ag%s\aw): \arTried to use item - but the clicky is already active or would not stack!", itemName)
             return false
         end
 

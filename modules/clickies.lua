@@ -311,20 +311,16 @@ function Module:GiveTime(combat_state)
 
                 if item then
                     self.TempSettings.ClickyState[clicky].item = item
-                    if item.Timer.TotalSeconds() == 0 then
-                        if (item.RequiredLevel() or 0) <= mq.TLO.Me.Level() then
-                            if Casting.SelfBuffItemCheck(item) then
-                                Logger.log_verbose("\aaClickies: Casting Item \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                                Casting.UseItem(item.Name(), mq.TLO.Me.ID())
-                                self.TempSettings.ClickyState[clicky].lastUsed = os.clock()
-                            else
-                                Logger.log_verbose("\ayClickies: Item \at%s\ay Clicky: \at%s\ay Already Active!", item.Name(), item.Clicky.Spell.RankName.Name())
-                            end
+                    if Casting.ItemReady(item()) then
+                        if Casting.SelfBuffItemCheck(item) then
+                            Logger.log_verbose("\aaClickies: Casting Item \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
+                            Casting.UseItem(item.Name(), mq.TLO.Me.ID())
+                            self.TempSettings.ClickyState[clicky].lastUsed = os.clock()
                         else
-                            Logger.log_verbose("\ayClickies: Item \at%s\ay Clicky: \at%s\ay I am too low level to use this clicky!", item.Name(), item.Clicky.Spell.RankName.Name())
+                            Logger.log_verbose("\ayClickies: Item \at%s\ay Clicky: \at%s\ay already active or would not stack!", item.Name(), item.Clicky.Spell.RankName.Name())
                         end
                     else
-                        Logger.log_verbose("\ayClickies: Item \at%s\ay Clicky: \at%s\ay Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
+                        Logger.log_verbose("\ayClickies: Item \at%s\ay Clicky: \at%s\ay Clicky not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
                     end
                 end
             end
@@ -366,18 +362,14 @@ function Module:GiveTime(combat_state)
 
                     if item then
                         self.TempSettings.ClickyState[clicky].item = item
-                        if item.Timer.TotalSeconds() == 0 then
-                            if (item.RequiredLevel() or 0) <= mq.TLO.Me.Level() then
-                                if Casting.DetSpellCheck(item.Clicky.Spell.RankName) then
-                                    Logger.log_verbose("\aaClicky: Item \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
-                                    Casting.UseItem(item.Name(), Config.Globals.AutoTargetID)
-                                    self.TempSettings.ClickyState[clicky].lastUsed = os.clock()
-                                    break --ensure we stop after we process a single clicky to allow rotations to continue
-                                else
-                                    Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay already active or would not stack!", item.Name(), item.Clicky.Spell.RankName.Name())
-                                end
+                        if Casting.ItemReady(item()) then
+                            if Casting.DetItemCheck(item) then
+                                Logger.log_verbose("\aaClicky: Item \at%s\ag Clicky: \at%s\ag!", item.Name(), item.Clicky.Spell.RankName.Name())
+                                Casting.UseItem(item.Name(), Config.Globals.AutoTargetID)
+                                self.TempSettings.ClickyState[clicky].lastUsed = os.clock()
+                                break --ensure we stop after we process a single clicky to allow rotations to continue
                             else
-                                Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay I am too low level to use this clicky!", item.Name(), item.Clicky.Spell.RankName.Name())
+                                Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay already active or would not stack!", item.Name(), item.Clicky.Spell.RankName.Name())
                             end
                         else
                             Logger.log_verbose("\ayClicky: Item \at%s\ay Clicky: \at%s\ay Clicky timer not ready!", item.Name(), item.Clicky.Spell.RankName.Name())
