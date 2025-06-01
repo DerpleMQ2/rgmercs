@@ -1236,11 +1236,12 @@ Config.DefaultConfig = {
         DisplayName = "Rez In-Zone PCs",
         Category = "Heal/Rez",
         Index = 17,
-        Tooltip = "If this setting is enabled, we will only attempt to rez a corpse if the owner isn't in zone with us.",
+        Tooltip = "Rez corpses of live PCs in the zone (If disabled, we will only rez corpses of PCs not in our current zone).",
         Default = true,
         ConfigType = "Advanced",
-        FAQ = "I don't want to rez corpses of people already in the same zone, what can I do about this?",
-        Answer = "The Heal/Rez options contain a setting to disable rezzing in-zone PCs.",
+        FAQ = "Why would I want (or not want) to rez corpses of PCs that are in-zone with us already?",
+        Answer = "Emu servers have various rules, such as no xp loss on death, or not dropping items to your corpse\n" ..
+            "Depending in the server, various combinations of rez settings may be required for the best play experience.",
     },
     ['RetryRezDelay']        = {
         DisplayName = "Retry Rez Delay",
